@@ -1,0 +1,39 @@
+This version of the ATLAS cone is coming from SpartyJet v2.20.0
+
+We have copied the following files
+  JetConeFinderTool.cxx
+  JetConeFinderTool.h
+  JetSplitMergeTool.cxx
+  JetSplitMergeTool.h
+that do the real work and based the coding in 
+ATLASConePlugin.{hh,cc} on ConeFinderTool.cxx by adapting
+to the ClusterSequence requirements.
+
+
+copied 
+  LorentzVector.{cc,hh} 
+from CDFCone/CDFcode in the FastJet plugin ... then,
+  - added et() == Et()
+  - added e() == E
+
+copied 
+  Jet.{cc,hh}, JetDistances.hh, CommonUtils.{cc,hh}
+from SpartyJet then
+  - added #include <algorithm> in Jet.hh
+
+
+
+- Cleaned a bit JetConeFinderTool.cc (mostly removed the m_log)
+- Check FIXME 9 !!! (related to maxiteration)
+- in #include directives, fixed the dirs
+- added "namespace SpartyJet" in JetConeFinderTool.hh
+- replaced StatusCode by int (as it was originally defined
+- removed the string argument in the JetConeFinderTool ctor
+
+- removed the string arg of the JetSplitMergeTool ctor
+- replaced 4-vect component access using a function (e.g. px())
+  with direct access (e.g. px)
+
+IMPORTANT:
+  - LorentzVector might conflict w its definition in CDFcode
+  - changed the GeV to 1.0 instead of 1000.0

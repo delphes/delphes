@@ -1,0 +1,32 @@
+Note on the implementation of the CMS Iterative Plugin
+
+The code is initially the CMSSW implementation in
+CMSIterativeConeAlgorithm.cc in /CMSSW/RecoJets/JetAlgorithms
+(more precisely, Revision 14 of the cc file)
+
+To avoid importing too many files from CMSSW, we did a couple of
+modifications starting from the CMSIterativeConeAlgorithm file:
+
+ - directly used the FastJet PseudoJet instead of the InputItem
+   present initially. Note that access to the info then has to be done
+   using . instead of -> which implies a few small modifications here
+   and there.
+
+ - added a small piece of code to compute Et. That peice of code is
+   the same as tracked down in the CMS code. It comes from the Root
+   Lorentzvector, more precisely, the PxPyPzE4D implementation.
+
+ - The ordering in Et, NumericSafeGreaterByEt, is imported from
+   EtComparator.h in PhysicsTools/Utilities/
+
+ - The DeltaR2 computation is imported from DeltaR.cc and DeltaPhi.cc
+   in CMSSW/DataFormats/Math
+
+ - finally, instead of the ProtoJet construction, we use the
+   ClusterSequence-compatible clustering. That one follows the line of
+   what is done in the SISCone plugin. Note that ve've checked in the
+   CMSSZ code that the protojet is indeed reconstructed using E-scheme
+   recombination (while the stability test is done using Et-scheme)
+
+Finally, we want to thank Andreas Oehler for pointing us to the CMS
+code.

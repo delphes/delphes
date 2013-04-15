@@ -1,0 +1,41 @@
+FastJet was written and is maintained and developed by 
+
+Matteo Cacciari
+Gavin P. Salam
+Gregory Soyez
+
+See http://fastjet.fr/ for further details, and the FastJet manual
+at http://arxiv.org/abs/1111.6097
+
+----------------------------------------------------------------------
+
+Many people have provided bug reports, suggestions for development and
+in some cases explicit code for plugin algorithms. We would in
+particular like to thank
+
+Vanya Belyaev
+Andy Buckley
+Timothy Chan
+Pierre-Antoine Delsart
+Olivier Devillers
+Robert Harris
+Joey Huston
+Sue Ann Koay
+Andreas Oehler
+Sal Rappoccio
+Juan Rojo
+Sebastian Sapeta
+Mike Seymour
+Jessie Shelton
+Torbjorn Sjostrand
+Lars Sonnenschein
+Hartmut Stadie
+Mark Sutton
+Chris Vermilion
+Markus Wobisch 
+
+----------------------------------------------------------------------
+
+This package uses T.Chan's closest pair algorithm, Proc.13th ACM-SIAM
+Symp. Discr. Alg, p.472 (2002), S.Fortune's Voronoi algorithm and code,
+and CGAL: http://www.cgal.org/
