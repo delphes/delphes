@@ -47,7 +47,7 @@ DelphesDisplay *gDelphesDisplay = 0;
 
 void EventDisplay(const char *configFile, const char *inputFile)
 {
-  gSystem->Load("libDelphes");
+  gSystem->Load("libDelphesDisplay");
 
   TEveManager::Create(kTRUE, "IV");
 
