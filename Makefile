@@ -16,12 +16,16 @@ endif
 SrcSuf = cc
 
 CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
-LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
+DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
+DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
 ###
 
-SHARED = libDelphes.$(DllSuf)
-SHAREDLIB = libDelphes.lib
+DELPHES = libDelphes.$(DllSuf)
+DELPHESLIB = libDelphes.lib
+
+DISPLAY = libDelphesDisplay.$(DllSuf)
+DISPLAYLIB = libDelphesDisplay.lib
 
 VERSION = $(shell cat VERSION)
 DISTDIR = Delphes-$(VERSION)
@@ -157,8 +161,6 @@ tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/ClassesLinkDef.h \
 	classes/DelphesModule.h \
 	classes/DelphesFactory.h \
-	classes/DelphesDisplay.h \
-	classes/DelphesCaloData.h \
 	classes/SortableObject.h \
 	classes/DelphesClasses.h
 tmp/modules/ModulesDict.$(SrcSuf): \
@@ -195,19 +197,26 @@ tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootConfReader.h \
 	external/ExRootAnalysis/ExRootTask.h
-DICT =  \
+DELPHES_DICT =  \
 	tmp/classes/ClassesDict.$(SrcSuf) \
 	tmp/modules/ModulesDict.$(SrcSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf)
 
-DICT_OBJ =  \
+DELPHES_DICT_OBJ =  \
 	tmp/classes/ClassesDict.$(ObjSuf) \
 	tmp/modules/ModulesDict.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(ObjSuf)
 
-tmp/classes/DelphesDisplay.$(ObjSuf): \
-	classes/DelphesDisplay.$(SrcSuf) \
-	classes/DelphesDisplay.h
+tmp/display/DisplayDict.$(SrcSuf): \
+	display/DisplayLinkDef.h \
+	display/DelphesDisplay.h \
+	display/DelphesCaloData.h
+DISPLAY_DICT =  \
+	tmp/display/DisplayDict.$(SrcSuf)
+
+DISPLAY_DICT_OBJ =  \
+	tmp/display/DisplayDict.$(ObjSuf)
+
 tmp/classes/DelphesHepMCReader.$(ObjSuf): \
 	classes/DelphesHepMCReader.$(SrcSuf) \
 	classes/DelphesHepMCReader.h \
@@ -250,9 +259,6 @@ tmp/classes/DelphesModule.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
 	external/ExRootAnalysis/ExRootResult.h
-tmp/classes/DelphesCaloData.$(ObjSuf): \
-	classes/DelphesCaloData.$(SrcSuf) \
-	classes/DelphesCaloData.h
 tmp/classes/DelphesClasses.$(ObjSuf): \
 	classes/DelphesClasses.$(SrcSuf) \
 	classes/DelphesClasses.h \
@@ -722,8 +728,7 @@ tmp/external/fastjet/plugins/EECambridge/EECambridgePlugin.$(ObjSuf): \
 	external/fastjet/plugins/EECambridge/EECambridgePlugin.$(SrcSuf) \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/NNH.hh
-SOURCE_OBJ =  \
-	tmp/classes/DelphesDisplay.$(ObjSuf) \
+DELPHES_OBJ =  \
 	tmp/classes/DelphesHepMCReader.$(ObjSuf) \
 	tmp/classes/DelphesLHEFReader.$(ObjSuf) \
 	tmp/classes/DelphesFactory.$(ObjSuf) \
@@ -732,7 +737,6 @@ SOURCE_OBJ =  \
 	tmp/classes/DelphesStream.$(ObjSuf) \
 	tmp/classes/DelphesPileUpWriter.$(ObjSuf) \
 	tmp/classes/DelphesModule.$(ObjSuf) \
-	tmp/classes/DelphesCaloData.$(ObjSuf) \
 	tmp/classes/DelphesClasses.$(ObjSuf) \
 	tmp/classes/DelphesPileUpReader.$(ObjSuf) \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
@@ -837,6 +841,16 @@ SOURCE_OBJ =  \
 	tmp/external/fastjet/plugins/GridJet/GridJetPlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/Jade/JadePlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/EECambridge/EECambridgePlugin.$(ObjSuf)
+
+tmp/display/DelphesDisplay.$(ObjSuf): \
+	display/DelphesDisplay.$(SrcSuf) \
+	display/DelphesDisplay.h
+tmp/display/DelphesCaloData.$(ObjSuf): \
+	display/DelphesCaloData.$(SrcSuf) \
+	display/DelphesCaloData.h
+DISPLAY_OBJ =  \
+	tmp/display/DelphesDisplay.$(ObjSuf) \
+	tmp/display/DelphesCaloData.$(ObjSuf)
 
 tmp/external/tcl/tclObj.$(ObjSuf): \
 	external/tcl/tclObj.c
@@ -1199,17 +1213,19 @@ modules/FastJetFinder.h: \
 
 ###
 
-all: $(SHARED) $(EXECUTABLE) $(STDHEP_EXECUTABLE)
+all: $(DELPHES) $(EXECUTABLE)
 
-$(SHARED): $(DICT_OBJ) $(SOURCE_OBJ) $(TCL_OBJ)
+display: $(DISPLAY)
+
+$(DELPHES): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 	@mkdir -p $(@D)
 	@echo ">> Building $@"
 ifeq ($(ARCH),aix5)
-	@$(MAKESHARED) $(OutPutOpt) $@ $(LIBS) -p 0 $^
+	@$(MAKESHARED) $(OutPutOpt) $@ $(DELPHES_LIBS) -p 0 $^
 else
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
-	@$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(LIBS)
+	@$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(DELPHES_LIBS)
 ifneq ($(subst $(MACOSX_MINOR),,1234),1234)
 ifeq ($(MACOSX_MINOR),4)
 	@ln -sf $@ $(subst .$(DllSuf),.so,$@)
@@ -1218,21 +1234,49 @@ endif
 else
 ifeq ($(PLATFORM),win32)
 	@bindexplib $* $^ > $*.def
-	@lib -nologo -MACHINE:IX86 $^ -def:$*.def $(OutPutOpt)$(SHAREDLIB)
-	@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $*.exp $(LIBS) $(OutPutOpt)$@
+	@lib -nologo -MACHINE:IX86 $^ -def:$*.def $(OutPutOpt)$(DELPHESLIB)
+	@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $*.exp $(DELPHES_LIBS) $(OutPutOpt)$@
 	@$(MT_DLL)
 else
-	@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(LIBS)
+	@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(DELPHES_LIBS)
+	@$(MT_DLL)
+endif
+endif
+endif
+
+$(DISPLAY): $(DELPHES_DICT_OBJ) $(DISPLAY_DICT_OBJ) $(DELPHES_OBJ) $(DISPLAY_OBJ) $(TCL_OBJ)
+	@mkdir -p $(@D)
+	@echo ">> Building $@"
+ifeq ($(ARCH),aix5)
+	@$(MAKESHARED) $(OutPutOpt) $@ $(DISPLAY_LIBS) -p 0 $^
+else
+ifeq ($(PLATFORM),macosx)
+# We need to make both the .dylib and the .so
+	@$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(DISPLAY_LIBS)
+ifneq ($(subst $(MACOSX_MINOR),,1234),1234)
+ifeq ($(MACOSX_MINOR),4)
+	@ln -sf $@ $(subst .$(DllSuf),.so,$@)
+endif
+endif
+else
+ifeq ($(PLATFORM),win32)
+	@bindexplib $* $^ > $*.def
+	@lib -nologo -MACHINE:IX86 $^ -def:$*.def $(OutPutOpt)$(DISPLAYLIB)
+	@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $*.exp $(DISPLAY_LIBS) $(OutPutOpt)$@
+	@$(MT_DLL)
+else
+	@$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(DISPLAY_LIBS)
 	@$(MT_DLL)
 endif
 endif
 endif
 
 clean:
-	@rm -f $(DICT_OBJ) $(SOURCE_OBJ) $(TCL_OBJ) $(STDHEP_OBJ) core
+	@rm -f $(DELPHES_DICT_OBJ) $(DISPLAY_DICT_OBJ) $(DELPHES_OBJ) $(DISPLAY_OBJ) $(TCL_OBJ) core
+	@rm -rf tmp
 
 distclean: clean
-	@rm -f $(SHARED) $(SHAREDLIB) $(EXECUTABLE)
+	@rm -f $(DELPHES) $(DELPHESLIB) $(DISPLAY) $(DISPLAYLIB) $(EXECUTABLE)
 
 dist:
 	@echo ">> Building $(DISTTAR)"
@@ -1256,12 +1300,22 @@ dist:
 	@cat $@.arch $< $@.base > $@
 	@rm $@.arch $@.base
 
-$(SOURCE_OBJ): tmp/%.$(ObjSuf): %.$(SrcSuf)
+$(DELPHES_OBJ): tmp/%.$(ObjSuf): %.$(SrcSuf)
 	@mkdir -p $(@D)
 	@echo ">> Compiling $<"
 	@$(CXX) $(CXXFLAGS) -c $< $(OutPutOpt)$@
 
-$(DICT_OBJ): %.$(ObjSuf): %.$(SrcSuf)
+$(DISPLAY_OBJ): tmp/%.$(ObjSuf): %.$(SrcSuf)
+	@mkdir -p $(@D)
+	@echo ">> Compiling $<"
+	@$(CXX) $(CXXFLAGS) -c $< $(OutPutOpt)$@
+
+$(DELPHES_DICT_OBJ): %.$(ObjSuf): %.$(SrcSuf)
+	@mkdir -p $(@D)
+	@echo ">> Compiling $<"
+	@$(CXX) $(CXXFLAGS) -c $< $(OutPutOpt)$@
+
+$(DISPLAY_DICT_OBJ): %.$(ObjSuf): %.$(SrcSuf)
 	@mkdir -p $(@D)
 	@echo ">> Compiling $<"
 	@$(CXX) $(CXXFLAGS) -c $< $(OutPutOpt)$@
@@ -1276,9 +1330,9 @@ $(EXECUTABLE_OBJ): tmp/%.$(ObjSuf): %.cpp
 	@echo ">> Compiling $<"
 	@$(CXX) $(CXXFLAGS) -c $< $(OutPutOpt)$@
 
-$(EXECUTABLE): %$(ExeSuf): $(DICT_OBJ) $(SOURCE_OBJ) $(TCL_OBJ)
+$(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 	@echo ">> Building $@"
-	@$(LD) $(LDFLAGS) $^ $(LIBS) $(OutPutOpt)$@
+	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
 
 ###
 

@@ -16,7 +16,7 @@
 #include "TEveCaloLegoOverlay.h"
 #include "TEveLegoEventHandler.h"
 
-#include "classes/DelphesDisplay.h"
+#include "display/DelphesDisplay.h"
 
 //------------------------------------------------------------------------------
 

@@ -14,9 +14,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesFactory.h"
 
-#include "classes/DelphesDisplay.h"
-#include "classes/DelphesCaloData.h"
-
 #include "classes/SortableObject.h"
 #include "classes/DelphesClasses.h"
 
@@ -28,9 +25,6 @@
 
 #pragma link C++ class DelphesModule+;
 #pragma link C++ class DelphesFactory+;
-
-#pragma link C++ class DelphesDisplay+;
-#pragma link C++ class DelphesCaloData+;
 
 #pragma link C++ class SortableObject+;
 
