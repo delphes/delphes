@@ -184,6 +184,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TrackPileUpSubtractor.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
+	modules/Cloner.h \
 	modules/ExampleModule.h
 tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootAnalysisLinkDef.h \
@@ -436,6 +437,15 @@ tmp/modules/PileUpMerger.$(ObjSuf): \
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/Cloner.$(ObjSuf): \
+	modules/Cloner.$(SrcSuf) \
+	modules/Cloner.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -757,6 +767,7 @@ DELPHES_OBJ =  \
 	tmp/modules/Isolation.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
+	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/JetPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/MomentumSmearing.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootFilter.$(ObjSuf) \
@@ -1056,6 +1067,10 @@ external/fastjet/ClusterSequence1GhostPassiveArea.hh: \
 	@touch $@
 
 modules/PileUpMerger.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/Cloner.h: \
 	classes/DelphesModule.h
 	@touch $@
 
