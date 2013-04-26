@@ -38,6 +38,8 @@ public:
 
 private:
 
+  Int_t fBitNumber;
+
   Double_t fDeltaR;
 
   std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!

@@ -31,6 +31,7 @@
 #include "modules/TrackPileUpSubtractor.h"
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
+#include "modules/Cloner.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -59,6 +60,7 @@
 #pragma link C++ class TrackPileUpSubtractor+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
+#pragma link C++ class Cloner+;
 #pragma link C++ class ExampleModule+;
 
 #endif

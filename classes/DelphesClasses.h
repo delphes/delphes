@@ -245,8 +245,8 @@ public:
   Float_t DeltaEta;  // jet radius in pseudorapidity
   Float_t DeltaPhi;  // jet radius in azimuthal angle
 
-  Int_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
-  Int_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
+  UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
   Int_t Charge; // tau charge
 
@@ -345,8 +345,8 @@ public:
   Int_t IsPU;
   Int_t IsConstituent;
   
-  Int_t BTag;
-  Int_t TauTag;
+  UInt_t BTag;
+  UInt_t TauTag;
 
   Float_t Eem;
   Float_t Ehad;

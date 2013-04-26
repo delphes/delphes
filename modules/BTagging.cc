@@ -92,6 +92,8 @@ void BTagging::Init()
   DelphesFormula *formula;
   Int_t i, size;
 
+  fBitNumber = GetInt("BitNumber", 0);
+
   fDeltaR = GetDouble("DeltaR", 0.5);
 
   fClassifier->fPTMin = GetDouble("PartonPTMin", 1.0);
@@ -201,7 +203,7 @@ void BTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficency formula
-    jet->BTag = gRandom->Uniform() <= formula->Eval(pt, eta);
+    jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta)) << fBitNumber;
   }
 }
 

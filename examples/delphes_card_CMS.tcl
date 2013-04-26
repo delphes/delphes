@@ -484,6 +484,8 @@ module BTagging BTagging {
   set PartonInputArray Delphes/partons
   set JetInputArray FastJetFinder/jets
 
+  set BitNumber 0
+
   set DeltaR 0.5
 
   set PartonPTMin 1.0
