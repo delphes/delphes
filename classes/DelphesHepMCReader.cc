@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <map>
+#include <vector>
 
 #include <stdio.h>
 
@@ -68,6 +69,10 @@ void DelphesHepMCReader::SetInputFile(FILE *inputFile)
 
 void DelphesHepMCReader::Clear()
 {
+  fStateSize = 0;
+  fState.clear();
+  fWeightSize = 0;
+  fWeight.clear();
   fVertexCounter = -1;
   fInCounter = -1;
   fOutCounter = -1;
@@ -93,7 +98,8 @@ bool DelphesHepMCReader::ReadBlock(DelphesFactory *factory,
   map< int, pair< int, int > >::iterator itMotherMap;
   map< int, pair< int, int > >::iterator itDaughterMap;
   char key;
-  int rc;
+  int i, rc, state;
+  double weight;
 
   if(!fgets(fBuffer, kBufferSize, fInputFile)) return kFALSE;
 
@@ -112,7 +118,36 @@ bool DelphesHepMCReader::ReadBlock(DelphesFactory *factory,
       && bufferStream.ReadDbl(fAlphaQED)
       && bufferStream.ReadInt(fProcessID)
       && bufferStream.ReadInt(fSignalCode)
-      && bufferStream.ReadInt(fVertexCounter);
+      && bufferStream.ReadInt(fVertexCounter)
+      && bufferStream.ReadInt(fBeamCode[0])
+      && bufferStream.ReadInt(fBeamCode[1])
+      && bufferStream.ReadInt(fStateSize);
+
+    if(!rc)
+    {
+      cerr << "** ERROR: " << "invalid event format" << endl;
+      return kFALSE;
+    }
+
+    for(i = 0; i < fStateSize; ++i)
+    {
+      rc = rc && bufferStream.ReadInt(state);
+      fState.push_back(state);
+    }
+
+    rc = rc && bufferStream.ReadInt(fWeightSize);
+
+    if(!rc)
+    {
+      cerr << "** ERROR: " << "invalid event format" << endl;
+      return kFALSE;
+    }
+
+    for(i = 0; i < fWeightSize; ++i)
+    {
+      rc = rc && bufferStream.ReadDbl(weight);
+      fWeight.push_back(weight);
+    }
 
     if(!rc)
     {
@@ -235,6 +270,7 @@ void DelphesHepMCReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventN
 
   element->ProcessID = fProcessID;
   element->MPI = fMPI;
+  element->Weight = fWeight.size() > 0 ? fWeight[0] : 1.0;
   element->Scale = fScale;
   element->AlphaQED = fAlphaQED;
   element->AlphaQCD = fAlphaQCD;

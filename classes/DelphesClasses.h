@@ -76,6 +76,8 @@ public:
   Int_t ProcessID; // unique signal process id | signal_process_id()
   Int_t MPI; // number of multi parton interactions | mpi () 
 
+  Float_t Weight; // weight for the event
+
   Float_t Scale; // energy scale, see hep-ph/0109068 | event_scale()
   Float_t AlphaQED; // QED coupling, see hep-ph/0109068 | alphaQED()
   Float_t AlphaQCD; // QCD coupling, see hep-ph/0109068 | alphaQCD()

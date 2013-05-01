@@ -15,6 +15,7 @@
  */
 
 #include <map>
+#include <vector>
 
 #include <stdio.h>
 
@@ -59,8 +60,14 @@ private:
 
   TDatabasePDG *fPDG;
 
-  int fEventNumber, fMPI, fProcessID, fSignalCode, fVertexCounter;
+  int fEventNumber, fMPI, fProcessID, fSignalCode, fVertexCounter, fBeamCode[2];
   double fScale, fAlphaQCD, fAlphaQED;
+
+  int fStateSize;
+  std::vector< int > fState;
+
+  int fWeightSize;
+  std::vector< double > fWeight;
 
   int fID1, fID2;
   double fX1, fX2, fScalePDF, fPDF1, fPDF2;
