@@ -63,6 +63,8 @@ private:
   int fEventNumber, fMPI, fProcessID, fSignalCode, fVertexCounter, fBeamCode[2];
   double fScale, fAlphaQCD, fAlphaQED;
 
+  double fMomentumCoefficient, fPositionCoefficient;
+
   int fStateSize;
   std::vector< int > fState;
 

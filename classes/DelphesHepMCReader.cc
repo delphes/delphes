@@ -73,6 +73,8 @@ void DelphesHepMCReader::Clear()
   fState.clear();
   fWeightSize = 0;
   fWeight.clear();
+  fMomentumCoefficient = 1.0;
+  fPositionCoefficient = 1.0;
   fVertexCounter = -1;
   fInCounter = -1;
   fOutCounter = -1;
@@ -97,7 +99,7 @@ bool DelphesHepMCReader::ReadBlock(DelphesFactory *factory,
 {
   map< int, pair< int, int > >::iterator itMotherMap;
   map< int, pair< int, int > >::iterator itDaughterMap;
-  char key;
+  char key, momentumUnit[4], positionUnit[3];
   int i, rc, state;
   double weight;
 
@@ -153,6 +155,34 @@ bool DelphesHepMCReader::ReadBlock(DelphesFactory *factory,
     {
       cerr << "** ERROR: " << "invalid event format" << endl;
       return kFALSE;
+    }
+  }
+  else if(key == 'U')
+  {
+    rc = sscanf(fBuffer + 1, "%3s %2s", momentumUnit, positionUnit);
+
+    if(rc != 2)
+    {
+      cerr << "** ERROR: " << "invalid units format" << endl;
+      return kFALSE;
+    }
+
+    if(strncmp(momentumUnit, "GEV", 3) == 0)
+    {
+      fMomentumCoefficient = 1.0;
+    }
+    else if(strncmp(momentumUnit, "MEV", 3) == 0)
+    {
+      fMomentumCoefficient = 0.001;
+    }
+    
+    if(strncmp(positionUnit, "MM", 3) == 0)
+    {
+      fPositionCoefficient = 1.0;
+    }
+    else if(strncmp(positionUnit, "CM", 3) == 0)
+    {
+      fPositionCoefficient = 10.0;
     }
   }
   else if(key == 'F')
@@ -310,6 +340,10 @@ void DelphesHepMCReader::AnalyzeParticle(DelphesFactory *factory,
   candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
   candidate->Momentum.SetPxPyPzE(fPx, fPy, fPz, fE);
+  if(fMomentumCoefficient != 1.0)
+  {
+    candidate->Momentum *= fMomentumCoefficient;
+  }
 
   candidate->M2 = 1;
   candidate->D2 = 1;
@@ -322,6 +356,10 @@ void DelphesHepMCReader::AnalyzeParticle(DelphesFactory *factory,
   {
     candidate->M1 = fOutVertexCode;
     candidate->Position.SetXYZT(fX, fY, fZ, fT);
+    if(fPositionCoefficient != 1.0)
+    {
+      candidate->Position *= fPositionCoefficient;
+    }
   }
   if(fInVertexCode < 0)
   {
