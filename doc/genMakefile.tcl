@@ -292,7 +292,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a CREDITS README VERSION Makefile configure classes converters display doc examples external modules readers $(DISTDIR)
+	@cp -a CREDITS README VERSION Makefile configure classes converters display doc examples external modules python readers $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)
