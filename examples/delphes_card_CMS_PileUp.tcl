@@ -625,5 +625,6 @@ module TreeWriter TreeWriter {
   add Branch MuonIsolation/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
+  add Branch Rho/rho Rho Rho
 }
 

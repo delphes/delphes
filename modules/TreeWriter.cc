@@ -63,6 +63,7 @@ void TreeWriter::Init()
   fClassMap[Jet::Class()] = &TreeWriter::ProcessJets;
   fClassMap[MissingET::Class()] = &TreeWriter::ProcessMissingET;
   fClassMap[ScalarHT::Class()] = &TreeWriter::ProcessScalarHT;
+  fClassMap[Rho::Class()] = &TreeWriter::ProcessRho;
 
   TBranchMap::iterator itBranchMap;
   map< TClass *, TProcessMethod >::iterator itClassMap;
@@ -513,6 +514,24 @@ void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array)
     entry = static_cast<ScalarHT*>(branch->NewEntry());
 
     entry->HT = momentum.Pt();
+  }
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessRho(ExRootTreeBranch *branch, TObjArray *array)
+{
+  Candidate *candidate = 0;
+  Rho *entry = 0;
+
+  // get the first entry
+  if((candidate = static_cast<Candidate*>(array->At(0))))
+  {
+    const TLorentzVector &momentum = candidate->Momentum;
+
+    entry = static_cast<Rho*>(branch->NewEntry());
+
+    entry->Rho = momentum.Pt();
   }
 }
 

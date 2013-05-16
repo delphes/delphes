@@ -164,6 +164,16 @@ public:
 
 //---------------------------------------------------------------------------
 
+class Rho: public TObject
+{
+public:
+  Float_t Rho; // rho energy density
+
+  ClassDef(Rho, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class Photon: public SortableObject
 {
 public:

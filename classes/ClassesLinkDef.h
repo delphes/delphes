@@ -35,6 +35,7 @@
 #pragma link C++ class GenParticle+;
 #pragma link C++ class MissingET+;
 #pragma link C++ class ScalarHT+;
+#pragma link C++ class Rho+;
 #pragma link C++ class Photon+;
 #pragma link C++ class Electron+;
 #pragma link C++ class Muon+;

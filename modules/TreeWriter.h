@@ -49,6 +49,7 @@ private:
   void ProcessJets(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessMissingET(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessRho(ExRootTreeBranch *branch, TObjArray *array);
 
 #ifndef __CINT__
   typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, TObjArray *); //!
