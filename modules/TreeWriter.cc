@@ -531,7 +531,7 @@ void TreeWriter::ProcessRho(ExRootTreeBranch *branch, TObjArray *array)
 
     entry = static_cast<Rho*>(branch->NewEntry());
 
-    entry->Rho = momentum.Pt();
+    entry->Rho = momentum.E();
   }
 }
 
