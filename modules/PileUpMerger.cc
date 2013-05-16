@@ -86,7 +86,7 @@ void PileUpMerger::Process()
   Int_t pid;
   Float_t x, y, z, t;
   Float_t px, py, pz, e;
-  Double_t dz;
+  Double_t dz, dphi;
   Int_t poisson, event;
   Long64_t allEntries, entry;
   Candidate *candidate;
@@ -115,6 +115,7 @@ void PileUpMerger::Process()
     fReader->ReadEntry(entry);
 
     dz = gRandom->Gaus(0.0, fZVertexSpread);
+    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {
@@ -131,7 +132,10 @@ void PileUpMerger::Process()
       candidate->IsPU = 1;
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+      candidate->Momentum.RotateZ(dphi);
+
       candidate->Position.SetXYZT(x, y, z + dz, t);
+      candidate->Position.RotateZ(dphi);
 
       fOutputArray->Add(candidate);
     }
