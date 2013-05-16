@@ -1,0 +1,41 @@
+Explaining DelphesAnalysis:
+AnalysisEvent.py -> main event class
+EventSelection.py -> definition of event categories. Must be complemented for a real analysis
+BaseControlPlots.py -> to be subclassed for each part of the analysis. Std schema: beginJob, process, endJob
+BaseWeightClass.py -> to be subclassed for each event weight
+ControlPlots.py -> main program. 
+DumpEventInfo.py -> dump info about a given event.
+CPconfig.py -> definition of all the components of the analysis. It sources a file provided with the configuration of each analysis.
+
+what should be touched to implement an example?
+     * config.py (name given as argument of ControlPlots or set as DelphesAnalysisCfg env var.
+     * specific EventSelection class
+     * specific controlPlots class(es)
+
+In the present directory, there are two examples:
+ * Simple analysis.
+  - simpleConfig.py
+  - SimpleEventSelection.py
+  - LeptonControlPlots.py
+* Basic ttbar analysis
+  - topConfig.py
+  - TtbarEventSelection.py
+  - TopReconstruction.py
+  - JetControlPlots.py
+  - LeptonControlPlots.py
+  - TopControlPlots.py
+
+Commands (starting in Delphes ROOT directory):
+
+# setup path
+. ./DelphesEnv.sh
+cd python
+# run the analysis
+DelphesAnalysis/ControlPlots.py -i ../files/ -o controlPlots_demo.root --all -c topConfig.py
+# dump a list of events in category 5 (ttbar candidates)
+export DelphesAnalysisCfg="topConfig.py"
+python DelphesAnalysis/DumpEventList.py 5 ../delphes_output.root 
+# for each of them, print details
+for i in `cat eventlist.txt| cut -d' ' -f 2`; { python DelphesAnalysis/DumpEventInfo.py $i ../delphes_output.root; }
+
+
