@@ -79,6 +79,7 @@ void StatusPidFilter::Process()
 {
   Candidate *candidate;
   Int_t status, pdgCode;
+  Bool_t pass;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -86,10 +87,24 @@ void StatusPidFilter::Process()
     status = candidate->Status;
     pdgCode = TMath::Abs(candidate->PID);
 
-    // Write all electrons, muons, taus and status == 3;
-    if(pdgCode != 11 && pdgCode != 13 && pdgCode != 15 && status != 3) continue;
+    pass = kFALSE;
 
-    if(candidate->Momentum.Pt() <= fPTMin) continue;
+    // status == 3
+    if(status == 3) pass = kTRUE;
+
+    // electrons, muons, taus
+    if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15) pass = kTRUE;
+
+    // neutrinos
+    if(pdgCode == 12 || pdgCode == 14 || pdgCode == 16) pass = kTRUE;
+
+    // heavy quarks
+    if(pdgCode == 5 || pdgCode == 6) pass = kTRUE;
+
+    // Gauge bosons and other fundamental bosons
+    if(pdgCode > 22 &&  pdgCode < 43) pass = kTRUE;
+
+    if(!pass || candidate->Momentum.Pt() <= fPTMin) continue;
 
     fOutputArray->Add(candidate);
   }
