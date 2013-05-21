@@ -131,7 +131,14 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
 
 void DelphesSTDHEPReader::SkipBytes(u_int size)
 {
-  xdr_opaque(fInputXDR, fBuffer, size);
+  u_int rndup;
+  rndup = size % 4;
+  if(rndup > 0)
+  {
+    rndup = 4 - rndup;
+  }
+
+  fseek(fInputFile, size + rndup, SEEK_CUR);
 }
 
 //---------------------------------------------------------------------------
@@ -239,7 +246,7 @@ void DelphesSTDHEPReader::ReadSTDHEPHeader()
   xdr_u_int(fInputXDR, &dimBlocks);
 
   u_int dimNTuples = 0;
-  if(strncmp(fBuffer, "2.00", 4))
+  if(strncmp(fBuffer, "2.00", 4) == 0)
   {
     SkipBytes(4);
     xdr_u_int(fInputXDR, &dimNTuples);
@@ -253,7 +260,7 @@ void DelphesSTDHEPReader::ReadSTDHEPHeader()
   }
 
   // Processing blocks extraction
-  if(dimNTuples > 0 && strncmp(fBuffer, "2.00", 4))
+  if(dimNTuples > 0 && strncmp(fBuffer, "2.00", 4) == 0)
   {
     SkipArray(4);
     SkipArray(4);
