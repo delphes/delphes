@@ -6,13 +6,13 @@
  *  $Date$
  *  $Revision$
  *
- *  
+ *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
 #include "modules/Delphes.h"
- 
+
 #include "modules/FastJetFinder.h"
 #include "modules/ParticlePropagator.h"
 #include "modules/Efficiency.h"
@@ -32,6 +32,7 @@
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
 #include "modules/Cloner.h"
+#include "modules/Weighter.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -61,6 +62,7 @@
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class Cloner+;
+#pragma link C++ class Weighter+;
 #pragma link C++ class ExampleModule+;
 
 #endif

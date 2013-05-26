@@ -174,6 +174,16 @@ public:
 
 //---------------------------------------------------------------------------
 
+class Weight: public TObject
+{
+public:
+  Float_t Weight; // weight for the event
+
+  ClassDef(Weight, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class Photon: public SortableObject
 {
 public:

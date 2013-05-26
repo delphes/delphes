@@ -185,6 +185,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
 	modules/Cloner.h \
+	modules/Weighter.h \
 	modules/ExampleModule.h
 tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootAnalysisLinkDef.h \
@@ -395,6 +396,15 @@ tmp/modules/TreeWriter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h
+tmp/modules/Weighter.$(ObjSuf): \
+	modules/Weighter.$(SrcSuf) \
+	modules/Weighter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/Delphes.$(ObjSuf): \
 	modules/Delphes.$(SrcSuf) \
 	modules/Delphes.h \
@@ -762,6 +772,7 @@ DELPHES_OBJ =  \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
+	tmp/modules/Weighter.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Isolation.$(ObjSuf) \
@@ -1021,13 +1032,13 @@ external/fastjet/internal/Dnn2piCylinder.hh: \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
 
-modules/JetPileUpSubtractor.h: \
-	classes/DelphesModule.h
-	@touch $@
-
 external/fastjet/Selector.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/RangeDefinition.hh
+	@touch $@
+
+modules/JetPileUpSubtractor.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/Error.hh: \
@@ -1158,6 +1169,10 @@ external/fastjet/ClusterSequenceVoronoiArea.hh: \
 	@touch $@
 
 modules/BTagging.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/Weighter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
