@@ -4,6 +4,8 @@
 
 set ExecutionPath {
 
+  Weighter
+
   PileUpMerger
   ParticlePropagator
 
@@ -47,6 +49,26 @@ set ExecutionPath {
   ScalarHT
 
   TreeWriter
+}
+
+##########
+# Weighter
+##########
+
+module Weighter Weighter {
+  set InputArray Delphes/allParticles
+
+  set OutputArray weight
+
+  # add Weight {PID1 PID2} {weight}
+  # default weight
+  add Weight {0} {1.0}
+
+  add Weight {23} {0.5}
+  add Weight {24} {0.5}
+  add Weight {-24} {0.5}
+  add Weight {23 24} {0.25}
+  add Weight {23 -24} {0.25}
 }
 
 ###############
@@ -626,5 +648,6 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
+  add Branch Weighter/weight Weight Weight
 }
 
