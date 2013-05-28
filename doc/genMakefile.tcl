@@ -130,11 +130,13 @@ proc executableDeps {} {
 
   global prefix suffix objSuf exeSuf
    
-  set executable [glob -nocomplain {readers/*.cpp} {converters/*.cpp}]
+  set executable [glob -nocomplain {readers/*.cpp} {converters/*.cpp} {examples/*.cpp}]
   
   set exeFiles {}
   
   foreach fileName $executable {
+    if {$fileName == "examples/DelphesCMSFWLite.cpp"} continue
+
     regsub {\.cpp} $fileName {} exeObjName
     set exeObjName $prefix$exeObjName
     set exeName [file tail $exeObjName]
