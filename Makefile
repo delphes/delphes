@@ -135,6 +135,17 @@ tmp/converters/pileup2root.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootProgressBar.h
+Example1$(ExeSuf): \
+	tmp/examples/Example1.$(ObjSuf)
+
+tmp/examples/Example1.$(ObjSuf): \
+	examples/Example1.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
 EXECUTABLE =  \
 	DelphesLHEF$(ExeSuf) \
 	DelphesHepMC$(ExeSuf) \
@@ -144,7 +155,8 @@ EXECUTABLE =  \
 	root2lhco$(ExeSuf) \
 	stdhep2pileup$(ExeSuf) \
 	hepmc2pileup$(ExeSuf) \
-	pileup2root$(ExeSuf)
+	pileup2root$(ExeSuf) \
+	Example1$(ExeSuf)
 
 EXECUTABLE_OBJ =  \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
@@ -155,7 +167,8 @@ EXECUTABLE_OBJ =  \
 	tmp/converters/root2lhco.$(ObjSuf) \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
-	tmp/converters/pileup2root.$(ObjSuf)
+	tmp/converters/pileup2root.$(ObjSuf) \
+	tmp/examples/Example1.$(ObjSuf)
 
 tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/ClassesLinkDef.h \

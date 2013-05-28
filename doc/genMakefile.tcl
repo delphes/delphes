@@ -30,7 +30,7 @@ proc dependencies {fileName firstLine {force 1} {command {}}} {
 	  }
     }
   }
-  
+
   if {[llength $list] > 0} {
     puts -nonewline $firstLine
     foreach file $list {puts -nonewline $suffix$file}
@@ -48,7 +48,7 @@ proc dependencies {fileName firstLine {force 1} {command {}}} {
     puts ""
   }
 
-  close $fid  
+  close $fid
 }
 
 proc dictDeps {dictVar args} {
@@ -56,20 +56,20 @@ proc dictDeps {dictVar args} {
   global prefix suffix srcSuf objSuf
 
   set dict [eval glob -nocomplain $args]
-  
+
   set dictSrcFiles {}
   set dictObjFiles {}
 
   foreach fileName $dict {
     regsub {LinkDef\.h} $fileName {Dict} dictName
     set dictName $prefix$dictName
-  
+
     lappend dictSrcFiles $dictName$srcSuf
     lappend dictObjFiles $dictName$objSuf
-  
+
     dependencies $fileName "$dictName$srcSuf:$suffix$fileName"
   }
-  
+
   puts -nonewline "${dictVar} = $suffix"
   puts [join $dictSrcFiles $suffix]
   puts ""
@@ -83,17 +83,17 @@ proc dictDeps {dictVar args} {
 proc sourceDeps {srcPrefix args} {
 
   global prefix suffix srcSuf objSuf
-  
+
   set source [eval glob -nocomplain $args]
-    
+
   set srcObjFiles {}
-  
+
   foreach fileName $source {
     regsub {\.cc} $fileName {} srcName
     set srcObjName $prefix$srcName
-  
+
     lappend srcObjFiles $srcObjName$objSuf
-  
+
     dependencies $fileName "$srcObjName$objSuf:$suffix$srcName$srcSuf"
   }
 
@@ -105,22 +105,22 @@ proc sourceDeps {srcPrefix args} {
 proc tclDeps {} {
 
   global prefix suffix srcSuf objSuf
-   
+
   set source [glob -nocomplain {external/tcl/*.c}]
-  
+
   set srcObjFiles {}
-  
+
   foreach fileName $source {
     if {$fileName == "tcl/tclc.c" || $fileName == "tcl/tcl.c"} continue
- 
+
     regsub {\.c} $fileName {} srcName
     set srcObjName $prefix$srcName
-  
+
     lappend srcObjFiles $srcObjName$objSuf
-  
+
     dependencies $fileName "$srcObjName$objSuf:$suffix$fileName"
   }
-  
+
   puts -nonewline "TCL_OBJ = $suffix"
   puts [join $srcObjFiles $suffix]
   puts ""
@@ -129,11 +129,11 @@ proc tclDeps {} {
 proc executableDeps {} {
 
   global prefix suffix objSuf exeSuf
-   
+
   set executable [glob -nocomplain {readers/*.cpp} {converters/*.cpp} {examples/*.cpp}]
-  
+
   set exeFiles {}
-  
+
   foreach fileName $executable {
     if {$fileName == "examples/DelphesCMSFWLite.cpp"} continue
 
@@ -143,13 +143,13 @@ proc executableDeps {} {
 
     lappend exeFiles $exeName$exeSuf
     lappend exeObjFiles $exeObjName$objSuf
-    
+
     puts "$exeName$exeSuf:$suffix$exeObjName$objSuf"
     puts ""
-  
+
     dependencies $fileName "$exeObjName$objSuf:$suffix$fileName"
   }
-  
+
   if [info exists exeFiles] {
     puts -nonewline "EXECUTABLE = $suffix"
     puts [join $exeFiles $suffix]
@@ -165,7 +165,7 @@ proc executableDeps {} {
 
 proc headerDeps {} {
   global suffix headerFiles
-    
+
   foreach fileName [array names headerFiles] {
     dependencies $fileName "$fileName:" 0 "\t@touch \$@"
   }
