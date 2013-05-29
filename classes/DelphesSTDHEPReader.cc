@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <stdio.h>
+#include <errno.h>
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 
@@ -86,6 +87,8 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   TObjArray *stableParticleOutputArray,
   TObjArray *partonOutputArray)
 {
+  bool skipNTuples = false;
+
   if(feof(fInputFile)) return kFALSE;
 
   xdr_int(fInputXDR, &fBlockType);
@@ -93,6 +96,10 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   SkipBytes(4);
 
   xdr_string(fInputXDR, &fBuffer, 100);
+  if(strncmp(fBuffer, "2.00", 4) == 0)
+  {
+    skipNTuples = true;
+  }
 
   if(fBlockType == EVENTTABLE)
   {
@@ -100,7 +107,7 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   }
   else if(fBlockType == EVENTHEADER)
   {
-    ReadSTDHEPHeader();
+    ReadSTDHEPHeader(skipNTuples);
   }
   else if(fBlockType == MCFIO_STDHEPBEG ||
           fBlockType == MCFIO_STDHEPEND)
@@ -115,9 +122,10 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   }
   else if(fBlockType == MCFIO_STDHEP4)
   {
-    ReadSTDHEP4();
+    ReadSTDHEP();
     AnalyzeParticles(factory, allParticleOutputArray,
       stableParticleOutputArray, partonOutputArray);
+    ReadSTDHEP4();
   }
   else
   {
@@ -131,14 +139,21 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
 
 void DelphesSTDHEPReader::SkipBytes(u_int size)
 {
+  int rc;
   u_int rndup;
+
   rndup = size % 4;
   if(rndup > 0)
   {
     rndup = 4 - rndup;
   }
 
-  fseek(fInputFile, size + rndup, SEEK_CUR);
+  rc = fseek(fInputFile, size + rndup, SEEK_CUR);
+
+  if(rc != 0 && errno == ESPIPE)
+  {
+    xdr_opaque(fInputXDR, fBuffer, size);
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -238,7 +253,7 @@ void DelphesSTDHEPReader::ReadEventTable()
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::ReadSTDHEPHeader()
+void DelphesSTDHEPReader::ReadSTDHEPHeader(bool skipNTuples)
 {
   SkipBytes(20);
 
@@ -246,7 +261,7 @@ void DelphesSTDHEPReader::ReadSTDHEPHeader()
   xdr_u_int(fInputXDR, &dimBlocks);
 
   u_int dimNTuples = 0;
-  if(strncmp(fBuffer, "2.00", 4) == 0)
+  if(skipNTuples)
   {
     SkipBytes(4);
     xdr_u_int(fInputXDR, &dimNTuples);
@@ -260,7 +275,7 @@ void DelphesSTDHEPReader::ReadSTDHEPHeader()
   }
 
   // Processing blocks extraction
-  if(dimNTuples > 0 && strncmp(fBuffer, "2.00", 4) == 0)
+  if(skipNTuples && dimNTuples > 0)
   {
     SkipArray(4);
     SkipArray(4);
@@ -341,8 +356,6 @@ void DelphesSTDHEPReader::ReadSTDHEP()
 void DelphesSTDHEPReader::ReadSTDHEP4()
 {
   u_int number;
-
-  ReadSTDHEP();
 
   // Extracting the event weight
   xdr_double(fInputXDR, &fWeight);

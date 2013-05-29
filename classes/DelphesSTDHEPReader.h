@@ -67,7 +67,7 @@ private:
 
   void ReadFileHeader();
   void ReadEventTable();
-  void ReadSTDHEPHeader();
+  void ReadSTDHEPHeader(bool skipNTuples);
   void ReadSTDCM1();
   void ReadSTDHEP();
   void ReadSTDHEP4();
