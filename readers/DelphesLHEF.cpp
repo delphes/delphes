@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
   DelphesFactory *factory = 0;
   TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
   DelphesLHEFReader *reader = 0;
-  Int_t i;
+  Int_t i, maxEvents, skipEvents;
   Long64_t length, eventCounter;
 
   if(argc < 3)
@@ -87,6 +87,19 @@ int main(int argc, char *argv[])
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
+
+    maxEvents = confReader->GetInt("::MaxEvents", 0);
+    skipEvents = confReader->GetInt("::SkipEvents", 0);
+
+    if(maxEvents < 0)
+    {
+      throw runtime_error("MaxEvents must be zero or positive");
+    }
+
+    if(skipEvents < 0)
+    {
+      throw runtime_error("SkipEvents must be zero or positive");
+    }
 
     modularDelphes = new Delphes("Delphes");
     modularDelphes->SetConfReader(confReader);
@@ -145,7 +158,8 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       reader->Clear();
       readStopWatch.Start();
-      while(reader->ReadBlock(factory, allParticleOutputArray,
+      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) &&
+        reader->ReadBlock(factory, allParticleOutputArray,
         stableParticleOutputArray, partonOutputArray) && !interrupted)
       {
         if(reader->EventReady())
@@ -153,15 +167,21 @@ int main(int argc, char *argv[])
           ++eventCounter;
 
           readStopWatch.Stop();
-          procStopWatch.Start();
-          modularDelphes->ProcessTask();
-          procStopWatch.Stop();
 
-          reader->AnalyzeEvent(branchEvent, eventCounter, &readStopWatch, &procStopWatch);
+          if(eventCounter > skipEvents)
+          {
+            readStopWatch.Stop();
+            procStopWatch.Start();
+            modularDelphes->ProcessTask();
+            procStopWatch.Stop();
 
-          treeWriter->Fill();
+            reader->AnalyzeEvent(branchEvent, eventCounter, &readStopWatch, &procStopWatch);
 
-          treeWriter->Clear();
+            treeWriter->Fill();
+
+            treeWriter->Clear();
+          }
+
           modularDelphes->Clear();
           reader->Clear();
 
