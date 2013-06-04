@@ -29,7 +29,7 @@ using namespace std;
 
 // Here you can put your analysis macro
 
-#include "Example3.C"
+#include "Example1.C"
 
 //------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
 // Here you call your macro's main function 
 
-  Example3(inputFile);
+  Example1(inputFile);
 
 //------------------------------------------------------------------------------
 
