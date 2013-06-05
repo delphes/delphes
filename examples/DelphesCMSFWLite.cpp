@@ -61,7 +61,7 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
 
      pid = particle.pdgId();
      status = particle.status();
-     px = particle.px(), py = particle.py(), pz = particle.phi(), e = particle.energy();
+     px = particle.px(), py = particle.py(), pz = particle.pz(), e = particle.energy();
      x = particle.vx(), y = particle.vy(), z = particle.vz();
 
     if(status == 1 || status == 2)
