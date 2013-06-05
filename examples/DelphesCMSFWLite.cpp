@@ -59,40 +59,37 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
   {
     const reco::GenParticle &particle = (*handleParticle)[i];
 
-     pid = particle.pdgId();
-     status = particle.status();
-     px = particle.px(), py = particle.py(), pz = particle.pz(), e = particle.energy();
-     x = particle.vx(), y = particle.vy(), z = particle.vz();
+    pid = particle.pdgId();
+    status = particle.status();
+    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy();
+    x = particle.vx(); y = particle.vy(); z = particle.vz();
 
-    if(status == 1 || status == 2)
+    candidate = factory->NewCandidate();
+
+    candidate->PID = pid;
+    pdgCode = TMath::Abs(candidate->PID);
+
+    candidate->Status = status;
+
+    pdgParticle = pdg->GetParticle(pid);
+    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+
+    candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+
+    candidate->Position.SetXYZT(x, y, z, 0.0);
+
+    allParticleOutputArray->Add(candidate);
+
+    if(!pdgParticle) return;
+
+    if(status == 1)
     {
-      candidate = factory->NewCandidate();
-
-      candidate->PID = pid;
-      pdgCode = TMath::Abs(candidate->PID);
-
-      candidate->Status = status;
-
-      pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
-      candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
-
-      candidate->Momentum.SetPxPyPzE(px, py, pz, e);
-
-      candidate->Position.SetXYZT(x, y, z, 0.0);
-
-      allParticleOutputArray->Add(candidate);
-
-      if(!pdgParticle) return;
-
-      if(status == 1)
-      {
-        stableParticleOutputArray->Add(candidate);
-      }
-      else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-      {
-        partonOutputArray->Add(candidate);
-      }
+      stableParticleOutputArray->Add(candidate);
+    }
+    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    {
+      partonOutputArray->Add(candidate);
     }
   }
 }
