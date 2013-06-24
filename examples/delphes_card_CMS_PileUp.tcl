@@ -566,7 +566,7 @@ module Merger ScalarHT {
 
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray JetPileUpSubtractor/jets
 
   set BitNumber 0
 
