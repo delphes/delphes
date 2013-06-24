@@ -600,7 +600,7 @@ module BTagging BTagging {
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
-  set JetInputArray JetPileUpSubtracto/jets
+  set JetInputArray JetPileUpSubtractor/jets
 
   set DeltaR 0.5
 
