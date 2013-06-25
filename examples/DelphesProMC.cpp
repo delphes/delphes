@@ -28,9 +28,9 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
 
-#include "ProMC/ProMC.pb.h"
-#include "ProMC/ProMCBook.h"
-#include "ProMC/ProMCHeader.pb.h"
+#include "ProMC.pb.h"
+#include "ProMCBook.h"
+#include "ProMCHeader.pb.h"
 
 using namespace std;
 
