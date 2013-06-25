@@ -89,7 +89,7 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
   DelphesStream bufferStream(fBuffer);
 
-  if(strstr(fBuffer, "<event"))
+  if(strstr(fBuffer, "<event>"))
   {
     Clear();
     fEventCounter = 1;
