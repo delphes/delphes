@@ -186,6 +186,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/MomentumSmearing.h \
 	modules/Calorimeter.h \
 	modules/Isolation.h \
+	modules/EnergyScale.h \
 	modules/UniqueObjectFinder.h \
 	modules/BTagging.h \
 	modules/TauTagging.h \
@@ -366,6 +367,15 @@ tmp/modules/StatusPidFilter.$(ObjSuf): \
 tmp/modules/ConstituentFilter.$(ObjSuf): \
 	modules/ConstituentFilter.$(SrcSuf) \
 	modules/ConstituentFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/EnergyScale.$(ObjSuf): \
+	modules/EnergyScale.$(SrcSuf) \
+	modules/EnergyScale.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -781,6 +791,7 @@ DELPHES_OBJ =  \
 	tmp/modules/FastJetFinder.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
+	tmp/modules/EnergyScale.$(ObjSuf) \
 	tmp/modules/TauTagging.$(ObjSuf) \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
@@ -1028,6 +1039,10 @@ classes/DelphesModule.h: \
 	@touch $@
 
 modules/Isolation.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/EnergyScale.h: \
 	classes/DelphesModule.h
 	@touch $@
 
