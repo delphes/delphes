@@ -135,7 +135,7 @@ proc executableDeps {} {
   set exeFiles {}
 
   foreach fileName $executable {
-    if {$fileName == "examples/DelphesCMSFWLite.cpp"} continue
+    if {$fileName == "examples/DelphesCMSFWLite.cpp" || $fileName == "examples/DelphesProMC.cpp"} continue
 
     regsub {\.cpp} $fileName {} exeObjName
     set exeObjName $prefix$exeObjName
