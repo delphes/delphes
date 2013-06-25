@@ -20,6 +20,7 @@
 #include "modules/MomentumSmearing.h"
 #include "modules/Calorimeter.h"
 #include "modules/Isolation.h"
+#include "modules/EnergyScale.h"
 #include "modules/UniqueObjectFinder.h"
 #include "modules/BTagging.h"
 #include "modules/TauTagging.h"
@@ -50,6 +51,7 @@
 #pragma link C++ class MomentumSmearing+;
 #pragma link C++ class Calorimeter+;
 #pragma link C++ class Isolation+;
+#pragma link C++ class EnergyScale+;
 #pragma link C++ class UniqueObjectFinder+;
 #pragma link C++ class BTagging+;
 #pragma link C++ class TauTagging+;
