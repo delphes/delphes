@@ -81,7 +81,7 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
 
     allParticleOutputArray->Add(candidate);
 
-    if(!pdgParticle) return;
+    if(!pdgParticle) continue;
 
     if(status == 1)
     {

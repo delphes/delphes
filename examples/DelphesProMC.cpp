@@ -113,7 +113,7 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
 
     allParticleOutputArray->Add(candidate);
 
-    if(!pdgParticle) return;
+    if(!pdgParticle) continue;
 
     if(status == 1)
     {
