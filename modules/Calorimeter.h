@@ -34,7 +34,7 @@ public:
   void Init();
   void Process();
   void Finish();
-
+  Double_t Draw_lognormal(Double_t mu, Double_t sigma);
 private:
 
   typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
@@ -79,7 +79,7 @@ private:
   TIterator *fItTowerPhotonArray; //!
 
   void FinalizeTower();
-  
+ 
   ClassDef(Calorimeter, 1)
 };
 
