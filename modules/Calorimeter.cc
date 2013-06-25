@@ -154,9 +154,6 @@ void Calorimeter::Init()
 
   fEFlowTrackOutputArray = ExportArray(GetString("EFlowTrackOutputArray", "eflowTracks"));
   fEFlowTowerOutputArray = ExportArray(GetString("EFlowTowerOutputArray", "eflowTowers"));
-
-  
-
 }
 
 //------------------------------------------------------------------------------
@@ -375,49 +372,23 @@ void Calorimeter::FinalizeTower()
   Candidate *particle, *track, *tower;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
-  Double_t sE,mE,sH,mH,SE=0,ME=0,SH=0,MH=0;
-  
+
   if(!fTower) return;
 
- // cout<<"new tower -----------------------"<<endl;
-
-  
-  sE = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
-  mE = fTowerECalEnergy;
- 
-  sH = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
-  mH = fTowerHCalEnergy;
-  
- // cout<<sE<<","<<mE<<endl;
- // cout<<sH<<","<<mH<<endl;
- // cout<<"---"<<endl;
- 
-  if(mE>0)SE = TMath::Sqrt(TMath::Log((1+(sE*sE)/(mE*mE))));
-  if(mE>0)ME = TMath::Log(mE)-0.5*SE*SE;
-  
-  if(mH>0)SH = TMath::Sqrt(TMath::Log((1+(sH*sH)/(mH*mH))));
-  if(mH>0)MH = TMath::Log(mH)-0.5*SH*SH;
-  
- // cout<<SE<<","<<ME<<endl;
- // cout<<SH<<","<<MH<<endl;
- // cout<<"---"<<endl;
-  
 //  ecalEnergy = gRandom->Gaus(fTowerECalEnergy, fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy));
-  ecalEnergy = (ME != 0.0 ? Draw_lognormal(ME,SE) : 0.0);
- // cout<<ecalEnergy<<endl;
-  
-  if(ecalEnergy < 0.0) ecalEnergy = 0.0;
+//  if(ecalEnergy < 0.0) ecalEnergy = 0.0;
 
-  hcalEnergy = (MH != 0.0 ? Draw_lognormal(MH,SH) : 0.0);
-  //hcalEnergy = gRandom->Gaus(fTowerHCalEnergy, fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy));
-  if(hcalEnergy < 0.0) hcalEnergy = 0.0;
+  ecalEnergy = LogNormal(fTowerECalEnergy, fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy));
 
-//  cout<<hcalEnergy<<endl; 
-   
+//  hcalEnergy = gRandom->Gaus(fTowerHCalEnergy, fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy));
+//  if(hcalEnergy < 0.0) hcalEnergy = 0.0;
+
+  hcalEnergy = LogNormal(fTowerHCalEnergy, fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy));
+
   energy = ecalEnergy + hcalEnergy;
 
- // eta = fTowerEta;
- // phi = fTowerPhi;
+//  eta = fTowerEta;
+//  phi = fTowerPhi;
 
   eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
   phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
@@ -501,8 +472,19 @@ void Calorimeter::FinalizeTower()
 
 //------------------------------------------------------------------------------
 
-Double_t Calorimeter::Draw_lognormal(Double_t mu, Double_t sigma)
+Double_t Calorimeter::LogNormal(Double_t mean, Double_t sigma)
+{
+  Double_t a, b;
+
+  if(mean > 0.0)
   {
-     Double_t g = gRandom->Gaus(0, 1);
-     return TMath::Exp(mu + sigma * g);
+    b = TMath::Sqrt(TMath::Log((1.0 + (sigma*sigma)/(mean*mean))));
+    a = TMath::Log(mean) - 0.5*b*b;
+
+    return TMath::Exp(a + b*gRandom->Gaus(0, 1));
   }
+  else
+  {
+    return 0.0;
+  }
+}
