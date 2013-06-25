@@ -63,8 +63,8 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
   element->Number = mutableEvent->number();
 
   element->ProcessID = mutableEvent->process_id();
-  element->MPI = 1;
-  element->Weight = 1.0;
+  element->MPI = mutableEvent->mpi();
+  element->Weight = mutableEvent->weight();
   element->Scale = mutableEvent->scale();
   element->AlphaQED = mutableEvent->alpha_qed();
   element->AlphaQCD = mutableEvent->alpha_qcd();
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
-    branchEvent = treeWriter->NewBranch("Event", LHEFEvent::Class());
+    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -236,6 +236,7 @@ int main(int argc, char *argv[])
       progressBar.Finish();
 
       inputFile->close();
+      delete inputFile;
     }
 
     modularDelphes->FinishTask();
