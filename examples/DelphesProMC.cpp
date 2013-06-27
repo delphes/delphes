@@ -82,7 +82,7 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
 
   mutableParticles = event.mutable_particles();
 
-  for(i = 0 ; i < mutableParticles->pdg_id_size(); ++i)
+  for(i = 0; i < mutableParticles->pdg_id_size(); ++i)
   {
     pid = mutableParticles->pdg_id(i);
     status = mutableParticles->status(i);
