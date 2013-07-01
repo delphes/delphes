@@ -75,6 +75,12 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D1 < 0) return -1;
 
+  if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
+     tau->D2 >= fParticleInputArray->GetEntriesFast())
+  {
+    throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
+  }
+
   for(i = tau->D1; i <= tau->D2; ++i)
   {
     daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
