@@ -6,10 +6,14 @@ then
 else
   echo ">> PROMC is set to $PROMC"
   echo ">> Building DelphesProMC";
+  
+  /bin/mkdir -p external/ProMC
+  
+  /bin/cp $PROMC/src/* external/ProMC/
 
-  INC="-I$PROMC/include -I$PROMC/src"
+  INC="-I$PROMC/include"
 
-  LIB="$PROMC/src/*.cc -L$PROMC/lib -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz"
+  LIB="external/ProMC/*.cc -L$PROMC/lib -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz"
 
   g++ -I. -Iexternal $INC `root-config --cflags --ldflags --libs` -lEG -L. -lDelphes $LIB -o DelphesProMC examples/DelphesProMC.cpp
 fi
