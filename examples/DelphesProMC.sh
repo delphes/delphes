@@ -6,9 +6,9 @@ then
 else
   echo ">> PROMC is set to $PROMC"
   echo ">> Building DelphesProMC"
-  
+
   /bin/mkdir -p external/ProMC
-  
+
   /bin/cp $PROMC/src/* external/ProMC/
 
   INC="-I$PROMC/include"
