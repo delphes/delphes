@@ -5,7 +5,7 @@ then
   echo "** ERROR: PROMC variable is not set. Is ProMC installed?"
 else
   echo ">> PROMC is set to $PROMC"
-  echo ">> Building DelphesProMC";
+  echo ">> Building DelphesProMC"
   
   /bin/mkdir -p external/ProMC
   
