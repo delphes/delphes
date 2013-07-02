@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <memory>
 
 #include <map>
+#include <vector>
 
 #include <stdlib.h>
 #include <signal.h>
@@ -40,8 +42,12 @@ using namespace std;
 
 void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
 {
-  size_t i;
   fwlite::Handle< vector< reco::GenParticle > > handleParticle;
+  vector< reco::GenParticle >::const_iterator itParticle;
+
+  vector< const reco::Candidate * > vectorCandidate;
+  vector< const reco::Candidate * >::iterator itCandidate;
+
   handleParticle.getByLabel(event, "genParticles");
 
   Candidate *candidate;
@@ -55,9 +61,14 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
 
   pdg = TDatabasePDG::Instance();
 
-  for(i = 0; i < handleParticle->size(); ++i)
+  for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
   {
-    const reco::GenParticle &particle = (*handleParticle)[i];
+    vectorCandidate.push_back(&*itParticle);
+  }
+
+  for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
+  {
+    const reco::GenParticle &particle = *itParticle;
 
     pid = particle.pdgId();
     status = particle.status();
@@ -70,6 +81,12 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
     pdgCode = TMath::Abs(candidate->PID);
 
     candidate->Status = status;
+
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
+    if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
+
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(particle.numberOfDaughters() - 1));
+    if(itCandidate != vectorCandidate.end()) candidate->D2 = distance(vectorCandidate.begin(), itCandidate);
 
     pdgParticle = pdg->GetParticle(pid);
     candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
