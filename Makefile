@@ -28,14 +28,8 @@ ifneq ($(PYTHIA8DATA),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8DATA)/../include
 DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -llhapdfdummy
-else
-ifneq ($(PYTHIA8DATA),)
-HAS_PYTHIA8 = true
-CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8DATA)/../include
-DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib/archive -lpythia8 -llhapdfdummy
 endif
 endif
-
 
 ###
 
