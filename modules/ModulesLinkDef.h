@@ -36,6 +36,10 @@
 #include "modules/Weighter.h"
 #include "modules/ExampleModule.h"
 
+#ifdef HAS_PYTHIA8
+#include "modules/PileUpMergerPythia8.h"
+#endif
+
 #ifdef __CINT__
 
 #pragma link off all globals;
@@ -66,5 +70,9 @@
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class ExampleModule+;
+
+#ifdef HAS_PYTHIA8
+#pragma link C++ class PileUpMergerPythia8+;
+#endif
 
 #endif

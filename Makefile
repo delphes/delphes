@@ -19,6 +19,11 @@ CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL 
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
+ifneq ($(PYTHIA8),)
+CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
+DELPHES_LIBS += -L$(PYTHIA8)/lib/archive -lpythia8 -llhapdfdummy
+endif
+
 ###
 
 DELPHES = libDelphes.$(DllSuf)
@@ -200,7 +205,8 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/StatusPidFilter.h \
 	modules/Cloner.h \
 	modules/Weighter.h \
-	modules/ExampleModule.h
+	modules/ExampleModule.h \
+	modules/PileUpMergerPythia8.h
 tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootAnalysisLinkDef.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
@@ -355,6 +361,16 @@ tmp/modules/FastJetFinder.$(ObjSuf): \
 	external/fastjet/plugins/SISCone/fastjet/SISConePlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh
+tmp/modules/PileUpMergerPythia8.$(ObjSuf): \
+	modules/PileUpMergerPythia8.$(SrcSuf) \
+	modules/PileUpMergerPythia8.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/StatusPidFilter.$(ObjSuf): \
 	modules/StatusPidFilter.$(SrcSuf) \
 	modules/StatusPidFilter.h \
@@ -888,6 +904,10 @@ DELPHES_OBJ =  \
 	tmp/external/fastjet/plugins/Jade/JadePlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/EECambridge/EECambridgePlugin.$(ObjSuf)
 
+ifneq ($(PYTHIA8),)
+DELPHES_OBJ +=  \
+	tmp/modules/PileUpMergerPythia8.$(ObjSuf)
+endif
 tmp/display/DelphesDisplay.$(ObjSuf): \
 	display/DelphesDisplay.$(SrcSuf) \
 	display/DelphesDisplay.h
@@ -898,6 +918,10 @@ DISPLAY_OBJ =  \
 	tmp/display/DelphesDisplay.$(ObjSuf) \
 	tmp/display/DelphesCaloData.$(ObjSuf)
 
+ifneq ($(PYTHIA8),)
+DISPLAY_OBJ +=  \
+	
+endif
 tmp/external/tcl/tclObj.$(ObjSuf): \
 	external/tcl/tclObj.c
 tmp/external/tcl/tclUtil.$(ObjSuf): \
@@ -1021,13 +1045,13 @@ external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh: \
 	external/fastjet/LimitedWarning.hh
 	@touch $@
 
-modules/ConstituentFilter.h: \
-	classes/DelphesModule.h
-	@touch $@
-
 external/fastjet/JetDefinition.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/PseudoJet.hh
+	@touch $@
+
+modules/ConstituentFilter.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 modules/Calorimeter.h: \
@@ -1157,6 +1181,10 @@ modules/Delphes.h: \
 	@touch $@
 
 modules/UniqueObjectFinder.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/PileUpMergerPythia8.h: \
 	classes/DelphesModule.h
 	@touch $@
 

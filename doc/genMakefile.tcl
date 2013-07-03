@@ -87,12 +87,17 @@ proc sourceDeps {srcPrefix args} {
   set source [eval glob -nocomplain $args]
 
   set srcObjFiles {}
+  set srcObjFilesPythia8 {}
 
   foreach fileName $source {
     regsub {\.cc} $fileName {} srcName
     set srcObjName $prefix$srcName
-
-    lappend srcObjFiles $srcObjName$objSuf
+    
+    if {$fileName == "modules/PileUpMergerPythia8.cc"} {
+      lappend srcObjFilesPythia8 $srcObjName$objSuf
+    } else {
+      lappend srcObjFiles $srcObjName$objSuf
+    }
 
     dependencies $fileName "$srcObjName$objSuf:$suffix$srcName$srcSuf"
   }
@@ -100,6 +105,11 @@ proc sourceDeps {srcPrefix args} {
   puts -nonewline "${srcPrefix}_OBJ = $suffix"
   puts [join $srcObjFiles $suffix]
   puts ""
+  
+  puts {ifneq ($(PYTHIA8),)}
+  puts -nonewline "${srcPrefix}_OBJ += $suffix"
+  puts [join $srcObjFilesPythia8 $suffix]
+  puts {endif}
 }
 
 proc tclDeps {} {
@@ -191,6 +201,11 @@ SrcSuf = cc
 CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
+
+ifneq ($(PYTHIA8),)
+CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
+DELPHES_LIBS += -L$(PYTHIA8)/lib/archive -lpythia8 -llhapdfdummy
+endif
 
 ###
 
