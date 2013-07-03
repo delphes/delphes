@@ -106,7 +106,7 @@ proc sourceDeps {srcPrefix args} {
   puts [join $srcObjFiles $suffix]
   puts ""
   
-  puts {ifneq ($(PYTHIA8),)}
+  puts {ifeq ($(HAS_PYTHIA8),true)}
   puts -nonewline "${srcPrefix}_OBJ += $suffix"
   puts [join $srcObjFilesPythia8 $suffix]
   puts {endif}
@@ -203,8 +203,15 @@ DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
 ifneq ($(PYTHIA8),)
+HAS_PYTHIA8 = true
 CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
-DELPHES_LIBS += -L$(PYTHIA8)/lib/archive -lpythia8 -llhapdfdummy
+DELPHES_LIBS += -L$(PYTHIA8)/lib -lpythia8 -llhapdfdummy
+else
+ifneq ($(PYTHIA8DATA),)
+HAS_PYTHIA8 = true
+CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8DATA)/../include
+DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -llhapdfdummy
+endif
 endif
 
 ###
@@ -321,7 +328,7 @@ dist:
 %Dict.$(SrcSuf):
 	@mkdir -p $(@D)
 	@echo ">> Generating $@"
-	@rootcint -f $@ -c -Iexternal $<
+	@rootcint -f $@ -c $(CXXFLAGS) $<
 	@echo "#define private public" > $@.arch
 	@echo "#define protected public" >> $@.arch
 	@mv $@ $@.base

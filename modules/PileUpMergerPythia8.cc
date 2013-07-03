@@ -56,8 +56,6 @@ PileUpMergerPythia8::~PileUpMergerPythia8()
 
 void PileUpMergerPythia8::Init()
 {
-  const char *fileName;
-
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
   fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
 
@@ -100,7 +98,6 @@ void PileUpMergerPythia8::Process()
   Float_t px, py, pz, e;
   Double_t dz, dphi;
   Int_t poisson, event, i;
-  Long64_t allEntries, entry;
   Candidate *candidate;
   DelphesFactory *factory;
 
@@ -123,7 +120,7 @@ void PileUpMergerPythia8::Process()
 
     for(i = 0; i < fPythia->event.size(); ++i)
     {
-      Pythia8::Particle &particle = pythia->event[i];
+      Pythia8::Particle &particle = fPythia->event[i];
 
       if(particle.status() != 1 || !particle.isVisible() || particle.pT() <= fPTMin) continue;
 
