@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
   DelphesFactory *factory = 0;
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i;
-  Long64_t entry, allEntries;
+  Long64_t eventCounter, numberOfEvents;
 
   if(argc < 4)
   {
@@ -196,14 +196,14 @@ int main(int argc, char *argv[])
 
       fwlite::Event event(inputFile);
 
-      allEntries = event.size();
+      numberOfEvents = event.size();
 
-      if(allEntries <= 0) continue;
+      if(numberOfEvents <= 0) continue;
 
-      ExRootProgressBar progressBar(allEntries - 1);
+      ExRootProgressBar progressBar(numberOfEvents - 1);
 
       // Loop over all objects
-      entry = 0;
+      eventCounter = 0;
       modularDelphes->Clear();
       treeWriter->Clear();
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
@@ -216,8 +216,8 @@ int main(int argc, char *argv[])
         modularDelphes->Clear();
         treeWriter->Clear();
 
-        progressBar.Update(entry);
-        ++entry;
+        progressBar.Update(eventCounter);
+        ++eventCounter;
       }
       progressBar.Finish();
 
