@@ -35,17 +35,17 @@ proc dependencies {fileName firstLine {force 1} {command {}}} {
     puts -nonewline $firstLine
     foreach file $list {puts -nonewline $suffix$file}
     if {$command != {}} {
-      puts ""
+      puts {}
       puts $command
     }
-    puts ""
+    puts {}
   } elseif {$force} {
     puts -nonewline $firstLine
     if {$command != {}} {
-      puts ""
+      puts {}
       puts $command
     }
-    puts ""
+    puts {}
   }
 
   close $fid
@@ -72,11 +72,11 @@ proc dictDeps {dictVar args} {
 
   puts -nonewline "${dictVar} = $suffix"
   puts [join $dictSrcFiles $suffix]
-  puts ""
+  puts {}
 
   puts -nonewline "${dictVar}_OBJ = $suffix"
   puts [join $dictObjFiles $suffix]
-  puts ""
+  puts {}
 
 }
 
@@ -102,15 +102,15 @@ proc sourceDeps {srcPrefix args} {
     dependencies $fileName "$srcObjName$objSuf:$suffix$srcName$srcSuf"
   }
 
-  puts -nonewline "${srcPrefix}_OBJ = $suffix"
+  puts -nonewline "${srcPrefix}_OBJ += $suffix"
   puts [join $srcObjFiles $suffix]
-  puts ""
+  puts {}
 
   puts {ifeq ($(HAS_PYTHIA8),true)}
   puts -nonewline "${srcPrefix}_OBJ += $suffix"
   puts [join $srcObjFilesPythia8 $suffix]
   puts {endif}
-  puts ""
+  puts {}
 }
 
 proc tclDeps {} {
@@ -134,19 +134,19 @@ proc tclDeps {} {
 
   puts -nonewline "TCL_OBJ = $suffix"
   puts [join $srcObjFiles $suffix]
-  puts ""
+  puts {}
 }
 
-proc executableDeps {} {
+proc executableDeps {args} {
 
   global prefix suffix objSuf exeSuf
 
-  set executable [glob -nocomplain {readers/*.cpp} {converters/*.cpp} {examples/*.cpp}]
+  set executable [eval glob -nocomplain $args]
 
   set exeFiles {}
 
   foreach fileName $executable {
-    if {$fileName == "examples/DelphesCMSFWLite.cpp" || $fileName == "examples/DelphesProMC.cpp"} continue
+    if {$fileName == "examples/DelphesProMC.cpp"} continue
 
     regsub {\.cpp} $fileName {} exeObjName
     set exeObjName $prefix$exeObjName
@@ -156,20 +156,20 @@ proc executableDeps {} {
     lappend exeObjFiles $exeObjName$objSuf
 
     puts "$exeName$exeSuf:$suffix$exeObjName$objSuf"
-    puts ""
+    puts {}
 
     dependencies $fileName "$exeObjName$objSuf:$suffix$fileName"
   }
 
   if [info exists exeFiles] {
-    puts -nonewline "EXECUTABLE = $suffix"
+    puts -nonewline "EXECUTABLE += $suffix"
     puts [join $exeFiles $suffix]
-    puts ""
+    puts {}
   }
   if [info exists exeObjFiles] {
-    puts -nonewline "EXECUTABLE_OBJ = $suffix"
+    puts -nonewline "EXECUTABLE_OBJ += $suffix"
     puts [join $exeObjFiles $suffix]
-    puts ""
+    puts {}
   }
 }
 
@@ -202,6 +202,25 @@ CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL 
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
+ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
+HAS_CMSSW = true
+CXXFLAGS += $(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH))
+DELPHES_LIBS += $(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH))
+ifneq ($(CMSSW_RELEASE_BASE),)
+CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src
+endif
+ifneq ($(LD_LIBRARY_PATH),)
+DELPHES_LIBS += $(subst include,lib,$(subst :, -L,$(LD_LIBRARY_PATH))
+endif
+DELPHES_LIBS += -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsPatCandidates -lDataFormatsLuminosity -lCommonToolsUtils
+endif
+
+ifneq ($(PROMC),)
+HAS_PROMC = true
+CXXFLAGS += -I$(PROMC)/include
+DELPHES_LIBS += -L$(PROMC)/lib -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
+endif
+
 ifneq ($(PYTHIA8),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
@@ -230,7 +249,25 @@ all:
 
 }
 
-executableDeps
+executableDeps {converters/*.cpp} {examples/*.cpp}
+
+executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp}
+
+puts {ifeq ($(HAS_CMSSW),true)}
+executableDeps {readers/DelphesCMSFWLite.cpp}
+puts {endif}
+puts {}
+
+puts {ifeq ($(HAS_PROMC),true)}
+executableDeps {readers/DelphesProMC.cpp}
+sourceDeps {DELPHES} {external/ProMC/*.cc}
+puts {endif}
+puts {}
+
+puts {ifeq ($(HAS_PYTHIA8),true)}
+executableDeps {readers/DelphesPythia8.cpp}
+puts {endif}
+puts {}
 
 dictDeps {DELPHES_DICT} {classes/*LinkDef.h} {modules/*LinkDef.h} {external/ExRootAnalysis/*LinkDef.h}
 

@@ -19,6 +19,25 @@ CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL 
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
+ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
+HAS_CMSSW = true
+CXXFLAGS += $(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH))
+DELPHES_LIBS += $(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH))
+ifneq ($(CMSSW_RELEASE_BASE),)
+CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src
+endif
+ifneq ($(LD_LIBRARY_PATH),)
+DELPHES_LIBS += $(subst include,lib,$(subst :, -L,$(LD_LIBRARY_PATH))
+endif
+DELPHES_LIBS += -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsPatCandidates -lDataFormatsLuminosity -lCommonToolsUtils
+endif
+
+ifneq ($(PROMC),)
+HAS_PROMC = true
+CXXFLAGS += -I$(PROMC)/include
+DELPHES_LIBS += -L$(PROMC)/lib -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
+endif
+
 ifneq ($(PYTHIA8),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
@@ -46,42 +65,6 @@ DISTTAR = $(DISTDIR).tar.gz
 all:
 
 
-DelphesLHEF$(ExeSuf): \
-	tmp/readers/DelphesLHEF.$(ObjSuf)
-
-tmp/readers/DelphesLHEF.$(ObjSuf): \
-	readers/DelphesLHEF.cpp \
-	modules/Delphes.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesLHEFReader.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootProgressBar.h
-DelphesHepMC$(ExeSuf): \
-	tmp/readers/DelphesHepMC.$(ObjSuf)
-
-tmp/readers/DelphesHepMC.$(ObjSuf): \
-	readers/DelphesHepMC.cpp \
-	modules/Delphes.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesHepMCReader.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootProgressBar.h
-DelphesSTDHEP$(ExeSuf): \
-	tmp/readers/DelphesSTDHEP.$(ObjSuf)
-
-tmp/readers/DelphesSTDHEP.$(ObjSuf): \
-	readers/DelphesSTDHEP.cpp \
-	modules/Delphes.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesSTDHEPReader.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootProgressBar.h
 lhco2root$(ExeSuf): \
 	tmp/converters/lhco2root.$(ObjSuf)
 
@@ -158,10 +141,7 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootUtilities.h
-EXECUTABLE =  \
-	DelphesLHEF$(ExeSuf) \
-	DelphesHepMC$(ExeSuf) \
-	DelphesSTDHEP$(ExeSuf) \
+EXECUTABLE +=  \
 	lhco2root$(ExeSuf) \
 	root2pileup$(ExeSuf) \
 	root2lhco$(ExeSuf) \
@@ -170,10 +150,7 @@ EXECUTABLE =  \
 	pileup2root$(ExeSuf) \
 	Example1$(ExeSuf)
 
-EXECUTABLE_OBJ =  \
-	tmp/readers/DelphesLHEF.$(ObjSuf) \
-	tmp/readers/DelphesHepMC.$(ObjSuf) \
-	tmp/readers/DelphesSTDHEP.$(ObjSuf) \
+EXECUTABLE_OBJ +=  \
 	tmp/converters/lhco2root.$(ObjSuf) \
 	tmp/converters/root2pileup.$(ObjSuf) \
 	tmp/converters/root2lhco.$(ObjSuf) \
@@ -181,6 +158,137 @@ EXECUTABLE_OBJ =  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
 	tmp/converters/pileup2root.$(ObjSuf) \
 	tmp/examples/Example1.$(ObjSuf)
+
+DelphesHepMC$(ExeSuf): \
+	tmp/readers/DelphesHepMC.$(ObjSuf)
+
+tmp/readers/DelphesHepMC.$(ObjSuf): \
+	readers/DelphesHepMC.cpp \
+	modules/Delphes.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesHepMCReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
+DelphesLHEF$(ExeSuf): \
+	tmp/readers/DelphesLHEF.$(ObjSuf)
+
+tmp/readers/DelphesLHEF.$(ObjSuf): \
+	readers/DelphesLHEF.cpp \
+	modules/Delphes.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesLHEFReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
+DelphesSTDHEP$(ExeSuf): \
+	tmp/readers/DelphesSTDHEP.$(ObjSuf)
+
+tmp/readers/DelphesSTDHEP.$(ObjSuf): \
+	readers/DelphesSTDHEP.cpp \
+	modules/Delphes.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesSTDHEPReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
+EXECUTABLE +=  \
+	DelphesHepMC$(ExeSuf) \
+	DelphesLHEF$(ExeSuf) \
+	DelphesSTDHEP$(ExeSuf)
+
+EXECUTABLE_OBJ +=  \
+	tmp/readers/DelphesHepMC.$(ObjSuf) \
+	tmp/readers/DelphesLHEF.$(ObjSuf) \
+	tmp/readers/DelphesSTDHEP.$(ObjSuf)
+
+ifeq ($(HAS_CMSSW),true)
+DelphesCMSFWLite$(ExeSuf): \
+	tmp/readers/DelphesCMSFWLite.$(ObjSuf)
+
+tmp/readers/DelphesCMSFWLite.$(ObjSuf): \
+	readers/DelphesCMSFWLite.cpp \
+	modules/Delphes.h \
+	classes/DelphesStream.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
+EXECUTABLE +=  \
+	DelphesCMSFWLite$(ExeSuf)
+
+EXECUTABLE_OBJ +=  \
+	tmp/readers/DelphesCMSFWLite.$(ObjSuf)
+
+endif
+
+ifeq ($(HAS_PROMC),true)
+DelphesProMC$(ExeSuf): \
+	tmp/readers/DelphesProMC.$(ObjSuf)
+
+tmp/readers/DelphesProMC.$(ObjSuf): \
+	readers/DelphesProMC.cpp \
+	modules/Delphes.h \
+	classes/DelphesStream.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h \
+	external/ProMC/ProMCBook.h
+EXECUTABLE +=  \
+	DelphesProMC$(ExeSuf)
+
+EXECUTABLE_OBJ +=  \
+	tmp/readers/DelphesProMC.$(ObjSuf)
+
+tmp/external/ProMC/ProMCBook.$(ObjSuf): \
+	external/ProMC/ProMCBook.$(SrcSuf)
+tmp/external/ProMC/ProMC.pb.$(ObjSuf): \
+	external/ProMC/ProMC.pb.$(SrcSuf)
+tmp/external/ProMC/ProMCStat.pb.$(ObjSuf): \
+	external/ProMC/ProMCStat.pb.$(SrcSuf)
+tmp/external/ProMC/ProMCHeader.pb.$(ObjSuf): \
+	external/ProMC/ProMCHeader.pb.$(SrcSuf)
+tmp/external/ProMC/ProMCDescription.pb.$(ObjSuf): \
+	external/ProMC/ProMCDescription.pb.$(SrcSuf)
+DELPHES_OBJ +=  \
+	tmp/external/ProMC/ProMCBook.$(ObjSuf) \
+	tmp/external/ProMC/ProMC.pb.$(ObjSuf) \
+	tmp/external/ProMC/ProMCStat.pb.$(ObjSuf) \
+	tmp/external/ProMC/ProMCHeader.pb.$(ObjSuf) \
+	tmp/external/ProMC/ProMCDescription.pb.$(ObjSuf)
+
+ifeq ($(HAS_PYTHIA8),true)
+DELPHES_OBJ +=  \
+	
+endif
+
+endif
+
+ifeq ($(HAS_PYTHIA8),true)
+DelphesPythia8$(ExeSuf): \
+	tmp/readers/DelphesPythia8.$(ObjSuf)
+
+tmp/readers/DelphesPythia8.$(ObjSuf): \
+	readers/DelphesPythia8.cpp \
+	modules/Delphes.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
+EXECUTABLE +=  \
+	DelphesPythia8$(ExeSuf)
+
+EXECUTABLE_OBJ +=  \
+	tmp/readers/DelphesPythia8.$(ObjSuf)
+
+endif
 
 tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/ClassesLinkDef.h \
@@ -794,7 +902,7 @@ tmp/external/fastjet/plugins/EECambridge/EECambridgePlugin.$(ObjSuf): \
 	external/fastjet/plugins/EECambridge/EECambridgePlugin.$(SrcSuf) \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/NNH.hh
-DELPHES_OBJ =  \
+DELPHES_OBJ +=  \
 	tmp/classes/DelphesHepMCReader.$(ObjSuf) \
 	tmp/classes/DelphesLHEFReader.$(ObjSuf) \
 	tmp/classes/DelphesFactory.$(ObjSuf) \
@@ -922,7 +1030,7 @@ tmp/display/DelphesDisplay.$(ObjSuf): \
 tmp/display/DelphesCaloData.$(ObjSuf): \
 	display/DelphesCaloData.$(SrcSuf) \
 	display/DelphesCaloData.h
-DISPLAY_OBJ =  \
+DISPLAY_OBJ +=  \
 	tmp/display/DelphesDisplay.$(ObjSuf) \
 	tmp/display/DelphesCaloData.$(ObjSuf)
 
