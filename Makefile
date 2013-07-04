@@ -915,6 +915,7 @@ ifeq ($(HAS_PYTHIA8),true)
 DELPHES_OBJ +=  \
 	tmp/modules/PileUpMergerPythia8.$(ObjSuf)
 endif
+
 tmp/display/DelphesDisplay.$(ObjSuf): \
 	display/DelphesDisplay.$(SrcSuf) \
 	display/DelphesDisplay.h
@@ -929,6 +930,7 @@ ifeq ($(HAS_PYTHIA8),true)
 DISPLAY_OBJ +=  \
 	
 endif
+
 tmp/external/tcl/tclObj.$(ObjSuf): \
 	external/tcl/tclObj.c
 tmp/external/tcl/tclUtil.$(ObjSuf): \

@@ -92,7 +92,7 @@ proc sourceDeps {srcPrefix args} {
   foreach fileName $source {
     regsub {\.cc} $fileName {} srcName
     set srcObjName $prefix$srcName
-    
+
     if {$fileName == "modules/PileUpMergerPythia8.cc"} {
       lappend srcObjFilesPythia8 $srcObjName$objSuf
     } else {
@@ -105,11 +105,12 @@ proc sourceDeps {srcPrefix args} {
   puts -nonewline "${srcPrefix}_OBJ = $suffix"
   puts [join $srcObjFiles $suffix]
   puts ""
-  
+
   puts {ifeq ($(HAS_PYTHIA8),true)}
   puts -nonewline "${srcPrefix}_OBJ += $suffix"
   puts [join $srcObjFilesPythia8 $suffix]
   puts {endif}
+  puts ""
 }
 
 proc tclDeps {} {
@@ -170,7 +171,6 @@ proc executableDeps {} {
     puts [join $exeObjFiles $suffix]
     puts ""
   }
-
 }
 
 proc headerDeps {} {
