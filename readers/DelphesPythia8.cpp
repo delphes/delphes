@@ -4,7 +4,7 @@
 
 #include <signal.h>
 
-#include "pythia->h"
+#include "Pythia.h"
 
 #include "TROOT.h"
 #include "TApplication.h"
@@ -39,7 +39,7 @@ void ConvertInput(Pythia8::Pythia *pythia, DelphesFactory *factory, TObjArray *a
 
   Int_t pid, status;
   Double_t px, py, pz, e;
-  Double_t x, y, z;
+  Double_t x, y, z, t;
 
   pdg = TDatabasePDG::Instance();
 
@@ -49,8 +49,6 @@ void ConvertInput(Pythia8::Pythia *pythia, DelphesFactory *factory, TObjArray *a
 
     pid = particle.id();
     status = particle.status();
-    m1 = particle.mother1(); m2 = particle.mother2();
-    d1 = particle.daughter1(); d2 = particle.daughter2();
     px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.e();
     x = particle.xProd(); y = particle.yProd(); z = particle.zProd(); t = particle.tProd();
 
@@ -61,11 +59,11 @@ void ConvertInput(Pythia8::Pythia *pythia, DelphesFactory *factory, TObjArray *a
 
     candidate->Status = status;
 
-    candidate->M1 = m1 - 1;
-    candidate->M2 = m2 - 1;
+    candidate->M1 = particle.mother1() - 1;
+    candidate->M2 = particle.mother2() - 1;
 
-    candidate->D1 = d1 - 1;
-    candidate->D2 = d2 - 1;
+    candidate->D1 = particle.daughter1() - 1;
+    candidate->D2 = particle.daughter2() - 1;
 
     pdgParticle = pdg->GetParticle(pid);
     candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
@@ -73,7 +71,7 @@ void ConvertInput(Pythia8::Pythia *pythia, DelphesFactory *factory, TObjArray *a
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 
-    candidate->Position.SetXYZT(x, y, z, 0.0);
+    candidate->Position.SetXYZT(x, y, z, t);
 
     allParticleOutputArray->Add(candidate);
 
@@ -105,7 +103,6 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesPythia8";
   stringstream message;
-  FILE *inputFile = 0;
   TFile *outputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
   ExRootTreeWriter *treeWriter = 0;
@@ -114,7 +111,6 @@ int main(int argc, char *argv[])
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  Int_t i;
   Long64_t eventCounter, errorCounter;
   Long64_t numberOfEvents, timesAllowErrors;
 
