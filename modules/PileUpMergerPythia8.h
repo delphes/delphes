@@ -38,12 +38,7 @@ private:
 
   Double_t fMeanPileUp;
   Double_t fZVertexSpread;
-  Double_t fCMEnergy;
   Double_t fPTMin;
-
-  Int_t fRandomSeed;
-  Int_t fBeamAID;
-  Int_t fBeamBID;
 
   Pythia8::Pythia *fPythia; //!
 

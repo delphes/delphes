@@ -56,21 +56,16 @@ PileUpMergerPythia8::~PileUpMergerPythia8()
 
 void PileUpMergerPythia8::Init()
 {
+  const char *fileName;
+
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
   fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
 
-  fCMEnergy = GetDouble("CMEnergy", 14000.0);
-  fPTMin = GetDouble("PTMin", 0.5);
+  fPTMin = GetDouble("PTMin", 0.0);
 
-  fRandomSeed = GetInt("RandomSeed", 1);
-  fBeamAID = GetInt("BeamAID", 2212);
-  fBeamBID = GetInt("BeamBID", 2212);
-
-  // Pythia8 pile-up initialization
+  fileName = GetString("ConfigFile", "MinBias.cmnd");
   fPythia = new Pythia8::Pythia();
-  fPythia->readString("SoftQCD:minBias = on");
-  fPythia->init(fBeamAID, fBeamBID, fCMEnergy);
-  fPythia->rndm.init(fRandomSeed);
+  fPythia->readFile(fileName);
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
