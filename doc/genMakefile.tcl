@@ -222,12 +222,12 @@ endif
 ifneq ($(PYTHIA8),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -I$(PYTHIA8)/include
-DELPHES_LIBS += -L$(PYTHIA8)/lib -lpythia8 -llhapdfdummy
+DELPHES_LIBS += -L$(PYTHIA8)/lib -lpythia8 -lLHAPDF -lgfortran -lz
 else
 ifneq ($(PYTHIA8DATA),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -I$(PYTHIA8DATA)/../include
-DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -llhapdfdummy
+DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -lLHAPDF -lgfortran -lz
 endif
 endif
 
