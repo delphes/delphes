@@ -21,13 +21,13 @@ DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
 ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
 HAS_CMSSW = true
-CXXFLAGS += $(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH))
-DELPHES_LIBS += $(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH))
+CXXFLAGS += -std=c++0x -I$(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH))
+DELPHES_LIBS += -L$(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH)))
 ifneq ($(CMSSW_RELEASE_BASE),)
 CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src
 endif
 ifneq ($(LD_LIBRARY_PATH),)
-DELPHES_LIBS += $(subst include,lib,$(subst :, -L,$(LD_LIBRARY_PATH))
+DELPHES_LIBS += -L$(subst include,lib,$(subst :, -L,$(LD_LIBRARY_PATH)))
 endif
 DELPHES_LIBS += -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsPatCandidates -lDataFormatsLuminosity -lCommonToolsUtils
 endif
