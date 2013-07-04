@@ -36,7 +36,9 @@ using namespace std;
 
 //---------------------------------------------------------------------------
 
-void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *factory, TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
+void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *factory,
+  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray,
+  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   Int_t i;
 
@@ -77,8 +79,8 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
   element->PDF1 = mutableEvent->pdf1();
   element->PDF2 = mutableEvent->pdf2();
 
-  element->ReadTime = 0.0;
-  element->ProcTime = 0.0;
+  element->ReadTime = readStopWatch->RealTime();
+  element->ProcTime = procStopWatch->RealTime();
 
   mutableParticles = event.mutable_particles();
 
@@ -143,6 +145,7 @@ int main(int argc, char *argv[])
   stringstream message;
   ProMCBook *inputFile = 0;
   TFile *outputFile = 0;
+  TStopwatch readStopWatch, procStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0;
   ExRootConfReader *confReader = 0;
@@ -218,19 +221,27 @@ int main(int argc, char *argv[])
       // Loop over all objects
       modularDelphes->Clear();
       treeWriter->Clear();
+      readStopWatch.Start();
       for(entry = 0; entry < allEntries && !interrupted; ++entry)
       {
         if(inputFile->next() != 0) continue;
         ProMCEvent event = inputFile->get();
 
-        ConvertInput(event, branchEvent, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+        readStopWatch.Stop();
+
+        procStopWatch.Start();
+        ConvertInput(event, branchEvent, factory,
+          allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
+          &readStopWatch, &procStopWatch);
         modularDelphes->ProcessTask();
+        procStopWatch.Stop();
 
         treeWriter->Fill();
 
         modularDelphes->Clear();
         treeWriter->Clear();
 
+        readStopWatch.Start();
         progressBar.Update(entry);
       }
       progressBar.Finish();
