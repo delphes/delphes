@@ -205,7 +205,8 @@ int main(int argc, char *argv[])
 
     pythia->init();
 
-    ExRootProgressBar progressBar(numberOfEvents - 1);
+    // ExRootProgressBar progressBar(numberOfEvents - 1);
+    ExRootProgressBar progressBar(-1);
 
     // Loop over all events
     errorCounter = 0;
@@ -244,9 +245,10 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
 
       readStopWatch.Start();
-      progressBar.Update(eventCounter);
+      progressBar.Update(eventCounter, eventCounter);
     }
 
+    progressBar.Update(eventCounter, eventCounter, kTRUE);
     progressBar.Finish();
 
     pythia->statistics();

@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
   DelphesFactory *factory = 0;
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i;
-  Long64_t entry, allEntries;
+  Long64_t eventCounter, numberOfEvents;
 
   if(argc < 4)
   {
@@ -212,17 +212,17 @@ int main(int argc, char *argv[])
         throw runtime_error(message.str());
       }
 
-      allEntries = inputFile->getEvents();;
+      numberOfEvents = inputFile->getEvents();;
 
-      if(allEntries <= 0) continue;
+      if(numberOfEvents <= 0) continue;
 
-      ExRootProgressBar progressBar(allEntries - 1);
+      ExRootProgressBar progressBar(numberOfEvents - 1);
 
       // Loop over all objects
       modularDelphes->Clear();
       treeWriter->Clear();
       readStopWatch.Start();
-      for(entry = 0; entry < allEntries && !interrupted; ++entry)
+      for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
       {
         if(inputFile->next() != 0) continue;
         ProMCEvent event = inputFile->get();
@@ -242,8 +242,10 @@ int main(int argc, char *argv[])
         treeWriter->Clear();
 
         readStopWatch.Start();
-        progressBar.Update(entry);
+        progressBar.Update(eventCounter);
       }
+
+      progressBar.Update(eventCounter, eventCounter, kTRUE);
       progressBar.Finish();
 
       inputFile->close();

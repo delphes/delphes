@@ -200,7 +200,8 @@ int main(int argc, char *argv[])
 
       if(numberOfEvents <= 0) continue;
 
-      ExRootProgressBar progressBar(numberOfEvents - 1);
+      // ExRootProgressBar progressBar(numberOfEvents - 1);
+      ExRootProgressBar progressBar(-1);
 
       // Loop over all objects
       eventCounter = 0;
@@ -216,9 +217,11 @@ int main(int argc, char *argv[])
         modularDelphes->Clear();
         treeWriter->Clear();
 
-        progressBar.Update(eventCounter);
+        progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
       }
+
+      progressBar.Update(eventCounter, eventCounter, kTRUE);
       progressBar.Finish();
 
       inputFile->Close();
