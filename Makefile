@@ -40,12 +40,12 @@ endif
 
 ifneq ($(PYTHIA8),)
 HAS_PYTHIA8 = true
-CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
+CXXFLAGS += -I$(PYTHIA8)/include
 DELPHES_LIBS += -L$(PYTHIA8)/lib -lpythia8 -llhapdfdummy
 else
 ifneq ($(PYTHIA8DATA),)
 HAS_PYTHIA8 = true
-CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8DATA)/../include
+CXXFLAGS += -I$(PYTHIA8DATA)/../include
 DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -llhapdfdummy
 endif
 endif
@@ -288,6 +288,15 @@ EXECUTABLE +=  \
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesPythia8.$(ObjSuf)
 
+tmp/modules/Pythia8Dict.$(SrcSuf): \
+	modules/Pythia8LinkDef.h \
+	modules/PileUpMergerPythia8.h
+DELPHES_DICT +=  \
+	tmp/modules/Pythia8Dict.$(SrcSuf)
+
+DELPHES_DICT_OBJ +=  \
+	tmp/modules/Pythia8Dict.$(ObjSuf)
+
 endif
 
 tmp/classes/ClassesDict.$(SrcSuf): \
@@ -320,8 +329,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/StatusPidFilter.h \
 	modules/Cloner.h \
 	modules/Weighter.h \
-	modules/ExampleModule.h \
-	modules/PileUpMergerPythia8.h
+	modules/ExampleModule.h
 tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootAnalysisLinkDef.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
@@ -334,12 +342,12 @@ tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootConfReader.h \
 	external/ExRootAnalysis/ExRootTask.h
-DELPHES_DICT =  \
+DELPHES_DICT +=  \
 	tmp/classes/ClassesDict.$(SrcSuf) \
 	tmp/modules/ModulesDict.$(SrcSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf)
 
-DELPHES_DICT_OBJ =  \
+DELPHES_DICT_OBJ +=  \
 	tmp/classes/ClassesDict.$(ObjSuf) \
 	tmp/modules/ModulesDict.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(ObjSuf)
@@ -348,10 +356,10 @@ tmp/display/DisplayDict.$(SrcSuf): \
 	display/DisplayLinkDef.h \
 	display/DelphesDisplay.h \
 	display/DelphesCaloData.h
-DISPLAY_DICT =  \
+DISPLAY_DICT +=  \
 	tmp/display/DisplayDict.$(SrcSuf)
 
-DISPLAY_DICT_OBJ =  \
+DISPLAY_DICT_OBJ +=  \
 	tmp/display/DisplayDict.$(ObjSuf)
 
 tmp/classes/DelphesHepMCReader.$(ObjSuf): \
@@ -1093,7 +1101,7 @@ tmp/external/tcl/tclExecute.$(ObjSuf): \
 	external/tcl/tclExecute.c
 tmp/external/tcl/tclCmdMZ.$(ObjSuf): \
 	external/tcl/tclCmdMZ.c
-TCL_OBJ =  \
+TCL_OBJ +=  \
 	tmp/external/tcl/tclObj.$(ObjSuf) \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclAsync.$(ObjSuf) \
@@ -1496,7 +1504,7 @@ dist:
 %Dict.$(SrcSuf):
 	@mkdir -p $(@D)
 	@echo ">> Generating $@"
-	@rootcint -f $@ -c $(CXXFLAGS) $<
+	@rootcint -f $@ -c -Iexternal $<
 	@echo "#define private public" > $@.arch
 	@echo "#define protected public" >> $@.arch
 	@mv $@ $@.base

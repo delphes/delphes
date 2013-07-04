@@ -70,11 +70,11 @@ proc dictDeps {dictVar args} {
     dependencies $fileName "$dictName$srcSuf:$suffix$fileName"
   }
 
-  puts -nonewline "${dictVar} = $suffix"
+  puts -nonewline "${dictVar} += $suffix"
   puts [join $dictSrcFiles $suffix]
   puts {}
 
-  puts -nonewline "${dictVar}_OBJ = $suffix"
+  puts -nonewline "${dictVar}_OBJ += $suffix"
   puts [join $dictObjFiles $suffix]
   puts {}
 
@@ -132,7 +132,7 @@ proc tclDeps {} {
     dependencies $fileName "$srcObjName$objSuf:$suffix$fileName"
   }
 
-  puts -nonewline "TCL_OBJ = $suffix"
+  puts -nonewline "TCL_OBJ += $suffix"
   puts [join $srcObjFiles $suffix]
   puts {}
 }
@@ -146,8 +146,6 @@ proc executableDeps {args} {
   set exeFiles {}
 
   foreach fileName $executable {
-    if {$fileName == "examples/DelphesProMC.cpp"} continue
-
     regsub {\.cpp} $fileName {} exeObjName
     set exeObjName $prefix$exeObjName
     set exeName [file tail $exeObjName]
@@ -223,12 +221,12 @@ endif
 
 ifneq ($(PYTHIA8),)
 HAS_PYTHIA8 = true
-CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8)/include
+CXXFLAGS += -I$(PYTHIA8)/include
 DELPHES_LIBS += -L$(PYTHIA8)/lib -lpythia8 -llhapdfdummy
 else
 ifneq ($(PYTHIA8DATA),)
 HAS_PYTHIA8 = true
-CXXFLAGS += -DHAS_PYTHIA8 -I$(PYTHIA8DATA)/../include
+CXXFLAGS += -I$(PYTHIA8DATA)/../include
 DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -llhapdfdummy
 endif
 endif
@@ -266,12 +264,13 @@ puts {}
 
 puts {ifeq ($(HAS_PYTHIA8),true)}
 executableDeps {readers/DelphesPythia8.cpp}
+dictDeps {DELPHES_DICT} {modules/Pythia8LinkDef.h}
 puts {endif}
 puts {}
 
-dictDeps {DELPHES_DICT} {classes/*LinkDef.h} {modules/*LinkDef.h} {external/ExRootAnalysis/*LinkDef.h}
+dictDeps {DELPHES_DICT} {classes/ClassesLinkDef.h} {modules/ModulesLinkDef.h} {external/ExRootAnalysis/ExRootAnalysisLinkDef.h}
 
-dictDeps {DISPLAY_DICT} {display/*LinkDef.h}
+dictDeps {DISPLAY_DICT} {display/DisplayLinkDef.h}
 
 sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc}
 
@@ -365,7 +364,7 @@ dist:
 %Dict.$(SrcSuf):
 	@mkdir -p $(@D)
 	@echo ">> Generating $@"
-	@rootcint -f $@ -c $(CXXFLAGS) $<
+	@rootcint -f $@ -c -Iexternal $<
 	@echo "#define private public" > $@.arch
 	@echo "#define protected public" >> $@.arch
 	@mv $@ $@.base
