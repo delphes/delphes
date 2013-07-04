@@ -35,6 +35,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 {
   int i;
 
+  HepMCEvent *element;
   Candidate *candidate;
   TDatabasePDG *pdg;
   TParticlePDG *pdgParticle;
@@ -45,8 +46,6 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   Double_t x, y, z, t;
 
   // event information
-  mutableEvent = event.mutable_event();
-
   element = static_cast<HepMCEvent *>(branch->NewEntry());
 
   element->Number = eventCounter;
@@ -58,10 +57,10 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   element->AlphaQED = pythia->info.alphaEM();
   element->AlphaQCD = pythia->info.alphaS();
 
-  element->ID1 = pythia->info.id1pdf();
-  element->ID2 = pythia->info.id2pdf();
-  element->X1 = pythia->info.x1pdf();
-  element->X2 = pythia->info.x2pdf();
+  element->ID1 = pythia->info.id1();
+  element->ID2 = pythia->info.id2();
+  element->X1 = pythia->info.x1();
+  element->X2 = pythia->info.x2();
   element->ScalePDF = pythia->info.QFac();
   element->PDF1 = pythia->info.pdf1();
   element->PDF2 = pythia->info.pdf2();
