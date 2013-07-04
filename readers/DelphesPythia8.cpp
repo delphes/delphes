@@ -28,7 +28,10 @@ using namespace std;
 
 //---------------------------------------------------------------------------
 
-void ConvertInput(Pythia8::Pythia *pythia, DelphesFactory *factory, TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
+void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
+  ExRootTreeBranch *branch, DelphesFactory *factory,
+  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray,
+  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   int i;
 
@@ -40,6 +43,31 @@ void ConvertInput(Pythia8::Pythia *pythia, DelphesFactory *factory, TObjArray *a
   Int_t pid, status;
   Double_t px, py, pz, e;
   Double_t x, y, z, t;
+
+  // event information
+  mutableEvent = event.mutable_event();
+
+  element = static_cast<HepMCEvent *>(branch->NewEntry());
+
+  element->Number = eventCounter;
+
+  element->ProcessID = pythia->info.code();
+  element->MPI = 1;
+  element->Weight = pythia->info.weight();
+  element->Scale = pythia->info.QRen();
+  element->AlphaQED = pythia->info.alphaEM();
+  element->AlphaQCD = pythia->info.alphaS();
+
+  element->ID1 = pythia->info.id1pdf();
+  element->ID2 = pythia->info.id2pdf();
+  element->X1 = pythia->info.x1pdf();
+  element->X2 = pythia->info.x2pdf();
+  element->ScalePDF = pythia->info.QFac();
+  element->PDF1 = pythia->info.pdf1();
+  element->PDF2 = pythia->info.pdf2();
+
+  element->ReadTime = readStopWatch->RealTime();
+  element->ProcTime = procStopWatch->RealTime();
 
   pdg = TDatabasePDG::Instance();
 
@@ -145,7 +173,7 @@ int main(int argc, char *argv[])
 
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
-    branchEvent = treeWriter->NewBranch("Event", LHEFEvent::Class());
+    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -205,7 +233,9 @@ int main(int argc, char *argv[])
       readStopWatch.Stop();
 
       procStopWatch.Start();
-      ConvertInput(pythia, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+      ConvertInput(eventCounter, pythia, branchEvent, factory,
+        allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
+        &readStopWatch, &procStopWatch);
       modularDelphes->ProcessTask();
       procStopWatch.Stop();
 
