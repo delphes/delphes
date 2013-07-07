@@ -418,10 +418,10 @@ int main(int argc, char *argv[])
 
   if(argc < 2 || argc > 3)
   {
-    cout << " Usage: " << appName << " input_file" << " [output_file]" << endl;
-    cout << " input_file - input file in ROOT format," << endl;
-    cout << " output_file - output file in LHCO format," << endl;
-    cout << " with no output_file, or when output_file is -, write to standard output." << endl;
+    cerr << " Usage: " << appName << " input_file" << " [output_file]" << endl;
+    cerr << " input_file - input file in ROOT format," << endl;
+    cerr << " output_file - output file in LHCO format," << endl;
+    cerr << " with no output_file, or when output_file is -, write to standard output." << endl;
     return 1;
   }
 
@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
 
   try
   {
-    cout << "** Reading " << argv[1] << endl;
+    cerr << "** Reading " << argv[1] << endl;
     inputChain = new TChain("Delphes");
     inputChain->Add(argv[1]);
 
@@ -456,8 +456,10 @@ int main(int argc, char *argv[])
       }
     }
 
+    fprintf(outputFile, "   #  typ      eta      phi      pt    jmas   ntrk   btag  had/em   dum1   dum2\n");
+
     allEntries = treeReader->GetEntries();
-    cout << "** Input file contains " << allEntries << " events" << endl;
+    cerr << "** Input file contains " << allEntries << " events" << endl;
 
     if(allEntries > 0)
     {
@@ -483,7 +485,7 @@ int main(int argc, char *argv[])
       delete writer;
     }
 
-    cout << "** Exiting..." << endl;
+    cerr << "** Exiting..." << endl;
 
     if(outputFile != stdout) fclose(outputFile);
     delete treeReader;
