@@ -94,7 +94,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
     pdgParticle = pdg->GetParticle(pid);
     candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
-    candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+    candidate->Mass = mass;
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 
