@@ -414,7 +414,7 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
 
   int number;
   int pid, status, m1, m2, d1, d2;
-  double px, py, pz, e, m;
+  double px, py, pz, e, mass;
   double x, y, z, t;
 
   XDR bufferXDR[6];
@@ -438,7 +438,7 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
     xdr_double(&bufferXDR[4], &py);
     xdr_double(&bufferXDR[4], &pz);
     xdr_double(&bufferXDR[4], &e);
-    xdr_double(&bufferXDR[4], &m);
+    xdr_double(&bufferXDR[4], &mass);
 
     xdr_double(&bufferXDR[5], &x);
     xdr_double(&bufferXDR[5], &y);
@@ -460,7 +460,7 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
 
     pdgParticle = fPDG->GetParticle(pid);
     candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
-    candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+    candidate->Mass = mass;
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 

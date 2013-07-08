@@ -52,7 +52,7 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
   Int_t pdgCode;
 
   Int_t pid, status;
-  Double_t px, py, pz, e, mass;
+  Double_t px, py, pz, mass;
   Double_t x, y, z;
 
   pdg = TDatabasePDG::Instance();
@@ -90,7 +90,6 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
     status = mutableParticles->status(i);
     px = mutableParticles->px(i); py = mutableParticles->py(i); pz = mutableParticles->pz(i); mass = mutableParticles->mass(i);
     x = mutableParticles->x(i); y = mutableParticles->y(i); z = mutableParticles->z(i);
-    e = TMath::Sqrt(px*px + py*py + pz*pz + mass*mass);
 
     candidate = factory->NewCandidate();
 
@@ -107,9 +106,9 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
 
     pdgParticle = pdg->GetParticle(pid);
     candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
-    candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+    candidate->Mass = mass;
 
-    candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+    candidate->Momentum.SetXYZM(px, py, pz, mass);
 
     candidate->Position.SetXYZT(x, y, z, 0.0);
 

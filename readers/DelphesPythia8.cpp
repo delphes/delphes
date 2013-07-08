@@ -42,7 +42,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   Int_t pdgCode;
 
   Int_t pid, status;
-  Double_t px, py, pz, e;
+  Double_t px, py, pz, e, mass;
   Double_t x, y, z, t;
 
   // event information
@@ -76,7 +76,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
     pid = particle.id();
     status = particle.status();
-    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.e();
+    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.e(); mass = particle.m();
     x = particle.xProd(); y = particle.yProd(); z = particle.zProd(); t = particle.tProd();
 
     candidate = factory->NewCandidate();

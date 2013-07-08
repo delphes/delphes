@@ -56,7 +56,7 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
   Int_t pdgCode;
 
   Int_t pid, status;
-  Double_t px, py, pz, e;
+  Double_t px, py, pz, e, mass;
   Double_t x, y, z;
 
   pdg = TDatabasePDG::Instance();
@@ -72,7 +72,7 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
 
     pid = particle.pdgId();
     status = particle.status();
-    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy();
+    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
     x = particle.vx(); y = particle.vy(); z = particle.vz();
 
     candidate = factory->NewCandidate();

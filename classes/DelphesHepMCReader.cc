@@ -337,7 +337,7 @@ void DelphesHepMCReader::AnalyzeParticle(DelphesFactory *factory,
 
   pdgParticle = fPDG->GetParticle(fPID);
   candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
-  candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+  candidate->Mass = fMass;
 
   candidate->Momentum.SetPxPyPzE(fPx, fPy, fPz, fE);
   if(fMomentumCoefficient != 1.0)
