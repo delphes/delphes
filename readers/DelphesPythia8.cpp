@@ -75,7 +75,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     Pythia8::Particle &particle = pythia->event[i];
 
     pid = particle.id();
-    status = particle.status();
+    status = particle.statusHepMC();
     px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.e(); mass = particle.m();
     x = particle.xProd(); y = particle.yProd(); z = particle.zProd(); t = particle.tProd();
 
