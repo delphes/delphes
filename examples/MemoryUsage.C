@@ -11,7 +11,7 @@ static const Color_t kExRootBackgroundColor = 10;
 //------------------------------------------------------------------------------
 
 TGraph grvsz, grrss;
-TLegend legend(0.41, 0.58, 0.77, 0.67);
+TLegend legend(0.41, 0.59, 0.77, 0.68);
 
 TCanvas *canvas;
 
@@ -88,19 +88,21 @@ void MemoryUsage(const char *inputFile)
   {
     in >> vsz  >> rss;
     if(!in.good()) break; 
-    grvsz.SetPoint(i, (i-1)*0.1, vsz);
-    grrss.SetPoint(i, (i-1)*0.1, rss);
+    grvsz.SetPoint(i, (i-1)*0.1, vsz/1024.0);
+    grrss.SetPoint(i, (i-1)*0.1, rss/1024.0);
     ++i;
   }
+  grvsz.SetPoint(i, (i-1)*0.1, 0.0);
+  grrss.SetPoint(i, (i-1)*0.1, 0.0);
 
   grvsz.GetXaxis()->SetLimits(0, 30);
   grvsz.GetXaxis()->SetTitleOffset(1.5);
   grvsz.GetYaxis()->SetTitleOffset(1.75);
   grvsz.GetXaxis()->SetTitle("time, s");
-  grvsz.GetYaxis()->SetTitle("memory usage, kB");
-  grvsz.SetLineColor(kBlack);
+  grvsz.GetYaxis()->SetTitle("memory usage, MB");
+  grvsz.SetLineColor(16);
   grrss.SetLineColor(kBlack);
-  grvsz.SetLineStyle(kDashed);
+  grvsz.SetLineStyle(kSolid);
   grrss.SetLineStyle(kSolid);
   grvsz.SetLineWidth(3);
   grrss.SetLineWidth(3);
