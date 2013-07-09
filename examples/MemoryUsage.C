@@ -100,7 +100,7 @@ void MemoryUsage(const char *inputFile)
   grvsz.GetYaxis()->SetTitleOffset(1.75);
   grvsz.GetXaxis()->SetTitle("time, s");
   grvsz.GetYaxis()->SetTitle("memory usage, MB");
-  grvsz.SetLineColor(16);
+  grvsz.SetLineColor(15);
   grrss.SetLineColor(kBlack);
   grvsz.SetLineStyle(kSolid);
   grrss.SetLineStyle(kSolid);

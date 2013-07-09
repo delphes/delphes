@@ -100,7 +100,7 @@ void ProcessingTime(const char *inputFile)
   gr.SetLineColor(kBlack);
   gr.SetLineWidth(2);
   grerr.SetFillStyle(1001);
-  grerr.SetFillColor(16);
+  grerr.SetFillColor(17);
   grerr.Draw("A3");
   gr.Draw("P");
 
