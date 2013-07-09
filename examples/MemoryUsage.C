@@ -11,6 +11,9 @@ static const Color_t kExRootBackgroundColor = 10;
 //------------------------------------------------------------------------------
 
 TGraph grvsz, grrss;
+TLegend legend(0.41, 0.58, 0.77, 0.67);
+
+TCanvas *canvas;
 
 //------------------------------------------------------------------------------
 
@@ -71,7 +74,7 @@ void MemoryUsage(const char *inputFile)
   {
     canvas = new TCanvas("c1", "c1", 800, 650);
   }
-  canvas->SetLogy(0);
+  canvas->SetGrid();
   canvas->SetHighLightColor(kExRootBackgroundColor);
 
   currentDirectory->cd();
@@ -101,5 +104,13 @@ void MemoryUsage(const char *inputFile)
   grrss.SetLineWidth(2);
   grvsz.Draw("AL");
   grrss.Draw("L");
+
+  legend.SetTextSize(kExRootFontSize);
+  legend.SetTextFont(kExRootFont);
+  legend.SetFillColor(kExRootBackgroundColor);
+  legend.SetBorderSize(0);
+  legend.AddEntry(&grvsz, "virtual memory size", "l");
+  legend.AddEntry(&grrss, "resident set size", "l");
+  legend.Draw();
 }
 
