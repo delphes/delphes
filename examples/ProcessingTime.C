@@ -8,7 +8,8 @@ static const Color_t kExRootBackgroundColor = 10;
 
 //------------------------------------------------------------------------------
 
-TGraphErrors gr;
+TGraph gr;
+TGraphErrors grerr;
 TPaveText comment(0.20, 0.75, 0.50, 0.84, "brNDC");
 
 TCanvas *canvas;
@@ -80,24 +81,28 @@ void ProcessingTime(const char *inputFile)
 
   currentDirectory->cd();
 
-  for(i = 1; i < 10; ++i)
+  for(i = 0; i < 9; ++i)
   {
-    chain->Draw("Event.ProcTime >> time", TString::Format("Jet_size == %d", i+1));
-    gr.SetPoint(i, i+1, hist.GetMean()*1000);
-    gr.SetPointError(i, 0, hist.GetRMS()*1000);
+    chain->Draw("Event.ProcTime >> time", TString::Format("Jet_size == %d", i+2));
+    gr.SetPoint(i, i+2, hist.GetMean()*1000);
+    grerr.SetPoint(i, i+2, hist.GetMean()*1000);
+    grerr.SetPointError(i, 0, hist.GetRMS()*1000);
   }
 
-  gr.GetXaxis()->SetLimits(1.0, 11.0);
-  gr.GetXaxis()->SetTitleOffset(1.5);
-  gr.GetYaxis()->SetTitleOffset(1.75);
-  gr.GetXaxis()->SetTitle("jet multiplicity");
-  gr.GetYaxis()->SetTitle("processing time per event, ms");
+  grerr.GetXaxis()->SetLimits(1.0, 11.0);
+  grerr.GetXaxis()->SetTitleOffset(1.5);
+  grerr.GetYaxis()->SetTitleOffset(1.75);
+  grerr.GetXaxis()->SetTitle("jet multiplicity");
+  grerr.GetYaxis()->SetTitle("processing time per event, ms");
   gr.SetMarkerStyle(kFullCircle);
-  gr.SetMarkerColor(kRed);
+  gr.SetMarkerColor(kBlack);
   gr.SetMarkerSize(1);
-  gr.SetLineColor(kRed);
+  gr.SetLineColor(kBlack);
   gr.SetLineWidth(2);
-  gr.Draw("AP");
+  grerr.SetFillStyle(1001);
+  grerr.SetFillColor(16);
+  grerr.Draw("A3");
+  gr.Draw("P");
 
   comment.SetTextSize(kExRootFontSize);
   comment.SetTextFont(kExRootFont);
