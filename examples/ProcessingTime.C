@@ -9,7 +9,7 @@ static const Color_t kExRootBackgroundColor = 10;
 //------------------------------------------------------------------------------
 
 TGraphErrors gr;
-TPaveText comment(0.20, 0.72, 0.50, 0.81, "brNDC");
+TPaveText comment(0.20, 0.75, 0.50, 0.84, "brNDC");
 
 TCanvas *canvas;
 
@@ -80,14 +80,14 @@ void ProcessingTime(const char *inputFile)
 
   currentDirectory->cd();
 
-  for(i = 1; i < 9; ++i)
+  for(i = 1; i < 10; ++i)
   {
     chain->Draw("Event.ProcTime >> time", TString::Format("Jet_size == %d", i+1));
     gr.SetPoint(i, i+1, hist.GetMean()*1000);
     gr.SetPointError(i, 0, hist.GetRMS()*1000);
   }
 
-  gr.GetXaxis()->SetLimits(1.0, 10.0);
+  gr.GetXaxis()->SetLimits(1.0, 11.0);
   gr.GetXaxis()->SetTitleOffset(1.5);
   gr.GetYaxis()->SetTitleOffset(1.75);
   gr.GetXaxis()->SetTitle("jet multiplicity");
