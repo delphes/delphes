@@ -79,11 +79,11 @@ void MemoryUsage(const char *inputFile)
 
   currentDirectory->cd();
 
-  grvsz.SetPoint(1, 0.0, 0.0);
-  grrss.SetPoint(1, 0.0, 0.0);
+  grvsz.SetPoint(0, 0.0, 0.0);
+  grrss.SetPoint(0, 0.0, 0.0);
 
   in.open(inputFile);
-  i = 2;
+  i = 1;
   while(1)
   {
     in >> vsz  >> rss;
