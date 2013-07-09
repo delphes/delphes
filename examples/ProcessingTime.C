@@ -93,7 +93,9 @@ void ProcessingTime(const char *inputFile)
   gr.GetXaxis()->SetTitle("jet multiplicity");
   gr.GetYaxis()->SetTitle("processing time per event, ms");
   gr.SetMarkerStyle(kFullCircle);
+  gr.SetMarkerColor(kRed);
   gr.SetMarkerSize(1);
+  gr.SetLineColor(kRed);
   gr.SetLineWidth(2);
   gr.Draw("AP");
 
