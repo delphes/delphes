@@ -98,10 +98,12 @@ void MemoryUsage(const char *inputFile)
   grvsz.GetYaxis()->SetTitleOffset(1.75);
   grvsz.GetXaxis()->SetTitle("time, s");
   grvsz.GetYaxis()->SetTitle("memory usage, kB");
-  grvsz.SetLineColor(kRed);
-  grrss.SetLineColor(kMagenta);
-  grvsz.SetLineWidth(2);
-  grrss.SetLineWidth(2);
+  grvsz.SetLineColor(kBlack);
+  grrss.SetLineColor(kBlack);
+  grvsz.SetLineStyle(kDashed);
+  grrss.SetLineStyle(kSolid);
+  grvsz.SetLineWidth(3);
+  grrss.SetLineWidth(3);
   grvsz.Draw("AL");
   grrss.Draw("L");
 
@@ -109,8 +111,8 @@ void MemoryUsage(const char *inputFile)
   legend.SetTextFont(kExRootFont);
   legend.SetFillColor(kExRootBackgroundColor);
   legend.SetBorderSize(0);
-  legend.AddEntry(&grvsz, "virtual memory size", "l");
-  legend.AddEntry(&grrss, "resident set size", "l");
+  legend.AddEntry(&grvsz, "virtual memory", "l");
+  legend.AddEntry(&grrss, "physical memory", "l");
   legend.Draw();
 }
 
