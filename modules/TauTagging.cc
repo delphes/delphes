@@ -179,12 +179,13 @@ void TauTagging::Finish()
 
 void TauTagging::Process()
 {
-  Candidate *jet, *tau;
+  Candidate *jet, *tau, *daughter;
+  TLorentzVector tauMomentum;
   Double_t pt, eta, phi;
   TObjArray *tauArray;
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
-  Int_t pdgCode, charge;
+  Int_t pdgCode, charge, i;
 
   // select taus
   fFilter->Reset();
@@ -209,7 +210,14 @@ void TauTagging::Process()
     itTauArray.Reset();
     while((tau = static_cast<Candidate *>(itTauArray.Next())))
     {
-      if(jetMomentum.DeltaR(tau->Momentum) <= fDeltaR)
+      tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+      for(i = tau->D1; i <= tau->D2; ++i)
+      {
+        daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
+        if(TMath::Abs(daughter->PID) == 16) continue;
+        tauMomentum += daughter->Momentum;
+      }
+      if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
       {
         pdgCode = 15;
         charge = tau->Charge;
