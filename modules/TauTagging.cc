@@ -210,13 +210,23 @@ void TauTagging::Process()
     itTauArray.Reset();
     while((tau = static_cast<Candidate *>(itTauArray.Next())))
     {
+      if(tau->D1 < 0) continue;
+
+      if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
+         tau->D2 >= fParticleInputArray->GetEntriesFast())
+      {
+        throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
+      }
+
       tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+
       for(i = tau->D1; i <= tau->D2; ++i)
       {
         daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
         if(TMath::Abs(daughter->PID) == 16) continue;
         tauMomentum += daughter->Momentum;
       }
+
       if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
       {
         pdgCode = 15;
