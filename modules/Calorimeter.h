@@ -73,17 +73,20 @@ private:
   TObjArray *fEFlowTrackOutputArray; //!
   TObjArray *fEFlowTowerOutputArray; //!
 
-  TObjArray *fTowerECalTrackArray; //!
-  TIterator *fItTowerECalTrackArray; //!
-
-  TObjArray *fTowerHCalTrackArray; //!
-  TIterator *fItTowerHCalTrackArray; //!
-
   TObjArray *fTowerECalArray; //!
   TIterator *fItTowerECalArray; //!
 
   TObjArray *fTowerHCalArray; //!
   TIterator *fItTowerHCalArray; //!
+
+  TObjArray *fTowerTrackArray; //!
+  TIterator *fItTowerTrackArray; //!
+
+  TObjArray *fTowerECalTrackArray; //!
+  TIterator *fItTowerECalTrackArray; //!
+
+  TObjArray *fTowerHCalTrackArray; //!
+  TIterator *fItTowerHCalTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

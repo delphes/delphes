@@ -44,6 +44,7 @@ Calorimeter::Calorimeter() :
   fItParticleInputArray(0), fItTrackInputArray(0),
   fTowerECalArray(0), fItTowerECalArray(0),
   fTowerHCalArray(0), fItTowerHCalArray(0),
+  fTowerTrackArray(0), fItTowerTrackArray(0),
   fTowerECalTrackArray(0), fItTowerECalTrackArray(0),
   fTowerHCalTrackArray(0), fItTowerHCalTrackArray(0)
 {
@@ -55,6 +56,8 @@ Calorimeter::Calorimeter() :
   fTowerHCalArray = new TObjArray;
   fItTowerHCalArray = fTowerHCalArray->MakeIterator();
 
+  fTowerTrackArray = new TObjArray;
+  fItTowerTrackArray = fTowerTrackArray->MakeIterator();
   fTowerECalTrackArray = new TObjArray;
   fItTowerECalTrackArray = fTowerECalTrackArray->MakeIterator();
   fTowerHCalTrackArray = new TObjArray;
@@ -73,6 +76,8 @@ Calorimeter::~Calorimeter()
   if(fTowerHCalArray) delete fTowerHCalArray;
   if(fItTowerHCalArray) delete fItTowerHCalArray;
 
+  if(fTowerTrackArray) delete fTowerTrackArray;
+  if(fItTowerTrackArray) delete fItTowerTrackArray;
   if(fTowerECalTrackArray) delete fTowerECalTrackArray;
   if(fItTowerECalTrackArray) delete fItTowerECalTrackArray;
   if(fTowerHCalTrackArray) delete fTowerHCalTrackArray;
@@ -351,10 +356,12 @@ void Calorimeter::Process()
       fTowerECalTrackHits = 0;
       fTowerHCalTrackHits = 0;
 
-      fTowerECalTrackArray->Clear();
-      fTowerHCalTrackArray->Clear();
       fTowerECalArray->Clear();
       fTowerHCalArray->Clear();
+
+      fTowerTrackArray->Clear();
+      fTowerECalTrackArray->Clear();
+      fTowerHCalTrackArray->Clear();
     }
 
     // check for track hits
@@ -364,11 +371,15 @@ void Calorimeter::Process()
 
       ++fTowerTrackAllHits;
       fTowerTrackArray->Add(track);
+
+      // check for track ECAL hits
       if(flags & 2)
       {
         ++fTowerECalTrackHits;
         fTowerECalTrackArray->Add(track);
       }
+
+      // check for track HCAL hits
       if(flags & 4)
       {
         ++fTowerHCalTrackHits;
@@ -378,15 +389,16 @@ void Calorimeter::Process()
     }
 
     ++fTowerAllHits;
+    fTower->AddCandidate(particle);
 
-    // check for ECAL hits in current tower
+    // check for ECAL hits
     if(flags & 2)
     {
       ++fTowerECalHits;
       fTowerECalArray->Add(particle);
     }
 
-    // check for HCAL hits in current tower
+    // check for HCAL hits
     if(flags & 4)
     {
       ++fTowerHCalHits;
@@ -405,8 +417,6 @@ void Calorimeter::Process()
 
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
-
-    fTower->AddCandidate(particle);
   }
 
   // finalize last tower
