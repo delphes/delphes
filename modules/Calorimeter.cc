@@ -510,6 +510,13 @@ void Calorimeter::FinalizeTower()
       iterator = fItTowerECalArray;
     }
 
+    if(fTowerECalHits == fTowerECalTrackHits &&
+       fTowerHCalHits == fTowerHCalTrackHits)
+    {
+      energy = 0.0;
+      iterator = 0;
+    }
+
     if(energy > 0.0 && iterator)
     {
       DelphesFactory *factory = GetFactory();
