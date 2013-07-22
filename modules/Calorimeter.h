@@ -44,7 +44,8 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTowerECalNeutralEnergy, fTowerHCalNeutralEnergy;
-  Int_t fTowerNeutralHits, fTowerPhotonHits, fTowerElectronHits, fTowerTrackHits, fTowerAllHits;
+  Int_t fTowerPhotonHits, fTowerECalHits, fTowerHCalHits, fTowerAllHits;
+  Int_t fTowerECalTrackHits, fTowerHCalTrackHits, fTowerTrackAllHits;
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
@@ -72,11 +73,17 @@ private:
   TObjArray *fEFlowTrackOutputArray; //!
   TObjArray *fEFlowTowerOutputArray; //!
 
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
+  TObjArray *fTowerECalTrackArray; //!
+  TIterator *fItTowerECalTrackArray; //!
 
-  TObjArray *fTowerPhotonArray; //!
-  TIterator *fItTowerPhotonArray; //!
+  TObjArray *fTowerHCalTrackArray; //!
+  TIterator *fItTowerHCalTrackArray; //!
+
+  TObjArray *fTowerECalArray; //!
+  TIterator *fItTowerECalArray; //!
+
+  TObjArray *fTowerHCalArray; //!
+  TIterator *fItTowerHCalArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
