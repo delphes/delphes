@@ -430,7 +430,7 @@ void Calorimeter::FinalizeTower()
   Candidate *particle, *track, *tower;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
-  TIterator *iterator;
+  TIterator *itTowerTrackArray, *itTowerArray;
 
   if(!fTower) return;
 
@@ -485,47 +485,53 @@ void Calorimeter::FinalizeTower()
     }
   }
   else if(fTowerTrackAllHits > 0 &&
-          fTowerECalHits + fTowerHCalHits == fTowerAllHits &&
-          (fTowerECalHits == fTowerECalTrackHits || fTowerHCalHits == fTowerHCalTrackHits))
+          fTowerECalHits + fTowerHCalHits == fTowerAllHits)
   {
-    if(fTowerECalHits == fTowerECalTrackHits)
-    {
-      fItTowerECalTrackArray->Reset();
-      while((track = static_cast<Candidate*>(fItTowerECalTrackArray->Next())))
-      {
-        fEFlowTrackOutputArray->Add(track);
-      }
-      energy = hcalEnergy;
-      iterator = fItTowerHCalArray;
-    }
-
-    if(fTowerHCalHits == fTowerHCalTrackHits)
-    {
-      fItTowerHCalTrackArray->Reset();
-      while((track = static_cast<Candidate*>(fItTowerHCalTrackArray->Next())))
-      {
-        fEFlowTrackOutputArray->Add(track);
-      }
-      energy = ecalEnergy;
-      iterator = fItTowerECalArray;
-    }
-
     if(fTowerECalHits == fTowerECalTrackHits &&
        fTowerHCalHits == fTowerHCalTrackHits)
     {
+      itTowerTrackArray = fItTowerTrackArray;
+      itTowerArray = 0;
       energy = 0.0;
-      iterator = 0;
+    }
+    else if(fTowerECalHits == fTowerECalTrackHits)
+    {
+      itTowerTrackArray = fItTowerECalTrackArray;
+      itTowerArray = fItTowerHCalArray;
+      energy = hcalEnergy;
+    }
+    else if(fTowerHCalHits == fTowerHCalTrackHits)
+    {
+      itTowerTrackArray = fItTowerHCalTrackArray;
+      itTowerArray = fItTowerECalArray;
+      energy = ecalEnergy;
+    }
+    else
+    {
+      itTowerTrackArray = 0;
+      itTowerArray = 0;
+      energy = 0.0;
+      fEFlowTowerOutputArray->Add(fTower);
     }
 
-    if(energy > 0.0 && iterator)
+    if(itTowerTrackArray)
+    {
+      itTowerTrackArray->Reset();
+      while((track = static_cast<Candidate*>(itTowerTrackArray->Next())))
+      {
+        fEFlowTrackOutputArray->Add(track);
+      }
+    }
+
+    if(itTowerArray && energy > 0.0)
     {
       DelphesFactory *factory = GetFactory();
 
       // create new tower
       tower = factory->NewCandidate();
 
-      iterator->Reset();
-      while((particle = static_cast<Candidate*>(iterator->Next())))
+      itTowerArray->Reset();
+      while((particle = static_cast<Candidate*>(itTowerArray->Next())))
       {
         tower->AddCandidate(particle);
       }
