@@ -430,7 +430,7 @@ void Calorimeter::FinalizeTower()
   Candidate *particle, *track, *tower;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
-  TIterator *itTowerTrackArray, *itTowerArray;
+  TIterator *itTowerTrackArray;
 
   if(!fTower) return;
 
@@ -491,26 +491,74 @@ void Calorimeter::FinalizeTower()
        fTowerHCalHits == fTowerHCalTrackHits)
     {
       itTowerTrackArray = fItTowerTrackArray;
-      itTowerArray = 0;
-      energy = 0.0;
     }
     else if(fTowerECalHits == fTowerECalTrackHits)
     {
       itTowerTrackArray = fItTowerECalTrackArray;
-      itTowerArray = fItTowerHCalArray;
-      energy = hcalEnergy;
+
+      if(hcalEnergy > 0.0)
+      {
+        DelphesFactory *factory = GetFactory();
+
+        // create new tower
+        tower = factory->NewCandidate();
+
+        fItTowerHCalArray->Reset();
+        while((particle = static_cast<Candidate*>(fItTowerHCalArray->Next())))
+        {
+          tower->AddCandidate(particle);
+        }
+
+        pt = hcalEnergy / TMath::CosH(eta);
+
+        tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
+        tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
+        tower->Eem = 0.0;
+        tower->Ehad = hcalEnergy;
+
+        tower->Edges[0] = fTowerEdges[0];
+        tower->Edges[1] = fTowerEdges[1];
+        tower->Edges[2] = fTowerEdges[2];
+        tower->Edges[3] = fTowerEdges[3];
+
+        fEFlowTowerOutputArray->Add(tower);
+      }
     }
     else if(fTowerHCalHits == fTowerHCalTrackHits)
     {
       itTowerTrackArray = fItTowerHCalTrackArray;
-      itTowerArray = fItTowerECalArray;
-      energy = ecalEnergy;
+
+      if(ecalEnergy > 0.0)
+      {
+        DelphesFactory *factory = GetFactory();
+
+        // create new tower
+        tower = factory->NewCandidate();
+
+        fItTowerECalArray->Reset();
+        while((particle = static_cast<Candidate*>(fItTowerECalArray->Next())))
+        {
+          tower->AddCandidate(particle);
+        }
+
+        pt = ecalEnergy / TMath::CosH(eta);
+
+        tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
+        tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
+        tower->Eem = ecalEnergy;
+        tower->Ehad = 0.0;
+
+        tower->Edges[0] = fTowerEdges[0];
+        tower->Edges[1] = fTowerEdges[1];
+        tower->Edges[2] = fTowerEdges[2];
+        tower->Edges[3] = fTowerEdges[3];
+
+        fEFlowTowerOutputArray->Add(tower);
+      }
     }
     else
     {
       itTowerTrackArray = 0;
-      itTowerArray = 0;
-      energy = 0.0;
       fEFlowTowerOutputArray->Add(fTower);
     }
 
@@ -521,34 +569,6 @@ void Calorimeter::FinalizeTower()
       {
         fEFlowTrackOutputArray->Add(track);
       }
-    }
-
-    if(itTowerArray && energy > 0.0)
-    {
-      DelphesFactory *factory = GetFactory();
-
-      // create new tower
-      tower = factory->NewCandidate();
-
-      itTowerArray->Reset();
-      while((particle = static_cast<Candidate*>(itTowerArray->Next())))
-      {
-        tower->AddCandidate(particle);
-      }
-
-      pt = energy / TMath::CosH(eta);
-
-      tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
-      tower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
-      tower->Eem = energy;
-      tower->Ehad = 0.0;
-
-      tower->Edges[0] = fTowerEdges[0];
-      tower->Edges[1] = fTowerEdges[1];
-      tower->Edges[2] = fTowerEdges[2];
-      tower->Edges[3] = fTowerEdges[3];
-
-      fEFlowTowerOutputArray->Add(tower);
     }
   }
   else if(energy > 0.0)
