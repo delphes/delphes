@@ -522,7 +522,7 @@ void Calorimeter::FinalizeTower()
         tower->Edges[2] = fTowerEdges[2];
         tower->Edges[3] = fTowerEdges[3];
 
-        //fEFlowTowerOutputArray->Add(tower);
+        fEFlowTowerOutputArray->Add(tower);
       }
     }
     else if(fTowerHCalHits == fTowerHCalTrackHits)
@@ -554,7 +554,7 @@ void Calorimeter::FinalizeTower()
         tower->Edges[2] = fTowerEdges[2];
         tower->Edges[3] = fTowerEdges[3];
 
-        //fEFlowTowerOutputArray->Add(tower);
+        fEFlowTowerOutputArray->Add(tower);
       }
     }
     else
