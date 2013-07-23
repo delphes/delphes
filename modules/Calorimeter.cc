@@ -389,7 +389,6 @@ void Calorimeter::Process()
     }
 
     ++fTowerAllHits;
-    fTower->AddCandidate(particle);
 
     // check for ECAL hits
     if(flags & 2)
@@ -417,6 +416,8 @@ void Calorimeter::Process()
 
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
+
+    fTower->AddCandidate(particle);
   }
 
   // finalize last tower
@@ -521,7 +522,7 @@ void Calorimeter::FinalizeTower()
         tower->Edges[2] = fTowerEdges[2];
         tower->Edges[3] = fTowerEdges[3];
 
-        fEFlowTowerOutputArray->Add(tower);
+        //fEFlowTowerOutputArray->Add(tower);
       }
     }
     else if(fTowerHCalHits == fTowerHCalTrackHits)
@@ -553,7 +554,7 @@ void Calorimeter::FinalizeTower()
         tower->Edges[2] = fTowerEdges[2];
         tower->Edges[3] = fTowerEdges[3];
 
-        fEFlowTowerOutputArray->Add(tower);
+        //fEFlowTowerOutputArray->Add(tower);
       }
     }
     else
