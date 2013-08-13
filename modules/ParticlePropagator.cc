@@ -169,7 +169,7 @@ void ParticlePropagator::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
-      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, 0.0);
+      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t);
 
       candidate->Momentum = candidateMomentum;
       candidate->AddCandidate(mother);
@@ -263,7 +263,7 @@ void ParticlePropagator::Process()
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
-        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, 0.0);
+        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t);
 
         candidate->Momentum = candidateMomentum;
         candidate->AddCandidate(mother);
