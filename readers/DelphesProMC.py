@@ -3,7 +3,6 @@
 import sys
 
 import urllib2
-import cStringIO
 import zipfile
 
 import ROOT
