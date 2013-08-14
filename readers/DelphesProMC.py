@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 
 import urllib2
@@ -104,11 +106,11 @@ def ConvertInput(name, momentumUnit, lengthUnit, branch, factory,
 
     candidate.Status = status
 
-    candidate.M1 = particles.mother1[i]
-    candidate.M2 = particles.mother2[i]
+    candidate.M1 = particles.mother1[i] if particles.mother1[i] < sys.maxint else -1
+    candidate.M2 = particles.mother2[i] if particles.mother2[i] < sys.maxint else -1
 
-    candidate.D1 = particles.daughter1[i]
-    candidate.D2 = particles.daughter2[i]
+    candidate.D1 = particles.daughter1[i] if particles.daughter1[i] < sys.maxint else -1
+    candidate.D2 = particles.daughter2[i] if particles.daughter2[i] < sys.maxint else -1
 
     candidate.Mass = mass
 
