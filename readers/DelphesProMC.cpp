@@ -140,7 +140,7 @@ void SignalHandler(int sig)
 
 int main(int argc, char *argv[])
 {
-  char appName[] = "DelphesCMSFWLite";
+  char appName[] = "DelphesProMC";
   stringstream message;
   ProMCBook *inputFile = 0;
   TFile *outputFile = 0;
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
         throw runtime_error(message.str());
       }
 
-      numberOfEvents = inputFile->getEvents();;
+      numberOfEvents = inputFile->getEvents();
 
       if(numberOfEvents <= 0) continue;
 
