@@ -2,7 +2,7 @@ import sys
 
 import urllib2
 import cStringIO
-import zipfile 
+import zipfile
 
 import ROOT
 
@@ -10,6 +10,8 @@ import ProMCHeader_pb2
 import ProMC_pb2
 
 ################################################################################
+# HttpFile class is written by Eli Carter (retracile)
+# http://stackoverflow.com/a/7852229
 
 class HttpFile(object):
   def __init__(self, url):
@@ -61,27 +63,26 @@ def ConvertInput(name, momentumUnit, lengthUnit, branch, factory,
 
   data = ProMC_pb2.ProMCEvent()
   data.ParseFromString(zip.read(name))
-  
+
   event = data.event
   particles = data.particles
 
   element = branch.NewEntry()
 
-
-# element.Number = event.Number
-# element.ProcessID = event.Process_ID
-# element.MPI = event.MPI
-# element.Weight = event.Weight
-# element.Scale = event.Scale
-# element.AlphaQED = event.Alpha_QED
-# element.AlphaQCD = event.Alpha_QCD
-# element.ID1 = event.ID1
-# element.ID2 = event.ID2
-# element.X1 = event.X1
-# element.X2 = event.X2
-# element.ScalePDF = event.Scale_PDF
-# element.PDF1 = event.PDF1
-# element.PDF2 = event.PDF2
+  element.Number = event.Number[0] if event.Number else 0
+  element.ProcessID = event.Process_ID[0] if event.Process_ID else 0
+  element.MPI = event.MPI[0] if event.MPI else 0
+#  element.Weight = event.Weight[0] if event.Weight else 0
+  element.Scale = event.Scale[0] if event.Scale else 0
+  element.AlphaQED = event.Alpha_QED[0] if event.Alpha_QED else 0
+  element.AlphaQCD = event.Alpha_QCD[0] if event.Alpha_QCD else 0
+  element.ID1 = event.ID1[0] if event.ID1 else 0
+  element.ID2 = event.ID2[0] if event.ID2 else 0
+  element.X1 = event.X1[0] if event.X1 else 0
+  element.X2 = event.X2[0] if event.X2 else 0
+  element.ScalePDF = event.Scale_PDF[0] if event.Scale_PDF else 0
+  element.PDF1 = event.PDF1[0] if event.PDF1 else 0
+  element.PDF2 = event.PDF2[0] if event.PDF2 else 0
 
   for i in range(len(particles.pdg_id)):
     pid = particles.pdg_id[i]
@@ -103,11 +104,11 @@ def ConvertInput(name, momentumUnit, lengthUnit, branch, factory,
 
     candidate.Status = status
 
-#    candidate.M1 = particles.mother1[i]
-#    candidate.M2 = particles.mother2[i]
+    candidate.M1 = particles.mother1[i]
+    candidate.M2 = particles.mother2[i]
 
-#    candidate.D1 = particles.daughter1[i]
-#    candidate.D2 = particles.daughter2[i]
+    candidate.D1 = particles.daughter1[i]
+    candidate.D2 = particles.daughter2[i]
 
     candidate.Mass = mass
 
@@ -140,7 +141,7 @@ ROOT.gSystem.Load('libDelphes')
 outputFile = ROOT.TFile(sys.argv[2], "CREATE")
 
 if not outputFile.IsOpen():
-  print "** ERROR: can't open ", sys.argv[2]
+  print "** ERROR: can't open", sys.argv[2]
   sys.exit(1)
 
 treeWriter = ROOT.ExRootTreeWriter(outputFile, "Delphes")
@@ -162,10 +163,19 @@ partonOutputArray = modularDelphes.ExportArray("partons")
 modularDelphes.InitTask()
 
 for fileName in sys.argv[3:]:
-  print "** Reading " + fileName
+  print "** Reading", fileName
 
-  file = HttpFile(fileName)
+  if fileName.startswith("http://"):
+    file = HttpFile(fileName)
+  else:
+    file = open(fileName)
+
   zip = zipfile.ZipFile(file)
+
+  numberOfEvents = len(zip.namelist())
+  if numberOfEvents <= 0: continue
+
+  progressBar = ROOT.ExRootProgressBar(numberOfEvents - 1)
 
   # retrive information from the header file
   header = ProMCHeader_pb2.ProMCHeader()
@@ -175,18 +185,24 @@ for fileName in sys.argv[3:]:
 
   modularDelphes.Clear()
   treeWriter.Clear()
+  eventCounter = 0
   for name in zip.namelist():
-    if name.isdigit():
-      ConvertInput(name, momentumUnit, lengthUnit, branchEvent, factory,
-        allParticleOutputArray, stableParticleOutputArray, partonOutputArray)
+    eventCounter += 1
+    if not name.isdigit(): continue
 
-      modularDelphes.ProcessTask()
+    ConvertInput(name, momentumUnit, lengthUnit, branchEvent, factory,
+      allParticleOutputArray, stableParticleOutputArray, partonOutputArray)
 
-      treeWriter.Fill()
+    modularDelphes.ProcessTask()
 
-      modularDelphes.Clear()
-      treeWriter.Clear()
+    treeWriter.Fill()
 
+    modularDelphes.Clear()
+    treeWriter.Clear()
+    progressBar.Update(eventCounter)
+
+  progressBar.Update(eventCounter, eventCounter, ROOT.kTRUE)
+  progressBar.Finish()
   zip.close()
 
 modularDelphes.FinishTask()
