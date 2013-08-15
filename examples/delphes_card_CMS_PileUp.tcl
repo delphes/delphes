@@ -533,7 +533,6 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
-
 ###########
 # b-tagging
 ###########
