@@ -1,23 +1,24 @@
 3.0.10:
-  updated ATLAS and CMS example card 
+  updated ATLAS and CMS example cards
   added DelphesProMC.py reader
-  fixed time in ParticlePropagator
-  newed energy flow 
-  fixed tau-jet matching 
-  read mass from input file 
-  added workaround for MadAnalysis bug 
-  added DelphesCMSFWLite, DelphesProMC and DelphesPythia8 to Makefile 
-  removed DelphesCMSFWLite.sh and DelphesProMC.sh 
-  moved DelphesCMSFWLite.cpp and DelphesProMC.cpp to readers 
+  added calculation of time after propagation in ParticlePropagator
+  improved energy flow algorithm
+  fixed tau-jet matching in TauTagging module
+  modified all the readers to read particle mass from input file
+  adapted LHCO output files to counter a bug in MadAnalysis
+  added Makefile rules to build DelphesCMSFWLite, DelphesProMC and DelphesPythia8
+  removed DelphesCMSFWLite.sh and DelphesProMC.sh from examples
+  moved DelphesCMSFWLite.cpp and DelphesProMC.cpp from examples to readers
   added PileUpMergerPythia8 module
-  fixed daughters indices in DelphesCMSFWLite 
-  fixed particle loop in DelphesCMSFWLite and DelphesProMC 
+  fixed daughters indices in DelphesCMSFWLite.cpp
+  fixed particle loop in DelphesCMSFWLite and DelphesProMC
   replaced <event with <event> in LHEF reader
   replaced log with log normal for calorimeter resolution
   added EnergyScale module
   added DelphesProMC reader
-  fixed particle momentum and particle status selection in DelphesCMSFWLite.cpp 
+  fixed particle status selection in DelphesCMSFWLite.cpp
+  fixed particle momentum calculation in DelphesCMSFWLite.cpp
   added MaxEvents, SkipEvents and RandomSeed parameters
-  added Example1.cpp 
-  added Weight branch and Weighter module 
-  added more AreaDefinition parameters for active_area 
+  added examples/Example1.cpp
+  added Weight branch and Weighter module
+  added more AreaDefinition parameters for active_area
