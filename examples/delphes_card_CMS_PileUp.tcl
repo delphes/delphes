@@ -4,8 +4,6 @@
 
 set ExecutionPath {
 
-  Weighter
-
   PileUpMerger
   ParticlePropagator
 
@@ -28,7 +26,7 @@ set ExecutionPath {
   FastJetFinder
   JetPileUpSubtractor
 
-  ConstituentFilter
+  JetEnergyScale
 
   PhotonEfficiency
   PhotonIsolation
@@ -49,26 +47,6 @@ set ExecutionPath {
   ScalarHT
 
   TreeWriter
-}
-
-##########
-# Weighter
-##########
-
-module Weighter Weighter {
-  set InputArray Delphes/allParticles
-
-  set OutputArray weight
-
-  # add Weight {PID1 PID2} {weight}
-  # default weight
-  add Weight {0} {1.0}
-
-  add Weight {23} {0.5}
-  add Weight {24} {0.5}
-  add Weight {-24} {0.5}
-  add Weight {23 24} {0.25}
-  add Weight {23 -24} {0.25}
 }
 
 ###############
@@ -180,14 +158,12 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
   # resolution formula for charged hadrons
-  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.01) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.03) + \
-                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.03) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.02) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05)}
+  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0e1) * (0.20) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.20) + \
+                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.20) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.20) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.20) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.20)}
 }
 
 #################################
@@ -200,9 +176,10 @@ module EnergySmearing ElectronEnergySmearing {
 
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
-  set ResolutionFormula {                  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.5e1) * (energy*0.015) + \
-                                           (abs(eta) <= 2.5) * (energy > 2.5e1)                    * sqrt(energy^2*0.005^2 + energy*0.05^2 + 0.25^2) + \
-                         (abs(eta) > 2.5 && abs(eta) <= 3.0)                                       * sqrt(energy^2*0.005^2 + energy*0.05^2 + 0.25^2) + \
+  # resolution formula for electrons
+  set ResolutionFormula {                  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.0e1) * (0.0225)*energy + \
+                                           (abs(eta) <= 2.5) * (energy > 2.0e1)                    * sqrt(energy^2*0.007^2 + energy*0.07^2 + 0.35^2) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0)                                       * sqrt(energy^2*0.007^2 + energy*0.07^2 + 0.35^2) + \
                          (abs(eta) > 3.0 && abs(eta) <= 5.0)                                       * sqrt(energy^2*0.107^2 + energy*2.08^2)}
 
 }
@@ -218,14 +195,15 @@ module MomentumSmearing MuonMomentumSmearing {
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
   # resolution formula for muons
-  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.03) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.02) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.03) + \
-                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.04) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.03) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05)}
+  set ResolutionFormula {                  (abs(eta) <= 0.5) * (pt > 0.1   && pt <= 5.0)   * (0.02) + \
+                                           (abs(eta) <= 0.5) * (pt > 5.0   && pt <= 1.0e2) * (0.015) + \
+                                           (abs(eta) <= 0.5) * (pt > 1.0e2)                * (0.03) + \
+                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 0.1   && pt <= 5.0)   * (0.03) + \
+                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 5.0   && pt <= 1.0e2) * (0.02) + \
+                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 1.0e2)                * (0.04) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 5.0)   * (0.04) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0   && pt <= 1.0e2) * (0.035) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.05)}
 }
 
 ##############
@@ -307,12 +285,13 @@ module Calorimeter Calorimeter {
   add EnergyFraction {3122} {0.3 0.7}
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  set ECalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.005^2 + energy*0.05^2 + 0.25^2) + \
+  set ECalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.007^2 + energy*0.07^2 + 0.35^2)  + \
                              (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.107^2 + energy*2.08^2)}
 
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-  set HCalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.050^2 + energy*1.50^2) + \
-                             (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.130^2 + energy*2.70^2)}
+  set HCalResolutionFormula {                  (abs(eta) <= 1.5) * sqrt(energy^2*0.055^2 + energy*1.20^2 + 3.50^2) + \
+                                               (abs(eta) > 1.5 && abs(eta) <= 3)   * sqrt(energy^2*0.065^2 + energy*2.00^2 + 3.50^2) + \
+                                               (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*3.13^2)}
 }
 
 ##########################
@@ -401,23 +380,6 @@ module FastJetFinder FastJetFinder {
   set JetPTMin 20.0
 }
 
-####################
-# Constituent filter
-####################
-
-module ConstituentFilter ConstituentFilter {
-
-# add JetInputArray InputArray
-  add JetInputArray GenJetFinder/jets
-  add JetInputArray FastJetFinder/jets
-
-# add ConstituentInputArray InputArray OutputArray
-  add ConstituentInputArray Delphes/stableParticles stableParticles
-  add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
-  add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
-  add ConstituentInputArray MuonMomentumSmearing/muons muons
-}
-
 ###########################
 # Jet Pile-Up Subtraction
 ###########################
@@ -429,6 +391,18 @@ module JetPileUpSubtractor JetPileUpSubtractor {
   set OutputArray jets
 
   set JetPTMin 20.0
+}
+
+##################
+# Jet Energy Scale
+##################
+
+module EnergyScale JetEnergyScale {
+  set InputArray JetPileUpSubtractor/jets
+  set OutputArray jets
+
+ # scale formula for jets
+  set ScaleFormula {1.0}
 }
 
 ###################
@@ -555,7 +529,7 @@ module Merger ScalarHT {
   add InputArray UniqueObjectFinder/jets
   add InputArray UniqueObjectFinder/electrons
   add InputArray UniqueObjectFinder/photons
-  add InputArray MuonIsolation/muons
+  add InputArray UniqueObjectFinder/muons
   set EnergyOutputArray energy
 }
 
@@ -566,7 +540,7 @@ module Merger ScalarHT {
 
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
-  set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
 
@@ -600,7 +574,7 @@ module BTagging BTagging {
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
-  set JetInputArray JetPileUpSubtractor/jets
+  set JetInputArray JetEnergyScale/jets
 
   set DeltaR 0.5
 
@@ -625,7 +599,8 @@ module UniqueObjectFinder UniqueObjectFinder {
 # add InputArray InputArray OutputArray
   add InputArray PhotonIsolation/photons photons
   add InputArray ElectronIsolation/electrons electrons
-  add InputArray JetPileUpSubtractor/jets jets
+  add InputArray MuonIsolation/muons muons
+  add InputArray JetEnergyScale/jets jets
 }
 
 ##################
@@ -644,10 +619,9 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/photons Photon Photon
-  add Branch MuonIsolation/muons Muon Muon
+  add Branch UniqueObjectFinder/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
-  add Branch Weighter/weight Weight Weight
 }
 
