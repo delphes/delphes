@@ -299,7 +299,7 @@ module Efficiency PhotonEfficiency {
 
 module Isolation PhotonIsolation {
   set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray TrackMerger/tracks
+  set IsolationInputArray EFlowMerger/eflow
 
   set OutputArray photons
 
@@ -333,7 +333,7 @@ module Efficiency ElectronEfficiency {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray TrackMerger/tracks
+  set IsolationInputArray EFlowMerger/eflow
 
   set OutputArray electrons
 
@@ -367,7 +367,7 @@ module Efficiency MuonEfficiency {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray TrackMerger/tracks
+  set IsolationInputArray EFlowMerger/eflow
 
   set OutputArray muons
 
@@ -451,7 +451,7 @@ module EnergyScale JetEnergyScale {
 
 module BTagging BTagging {
   set PartonInputArray Delphes/partons
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
 
@@ -484,7 +484,7 @@ module BTagging BTagging {
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
-  set JetInputArray FastJetFinder/jets
+  set JetInputArray JetEnergyScale/jets
 
   set DeltaR 0.5
 
@@ -510,7 +510,7 @@ module UniqueObjectFinder UniqueObjectFinder {
   add InputArray PhotonIsolation/photons photons
   add InputArray ElectronIsolation/electrons electrons
   add InputArray MuonIsolation/muons muons
-  add InputArray FastJetFinder/jets jets
+  add InputArray JetEnergyScale/jets jets
 }
 
 ##################
