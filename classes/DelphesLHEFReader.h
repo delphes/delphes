@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 
+#include <vector>
+
 class TObjArray;
 class TStopwatch;
 class TDatabasePDG;
@@ -42,6 +44,8 @@ public:
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
+  void AnalyzeRwgt(ExRootTreeBranch *branch);
+
 private:
 
   void AnalyzeParticle(DelphesFactory *factory,
@@ -55,6 +59,8 @@ private:
 
   TDatabasePDG *fPDG;
 
+  bool fEventReady;
+
   int fEventCounter;
 
   int fParticleCounter, fProcessID;
@@ -62,6 +68,8 @@ private:
 
   int fPID, fStatus, fM1, fM2, fC1, fC2;
   double fPx, fPy, fPz, fE, fMass;
+  
+  std::vector<double> fRwgtList;
 };
 
 #endif // DelphesLHEFReader_h
