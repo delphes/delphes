@@ -1,12 +1,12 @@
 3.0.10:
   new readers (DelphesProMC.cpp, DelphesProMC.py (#220), DelphesPythia8)
   new modules (EnergyScale, PileUpMergerPythia8, Weighter)
-  new module parameters (absolute/relative isolation (#204), flat/poisson pile-up distribution)
+  new module parameters (absolute/relative isolation (#187), flat/poisson pile-up distribution)
   new global parameters (max number of events, skip events (#183), random seed (#202))
   new branches (pile-up event density rho, MC event weight)
   updated CMS and ALTAS detector cards (and added ATLAS pile-up detector card)
   calorimeter smearing is now performed according to a logNormal distribution
-  improved particle-flow algorithm
+  improved particle-flow algorithm (#204)
   added calculation of particle propagation time in the tracker
   fixed tau-jet matching by only considering visible hadronic tau (#208)
   read masses from MC event file (#201)
