@@ -56,6 +56,8 @@ void PileUpMerger::Init()
 {
   const char *fileName;
 
+  fPileUpDistribution = GetInt("PileUpDistribution", 0);
+
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
   fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
 
@@ -87,7 +89,7 @@ void PileUpMerger::Process()
   Float_t x, y, z, t;
   Float_t px, py, pz, e;
   Double_t dz, dphi;
-  Int_t poisson, event;
+  Int_t numberOfEvents, event;
   Long64_t allEntries, entry;
   Candidate *candidate;
   DelphesFactory *factory;
@@ -100,11 +102,22 @@ void PileUpMerger::Process()
 
   factory = GetFactory();
 
-  poisson = gRandom->Poisson(fMeanPileUp);
+  switch(fPileUpDistribution)
+  {
+    case 0:
+      numberOfEvents = gRandom->Poisson(fMeanPileUp);
+      break;
+    case 1:
+      numberOfEvents = gRandom->Integer(2*fMeanPileUp + 1);
+      break;
+    default:
+      numberOfEvents = gRandom->Poisson(fMeanPileUp);
+      break;
+  }
 
   allEntries = fReader->GetEntries();
 
-  for(event = 0; event < poisson; ++event)
+  for(event = 0; event < numberOfEvents; ++event)
   {
     do
     {
