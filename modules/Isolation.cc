@@ -89,6 +89,10 @@ void Isolation::Init()
 
   fPTRatioMax = GetDouble("PTRatioMax", 0.1);
 
+  fPTSumMax = GetDouble("PTSumMax", 5.0);
+
+  fUsePTSum = GetBool("UsePTSum", false);
+
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
 
   // import input array(s)
@@ -131,7 +135,7 @@ void Isolation::Process()
 {
   Candidate *candidate, *isolation;
   TObjArray *isolationArray;
-  Double_t sumPT, ratio;
+  Double_t sum, ratio;
   Int_t counter;
   Double_t rho = 0.0;
 
@@ -156,7 +160,7 @@ void Isolation::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
     // loop over all input tracks
-    sumPT = 0.0;
+    sum = 0.0;
     counter = 0;
     itIsolationArray.Reset();
     while((isolation = static_cast<Candidate*>(itIsolationArray.Next())))
@@ -166,16 +170,16 @@ void Isolation::Process()
       if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax &&
          !candidate->Overlaps(isolation))
       {
-        sumPT += isolationMomentum.Pt();
+        sum += isolationMomentum.Pt();
         ++counter;
       }
     }
 
-    // correct sumPT for pile-up contamination
-    sumPT = sumPT - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();  
+    // correct sum for pile-up contamination
+    sum = sum - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();  
 
-    ratio = sumPT/candidateMomentum.Pt();
-    if(ratio > fPTRatioMax) continue;
+    ratio = sum/candidateMomentum.Pt();
+    if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
 
     fOutputArray->Add(candidate);
   }

@@ -1,10 +1,11 @@
 3.0.10:
+  added UsePTSum and PTSumMax parameters to the Isolation module
   added posibility to read reweighting information from LHEF
   updated ATLAS and CMS example cards
   added DelphesProMC.py reader
-  added calculation of time after propagation in ParticlePropagator
+  added calculation of time after propagation in the ParticlePropagator module
   improved energy flow algorithm
-  fixed tau-jet matching in TauTagging module
+  fixed tau-jet matching in the TauTagging module
   modified all the readers to read particle mass from input file
   adapted LHCO output files to counter a bug in MadAnalysis
   added Makefile rules to build DelphesCMSFWLite, DelphesProMC and DelphesPythia8
