@@ -1,27 +1,31 @@
 3.0.10:
-  added PileUpDistribution parameter to the PileUpMerger module
-  added UsePTSum and PTSumMax parameters to the Isolation module
-  added posibility to read reweighting information from LHEF
-  updated ATLAS and CMS example cards
-  added DelphesProMC.py reader
-  added calculation of time after propagation in the ParticlePropagator module
-  improved energy flow algorithm
-  fixed tau-jet matching in the TauTagging module
-  modified all the readers to read particle mass from input file
-  adapted LHCO output files to counter a bug in MadAnalysis
-  added Makefile rules to build DelphesCMSFWLite, DelphesProMC and DelphesPythia8
-  removed DelphesCMSFWLite.sh and DelphesProMC.sh from examples
-  moved DelphesCMSFWLite.cpp and DelphesProMC.cpp from examples to readers
-  added PileUpMergerPythia8 module
-  fixed daughters indices in DelphesCMSFWLite.cpp
-  fixed particle loop in DelphesCMSFWLite and DelphesProMC
-  replaced <event with <event> in LHEF reader
-  replaced log with log normal for calorimeter resolution
-  added EnergyScale module
-  added DelphesProMC reader
-  fixed particle status selection in DelphesCMSFWLite.cpp
-  fixed particle momentum calculation in DelphesCMSFWLite.cpp
-  added MaxEvents, SkipEvents and RandomSeed parameters
-  added examples/Example1.cpp
-  added Weight branch and Weighter module
-  added more AreaDefinition parameters for active_area
+  new readers (DelphesProMC.cpp, DelphesProMC.py (#220), DelphesPythia8)
+  new modules (EnergyScale, PileUpMergerPythia8, Weighter)
+  new module parameters (absolute/relative isolation (#204), flat/poisson pile-up distribution)
+  new global parameters (max number of events, skip events (#183), random seed (#202))
+  new branches (pile-up event density rho, MC event weight)
+  updated CMS and ALTAS detector cards (and added ATLAS pile-up detector card)
+  calorimeter smearing is now performed according to a logNormal distribution
+  improved particle-flow algorithm
+  added calculation of particle propagation time in the tracker
+  fixed tau-jet matching by only considering visible hadronic tau (#208)
+  read masses from MC event file (#201)
+  bug fixes in DelphesCMSFWLite (#196)
+  compilable analysis macro examples (#182)
+  ability to read MC re-weighting information from LHE files
+
+3.0.9:
+  fixed reading of weighted STDHEP events (#181)
+  fixed script building Delphes with CMSFWLite (#180)
+  added more particles to StatusPidFilter (#179)
+
+3.0.8:
+  fixed treatment of units in HepMC format (#175)
+  added Weight to HepMCEvent branch to store the event weight (#173)
+  added Rho branch to store the rho energy density (#176)
+  added random rotation of pile-up events around the z-axis
+
+3.0.7:
+  added separate make rule for the event display to fix the compilation problem for systems without OpenGL libraries (#168, #127)
+  added Cloner module
+  modified BTagging module (several BTagging bits can be stored for the same jet collection, see here)
