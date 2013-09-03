@@ -262,8 +262,6 @@ void Calorimeter::Process()
     fTrackECalFractions.push_back(ecalFraction);
     fTrackHCalFractions.push_back(hcalFraction);
 
-    if(ecalFraction < 1.0E-9 && hcalFraction < 1.0E-9) continue;
-
     // find eta bin [1, fEtaBins.size - 1]
     itEtaBin = lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
     if(itEtaBin == fEtaBins.begin() || itEtaBin == fEtaBins.end()) continue;
