@@ -9,7 +9,7 @@
   improved particle-flow algorithm (#204)
   added calculation of particle propagation time in the tracker
   fixed tau-jet matching by only considering visible hadronic tau (#208)
-  read masses from MC event file (#201)
+  read masses from MC event file (#195, #201)
   bug fixes in DelphesCMSFWLite (#196)
   compilable analysis macro examples (#182)
   ability to read MC re-weighting information from LHE files
