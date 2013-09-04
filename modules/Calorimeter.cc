@@ -381,18 +381,23 @@ void Calorimeter::FinalizeTower()
   Candidate *track, *tower;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
+  Double_t ecalSigma, hcalSigma;
 
   if(!fTower) return;
 
-//  ecalEnergy = gRandom->Gaus(fTowerECalEnergy, fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy));
+  ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
+
+//  ecalEnergy = gRandom->Gaus(fTowerECalEnergy, ecalSigma);
 //  if(ecalEnergy < 0.0) ecalEnergy = 0.0;
 
-  ecalEnergy = LogNormal(fTowerECalEnergy, fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy));
+  ecalEnergy = LogNormal(fTowerECalEnergy, ecalSigma);
 
-//  hcalEnergy = gRandom->Gaus(fTowerHCalEnergy, fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy));
+  hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
+
+//  hcalEnergy = gRandom->Gaus(fTowerHCalEnergy, hcalSigma);
 //  if(hcalEnergy < 0.0) hcalEnergy = 0.0;
 
-  hcalEnergy = LogNormal(fTowerHCalEnergy, fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy));
+  hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
 
   energy = ecalEnergy + hcalEnergy;
 
@@ -435,10 +440,10 @@ void Calorimeter::FinalizeTower()
   }
 
   ecalEnergy -= fTrackECalEnergy;
-  if(ecalEnergy < 0.0) ecalEnergy = 0.0;
+  if(ecalEnergy < 0.0 || ecalEnergy < ecalSigma) ecalEnergy = 0.0;
 
   hcalEnergy -= fTrackHCalEnergy;
-  if(hcalEnergy < 0.0) hcalEnergy = 0.0;
+  if(hcalEnergy < 0.0 || hcalEnergy < hcalSigma) hcalEnergy = 0.0;
 
   energy = ecalEnergy + hcalEnergy;
 
