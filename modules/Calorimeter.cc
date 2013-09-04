@@ -455,15 +455,9 @@ void Calorimeter::FinalizeTower()
 
     pt = energy / TMath::CosH(eta);
 
-    tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
     tower->Eem = ecalEnergy;
     tower->Ehad = hcalEnergy;
-
-    tower->Edges[0] = fTowerEdges[0];
-    tower->Edges[1] = fTowerEdges[1];
-    tower->Edges[2] = fTowerEdges[2];
-    tower->Edges[3] = fTowerEdges[3];
 
     fEFlowTowerOutputArray->Add(tower);
   }
