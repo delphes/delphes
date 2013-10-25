@@ -866,8 +866,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.70710678"
-     inkscape:cx="486.52926"
-     inkscape:cy="394.24715"
+     inkscape:cx="387.42411"
+     inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -1158,30 +1158,6 @@
            x="329.83301"
            id="tspan5344-2-0-8-5"
            sodipodi:role="line">unique object finder</tspan></text>
-    </g>
-    <g
-       id="g4365"
-       transform="translate(-210,4.9999862)">
-      <rect
-         ry="0"
-         y="652.36218"
-         x="560"
-         height="20"
-         width="40"
-         id="rect8357-2"
-         style="opacity:0.75;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:3.79999995;stroke-opacity:1;stroke-dasharray:none" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text8359-0"
-         y="666.58044"
-         x="579.98682"
-         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Cambria;-inkscape-font-specification:Cambria"
-         xml:space="preserve"><tspan
-           style="font-size:18px;text-align:center;text-anchor:middle"
-           y="666.58044"
-           x="579.98682"
-           id="tspan8365-0"
-           sodipodi:role="line">isol</tspan></text>
     </g>
     <g
        id="g6602"
@@ -1513,30 +1489,6 @@
            y="665.6825"
            x="129.4082"
            sodipodi:role="line">file</tspan></text>
-    </g>
-    <g
-       transform="translate(10,4.9999874)"
-       id="g4325-8">
-      <rect
-         ry="0"
-         y="652.36218"
-         x="260"
-         height="20"
-         width="40"
-         id="rect8357-2-4-2"
-         style="opacity:0.75;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:3.79999995;stroke-opacity:1;stroke-dasharray:none" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text8359-0-6-4"
-         y="666.58044"
-         x="279.98682"
-         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Cambria;-inkscape-font-specification:Cambria"
-         xml:space="preserve"><tspan
-           style="font-size:18px;text-align:center;text-anchor:middle"
-           y="666.58044"
-           x="279.98682"
-           id="tspan8365-0-0-5"
-           sodipodi:role="line">isol</tspan></text>
     </g>
     <path
        style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
@@ -2159,7 +2111,7 @@
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
-       d="m 290,642.36217 -7e-5,11.99998"
+       d="m 290,642.36217 -7e-5,46.99998"
        id="path8427-0-7-2-2-93"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
@@ -2183,7 +2135,7 @@
        sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
-       d="m 290,677.36217 0,82"
+       d="m 290,712.36217 0,47"
        id="path8427-0-9"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
@@ -2200,28 +2152,27 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <g
-       transform="translate(-70,4.9999874)"
-       id="g4325-8-8">
+       id="g4466">
       <rect
          ry="0"
-         y="652.36218"
-         x="260"
+         y="657.36218"
+         x="170"
          height="20"
-         width="40"
+         width="80"
          id="rect8357-2-4-2-9"
-         style="opacity:0.75;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:3.79999995;stroke-opacity:1;stroke-dasharray:none" />
+         style="opacity:0.75000000000000000;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:3.79999995;stroke-opacity:1;stroke-dasharray:none" />
       <text
          sodipodi:linespacing="125%"
          id="text8359-0-6-4-2"
-         y="666.58044"
-         x="279.98682"
+         y="671.58044"
+         x="209.95605"
          style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Cambria;-inkscape-font-specification:Cambria"
          xml:space="preserve"><tspan
            style="font-size:18px;text-align:center;text-anchor:middle"
-           y="666.58044"
-           x="279.98682"
+           y="671.58044"
+           x="209.95605"
            id="tspan8365-0-0-5-79"
-           sodipodi:role="line">isol</tspan></text>
+           sodipodi:role="line">isolation</tspan></text>
     </g>
     <path
        style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Mend)"
@@ -2240,5 +2191,53 @@
        d="m 149.99993,332.3622 0,30 360,0 0,-30"
        id="path4506"
        inkscape:connector-curvature="0" />
+    <g
+       transform="translate(160,-1.2617188e-5)"
+       id="g4466-1">
+      <rect
+         ry="0"
+         y="657.36218"
+         x="170"
+         height="20"
+         width="80"
+         id="rect8357-2-4-2-9-7"
+         style="opacity:0.75;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:3.79999995;stroke-opacity:1;stroke-dasharray:none" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text8359-0-6-4-2-4"
+         y="671.58044"
+         x="209.95605"
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Cambria;-inkscape-font-specification:Cambria"
+         xml:space="preserve"><tspan
+           style="font-size:18px;text-align:center;text-anchor:middle"
+           y="671.58044"
+           x="209.95605"
+           id="tspan8365-0-0-5-79-0"
+           sodipodi:role="line">isolation</tspan></text>
+    </g>
+    <g
+       transform="translate(80,34.999987)"
+       id="g4466-1-9">
+      <rect
+         ry="0"
+         y="657.36218"
+         x="170"
+         height="20"
+         width="80"
+         id="rect8357-2-4-2-9-7-4"
+         style="opacity:0.75;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:3.79999995;stroke-opacity:1;stroke-dasharray:none" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text8359-0-6-4-2-4-8"
+         y="671.58044"
+         x="209.95605"
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Cambria;-inkscape-font-specification:Cambria"
+         xml:space="preserve"><tspan
+           style="font-size:18px;text-align:center;text-anchor:middle"
+           y="671.58044"
+           x="209.95605"
+           id="tspan8365-0-0-5-79-0-8"
+           sodipodi:role="line">isolation</tspan></text>
+    </g>
   </g>
 </svg>
