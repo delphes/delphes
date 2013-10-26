@@ -179,7 +179,7 @@ module EnergySmearing ElectronEnergySmearing {
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
   # resolution formula for electrons
-  set ResolutionFormula {                  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.0e1) * (0.0225)*energy + \
+  set ResolutionFormula {                  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.0e1) * (energy*0.0225) + \
                                            (abs(eta) <= 2.5) * (energy > 2.0e1)                    * sqrt(energy^2*0.007^2 + energy*0.07^2 + 0.35^2) + \
                          (abs(eta) > 2.5 && abs(eta) <= 3.0)                                       * sqrt(energy^2*0.007^2 + energy*0.07^2 + 0.35^2) + \
                          (abs(eta) > 3.0 && abs(eta) <= 5.0)                                       * sqrt(energy^2*0.107^2 + energy*2.08^2)}
@@ -216,6 +216,7 @@ module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronEnergySmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
 
@@ -318,7 +319,6 @@ module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray TrackPileUpSubtractor/eflowTracks
   add InputArray Calorimeter/eflowTowers
-  add InputArray MuonMomentumSmearing/muons
   set OutputArray eflow
 }
 
@@ -517,7 +517,8 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray EFlowMerger/eflow
+  add InputArray Calorimeter/eflowTracks
+  add InputArray Calorimeter/eflowTowers
   set MomentumOutputArray momentum
 }
 
@@ -614,7 +615,6 @@ module TreeWriter TreeWriter {
   add Branch Calorimeter/towers Tower Tower
   add Branch Calorimeter/eflowTracks EFlowTrack Track
   add Branch Calorimeter/eflowTowers EFlowTower Tower
-  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
