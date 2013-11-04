@@ -38,7 +38,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 JetPileUpSubtractor::JetPileUpSubtractor() :
-  fItJetInputArray(0)
+  fItJetInputArray(0), fItRhoInputArray(0)
 {
 
 }
@@ -62,6 +62,7 @@ void JetPileUpSubtractor::Init()
   fItJetInputArray = fJetInputArray->MakeIterator();
 
   fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
+  fItRhoInputArray = fRhoInputArray->MakeIterator();
 
   // create output array(s)
 
@@ -73,6 +74,7 @@ void JetPileUpSubtractor::Init()
 
 void JetPileUpSubtractor::Finish()
 {
+  if(fItRhoInputArray) delete fItRhoInputArray;
   if(fItJetInputArray) delete fItJetInputArray;
 }
 
@@ -82,13 +84,10 @@ void JetPileUpSubtractor::Process()
 {
   Candidate *candidate;
   TLorentzVector momentum, area;
+  Double_t eta = 0.0;
   Double_t rho = 0.0;
 
-  if(fRhoInputArray && fRhoInputArray->GetEntriesFast() > 0)
-  {
-    candidate = static_cast<Candidate*>(fRhoInputArray->At(0));
-    rho = candidate->Momentum.Pt();
-  }
+  if(!fRhoInputArray) return;
 
   // loop over all input candidates
   fItJetInputArray->Reset();
@@ -96,6 +95,17 @@ void JetPileUpSubtractor::Process()
   {
     momentum = candidate->Momentum;
     area = candidate->Area;
+    eta = TMath::Abs(momentum.Eta());
+
+    // find rho
+    rho = 0.0;
+    while((candidate = static_cast<Candidate*>(fItRhoInputArray->Next())))
+    {
+      if(eta >= candidate->Edges[0] && eta < candidate->Edges[1])
+      {
+        rho = candidate->Momentum.Pt();
+      }
+    }  
 
     // apply pile-up correction
     if(momentum.Pt() <= rho * area.Pt()) continue;

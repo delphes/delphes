@@ -35,6 +35,7 @@ private:
   Double_t fJetPTMin;
 
   TIterator *fItJetInputArray; //!
+  TIterator *fItRhoInputArray; //!
 
   const TObjArray *fJetInputArray; //!
   const TObjArray *fRhoInputArray; //!

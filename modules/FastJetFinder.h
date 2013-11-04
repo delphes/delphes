@@ -15,7 +15,7 @@
 
 #include "classes/DelphesModule.h"
 
-#include <vector>
+#include <map>
 
 class TObjArray;
 class TIterator;
@@ -36,12 +36,12 @@ public:
   void Init();
   void Process();
   void Finish();
-  
+
 private:
 
   void *fPlugin; //!
   fastjet::JetDefinition *fDefinition; //!
-   
+
   Int_t fJetAlgorithm;
   Double_t fParameterR;
   Double_t fJetPTMin;
@@ -53,26 +53,26 @@ private:
   Int_t fIratch;
   Double_t fAdjacencyCut;
   Double_t fOverlapThreshold;
-  
+
   // --- FastJet Area method --------
-  
+
   fastjet::AreaDefinition *fAreaDefinition;
-  Int_t fAreaAlgorithm;  
-  Bool_t  fComputeRho; 
-  Double_t fRhoEtaMax;
-  
+  Int_t fAreaAlgorithm;
+  Bool_t  fComputeRho;
+
   // -- ghost based areas --
   Double_t fGhostEtaMax;
   Int_t fRepeat;
   Double_t fGhostArea;
   Double_t fGridScatter;
   Double_t fPtScatter;
-  Double_t fMeanGhostPt; 
-  
+  Double_t fMeanGhostPt;
+
   // -- voronoi areas --
   Double_t fEffectiveRfact;
-  
-  
+
+  std::map< Double_t, Double_t > fEtaRangeMap; //!
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

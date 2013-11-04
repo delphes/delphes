@@ -29,7 +29,7 @@
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -70,6 +70,18 @@ void FastJetFinder::Init()
 {
   JetDefinition::Plugin *plugin = NULL;
 
+  // read eta ranges
+
+  ExRootConfParam param = GetParam("RhoEtaRange");
+  Long_t i, size;
+
+  fEtaRangeMap.clear();
+  size = param.GetSize();
+  for(i = 0; i < size/2; ++i)
+  {
+    fEtaRangeMap[param[i*2].GetDouble()] = param[i*2 + 1].GetDouble();
+  }
+
   // define algorithm
 
   fJetAlgorithm = GetInt("JetAlgorithm", 6);
@@ -89,7 +101,6 @@ void FastJetFinder::Init()
   // ---  Jet Area Parameters ---
   fAreaAlgorithm = GetInt("AreaAlgorithm", 0);
   fComputeRho = GetBool("ComputeRho", false);
-  fRhoEtaMax = GetDouble("RhoEtaMax", 5.0);
   // - ghost based areas -
   fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
   fRepeat = GetInt("Repeat", 1);
@@ -125,7 +136,7 @@ void FastJetFinder::Init()
 
   switch(fJetAlgorithm)
   {
-    case 1: 
+    case 1:
       plugin = new fastjet::CDFJetCluPlugin(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
       fDefinition = new fastjet::JetDefinition(plugin);
       break;
@@ -148,11 +159,11 @@ void FastJetFinder::Init()
       fDefinition = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterR);
       break;
   }
-  
+
   fPlugin = plugin;
 
   ClusterSequence::print_banner();
-  
+
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
@@ -186,6 +197,7 @@ void FastJetFinder::Process()
   PseudoJet jet, area;
   vector<PseudoJet> inputList, outputList;
   ClusterSequence *sequence;
+  map< Double_t, Double_t >::iterator itEtaRangeMap;
 
   DelphesFactory *factory = GetFactory();
 
@@ -195,15 +207,15 @@ void FastJetFinder::Process()
   fItInputArray->Reset();
   number = 0;
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
-  {   
+  {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
     inputList.push_back(jet);
     ++number;
   }
-   
-  // construct jets 
+
+  // construct jets
   if(fAreaDefinition)
   {
     sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
@@ -211,21 +223,26 @@ void FastJetFinder::Process()
   else
   {
     sequence = new ClusterSequence(inputList, *fDefinition);
-  } 
+  }
 
   // compute rho and store it
   if(fComputeRho && fAreaDefinition)
   {
-    Selector select_rapidity = SelectorAbsRapMax(fRhoEtaMax);
-    JetMedianBackgroundEstimator estimator(select_rapidity, *fDefinition, *fAreaDefinition);
-    estimator.set_particles(inputList);
-    rho = estimator.rho();
+    for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap)
+    {
+      Selector select_rapidity = SelectorAbsRapRange(itEtaRangeMap->first, itEtaRangeMap->second);
+      JetMedianBackgroundEstimator estimator(select_rapidity, *fDefinition, *fAreaDefinition);
+      estimator.set_particles(inputList);
+      rho = estimator.rho();
 
-    candidate = factory->NewCandidate();
-    candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho); 
-    fRhoOutputArray->Add(candidate);
+      candidate = factory->NewCandidate();
+      candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
+      candidate->Edges[0] = itEtaRangeMap->first;
+      candidate->Edges[1] = itEtaRangeMap->second;
+      fRhoOutputArray->Add(candidate);
+    }
   }
-  
+
   outputList.clear();
   outputList = sorted_by_pt(sequence->inclusive_jets(fJetPTMin));
 
