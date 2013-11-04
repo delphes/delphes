@@ -175,13 +175,16 @@ module MomentumSmearing MuonMomentumSmearing {
   # resolution formula for muons
   set ResolutionFormula {                  (abs(eta) <= 0.5) * (pt > 0.1   && pt <= 5.0)   * (0.02) + \
                                            (abs(eta) <= 0.5) * (pt > 5.0   && pt <= 1.0e2) * (0.015) + \
-                                           (abs(eta) <= 0.5) * (pt > 1.0e2)                * (0.03) + \
+                                           (abs(eta) <= 0.5) * (pt > 1.0e2 && pt <= 2.0e2) * (0.03) + \
+                                           (abs(eta) <= 0.5) * (pt > 2.0e2)                * (0.05 + pt*1.e-4) + \
                          (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 0.1   && pt <= 5.0)   * (0.03) + \
                          (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 5.0   && pt <= 1.0e2) * (0.02) + \
-                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 1.0e2)                * (0.04) + \
+                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 1.0e2 && pt <= 2.0e2) * (0.04) + \
+                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05 + pt*1.e-4) + \
                          (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 5.0)   * (0.04) + \
                          (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0   && pt <= 1.0e2) * (0.035) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.05)}
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2 && pt <= 2.0e2) * (0.05) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05 + pt*1.e-4)}
 }
 
 ##############
@@ -362,10 +365,12 @@ module Efficiency MuonEfficiency {
   # set EfficiencyFormula {efficiency as a function of eta and pt}
 
   # efficiency formula for muons
-  set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) + \
-                                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0)  * (0.85) + \
-                         (abs(eta) > 2.4)                                   * (0.00)}
+  set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) + \
+                                           (abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) + \
+                         (abs(eta) > 2.4)                                                 * (0.00)}
 }
 
 ################
