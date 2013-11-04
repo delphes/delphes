@@ -340,7 +340,9 @@ module FastJetFinder Rho {
   set JetAlgorithm 4
   set ParameterR 0.6
   set GhostEtaMax 5.0
-  set RhoEtaMax 5.0
+  
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
 
   set JetPTMin 0.0
 }
