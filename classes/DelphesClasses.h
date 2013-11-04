@@ -147,7 +147,10 @@ class MissingET: public TObject
 {
 public:
   Float_t MET; // mising transverse energy
+  Float_t Eta; // mising energy pseudorapidity
   Float_t Phi; // mising energy azimuthal angle
+
+  TLorentzVector P4();
 
   ClassDef(MissingET, 1)
 };

@@ -38,6 +38,15 @@ TLorentzVector GenParticle::P4()
 
 //------------------------------------------------------------------------------
 
+TLorentzVector MissingET::P4()
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(MET, Eta, Phi, 0.0);
+  return vec;
+}
+
+//------------------------------------------------------------------------------
+
 TLorentzVector Photon::P4()
 {
   TLorentzVector vec;
