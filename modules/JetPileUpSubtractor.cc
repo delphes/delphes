@@ -82,12 +82,10 @@ void JetPileUpSubtractor::Finish()
 
 void JetPileUpSubtractor::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate, *object;
   TLorentzVector momentum, area;
   Double_t eta = 0.0;
   Double_t rho = 0.0;
-
-  if(!fRhoInputArray) return;
 
   // loop over all input candidates
   fItJetInputArray->Reset();
@@ -99,19 +97,23 @@ void JetPileUpSubtractor::Process()
 
     // find rho
     rho = 0.0;
-    while((candidate = static_cast<Candidate*>(fItRhoInputArray->Next())))
+    if(fRhoInputArray)
     {
-      if(eta >= candidate->Edges[0] && eta < candidate->Edges[1])
+      fItRhoInputArray->Reset();
+      while((object = static_cast<Candidate*>(fItRhoInputArray->Next())))
       {
-        rho = candidate->Momentum.Pt();
+        if(eta >= object->Edges[0] && eta < object->Edges[1])
+        {
+          rho = object->Momentum.Pt();
+        }
       }
-    }  
+    }
 
     // apply pile-up correction
     if(momentum.Pt() <= rho * area.Pt()) continue;
 
     momentum -= rho * area;
-  
+
     if(momentum.Pt() <= fJetPTMin) continue;
 
     candidate = static_cast<Candidate*>(candidate->Clone());

@@ -68,7 +68,8 @@ Int_t IsolationClassifier::GetCategory(TObject *object)
 
 Isolation::Isolation() :
   fClassifier(0), fFilter(0),
-  fItIsolationInputArray(0), fItCandidateInputArray(0)
+  fItIsolationInputArray(0), fItCandidateInputArray(0),
+  fItRhoInputArray(0)
 {
   fClassifier = new IsolationClassifier;
 }
@@ -109,6 +110,7 @@ void Isolation::Init()
   if(rhoInputArrayName[0] != '\0')
   {
     fRhoInputArray = ImportArray(rhoInputArrayName);
+    fItRhoInputArray = fRhoInputArray->MakeIterator();
   }
   else
   {
@@ -124,6 +126,7 @@ void Isolation::Init()
 
 void Isolation::Finish()
 {
+  if(fItRhoInputArray) delete fItRhoInputArray;
   if(fFilter) delete fFilter;
   if(fItCandidateInputArray) delete fItCandidateInputArray;
   if(fItIsolationInputArray) delete fItIsolationInputArray;
@@ -133,10 +136,11 @@ void Isolation::Finish()
 
 void Isolation::Process()
 {
-  Candidate *candidate, *isolation;
+  Candidate *candidate, *isolation, *object;
   TObjArray *isolationArray;
   Double_t sum, ratio;
   Int_t counter;
+  Double_t eta = 0.0;
   Double_t rho = 0.0;
 
   if(fRhoInputArray && fRhoInputArray->GetEntriesFast() > 0)
@@ -158,6 +162,7 @@ void Isolation::Process()
   while((candidate = static_cast<Candidate*>(fItCandidateInputArray->Next())))
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
+    eta = TMath::Abs(candidateMomentum.Eta());
 
     // loop over all input tracks
     sum = 0.0;
@@ -175,8 +180,22 @@ void Isolation::Process()
       }
     }
 
+    // find rho
+    rho = 0.0;
+    if(fRhoInputArray)
+    {
+      fItRhoInputArray->Reset();
+      while((object = static_cast<Candidate*>(fItRhoInputArray->Next())))
+      {
+        if(eta >= object->Edges[0] && eta < object->Edges[1])
+        {
+          rho = object->Momentum.Pt();
+        }
+      }
+    }
+
     // correct sum for pile-up contamination
-    sum = sum - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();  
+    sum = sum - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();
 
     ratio = sum/candidateMomentum.Pt();
     if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;

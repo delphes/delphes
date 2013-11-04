@@ -52,6 +52,8 @@ private:
 
   TIterator *fItCandidateInputArray; //!
 
+  TIterator *fItRhoInputArray; //!
+
   const TObjArray *fIsolationInputArray; //!
 
   const TObjArray *fCandidateInputArray; //!
