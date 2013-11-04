@@ -35,7 +35,7 @@ public:
   Long64_t Number; // event number
 
   Float_t ReadTime;
-  Float_t ProcTime;  
+  Float_t ProcTime;
 
   ClassDef(Event, 1)
 };
@@ -74,7 +74,7 @@ class HepMCEvent: public Event
 public:
 
   Int_t ProcessID; // unique signal process id | signal_process_id()
-  Int_t MPI; // number of multi parton interactions | mpi () 
+  Int_t MPI; // number of multi parton interactions | mpi ()
 
   Float_t Weight; // weight for the event
 
@@ -83,7 +83,7 @@ public:
   Float_t AlphaQCD; // QCD coupling, see hep-ph/0109068 | alphaQCD()
 
   Int_t ID1; // flavour code of first parton | pdf_info()->id1()
-  Int_t ID2; // flavour code of second parton | pdf_info()->id2()     
+  Int_t ID2; // flavour code of second parton | pdf_info()->id2()
 
   Float_t X1; // fraction of beam momentum carried by first parton ("beam side") | pdf_info()->x1()
   Float_t X2; // fraction of beam momentum carried by second parton ("target side") | pdf_info()->x2()
@@ -105,7 +105,7 @@ public:
 
   Int_t Status; // particle status | hepevt.isthep[number]
   Int_t IsPU; // 0 or 1 for particles from pile-up interactions
-  
+
 
   Int_t M1; // particle 1st mother | hepevt.jmohep[number][0] - 1
   Int_t M2; // particle 2nd mother | hepevt.jmohep[number][1] - 1
@@ -135,7 +135,7 @@ public:
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
-  
+
   TLorentzVector P4();
 
   ClassDef(GenParticle, 1)
@@ -171,6 +171,7 @@ class Rho: public TObject
 {
 public:
   Float_t Rho; // rho energy density
+  Float_t Edges[2]; // pseudorapidity range edges
 
   ClassDef(Rho, 1)
 };
@@ -196,7 +197,7 @@ public:
   Float_t Phi; // photon azimuthal angle
 
   Float_t E; // photon energy
-  
+
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
   TRefArray Particles; // references to generated particles
@@ -290,9 +291,9 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Track: public SortableObject 
+class Track: public SortableObject
 {
-public:  
+public:
   Int_t PID; // HEP ID number
 
   Int_t Charge; // track charge
@@ -325,7 +326,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Tower: public SortableObject 
+class Tower: public SortableObject
 {
 public:
   Float_t ET; // calorimeter tower transverse energy
@@ -351,7 +352,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Candidate: public SortableObject 
+class Candidate: public SortableObject
 {
   friend class DelphesFactory;
 
@@ -366,10 +367,10 @@ public:
   Int_t Charge;
 
   Float_t Mass;
-  
+
   Int_t IsPU;
   Int_t IsConstituent;
-  
+
   UInt_t BTag;
   UInt_t TauTag;
 
@@ -392,12 +393,12 @@ public:
 
   virtual void Copy(TObject &object) const;
   virtual TObject *Clone(const char *newname = "") const;
-  virtual void Clear(Option_t* option = ""); 
+  virtual void Clear(Option_t* option = "");
 
 private:
   DelphesFactory *fFactory; //!
   TObjArray *fArray; //!
-  
+
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
   ClassDef(Candidate, 1)
