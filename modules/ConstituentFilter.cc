@@ -78,7 +78,7 @@ void ConstituentFilter::Init()
     array = ImportArray(param[i*2].GetString());
     iterator = array->MakeIterator();
 
-    fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());;
+    fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());
   }
 }
 
