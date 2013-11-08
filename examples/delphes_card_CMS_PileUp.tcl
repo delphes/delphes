@@ -630,5 +630,6 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
+  add Branch PileUpMerger/Vertices Vertex Vertex
 }
 

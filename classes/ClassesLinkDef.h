@@ -33,6 +33,7 @@
 #pragma link C++ class LHEFEvent+;
 #pragma link C++ class HepMCEvent+;
 #pragma link C++ class GenParticle+;
+#pragma link C++ class Vertex+;
 #pragma link C++ class MissingET+;
 #pragma link C++ class ScalarHT+;
 #pragma link C++ class Rho+;

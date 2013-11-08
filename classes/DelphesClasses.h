@@ -143,6 +143,19 @@ public:
 
 //---------------------------------------------------------------------------
 
+class Vertex: public TObject
+{
+public:
+  Float_t T; // vertex position (t component)
+  Float_t X; // vertex position (x component)
+  Float_t Y; // vertex position (y component)
+  Float_t Z; // vertex position (z component)
+
+  ClassDef(Vertex, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class MissingET: public TObject
 {
 public:

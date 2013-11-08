@@ -40,6 +40,7 @@ private:
   void FillParticles(Candidate *candidate, TRefArray *array);
 
   void ProcessParticles(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessVertices(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessTracks(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessTowers(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array);

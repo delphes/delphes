@@ -212,6 +212,29 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
 
 //------------------------------------------------------------------------------
 
+void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
+{
+  TIter iterator(array);
+  Candidate *candidate = 0;
+  Vertex *entry = 0;
+
+  // loop over all vertices
+  iterator.Reset();
+  while((candidate = static_cast<Candidate*>(iterator.Next())))
+  {
+    const TLorentzVector &position = candidate->Position;
+
+    entry = static_cast<Vertex*>(branch->NewEntry());
+
+    entry->X = position.X();
+    entry->Y = position.Y();
+    entry->Z = position.Z();
+    entry->T = position.T();
+  }
+}
+
+//------------------------------------------------------------------------------
+
 void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
 {
   TIter iterator(array);
@@ -220,7 +243,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
   Track *entry = 0;
   Double_t pt, signz, cosTheta, eta, rapidity;
 
-  // loop over all jets
+  // loop over all tracks
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
@@ -279,7 +302,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
   Tower *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
 
-  // loop over all jets
+  // loop over all towers
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {

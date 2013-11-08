@@ -42,7 +42,8 @@ private:
 
   const TObjArray *fInputArray; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fParticleOutputArray; //!
+  TObjArray *fVertexOutputArray; //!
 
   ClassDef(PileUpMerger, 1)
 };

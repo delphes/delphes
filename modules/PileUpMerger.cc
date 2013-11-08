@@ -69,7 +69,8 @@ void PileUpMerger::Init()
   fItInputArray = fInputArray->MakeIterator();
 
   // create output arrays
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
+  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -97,7 +98,7 @@ void PileUpMerger::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    fOutputArray->Add(candidate);
+    fParticleOutputArray->Add(candidate);
   }
 
   factory = GetFactory();
@@ -130,6 +131,10 @@ void PileUpMerger::Process()
     dz = gRandom->Gaus(0.0, fZVertexSpread);
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 
+    candidate = factory->NewCandidate();
+    candidate->Position.SetXYZT(0.0, 0.0, dz, 0.0);
+    fVertexOutputArray->Add(candidate);
+
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {
       candidate = factory->NewCandidate();
@@ -150,7 +155,7 @@ void PileUpMerger::Process()
       candidate->Position.SetXYZT(x, y, z + dz, t);
       candidate->Position.RotateZ(dphi);
 
-      fOutputArray->Add(candidate);
+      fParticleOutputArray->Add(candidate);
     }
   }
 }
