@@ -75,7 +75,7 @@
 <tr bgcolor="#ffffff">
   <td>MPI</td>
   <td>number of multi parton interactions </td>
-  <td> mpi () </td>
+  <td> mpi ()</td>
 </tr>
 <tr bgcolor="#eeeeee">
   <td>Weight</td>
@@ -105,7 +105,7 @@
 <tr bgcolor="#ffffff">
   <td>ID2</td>
   <td>flavour code of second parton </td>
-  <td> pdf_info()->id2()     </td>
+  <td> pdf_info()->id2()</td>
 </tr>
 <tr bgcolor="#eeeeee">
   <td>X1</td>
@@ -238,6 +238,27 @@
   <td>particle vertex position (z component) </td>
   <td> hepevt.vhep[number][2]</td>
 </tr>
+<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Vertex"><H3>Vertex</H3><hr></td></tr>
+<tr bgcolor="#eeeeee">
+  <td>T</td>
+  <td>vertex position (t component)</td>
+  <td></td>
+</tr>
+<tr bgcolor="#ffffff">
+  <td>X</td>
+  <td>vertex position (x component)</td>
+  <td></td>
+</tr>
+<tr bgcolor="#eeeeee">
+  <td>Y</td>
+  <td>vertex position (y component)</td>
+  <td></td>
+</tr>
+<tr bgcolor="#ffffff">
+  <td>Z</td>
+  <td>vertex position (z component)</td>
+  <td></td>
+</tr>
 <tr bgcolor="#ffffff"><td colspan=3><hr><a name="MissingET"><H3>MissingET</H3><hr></td></tr>
 <tr bgcolor="#eeeeee">
   <td>MET</td>
@@ -245,6 +266,11 @@
   <td></td>
 </tr>
 <tr bgcolor="#ffffff">
+  <td>Eta</td>
+  <td>mising energy pseudorapidity</td>
+  <td></td>
+</tr>
+<tr bgcolor="#eeeeee">
   <td>Phi</td>
   <td>mising energy azimuthal angle</td>
   <td></td>
@@ -259,6 +285,17 @@
 <tr bgcolor="#eeeeee">
   <td>Rho</td>
   <td>rho energy density</td>
+  <td></td>
+</tr>
+<tr bgcolor="#ffffff">
+  <td>Edges[2]</td>
+  <td>pseudorapidity range edges</td>
+  <td></td>
+</tr>
+<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Weight"><H3>Weight</H3><hr></td></tr>
+<tr bgcolor="#eeeeee">
+  <td>Weight</td>
+  <td>weight for the event</td>
   <td></td>
 </tr>
 <tr bgcolor="#ffffff"><td colspan=3><hr><a name="Photon"><H3>Photon</H3><hr></td></tr>
