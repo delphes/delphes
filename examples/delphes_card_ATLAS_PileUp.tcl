@@ -214,6 +214,7 @@ module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronEnergySmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
 
@@ -313,7 +314,6 @@ module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray TrackPileUpSubtractor/eflowTracks
   add InputArray Calorimeter/eflowTowers
-  add InputArray MuonMomentumSmearing/muons
   set OutputArray eflow
 }
 
@@ -335,6 +335,8 @@ module FastJetFinder Rho {
   set ParameterR 0.6
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
+
+  add RhoEtaRange 0.0 5.0
 
   set JetPTMin 0.0
 }
@@ -510,7 +512,8 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray EFlowMerger/eflow
+  add InputArray Calorimeter/eflowTracks
+  add InputArray Calorimeter/eflowTowers
   set MomentumOutputArray momentum
 }
 
@@ -606,7 +609,6 @@ module TreeWriter TreeWriter {
   add Branch Calorimeter/towers Tower Tower
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowTowers EFlowTower Tower
-#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
@@ -615,5 +617,6 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
+  add Branch PileUpMerger/Vertices Vertex Vertex
 }
 
