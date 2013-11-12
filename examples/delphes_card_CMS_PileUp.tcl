@@ -56,7 +56,8 @@ set ExecutionPath {
 module PileUpMerger PileUpMerger {
   set InputArray Delphes/stableParticles
 
-  set OutputArray stableParticles
+  set ParticleOutputArray stableParticles
+  set VertexOutputArray vertices
 
   # pre-generated minbias input file
   set PileUpFile MinBias.pileup
@@ -630,6 +631,6 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
-  add Branch PileUpMerger/Vertices Vertex Vertex
+  add Branch PileUpMerger/vertices Vertex Vertex
 }
 
