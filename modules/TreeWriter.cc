@@ -55,6 +55,7 @@ TreeWriter::~TreeWriter()
 void TreeWriter::Init()
 {
   fClassMap[GenParticle::Class()] = &TreeWriter::ProcessParticles;
+  fClassMap[Vertex::Class()] = &TreeWriter::ProcessVertices;
   fClassMap[Track::Class()] = &TreeWriter::ProcessTracks;
   fClassMap[Tower::Class()] = &TreeWriter::ProcessTowers;
   fClassMap[Photon::Class()] = &TreeWriter::ProcessPhotons;
