@@ -1,3 +1,13 @@
+3.0.11:
+  new energy-flow algorithm, optimized for better compatibility with pile-up subtraction 
+  added possibility of computing pile-up density in different eta regions via the RhoEtaRange parameter in FastJetFinder module
+  implemented correct efficiency/resolution for high pt muons in CMS cards
+  removed pile-up subtraction on missing energy
+  added possibility to read re-weighting information from LHEF input files
+  added UsePTSum and PTSumMax parameters to isolation module
+  added possibility of specifying the shape of pile-up distribution (via the PileUpDistribution parameter in the PileUpMerger module)
+  added pile-up Vertex collection to the output tree
+
 3.0.10:
   new readers (DelphesProMC.cpp, DelphesProMC.py (#220), DelphesPythia8)
   new modules (EnergyScale, PileUpMergerPythia8, Weighter)
