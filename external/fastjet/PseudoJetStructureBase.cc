@@ -31,7 +31,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#ifndef __FJCORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
+#endif  // __FJCORE__
 
 using namespace std;
 
@@ -73,6 +75,7 @@ const ClusterSequence * PseudoJetStructureBase::validated_cs() const{
   throw Error("This PseudoJet structure is not associated with a valid ClusterSequence");
 }
 
+#ifndef __FJCORE__
 // if the jet has valid area information then return a pointer to
 // the associated ClusterSequenceAreaBase object; otherwise throw an error
 //
@@ -80,6 +83,7 @@ const ClusterSequence * PseudoJetStructureBase::validated_cs() const{
 const ClusterSequenceAreaBase * PseudoJetStructureBase::validated_csab() const{
   throw Error("This PseudoJet structure is not associated with a valid cluster sequence with area");
 }
+#endif
 
 
 //-------------------------------------------------------------
@@ -192,6 +196,7 @@ std::vector<PseudoJet> PseudoJetStructureBase::pieces(const PseudoJet & /*refere
 // the following ones require a computation of the area in the
 // parent ClusterSequence (See ClusterSequenceAreaBase for details)
 //------------------------------------------------------------------
+#ifndef __FJCORE__
 
 // return the jet (scalar) area.
 //
@@ -221,5 +226,6 @@ PseudoJet PseudoJetStructureBase::area_4vector(const PseudoJet & /*reference*/) 
 bool PseudoJetStructureBase::is_pure_ghost(const PseudoJet & /*reference*/) const{
   throw Error("This PseudoJet structure has no implementation for is_pure_ghost");
 }
+#endif  // __FJCORE__
 
 FASTJET_END_NAMESPACE

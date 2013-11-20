@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: CompositeJetStructure.hh 2684 2011-11-14 07:41:44Z soyez $
+// $Id: CompositeJetStructure.hh 3071 2013-04-01 12:52:46Z cacciari $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -87,6 +87,7 @@ public:
   virtual std::vector<PseudoJet> pieces(const PseudoJet &jet) const;
 
   // area-related material
+#ifndef __FJCORE__
 
   /// check if it has a well-defined area
   virtual bool has_area() const;
@@ -115,6 +116,7 @@ public:
     _area_4vector_ptr = area_4vector_ptr;
   }
 
+#endif  // __FJCORE__
 
 protected:
   std::vector<PseudoJet> _pieces;  ///< the pieces building the jet

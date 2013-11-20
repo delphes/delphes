@@ -1,5 +1,8 @@
+#ifndef __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
+#define __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
+
 //STARTHEADER
-// $Id: PseudoJetStructureBase.hh 2670 2011-11-11 17:01:06Z salam $
+// $Id: PseudoJetStructureBase.hh 3071 2013-04-01 12:52:46Z cacciari $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -27,9 +30,6 @@
 //ENDHEADER
 
 
-#ifndef __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
-#define __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
-
 #include "fastjet/internal/base.hh"
 
 #include <vector>
@@ -39,7 +39,9 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 class PseudoJet;
 class ClusterSequence;
+#ifndef __FJCORE__
 class ClusterSequenceAreaBase;
+#endif  // __FJCORE__
 
 /// @ingroup extra_info
 /// \class PseudoJetStructureBase
@@ -84,9 +86,11 @@ public:
   /// pointer to it; otherwise throw an error
   virtual const ClusterSequence * validated_cs() const;
 
+#ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   virtual const ClusterSequenceAreaBase * validated_csab() const;
+#endif
 
   //\}
 
@@ -202,6 +206,7 @@ public:
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
+#ifndef __FJCORE__
 
   /// check if it has a defined area
   ///
@@ -229,6 +234,7 @@ public:
   /// By default, throws an Error
   virtual bool is_pure_ghost(const PseudoJet &reference) const;
 
+#endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------
 };
 

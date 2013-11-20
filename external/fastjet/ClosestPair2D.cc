@@ -182,7 +182,7 @@ void ClosestPair2D::closest_pair(unsigned int & ID1, unsigned int & ID2,
   ID1 = _heap->minloc();
   ID2 = _ID(_points[ID1].neighbour);
   distance2 = _points[ID1].neighbour_dist2;
-  if (ID1 > ID2) swap(ID1,ID2);
+  if (ID1 > ID2) std::swap(ID1,ID2);
 }
 
 

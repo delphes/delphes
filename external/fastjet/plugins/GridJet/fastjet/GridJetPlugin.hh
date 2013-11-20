@@ -74,6 +74,15 @@ public:
   /// circular jet would give the same area.
   virtual double R() const;
 
+  /// returns the actual rapidity spacing of the grid
+  double drap()   const {return _dy;}
+  /// returns the actual phi spacing of the grid
+  double dphi() const {return _dphi;}
+  /// returns the minimum rapidity of the grid
+  double rapmin() const {return _ymin;}
+  /// returns the maximum rapidity of the grid
+  double rapmax() const {return _ymax;}
+
 private:
 
   void setup_grid();

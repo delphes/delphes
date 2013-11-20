@@ -146,7 +146,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef FASTJET_PACKAGE_STRING 
-#define FASTJET_PACKAGE_STRING  "FastJet 3.0.3" 
+#define FASTJET_PACKAGE_STRING  "FastJet 3.0.6" 
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -154,14 +154,9 @@
 #define FASTJET_PACKAGE_TARNAME  "fastjet" 
 #endif
 
-/* Define to the home page for this package. */
-#ifndef FASTJET_PACKAGE_URL 
-#define FASTJET_PACKAGE_URL  "" 
-#endif
-
 /* Define to the version of this package. */
 #ifndef FASTJET_PACKAGE_VERSION 
-#define FASTJET_PACKAGE_VERSION  "3.0.3" 
+#define FASTJET_PACKAGE_VERSION  "3.0.6" 
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
@@ -171,7 +166,7 @@
 
 /* Version number of package */
 #ifndef FASTJET_VERSION 
-#define FASTJET_VERSION  "3.0.3" 
+#define FASTJET_VERSION  "3.0.6" 
 #endif
  
 /* once: _INCLUDE_FASTJET_CONFIG_AUTO_H */

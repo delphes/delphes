@@ -28,7 +28,7 @@
 #include "config.h"
 //#else
 //#define PACKAGE_NAME "SISCone"
-//#define VERSION "1.4.0-devel"
+//#define VERSION "2.0.6"
 //#warning "No config.h file available, using preset values"
 //#endif
 

@@ -30,7 +30,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#ifndef __FJCORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
+#endif  // __FJCORE__
 #include "fastjet/CompositeJetStructure.hh"
 #include<valarray>
 #include<iostream>
@@ -66,6 +68,14 @@ PseudoJet::PseudoJet(const double px_in, const double py_in, const double pz_in,
 void PseudoJet::_finish_init () {
   _kt2 = this->px()*this->px() + this->py()*this->py();
   _phi = pseudojet_invalid_phi;
+  // strictly speaking, _rap does not need initialising, because
+  // it's never used as long as _phi == pseudojet_invalid_phi
+  // (and gets set when _phi is requested). However ATLAS
+  // 2013-03-28 complained that they sometimes have NaN's in
+  // _rap and this interferes with some of their internal validation. 
+  // So we initialise it; penalty is about 0.3ns per PseudoJet out of about
+  // 10ns total initialisation time (on a intel Core i7 2.7GHz)
+  _rap = pseudojet_invalid_rap;
 }
 
 //----------------------------------------------------------------------
@@ -667,6 +677,8 @@ std::vector<PseudoJet> PseudoJet::pieces() const{
 // associated ClusterSequence (See ClusterSequenceAreaBase for details)
 //----------------------------------------------------------------------
 
+#ifndef __FJCORE__
+
 //----------------------------------------------------------------------
 // if possible, return a valid ClusterSequenceAreaBase pointer; otherwise
 // throw an error
@@ -714,6 +726,7 @@ bool PseudoJet::is_pure_ghost() const{
   return validated_structure_ptr()->is_pure_ghost(*this);
 }
 
+#endif  // __FJCORE__
 
 //----------------------------------------------------------------------
 //

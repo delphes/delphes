@@ -2,7 +2,7 @@
 #define __FASTJET_SHARED_PTR_HH__
 
 //STARTHEADER
-// $Id: SharedPtr.hh 2680 2011-11-12 17:12:05Z soyez $
+// $Id: SharedPtr.hh 3129 2013-06-05 08:48:36Z salam $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -34,15 +34,15 @@
 
 // for testing purposes, the following define makes it possible
 // for our SharedPtr simply to be derived from the STL TR1 one.
-// #define USETR1SHAREDPTR
+// #define __FASTJET_USETR1SHAREDPTR
 
-#ifdef USETR1SHAREDPTR
+#ifdef __FASTJET_USETR1SHAREDPTR
 #include <tr1/memory>
-#endif // USETR1SHAREDPTR
+#endif // __FASTJET_USETR1SHAREDPTR
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
-#ifdef USETR1SHAREDPTR
+#ifdef __FASTJET_USETR1SHAREDPTR
 
 /// @ingroup advanced_usage
 /// \class SharedPtr
@@ -77,7 +77,7 @@ public:
 };
 
 
-#else // USETR1SHAREDPTR
+#else // __FASTJET_USETR1SHAREDPTR
 
 /**
  * @ingroup advanced_usage
@@ -389,7 +389,7 @@ inline T* get_pointer(SharedPtr<T> const & t){
   return t.get();
 }
 
-#endif // USETR1SHAREDPTR
+#endif // __FASTJET_USETR1SHAREDPTR
 
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh
 

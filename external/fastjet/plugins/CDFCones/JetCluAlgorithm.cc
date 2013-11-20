@@ -27,6 +27,7 @@
 #include "Centroid.hh"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 #include <fastjet/internal/base.hh>
 
@@ -78,8 +79,8 @@ void JetCluAlgorithm::buildPreClusters(std::vector<Cluster>& seedTowers, std::ve
 	  int iPhiPreClusterTower = preClusterTowerIter->iPhi();
 	  if ((iEtaPreClusterTower >= 8 && iEtaPreClusterTower < 14) || (iEtaPreClusterTower >= 38 && iEtaPreClusterTower < 44))
 	    iPhiPreClusterTower = iPhiPreClusterTower/2;
-	  int dIEta = abs(iEtaSeedTower - iEtaPreClusterTower);
-	  int dIPhi = abs(iPhiSeedTower - iPhiPreClusterTower);
+	  int dIEta = std::abs(iEtaSeedTower - iEtaPreClusterTower);
+	  int dIPhi = std::abs(iPhiSeedTower - iPhiPreClusterTower);
 	  if(dIPhi > 12)
 	    dIPhi = 24 - dIPhi;
 	  int adj = dIPhi*dIPhi + dIEta*dIEta;

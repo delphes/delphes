@@ -67,7 +67,7 @@ PseudoJet JHTopTagger::result(const PseudoJet & jet) const{
 
   // warn if the jet has not been clustered with a Cambridge/Aachen
   // algorithm
-  if (! jet.validated_cs()->jet_def().jet_algorithm() == cambridge_algorithm)
+  if (jet.validated_cs()->jet_def().jet_algorithm() != cambridge_algorithm)
     _warnings_nonca.warn("JHTopTagger should only be applied on jets from a Cambridge/Aachen clustering; use it with other algorithms at your own risk.");
 
 

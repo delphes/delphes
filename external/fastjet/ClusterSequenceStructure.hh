@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: ClusterSequenceStructure.hh 2577 2011-09-13 15:11:38Z salam $
+// $Id: ClusterSequenceStructure.hh 3071 2013-04-01 12:52:46Z cacciari $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -95,9 +95,11 @@ public:
   /// pointer to it; otherwise throw an error
   virtual const ClusterSequence * validated_cs() const;
 
+#ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   virtual const ClusterSequenceAreaBase * validated_csab() const;
+#endif  // __FJCORE__
 
   /// set the associated csw
   virtual void set_associated_cs(const ClusterSequence * new_cs){
@@ -236,6 +238,7 @@ public:
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
+#ifndef __FJCORE__
 
   /// check if it has a defined area
   virtual bool has_area() const;
@@ -257,6 +260,7 @@ public:
   /// throws an Error if there is no support for area in the parent CS
   virtual bool is_pure_ghost(const PseudoJet &reference) const;
 
+#endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------
 
 protected:

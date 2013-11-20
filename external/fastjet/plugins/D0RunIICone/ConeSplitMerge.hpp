@@ -74,7 +74,7 @@ template <class Item>
 class ProtoJet_ET_seedET_order
 {
 public:
-  bool operator()(const ProtoJet<Item> & first, const ProtoJet<Item> & second)
+  bool operator()(const ProtoJet<Item> & first, const ProtoJet<Item> & second) const
   {
     if ( first.pT() > second.pT() ) return true;
     else

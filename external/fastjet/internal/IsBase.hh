@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: IsBase.hh 2622 2011-10-05 22:13:23Z soyez $
+// $Id: IsBase.hh 3071 2013-04-01 12:52:46Z cacciari $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -162,7 +162,7 @@ struct IsBaseAndDerived{
 /// derived from B and NULL otherwise
 template<class B, class D>
 B* cast_if_derived(D* d){
-  return IsBaseAndDerived<B,D>::value ? (B*)(d) : NULL;
+  return IsBaseAndDerived<B,D>::value ? (B*)(d) : 0;
 }
 
 

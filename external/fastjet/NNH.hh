@@ -1,8 +1,8 @@
-#ifndef __NNH_HH__
-#define __NNH_HH__
+#ifndef __FASTJET_NNH_HH__
+#define __FASTJET_NNH_HH__
 
 //STARTHEADER
-// $Id: NNH.hh 2891 2012-06-15 12:47:59Z soyez $
+// $Id: NNH.hh 3203 2013-09-15 07:49:50Z salam $
 //
 // Copyright (c) 2009, Matteo Cacciari, Gavin Salam and Gregory Soyez
 //
@@ -378,4 +378,4 @@ template <class BJ, class I>  void NNH<BJ,I>::set_NN_nocross(
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh
 
 
-#endif // __NNH_HH__
+#endif // __FASTJET_NNH_HH__

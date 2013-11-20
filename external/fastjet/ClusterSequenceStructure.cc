@@ -30,7 +30,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#ifndef __FJCORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
+#endif  // __FJCORE__
 #include <iostream>
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -254,6 +256,7 @@ vector<PseudoJet> ClusterSequenceStructure::pieces(const PseudoJet &reference) c
 // associated ClusterSequence (See ClusterSequenceAreaBase for details)
 //----------------------------------------------------------------------
 
+#ifndef __FJCORE__
 // if possible, return a valid ClusterSequenceAreaBase pointer; otherwise
 // throw an error
 const ClusterSequenceAreaBase * ClusterSequenceStructure::validated_csab() const {
@@ -261,7 +264,6 @@ const ClusterSequenceAreaBase * ClusterSequenceStructure::validated_csab() const
   if (csab == NULL) throw Error("you requested jet-area related information, but the PseudoJet does not have associated area information.");
   return csab;
 }
-
 
 // check if it has a defined area
 bool ClusterSequenceStructure::has_area() const{
@@ -293,6 +295,8 @@ PseudoJet ClusterSequenceStructure::area_4vector(const PseudoJet &reference) con
 bool ClusterSequenceStructure::is_pure_ghost(const PseudoJet &reference) const{
   return validated_csab()->is_pure_ghost(reference);
 }
+
+#endif  // __FJCORE__
 
 
 

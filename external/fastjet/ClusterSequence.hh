@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: ClusterSequence.hh 2806 2011-12-01 17:21:00Z salam $
+// $Id: ClusterSequence.hh 3114 2013-05-04 08:46:00Z salam $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -32,7 +32,6 @@
 
 #include<vector>
 #include<map>
-#include "fastjet/internal/DynamicNearestNeighbours.hh"
 #include "fastjet/PseudoJet.hh"
 #include<memory>
 #include<cassert>
@@ -50,8 +49,9 @@
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 
-// forward declaration
+// forward declarations
 class ClusterSequenceStructure;
+class DynamicNearestNeighbours;
 
 /// @ingroup basic_classes
 /// \class ClusterSequence

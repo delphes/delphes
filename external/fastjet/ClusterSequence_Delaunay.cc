@@ -30,6 +30,7 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#include "fastjet/internal/DynamicNearestNeighbours.hh"
 #include<iostream>
 #include<sstream>
 #include<cmath>

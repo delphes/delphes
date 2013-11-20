@@ -44,6 +44,8 @@ using namespace std;
 CompositeJetStructure::CompositeJetStructure(const std::vector<PseudoJet> & initial_pieces, 
 					     const JetDefinition::Recombiner * recombiner)
   : _pieces(initial_pieces){
+
+#ifndef __FJCORE__
   // deal with area support (cache the area if needed)
   //--------------------------------------------------
   // check if all the pieces have area, in which case store it
@@ -67,6 +69,10 @@ CompositeJetStructure::CompositeJetStructure(const std::vector<PseudoJet> & init
   } else {
     _area_4vector_ptr = 0;
   }
+#else
+  if (recombiner){};  // ugly trick to prevent a gcc warning
+  _area_4vector_ptr = 0;
+#endif
 
 }
 
@@ -114,6 +120,7 @@ std::vector<PseudoJet> CompositeJetStructure::pieces(const PseudoJet & /*jet*/) 
 }
 
 
+#ifndef __FJCORE__
 // area-related material
 
 // check if it has a well-defined area
@@ -166,6 +173,7 @@ bool CompositeJetStructure::is_pure_ghost(const PseudoJet & /*reference*/) const
   return true;
 }
 
+#endif  // __FJCORE__
 
 
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh

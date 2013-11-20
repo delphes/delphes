@@ -1,5 +1,5 @@
 //STARTHEADER
-// $Id: PseudoJet.hh 2728 2011-11-20 14:18:59Z salam $
+// $Id: PseudoJet.hh 3111 2013-05-04 08:17:27Z salam $
 //
 // Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -51,9 +51,12 @@ const double MaxRap = 1e5;
 
 /// default value for phi, meaning it (and rapidity) have yet to be calculated) 
 const double pseudojet_invalid_phi = -100.0;
+const double pseudojet_invalid_rap = -1e200;
 
+#ifndef __FJCORE__
 // forward definition
 class ClusterSequenceAreaBase;
+#endif  // __FJCORE__
 
 /// @ingroup basic_classes
 /// \class PseudoJet
@@ -72,6 +75,7 @@ class PseudoJet {
   // cases better than just having the default constructor for the
   // internal shared pointer: see PJtiming.cc and the notes therein)
   PseudoJet() : _px(0), _py(0), _pz(0), _E(0) {_finish_init(); _reset_indices();}
+  //PseudoJet() : _px(0), _py(0), _pz(0), _E(0), _phi(pseudojet_invalid_phi), _rap(pseudojet_invalid_rap), _kt2(0) {_reset_indices();}
   /// construct a pseudojet from explicit components
   PseudoJet(const double px, const double py, const double pz, const double E);
 
@@ -250,7 +254,11 @@ class PseudoJet {
     // complex construct here that works also in such a case. As for
     // dynamic_cast, NULL is returned if L is not derived from
     // PseudoJet
-    const PseudoJet * pj = cast_if_derived<const PseudoJet>(&some_four_vector);
+    //
+    // Note the explicit request for fastjet::cast_if_derived; when
+    // combining fastjet and fjcore, this avoids ambiguity in which of
+    // the two cast_if_derived calls to use.
+    const PseudoJet * pj = fastjet::cast_if_derived<const PseudoJet>(&some_four_vector);
 
     if (pj){
       (*this) = *pj;
@@ -503,6 +511,7 @@ class PseudoJet {
   /// shorthand for validated_cluster_sequence()
   const ClusterSequence * validated_cs() const;
 
+#ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   inline const ClusterSequenceAreaBase * validated_cluster_sequence_area_base() const {
@@ -511,6 +520,8 @@ class PseudoJet {
 
   /// shorthand for validated_cluster_sequence_area_base()
   const ClusterSequenceAreaBase * validated_csab() const;
+#endif  //  __FJCORE__
+
   //\}
 
   //-------------------------------------------------------------
@@ -717,6 +728,7 @@ class PseudoJet {
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
+#ifndef __FJCORE__
 
   /// check if it has a defined area
   virtual bool has_area() const;
@@ -738,6 +750,7 @@ class PseudoJet {
   /// throws an Error if there is no support for area in the parent CS
   virtual bool is_pure_ghost() const;
 
+#endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------
 
 

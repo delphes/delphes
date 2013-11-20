@@ -1,6 +1,6 @@
 // -*- C++ -*-
-#ifndef __CLUSTERQUENCE_N2_ICC__
-#define __CLUSTERQUENCE_N2_ICC__
+#ifndef __FASTJET_CLUSTERQUENCE_N2_ICC__
+#define __FASTJET_CLUSTERQUENCE_N2_ICC__
 #include "fastjet/ClusterSequence.hh"
 
 //STARTHEADER
@@ -195,6 +195,6 @@ template<class BJ> void ClusterSequence::_simple_N2_cluster() {
 
 FASTJET_END_NAMESPACE
 
-#endif // __CLUSTERQUENCE_N2_ICC__
+#endif // __FASTJET_CLUSTERQUENCE_N2_ICC__
 
 
