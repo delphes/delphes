@@ -51,7 +51,7 @@ private:
   Int_t fMaxIterations;
   Int_t fMaxPairSize;
   Int_t fIratch;
-  Double_t fAdjacencyCut;
+  Int_t fAdjacencyCut;
   Double_t fOverlapThreshold;
 
   // --- FastJet Area method --------
