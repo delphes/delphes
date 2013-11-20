@@ -93,7 +93,7 @@ void FastJetFinder::Init()
   fMaxIterations = GetInt("MaxIterations", 100);
   fMaxPairSize = GetInt("MaxPairSize", 2);
   fIratch = GetInt("Iratch", 1);
-  fAdjacencyCut = GetDouble("AdjacencyCut", 2.0);
+  fAdjacencyCut = GetInt("AdjacencyCut", 2);
   fOverlapThreshold = GetDouble("OverlapThreshold", 0.75);
 
   fJetPTMin = GetDouble("JetPTMin", 10.0);
