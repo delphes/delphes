@@ -4,8 +4,8 @@
 #include "fastjet/SISConePlugin.hh"
 
 // sisocne stuff
-#include "siscone/momentum.h"
-#include "siscone/siscone.h"
+#include "momentum.h"
+#include "siscone.h"
 
 // other stuff
 #include<sstream>

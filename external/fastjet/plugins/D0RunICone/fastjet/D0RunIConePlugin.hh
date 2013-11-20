@@ -29,7 +29,7 @@
 //----------------------------------------------------------------------
 //ENDHEADER
 
-#include "fastjet/D0RunIBaseConePlugin.hh"
+#include "D0RunIBaseConePlugin.hh"
 
 // questionable whether this should be in fastjet namespace or not...
 
