@@ -110,7 +110,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
 
   TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
   TClonesArray *branchEFlowTower = treeReader->UseBranch("EFlowTower");
-  TClonesArray *branchEFlowMuon = treeReader->UseBranch("EFlowMuon");
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
 
   Long64_t allEntries = treeReader->GetEntries();

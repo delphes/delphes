@@ -527,7 +527,6 @@ module TreeWriter TreeWriter {
   add Branch Calorimeter/towers Tower Tower
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowTowers EFlowTower Tower
-#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
