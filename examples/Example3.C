@@ -95,7 +95,7 @@ void BookHistograms(ExRootResult *result, TestPlots *plots)
   plots->fJetDeltaPT = result->AddHist1D(
     "jet delta pt", "(p_{T}^{jet} - p_{T}^{constituents})/p_{T}^{jet}",
     "(p_{T}^{jet} - p_{T}^{constituents})/p_{T}^{jet}", "number of jets",
-    100, -1.0e-7, 1.0e-7);
+    100, -1.0e-1, 1.0e-1);
 
 }
 
@@ -258,7 +258,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
           momentum += ((Muon*) object)->P4();
         }
       }
-      plots->fJetDeltaPT->Fill((jet->PT - momentum.Pt())/jet->PT );
+      plots->fJetDeltaPT->Fill((jet->PT - momentum.Pt())/jet->PT);
     }
   }
 }
