@@ -1,7 +1,7 @@
 
 /** \class EnergyScale
  *
- *  Performs transverse momentum resolution smearing.
+ *  Applies energy scale.
  *
  *  $Date$
  *  $Revision$
@@ -61,12 +61,12 @@ void EnergyScale::Init()
 
   // import input array
 
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
+  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
   fItInputArray = fInputArray->MakeIterator();
 
   // create output array
 
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
@@ -87,17 +87,16 @@ void EnergyScale::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-   momentum = candidate->Momentum;
-   
-   scale = fFormula->Eval(momentum.Pt(),momentum.Eta());
-   
-   if(scale>0)momentum *= scale;
-   
-   candidate = static_cast<Candidate*>(candidate->Clone());
-   candidate->Momentum = momentum;
+    momentum = candidate->Momentum;
 
-   fOutputArray->Add(candidate);
+    scale = fFormula->Eval(momentum.Pt(), momentum.Eta());
 
+    if(scale > 0.0) momentum *= scale;
+
+    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate->Momentum = momentum;
+
+    fOutputArray->Add(candidate);
   }
 }
 
