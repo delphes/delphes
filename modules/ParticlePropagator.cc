@@ -2,7 +2,7 @@
 /** \class ParticlePropagator
  *
  *  Propagates charged and neutral particles
- *  from a given vertex to a cylinder defined by its radius, 
+ *  from a given vertex to a cylinder defined by its radius,
  *  its half-length, centered at (0,0,0) and with its axis
  *  oriented along the z-axis.
  *
@@ -32,7 +32,7 @@
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -61,7 +61,7 @@ void ParticlePropagator::Init()
   fHalfLength = GetDouble("HalfLength", 3.0);
   fBz = GetDouble("Bz", 0.0);
   if(fRadius < 1.0E-2)
-  { 
+  {
     cout << "ERROR: magnetic field radius is too low\n";
     return;
   }
@@ -105,9 +105,9 @@ void ParticlePropagator::Process()
   Double_t t_z, t_r, t_ra, t_rb;
   Double_t tmp, discr, discr2;
   Double_t delta, gammam, omega, asinrho;
-  
+
   const Double_t c_light = 2.99792458E8;
-    
+
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
@@ -141,7 +141,7 @@ void ParticlePropagator::Process()
       // solve pt2*t^2 + 2*(px*x + py*y)*t + (fRadius2 - x*x - y*y) = 0
       tmp = px*y - py*x;
       discr2 = pt2*fRadius2 - tmp*tmp;
-      
+
       if(discr2 < 0)
       {
         // no solutions
@@ -152,14 +152,14 @@ void ParticlePropagator::Process()
       discr = TMath::Sqrt(discr2);
       t1 = (-tmp + discr)/pt2;
       t2 = (-tmp - discr)/pt2;
-      t = (t1 < 0) ? t2 : t1; 
+      t = (t1 < 0) ? t2 : t1;
 
       z_t = z + pz*t;
       if(TMath::Abs(z_t) > fHalfLength)
       {
         t3 = (+fHalfLength - z) / pz;
         t4 = (-fHalfLength - z) / pz;
-        t = (t3 < 0) ? t4 : t3; 
+        t = (t3 < 0) ? t4 : t3;
       }
 
       x_t = x + px*t;
@@ -169,13 +169,13 @@ void ParticlePropagator::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
-      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t);
+      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*e*1.0E3);
 
       candidate->Momentum = candidateMomentum;
       candidate->AddCandidate(mother);
-      
+
       fOutputArray->Add(candidate);
-      if(TMath::Abs(q) > 1.0E-9) 
+      if(TMath::Abs(q) > 1.0E-9)
       {
         switch(TMath::Abs(candidate->PID))
         {
@@ -194,14 +194,14 @@ void ParticlePropagator::Process()
     {
 
       // 1.  initial transverse momentum p_{T0} : Part->pt
-      //     initial transverse momentum direction \phi_0 = -atan(p_X0/p_Y0) 
+      //     initial transverse momentum direction \phi_0 = -atan(p_X0/p_Y0)
       //     relativistic gamma : gamma = E/mc² ; gammam = gamma \times m
       //     giration frequency \omega = q/(gamma m) fBz
       //     helix radius r = p_T0 / (omega gamma m)
 
       gammam = e*1.0E9 / (c_light*c_light);      // gammam in [eV/c²]
-      omega = q * fBz / (gammam);                // omega is here in [ 89875518 / s]  
-      r = pt / (q * fBz) * 1.0E9/c_light;        // in [m]  
+      omega = q * fBz / (gammam);                // omega is here in [ 89875518 / s]
+      r = pt / (q * fBz) * 1.0E9/c_light;        // in [m]
 
       phi_0 = TMath::ATan2(py, px); // [rad] in [-pi; pi]
 
@@ -249,7 +249,7 @@ void ParticlePropagator::Process()
         t_ra = TMath::Min(t1, TMath::Min(t2, t3));
         t_rb = TMath::Min(t4, TMath::Min(t5, t6));
         t_r = TMath::Min(t_ra, t_rb);
-        t = TMath::Min(t_r, t_z); 
+        t = TMath::Min(t_r, t_z);
       }
 
       // 4. position in terms of x(t), y(t), z(t)
@@ -263,7 +263,7 @@ void ParticlePropagator::Process()
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
-        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t);
+        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*c_light*1.0E3);
 
         candidate->Momentum = candidateMomentum;
         candidate->AddCandidate(mother);
