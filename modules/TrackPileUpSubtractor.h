@@ -38,6 +38,11 @@ private:
   std::map< TIterator *, TObjArray * > fInputMap; //!
 
   ClassDef(TrackPileUpSubtractor, 1)
+
+  TIterator *fItVertexInputArray; //!
+
+  const TObjArray *fVertexInputArray; //!
+
 };
 
 #endif

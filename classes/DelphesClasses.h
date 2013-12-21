@@ -210,7 +210,9 @@ public:
   Float_t Phi; // photon azimuthal angle
 
   Float_t E; // photon energy
-
+  
+  Float_t T; //particle arrival time of flight 
+  
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
   TRefArray Particles; // references to generated particles
@@ -232,7 +234,9 @@ public:
   Float_t PT; // electron transverse momentum
   Float_t Eta; // electron pseudorapidity
   Float_t Phi; // electron azimuthal angle
-
+  
+  Float_t T; //particle arrival time of flight 
+  
   Int_t Charge; // electron charge
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
@@ -257,6 +261,8 @@ public:
   Float_t Eta; // muon pseudorapidity
   Float_t Phi; // muon azimuthal angle
 
+  Float_t T; //particle arrival time of flight 
+    
   Int_t Charge; // muon charge
 
   TRef Particle; // reference to generated particle
@@ -279,6 +285,8 @@ public:
   Float_t Eta; // jet pseudorapidity
   Float_t Phi; // jet azimuthal angle
 
+  Float_t T; //particle arrival time of flight 
+  
   Float_t Mass; // jet invariant mass
 
   Float_t DeltaEta;  // jet radius in pseudorapidity
@@ -322,10 +330,12 @@ public:
   Float_t X; // track vertex position (x component)
   Float_t Y; // track vertex position (y component)
   Float_t Z; // track vertex position (z component)
+  Float_t T; // track vertex position (z component)
 
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
+  Float_t TOuter; // track position (z component) at the tracker edge
 
   TRef Particle; // reference to generated particle
 
@@ -348,6 +358,8 @@ public:
 
   Float_t E; // calorimeter tower energy
 
+  Float_t T; //particle arrival time of flight 
+  
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
 

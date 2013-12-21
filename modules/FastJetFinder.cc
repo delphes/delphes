@@ -192,6 +192,7 @@ void FastJetFinder::Process()
   Candidate *candidate, *constituent;
   TLorentzVector momentum;
   Double_t deta, dphi, detaMax, dphiMax;
+  Double_t time, weightTime, avTime;
   Int_t number;
   Double_t rho = 0;
   PseudoJet jet, area;
@@ -258,6 +259,9 @@ void FastJetFinder::Process()
 
     candidate = factory->NewCandidate();
 
+    time=0;
+    weightTime=0;
+
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
@@ -268,11 +272,17 @@ void FastJetFinder::Process()
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
       if(deta > detaMax) detaMax = deta;
       if(dphi > dphiMax) dphiMax = dphi;
-
+      
+      time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
+      weightTime += TMath::Sqrt(constituent->Momentum.E());
+    
       candidate->AddCandidate(constituent);
     }
+   
+    avTime = time/weightTime;
 
     candidate->Momentum = momentum;
+    candidate->Position.SetT(avTime);
     candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
 
     candidate->DeltaEta = detaMax;

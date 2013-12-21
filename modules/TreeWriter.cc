@@ -94,7 +94,7 @@ void TreeWriter::Init()
       cout << "** ERROR: cannot find class '" << branchClassName << "'" << endl;
       continue;
     }
-
+    
     itClassMap = fClassMap.find(branchClass);
     if(itClassMap == fClassMap.end())
     {
@@ -114,7 +114,6 @@ void TreeWriter::Init()
 
 void TreeWriter::Finish()
 {
-
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +159,9 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *candidate = 0;
   GenParticle *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
-
+  
+  const Double_t c_light = 2.99792458E8;
+  
   // loop over all particles
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))
@@ -207,7 +208,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->X = position.X();
     entry->Y = position.Y();
     entry->Z = position.Z();
-    entry->T = position.T();
+    entry->T = position.T()*1.0E-3/c_light;
   }
 }
 
@@ -218,6 +219,8 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
   TIter iterator(array);
   Candidate *candidate = 0;
   Vertex *entry = 0;
+  
+  const Double_t c_light = 2.99792458E8;
 
   // loop over all vertices
   iterator.Reset();
@@ -230,7 +233,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
     entry->X = position.X();
     entry->Y = position.Y();
     entry->Z = position.Z();
-    entry->T = position.T();
+    entry->T = position.T()*1.0E-3/c_light;
   }
 }
 
@@ -243,7 +246,8 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *particle = 0;
   Track *entry = 0;
   Double_t pt, signz, cosTheta, eta, rapidity;
-
+  const Double_t c_light = 2.99792458E8;
+  
   // loop over all tracks
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))
@@ -270,6 +274,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->XOuter = position.X();
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
+    entry->TOuter = position.T()*1.0E-3/c_light;
 
     const TLorentzVector &momentum = candidate->Momentum;
 
@@ -289,6 +294,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->X = initialPosition.X();
     entry->Y = initialPosition.Y();
     entry->Z = initialPosition.Z();
+    entry->T = initialPosition.T()*1.0E-3/c_light;
 
     entry->Particle = particle;
   }
@@ -302,13 +308,15 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *candidate = 0;
   Tower *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
-
+  const Double_t c_light = 2.99792458E8;
+  
   // loop over all towers
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
     const TLorentzVector &momentum = candidate->Momentum;
-
+    const TLorentzVector &position = candidate->Position;
+    
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -330,7 +338,9 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Edges[1] = candidate->Edges[1];
     entry->Edges[2] = candidate->Edges[2];
     entry->Edges[3] = candidate->Edges[3];
-
+    
+    entry->T = position.T()*1.0E-3/c_light;
+    
     FillParticles(candidate, &entry->Particles);
   }
 }
@@ -343,7 +353,8 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *candidate = 0;
   Photon *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
-
+  const Double_t c_light = 2.99792458E8;
+  
   array->Sort();
 
   // loop over all photons
@@ -352,6 +363,8 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
   {
     TIter it1(candidate->GetCandidates());
     const TLorentzVector &momentum = candidate->Momentum;
+    const TLorentzVector &position = candidate->Position;
+    
 
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
@@ -365,7 +378,9 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
     entry->E = momentum.E();
-
+    
+    entry->T = position.T()*1.0E-3/c_light;
+   
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
 
     FillParticles(candidate, &entry->Particles);
@@ -380,7 +395,8 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *candidate = 0;
   Electron *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
-
+  const Double_t c_light = 2.99792458E8;
+  
   array->Sort();
 
   // loop over all electrons
@@ -388,7 +404,8 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
     const TLorentzVector &momentum = candidate->Momentum;
-
+    const TLorentzVector &position = candidate->Position;
+    
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -400,7 +417,9 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
     entry->PT = pt;
-
+    
+    entry->T = position.T()*1.0E-3/c_light;
+    
     entry->Charge = candidate->Charge;
 
     entry->EhadOverEem = 0.0;
@@ -417,7 +436,9 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *candidate = 0;
   Muon *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
-
+  
+  const Double_t c_light = 2.99792458E8;
+  
   array->Sort();
 
   // loop over all muons
@@ -425,6 +446,8 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
     const TLorentzVector &momentum = candidate->Momentum;
+    const TLorentzVector &position = candidate->Position;
+    
 
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
@@ -441,6 +464,10 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
 
+    entry->T = position.T()*1.0E-3/c_light;
+    
+   // cout<<entry->PT<<","<<entry->T<<endl;
+
     entry->Charge = candidate->Charge;
 
     entry->Particle = candidate->GetCandidates()->At(0);
@@ -456,7 +483,8 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
   Jet *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
   Double_t ecalEnergy, hcalEnergy;
-
+  const Double_t c_light = 2.99792458E8;
+  
   array->Sort();
 
   // loop over all jets
@@ -464,8 +492,10 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
     TIter itConstituents(candidate->GetCandidates());
+    
     const TLorentzVector &momentum = candidate->Momentum;
-
+    const TLorentzVector &position = candidate->Position;
+   
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -478,6 +508,8 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
 
+    entry->T = position.T()*1.0E-3/c_light;
+    
     entry->Mass = momentum.M();
 
     entry->DeltaEta = candidate->DeltaEta;

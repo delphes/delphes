@@ -44,6 +44,13 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
+  
+  Double_t fTowerECalTime, fTowerHCalTime;
+  Double_t fTrackECalTime, fTrackHCalTime;
+   
+  Double_t fTowerECalWeightTime, fTowerHCalWeightTime;
+  Double_t fTrackECalWeightTime, fTrackHCalWeightTime;
+  
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
   TFractionMap fFractionMap; //!

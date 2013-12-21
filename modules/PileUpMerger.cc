@@ -15,7 +15,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesTF2.h"
 #include "classes/DelphesPileUpReader.h"
 
 #include "ExRootAnalysis/ExRootResult.h"
@@ -40,14 +40,17 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpMerger::PileUpMerger() :
-  fReader(0), fItInputArray(0)
+  fFunction(0), fReader(0), fItInputArray(0)
 {
+  fFunction = new DelphesTF2;
 }
+
 
 //------------------------------------------------------------------------------
 
 PileUpMerger::~PileUpMerger()
 {
+  delete fFunction;
 }
 
 //------------------------------------------------------------------------------
@@ -59,8 +62,15 @@ void PileUpMerger::Init()
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
-  fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
+  
+  fZVertexSpread = GetDouble("ZVertexSpread", 0.15);
+  fTVertexSpread = GetDouble("TVertexSpread", 1.5E-09);
 
+  // read vertex smearing formula
+	
+  fFunction->Compile(GetString("VertexDistributionFormula", "0.0"));
+  fFunction->SetRange(-fZVertexSpread,-fTVertexSpread,fZVertexSpread,fTVertexSpread);
+ 
   fileName = GetString("PileUpFile", "MinBias.pileup");
   fReader = new DelphesPileUpReader(fileName);
 
@@ -89,20 +99,38 @@ void PileUpMerger::Process()
   Int_t pid;
   Float_t x, y, z, t;
   Float_t px, py, pz, e;
-  Double_t dz, dphi;
+  Double_t dz, dphi, dt;
   Int_t numberOfEvents, event;
   Long64_t allEntries, entry;
-  Candidate *candidate;
+  Candidate *candidate, *vertexcandidate;
   DelphesFactory *factory;
+  
+  const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
+  
+    // --- Deal with Primary vertex first  ------
+  
+  fFunction->GetRandom2(dz,dt);
+ 
+  dt *= c_light*1.0E3; //necessary in order to make t in mm/c
+  dz *= 1.0E3; //necessary in order to make z in mm
+  
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+    candidate->Position.SetXYZT(x, y, z+dz, t+dt);
     fParticleOutputArray->Add(candidate);
   }
 
   factory = GetFactory();
-
+  
+  vertexcandidate = factory->NewCandidate();
+  vertexcandidate->Position.SetXYZT(0.0, 0.0, dz, dt);
+  fVertexOutputArray->Add(vertexcandidate);
+ 
+  
+  // --- Then with pile-up vertices  ------
+ 
   switch(fPileUpDistribution)
   {
     case 0:
@@ -117,7 +145,7 @@ void PileUpMerger::Process()
   }
 
   allEntries = fReader->GetEntries();
-
+ 
   for(event = 0; event < numberOfEvents; ++event)
   {
     do
@@ -127,13 +155,21 @@ void PileUpMerger::Process()
     while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
-
-    dz = gRandom->Gaus(0.0, fZVertexSpread);
+ 
+   // --- Pile-up vertex smearing 
+    
+    fFunction->GetRandom2(dz,dt);
+ 
+    dt *= c_light*1.0E3; //necessary in order to make t in mm/c
+    dz *= 1.0E3; //necessary in order to make z in mm
+ 
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 
-    candidate = factory->NewCandidate();
-    candidate->Position.SetXYZT(0.0, 0.0, dz, 0.0);
-    fVertexOutputArray->Add(candidate);
+    vertexcandidate = factory->NewCandidate();
+    vertexcandidate->Position.SetXYZT(0.0, 0.0, dz, dt);
+    vertexcandidate->IsPU = 1;
+    
+    fVertexOutputArray->Add(vertexcandidate);
 
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {
@@ -148,13 +184,13 @@ void PileUpMerger::Process()
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
       candidate->IsPU = 1;
-
+    
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
 
-      candidate->Position.SetXYZT(x, y, z + dz, t);
+      candidate->Position.SetXYZT(x, y, z+dz, t+dt);
       candidate->Position.RotateZ(dphi);
-
+      
       fParticleOutputArray->Add(candidate);
     }
   }

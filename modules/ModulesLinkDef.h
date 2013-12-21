@@ -18,6 +18,7 @@
 #include "modules/Efficiency.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
+#include "modules/TimeSmearing.h"
 #include "modules/Calorimeter.h"
 #include "modules/Isolation.h"
 #include "modules/EnergyScale.h"
@@ -49,6 +50,7 @@
 #pragma link C++ class Efficiency+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
+#pragma link C++ class TimeSmearing+;
 #pragma link C++ class Calorimeter+;
 #pragma link C++ class Isolation+;
 #pragma link C++ class EnergyScale+;
