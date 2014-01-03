@@ -101,7 +101,7 @@ void TrackPileUpSubtractor::Process()
   map< TIterator *, TObjArray * >::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
-  Double_t z, zvtx;
+  Double_t z, zvtx=0;
 
   
   // find z position of primary vertex

@@ -532,6 +532,20 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     }
 
     entry->EhadOverEem = ecalEnergy > 0.0 ? hcalEnergy/ecalEnergy : 999.9;
+  
+    //---   Pile-Up Jet ID variables ----
+
+    entry->NCharged = candidate->NCharged;
+    entry->NNeutrals = candidate->NNeutrals;
+    entry->Beta = candidate->Beta;
+    entry->BetaStar = candidate->BetaStar;
+    entry->MeanSqDeltaR = candidate->MeanSqDeltaR;
+    entry->PTD = candidate->PTD;
+    entry->FracPt[0] = candidate->FracPt[0];
+    entry->FracPt[1] = candidate->FracPt[1];
+    entry->FracPt[2] = candidate->FracPt[2];
+    entry->FracPt[3] = candidate->FracPt[3];
+    entry->FracPt[4] = candidate->FracPt[4];
 
     FillParticles(candidate, &entry->Particles);
   }

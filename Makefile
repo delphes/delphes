@@ -326,6 +326,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PileUpMerger.h \
 	modules/JetPileUpSubtractor.h \
 	modules/TrackPileUpSubtractor.h \
+	modules/PileUpJetID.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
 	modules/Cloner.h \
@@ -510,6 +511,15 @@ tmp/modules/ExampleModule.$(ObjSuf): \
 tmp/modules/EnergyScale.$(ObjSuf): \
 	modules/EnergyScale.$(SrcSuf) \
 	modules/EnergyScale.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/PileUpJetID.$(ObjSuf): \
+	modules/PileUpJetID.$(SrcSuf) \
+	modules/PileUpJetID.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -947,6 +957,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/ExampleModule.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
+	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/JetPileUpSubtractor.$(ObjSuf) \
@@ -1293,6 +1304,10 @@ external/fastjet/tools/Pruner.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/WrappedStructure.hh \
 	external/fastjet/tools/Transformer.hh
+	@touch $@
+
+modules/PileUpJetID.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/version.hh: \

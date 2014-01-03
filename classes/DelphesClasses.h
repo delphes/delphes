@@ -307,6 +307,18 @@ public:
 
   TLorentzVector P4();
 
+  // -- PileUpJetID variables ---
+
+  Int_t    NCharged;
+  Int_t    NNeutrals;
+  Float_t  Beta;
+  Float_t  BetaStar;
+  Float_t  MeanSqDeltaR;
+  Float_t  PTD;
+  Float_t  FracPt[5];
+
+
+
   ClassDef(Jet, 2)
 };
 
@@ -419,6 +431,16 @@ public:
   virtual void Copy(TObject &object) const;
   virtual TObject *Clone(const char *newname = "") const;
   virtual void Clear(Option_t* option = "");
+
+// -- PileUpJetID variables ---
+
+  Int_t    NCharged;
+  Int_t    NNeutrals;
+  Float_t  Beta;
+  Float_t  BetaStar;
+  Float_t  MeanSqDeltaR;
+  Float_t  PTD;
+  Float_t  FracPt[5];
 
 private:
   DelphesFactory *fFactory; //!
