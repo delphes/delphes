@@ -52,7 +52,11 @@ private:
   TIterator *fItNeutralInputArray; // SCZ
 
   TObjArray *fOutputArray; //!
+  
+  TIterator *fItVertexInputArray; //!
+  const TObjArray *fVertexInputArray; //!
 
+  Double_t fZVertexResolution;
 
   ClassDef(PileUpJetID, 1)
 };

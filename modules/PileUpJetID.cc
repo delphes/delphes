@@ -35,7 +35,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpJetID::PileUpJetID() :
-  fItJetInputArray(0),fTrackInputArray(0),fNeutralInputArray(0)
+  fItJetInputArray(0),fTrackInputArray(0),fNeutralInputArray(0),fItVertexInputArray(0) 
 {
 
 }
@@ -67,8 +67,12 @@ void PileUpJetID::Init()
 
   fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "Calorimeter/eflowTowers"));
   fItNeutralInputArray = fNeutralInputArray->MakeIterator();
-
-  // create output array(s)
+  
+  fVertexInputArray = ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"));
+  fItVertexInputArray = fVertexInputArray->MakeIterator();
+  
+  fZVertexResolution  = GetDouble("ZVertexResolution", 0.005)*1.0E3;
+// create output array(s)
 
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
 
@@ -82,6 +86,7 @@ void PileUpJetID::Finish()
   if(fItJetInputArray) delete fItJetInputArray;
   if(fItTrackInputArray) delete fItTrackInputArray;
   if(fItNeutralInputArray) delete fItNeutralInputArray;
+  if(fItVertexInputArray) delete fItVertexInputArray;
 
 }
 
@@ -91,8 +96,21 @@ void PileUpJetID::Process()
 {
   Candidate *candidate, *constituent;
   TLorentzVector momentum, area;
+  Double_t zvtx=0;
 
   Candidate *trk;
+
+ // find z position of primary vertex
+   
+  fItVertexInputArray->Reset();
+  while((candidate = static_cast<Candidate*>(fItVertexInputArray->Next())))
+  {
+    if(!candidate->IsPU)
+    {
+    zvtx = candidate->Position.Z();
+    break;
+    }
+  }
 
   // loop over all input candidates
   fItJetInputArray->Reset();
@@ -128,7 +146,7 @@ void PileUpJetID::Process()
 	  nn++;
 	} else {
 	  // charged
-	  if (constituent->IsPU) {
+	  if (constituent->IsPU && TMath::Abs(constituent->Position.Z()-zvtx) > fZVertexResolution) {
 	    sumptchpu += pt;
 	  } else {
 	    sumptchpv += pt;
@@ -145,12 +163,12 @@ void PileUpJetID::Process()
     } else {
       // Not using constituents, using dr
       fItTrackInputArray->Reset();
-      while ((trk = static_cast<Candidate*>(fItTrackInputArray->Next()))) {
+       while ((trk = static_cast<Candidate*>(fItTrackInputArray->Next()))) {
 	if (trk->Momentum.DeltaR(candidate->Momentum) < fParameterR) {
 	  float pt = trk->Momentum.Pt();
 	  sumpt += pt;
 	  sumptch += pt;
-	  if (trk->IsPU) {
+	  if (trk->IsPU && TMath::Abs(trk->Position.Z()-zvtx) > fZVertexResolution) {
 	    sumptchpu += pt;
 	  } else {
 	    sumptchpv += pt;

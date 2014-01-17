@@ -109,13 +109,12 @@ void TrackPileUpSubtractor::Process()
   fItVertexInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItVertexInputArray->Next())))
   {
-    if(candidate->IsPU == 0)
+    if(!candidate->IsPU)
     {
     zvtx = candidate->Position.Z();
-    break;
+    // break;
     }
   }
-
 
   // loop over all input arrays
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
@@ -129,9 +128,10 @@ void TrackPileUpSubtractor::Process()
     {
       particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
       z = particle->Position.Z();
-
+      
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
+      
       if(candidate->IsPU && TMath::Abs(z-zvtx) > fZVertexResolution) continue;
 
       array->Add(candidate);
