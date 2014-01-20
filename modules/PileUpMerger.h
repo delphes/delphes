@@ -39,9 +39,9 @@ private:
   Double_t fZVertexSpread;
   Double_t fTVertexSpread;
 
-  DelphesPileUpReader *fReader;
-
   DelphesTF2 *fFunction; //!
+
+  DelphesPileUpReader *fReader; //!
 
   TIterator *fItInputArray; //!
 
