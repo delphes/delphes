@@ -110,14 +110,14 @@ Candidate::Candidate() :
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
-  fFactory(0),
-  fArray(0),
   NCharged(0),
   NNeutrals(0),
   Beta(0),
   BetaStar(0),
   MeanSqDeltaR(0),
-  PTD(0)
+  PTD(0),
+  fFactory(0),
+  fArray(0)
 {
   Edges[0] = 0.0;
   Edges[1] = 0.0;
