@@ -16,14 +16,6 @@ public:
 
   ~DelphesTF2();
 
-//  Int_t Compile(const char *expression);
-
-//  Double_t Eval(Double_t z, Double_t t);
-  
-//  std::string ChangeVariables(const char *expression);
-  
-//  void ReplaceAll(std::string& str, const std::string& from, const std::string& to);
-  
   Int_t DefinedVariable(TString &variable, Int_t &action);
 
 };
