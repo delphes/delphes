@@ -1,3 +1,4 @@
+
 #######################################
 # Order of execution of various modules
 #######################################
@@ -18,6 +19,7 @@ set ExecutionPath {
   TrackMerger
   Calorimeter
   TrackPileUpSubtractor
+  NeutralTowerMerger
   EFlowMerger
 
   GenJetFinder
@@ -252,7 +254,8 @@ module Calorimeter Calorimeter {
   set PhotonOutputArray photons
 
   set EFlowTrackOutputArray eflowTracks
-  set EFlowTowerOutputArray eflowTowers
+  set EFlowPhotonOutputArray eflowPhotons
+  set EFlowNeutralHadronOutputArray eflowNeutralHadrons
 
   set pi [expr {acos(-1)}]
 
@@ -333,15 +336,29 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
 }
 
 ####################
+# Neutral tower merger
+####################
+
+module Merger NeutralTowerMerger {
+# add InputArray InputArray
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
+  set OutputArray eflowTowers
+}
+
+
+####################
 # Energy flow merger
 ####################
 
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray TrackPileUpSubtractor/eflowTracks
-  add InputArray Calorimeter/eflowTowers
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
   set OutputArray eflow
 }
+
 
 #############
 # Rho pile-up
@@ -411,7 +428,7 @@ module FastJetFinder FastJetFinder {
 module PileUpJetID PileUpJetID {
   set JetInputArray FastJetFinder/jets
   set TrackInputArray Calorimeter/eflowTracks
-  set NeutralInputArray Calorimeter/eflowTowers
+  set NeutralInputArray NeutralTowerMerger/eflowTowers
 
   set VertexInputArray PileUpMerger/vertices
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
@@ -456,7 +473,7 @@ module EnergyScale JetEnergyScale {
 ###################
 
 module Efficiency PhotonEfficiency {
-  set InputArray Calorimeter/photons
+  set InputArray Calorimeter/eflowPhotons
   set OutputArray photons
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
@@ -467,6 +484,7 @@ module Efficiency PhotonEfficiency {
                          (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.85) + \
                          (abs(eta) > 2.5)                                   * (0.00)}
 }
+
 
 ##################
 # Photon isolation
@@ -564,10 +582,11 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray Calorimeter/eflowTracks
-  add InputArray Calorimeter/eflowTowers
+  add InputArray EFlowMerger/eflow
   set MomentumOutputArray momentum
 }
+
+
 
 ##################
 # Scalar HT merger
@@ -655,13 +674,22 @@ module UniqueObjectFinder UniqueObjectFinder {
 # ROOT tree writer
 ##################
 
+# tracks, towers and eflow objects are not stored by default in the output.
+# if needed (for jet constituent or other studies), uncomment the relevant 
+# "add Branch ..." lines. 
+
+
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
+  
   add Branch Delphes/allParticles Particle GenParticle
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowTowers EFlowTower Tower
+
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
+#  add Branch Calorimeter/eflowTracks EFlowTrack Track
+#  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
+#  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron

@@ -211,7 +211,8 @@ module Calorimeter Calorimeter {
   set PhotonOutputArray photons
 
   set EFlowTrackOutputArray eflowTracks
-  set EFlowTowerOutputArray eflowTowers
+  set EFlowPhotonOutputArray eflowPhotons
+  set EFlowNeutralHadronOutputArray eflowNeutralHadrons
 
   set pi [expr {acos(-1)}]
 
@@ -282,7 +283,8 @@ module Calorimeter Calorimeter {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray Calorimeter/eflowTracks
-  add InputArray Calorimeter/eflowTowers
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
   set OutputArray eflow
 }
 
@@ -291,7 +293,7 @@ module Merger EFlowMerger {
 ###################
 
 module Efficiency PhotonEfficiency {
-  set InputArray Calorimeter/photons
+  set InputArray Calorimeter/eflowPhotons
   set OutputArray photons
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
@@ -396,8 +398,7 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray Calorimeter/eflowTracks
-  add InputArray Calorimeter/eflowTowers
+  add InputArray EFlowMerger/eflow
   set MomentumOutputArray momentum
 }
 
@@ -456,7 +457,7 @@ module EnergyScale JetEnergyScale {
   set OutputArray jets
 
  # scale formula for jets
-  set ScaleFormula {1.08}
+  set ScaleFormula {1.00}
 }
 
 ###########
@@ -532,13 +533,21 @@ module UniqueObjectFinder UniqueObjectFinder {
 # ROOT tree writer
 ##################
 
+# tracks, towers and eflow objects are not stored by default in the output.
+# if needed (for jet constituent or other studies), uncomment the relevant 
+# "add Branch ..." lines. 
+
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
+ 
   add Branch Delphes/allParticles Particle GenParticle
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
+
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
   add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowTowers EFlowTower Tower
+  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
+  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+ 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron

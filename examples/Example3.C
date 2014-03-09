@@ -19,9 +19,6 @@ struct TestPlots
   TH1 *fTrackDeltaPT;
   TH1 *fTrackDeltaEta;
 
-  TH1 *fTowerDeltaEem;
-  TH1 *fTowerDeltaEhad;
-
   TH1 *fJetDeltaPT;
 };
 
@@ -82,16 +79,6 @@ void BookHistograms(ExRootResult *result, TestPlots *plots)
     "(#eta^{particle} - #eta^{track})/#eta^{particle}", "number of tracks",
     100, -0.1, 0.1);
 
-  plots->fTowerDeltaEem = result->AddHist1D(
-    "tower delta Eem", "(Eem^{particles} - Eem^{tower})/Eem^{particles}",
-    "(Eem^{particles} - Eem^{tower})/Eem^{particles}", "number of tower",
-    100, -0.5, 0.5);
-
-  plots->fTowerDeltaEhad = result->AddHist1D(
-    "tower delta Ehad", "(Ehad^{particles} - Ehad^{tower})/Ehad^{particles}",
-    "(Ehad^{particles} - Ehad^{tower})/Ehad^{particles}", "number of tower",
-    100, -5.0, 5.0);
-
   plots->fJetDeltaPT = result->AddHist1D(
     "jet delta pt", "(p_{T}^{jet} - p_{T}^{constituents})/p_{T}^{jet}",
     "(p_{T}^{jet} - p_{T}^{constituents})/p_{T}^{jet}", "number of jets",
@@ -109,7 +96,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
   TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 
   TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
-  TClonesArray *branchEFlowTower = treeReader->UseBranch("EFlowTower");
+  TClonesArray *branchEFlowPhoton = treeReader->UseBranch("EFlowPhoton");
+  TClonesArray *branchEFlowNeutralHadron = treeReader->UseBranch("EFlowNeutralHadron");
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
 
   Long64_t allEntries = treeReader->GetEntries();
@@ -187,44 +175,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
       plots->fTrackDeltaEta->Fill((particle->Eta - track->Eta)/particle->Eta);
     }
 
-    // Loop over all towers in event
-    for(i = 0; i < branchEFlowTower->GetEntriesFast(); ++i)
-    {
-      tower = (Tower*) branchEFlowTower->At(i);
-
-      Eem = 0.0;
-      Ehad = 0.0;
-      skip = kFALSE;
-      for(j = 0; j < tower->Particles.GetEntriesFast(); ++j)
-      {
-        particle = (GenParticle*) tower->Particles.At(j);
-        pdgCode = TMath::Abs(particle->PID);
-
-        // skip muons and neutrinos
-        if(pdgCode == 12 || pdgCode == 13 || pdgCode == 14 || pdgCode == 16)
-        {
-          continue;
-        }
-
-        // skip K0short and Lambda
-        if(pdgCode == 310 || pdgCode == 3122)
-        {
-          skip = kTRUE;
-        }
-
-        if(pdgCode == 11 || pdgCode == 22)
-        {
-          Eem += particle->E;
-        }
-        else
-        {
-          Ehad += particle->E;
-        }
-      }
-      if(skip) continue;
-      if(Eem > 0.0 && tower->Eem > 0.0) plots->fTowerDeltaEem->Fill((Eem - tower->Eem)/Eem);
-      if(Ehad > 0.0 && tower->Ehad > 0.0) plots->fTowerDeltaEhad->Fill((Ehad - tower->Ehad)/Ehad);
-    }
+    cout<<"--  New event -- "<<endl;
 
     // Loop over all jets in event
     for(i = 0; i < branchJet->GetEntriesFast(); ++i)
@@ -232,6 +183,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
       jet = (Jet*) branchJet->At(i);
 
       momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+
+      cout<<"Looping over jet constituents. Jet pt: "<<jet->PT<<", eta: "<<jet->Eta<<", phi: "<<jet->Phi<<endl;      
 
       // Loop over all jet's constituents
       for(j = 0; j < jet->Constituents.GetEntriesFast(); ++j)
@@ -243,18 +196,22 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
 
         if(object->IsA() == GenParticle::Class())
         {
+          cout<<"    GenPart pt: "<<((GenParticle*) object)->PT<<", eta: "<<((GenParticle*) object)->Eta<<", phi: "<<((GenParticle*) object)->Phi<<endl;
           momentum += ((GenParticle*) object)->P4();
         }
         else if(object->IsA() == Track::Class())
         {
+          cout<<"    Track pt: "<<((Track*) object)->PT<<", eta: "<<((Track*) object)->Eta<<", phi: "<<((Track*) object)->Phi<<endl;
           momentum += ((Track*) object)->P4();
         }
         else if(object->IsA() == Tower::Class())
         {
+          cout<<"    Tower pt: "<<((Tower*) object)->ET<<", eta: "<<((Tower*) object)->Eta<<", phi: "<<((Tower*) object)->Phi<<endl;
           momentum += ((Tower*) object)->P4();
         }
         else if(object->IsA() == Muon::Class())
         {
+          cout<<"    Muon pt: "<<((Muon*) object)->PT<<", eta: "<<((Muon*) object)->Eta<<", phi: "<<((Muon*) object)->Phi<<endl;
           momentum += ((Muon*) object)->P4();
         }
       }
