@@ -2,7 +2,7 @@
 /** \class Calorimeter
  *
  *  Fills calorimeter towers, performs calorimeter resolution smearing,
- *  preselects towers hit by photons and creates energy flow objects.
+ *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
  *  $Date$
  *  $Revision$
@@ -148,9 +148,12 @@ void Calorimeter::Init()
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
   fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "photons"));
-
+  
   fEFlowTrackOutputArray = ExportArray(GetString("EFlowTrackOutputArray", "eflowTracks"));
-  fEFlowTowerOutputArray = ExportArray(GetString("EFlowTowerOutputArray", "eflowTowers"));
+  fEFlowPhotonOutputArray = ExportArray(GetString("EFlowPhotonOutputArray", "eflowPhotons"));
+  fEFlowNeutralHadronOutputArray = ExportArray(GetString("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -340,7 +343,7 @@ void Calorimeter::Process()
      
       fTowerTrackHits = 0;
       fTowerPhotonHits = 0;
-
+      
       fTowerTrackArray->Clear();
     }
 
@@ -370,10 +373,10 @@ void Calorimeter::Process()
 
       continue;
     }
-
+   
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
-
+    
     particle = static_cast<Candidate*>(fParticleInputArray->At(number));
     momentum = particle->Momentum;
     position = particle->Position;
@@ -450,14 +453,14 @@ void Calorimeter::FinalizeTower()
   fTower->Edges[3] = fTowerEdges[3];
 
 
-  // fill calorimeter towers and photon candidates
+  // fill calorimeter towers
   if(energy > 0.0)
   {
     if(fTowerPhotonHits > 0 && fTowerTrackHits == 0)
     {
       fPhotonOutputArray->Add(fTower);
     }
-
+   
     fTowerOutputArray->Add(fTower);
   }
 
@@ -478,20 +481,39 @@ void Calorimeter::FinalizeTower()
 
   energy = ecalEnergy + hcalEnergy;
 
+  
   // save ECAL and/or HCAL energy excess as an energy flow tower
-  if(energy > 0.0)
+  if(ecalEnergy > 0.0)
   {
-    // create new tower
+    // create new photon tower
     tower = static_cast<Candidate*>(fTower->Clone());
 
-    pt = energy / TMath::CosH(eta);
+    pt = ecalEnergy / TMath::CosH(eta);
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
     tower->Eem = ecalEnergy;
+    tower->Ehad = 0;
+
+    fEFlowPhotonOutputArray->Add(tower);
+  }
+
+  if(hcalEnergy > 0.0)
+  {
+    // create new neutral hadron tower
+    tower = static_cast<Candidate*>(fTower->Clone());
+
+    pt = hcalEnergy / TMath::CosH(eta);
+
+    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
+    tower->Eem = 0;
     tower->Ehad = hcalEnergy;
 
-    fEFlowTowerOutputArray->Add(tower);
+    fEFlowNeutralHadronOutputArray->Add(tower);
   }
+
+
+
+
 }
 
 //------------------------------------------------------------------------------
