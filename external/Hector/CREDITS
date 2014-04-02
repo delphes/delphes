@@ -1,0 +1,23 @@
+  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                         *
+*                   --<--<--  A fast simulator --<--<--     *
+*                 / --<--<--     of particle   --<--<--     *
+*  ----HECTOR----<                                          *
+*                 \ -->-->-- transport through -->-->--     *
+*                   -->-->-- generic beamlines -->-->--     *
+*                                                           *
+* JINST 2:P09005 (2007)                                     *
+*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
+*       http://www.fynu.ucl.ac.be/hector.html               *
+*                                                           *
+* Center for Cosmology, Particle Physics and Phenomenology  *
+*              Universite catholique de Louvain             *
+*                 Louvain-la-Neuve, Belgium                 *
+ *                                                         *
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+   J. de Favereau, X. Rouby ~~~ cp3_hector_devel@listes.uclouvain.be
+	jerome.defavereau@uclouvain.be 
+	xavier.rouby@cern.ch
+
+   (C) All rights reserved
