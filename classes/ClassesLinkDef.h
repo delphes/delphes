@@ -6,7 +6,7 @@
  *  $Date: 2008-07-08 12:01:52 $
  *  $Revision: 1.2 $
  *
- *  
+ *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
@@ -44,6 +44,7 @@
 #pragma link C++ class Jet+;
 #pragma link C++ class Track+;
 #pragma link C++ class Tower+;
+#pragma link C++ class HectorHit+;
 
 #pragma link C++ class Candidate+;
 

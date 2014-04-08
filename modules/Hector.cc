@@ -62,14 +62,18 @@ void Hector::Init()
   fDirection = GetInt("Direction", 1);
   fBeamLineLength = GetDouble("BeamLineLength", 430.0);
   fDistance = GetDouble("Distance", 420.0);
+  fOffsetX = GetDouble("OffsetX", 0.0);
+  fOffsetS = GetDouble("OffsetS", 120.0);
   fSigmaE = GetDouble("SigmaE", 0.0);
   fSigmaX = GetDouble("SigmaX", 0.0);
   fSigmaY = GetDouble("SigmaY", 0.0);
+  fSigmaT = GetDouble("SigmaT", 0.0);
   fEtaMin = GetDouble("EtaMin", 5.0);
 
   fBeamLine = new H_BeamLine(fDirection, fBeamLineLength + 0.1);
-  fBeamLine->fill(GetString("BeamLineFile", "examples/LHCB1IR5_5TeV.tfs"), fDirection, "IP5" );
+  fBeamLine->fill(GetString("BeamLineFile", "examples/LHCB1IR5_5TeV.tfs"), fDirection, GetString("IPName", "IP5"));
   fBeamLine->offsetElements(120, -0.097*fDirection);
+  fBeamLine->offsetElements(fOffsetS, fOffsetX);
   fBeamLine->calcMatrix();
 
   // import input array
@@ -79,7 +83,7 @@ void Hector::Init()
 
   // create output array
 
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fOutputArray = ExportArray(GetString("OutputArray", "hits"));
 }
 
 //------------------------------------------------------------------------------
@@ -96,7 +100,10 @@ void Hector::Process()
 {
   Candidate *candidate, *mother;
   Double_t pz;
-  Double_t x, y, z, tx, ty;
+  Double_t x, y, z, tx, ty, theta;
+  Double_t distance, time;
+
+  const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -117,6 +124,10 @@ void Hector::Process()
     tx = 0.0;
     ty = 0.0;
 
+    theta = TMath::Hypot(TMath::ATan(candidateMomentum.Px()/pz), TMath::ATan(candidateMomentum.Py()/pz));
+    distance = (fDistance - 1.0E-3 * candidatePosition.Z())/TMath::Cos(theta);
+    time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T())/c_light, fSigmaT);
+
     H_BeamParticle particle(candidate->Mass, candidate->Charge);
     particle.set4Momentum(candidateMomentum);
     particle.setPosition(x, y, tx, ty, z);
@@ -132,7 +143,7 @@ void Hector::Process()
 
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->Position.SetXYZT(particle.getX(), particle.getY(), fDistance, 0.0);
+    candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
     candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
     candidate->AddCandidate(mother);
 

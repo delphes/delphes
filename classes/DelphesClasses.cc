@@ -25,6 +25,7 @@ CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
 CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
 CompBase *Track::fgCompare = CompPT<Track>::Instance();
 CompBase *Tower::fgCompare = CompE<Tower>::Instance();
+CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
 
 //------------------------------------------------------------------------------

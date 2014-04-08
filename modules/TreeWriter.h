@@ -52,6 +52,7 @@ private:
   void ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessRho(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessWeight(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessHectorHit(ExRootTreeBranch *branch, TObjArray *array);
 
 #ifndef __CINT__
   typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, TObjArray *); //!

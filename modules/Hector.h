@@ -33,11 +33,12 @@ public:
 private:
 
   Int_t fDirection;
-  
+
   Double_t fBeamLineLength, fDistance;
-  Double_t fSigmaE, fSigmaX, fSigmaY;
+  Double_t fOffsetX, fOffsetS;
+  Double_t fSigmaE, fSigmaX, fSigmaY, fSigmaT;
   Double_t fEtaMin;
-  
+
   H_BeamLine *fBeamLine;
 
   TIterator *fItInputArray; //!

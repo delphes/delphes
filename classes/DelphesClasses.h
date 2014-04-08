@@ -389,6 +389,28 @@ public:
 
 //---------------------------------------------------------------------------
 
+class HectorHit: public SortableObject
+{
+public:
+  Float_t E; // reconstructed energy [GeV]
+
+  Float_t Tx; // angle of the momentum in the horizontal (x,z) plane [urad]
+  Float_t Ty; // angle of the momentum in the verical (y,z) plane [urad]
+
+  Float_t T; // time of flight to the detector [s]
+
+  Float_t X; // horizontal distance to the beam [um]
+  Float_t Y; // vertical distance to the beam [um]
+  Float_t S; // distance to the interaction point [m]
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  ClassDef(HectorHit, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class Candidate: public SortableObject
 {
   friend class DelphesFactory;
