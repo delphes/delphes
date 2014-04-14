@@ -72,7 +72,6 @@ void Hector::Init()
 
   fBeamLine = new H_BeamLine(fDirection, fBeamLineLength + 0.1);
   fBeamLine->fill(GetString("BeamLineFile", "examples/LHCB1IR5_5TeV.tfs"), fDirection, GetString("IPName", "IP5"));
-  fBeamLine->offsetElements(120, -0.097*fDirection);
   fBeamLine->offsetElements(fOffsetS, fOffsetX);
   fBeamLine->calcMatrix();
 
@@ -116,7 +115,7 @@ void Hector::Process()
 
     x = 1.0E3 * candidatePosition.X();
     y = 1.0E3 * candidatePosition.Y();
-    z = 1.0E-2 * candidatePosition.Z();
+    z = 1.0E-3 * candidatePosition.Z();
 
 //    tx = 1.0E6 * TMath::ATan(candidateMomentum.Px()/pz);
 //    ty = 1.0E6 * TMath::ATan(candidateMomentum.Py()/pz);
