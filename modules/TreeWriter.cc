@@ -276,7 +276,13 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
-
+    
+    entry->Dxy = candidate->Dxy;
+    entry->SDxy = candidate->SDxy ;
+    entry->Xd = candidate -> Xd;
+    entry->Yd = candidate -> Yd;
+    entry->Zd = candidate -> Zd;
+   
     const TLorentzVector &momentum = candidate->Momentum;
 
     pt = momentum.Pt();

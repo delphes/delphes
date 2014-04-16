@@ -18,11 +18,13 @@
 #include "modules/Efficiency.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
+#include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/Calorimeter.h"
 #include "modules/Isolation.h"
 #include "modules/EnergyScale.h"
 #include "modules/UniqueObjectFinder.h"
+#include "modules/TrackCountingBTagging.h"
 #include "modules/BTagging.h"
 #include "modules/TauTagging.h"
 #include "modules/TreeWriter.h"
@@ -52,11 +54,13 @@
 #pragma link C++ class Efficiency+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
+#pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class Calorimeter+;
 #pragma link C++ class Isolation+;
 #pragma link C++ class EnergyScale+;
 #pragma link C++ class UniqueObjectFinder+;
+#pragma link C++ class TrackCountingBTagging+;
 #pragma link C++ class BTagging+;
 #pragma link C++ class TauTagging+;
 #pragma link C++ class TreeWriter+;

@@ -348,6 +348,12 @@ public:
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
   Float_t TOuter; // track position (z component) at the tracker edge
+  
+  Float_t Dxy;     // track signed transverse impact parameter
+  Float_t SDxy;    // signed error on the track signed transverse impact parameter
+  Float_t Xd;      // X coordinate of point of closest approach to vertex
+  Float_t Yd;      // Y coordinate of point of closest approach to vertex
+  Float_t Zd;      // Z coordinate of point of closest approach to vertex
 
   TRef Particle; // reference to generated particle
 
@@ -443,6 +449,12 @@ public:
   Float_t DeltaPhi;
 
   TLorentzVector Momentum, Position, Area;
+  
+  Float_t  Dxy;    
+  Float_t  SDxy;   
+  Float_t  Xd;     
+  Float_t  Yd;     
+  Float_t  Zd;     
 
   // PileUpJetID variables
 
