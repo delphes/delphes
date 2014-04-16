@@ -553,7 +553,15 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->FracPt[2] = candidate->FracPt[2];
     entry->FracPt[3] = candidate->FracPt[3];
     entry->FracPt[4] = candidate->FracPt[4];
-
+   
+    //--- N-subjettiness variables ----
+    
+    entry->Tau1 = candidate->Tau1;
+    entry->Tau2 = candidate->Tau2;
+    entry->Tau3 = candidate->Tau3;
+    entry->Tau4 = candidate->Tau4;
+    entry->Tau5 = candidate->Tau5;
+   
     FillParticles(candidate, &entry->Particles);
   }
 }

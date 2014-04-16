@@ -493,7 +493,11 @@ tmp/modules/FastJetFinder.$(ObjSuf): \
 	external/fastjet/tools/JetMedianBackgroundEstimator.hh \
 	external/fastjet/plugins/SISCone/fastjet/SISConePlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh \
-	external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh
+	external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh \
+	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh \
+	external/fastjet/contribs/Nsubjettiness/Njettiness.hh \
+	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh \
+	external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh
 tmp/modules/BTagging.$(ObjSuf): \
 	modules/BTagging.$(SrcSuf) \
 	modules/BTagging.h \
@@ -1018,6 +1022,18 @@ tmp/external/Hector/H_Marker.$(ObjSuf): \
 	external/Hector/H_Marker.$(SrcSuf)
 tmp/external/Hector/H_OpticalElement.$(ObjSuf): \
 	external/Hector/H_OpticalElement.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/MeasureFunction.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/MeasureFunction.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/AxesFinder.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/AxesFinder.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/Njettiness.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/Njettiness.$(SrcSuf)
 DELPHES_OBJ +=  \
 	tmp/classes/DelphesFormula.$(ObjSuf) \
 	tmp/classes/DelphesClasses.$(ObjSuf) \
@@ -1166,7 +1182,13 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_RectangularAperture.$(ObjSuf) \
 	tmp/external/Hector/H_Parameters.$(ObjSuf) \
 	tmp/external/Hector/H_Marker.$(ObjSuf) \
-	tmp/external/Hector/H_OpticalElement.$(ObjSuf)
+	tmp/external/Hector/H_OpticalElement.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/MeasureFunction.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/AxesFinder.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/Njettiness.$(ObjSuf)
 
 ifeq ($(HAS_PYTHIA8),true)
 DELPHES_OBJ +=  \
@@ -1362,6 +1384,10 @@ external/fastjet/Error.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
 
+external/fastjet/contribs/Nsubjettiness/Njettiness.hh: \
+	external/fastjet/PseudoJet.hh
+	@touch $@
+
 modules/Efficiency.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -1400,6 +1426,11 @@ modules/PileUpMerger.h: \
 
 external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	external/fastjet/internal/numconsts.hh
+	@touch $@
+
+external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh: \
+	external/fastjet/ClusterSequence.hh \
+	external/fastjet/JetDefinition.hh
 	@touch $@
 
 modules/Cloner.h: \
@@ -1505,6 +1536,11 @@ modules/BTagging.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh: \
+	external/fastjet/PseudoJet.hh \
+	external/fastjet/JetDefinition.hh
+	@touch $@
+
 modules/ImpactParameterSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -1557,6 +1593,10 @@ external/fastjet/ClusterSequenceStructure.hh: \
 	external/fastjet/internal/base.hh \
 	external/fastjet/SharedPtr.hh \
 	external/fastjet/PseudoJetStructureBase.hh
+	@touch $@
+
+external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh: \
+	external/fastjet/FunctionOfPseudoJet.hh
 	@touch $@
 
 modules/StatusPidFilter.h: \

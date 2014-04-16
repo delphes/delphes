@@ -317,7 +317,13 @@ public:
   Float_t  PTD;
   Float_t  FracPt[5];
 
-
+ // -- Nsubjettiness variables ---
+  
+  Float_t Tau1; 
+  Float_t Tau2; 
+  Float_t Tau3; 
+  Float_t Tau4; 
+  Float_t Tau5; 
 
   ClassDef(Jet, 2)
 };
@@ -465,7 +471,15 @@ public:
   Float_t  MeanSqDeltaR;
   Float_t  PTD;
   Float_t  FracPt[5];
-
+ 
+  // -- Nsubjettiness variables ---
+ 
+  Float_t Tau1;
+  Float_t Tau2;
+  Float_t Tau3;
+  Float_t Tau4;
+  Float_t Tau5;
+ 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 

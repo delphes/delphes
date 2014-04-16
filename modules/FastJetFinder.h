@@ -40,6 +40,9 @@ public:
 private:
 
   void *fPlugin; //!
+  void *fRecomb; //!
+  void *fNjettinessPlugin; //!
+  
   fastjet::JetDefinition *fDefinition; //!
 
   Int_t fJetAlgorithm;
@@ -54,6 +57,14 @@ private:
   Int_t fAdjacencyCut;
   Double_t fOverlapThreshold;
 
+  //-- N (sub)jettiness parameters --
+  
+  Bool_t fComputeNsubjettiness;
+  Double_t fBeta;
+  Int_t fAxisMode;
+  Double_t fRcutOff; 
+  Int_t fN ;
+  
   // --- FastJet Area method --------
 
   fastjet::AreaDefinition *fAreaDefinition;

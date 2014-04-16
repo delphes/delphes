@@ -46,13 +46,20 @@
 #include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
 #include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
 
+#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh" 
+#include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
+#include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
+#include "fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh"
+
 using namespace std;
 using namespace fastjet;
+using namespace fastjet::contrib;
+
 
 //------------------------------------------------------------------------------
 
 FastJetFinder::FastJetFinder() :
-  fPlugin(0), fDefinition(0), fAreaDefinition(0), fItInputArray(0)
+  fPlugin(0), fDefinition(0), fAreaDefinition(0), fItInputArray(0), fRecomb(0), fNjettinessPlugin(0)
 {
 
 }
@@ -68,8 +75,11 @@ FastJetFinder::~FastJetFinder()
 
 void FastJetFinder::Init()
 {
+  
   JetDefinition::Plugin *plugin = NULL;
-
+  JetDefinition::Recombiner *recomb = NULL;
+  NjettinessPlugin *njet_plugin = NULL;
+  
   // read eta ranges
 
   ExRootConfParam param = GetParam("RhoEtaRange");
@@ -98,9 +108,18 @@ void FastJetFinder::Init()
 
   fJetPTMin = GetDouble("JetPTMin", 10.0);
 
+  //-- N(sub)jettiness parameters --
+  
+  fComputeNsubjettiness = GetBool("ComputeNsubjettiness", false);
+  fBeta = GetDouble("Beta", 1.0);
+  fAxisMode = GetInt("AxisMode", 1);
+  fRcutOff = GetDouble("RcutOff", 0.8); //used only if Njettiness is used as jet clustering algo (case 8)
+  fN = GetInt("N", 2);                  //used only if Njettiness is used as jet clustering algo (case 8)
+  
   // ---  Jet Area Parameters ---
   fAreaAlgorithm = GetInt("AreaAlgorithm", 0);
   fComputeRho = GetBool("ComputeRho", false);
+  
   // - ghost based areas -
   fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
   fRepeat = GetInt("Repeat", 1);
@@ -108,6 +127,7 @@ void FastJetFinder::Init()
   fGridScatter = GetDouble("GridScatter", 1.0);
   fPtScatter = GetDouble("PtScatter", 0.1);
   fMeanGhostPt = GetDouble("MeanGhostPt", 1.0E-100);
+  
   // - voronoi based areas -
   fEffectiveRfact = GetDouble("EffectiveRfact", 1.0);
 
@@ -158,10 +178,21 @@ void FastJetFinder::Init()
     case 6:
       fDefinition = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterR);
       break;
+    case 7:
+      recomb = new fastjet::contrib::WinnerTakeAllRecombiner();
+      fDefinition = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterR, recomb, Best);
+      break;
+    case 8:
+      njet_plugin = new fastjet::contrib::NjettinessPlugin(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
+      fDefinition = new fastjet::JetDefinition(njet_plugin);
+      break;
   }
+ 
 
   fPlugin = plugin;
-
+  fRecomb = recomb;
+  fNjettinessPlugin = njet_plugin;
+  
   ClusterSequence::print_banner();
 
   // import input array
@@ -183,6 +214,8 @@ void FastJetFinder::Finish()
   if(fDefinition) delete fDefinition;
   if(fAreaDefinition) delete fAreaDefinition;
   if(fPlugin) delete static_cast<JetDefinition::Plugin*>(fPlugin);
+  if(fRecomb) delete static_cast<JetDefinition::Recombiner*>(fRecomb);
+  if(fNjettinessPlugin) delete static_cast<JetDefinition::Plugin*>(fNjettinessPlugin);
 }
 
 //------------------------------------------------------------------------------
@@ -247,6 +280,7 @@ void FastJetFinder::Process()
   outputList.clear();
   outputList = sorted_by_pt(sequence->inclusive_jets(fJetPTMin));
 
+
   // loop over all jets and export them
   detaMax = 0.0;
   dphiMax = 0.0;
@@ -264,6 +298,7 @@ void FastJetFinder::Process()
 
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
+      
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
@@ -287,6 +322,33 @@ void FastJetFinder::Process()
 
     candidate->DeltaEta = detaMax;
     candidate->DeltaPhi = dphiMax;
+
+    // --- compute N-subjettiness with N = 1,2,3,4,5 ----
+    
+    if(fComputeNsubjettiness)
+    {
+      Njettiness::AxesMode axisMode;
+     
+      if (fAxisMode == 1) axisMode = Njettiness::wta_kt_axes;
+      if (fAxisMode == 2) axisMode = Njettiness::onepass_wta_kt_axes;
+      if (fAxisMode == 3) axisMode = Njettiness::kt_axes;
+      if (fAxisMode == 4) axisMode = Njettiness::onepass_kt_axes;
+       
+      Njettiness::MeasureMode measureMode = Njettiness::unnormalized_measure;
+      
+      Nsubjettiness nSub1(1, axisMode, measureMode, fBeta);
+      Nsubjettiness nSub2(2, axisMode, measureMode, fBeta);
+      Nsubjettiness nSub3(3, axisMode, measureMode, fBeta); 
+      Nsubjettiness nSub4(4, axisMode, measureMode, fBeta); 
+      Nsubjettiness nSub5(5, axisMode, measureMode, fBeta); 
+    
+      candidate -> Tau1 = nSub1(*itOutputList);
+      candidate -> Tau2 = nSub2(*itOutputList);
+      candidate -> Tau3 = nSub3(*itOutputList);
+      candidate -> Tau4 = nSub4(*itOutputList);
+      candidate -> Tau5 = nSub5(*itOutputList);
+    }
+
 
     fOutputArray->Add(candidate);
   }
