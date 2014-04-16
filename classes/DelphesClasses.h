@@ -403,6 +403,8 @@ public:
   Float_t Y; // vertical distance to the beam [um]
   Float_t S; // distance to the interaction point [m]
 
+  TRef Particle; // reference to generated particle
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 

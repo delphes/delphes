@@ -111,7 +111,7 @@ void Hector::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     pz = candidateMomentum.Pz();
 
-    if(candidateMomentum.Eta() <= fEtaMin || fDirection*pz <= 0.0) continue;
+    if(TMath::Abs(candidateMomentum.Eta()) <= fEtaMin || TMath::Sign(pz, Double_t(fDirection)) != pz) continue;
 
     x = 1.0E3 * candidatePosition.X();
     y = 1.0E3 * candidatePosition.Y();
@@ -128,7 +128,9 @@ void Hector::Process()
     time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T())/c_light, fSigmaT);
 
     H_BeamParticle particle(candidate->Mass, candidate->Charge);
-    particle.set4Momentum(candidateMomentum);
+//    particle.set4Momentum(candidateMomentum);
+    particle.set4Momentum(candidateMomentum.Px(), candidateMomentum.Py(), 
+                          candidateMomentum.Pz(), candidateMomentum.E());
     particle.setPosition(x, y, tx, ty, z);
 
     particle.smearAng(fSigmaX, fSigmaY, gRandom);

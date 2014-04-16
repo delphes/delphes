@@ -657,6 +657,8 @@ void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, TObjArray *array)
     entry->X = position.X();
     entry->Y = position.Y();
     entry->S = position.Z();
+
+    entry->Particle = candidate->GetCandidates()->At(0);
   }
 }
 
