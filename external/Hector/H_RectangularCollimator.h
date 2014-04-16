@@ -1,48 +1,41 @@
 #ifndef _H_RectangularCollimator_
 #define _H_RectangularCollimator_
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_RectangularCollimator.h
 /// \brief Class describing Rectangular Collimators
 
 // local #includes
-#include "H_Drift.h"
+#include "H_OpticalElement.h"
 
 /// R-Collimators for the LHC beamline.
-class H_RectangularCollimator : public H_Drift {
+class H_RectangularCollimator : public H_OpticalElement {
 
 	public:
 	/// Constructors and destructor
 	//@{
-		H_RectangularCollimator():H_Drift() {type = RCOLLIMATOR; init();}
+		H_RectangularCollimator():H_OpticalElement(RCOLLIMATOR,0.,0.,0.) {init();}
 		H_RectangularCollimator(const double, const double );
-		H_RectangularCollimator(const string&, const double, const double );
-		~H_RectangularCollimator() {};
+		H_RectangularCollimator(const string, const double, const double );
+		~H_RectangularCollimator() { return; };
 	//@}
-		H_RectangularCollimator* clone() const;
+		virtual void printProperties() const;
 		void init();
+
 	private:
 	 	virtual void setTypeString() {typestring=RCOLLIMATORNAME;};
-		virtual void setMatrix(const float, const float, const float) ;
-	
-	friend std::ostream& operator<< (std::ostream& os, const H_RectangularCollimator& el);
+		virtual void setMatrix(const float, const float, const float) const ;
+
 };
 
 #endif

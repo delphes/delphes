@@ -1,23 +1,16 @@
 #ifndef _H_Drift_
 #define _H_Drift_
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_Drift.h
 /// \brief Class aiming at simulating LHC beam drift.
@@ -33,17 +26,15 @@ class H_Drift : public H_OpticalElement {
 	//@{
 		H_Drift():H_OpticalElement(DRIFT,0.,0.,0.) {init();}
         	H_Drift(const double s, const double l):H_OpticalElement(DRIFT,s,0.,l){init();}
-	        H_Drift(const string& nameE, const double s, const double l):H_OpticalElement(nameE,DRIFT,s,0.,l){init();}
-	        ~H_Drift() { };
+	        H_Drift(const string nameE, const double s, const double l):H_OpticalElement(nameE,DRIFT,s,0.,l){init();}
+	        ~H_Drift() { return; };
 	//@}
+        	virtual void printProperties() const;
 	        void init();
-		virtual void printProperties() const { cout << *this; return;};
-		H_Drift* clone() const;
 
-	protected:
+	private:
         	virtual void setTypeString() {typestring = DRIFTNAME;};
-	        virtual void setMatrix(const float, const float, const float) ;
-	friend std::ostream& operator<< (std::ostream& os, const H_Drift& el);
+	        virtual void setMatrix(const float, const float, const float) const ;
 };
 
 #endif

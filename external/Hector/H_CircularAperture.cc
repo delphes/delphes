@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_CircularAperture.cc
 /// \brief Defines the circular aperture of beamline elements.
@@ -29,12 +22,15 @@
 #include "H_CircularAperture.h"
 using namespace std;
 
-H_CircularAperture* H_CircularAperture::clone() const {
-	return new H_CircularAperture(x1,fx,fy);
+/// Circular apertures
+H_CircularAperture::H_CircularAperture(const float r, const float posx, const float posy) :H_EllipticAperture(r,r,posx,posy) { 
+        /// @param r is the radius of the circular shape
+        /// @param posx, posy are the (x,y) coordinates of the center of the circle
+	type= CIRCULAR; 
 }
 
-std::ostream& operator<< (std::ostream& os, const H_CircularAperture& ap) {
-        os     << "Aperture shape:" << ap.aptypestring << ", aperture radius : " << ap.x1 << endl;
-        os     << " \t Center : " << ap.fx << "," << ap.fy << endl;
-        return os;
+void H_CircularAperture::printProperties() const {
+        cout << "Aperture shape:" << getTypeString() << ", aperture radius : " << x1 << endl;
+        cout << " \t Center : " << fx << "," << fy << endl;
+        return;
 }

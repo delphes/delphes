@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_TransportMatrices.cc
 /// \brief Includes the implementation of every transport matrix.
@@ -35,24 +28,24 @@ bool relative_energy = 1;
 // caution : do not change particle mass, not implemented yet.
 
 extern double omega(const double k, const double l) {
-		// [l] = [m] and [k] = [1/m^2] for quadrupoles
+		// [l] = [m] and [k] = [1/m�] for quadrupoles
 		// [omega] = [1]
 	return sqrt(fabs(k))*l;
 }
 
 extern double radius(const double k) {
-		// [k] = [1/m^2] for quadrupoles
+		// [k] = [1/m�] for quadrupoles
 		// [k] = [1/m]  for dipoles
 		// [radius(k)] = [m]
-	if(k==0 && VERBOSE) cout<<"<H_TransportMatrices> ERROR : Dipole has no effect : results will be corrupted"<<endl; 
+	if(k==0 && VERBOSE) cout<<"ERROR : Dipole has no effect : results will be corrupted"<<endl; 
 	// this is protected by the "if(k==0) -> driftmat" in every matrix below (ex vquatmat)
 	return (k==0) ? 1 : 1/k;
 }
 
-extern void printMatrix(TMatrix TMat) {
+extern void printMatrix(TMatrix * TMat) {
 	char temp[20];
 	float * el = new float[MDIM*MDIM];
-	el = (TMat.GetMatrixArray());
+	el = (TMat->GetMatrixArray());
 
 	cout << endl << "\t";
 	for(int i=0;i<MDIM*MDIM;i++) {
@@ -155,9 +148,9 @@ extern TMatrix rdipmat(const float l, const float k, const float eloss = 0., con
 	float * efmat = new float[MDIM*MDIM];
 	double simp = r*2*sin(l/(2*r))*sin(l/(2*r))/BE;
 	double psy = ke*l/2.;
-	float tefmat[MDIM*MDIM] = {1., tan(psy)*ke, 0., 0., 0., 0.,
+	float tefmat[MDIM*MDIM] = {1., (float)(tan(psy)*ke), 0., 0., 0., 0.,
 	                            0., 1., 0., 0., 0., 0.,
-	                            0., 0., 1., -tan(psy)*ke, 0., 0.,
+	                            0., 0., 1., (float)(-tan(psy)*ke), 0., 0.,
 	                            0., 0., 0., 1., 0., 0.,
 	                            0., 0., 0., 0., 1., 0.,
 	                            0., 0., 0., 0., 0., 1. };
@@ -166,7 +159,7 @@ extern TMatrix rdipmat(const float l, const float k, const float eloss = 0., con
 	             	           r*sin(l/r),cos(l/r),0.,0., 0., 0.,
    		           	           0.,0.,1.,0., 0., 0.,
    	            	           0.,0.,l,1., 0., 0., 
-   	                        simp, sin(l/r)/BE, 0., 0., 1., 0.,
+   	                        (float)simp, (float)(sin(l/r)/BE), 0., 0., 1., 0.,
    	                        0., 0., 0., 0., 0., 1. };
 	for(int i=0;i<MDIM*MDIM;i++) { 
 		mat[i] = tmat[i];
@@ -215,7 +208,7 @@ extern TMatrix sdipmat(const float l, const float k, const float eloss = 0., con
 		                      r*sin(l/r),cos(l/r),0.,0., 0., 0.,
 			                  0.,0.,1.,0., 0., 0.,
 			                  0.,0.,l,1., 0., 0.,
-			                  simp, sin(l/r)/BE, 0., 0., 1., 0.,
+			                  simp, (float)(sin(l/r)/BE), 0., 0., 1., 0.,
 			                  0., 0., 0., 0., 0., 1.
 				           };
 	if(!relative_energy) {
@@ -264,7 +257,7 @@ extern TMatrix hkickmat(const float l, const float k, const float eloss =0., con
                            0.,0.,1.,0.,0.,0.,
                            0.,0.,l ,1.,0.,0.,
                            0.,0.,0.,0.,1.,0.,
-                           l*tan(ke)/2.,ke, 0., 0., 0., 1. 
+                           (float)(l*tan(ke)/2.),ke, 0., 0., 0., 1. 
 	};
 
 	for(int i=0;i<MDIM*MDIM;i++) { mat[i] = tmat[i]; }
@@ -291,7 +284,7 @@ extern TMatrix vkickmat(const float l, const float k, const float eloss=0., cons
                            0.,0.,1.,0.,0.,0.,
                            0.,0.,l ,1.,0.,0.,
                            0.,0.,0.,0.,1.,0.,
-                           0.,0.,l*tan(ke)/2.,ke, 0., 1. 
+                           0.,0.,(float)(l*tan(ke)/2.),ke, 0., 1. 
 	};
 
 	for(int i=0;i<MDIM*MDIM;i++) { mat[i] = tmat[i]; }

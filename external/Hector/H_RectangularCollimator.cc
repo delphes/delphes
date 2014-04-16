@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_RectangularCollimator.cc
 /// \brief R-Collimators for the LHC beamline.
@@ -30,44 +23,32 @@ void H_RectangularCollimator::init() {
 	return;
 }
 
-H_RectangularCollimator::H_RectangularCollimator(const double s, const double l) :H_Drift(s,l){
-	type = RCOLLIMATOR;
-	init();
+H_RectangularCollimator::H_RectangularCollimator(const double s, const double l) :H_OpticalElement(RCOLLIMATOR,s,0.,l){
+		init();
 	return;
 }
 
-H_RectangularCollimator::H_RectangularCollimator(const string& nameE, const double s, const double l) :H_Drift(nameE,s,l){
-	type = RCOLLIMATOR;
-	init();
+H_RectangularCollimator::H_RectangularCollimator(const string nameE, const double s, const double l) :H_OpticalElement(nameE,RCOLLIMATOR,s,0.,l){
+		init();
 	return;
 }
 
-std::ostream& operator<< (std::ostream& os, const H_RectangularCollimator& el) {
-	os << el.typestring << el.name << "\t\t at s = " << el.fs << "\t length = " << el.element_length <<endl;
-	if(el.element_aperture->getType()!=NONE) {
-        	os << *(el.element_aperture) << endl;
+void H_RectangularCollimator::printProperties() const {
+	cout << typestring << name;
+	cout << "\t\t at s = " << fs;
+	cout << "\t length = " << element_length;
+	cout<<endl;
+	if(element_aperture->getType()!=NONE) {
+        	cout <<"\t aperture type = " << element_aperture->getTypeString();
+                	element_aperture->printProperties();
 	}
 
-	if(el.element_length<0 && VERBOSE) os <<"<H_RectangularCollimator> ERROR : Interpenetration of elements !"<<endl; 
-	else if(el.element_length==0 && VERBOSE) os <<"<H_RectangularCollimator> WARNING : 0-length "<< el.name << " !" << endl;
-   return os;
+	if(element_length<0)  { if(VERBOSE) cout<<"\t ERROR : Interpenetration of elements !"<<endl; }
+	if(element_length==0) { if(VERBOSE) cout<<"\t WARNING : 0-length "<< name << " !" << endl; }
 }
 
-//void H_RectangularCollimator::setMatrix(const float eloss, const float p_mass, const float p_charge) {
-void H_RectangularCollimator::setMatrix(const float , const float , const float ) {
-	element_mat = driftmat(element_length);
+void H_RectangularCollimator::setMatrix(const float eloss, const float p_mass, const float p_charge) const {
+	//	cout<<"\t WARNING : H_RectangularCollimator matrices not yet implemented ! " << endl;
+		*element_mat = driftmat(element_length);
 	return ;
 }
-
-H_RectangularCollimator* H_RectangularCollimator::clone() const {
-	H_RectangularCollimator* temp_coll = new H_RectangularCollimator(name,fs,element_length);
-	temp_coll->setAperture(element_aperture);
-	temp_coll->setX(xpos);
-	temp_coll->setY(ypos);
-	temp_coll->setTX(txpos);
-	temp_coll->setTY(typos);
-	temp_coll->setBetaX(betax);
-	temp_coll->setBetaY(betay);
-	return temp_coll;
-}
-

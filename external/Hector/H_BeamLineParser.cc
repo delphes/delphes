@@ -1,26 +1,19 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_BeamLineParser.cc
 /// \brief Reader for madx tables
 ///
-/// Notes : Verifier que tous les SBEND sont toujours appeles MB. Et seulement comme ca !
-/// Verifier qu'il n'y a pas de problemes d'inversion H/V QUADRUPOLES
+/// Notes : V�ifier que tous les SBEND sont toujours appel� MB. Et seulement comme � !
+/// V�ifier qu'il n'y a pas de probl�e d'inversion H/V QUADRUPOLES
 /// no distinction between H and Vkickers ?
 /// The identification of the element is based on the values of k1l, k2l, hkick, vkick and on their name.
 /// x and y are put in m
@@ -37,7 +30,7 @@ using namespace std;
 
 
 /// Identifies the column content from its header
-int column_identification(const string& header) {
+int column_identification(const string header) {
 	// identifies the column type from its name
 
 	     if (header=="NAME")    {return MADX_NAME; }

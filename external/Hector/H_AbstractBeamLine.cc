@@ -1,20 +1,14 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
+
 
 /// \file H_AbstractBeamLine.cc
 /// \brief Class describing ideal beamline.
@@ -26,61 +20,44 @@
 #include <cmath>
 
 // ROOT #includes
-#include "TPaveLabel.h"
-#include "TLine.h"
-#include "TGaxis.h"
-#include "TLegend.h"
-#include "TF1.h"
-#include "TROOT.h"
+//#include "TPaveLabel.h"
+//#include "TLine.h"
+//#include "TGaxis.h"
+//#include "TLegend.h"
+//#include "TF1.h"
+//#include "TROOT.h"
 
 // local #includes
 #include "H_Parameters.h"
 #include "H_TransportMatrices.h"
 #include "H_Drift.h"
 #include "H_AbstractBeamLine.h"
+#include "H_BeamParticle.h"
 #include "H_RomanPot.h"
 using namespace std;
 
 void H_AbstractBeamLine::init(const float length) {
-	beam_mat.ResizeTo(MDIM,MDIM);
-	beam_mat = driftmat(length);
+	beam_mat = new TMatrix(MDIM,MDIM);
   	beam_length = length;
 	H_Drift * drift0 = new H_Drift("Drift0",0.,length);
 	add(drift0);
 	return;
 }
 
-H_AbstractBeamLine::H_AbstractBeamLine(const H_AbstractBeamLine& beamline) : 
-	matrices(beamline.matrices)   {
-	//elements = beamline.elements; //<-- bad ! the new vector contains the same pointers as the previous one
-	cloneElements(beamline);
-	beam_mat.ResizeTo(MDIM,MDIM);
-	beam_mat = beamline.beam_mat;
+H_AbstractBeamLine::H_AbstractBeamLine(const H_AbstractBeamLine& beamline) {
+	elements = beamline.elements;
+	matrices = beamline.matrices;
+	beam_mat = new TMatrix(*(beamline.beam_mat));
 	beam_length = beamline.beam_length;
 }
 
 H_AbstractBeamLine& H_AbstractBeamLine::operator=(const H_AbstractBeamLine& beamline) {
 	if(this== &beamline) return *this;
-	//elements = beamline.elements; //<-- bad ! the new vector contains the same pointers as the previous one
-	cloneElements(beamline);
+        elements = beamline.elements;
         matrices = beamline.matrices;
-        beam_mat = beamline.beam_mat;
+        beam_mat = new TMatrix(*(beamline.beam_mat));
 	beam_length = beamline.beam_length;
 	return *this;
-}
-
-H_AbstractBeamLine* H_AbstractBeamLine::clone() const {
-	H_AbstractBeamLine* temp_beam = new H_AbstractBeamLine(beam_length);
-	vector<H_OpticalElement*>::const_iterator element_i;
-	for (element_i = elements.begin(); element_i<elements.end(); element_i++) {
-		if((*element_i)->getType()!=DRIFT) {
-			H_OpticalElement* temp_el = (*element_i)->clone();
-			temp_beam->add(temp_el);
-		}
-	}
-	temp_beam->beam_mat = beam_mat;
-	temp_beam->matrices = matrices;
-	return temp_beam;
 }
 
 H_AbstractBeamLine::~H_AbstractBeamLine() {
@@ -90,14 +67,7 @@ H_AbstractBeamLine::~H_AbstractBeamLine() {
 	}
 	elements.clear(); 
 	matrices.clear(); 
-}
-
-void H_AbstractBeamLine::cloneElements(const H_AbstractBeamLine& beam) {
-	vector<H_OpticalElement*>::const_iterator element_i;
-        for (element_i = beam.elements.begin(); element_i< beam.elements.end(); element_i++) {
-        	H_OpticalElement* temp_el = (*element_i)->clone();
-                elements.push_back(temp_el);
-        }
+	delete beam_mat;
 }
 
 void H_AbstractBeamLine::add(H_OpticalElement * newElement) {
@@ -109,18 +79,32 @@ void H_AbstractBeamLine::add(H_OpticalElement * newElement) {
  	float a = newElement->getS()+newElement->getLength();
 	if (a > beam_length)	{
 		beam_length = a;
-		if(VERBOSE) cout<<"<H_AbstractBeamLine> WARNING : element ("<< newElement->getName()<<") too far away. The beam length has been extended to "<< beam_length << ". "<<endl;
+		if(VERBOSE) cout<<"WARNING : element ("<< newElement->getName()<<") too far away. The beam length has been extended to "<< beam_length << ". "<<endl;
 	}
 	calcSequence();
 	calcMatrix();
-	return;
 }
 
-const TMatrix H_AbstractBeamLine::getBeamMatrix() const {
-	return beam_mat;
+void H_AbstractBeamLine::add(H_OpticalElement & newElement) {
+	/// @param newElement is added to the beamline
+//	H_OpticalElement * el = new H_OpticalElement(newElement);
+//	elements.push_back(el);
+	elements.push_back(&newElement);
+ 	float a = newElement.getS()+newElement.getLength();
+	if (a > beam_length)	{
+		beam_length = a;
+		if(VERBOSE) cout<<"WARNING : element ("<< newElement.getName()<<") too far away. The beam length has been extended to "<< beam_length << ". "<<endl;
+	}
+	calcSequence();
+	calcMatrix();
 }
 
-const TMatrix H_AbstractBeamLine::getBeamMatrix(const float eloss,const float p_mass, const float p_charge) {
+const TMatrix * H_AbstractBeamLine::getBeamMatrix() const {
+	TMatrix * mat = new TMatrix(*beam_mat);
+	return mat;
+}
+
+const TMatrix * H_AbstractBeamLine::getBeamMatrix(const float eloss,const float p_mass, const float p_charge) {
 
 	vector<H_OpticalElement*>::iterator element_i;
     TMatrix calc_mat(MDIM,MDIM);
@@ -133,10 +117,11 @@ const TMatrix H_AbstractBeamLine::getBeamMatrix(const float eloss,const float p_
 	for(element_i = elements.begin(); element_i < elements.end(); element_i++) {
 		calc_mat *= (*element_i)->getMatrix(eloss,p_mass,p_charge);
 	}
-	return calc_mat;
+	const TMatrix* bmat = new TMatrix(calc_mat);
+	return bmat;
 }
 
-const TMatrix H_AbstractBeamLine::getPartialMatrix(const string& elname, const float eloss, const float p_mass, const float p_charge) {
+const TMatrix * H_AbstractBeamLine::getPartialMatrix(const string elname, const float eloss, const float p_mass, const float p_charge) {
 
 	vector<H_OpticalElement*>::iterator element_i;
 	TMatrix calc_mat(MDIM,MDIM);
@@ -146,35 +131,37 @@ const TMatrix H_AbstractBeamLine::getPartialMatrix(const string& elname, const f
 	for(element_i = elements.begin(); element_i < elements.end(); element_i++) {
 		calc_mat *= (*element_i)->getMatrix(eloss,p_mass,p_charge);
 		if(elname==(*element_i)->getName()) {
-			return calc_mat;
+			const TMatrix* bmat = new TMatrix(calc_mat);
+			return bmat;
 		}
 	}
-	cout<<"<H_AbstractBeamLine> Element "<<elname<<" desn't exist. Returning full beam matrix"<<endl;
-	return calc_mat;
+	cout<<"Element "<<elname<<" desn't exist. Returning full beam matrix"<<endl;
+	const TMatrix* bmat = new TMatrix(calc_mat);
+	return bmat;
 }
 
-const TMatrix H_AbstractBeamLine::getPartialMatrix(const unsigned int element_position) const {
+const TMatrix * H_AbstractBeamLine::getPartialMatrix(const unsigned int element_position) const {
  	//const int N = (element_position<0)?0:(( (element_position)>elements.size()-1)?elements.size()-1:element_position);
 	const int N = (element_position>elements.size()-1)?elements.size()-1:element_position;
-	return *(matrices.begin()+N); // //for optimization of the code :same as return &matrices[N];
+	return &(*(matrices.begin()+N)); // //for optimization of the code :same as return &matrices[N];
 }
 
-const TMatrix H_AbstractBeamLine::getPartialMatrix(const H_OpticalElement * element) const{
+const TMatrix * H_AbstractBeamLine::getPartialMatrix(const H_OpticalElement * element) const{
 	// returns the transport matrix to transport until the end of the specified element
 	// !!! 2 elements should never have the same name in "elements" !!!
 
 	vector<H_OpticalElement*>::const_iterator element_i;
 	vector<TMatrix>::const_iterator matrix_i;
-	TMatrix calc_mat(MDIM,MDIM);
+	TMatrix * calc_mat = new TMatrix(MDIM,MDIM);
 
 	// parses the list of optical elements and find the searched one
 	for(element_i = elements.begin(),matrix_i = matrices.begin(); element_i < elements.end(); element_i++, matrix_i++) {
 		if(element->getName() == (*element_i)->getName()) {
 			// element has been found
-			calc_mat = *matrix_i;
+			calc_mat = const_cast<TMatrix*>( &(*matrix_i));
         	}
 	}
-	return calc_mat;
+	return (const TMatrix*) calc_mat;
 }
 
 H_OpticalElement * H_AbstractBeamLine::getElement(const unsigned int element_position) {
@@ -182,40 +169,38 @@ H_OpticalElement * H_AbstractBeamLine::getElement(const unsigned int element_pos
 	return *(elements.begin()+N);//for optimization of the code :same as return &elements[N];
 }
 
-H_OpticalElement * H_AbstractBeamLine::getElement(const unsigned int element_position) const {
+const H_OpticalElement * H_AbstractBeamLine::getElement(const unsigned int element_position) const {
 	const unsigned int N = (element_position>elements.size())?elements.size():element_position;
         return *(elements.begin()+N);//for optimization of the code :same as return &elements[N];
 }
 
 
-H_OpticalElement * H_AbstractBeamLine::getElement(const string& el_name) {
+H_OpticalElement * H_AbstractBeamLine::getElement(const string el_name) {
 	for(unsigned int i=0; i < elements.size(); i++) {
 		if( (*(elements.begin()+i))->getName() == el_name ) 
 			return *(elements.begin()+i);
 	} // if found -> return ; else : not found at all !	
-	cout<<"<H_AbstractBeamLine> Element "<<el_name<<" not found"<<endl;
+	cout<<"Element "<<el_name<<" not found"<<endl;
 	return *(elements.begin()+1);
 }
 
-H_OpticalElement * H_AbstractBeamLine::getElement(const string& el_name) const {
+const H_OpticalElement * H_AbstractBeamLine::getElement(const string el_name) const {
         for(unsigned int i=0; i < elements.size(); i++) {
 		if( (*(elements.begin()+i))->getName() == el_name)
 			return *(elements.begin()+i);
 	} // if found -> return ; else : not found at all !
-	cout<<"<H_AbstractBeamLine> Element "<<el_name<<" not found"<<endl;
+	cout<<"Element "<<el_name<<" not found"<<endl;
 	return *(elements.begin()+1);
 }
 
-std::ostream& operator<< (std::ostream& os, const H_AbstractBeamLine& be) {
-        vector<H_OpticalElement*>::const_iterator element_i;
-        os << "Beamline content" << endl;
-        for (element_i = be.elements.begin(); element_i < be.elements.end(); element_i++) {
-                os << (int)(element_i - be.elements.begin()) << "\t" << (*element_i)->getName() << "\t" << (*element_i)->getS() << endl;
-        }
-  return os;
+void H_AbstractBeamLine::printProperties() const {
+	vector<H_OpticalElement*>::const_iterator element_i;
+	cout << "Pointeurs des elements du faisceau" << endl;
+	for (element_i = elements.begin(); element_i < elements.end(); element_i++) {
+		cout << (int)(element_i-elements.begin()) << "\t" << (*element_i)->getName() << "\t" << (*element_i)->getS() << endl;	
+	}
+	return;
 }
-
-void H_AbstractBeamLine::printProperties() const { cout << *this; return; }
 
 void H_AbstractBeamLine::showElements() const{
 	vector<H_OpticalElement*>::const_iterator element_i;
@@ -253,7 +238,7 @@ void H_AbstractBeamLine::showMatrices() const{
 	for(matrix_i = matrices.begin(), element_i = elements.begin(); matrix_i < matrices.end(); matrix_i++, element_i++) {
 		temp = *matrix_i;
 		cout << "Matrix for transport until s=" << (*element_i)->getS() + (*element_i)->getLength() << "m (" << (*element_i)->getName() << "). " << endl;
-		printMatrix(temp);
+		printMatrix(&temp);
 		cout << endl;
 	}
 	return ;
@@ -270,7 +255,7 @@ void H_AbstractBeamLine::calcSequence() {
 
 	// getting rid of drifts before calculating
 	for(element_i = elements.begin(); element_i < elements.end(); element_i++) {
-		if((*element_i)->getType() == DRIFT) {delete (*element_i); elements.erase(element_i); }
+		if((*element_i)->getType() == DRIFT) {elements.erase(element_i); }
 	}
 
 	// ordering the elements in position
@@ -295,10 +280,7 @@ void H_AbstractBeamLine::calcSequence() {
 			H_Drift *dr = new H_Drift(current_pos,drift_length);
 			temp_elements.push_back(dr);
 	}
-	
-	// cleaning : avoid some memory leaks
 	elements.clear();
-
 	for(element_i=temp_elements.begin(); element_i < temp_elements.end(); element_i++) {
 		elements.push_back(*element_i);
 	}
@@ -320,8 +302,7 @@ void H_AbstractBeamLine::calcMatrix() {
 		matrices.push_back(calc_mat);
   	}
 
-	beam_mat.ResizeTo(MDIM,MDIM);
-	beam_mat = calc_mat;
+	*beam_mat = calc_mat;
 	return;
 }
 
@@ -337,11 +318,10 @@ float dh(float k) {
         return 0.8*(1-exp(-psi*fabs(k)));
 }
 
-void H_AbstractBeamLine::draw(const float xmin, const float ymin, const float xmax, const float ymax) const{
-	gROOT->SetStyle("Plain");
-	TLegend* leg = new TLegend(xmin,ymin,xmax,ymax,""); 
+void H_AbstractBeamLine::draw() const{
+/*	gROOT->SetStyle("Plain");
+	TLegend* leg = new TLegend(0.85,0.50,1,1,"Legend");
 	leg->SetBorderSize(1);
-	leg->SetFillColor(kWhite);
 	TBox* b1 = new TBox();
 	TBox* b2 = new TBox(0,0,10,10);
 	TBox* b3 = new TBox(0,0,0,0);
@@ -364,6 +344,7 @@ void H_AbstractBeamLine::draw(const float xmin, const float ymin, const float xm
 	leg->AddEntry(b6,VKICKERNAME);
 	leg->AddEntry(b7,"RCollimator");
 	leg->Draw();
+*/ 
 /*	TLine* l1 = new TLine(0.05,0.5,0.95,0.5);
 	TLine* l2 = new TLine(0.1,0.1,0.1,0.9);
 	TLine* l3 = new TLine(0.9,0.1,0.9,0.9);
@@ -412,16 +393,15 @@ void H_AbstractBeamLine::draw(const float xmin, const float ymin, const float xm
 	return;
 }
 
-void H_AbstractBeamLine::drawX(const float a_min, const float a_max, const float scale) const{
+void H_AbstractBeamLine::drawX(const float a_min, const float a_max) const{
 	/// @param a_min defines the size of the drawing
 	/// @param a_max defines the size of the drawing
-	/// @param scale allows to multiply the drawing, i.e. changing the units
 	const int N = getNumberOfElements();
 	for(int i=0;i<N;i++) {
 		float height = fabs(a_max);
         	float meight = fabs(a_min);
         	float size = (height>meight)?meight:height;
-		float middle = getElement(i)->getX()*URAD*scale;
+		float middle = getElement(i)->getX()*URAD;
         	if(getElement(i)->getType()!=DRIFT) getElement(i)->draw(middle+size/2.,middle-size/2.);
     	}
 }
@@ -439,7 +419,7 @@ void H_AbstractBeamLine::drawY(const float a_min, const float a_max) const{
         }
 }
 
-void H_AbstractBeamLine::moveElement(const string& name, const float new_s) {
+void H_AbstractBeamLine::moveElement(const string name, const float new_s) {
 	/// @param name identifies the element to move
 	/// @param new_s is where to put it
        vector<H_OpticalElement*>::iterator element_i;
@@ -452,7 +432,7 @@ void H_AbstractBeamLine::moveElement(const string& name, const float new_s) {
        return;
 }
 
-void H_AbstractBeamLine::alignElement(const string& name, const float disp_x, const float disp_y) {
+void H_AbstractBeamLine::alignElement(const string name, const float disp_x, const float disp_y) {
 	/// @param name identifies the element to move
 	/// @param disp_x identifies the displacement to add in x [\f$ \mu m \f$]
 	/// @param disp_y identifies the displacement to add in y [\f$ \mu m \f$]
@@ -464,11 +444,12 @@ void H_AbstractBeamLine::alignElement(const string& name, const float disp_x, co
 				return ;
 			}
 		}
-		cout<<"<H_AbstractBeamLine> WARNING : Element "<<name<<" not found."<<endl; 
+		cout<<"Element "<<name<<" not found."<<endl; 
+		if(VERBOSE) cout<<"Element "<<name<<" not found."<<endl;
 		return;
 }
 
-void H_AbstractBeamLine::tiltElement(const string& name, const float ang_x, const float ang_y) {
+void H_AbstractBeamLine::tiltElement(const string name, const float ang_x, const float ang_y) {
 	/// @param name identifies the element to move
 	/// @param ang_x identifies the angle to add in x
 	/// @param ang_y identifies the angle to add in y
@@ -480,7 +461,7 @@ void H_AbstractBeamLine::tiltElement(const string& name, const float ang_x, cons
 				return ;
 			}
 		}
-		cout<<"<H_AbstractBeamLine> WARNING : Element "<<name<<" not found."<<endl; 
+		if(VERBOSE) cout<<"Element "<<name<<" not found."<<endl;
 		return;
 }
 
@@ -499,6 +480,7 @@ void H_AbstractBeamLine::offsetElements(const float start, const float offset) {
 	}
 }
 
+/*
 TGraph * H_AbstractBeamLine::getBetaX() const{
         const int N = elements.size();
         float * s = new float[N], * b = new float[N], temp;
@@ -647,4 +629,4 @@ TGraph * H_AbstractBeamLine::getRelY() const{
         delete [] r;
         return rely;
 }
-
+*/

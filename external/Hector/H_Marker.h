@@ -1,48 +1,40 @@
 #ifndef _H_Marker_
 #define _H_Marker_
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_Marker.h
 /// \brief Class defining a marker in the beamline (e.g. for interaction point)
 
 // local includes
-#include "H_Drift.h"
+#include "H_OpticalElement.h"
 
 /// \brief Class defining a marker in the beamline (e.g. for interaction point)
-class H_Marker : public H_Drift {
+class H_Marker : public H_OpticalElement {
 
 	public:
 	/// Constructors and destructor
 	//@{
-		H_Marker():H_Drift() { type = MARKER; init();}
-        	H_Marker(const double s):H_Drift(s,0.) { type =MARKER; init();}
-	        H_Marker(const string& nameE, const double s):H_Drift(nameE,s,0.) { type=MARKER; init();}
-	        ~H_Marker() { };
+		H_Marker():H_OpticalElement(MARKER,0.,0.,0.) {init();}
+        	H_Marker(const double s):H_OpticalElement(MARKER,s,0.,0.){init();}
+	        H_Marker(const string nameE, const double s):H_OpticalElement(nameE,MARKER,s,0.,0.){init();}
+	        ~H_Marker() { return; };
 	//@}
-		H_Marker* clone() const ;
+        	virtual void printProperties() const;
 	        void init();
 
 	private:
         	virtual void setTypeString() {typestring = MARKERNAME;};
-	        virtual void setMatrix(const float , const float, const float) ;
-	friend std::ostream& operator<< (std::ostream& os, const H_Marker& el);
+	        virtual void setMatrix(const float , const float, const float) const ;
 };
 
 #endif

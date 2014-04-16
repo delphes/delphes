@@ -1,24 +1,16 @@
 #ifndef _H_VerticalQuadrupole_
 #define _H_VerticalQuadrupole_
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
 
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_VerticalQuadrupole.h
 /// \brief Vertically focussing quadrupoles.
@@ -34,13 +26,12 @@ class H_VerticalQuadrupole : public H_Quadrupole {
 	//@{
 		H_VerticalQuadrupole():H_Quadrupole(VQUADRUPOLE,0.,0.,0.) {init();}
 		H_VerticalQuadrupole(const double s, const double k, const double l):H_Quadrupole(VQUADRUPOLE,s,k,l) {init();}
-		H_VerticalQuadrupole(const string& nameE, const double s, const double k, const double l):H_Quadrupole(nameE,VQUADRUPOLE,s,k,l) {init();}
-	~H_VerticalQuadrupole() {};
-//@}
-	H_VerticalQuadrupole* clone() const ;
-private:
+		H_VerticalQuadrupole(string nameE, const double s, const double k, const double l):H_Quadrupole(nameE,VQUADRUPOLE,s,k,l) {init();}
+		~H_VerticalQuadrupole() {return;};
+	//@}
+	private:
 		virtual void setTypeString() {typestring = VQUADRUPOLENAME;} ;
-		virtual void setMatrix(const float, const float, const float) ;
+		virtual void setMatrix(const float, const float, const float) const;
 };
 
 #endif

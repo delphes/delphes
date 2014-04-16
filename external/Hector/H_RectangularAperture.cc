@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_RectangularAperture.cc
 /// \brief Defines the rectangular aperture of beamline elements.
@@ -26,19 +19,15 @@
 #include <cmath> // needed for fabs
 
 // ROOT #includes
-#include "TPave.h"
+//#include "TPave.h"
 
 // local #includes
 #include "H_RectangularAperture.h"
 using namespace std;
 
-H_RectangularAperture::H_RectangularAperture(const float l, const float h, const float posx, const float posy) :H_Aperture(RECTANGULAR,l,h,0,0,posx,posy) {
-	/// @param l, h are the length and height of the rectangular shape
+H_RectangularAperture::H_RectangularAperture(const float x1, const float x2, const float posx, const float posy) :H_Aperture(RECTANGULAR,x1,x2,0,0,posx,posy) {
+	/// @param x1, x2 are the length and height of the rectangular shape
 	/// @param posx, posy are the (x,y) coordinates of the center of the rectangular shape
-}
-
-H_RectangularAperture* H_RectangularAperture::clone() const {
-	return new H_RectangularAperture(x1,x2,fx,fy);
 }
 
 bool H_RectangularAperture::isInside(const float x, const float y) const {
@@ -46,18 +35,17 @@ bool H_RectangularAperture::isInside(const float x, const float y) const {
 	return (fabs(x-fx)<x1&&fabs(y-fy)<x2);
 }
 
-void H_RectangularAperture::draw(const float scale) const {
-	TPave* tp = new TPave((fx-x1)*scale,(fy-x2)*scale,(fx+x1)*scale,(fy+x2)*scale,1);
+void H_RectangularAperture::draw() const {
+/*	TPave* tp = new TPave(fx-x1,fy-x2,fx+x1,fy+x2,1);
 	tp->SetFillStyle(3003);
 	tp->SetLineColor(2);
 	tp->SetFillColor(2);
 	tp->Draw();
 	return;
+*/
 }
-
-std::ostream& operator<< (std::ostream& os, const H_RectangularAperture& ap) {
-	os << "Aperture shape:" << ap.aptypestring << ", rectangle sides : " << ap. x1 <<", " << ap.x2 <<endl;
-	os << " \t Center : " << ap.fx << "," << ap.fy << endl;
-        return os;
+void H_RectangularAperture::printProperties() const {
+	cout << "Aperture shape:" << getTypeString() << ", rectangle Sides : "<<x1<<", "<<x2<<endl;
+	cout << " \t Center : " << fx << "," << fy << endl;
+	return;
 }
-

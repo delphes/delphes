@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_BeamParticle.cc
 /// \brief Class aiming at simulating a particle in the LHC beam
@@ -25,7 +18,6 @@
 
 // c++ #includes
 #include <iostream>
-#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <string>
@@ -34,11 +26,12 @@
 // ROOT #includes
 #include "H_Parameters.h"
 #include "TRandom.h"
-#include "TVectorD.h"
+//#include "TView.h"
+//#include "TPolyLine3D.h"
 #ifdef _include_pythia_
 #include "TPythia6.h"
+#include "TRandom.h"
 #endif
-
 // local #includes
 #include "H_OpticalElement.h"
 #include "H_BeamParticle.h"
@@ -46,7 +39,7 @@
 
 using namespace std;
 
-void H_BeamParticle::init() { // for more efficiency, put the objects away from init!
+void H_BeamParticle::init() {
 	mp = MP;
 	qp = QP;
         fx = 0;
@@ -64,16 +57,25 @@ void H_BeamParticle::init() { // for more efficiency, put the objects away from 
 	stop_element = 0;
 }
 
-H_BeamParticle::H_BeamParticle() { 
+H_BeamParticle::H_BeamParticle() {
 	init();
 }
 
-H_BeamParticle::H_BeamParticle(const H_BeamParticle& p): 
-	mp(p.mp), qp(p.qp), fs(p.fs), fx(p.fx), fy(p.fy), thx(p.thx), thy(p.thy), 
-	energy(p.energy), hasstopped(p.hasstopped), hasemitted(p.hasemitted),
-	isphysical(p.isphysical), stop_position(new TVectorD(*(p.stop_position))),
-	stop_element(0), positions(p.positions) {
+H_BeamParticle::H_BeamParticle(const H_BeamParticle& p) {
+	mp = p.mp;
+	qp = p.qp;
+	fx = p.fx;
+	fy = p.fy;
+	thx = p.thx;
+	thy = p.thy;
+	fs = p.fs;
+	energy = p.energy;
+	hasstopped = p.hasstopped;
+	hasemitted = p.hasemitted;
+	isphysical = p.isphysical;
+	stop_position = new TVectorD(*(p.stop_position));
 	if(p.hasstopped) stop_element = new H_OpticalElement(*(p.stop_element)); 
+	positions = p.positions;
 }
 
 H_BeamParticle::H_BeamParticle(const double mass, const double charge) {
@@ -98,48 +100,29 @@ H_BeamParticle& H_BeamParticle::operator=(const H_BeamParticle& p) {
 	isphysical = p.isphysical;
         stop_position = new TVectorD(*(p.stop_position));
 	if(p.hasstopped) stop_element = new H_OpticalElement(*(p.stop_element));
-	else stop_element = 0;
         positions = p.positions;
 	return *this;
 }
 
-const bool H_BeamParticle::stopped(const H_AbstractBeamLine * beamline) {
+bool H_BeamParticle::stopped(const H_AbstractBeamLine * beamline) {
 	vector<TVectorD>::const_iterator position_i;
 	for(position_i = positions.begin(); position_i < positions.end()-1; position_i++) {
 		const unsigned int pos = position_i-positions.begin();
 		if(beamline->getElement(pos)->getAperture()->getType()!=NONE) {
 			bool has_passed_entrance = beamline->getElement(pos)->isInside((*position_i)[INDEX_X],(*position_i)[INDEX_Y]);
-			bool has_passed_exit     = beamline->getElement(pos)->isInside((*(position_i+1))[INDEX_X],(*(position_i+1))[INDEX_Y]);
-			// here we should distinguish between particles passing the input or not.
-			//  - particles not passing the input are logically stopped at the input position. period.
-			//  - particles passing the input but not the output are stopped somewhere in the element
-			//  - particles passing both the input and the output could have been stopped somewhere inside too (less likely)
-			if(!has_passed_entrance) {
-				if(VERBOSE) cout<<"Stopped at the entrance of "<<beamline->getElement(pos)->getName();
-				hasstopped=true;
-				stop_element = const_cast<H_OpticalElement*>(beamline->getElement(pos));
-				*stop_position = *position_i;
-				if(VERBOSE) cout<<" at s = "<<(*stop_position)[4]<<endl;
-				return hasstopped;
-			} else if (!has_passed_exit) {
-				if(VERBOSE) cout<<"Stopped inside "<<beamline->getElement(pos)->getName();
-				hasstopped=true;
-				stop_element = const_cast<H_OpticalElement*>(beamline->getElement(pos));
-				// this should be computed using the element-based method "H_OpticalElement::getHitPosition" (caution : always nonlinear).
-				*stop_position = beamline->getElement(pos)->getHitPosition(*position_i,BE-energy,mp,qp);
-				if(VERBOSE) cout<<" at s = "<<(*stop_position)[4]<<endl;
-				return hasstopped;
-			}
-/*
+			bool has_passed_exit     = beamline->getElement(pos)->isInside((*(position_i+1))[INDEX_X],(*(position_i+1))[INDEX_Y]); 
 			if(!(has_passed_entrance && has_passed_exit)) {
+	//			cout << "p =" << (*position_i)[INDEX_X] << "; el=" << beamline->getElement(pos)->getX()<<endl;
+	//			beamline->getElement(position_i-positions.begin())->printProperties();
 				if(VERBOSE) cout<<"particle stopped at "<<(beamline->getElement(pos))->getName();
 				if(VERBOSE) cout<<" (s = "<<(*position_i)[4] << ")" << endl;
+				if(VERBOSE && !has_passed_exit) cout << "Particle stopped inside the element" << endl;
 				hasstopped=true;
 				stop_element = const_cast<H_OpticalElement*>(beamline->getElement(pos));
 				*stop_position = *position_i;
 				return hasstopped;
 			} // if
-*/
+//			else cout << "outside aperture " << endl;
 		} // if
 	} // for
 	return hasstopped;
@@ -157,8 +140,6 @@ void H_BeamParticle::addPosition(const double x, const double tx, const double y
 		TVectorD temp_vec(LENGTH_VEC,xys);
 		positions.push_back(temp_vec);
 }
-
-
 
 void H_BeamParticle::smearPos(const double dx,const double dy, TRandom* r) {
   // the beam is centered on (fx,fy) at IP
@@ -190,7 +171,6 @@ void H_BeamParticle::smearS(const double errs, TRandom* r) {
         return;
 }
 
-
 void H_BeamParticle::set4Momentum(const double px, const double py, const double pz, const double ene) {
 	/// @param px, py, pz, ene is \f$ (\vec p , E) [GeV]\f$ 
 	///
@@ -206,13 +186,6 @@ void H_BeamParticle::set4Momentum(const double px, const double py, const double
 	positions.clear();
         addPosition(fx,thx,fy,thy,fs);
 	return;
-}
-
-void H_BeamParticle::set4Momentum(const TLorentzVector& pmu) {
-	/// @param pmu is the particle 4-momentum \f$ p^\mu \f$
-	///
-	/// Clears the H_BeamParticle::positions vector.
-	set4Momentum(pmu.Px(), pmu.Py(), pmu.Pz(), pmu.E());
 }
 
 void H_BeamParticle::setE(const double ene) {
@@ -239,6 +212,11 @@ void H_BeamParticle::setPosition(const double x, const double y, const double tx
 const H_OpticalElement* H_BeamParticle::getStoppingElement() const{
 	if(hasstopped) return stop_element;
 	else { H_OpticalElement * dummy_el = new H_Drift("",0,0); return dummy_el;}
+}
+
+void H_BeamParticle::emitGamma(const double gee, const double gq2) {
+	emitGamma(gee,gq2,0,2*PI);
+	return;
 }
 
 void H_BeamParticle::emitGamma(const double gee, const double gq2, const double phimin, const double phimax) {
@@ -270,11 +248,11 @@ void H_BeamParticle::emitGamma(const double gee, const double gq2, const double 
 	const double q2 = (gq2 > q2max ) ? q2max : (gq2 < q2min) ? q2min : gq2;
 	
 	if( (gq2>q2max) || (gq2<q2min)) {
-		if(VERBOSE) cout<<"<H_BeamParticle> WARNING : Non physical particle ! Q2 (" << q2 << ") and E ("<<gee << ") are not compatible." << endl; 
+		if(VERBOSE) cout<<"Non physical particle ! Q2 (" << q2 << ") and E ("<<gee << ") are not compatible." << endl; 
 		isphysical = false; 
 	}
 
-	if(hasemitted) { cout<<"<H_BeamParticle> WARNING : particle has already emitted at least one gamma !"<<endl;}
+	if(hasemitted) { cout<<"particle has already emitted at least one gamma !"<<endl;}
 	hasemitted = true;
 	energy = energy - gee;
 	// gkk is k
@@ -329,15 +307,15 @@ void H_BeamParticle::doInelastic() {
 	return;
 }
 
-std::ostream& operator<< (std::ostream& os, const H_BeamParticle& p) {
-        os << " M   = " << p.getM()  << "GeV ";
-        os << " Q   = " << p.getQ()  << "e";
-        os << " fx  = " << p.getX()  << "m   ";
-        os << " fy  = " << p.getY()  << "m   ";
-        os << " thx = " << p.getTX() << "rad ";
-        os << " thy = " << p.getTY() << "rad ";
-        os << endl;
-   return os;
+void H_BeamParticle::printProperties() const {
+	cout << " M   = " << getM()  << "GeV ";
+	cout << " Q   = " << getQ()  << "e";
+	cout << " fx  = " << getX()  << "m   ";
+ 	cout << " fy  = " << getY()  << "m   ";
+	cout << " thx = " << getTX() << "rad ";
+	cout << " thy = " << getTY() << "rad ";
+	cout << endl;
+	return;
 }
 
 /// The phase space vector is (x,x',y,y',E)
@@ -377,12 +355,12 @@ void H_BeamParticle::propagate(const double position) {
         	for(position_i = positions.begin(); position_i < positions.end(); position_i++) {
 			if((*position_i)[INDEX_S]>=position) {
 				if(position_i==positions.begin()) {
-					if(VERBOSE) cout<<"<H_BeamParticle> ERROR : non reachable value"<<endl;
+					if(VERBOSE) cout<<"ERROR : non reachable value"<<endl;
 					return;
 				}
 				l = (*position_i)[INDEX_S] - (*(position_i-1))[INDEX_S];
 				if(l==0) {
-					if(VERBOSE) cout<<"<H_BeamParticle> WARNING : no luck in choosing position, no propagation done"<<endl;
+					if(VERBOSE) cout<<"WARNING : no luck in choosing position, no propagation done"<<endl;
 					return;
 				}
 				fs = position;
@@ -395,15 +373,15 @@ void H_BeamParticle::propagate(const double position) {
 		}
 		position_i = positions.begin();
 		cout << "Desired position is : " << position << " & positions.begin() is " << (*position_i)[INDEX_S] << endl;
-		cout<<"<H_BeamParticle> ERROR : position not reachable"<<endl;	
+		cout<<"ERROR : position not reachable"<<endl;	
 		return;
 	}
 }
 
-/// Caution : do not use this method (obsolete) !!!
+/// Caution : do not use this method !!!
 void H_BeamParticle::propagate(const H_AbstractBeamLine * beam, const H_OpticalElement * element) {
 	TMatrixD X(*getV());
-	X *= beam->getPartialMatrix(element);
+	X *= *(beam->getPartialMatrix(element));
 	fx = URAD*(X.GetMatrixArray())[0];
 	thx = URAD*atan((X.GetMatrixArray())[1]);
 	fy = URAD*(X.GetMatrixArray())[2];
@@ -411,14 +389,14 @@ void H_BeamParticle::propagate(const H_AbstractBeamLine * beam, const H_OpticalE
 	return;
 }
 
-void H_BeamParticle::propagate(const H_AbstractBeamLine * beam, const string& el_name) {
-	propagate(beam->getElement(el_name)->getS()+beam->getElement(el_name)->getLength());
+void H_BeamParticle::propagate(const H_AbstractBeamLine * beam, const string el_name) {
+	propagate(beam->getElement(el_name)->getS());
 	return;
 }
 
 void H_BeamParticle::propagate(const H_AbstractBeamLine * beam) {
 	TMatrixD X(*getV());
-	X  *= beam->getBeamMatrix();
+	X  *= *(beam->getBeamMatrix());
 	fx  = URAD*(X.GetMatrixArray())[0];
 	thx = URAD*atan((X.GetMatrixArray())[1]);
 	fy  = URAD*(X.GetMatrixArray())[2];
@@ -435,13 +413,13 @@ void H_BeamParticle::showPositions() const{
 	}
 	return ;
 }
-
+/*
 TGraph * H_BeamParticle::getPath(const int x_or_y, const int color) const{
         /// @param x_or_y = 0(1) draws the x(y) component;
 
         const int N = (int) positions.size();
-		int mycolor = color;
-        if(N<2) cout<<"<H_BeamParticle> WARNING : particle positions not calculated : please run computePath"<<endl; 
+	int mycolor = color;
+        if(N<2) cout<<"particle positions not calculated : please run computePath"<<endl; 
         double * s = new double[N], * graph = new double[N];
 
         int index;
@@ -460,20 +438,44 @@ TGraph * H_BeamParticle::getPath(const int x_or_y, const int color) const{
         return ppath;
 }
 
-void H_BeamParticle::getPath(const int x_or_y, const string& filename) const{
-        /// @param x_or_y = 0(1) draws the x(y) component;
-	ofstream outfile(filename.c_str());
+TPolyLine3D *  H_BeamParticle::getPath3D(const H_AbstractBeamLine * beam, const bool isfirst, const int color, const int side) const{
+        const int N = (int) positions.size();
+	int mycolor = color;
+        if(N<2) cout<<"WARNING : particle positions not calculated. Run computePath"<<endl;
+        double * s = new double[N], * graphx = new double[N], * graphy = new double[N];
+	int direction = (side<0)?-1:1;
 
-        int index;
-        if(x_or_y==0) {index = INDEX_X;} else {index = INDEX_Y;}
 
         vector<TVectorD>::const_iterator position_i;
         for(position_i = positions.begin(); position_i < positions.end(); position_i++) {
-		outfile << (*position_i)[index] << "\t" << (*position_i)[INDEX_S] << endl;
+                graphx[(int)(position_i-positions.begin())] = (*position_i)[INDEX_X];
+                graphy[(int)(position_i-positions.begin())] = (*position_i)[INDEX_Y];
+                s[(int)(position_i-positions.begin())] = (*position_i)[INDEX_S]*1000*direction;
         }
-	outfile.close();
-}
 
+        float coi[3] = {beam->getLength()*(-1000),-10000,-5000};
+        float cof[3] = {beam->getLength()*1000,10000,5000};
+        TView *view = TView::CreateView(11);
+        view->SetRange(coi[0],coi[1],coi[2],cof[0],cof[1],cof[2]);
+        TPolyLine3D* ppath = new TPolyLine3D(N,s,graphx,graphy);
+	ppath->SetLineColor(mycolor);
+
+        if(isfirst) {
+                ppath->Draw();
+                view->ShowAxis();
+        } else {
+                ppath->Draw("same");
+        }
+
+        delete [] s;
+        delete [] graphx;
+        delete [] graphy;
+        return ppath;
+} // getPath3D
+*/
+void H_BeamParticle::computePath(const H_AbstractBeamLine * beam) {
+	computePath(beam,true);
+}
 
 // should be removed later, to keep only computePath(const H_AbstractBeamLine & , const bool)
 void H_BeamParticle::computePath(const H_AbstractBeamLine * beam, const bool NonLinear) {
@@ -504,53 +506,28 @@ void H_BeamParticle::computePath(const H_AbstractBeamLine * beam, const bool Non
 
 	for (int i=0; i<N; i++) {
 		const unsigned pos = i;
-		if(fs < beam->getElement(pos)->getS() && fs > beam->getElement(pos-1)->getS()) {
-			if(beam->getElement(pos-1)->getType()!=DRIFT) { 
-				cout<<"Path starts inside element "<<beam->getElement(pos-1)->getName()<<endl;
-			} else { 
-				cout<<"Path starts inside unnamed drift "<<endl;
-			}
-			H_OpticalElement* temp_el = beam->getElement(pos-1)->clone();
-			temp_el->setS(fs);
-			temp_el->setLength(beam->getElement(pos)->getS() - fs);
-			mat[0][0] = mat[0][0] - temp_el->getX();
-			mat[0][1] = mat[0][1] - tan(temp_el->getTX());
-			mat[0][2] = mat[0][2] - temp_el->getY();
-			mat[0][3] = mat[0][3] - tan(temp_el->getTY());
-			mat *= temp_el->getMatrix(energy_loss,mp,qp);
-			mat[0][0] = mat[0][0] + temp_el->getX();
-			mat[0][1] = mat[0][1] + tan(temp_el->getTX());
-			mat[0][2] = mat[0][2] + temp_el->getY();
-			mat[0][3] = mat[0][3] + tan(temp_el->getTY());
-			xys[0] = mat.GetMatrixArray()[0]*URAD;
-			xys[1] = atan(mat.GetMatrixArray()[1])*URAD;
-			xys[2] = mat.GetMatrixArray()[2]*URAD;
-			xys[3] = atan(mat.GetMatrixArray()[3])*URAD;
-			xys[4] = temp_el->getS()+temp_el->getLength();
-			addPosition(xys[0],xys[1],xys[2],xys[3],xys[4]);
-			if (temp_el) delete temp_el;
-		} 
-		if(fs <= beam->getElement(pos)->getS()) {
-			mat[0][0] = mat[0][0] - beam->getElement(pos)->getX();
-			mat[0][1] = mat[0][1] - tan(beam->getElement(pos)->getTX()/URAD)*URAD;
-			mat[0][2] = mat[0][2] - beam->getElement(pos)->getY();
-			mat[0][3] = mat[0][3] - tan(beam->getElement(pos)->getTY()/URAD)*URAD;
-			mat *= beam->getElement(pos)->getMatrix(energy_loss,mp,qp);
-			mat[0][0] = mat[0][0] + beam->getElement(pos)->getX();
-			mat[0][1] = mat[0][1] + tan(beam->getElement(pos)->getTX()/URAD)*URAD;
-			mat[0][2] = mat[0][2] + beam->getElement(pos)->getY();
-			mat[0][3] = mat[0][3] + tan(beam->getElement(pos)->getTY()/URAD)*URAD;
-			xys[0] = mat.GetMatrixArray()[0]*URAD;
-			xys[1] = atan(mat.GetMatrixArray()[1])*URAD;
-			xys[2] = mat.GetMatrixArray()[2]*URAD;
-			xys[3] = atan(mat.GetMatrixArray()[3])*URAD;
-			xys[4] = beam->getElement(pos)->getS()+beam->getElement(pos)->getLength();
-			addPosition(xys[0],xys[1],xys[2],xys[3],xys[4]);
-		}
-	}
+		mat[0][0] = mat[0][0] - beam->getElement(pos)->getX();
+		mat[0][1] = mat[0][1] - tan(beam->getElement(pos)->getTX()/URAD)*URAD;
+		mat[0][2] = mat[0][2] - beam->getElement(pos)->getY();
+		mat[0][3] = mat[0][3] - tan(beam->getElement(pos)->getTY()/URAD)*URAD;
+		mat *= beam->getElement(pos)->getMatrix(energy_loss,mp,qp);
+		mat[0][0] = mat[0][0] + beam->getElement(pos)->getX();
+		mat[0][1] = mat[0][1] + tan(beam->getElement(pos)->getTX()/URAD)*URAD;
+		mat[0][2] = mat[0][2] + beam->getElement(pos)->getY();
+		mat[0][3] = mat[0][3] + tan(beam->getElement(pos)->getTY()/URAD)*URAD;
+                xys[0] = mat.GetMatrixArray()[0]*URAD;
+                xys[1] = atan(mat.GetMatrixArray()[1])*URAD;
+                xys[2] = mat.GetMatrixArray()[2]*URAD;
+                xys[3] = atan(mat.GetMatrixArray()[3])*URAD;
+                xys[4] = beam->getElement(pos)->getS()+beam->getElement(pos)->getLength();
+                addPosition(xys[0],xys[1],xys[2],xys[3],xys[4]);
+                fx = xys[0];
+                fy = xys[2];
+                thx = xys[1];
+                thy = xys[3];
+        }
 }
 
-// part about non-ip particle is not ready yet. use the above method in the meantime
 void H_BeamParticle::computePath(const H_AbstractBeamLine & beam, const bool NonLinear) {
 	TMatrixD temp_mat(MDIM,MDIM);
 	double temp_x, temp_y, temp_s, temp_tx, temp_ty;
@@ -577,49 +554,28 @@ void H_BeamParticle::computePath(const H_AbstractBeamLine & beam, const bool Non
 
 	double energy_loss = NonLinear?BE-energy:0;
 
-	// modify here to allow starting at non-IP positions
-	// s is distance to IP
-	// initial position is already in positions vector ?
 	for (int i=0; i<N; i++) {
 		const unsigned pos = i;
-		// if we are inside an element, we should start by adding the action
-		// of the rest of this element
-		if(pos > 0 && fs < beam.getElement(pos)->getS() && fs > beam.getElement(pos-1)->getS()) {
-			cout<<"Path starts inside element "<<beam.getElement(pos-1)->getName()<<endl;
-			H_OpticalElement* temp_el = new H_OpticalElement(*(beam.getElement(pos-1)));
-			temp_el->setS(fs);
-			temp_el->setLength(beam.getElement(pos)->getS() - fs);
-			mat[0][0] = mat[0][0] - temp_el->getX();
-			mat[0][1] = mat[0][1] - tan(temp_el->getTX());
-			mat[0][2] = mat[0][2] - temp_el->getY();
-			mat[0][3] = mat[0][3] - tan(temp_el->getTY());
-			mat *= temp_el->getMatrix(energy_loss,mp,qp);
-			mat[0][0] = mat[0][0] + temp_el->getX();
-			mat[0][1] = mat[0][1] + tan(temp_el->getTX());
-			mat[0][2] = mat[0][2] + temp_el->getY();
-			mat[0][3] = mat[0][3] + tan(temp_el->getTY());
-		} else if(fs >= beam.getElement(pos)->getS()) {
-			mat[0][0] = mat[0][0] - beam.getElement(pos)->getX();
-			mat[0][1] = mat[0][1] - tan(beam.getElement(pos)->getTX());
-			mat[0][2] = mat[0][2] - beam.getElement(pos)->getY();
-			mat[0][3] = mat[0][3] - tan(beam.getElement(pos)->getTY());
-			mat *= beam.getElement(pos)->getMatrix(energy_loss,mp,qp);
-			mat[0][0] = mat[0][0] + beam.getElement(pos)->getX();
-			mat[0][1] = mat[0][1] + tan(beam.getElement(pos)->getTX());
-			mat[0][2] = mat[0][2] + beam.getElement(pos)->getY();
-			mat[0][3] = mat[0][3] + tan(beam.getElement(pos)->getTY());
-		}
-		xys[0] = mat.GetMatrixArray()[0]*URAD;
-		xys[1] = atan(mat.GetMatrixArray()[1])*URAD;
-		xys[2] = mat.GetMatrixArray()[2]*URAD;
-		xys[3] = atan(mat.GetMatrixArray()[3])*URAD;
-		xys[4] = beam.getElement(pos)->getS()+beam.getElement(pos)->getLength();
-		addPosition(xys[0],xys[1],xys[2],xys[3],xys[4]);
-		fx = xys[0];
-		fy = xys[2];
-		thx = xys[1];
-		thy = xys[3];
-	}
+		mat[0][0] = mat[0][0] - beam.getElement(pos)->getX();
+		mat[0][1] = mat[0][1] - tan(beam.getElement(pos)->getTX());
+		mat[0][2] = mat[0][2] - beam.getElement(pos)->getY();
+		mat[0][3] = mat[0][3] - tan(beam.getElement(pos)->getTY());
+		mat *= beam.getElement(pos)->getMatrix(energy_loss,mp,qp);
+		mat[0][0] = mat[0][0] + beam.getElement(pos)->getX();
+		mat[0][1] = mat[0][1] + tan(beam.getElement(pos)->getTX());
+		mat[0][2] = mat[0][2] + beam.getElement(pos)->getY();
+		mat[0][3] = mat[0][3] + tan(beam.getElement(pos)->getTY());
+                xys[0] = mat.GetMatrixArray()[0]*URAD;
+                xys[1] = atan(mat.GetMatrixArray()[1])*URAD;
+                xys[2] = mat.GetMatrixArray()[2]*URAD;
+                xys[3] = atan(mat.GetMatrixArray()[3])*URAD;
+                xys[4] = beam.getElement(pos)->getS()+beam.getElement(pos)->getLength();
+                addPosition(xys[0],xys[1],xys[2],xys[3],xys[4]);
+                fx = xys[0];
+                fy = xys[2];
+                thx = xys[1];
+                thy = xys[3];
+        }
 }
 
 void H_BeamParticle::resetPath() {

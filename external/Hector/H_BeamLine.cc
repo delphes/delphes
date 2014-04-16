@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_BeamLine.cc
 /// \brief Reads external files and retrieves features of the real beam optical elements
@@ -23,7 +16,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <cstdlib>
 
 // local #includes
 #include "H_BeamLine.h"
@@ -46,34 +38,44 @@ using namespace std;
 // Caution : mad conventions for vertically(horizontally) focusing quadrupoles
 // are opposite to Wille's. See fill() for more details.
 
-H_BeamLine::H_BeamLine(): H_AbstractBeamLine(), 
-	direction(1), ips(0), ipx(0), ipy(0), iptx(0), ipty(0) {
+H_BeamLine::H_BeamLine(const int si, const float length) : H_AbstractBeamLine(length){
+	direction = (si >= abs(si)) ? 1 : -1;
+	ips=0;
+	ipx=0;
+	ipy=0;
+	iptx=0;
+	ipty=0;
 }
 
-H_BeamLine::H_BeamLine(const int si, const float length) : H_AbstractBeamLine(length),
-	direction((si >= abs(si)) ? 1 : -1), ips(0), ipx(0), ipy(0), iptx(0), ipty(0) {
-}
-
-H_BeamLine::H_BeamLine(const H_BeamLine& beam) : H_AbstractBeamLine(beam),
-	direction(beam.direction), ips(beam.ips), ipx(beam.ipx), ipy(beam.ipy), iptx(beam.iptx), ipty(beam.ipty) {
-}
-
-H_BeamLine& H_BeamLine::operator=(const H_BeamLine& beam) {
-	if(this==&beam) return *this;
-	H_AbstractBeamLine::operator=(beam); // call the mother's operator=
+H_BeamLine::H_BeamLine(const H_BeamLine& beam) : H_AbstractBeamLine(beam) {
 	direction = beam.direction;
 	ips = beam.ips;
 	ipx = beam.ipx;
 	ipy = beam.ipy;
 	iptx = beam.iptx;
 	ipty = beam.ipty;
+}
+
+H_BeamLine& H_BeamLine::operator=(const H_BeamLine& beam) {
+	if(this==&beam) return *this;
+	direction = beam.direction;
+	ips = beam.ips;
+	ipx = beam.ipx;
+    ipy = beam.ipy;
+    iptx = beam.iptx;
+    ipty = beam.ipty;
 	return *this;
 }
 
-void H_BeamLine::findIP(const string& filename, const string& ipname) {
+void H_BeamLine::findIP(const string filename) {
+	findIP(filename,"IP5");
+	return;
+}
+
+void H_BeamLine::findIP(const string filename, const string ipname) {
 	// searches for the IP position in the extended table.
 	ifstream tabfile(filename.c_str());
-		if (! tabfile.is_open()) cout << "<H_BeamLine> ERROR: I Can't open \"" << filename << "\"" << endl;
+		if (! tabfile.is_open()) cout << "\t ERROR: I Can't open \"" << filename << "\"" << endl;
 	bool found = false;
 	int N_col=0;
 	string headers[40];  // table of all column headers
@@ -111,7 +113,7 @@ void H_BeamLine::findIP(const string& filename, const string& ipname) {
 		} // if(... "K0L")
 	} // while (!eof)
 
-	if (!found) cout << "<H_BeamLine> ERROR ! IP not found." << endl;
+	if (!found) cout << "\t ERROR ! IP not found." << endl;
 	tabfile.close();
 }
 
@@ -124,13 +126,18 @@ double* H_BeamLine::getIPProperties() {
 	return temp;
 }
 
+void H_BeamLine::fill(const string filename) {
+	fill(filename,1,"IP5");
+	return;
+}
 
-void H_BeamLine::fill(const string& filename, const int dir, const string& ipname) {
+
+void H_BeamLine::fill(const string filename, const int dir, const string ipname) {
 	string headers[40];  // table of all column headers
 	int header_type[40]; // table of all column types
 	findIP(filename,ipname);
 	ifstream tabfile(filename.c_str());
-		if (! tabfile.is_open()) cout << "<H_BeamLine> ERROR: I Can't open \"" << filename << "\"" << endl;
+		if (! tabfile.is_open()) cout << "\t ERROR: I Can't open \"" << filename << "\"" << endl;
 	if(VERBOSE) {
 		cout<<"Using file : "<< filename <<" in the "<<((direction>0)?"positive":"negative")<<" direction."<<endl;
 		cout<<"IP was found at position : "<<ips<<endl<<endl;
@@ -186,49 +193,44 @@ void H_BeamLine::fill(const string& filename, const int dir, const string& ipnam
 				default: break;
 			}
 
-			if(el!=0) {
-				ap = 0; //init
-				if(e.aper_1 !=0 || e.aper_2 !=0 || e.aper_3 !=0 || e.aper_4 != 0) {
-					e.aper_1 *= URAD;
-					e.aper_2 *= URAD;
-					e.aper_3 *= URAD;
-					e.aper_4 *= URAD; // in [m] in the tables !
+			ap = 0; //init
+			if(e.aper_1 !=0 || e.aper_2 !=0 || e.aper_3 !=0 || e.aper_4 != 0) {
+				e.aper_1 *= URAD;
+				e.aper_2 *= URAD;
+				e.aper_3 *= URAD;
+				e.aper_4 *= URAD; // in [m] in the tables !
 
-					if(strstr(e.apertype.c_str(),"RECTELLIPSE")) 
-						ap = new H_RectEllipticAperture(e.aper_1,e.aper_2,e.aper_3,e.aper_4,0,0);
-					else if(strstr(e.apertype.c_str(),"CIRCLE")) 
-						ap = new H_CircularAperture(e.aper_1,0,0);
-					else if(strstr(e.apertype.c_str(),"RECTANGLE")) 
-						ap = new H_RectangularAperture(e.aper_1,e.aper_2,0,0);
-					else if(strstr(e.apertype.c_str(),"ELLIPSE")) 
-						ap = new H_EllipticAperture(e.aper_1,e.aper_2,0,0);
-				}
-	
+				if(strstr(e.apertype.c_str(),"RECTELLIPSE")) ap = new H_RectEllipticAperture(e.aper_1,e.aper_2,e.aper_3,e.aper_4,0,0);
+				else if(strstr(e.apertype.c_str(),"CIRCLE")) ap = new H_CircularAperture(e.aper_1,0,0);
+				else if(strstr(e.apertype.c_str(),"RECTANGLE")) ap = new H_RectangularAperture(e.aper_1,e.aper_2,0,0);
+				else if(strstr(e.apertype.c_str(),"ELLIPSE")) ap = new H_EllipticAperture(e.aper_1,e.aper_2,0,0);
+			}
+
+			if(el!=0) {
 				if (direction<0) {
-					el->setBetaX(e.betx);	el->setBetaY(e.bety);
-					el->setDX(e.dx);	el->setDY(e.dy);
-					el->setRelX(e.x);	el->setRelY(e.y);
+					el->setBetaX(e.betx);
+					el->setBetaY(e.bety);
+					el->setDX(e.dx);
+					el->setDY(e.dy);
+					el->setRelX(e.x);
+					el->setRelY(e.y);
 				} else {
-					el->setBetaX(previous_betax); 	el->setBetaY(previous_betay);
-					el->setDX(previous_dx);		el->setDY(previous_dy);
-					el->setRelX(previous_x);	el->setRelY(previous_y);
+					el->setBetaX(previous_betax);
+					el->setBetaY(previous_betay);
+					el->setDX(previous_dx);
+					el->setDY(previous_dy);
+					el->setRelX(previous_x);
+					el->setRelY(previous_y);
 				}
 				if(ap!=0) { 
-					el->setAperture(ap);
-					delete ap;
-					// if memory is allocated, i.e. if ap!=0,
-					// it wont be deallocated in H_OpticalElement::~H_OpticalElement
-					// ap should then be deleted here
-				} // memory leak-free!
+					el->setAperture(ap); 
+				//		delete ap; // ap deleted in H_AbstractBeamLine::~H_AbstractBeamLine
+				}
 	
-				/// Parses all the elements from the beginning of the file, 
-				/// but only keeps the ones from the IP till the desired length
-				if(e.s>=0 && e.s<beam_length) add(el);
-				else { delete el;} 
-				// NB : if "el" is added to the beamline, it will be 
-				// deleted by H_AbstractBeamLine::~H_AbstractBeamLine
-				// Otherwise, it should be deleted explicitly
+				/// Parses all the elements, but only keeps the ones from the IP till the desired length
+				if(e.s>=0 && e.s<beam_length) add(*el);
 
+			// delete el; // el deleted in H_AbstractBeamLine::~H_AbstractBeamLine
 			} // if(el!=0)
 		} // if (found)
 		else if(strstr(temp_string.c_str(),"K0L")) { // if (!found)

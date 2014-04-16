@@ -1,20 +1,13 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_Marker.cc
 /// \brief Class defining a marker in the beamline (e.g. for interaction point)
@@ -30,28 +23,16 @@ void H_Marker::init() {
 	return;
 }
 
-std::ostream& operator<< (std::ostream& os, const H_Marker& el) {
-	os << el.typestring << el.name << "\t\t at s = " << el.fs;
-	if(el.element_aperture->getType()!=NONE) {
-                os << *(el.element_aperture) << endl;
+void H_Marker::printProperties() const {
+	cout << typestring << name;
+	cout << "\t\t at s = " << fs << endl;
+	if(element_aperture->getType()!=NONE) {
+		cout <<"\t aperture type = " << element_aperture->getTypeString();
+                element_aperture->printProperties();
         }
-   return os;
 }
 
-//void H_Marker::setMatrix(const float eloss, const float p_mass, const float p_charge) {
-void H_Marker::setMatrix(const float , const float , const float ) {
-		element_mat = driftmat(0);
+void H_Marker::setMatrix(const float eloss, const float p_mass, const float p_charge) const {
+		*element_mat = driftmat(0);
 	return ;
-}
-
-H_Marker* H_Marker::clone() const {
-	H_Marker* temp_mkr = new H_Marker(name,fs);
-	temp_mkr->setAperture(element_aperture);
-	temp_mkr->setX(xpos);
-	temp_mkr->setY(ypos);
-	temp_mkr->setTX(txpos);
-	temp_mkr->setTY(typos);
-	temp_mkr->setBetaX(betax);
-	temp_mkr->setBetaY(betay);
-	return temp_mkr;
 }

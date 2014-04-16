@@ -1,23 +1,16 @@
 #ifndef _H_BeamLine_
 #define _H_BeamLine_
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_BeamLine.h
 /// \brief Class aiming at retrieving features of the real beam optical elements.
@@ -38,18 +31,24 @@ class H_BeamLine : public H_AbstractBeamLine {
 	public:
 	///     Constructors and destructor
 	//@{
-		H_BeamLine();
+		H_BeamLine():H_AbstractBeamLine() {direction=1; ips=0; };
 		H_BeamLine(const H_BeamLine& );
 		H_BeamLine(const int, const float);
 		H_BeamLine& operator=(const H_BeamLine& );
-		~H_BeamLine() {};
+		~H_BeamLine() {return;};
 	//@
 		///     Finds the IP position (s) from the MAD table. Should be "IP5" or "IP1".
-		void findIP(const string& filename, const string& ipname="IP5");
+		//@{
+		void findIP(const string);
+		void findIP(const string, const string);
+		//@}
 		///     Reader for the external MAD table
-		void fill(const string& filename, const int dir=1, const string& ipname="IP5");
+		//@{
+		void fill(const string);
+		void fill(const string, const int, const string );
+		//@}
 		///     Returns the IP position (s)
-		double getIP() const {return ips;};
+		double getIP() {return ips;};
 		///		Returns positions and angles of beam at IP
 		double* getIPProperties();
 

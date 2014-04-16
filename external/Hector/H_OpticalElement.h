@@ -1,23 +1,16 @@
 #ifndef _H_OpticalElement_
 #define _H_OpticalElement_
 
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                         *
-*                   --<--<--  A fast simulator --<--<--     *
-*                 / --<--<--     of particle   --<--<--     *
-*  ----HECTOR----<                                          *
-*                 \ -->-->-- transport through -->-->--     *
-*                   -->-->-- generic beamlines -->-->--     *
-*                                                           *
-* JINST 2:P09005 (2007)                                     *
-*      X Rouby, J de Favereau, K Piotrzkowski (CP3)         *
-*       http://www.fynu.ucl.ac.be/hector.html               *
-*                                                           *
-* Center for Cosmology, Particle Physics and Phenomenology  *
-*              Universite catholique de Louvain             *
-*                 Louvain-la-Neuve, Belgium                 *
- *                                                         *
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+---- Hector the simulator ----
+   A fast simulator of particles through generic beamlines.
+   J. de Favereau, X. Rouby ~~~ hector_devel@cp3.phys.ucl.ac.be
+
+        http://www.fynu.ucl.ac.be/hector.html
+
+   Centre de Physique des Particules et de Phénoménologie (CP3)
+   Université Catholique de Louvain (UCL)
+*/
 
 /// \file H_OpticalElement.h
 /// \brief Class aiming at describing any beam optical element.
@@ -32,7 +25,6 @@
 
 // ROOT #includes
 #include "TMatrix.h"
-#include "TVectorD.h"
 
 // local #includes
 #include "H_TransportMatrices.h"
@@ -42,7 +34,19 @@
 using namespace std;
 
 	// type #defines
-enum {DRIFT=1, RDIPOLE, SDIPOLE, VQUADRUPOLE, HQUADRUPOLE, VKICKER, HKICKER, RCOLLIMATOR, ECOLLIMATOR, CCOLLIMATOR, RP, IP, MARKER};
+#define DRIFT        1
+#define RDIPOLE      2
+#define SDIPOLE      3
+#define VQUADRUPOLE  4
+#define HQUADRUPOLE  5
+#define VKICKER      6
+#define HKICKER      7
+#define RCOLLIMATOR  8
+#define ECOLLIMATOR  9
+#define CCOLLIMATOR 10
+#define RP          11
+#define IP          12
+#define MARKER      13
 
 	// typestring[30] #defines
 #define DRIFTNAME	"Drift        "
@@ -64,35 +68,34 @@ class H_OpticalElement {
 
 	public:
         ///     init method for constructors
-                void init(const string&, const int , const double , const double , const double);
+                void init(const string, const int , const double , const double , const double, H_Aperture*);
 		/// Constructors and destructor
 		//@{
-		H_OpticalElement(const string&, const int, const double, const double, const double, H_Aperture*);
+		H_OpticalElement(const string, const int, const double, const double, const double, H_Aperture*);
 		H_OpticalElement(const int, const double, const double, const double, H_Aperture*);
-		H_OpticalElement(const string&, const int, const double, const double, const double);
+		H_OpticalElement(const string, const int, const double, const double, const double);
 		H_OpticalElement(const int, const double, const double, const double);
 		H_OpticalElement();
 		H_OpticalElement(const H_OpticalElement&);
-		virtual ~H_OpticalElement() { delete element_aperture;};
+	        virtual ~H_OpticalElement() {delete element_mat; delete element_aperture;};
 		//@}
 		///     Prints the element features
-	        virtual void printProperties() const { cout << *this; return;};
+	        virtual void printProperties() const ;
 		///     Shows the element transport matrix
 	        void showMatrix() const ;
 		///     Draws the aperture shape
 	        void drawAperture() const ;
 		///     Sets the aperture of the element
-		void setAperture(const H_Aperture*);
+		void setAperture(H_Aperture *);
 		///     Ordering operator acting on the s coordinate
-		inline bool operator>(const H_OpticalElement& tocomp) const {return ( fs>tocomp.getS() ); };
+		inline bool operator>(const H_OpticalElement tocomp) const {if(fs>tocomp.getS()) { return true; } else { return false; }};
 		///     Ordering operator acting on the s coordinate
-		inline bool operator<(const H_OpticalElement& tocomp) const {return ( fs<tocomp.getS() ); };
+		inline bool operator<(const H_OpticalElement tocomp) const {if(fs<tocomp.getS()) { return true; } else { return false; }};
 		/// 	Copy operator
 		H_OpticalElement& operator=(const H_OpticalElement&); 
 		///     Sets the element longitudinal (s), and horizontal (x) and vertical (y) coordinates.
 		//@{
 		inline void setS(const double new_s) {fs=new_s;};
-		inline void setLength(const double new_l) { element_length = new_l;};
 		inline void setX(const double new_pos) {
 		        /// @param new_pos in [m]
 	        	element_aperture->setPosition(new_pos*URAD,ypos);
@@ -135,11 +138,11 @@ class H_OpticalElement {
 		inline bool isInside(const double x, const double y) const { return (bool) element_aperture->isInside(x,y);};
 		///     Returns the element transport matrix
 		//@{
-		TMatrix getMatrix() ;
-		TMatrix getMatrix(const float, const float, const float) ;
+		TMatrix getMatrix() const;
+		TMatrix getMatrix(const float, const float, const float) const;
 		//@}
 		///     Returns the element aperture
-		H_Aperture* getAperture() const {return element_aperture;};
+		H_Aperture * getAperture() const {return element_aperture;};
 		///	Sets the beta functions
 		//@{
 		inline void setBetaX(const double beta) { betax = beta;};
@@ -171,8 +174,6 @@ class H_OpticalElement {
                 inline double getRelX() const {return relx;};
                 inline double getRelY() const {return rely;};
                 //@}
-		virtual H_OpticalElement* clone() const { return new H_OpticalElement();};
-		TVectorD getHitPosition(const TVectorD& , const double, const double, const double);
 
 
 	protected:
@@ -204,13 +205,11 @@ class H_OpticalElement {
 		//@}
 		virtual void setTypeString() {return;};
 		/// Optical element transport matrix.
-		virtual void setMatrix(const float, const float, const float) { cout<<"dummy setmatrix"<<endl; return;};
+	    	virtual void setMatrix(const float, const float, const float) const {return;};
 		/// Optical element transport matrix.
- 		TMatrix element_mat;
-		/// Optical element aperture. 
-	    	H_Aperture* element_aperture;
-
-	friend std::ostream& operator<< (std::ostream& os, const H_OpticalElement& el);
+ 		TMatrix * element_mat;
+		/// Optical element aperture.
+	    	H_Aperture * element_aperture;
 };
 
 #endif
