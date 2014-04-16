@@ -315,6 +315,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/MomentumSmearing.h \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
+	modules/SimpleCalorimeter.h \
 	modules/Calorimeter.h \
 	modules/Isolation.h \
 	modules/EnergyScale.h \
@@ -620,6 +621,15 @@ tmp/modules/ExampleModule.$(ObjSuf): \
 tmp/modules/EnergyScale.$(ObjSuf): \
 	modules/EnergyScale.$(SrcSuf) \
 	modules/EnergyScale.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/SimpleCalorimeter.$(ObjSuf): \
+	modules/SimpleCalorimeter.$(SrcSuf) \
+	modules/SimpleCalorimeter.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -1066,6 +1076,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/ExampleModule.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
+	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/ParticlePropagator.$(ObjSuf) \
 	tmp/modules/Weighter.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
@@ -1555,6 +1566,10 @@ modules/Weighter.h: \
 
 external/fastjet/internal/BasicRandom.hh: \
 	external/fastjet/internal/base.hh
+	@touch $@
+
+modules/SimpleCalorimeter.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh: \

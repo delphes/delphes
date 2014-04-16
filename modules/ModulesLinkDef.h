@@ -20,6 +20,7 @@
 #include "modules/MomentumSmearing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
+#include "modules/SimpleCalorimeter.h"
 #include "modules/Calorimeter.h"
 #include "modules/Isolation.h"
 #include "modules/EnergyScale.h"
@@ -56,6 +57,7 @@
 #pragma link C++ class MomentumSmearing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
+#pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class Calorimeter+;
 #pragma link C++ class Isolation+;
 #pragma link C++ class EnergyScale+;

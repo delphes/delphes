@@ -1,13 +1,13 @@
-#ifndef Calorimeter_h
-#define Calorimeter_h
+#ifndef SimpleCalorimeter_h
+#define SimpleCalorimeter_h
 
-/** \class Calorimeter
+/** \class SimpleCalorimeter
  *
- *  Fills calorimeter towers, performs calorimeter resolution smearing,
+ *  Fills SimpleCalorimeter towers, performs SimpleCalorimeter resolution smearing,
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
- *  $Date$
- *  $Revision$
+ *  $Date: 2014-04-16 15:29:31 +0200 (Wed, 16 Apr 2014) $
+ *  $Revision: 1364 $
  *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
@@ -24,12 +24,12 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class Calorimeter: public DelphesModule
+class SimpleCalorimeter: public DelphesModule
 {
 public:
 
-  Calorimeter();
-  ~Calorimeter();
+  SimpleCalorimeter();
+  ~SimpleCalorimeter();
 
   void Init();
   void Process();
@@ -37,19 +37,19 @@ public:
 
 private:
 
-  typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
+  typedef std::map< Long64_t, Double_t > TFractionMap; //!
   typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
 
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
-  Double_t fTowerECalEnergy, fTowerHCalEnergy;
-  Double_t fTrackECalEnergy, fTrackHCalEnergy;
+  Double_t fTowerEnergy;
+  Double_t fTrackEnergy;
   
-  Double_t fTowerECalTime, fTowerHCalTime;
-  Double_t fTrackECalTime, fTrackHCalTime;
+  Double_t fTowerTime;
+  Double_t fTrackTime;
    
-  Double_t fTowerECalWeightTime, fTowerHCalWeightTime;
-  Double_t fTrackECalWeightTime, fTrackHCalWeightTime;
+  Double_t fTowerWeightTime;
+  Double_t fTrackWeightTime;
   
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
@@ -61,15 +61,12 @@ private:
 
   std::vector < Long64_t > fTowerHits;
 
-  std::vector < Double_t > fTowerECalFractions;
-  std::vector < Double_t > fTowerHCalFractions;
-
-  std::vector < Double_t > fTrackECalFractions;
-  std::vector < Double_t > fTrackHCalFractions;
-
-  DelphesFormula *fECalResolutionFormula; //!
-  DelphesFormula *fHCalResolutionFormula; //!
-
+  std::vector < Double_t > fTowerFractions;
+  
+  std::vector < Double_t > fTrackFractions;
+ 
+  DelphesFormula *fResolutionFormula; //!
+ 
   TIterator *fItParticleInputArray; //!
   TIterator *fItTrackInputArray; //!
 
@@ -77,19 +74,16 @@ private:
   const TObjArray *fTrackInputArray; //!
 
   TObjArray *fTowerOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
  
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowPhotonOutputArray; //!
-  TObjArray *fEFlowNeutralHadronOutputArray; //!
-
+  TObjArray *fEFlowTowerOutputArray; //!
+ 
   TObjArray *fTowerTrackArray; //!
   TIterator *fItTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
-  ClassDef(Calorimeter, 1)
+  ClassDef(SimpleCalorimeter, 1)
 };
 
 #endif
