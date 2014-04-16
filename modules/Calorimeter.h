@@ -37,19 +37,19 @@ public:
 
 private:
 
-  typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
+  typedef std::map< Long64_t, Double_t > TFractionMap; //!
   typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
 
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
-  Double_t fTowerECalEnergy, fTowerHCalEnergy;
-  Double_t fTrackECalEnergy, fTrackHCalEnergy;
+  Double_t fTowerEnergy;
+  Double_t fTrackEnergy;
   
-  Double_t fTowerECalTime, fTowerHCalTime;
-  Double_t fTrackECalTime, fTrackHCalTime;
+  Double_t fTowerTime;
+  Double_t fTrackTime;
    
-  Double_t fTowerECalWeightTime, fTowerHCalWeightTime;
-  Double_t fTrackECalWeightTime, fTrackHCalWeightTime;
+  Double_t fTowerWeightTime;
+  Double_t fTrackWeightTime;
   
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
@@ -61,15 +61,12 @@ private:
 
   std::vector < Long64_t > fTowerHits;
 
-  std::vector < Double_t > fTowerECalFractions;
-  std::vector < Double_t > fTowerHCalFractions;
-
-  std::vector < Double_t > fTrackECalFractions;
-  std::vector < Double_t > fTrackHCalFractions;
-
-  DelphesFormula *fECalResolutionFormula; //!
-  DelphesFormula *fHCalResolutionFormula; //!
-
+  std::vector < Double_t > fTowerFractions;
+  
+  std::vector < Double_t > fTrackFractions;
+ 
+  DelphesFormula *fResolutionFormula; //!
+ 
   TIterator *fItParticleInputArray; //!
   TIterator *fItTrackInputArray; //!
 
@@ -77,12 +74,9 @@ private:
   const TObjArray *fTrackInputArray; //!
 
   TObjArray *fTowerOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
  
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowPhotonOutputArray; //!
-  TObjArray *fEFlowNeutralHadronOutputArray; //!
-
+  TObjArray *fEFlowTowerOutputArray; //!
+ 
   TObjArray *fTowerTrackArray; //!
   TIterator *fItTowerTrackArray; //!
 
