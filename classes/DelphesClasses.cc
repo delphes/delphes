@@ -110,8 +110,8 @@ Candidate::Candidate() :
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
-  Dxy(0),SDxy(0),Xd(0),Yd(0),Zd(0),
   Area(0.0, 0.0, 0.0, 0.0),
+  Dxy(0), SDxy(0), Xd(0), Yd(0), Zd(0),
   NCharged(0),
   NNeutrals(0),
   Beta(0),
@@ -221,12 +221,12 @@ void Candidate::Copy(TObject &obj) const
   object.DeltaPhi = DeltaPhi;
   object.Momentum = Momentum;
   object.Position = Position;
+  object.Area = Area;
   object.Dxy = Dxy;
   object.SDxy = SDxy;
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
-  object.Area = Area;
 
   object.NCharged = NCharged;
   object.NNeutrals = NNeutrals;
