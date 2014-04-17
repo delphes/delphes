@@ -59,7 +59,7 @@ using namespace fastjet::contrib;
 //------------------------------------------------------------------------------
 
 FastJetFinder::FastJetFinder() :
-  fPlugin(0), fDefinition(0), fAreaDefinition(0), fItInputArray(0), fRecomb(0), fNjettinessPlugin(0)
+  fPlugin(0), fRecomb(0), fNjettinessPlugin(0), fDefinition(0), fAreaDefinition(0), fItInputArray(0)
 {
 
 }
@@ -75,10 +75,9 @@ FastJetFinder::~FastJetFinder()
 
 void FastJetFinder::Init()
 {
-
-  JetDefinition::Plugin *plugin = NULL;
-  JetDefinition::Recombiner *recomb = NULL;
-  NjettinessPlugin *njet_plugin = NULL;
+  JetDefinition::Plugin *plugin = 0;
+  JetDefinition::Recombiner *recomb = 0;
+  NjettinessPlugin *njetPlugin = 0;
 
   // read eta ranges
 
@@ -134,19 +133,19 @@ void FastJetFinder::Init()
   switch(fAreaAlgorithm)
   {
     case 1:
-      fAreaDefinition = new fastjet::AreaDefinition(active_area_explicit_ghosts, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+      fAreaDefinition = new AreaDefinition(active_area_explicit_ghosts, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
       break;
     case 2:
-      fAreaDefinition = new fastjet::AreaDefinition(one_ghost_passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+      fAreaDefinition = new AreaDefinition(one_ghost_passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
       break;
     case 3:
-      fAreaDefinition = new fastjet::AreaDefinition(passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+      fAreaDefinition = new AreaDefinition(passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
       break;
     case 4:
-      fAreaDefinition = new fastjet::AreaDefinition(VoronoiAreaSpec(fEffectiveRfact));
+      fAreaDefinition = new AreaDefinition(VoronoiAreaSpec(fEffectiveRfact));
       break;
     case 5:
-      fAreaDefinition = new fastjet::AreaDefinition(active_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+      fAreaDefinition = new AreaDefinition(active_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
       break;
     default:
     case 0:
@@ -157,40 +156,40 @@ void FastJetFinder::Init()
   switch(fJetAlgorithm)
   {
     case 1:
-      plugin = new fastjet::CDFJetCluPlugin(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
-      fDefinition = new fastjet::JetDefinition(plugin);
+      plugin = new CDFJetCluPlugin(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
+      fDefinition = new JetDefinition(plugin);
       break;
     case 2:
-      plugin = new fastjet::CDFMidPointPlugin(fSeedThreshold, fConeRadius, fConeAreaFraction, fMaxPairSize, fMaxIterations, fOverlapThreshold);
-      fDefinition = new fastjet::JetDefinition(plugin);
+      plugin = new CDFMidPointPlugin(fSeedThreshold, fConeRadius, fConeAreaFraction, fMaxPairSize, fMaxIterations, fOverlapThreshold);
+      fDefinition = new JetDefinition(plugin);
       break;
     case 3:
-      plugin = new fastjet::SISConePlugin(fConeRadius, fOverlapThreshold, fMaxIterations, fJetPTMin);
-      fDefinition = new fastjet::JetDefinition(plugin);
+      plugin = new SISConePlugin(fConeRadius, fOverlapThreshold, fMaxIterations, fJetPTMin);
+      fDefinition = new JetDefinition(plugin);
       break;
     case 4:
-      fDefinition = new fastjet::JetDefinition(fastjet::kt_algorithm, fParameterR);
+      fDefinition = new JetDefinition(kt_algorithm, fParameterR);
       break;
     case 5:
-      fDefinition = new fastjet::JetDefinition(fastjet::cambridge_algorithm, fParameterR);
+      fDefinition = new JetDefinition(cambridge_algorithm, fParameterR);
       break;
     default:
     case 6:
-      fDefinition = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterR);
+      fDefinition = new JetDefinition(antikt_algorithm, fParameterR);
       break;
     case 7:
-      recomb = new fastjet::contrib::WinnerTakeAllRecombiner();
-      fDefinition = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterR, recomb, Best);
+      recomb = new WinnerTakeAllRecombiner();
+      fDefinition = new JetDefinition(antikt_algorithm, fParameterR, recomb, Best);
       break;
     case 8:
-      njet_plugin = new fastjet::contrib::NjettinessPlugin(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
-      fDefinition = new fastjet::JetDefinition(njet_plugin);
+      njetPlugin = new NjettinessPlugin(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
+      fDefinition = new JetDefinition(njetPlugin);
       break;
   }
 
   fPlugin = plugin;
   fRecomb = recomb;
-  fNjettinessPlugin = njet_plugin;
+  fNjettinessPlugin = njetPlugin;
 
   ClusterSequence::print_banner();
 

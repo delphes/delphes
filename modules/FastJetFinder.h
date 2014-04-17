@@ -24,6 +24,9 @@ namespace fastjet {
   class JetDefinition;
   class AreaDefinition;
   class Selector;
+  namespace contrib {
+    class NjettinessPlugin;
+  }
 }
 
 class FastJetFinder: public DelphesModule
@@ -41,7 +44,7 @@ private:
 
   void *fPlugin; //!
   void *fRecomb; //!
-  void *fNjettinessPlugin; //!
+  fastjet::contrib::NjettinessPlugin *fNjettinessPlugin; //!
 
   fastjet::JetDefinition *fDefinition; //!
 
