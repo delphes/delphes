@@ -279,9 +279,9 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     
     entry->Dxy = candidate->Dxy;
     entry->SDxy = candidate->SDxy ;
-    entry->Xd = candidate -> Xd;
-    entry->Yd = candidate -> Yd;
-    entry->Zd = candidate -> Zd;
+    entry->Xd = candidate->Xd;
+    entry->Yd = candidate->Yd;
+    entry->Zd = candidate->Zd;
    
     const TLorentzVector &momentum = candidate->Momentum;
 
@@ -473,8 +473,6 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->T = position.T()*1.0E-3/c_light;
 
-   // cout<<entry->PT<<","<<entry->T<<endl;
-
     entry->Charge = candidate->Charge;
 
     entry->Particle = candidate->GetCandidates()->At(0);
@@ -556,11 +554,11 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
    
     //--- N-subjettiness variables ----
     
-    entry->Tau1 = candidate->Tau1;
-    entry->Tau2 = candidate->Tau2;
-    entry->Tau3 = candidate->Tau3;
-    entry->Tau4 = candidate->Tau4;
-    entry->Tau5 = candidate->Tau5;
+    entry->Tau1 = candidate->Tau[0];
+    entry->Tau2 = candidate->Tau[1];
+    entry->Tau3 = candidate->Tau[2];
+    entry->Tau4 = candidate->Tau[3];
+    entry->Tau5 = candidate->Tau[4];
    
     FillParticles(candidate, &entry->Particles);
   }

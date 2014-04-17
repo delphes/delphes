@@ -120,24 +120,21 @@ void ImpactParameterSmearing::Process()
     dz = zd;
   
     ddxy = gRandom->Gaus(0,fFormula->Eval(pt, eta));
-    ddz  = gRandom->Gaus(0,fFormula->Eval(pt, eta));
+    ddz = gRandom->Gaus(0,fFormula->Eval(pt, eta));
   
     //fill smeared values in candidate
     mother = candidate;
     
     candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate -> Xd = xd;
-    candidate -> Yd = yd;
-    candidate -> Zd = zd;
+    candidate->Xd = xd;
+    candidate->Yd = yd;
+    candidate->Zd = zd;
     
-    candidate -> Dxy = dxy;
-    candidate -> SDxy = ddxy;
+    candidate->Dxy = dxy;
+    candidate->SDxy = ddxy;
       
     candidate->AddCandidate(mother);
     fOutputArray->Add(candidate);
-    
-    
-    
   }
 }
 

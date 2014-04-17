@@ -46,7 +46,7 @@
 #include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
 #include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
 
-#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh" 
+#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
 #include "fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh"
@@ -75,11 +75,11 @@ FastJetFinder::~FastJetFinder()
 
 void FastJetFinder::Init()
 {
-  
+
   JetDefinition::Plugin *plugin = NULL;
   JetDefinition::Recombiner *recomb = NULL;
   NjettinessPlugin *njet_plugin = NULL;
-  
+
   // read eta ranges
 
   ExRootConfParam param = GetParam("RhoEtaRange");
@@ -109,17 +109,17 @@ void FastJetFinder::Init()
   fJetPTMin = GetDouble("JetPTMin", 10.0);
 
   //-- N(sub)jettiness parameters --
-  
+
   fComputeNsubjettiness = GetBool("ComputeNsubjettiness", false);
   fBeta = GetDouble("Beta", 1.0);
   fAxisMode = GetInt("AxisMode", 1);
-  fRcutOff = GetDouble("RcutOff", 0.8); //used only if Njettiness is used as jet clustering algo (case 8)
-  fN = GetInt("N", 2);                  //used only if Njettiness is used as jet clustering algo (case 8)
-  
+  fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
+  fN = GetInt("N", 2);                  // used only if Njettiness is used as jet clustering algo (case 8)
+
   // ---  Jet Area Parameters ---
   fAreaAlgorithm = GetInt("AreaAlgorithm", 0);
   fComputeRho = GetBool("ComputeRho", false);
-  
+
   // - ghost based areas -
   fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
   fRepeat = GetInt("Repeat", 1);
@@ -127,7 +127,7 @@ void FastJetFinder::Init()
   fGridScatter = GetDouble("GridScatter", 1.0);
   fPtScatter = GetDouble("PtScatter", 0.1);
   fMeanGhostPt = GetDouble("MeanGhostPt", 1.0E-100);
-  
+
   // - voronoi based areas -
   fEffectiveRfact = GetDouble("EffectiveRfact", 1.0);
 
@@ -187,12 +187,11 @@ void FastJetFinder::Init()
       fDefinition = new fastjet::JetDefinition(njet_plugin);
       break;
   }
- 
 
   fPlugin = plugin;
   fRecomb = recomb;
   fNjettinessPlugin = njet_plugin;
-  
+
   ClusterSequence::print_banner();
 
   // import input array
@@ -298,7 +297,7 @@ void FastJetFinder::Process()
 
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
-      
+
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
@@ -307,13 +306,13 @@ void FastJetFinder::Process()
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
       if(deta > detaMax) detaMax = deta;
       if(dphi > dphiMax) dphiMax = dphi;
-      
+
       time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
       weightTime += TMath::Sqrt(constituent->Momentum.E());
-    
+
       candidate->AddCandidate(constituent);
     }
-   
+
     avTime = time/weightTime;
 
     candidate->Momentum = momentum;
@@ -324,29 +323,41 @@ void FastJetFinder::Process()
     candidate->DeltaPhi = dphiMax;
 
     // --- compute N-subjettiness with N = 1,2,3,4,5 ----
-    
+
     if(fComputeNsubjettiness)
     {
       Njettiness::AxesMode axisMode;
-     
-      if (fAxisMode == 1) axisMode = Njettiness::wta_kt_axes;
-      if (fAxisMode == 2) axisMode = Njettiness::onepass_wta_kt_axes;
-      if (fAxisMode == 3) axisMode = Njettiness::kt_axes;
-      if (fAxisMode == 4) axisMode = Njettiness::onepass_kt_axes;
-       
+
+      switch(fAxisMode)
+      {
+        default:
+        case 1:
+          axisMode = Njettiness::wta_kt_axes;
+          break;
+        case 2:
+          axisMode = Njettiness::onepass_wta_kt_axes;
+          break;
+        case 3:
+          axisMode = Njettiness::kt_axes;
+          break;
+        case 4:
+          axisMode = Njettiness::onepass_kt_axes;
+          break;
+      }
+
       Njettiness::MeasureMode measureMode = Njettiness::unnormalized_measure;
-      
+
       Nsubjettiness nSub1(1, axisMode, measureMode, fBeta);
       Nsubjettiness nSub2(2, axisMode, measureMode, fBeta);
-      Nsubjettiness nSub3(3, axisMode, measureMode, fBeta); 
-      Nsubjettiness nSub4(4, axisMode, measureMode, fBeta); 
-      Nsubjettiness nSub5(5, axisMode, measureMode, fBeta); 
-    
-      candidate -> Tau1 = nSub1(*itOutputList);
-      candidate -> Tau2 = nSub2(*itOutputList);
-      candidate -> Tau3 = nSub3(*itOutputList);
-      candidate -> Tau4 = nSub4(*itOutputList);
-      candidate -> Tau5 = nSub5(*itOutputList);
+      Nsubjettiness nSub3(3, axisMode, measureMode, fBeta);
+      Nsubjettiness nSub4(4, axisMode, measureMode, fBeta);
+      Nsubjettiness nSub5(5, axisMode, measureMode, fBeta);
+
+      candidate->Tau[0] = nSub1(*itOutputList);
+      candidate->Tau[1] = nSub2(*itOutputList);
+      candidate->Tau[2] = nSub3(*itOutputList);
+      candidate->Tau[3] = nSub4(*itOutputList);
+      candidate->Tau[4] = nSub5(*itOutputList);
     }
 
 

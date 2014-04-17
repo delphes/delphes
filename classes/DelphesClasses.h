@@ -106,7 +106,6 @@ public:
   Int_t Status; // particle status | hepevt.isthep[number]
   Int_t IsPU; // 0 or 1 for particles from pile-up interactions
 
-
   Int_t M1; // particle 1st mother | hepevt.jmohep[number][0] - 1
   Int_t M2; // particle 2nd mother | hepevt.jmohep[number][1] - 1
 
@@ -299,14 +298,6 @@ public:
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
-  TRefArray Constituents; // references to constituents
-  TRefArray Particles; // references to generated particles
-
-  static CompBase *fgCompare; //!
-  const CompBase *GetCompare() const { return fgCompare; }
-
-  TLorentzVector P4();
-
   // -- PileUpJetID variables ---
 
   Int_t    NCharged;
@@ -318,12 +309,20 @@ public:
   Float_t  FracPt[5];
 
  // -- Nsubjettiness variables ---
-  
-  Float_t Tau1; 
-  Float_t Tau2; 
-  Float_t Tau3; 
-  Float_t Tau4; 
-  Float_t Tau5; 
+
+  Float_t Tau1;
+  Float_t Tau2;
+  Float_t Tau3;
+  Float_t Tau4;
+  Float_t Tau5;
+
+  TRefArray Constituents; // references to constituents
+  TRefArray Particles; // references to generated particles
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  TLorentzVector P4();
 
   ClassDef(Jet, 2)
 };
@@ -354,7 +353,7 @@ public:
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
   Float_t TOuter; // track position (z component) at the tracker edge
-  
+
   Float_t Dxy;     // track signed transverse impact parameter
   Float_t SDxy;    // signed error on the track signed transverse impact parameter
   Float_t Xd;      // X coordinate of point of closest approach to vertex
@@ -368,7 +367,7 @@ public:
 
   TLorentzVector P4();
 
-  ClassDef(Track, 1)
+  ClassDef(Track, 2)
 };
 
 //---------------------------------------------------------------------------
@@ -455,12 +454,12 @@ public:
   Float_t DeltaPhi;
 
   TLorentzVector Momentum, Position, Area;
-  
-  Float_t  Dxy;    
-  Float_t  SDxy;   
-  Float_t  Xd;     
-  Float_t  Yd;     
-  Float_t  Zd;     
+
+  Float_t  Dxy;
+  Float_t  SDxy;
+  Float_t  Xd;
+  Float_t  Yd;
+  Float_t  Zd;
 
   // PileUpJetID variables
 
@@ -471,15 +470,11 @@ public:
   Float_t  MeanSqDeltaR;
   Float_t  PTD;
   Float_t  FracPt[5];
- 
+
   // -- Nsubjettiness variables ---
- 
-  Float_t Tau1;
-  Float_t Tau2;
-  Float_t Tau3;
-  Float_t Tau4;
-  Float_t Tau5;
- 
+
+  Float_t Tau[5];
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -498,7 +493,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 1)
+  ClassDef(Candidate, 2)
 };
 
 #endif // DelphesClasses_h

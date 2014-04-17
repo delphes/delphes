@@ -111,7 +111,7 @@ Candidate::Candidate() :
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
   Dxy(0),SDxy(0),Xd(0),Yd(0),Zd(0),
-  Tau1(0.0), Tau2(0.0), Tau3(0.0), Tau4(0.0), Tau5(0.0), 
+  Tau1(0.0), Tau2(0.0), Tau3(0.0), Tau4(0.0), Tau5(0.0),
   Area(0.0, 0.0, 0.0, 0.0),
   NCharged(0),
   NNeutrals(0),
@@ -240,7 +240,7 @@ void Candidate::Copy(TObject &obj) const
   object.Tau3 = Tau3;
   object.Tau4 = Tau4;
   object.Tau5 = Tau5;
- 
+
   object.fFactory = fFactory;
   object.fArray = 0;
 
@@ -302,6 +302,6 @@ void Candidate::Clear(Option_t* option)
   Tau3 = 0.0;
   Tau4 = 0.0;
   Tau5 = 0.0;
- 
+
   fArray = 0;
 }
