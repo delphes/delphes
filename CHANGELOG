@@ -1,12 +1,20 @@
+3.1.0:
+  added Hector module (fast simulator for the transport of particles in beam lines)
+  added N-subjettiness and N-jettiness (to identify boosted hadronically-decaying objects like electroweak bosons and top quarks)
+  added SimpleCalorimeter module (to study effects of different granularity in ECAL and HCAL)
+  added ImpactParameterSmearing (to smear transverse and longitudinal track impact parameter needed for track counting b-tagging)
+  added TrackCountingBTagging module (for simple b-tagging algorithm based on counting tracks with large impact parameter)
+  added basic card for FCC studies (examples/delphes_card_FCC_basic.tcl)
+
 3.0.12:
   updated FastJet library to 3.0.6
   added smearing of (z,t) vertex distribution in the PileUpMerger module
-  propagation time computed for every output collection 
+  propagation time computed for every output collection
   added TimeSmearing module (for propagation time measurement)
-  added PileUpJetId module (thanks to Seth Senz) 
+  added PileUpJetId module (thanks to Seth Senz)
 
 3.0.11:
-  new energy-flow algorithm, optimized for better compatibility with pile-up subtraction 
+  new energy-flow algorithm, optimized for better compatibility with pile-up subtraction
   added possibility of computing pile-up density in different eta regions via the RhoEtaRange parameter in FastJetFinder module
   implemented correct efficiency/resolution for high pt muons in CMS cards
   removed pile-up subtraction on missing energy
