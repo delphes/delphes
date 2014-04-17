@@ -298,23 +298,19 @@ public:
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
-  // -- PileUpJetID variables ---
+  Int_t    NCharged; // number of charged constituents 
+  Int_t    NNeutrals; // number of neutral constituents 
+  Float_t  Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents) 
+  Float_t  BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents) 
+  Float_t  MeanSqDeltaR; // average distance (squared) between constituent and jet weighted by pt (squared) of constituent
+  Float_t  PTD; // average pt between constituent and jet weighted by pt of constituent
+  Float_t  FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents) 
 
-  Int_t    NCharged;
-  Int_t    NNeutrals;
-  Float_t  Beta;
-  Float_t  BetaStar;
-  Float_t  MeanSqDeltaR;
-  Float_t  PTD;
-  Float_t  FracPt[5];
-
- // -- Nsubjettiness variables ---
-
-  Float_t Tau1;
-  Float_t Tau2;
-  Float_t Tau3;
-  Float_t Tau4;
-  Float_t Tau5;
+  Float_t Tau1; // 1-subjettiness
+  Float_t Tau2; // 2-subjettiness
+  Float_t Tau3; // 3-subjettiness
+  Float_t Tau4; // 4-subjettiness
+  Float_t Tau5; // 5-subjettiness
 
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
@@ -471,7 +467,7 @@ public:
   Float_t  PTD;
   Float_t  FracPt[5];
 
-  // -- Nsubjettiness variables ---
+  // N-subjettiness variables
 
   Float_t Tau[5];
 

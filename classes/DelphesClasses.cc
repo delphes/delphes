@@ -111,7 +111,6 @@ Candidate::Candidate() :
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
   Dxy(0),SDxy(0),Xd(0),Yd(0),Zd(0),
-  Tau1(0.0), Tau2(0.0), Tau3(0.0), Tau4(0.0), Tau5(0.0),
   Area(0.0, 0.0, 0.0, 0.0),
   NCharged(0),
   NNeutrals(0),
@@ -131,6 +130,11 @@ Candidate::Candidate() :
   FracPt[2] = 0.0;
   FracPt[3] = 0.0;
   FracPt[4] = 0.0;
+  Tau[0] = 0.0;
+  Tau[1] = 0.0;
+  Tau[2] = 0.0;
+  Tau[3] = 0.0;
+  Tau[4] = 0.0;
 }
 
 //------------------------------------------------------------------------------
@@ -235,11 +239,11 @@ void Candidate::Copy(TObject &obj) const
   object.FracPt[2] = FracPt[2];
   object.FracPt[3] = FracPt[3];
   object.FracPt[4] = FracPt[4];
-  object.Tau1 = Tau1;
-  object.Tau2 = Tau2;
-  object.Tau3 = Tau3;
-  object.Tau4 = Tau4;
-  object.Tau5 = Tau5;
+  object.Tau[0] = Tau[0];
+  object.Tau[1] = Tau[1];
+  object.Tau[2] = Tau[2];
+  object.Tau[3] = Tau[3];
+  object.Tau[4] = Tau[4];
 
   object.fFactory = fFactory;
   object.fArray = 0;
@@ -297,11 +301,11 @@ void Candidate::Clear(Option_t* option)
   FracPt[2] = 0.0;
   FracPt[3] = 0.0;
   FracPt[4] = 0.0;
-  Tau1 = 0.0;
-  Tau2 = 0.0;
-  Tau3 = 0.0;
-  Tau4 = 0.0;
-  Tau5 = 0.0;
+  Tau[0] = 0.0;
+  Tau[1] = 0.0;
+  Tau[2] = 0.0;
+  Tau[3] = 0.0;
+  Tau[4] = 0.0;
 
   fArray = 0;
 }
