@@ -67,15 +67,15 @@ module PileUpMerger PileUpMerger {
 
   # average expected pile up
   set MeanPileUp 10
-  
-  # maximum spread in the beam direction in m 
+
+  # maximum spread in the beam direction in m
   set ZVertexSpread 0.10
-  
+
   # maximum spread in time in s
   set TVertexSpread 1.5E-09
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
-  
+
   set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
 
   #set VertexDistributionFormula { (abs(t) <= 1.0e-09) * (abs(z) <= 0.15) * (1.00) + \
@@ -328,7 +328,7 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   add InputArray Calorimeter/eflowTracks eflowTracks
   add InputArray ElectronEnergySmearing/electrons electrons
   add InputArray MuonMomentumSmearing/muons muons
-  
+
   set VertexInputArray PileUpMerger/vertices
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
@@ -378,7 +378,7 @@ module FastJetFinder Rho {
   set JetAlgorithm 4
   set ParameterR 0.6
   set GhostEtaMax 5.0
-  
+
   add RhoEtaRange 0.0 2.5
   add RhoEtaRange 2.5 5.0
 
@@ -434,7 +434,7 @@ module PileUpJetID PileUpJetID {
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
   set ZVertexResolution 0.0001
-  
+
   set OutputArray jets
 
   set UseConstituents 0
@@ -675,17 +675,16 @@ module UniqueObjectFinder UniqueObjectFinder {
 ##################
 
 # tracks, towers and eflow objects are not stored by default in the output.
-# if needed (for jet constituent or other studies), uncomment the relevant 
-# "add Branch ..." lines. 
-
+# if needed (for jet constituent or other studies), uncomment the relevant
+# "add Branch ..." lines.
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-  
   add Branch Delphes/allParticles Particle GenParticle
 
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
+
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
 #  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower

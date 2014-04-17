@@ -521,11 +521,9 @@ module UniqueObjectFinder UniqueObjectFinder {
 # ROOT tree writer
 ##################
 
-
 # tracks, towers and eflow objects are not stored by default in the output.
-# if needed (for jet constituent or other studies), uncomment the relevant 
-# "add Branch ..." lines. 
-
+# if needed (for jet constituent or other studies), uncomment the relevant
+# "add Branch ..." lines.
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
@@ -533,10 +531,11 @@ module TreeWriter TreeWriter {
 
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
+
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
 #  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
- 
+
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron

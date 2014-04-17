@@ -497,9 +497,10 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
   add Branch GenJetFinder/jets GenJet Jet
   
+  add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
   add Branch Hcal/eflowNeutralHadrons NeutralHadron Tower
   add Branch Ecal/eflowPhotons Photon Photon
-  add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
+
   add Branch ElectronEnergySmearing/electrons Electron Electron
   add Branch MuonMomentumSmearing/muons Muon Muon
   add Branch JetEnergyScale/jets Jet Jet
