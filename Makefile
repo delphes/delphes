@@ -585,15 +585,6 @@ tmp/modules/BTagging.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
-tmp/modules/UniformCalorimeter.$(ObjSuf): \
-	modules/UniformCalorimeter.$(SrcSuf) \
-	modules/UniformCalorimeter.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesFormula.h \
-	external/ExRootAnalysis/ExRootResult.h \
-	external/ExRootAnalysis/ExRootFilter.h \
-	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/TreeWriter.$(ObjSuf): \
 	modules/TreeWriter.$(SrcSuf) \
 	modules/TreeWriter.h \
@@ -1081,7 +1072,6 @@ DELPHES_OBJ +=  \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
-	tmp/modules/UniformCalorimeter.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/Weighter.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
@@ -1622,10 +1612,6 @@ external/fastjet/ClusterSequenceStructure.hh: \
 
 external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh: \
 	external/fastjet/FunctionOfPseudoJet.hh
-	@touch $@
-
-modules/UniformCalorimeter.h: \
-	classes/DelphesModule.h
 	@touch $@
 
 modules/StatusPidFilter.h: \
