@@ -1,5 +1,5 @@
 3.1.1:
-  adapted DelphesSTDHEP to the latest version of the STDHEP format introduced in MadGraph5_aMC@NLO 2.1.1
+  adapted DelphesSTDHEP to the latest version of the STDHEP format introduced in MadGraph5_aMC@NLO 2.1.2
 
 3.1.0:
   added Hector module (fast simulator for the transport of particles in beam lines)
