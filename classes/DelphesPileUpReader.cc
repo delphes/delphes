@@ -56,7 +56,7 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   xdrstdio_create(fInputXDR, fPileUpFile, XDR_DECODE);
 
   // read number of events
-  fseek(fPileUpFile, -8, SEEK_END);
+  fseeko(fPileUpFile, -8, SEEK_END);
   xdr_hyper(fInputXDR, &fEntries);
 
   if(fEntries >= kIndexSize)
@@ -66,7 +66,7 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   }
 
   // read index of events
-  fseek(fPileUpFile, -8 - 8*fEntries, SEEK_END);
+  fseeko(fPileUpFile, -8 - 8*fEntries, SEEK_END);
   xdr_opaque(fInputXDR, fIndex, fEntries*8);
 }
 
@@ -121,7 +121,7 @@ bool DelphesPileUpReader::ReadEntry(quad_t entry)
   xdr_hyper(fIndexXDR, &offset);
 
   // read event
-  fseek(fPileUpFile, offset, SEEK_SET);
+  fseeko(fPileUpFile, offset, SEEK_SET);
   xdr_int(fInputXDR, &fEntrySize);
 
   if(fEntrySize >= kBufferSize)
