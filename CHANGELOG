@@ -1,3 +1,6 @@
+3.1.2:
+  fixed smearing of (z,t) vertex distribution in the PileUpMerger module
+
 3.1.1:
   adapted DelphesSTDHEP to the latest version of the STDHEP format introduced in MadGraph5_aMC@NLO 2.1.2
 
