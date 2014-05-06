@@ -118,6 +118,8 @@ void PileUpMerger::Process()
 
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+    z = candidate->Position.Z();
+    t = candidate->Position.T();
     candidate->Position.SetZ(z + dz);
     candidate->Position.SetT(t + dt);
     fParticleOutputArray->Add(candidate);
@@ -188,7 +190,7 @@ void PileUpMerger::Process()
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
 
-      candidate->Position.SetXYZT(x, y, z+dz, t+dt);
+      candidate->Position.SetXYZT(x, y, z + dz, t + dt);
       candidate->Position.RotateZ(dphi);
 
       fParticleOutputArray->Add(candidate);
