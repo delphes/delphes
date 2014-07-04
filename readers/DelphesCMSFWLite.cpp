@@ -35,21 +35,30 @@
 #include "DataFormats/FWLite/interface/Event.h"
 #include "DataFormats/FWLite/interface/Handle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 using namespace std;
 
 //---------------------------------------------------------------------------
 
-void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
+void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
+  ExRootTreeBranch *branchEvent, DelphesFactory *factory,
+  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray,
+  TObjArray *partonOutputArray)
 {
+  fwlite::Handle< GenEventInfoProduct > handleGenEventInfo;
+
   fwlite::Handle< vector< reco::GenParticle > > handleParticle;
   vector< reco::GenParticle >::const_iterator itParticle;
 
   vector< const reco::Candidate * > vectorCandidate;
   vector< const reco::Candidate * >::iterator itCandidate;
 
+  handleGenEventInfo.getByLabel(event, "generator");
   handleParticle.getByLabel(event, "genParticles");
 
+  HepMCEvent *element;
   Candidate *candidate;
   TDatabasePDG *pdg;
   TParticlePDG *pdgParticle;
@@ -58,6 +67,28 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
   Int_t pid, status;
   Double_t px, py, pz, e, mass;
   Double_t x, y, z;
+
+  element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
+
+  element->Number = eventCounter;
+
+  element->ProcessID = handleGenEventInfo->signalProcessID();
+  element->MPI = 1;
+  element->Weight = handleGenEventInfo->weights()[0];
+  element->Scale = handleGenEventInfo->qScale();
+  element->AlphaQED = handleGenEventInfo->alphaQED();
+  element->AlphaQCD = handleGenEventInfo->alphaQCD();
+
+  element->ID1 = 0;
+  element->ID2 = 0;
+  element->X1 = 0.0;
+  element->X2 = 0.0;
+  element->ScalePDF = 0.0;
+  element->PDF1 = 0.0;
+  element->PDF2 = 0.0;
+
+  element->ReadTime = 0.0;
+  element->ProcTime = 0.0;
 
   pdg = TDatabasePDG::Instance();
 
@@ -81,6 +112,12 @@ void ConvertInput(fwlite::Event &event, DelphesFactory *factory, TObjArray *allP
     pdgCode = TMath::Abs(candidate->PID);
 
     candidate->Status = status;
+
+    if(particle.mother())
+    {
+      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.mother());
+      if(itCandidate != vectorCandidate.end()) candidate->M1 = distance(vectorCandidate.begin(), itCandidate);
+    }
 
     itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
     if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
@@ -130,6 +167,7 @@ int main(int argc, char *argv[])
   TFile *outputFile = 0;
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
+  ExRootTreeBranch *branchEvent = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
@@ -167,6 +205,8 @@ int main(int argc, char *argv[])
     }
 
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+
+    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -209,7 +249,8 @@ int main(int argc, char *argv[])
       treeWriter->Clear();
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
-        ConvertInput(event, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+        ConvertInput(event, eventCounter, branchEvent, factory,
+          allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
         modularDelphes->ProcessTask();
 
         treeWriter->Fill();
