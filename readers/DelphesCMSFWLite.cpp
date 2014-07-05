@@ -74,7 +74,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   element->ProcessID = handleGenEventInfo->signalProcessID();
   element->MPI = 1;
-  element->Weight = handleGenEventInfo->weights()[0];
+  element->Weight = handleGenEventInfo->weight();
   element->Scale = handleGenEventInfo->qScale();
   element->AlphaQED = handleGenEventInfo->alphaQED();
   element->AlphaQCD = handleGenEventInfo->alphaQCD();
