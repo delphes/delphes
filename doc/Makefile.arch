@@ -52,7 +52,6 @@ ROOTLDFLAGS  := $(shell $(RC) --ldflags)
 ROOTLIBS     := $(shell $(RC) --libs)
 ROOTGLIBS    := $(shell $(RC) --glibs)
 HASTHREAD    := $(shell $(RC) --has-thread)
-ROOTDICTTYPE := $(shell $(RC) --dicttype)
 ROOTCINT     := rootcint
 
 ifeq ($(PLATFORM),macosx)

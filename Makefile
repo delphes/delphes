@@ -1753,7 +1753,7 @@ $(DISPLAY_DICT_OBJ): %.$(ObjSuf): %.$(SrcSuf)
 $(TCL_OBJ): tmp/%.$(ObjSuf): %.c
 	@mkdir -p $(@D)
 	@echo ">> Compiling $<"
-	@gcc $(CXXFLAGS) -c $< $(OutPutOpt)$@
+	@$(CC) $(patsubst -std=%,,$(CXXFLAGS)) -c $< $(OutPutOpt)$@
 
 $(EXECUTABLE_OBJ): tmp/%.$(ObjSuf): %.cpp
 	@mkdir -p $(@D)
