@@ -16,7 +16,6 @@
 #include <deque>
 
 class TObjArray;
-class DelphesFormula;
 
 class PileUpJetID: public DelphesModule
 {

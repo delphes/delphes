@@ -15,7 +15,6 @@
 
 class TIterator;
 class TObjArray;
-class DelphesFormula;
 
 class TimeSmearing: public DelphesModule
 {

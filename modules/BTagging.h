@@ -42,8 +42,10 @@ private:
 
   Double_t fDeltaR;
 
+#if !defined(__CINT__) && !defined(__CLING__)
   std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!
-  
+#endif
+
   BTaggingPartonClassifier *fClassifier; //!
   
   ExRootFilter *fFilter;

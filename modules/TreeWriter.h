@@ -54,7 +54,7 @@ private:
   void ProcessWeight(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessHectorHit(ExRootTreeBranch *branch, TObjArray *array);
 
-#ifndef __CINT__
+#if !defined(__CINT__) && !defined(__CLING__)
   typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, TObjArray *); //!
 
   typedef std::map< ExRootTreeBranch *, std::pair< TProcessMethod, TObjArray * > > TBranchMap; //!
