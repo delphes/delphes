@@ -9,6 +9,18 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 find_package(ROOT COMPONENTS EG Eve GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
 include(${ROOT_USE_FILE})
 
+if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+  set(CMAKE_INSTALL_LIBDIR "lib")
+endif()
+
+function(DELPHES_GENERATE_DICTIONARY dictionary)
+  if(${ROOT_VERSION} LESS 6.0)
+    ROOT_GENERATE_DICTIONARY(${dictionary} ${ARGN})
+  else()
+    ROOT_GENERATE_DICTIONARY(${dictionary} MODULE ${dictionary} ${ARGN})
+  endif()
+endfunction()
+
 # Declare position of all other externals needed
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
 

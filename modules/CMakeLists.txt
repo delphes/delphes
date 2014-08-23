@@ -9,7 +9,7 @@ file(GLOB headers *.h)
 list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/ModulesLinkDef.h)
 list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/Pythia8LinkDef.h)
 
-ROOT_GENERATE_DICTIONARY(ModulesDict ${headers} LINKDEF ModulesLinkDef.h)
+DELPHES_GENERATE_DICTIONARY(ModulesDict ${headers} LINKDEF ModulesLinkDef.h)
 
 # TODO: implement switch to enable Pythia8 if present
 list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/PileUpMergerPythia8.cc)

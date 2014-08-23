@@ -7,7 +7,7 @@ file(GLOB sources *.cc)
 file(GLOB headers *.h)
 list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/ExRootAnalysisLinkDef.h)
 
-ROOT_GENERATE_DICTIONARY(ExRootAnalysisDict ${headers} LINKDEF ExRootAnalysisLinkDef.h)
+DELPHES_GENERATE_DICTIONARY(ExRootAnalysisDict ${headers} LINKDEF ExRootAnalysisLinkDef.h)
 
 add_library(ExRootAnalysis OBJECT ${sources} ExRootAnalysisDict.cxx)
 
