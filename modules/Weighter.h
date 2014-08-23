@@ -32,6 +32,8 @@ public:
   void Finish();
 
 private:
+
+#if !defined(__CINT__) && !defined(__CLING__)
   struct TIndexStruct
   {
     Int_t codes[4];
@@ -40,6 +42,7 @@ private:
 
   std::set<Int_t> fWeightSet, fCodeSet;
   std::map<TIndexStruct, Double_t> fWeightMap;
+#endif
 
   TIterator *fItInputArray; //!
 
