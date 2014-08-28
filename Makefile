@@ -9,11 +9,10 @@
 
 include doc/Makefile.arch
 
-ifeq ($(ARCH),macosx64)
-UNDEFOPT = dynamic_lookup
-endif
+ROOT_MAJOR := $(shell $(RC) --version | cut -d'.' -f1)
 
 SrcSuf = cc
+PcmSuf = _rdict.pcm
 
 CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
@@ -291,11 +290,17 @@ EXECUTABLE_OBJ +=  \
 tmp/modules/Pythia8Dict.$(SrcSuf): \
 	modules/Pythia8LinkDef.h \
 	modules/PileUpMergerPythia8.h
+Pythia8Dict$(PcmSuf): \
+	tmp/modules/Pythia8Dict$(PcmSuf) \
+	tmp/modules/Pythia8Dict.$(SrcSuf)
 DELPHES_DICT +=  \
 	tmp/modules/Pythia8Dict.$(SrcSuf)
 
 DELPHES_DICT_OBJ +=  \
 	tmp/modules/Pythia8Dict.$(ObjSuf)
+
+DELPHES_DICT_PCM +=  \
+	Pythia8Dict$(PcmSuf)
 
 endif
 
@@ -305,6 +310,9 @@ tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/DelphesFactory.h \
 	classes/SortableObject.h \
 	classes/DelphesClasses.h
+ClassesDict$(PcmSuf): \
+	tmp/classes/ClassesDict$(PcmSuf) \
+	tmp/classes/ClassesDict.$(SrcSuf)
 tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ModulesLinkDef.h \
 	modules/Delphes.h \
@@ -336,6 +344,9 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Weighter.h \
 	modules/Hector.h \
 	modules/ExampleModule.h
+ModulesDict$(PcmSuf): \
+	tmp/modules/ModulesDict$(PcmSuf) \
+	tmp/modules/ModulesDict.$(SrcSuf)
 tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootAnalysisLinkDef.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
@@ -348,6 +359,9 @@ tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootConfReader.h \
 	external/ExRootAnalysis/ExRootTask.h
+ExRootAnalysisDict$(PcmSuf): \
+	tmp/external/ExRootAnalysis/ExRootAnalysisDict$(PcmSuf) \
+	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf)
 DELPHES_DICT +=  \
 	tmp/classes/ClassesDict.$(SrcSuf) \
 	tmp/modules/ModulesDict.$(SrcSuf) \
@@ -358,15 +372,26 @@ DELPHES_DICT_OBJ +=  \
 	tmp/modules/ModulesDict.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(ObjSuf)
 
+DELPHES_DICT_PCM +=  \
+	ClassesDict$(PcmSuf) \
+	ModulesDict$(PcmSuf) \
+	ExRootAnalysisDict$(PcmSuf)
+
 tmp/display/DisplayDict.$(SrcSuf): \
 	display/DisplayLinkDef.h \
 	display/DelphesDisplay.h \
 	display/DelphesCaloData.h
+DisplayDict$(PcmSuf): \
+	tmp/display/DisplayDict$(PcmSuf) \
+	tmp/display/DisplayDict.$(SrcSuf)
 DISPLAY_DICT +=  \
 	tmp/display/DisplayDict.$(SrcSuf)
 
 DISPLAY_DICT_OBJ +=  \
 	tmp/display/DisplayDict.$(ObjSuf)
+
+DISPLAY_DICT_PCM +=  \
+	DisplayDict$(PcmSuf)
 
 tmp/classes/DelphesHepMCReader.$(ObjSuf): \
 	classes/DelphesHepMCReader.$(SrcSuf) \
@@ -1643,9 +1668,13 @@ modules/FastJetFinder.h: \
 
 ###
 
+ifeq ($(ROOT_MAJOR),6)
+all: $(DELPHES) $(DELPHES_DICT_PCM) $(EXECUTABLE)
+display: $(DISPLAY) $(DISPLAY_DICT_PCM)
+else
 all: $(DELPHES) $(EXECUTABLE)
-
 display: $(DISPLAY)
+endif
 
 $(DELPHES): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 	@mkdir -p $(@D)
@@ -1706,7 +1735,7 @@ clean:
 	@rm -rf tmp
 
 distclean: clean
-	@rm -f $(DELPHES) $(DELPHESLIB) $(DISPLAY) $(DISPLAYLIB) $(EXECUTABLE)
+	@rm -f $(DELPHES) $(DELPHESLIB) $(DELPHES_DICT_PCM) $(DISPLAY) $(DISPLAYLIB) $(DISPLAY_DICT_PCM) $(EXECUTABLE)
 
 dist:
 	@echo ">> Building $(DISTTAR)"
@@ -1718,7 +1747,7 @@ dist:
 
 ###
 
-.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
+.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf) $(PcmSuf)
 
 %Dict.$(SrcSuf):
 	@mkdir -p $(@D)
@@ -1729,6 +1758,10 @@ dist:
 	@mv $@ $@.base
 	@cat $@.arch $< $@.base > $@
 	@rm $@.arch $@.base
+
+%Dict$(PcmSuf):
+	@echo ">> Copying $@"
+	@cp $< $@
 
 $(DELPHES_OBJ): tmp/%.$(ObjSuf): %.$(SrcSuf)
 	@mkdir -p $(@D)

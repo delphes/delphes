@@ -5,6 +5,7 @@ set suffix " \\\n\t"
 
 set srcSuf {.$(SrcSuf)}
 set objSuf {.$(ObjSuf)}
+set pcmSuf {$(PcmSuf)}
 set exeSuf {$(ExeSuf)}
 
 proc dependencies {fileName firstLine {force 1} {command {}}} {
@@ -27,7 +28,7 @@ proc dependencies {fileName firstLine {force 1} {command {}}} {
       } elseif [file exists external/$file] {
         lappend list external/$file
         set headerFiles(external/$file) 1
-	  }
+      }
     }
   }
 
@@ -53,7 +54,7 @@ proc dependencies {fileName firstLine {force 1} {command {}}} {
 
 proc dictDeps {dictVar args} {
 
-  global prefix suffix srcSuf objSuf
+  global prefix suffix srcSuf objSuf pcmSuf
 
   set dict [eval glob -nocomplain $args]
 
@@ -66,8 +67,14 @@ proc dictDeps {dictVar args} {
 
     lappend dictSrcFiles $dictName$srcSuf
     lappend dictObjFiles $dictName$objSuf
+    lappend dictPcmFiles [file tail $dictName$pcmSuf]
 
     dependencies $fileName "$dictName$srcSuf:$suffix$fileName"
+
+    puts -nonewline [file tail $dictName$pcmSuf]:$suffix
+    puts -nonewline $dictName$pcmSuf$suffix
+    puts -nonewline $dictName$srcSuf
+    puts {}
   }
 
   puts -nonewline "${dictVar} += $suffix"
@@ -78,6 +85,9 @@ proc dictDeps {dictVar args} {
   puts [join $dictObjFiles $suffix]
   puts {}
 
+  puts -nonewline "${dictVar}_PCM += $suffix"
+  puts [join $dictPcmFiles $suffix]
+  puts {}
 }
 
 proc sourceDeps {srcPrefix args} {
@@ -190,11 +200,10 @@ puts {
 
 include doc/Makefile.arch
 
-ifeq ($(ARCH),macosx64)
-UNDEFOPT = dynamic_lookup
-endif
+ROOT_MAJOR := $(shell $(RC) --version | cut -d'.' -f1)
 
 SrcSuf = cc
+PcmSuf = _rdict.pcm
 
 CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
@@ -284,9 +293,13 @@ puts {
 
 ###
 
+ifeq ($(ROOT_MAJOR),6)
+all: $(DELPHES) $(DELPHES_DICT_PCM) $(EXECUTABLE)
+display: $(DISPLAY) $(DISPLAY_DICT_PCM)
+else
 all: $(DELPHES) $(EXECUTABLE)
-
 display: $(DISPLAY)
+endif
 
 $(DELPHES): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 	@mkdir -p $(@D)
@@ -347,7 +360,7 @@ clean:
 	@rm -rf tmp
 
 distclean: clean
-	@rm -f $(DELPHES) $(DELPHESLIB) $(DISPLAY) $(DISPLAYLIB) $(EXECUTABLE)
+	@rm -f $(DELPHES) $(DELPHESLIB) $(DELPHES_DICT_PCM) $(DISPLAY) $(DISPLAYLIB) $(DISPLAY_DICT_PCM) $(EXECUTABLE)
 
 dist:
 	@echo ">> Building $(DISTTAR)"
@@ -359,7 +372,7 @@ dist:
 
 ###
 
-.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
+.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf) $(PcmSuf)
 
 %Dict.$(SrcSuf):
 	@mkdir -p $(@D)
@@ -370,6 +383,10 @@ dist:
 	@mv $@ $@.base
 	@cat $@.arch $< $@.base > $@
 	@rm $@.arch $@.base
+
+%Dict$(PcmSuf):
+	@echo ">> Copying $@"
+	@cp $< $@
 
 $(DELPHES_OBJ): tmp/%.$(ObjSuf): %.$(SrcSuf)
 	@mkdir -p $(@D)
