@@ -3,8 +3,8 @@
  *
  *  Lists classes to be included in cint dicitonary
  *
- *  $Date$
- *  $Revision$
+ *  $Date: 2014-04-16 17:17:35 +0200 (Wed, 16 Apr 2014) $
+ *  $Revision: 1369 $
  *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
@@ -16,8 +16,10 @@
 #include "modules/FastJetFinder.h"
 #include "modules/ParticlePropagator.h"
 #include "modules/Efficiency.h"
+#include "modules/IdentificationMap.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
+#include "modules/AngularSmearing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
@@ -53,8 +55,10 @@
 #pragma link C++ class FastJetFinder+;
 #pragma link C++ class ParticlePropagator+;
 #pragma link C++ class Efficiency+;
+#pragma link C++ class IdentificationMap+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
+#pragma link C++ class AngularSmearing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
