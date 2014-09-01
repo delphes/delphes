@@ -15,7 +15,8 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
-  
+  ImpactParameterSmearing
+ 
   IdentificationMap
   
   Ecal
@@ -112,12 +113,30 @@ module Merger TrackMerger {
 }
 
 
+
+################################
+# Track impact parameter smearing
+################################
+
+module ImpactParameterSmearing ImpactParameterSmearing {
+  set InputArray TrackMerger/tracks
+  set OutputArray tracks
+
+
+# absolute impact parameter smearing formula (in mm) as a function of pt and eta
+set ResolutionFormula {0.0116 + 0.0234/pt}
+
+}
+
+###### ref. JINST 9 C01065 #############
+
+
 ####################################
 # Charged hadron PID
 ####################################
 
 module IdentificationMap IdentificationMap {
-  set InputArray TrackMerger/tracks
+  set InputArray ImpactParameterSmearing/tracks
   set OutputArray tracks
   
   # {PID in} {PID out} {formula}
