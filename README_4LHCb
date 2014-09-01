@@ -142,17 +142,3 @@ Basic analysis macro:
   histTrackPT->Draw();
 }
 
-
-More advanced macro-based analysis
-==================================
-
-The 'examples' directory contains ROOT macros Example1.C, Example2.C and Example3.C.
-
-Here are the commands to run these ROOT macros:
-
-   root -l
-   .X examples/Example1.C("delphes_output.root");
-
-or
-
-   root -l examples/Example1.C\(\"delphes_output.root\"\)
