@@ -1,5 +1,5 @@
-set MaxEvents 1000
-set RandomSeed 123
+#set MaxEvents 1000
+#set RandomSeed 123
 
 
 #######################################

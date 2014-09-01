@@ -19,7 +19,6 @@
 #include "modules/IdentificationMap.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
-#include "modules/AngularSmearing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
@@ -58,7 +57,6 @@
 #pragma link C++ class IdentificationMap+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
-#pragma link C++ class AngularSmearing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;

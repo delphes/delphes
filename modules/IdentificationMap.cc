@@ -74,7 +74,7 @@ void IdentificationMap::Init()
     pdg = param[i*3].GetInt();
     fEfficiencyMap.insert(make_pair(pdg,make_pair(param[i*3 + 1].GetInt(),formula)));
   
-    cout<<param[i*3].GetInt()<<","<<param[i*3+1].GetInt()<<","<<param[i*3 + 2].GetString()<<endl;
+   // cout<<param[i*3].GetInt()<<","<<param[i*3+1].GetInt()<<","<<param[i*3 + 2].GetString()<<endl;
   
   }
 
