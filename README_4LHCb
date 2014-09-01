@@ -1,21 +1,3 @@
-Quick start with Delphes
-========================
-
-1) Compile:
-
-   make
-
-2) Simulate p p -> b b~ events 
-
-  tar xzvf pp2pp.hep.tgz
-  ./DelphesSTDHEP examples/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
-
-
-For more details, please visit:
-
-https://cp3.irmp.ucl.ac.be/projects/delphes
-
-
 Delphes 4 LHCb
 ==============
 
@@ -56,6 +38,25 @@ resolution of neutral objects such as photons/neutral hadrons.
 user specifies here which collections are stored in the output. 
 By default tracks, neutral hadrons and photons are stored in this card.
 Tracks contain muons, electrons, and charged hadrons. 
+
+
+Quick start with Delphes
+========================
+
+1) Compile:
+
+   make
+
+2) Simulate p p -> b b~ events 
+
+  tar -xzvf pp2pp.hep.tgz
+  ./DelphesSTDHEP examples/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
+
+
+For more details, please visit:
+
+https://cp3.irmp.ucl.ac.be/projects/delphes
+
 
 
 Simple analysis using TTree::Draw
