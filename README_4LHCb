@@ -7,7 +7,7 @@ Quick start with Delphes
 
 2) Simulate p p -> b b~ events 
 
-   gunzip pp2pp.hep.gz
+   tar xzvf  pp2pp.hep.tgz
   ./DelphesSTDHEP examples/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
 
 
@@ -122,23 +122,23 @@ Basic analysis macro:
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
-    // If event contains at least 1 electron
+    // If event contains at least 1 track
     if(branchTrack->GetEntries() > 0)
     {
-      // Take first electron
+      // Take first track
       Track *track = (Track*) branchTrack->At(0);
       
       // Plot track transverse momentum
       histTrackPT->Fill(track->PT);
       
-      // Print electron transverse momentum
-      cout << track->PT << endl;
+      // Print electron transverse momentum and Particle Data Group ID
+      cout << track->PID<< "   " << track->PT << endl;
     }
 
   }
 
   // Show resulting histograms
-  histElectronPT->Draw();
+  histTrackPT->Draw();
 }
 
 
