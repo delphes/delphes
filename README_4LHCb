@@ -49,7 +49,7 @@ Quick start with Delphes
 
 2) Simulate p p -> b b~ events 
 
-  tar -xzvf pp2pp.hep.tgz
+  tar -xzvf pp2bb.hep.tgz
   ./DelphesSTDHEP examples/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
 
 
