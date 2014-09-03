@@ -1,0 +1,70 @@
+------------------------------------------------------------------------
+SoftKiller FastJet contrib
+------------------------------------------------------------------------
+
+The SoftKiller FastJet contrib aims to provide an implementation of
+the pileup removal technique introduced in
+	
+  SoftKiller, a particle-level pileup removal method
+  Matteo Cacciari, Gavin P. Salam, Gregory Soyez
+  arXiv:1407.0408
+
+The SoftKiller class progressively kills soft particles in order of
+increasing pt until half of the event is empty (i.e. rho is zero). 
+It is constructed using
+
+  SoftKiller soft_killer(double rapmax, double grid_spacing,
+                         Selector sifter = Selector());
+
+with
+
+  rapmax        the maximal (absolute) rapidity extent of the grid
+  tile_size     the requested grid spacing (or equivalent tile size)
+  sifter        when provided, the soft killer is applied
+                only to particles that pass the sifter (the
+                others are kept untouched)
+
+For a given event, the SoftKiller is then applied to an event as follows
+
+  vector<PseudoJet> event;
+  vector<PseudoJet> killed_event = soft_killer(event);
+
+For an explicit illustration of how this works, see the example.cc
+file which can be built using
+
+    make example
+
+and should be run with
+
+   ./example < ../data/Pythia-Zp2jets-lhc-pileup-1ev.dat
+ 
+The expected output can be found in example.ref
+
+----------------------------------------------------------------------
+More advanced usage
+===================
+
+If you have FastJet 3.1, then you can use its RectangularGrid to have
+obtain control over the grid; for example to apply a soft killer
+separately to central and forward particles you might have:
+
+   double central_rapmax = 2.5, forward_rapmax = 5.0, tile_size = 0.5;
+
+   // the central SK runs from -central_rapmax to central_rapmax; we
+   // can have separate rapidity and phi tile sizes, but here keep
+   // them the same
+   RectangularGrid central_grid(-central_rapmax, central_rapmax, tile_size, tile_size);
+   SoftKiller central_killer(central_grid);
+   Selector central_selector = SelectorAbsRapMax(central_rapmax); // for later use
+   
+   // for the forward SK, we have a grid from -5.0 to 5.0 but then use
+   // only grid tiles whose central point passes the forward selector
+   Selector forward_selector = SelectorAbsRapRange(central_rapmax, forward_rapmax);
+   RectangularGrid forward_grid(-forward_rapma, forward_rapmax, tile_size, tile_size, forward_selector);
+   SoftKiller central_killer(forward_grid);
+
+   // now process central and forward particles separately
+   vector<PseudoJet> central_kept_particles = central_killer(central_selector(particles));
+   vector<PseudoJet> forward_kept_particles = forward_killer(forward_selector(particles));
+
+

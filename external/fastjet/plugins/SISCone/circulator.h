@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision::                                                              $//
-// $Date::                                                                  $//
+// $Revision:: 103                                                          $//
+// $Date:: 2007-02-18 17:07:34 +0100 (Sun, 18 Feb 2007)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __CIRCULATOR_H__

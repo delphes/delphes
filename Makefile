@@ -766,6 +766,13 @@ tmp/external/ExRootAnalysis/ExRootProgressBar.$(ObjSuf): \
 tmp/external/ExRootAnalysis/ExRootUtilities.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootUtilities.$(SrcSuf) \
 	external/ExRootAnalysis/ExRootUtilities.h
+tmp/external/fastjet/LazyTiling9SeparateGhosts.$(ObjSuf): \
+	external/fastjet/LazyTiling9SeparateGhosts.$(SrcSuf) \
+	external/fastjet/internal/LazyTiling9SeparateGhosts.hh \
+	external/fastjet/internal/TilingExtent.hh
+tmp/external/fastjet/TilingExtent.$(ObjSuf): \
+	external/fastjet/TilingExtent.$(SrcSuf) \
+	external/fastjet/internal/TilingExtent.hh
 tmp/external/fastjet/Dnn2piCylinder.$(ObjSuf): \
 	external/fastjet/Dnn2piCylinder.$(SrcSuf) \
 	external/fastjet/internal/Dnn2piCylinder.hh
@@ -779,6 +786,10 @@ tmp/external/fastjet/ClusterSequenceActiveArea.$(ObjSuf): \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/ClusterSequenceActiveArea.hh \
 	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh
+tmp/external/fastjet/LazyTiling9.$(ObjSuf): \
+	external/fastjet/LazyTiling9.$(SrcSuf) \
+	external/fastjet/internal/LazyTiling9.hh \
+	external/fastjet/internal/TilingExtent.hh
 tmp/external/fastjet/ClusterSequence_Delaunay.$(ObjSuf): \
 	external/fastjet/ClusterSequence_Delaunay.$(SrcSuf) \
 	external/fastjet/Error.hh \
@@ -791,6 +802,10 @@ tmp/external/fastjet/ClusterSequence_Delaunay.$(ObjSuf): \
 tmp/external/fastjet/ClusterSequenceArea.$(ObjSuf): \
 	external/fastjet/ClusterSequenceArea.$(SrcSuf) \
 	external/fastjet/ClusterSequenceArea.hh
+tmp/external/fastjet/LazyTiling25.$(ObjSuf): \
+	external/fastjet/LazyTiling25.$(SrcSuf) \
+	external/fastjet/internal/LazyTiling25.hh \
+	external/fastjet/internal/TilingExtent.hh
 tmp/external/fastjet/Voronoi.$(ObjSuf): \
 	external/fastjet/Voronoi.$(SrcSuf) \
 	external/fastjet/internal/Voronoi.hh
@@ -802,7 +817,8 @@ tmp/external/fastjet/ClusterSequence_TiledN2.$(ObjSuf): \
 	external/fastjet/ClusterSequence_TiledN2.$(SrcSuf) \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequence.hh \
-	external/fastjet/internal/MinHeap.hh
+	external/fastjet/internal/MinHeap.hh \
+	external/fastjet/internal/TilingExtent.hh
 tmp/external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.$(ObjSuf): \
 	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.$(SrcSuf) \
 	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh
@@ -814,6 +830,9 @@ tmp/external/fastjet/CompositeJetStructure.$(ObjSuf): \
 tmp/external/fastjet/DnnPlane.$(ObjSuf): \
 	external/fastjet/DnnPlane.$(SrcSuf) \
 	external/fastjet/internal/DnnPlane.hh
+tmp/external/fastjet/RectangularGrid.$(ObjSuf): \
+	external/fastjet/RectangularGrid.$(SrcSuf) \
+	external/fastjet/RectangularGrid.hh
 tmp/external/fastjet/ClusterSequence_DumbN3.$(ObjSuf): \
 	external/fastjet/ClusterSequence_DumbN3.$(SrcSuf) \
 	external/fastjet/PseudoJet.hh \
@@ -822,6 +841,10 @@ tmp/external/fastjet/ClusterSequencePassiveArea.$(ObjSuf): \
 	external/fastjet/ClusterSequencePassiveArea.$(SrcSuf) \
 	external/fastjet/ClusterSequencePassiveArea.hh \
 	external/fastjet/ClusterSequenceVoronoiArea.hh
+tmp/external/fastjet/LazyTiling9Alt.$(ObjSuf): \
+	external/fastjet/LazyTiling9Alt.$(SrcSuf) \
+	external/fastjet/internal/LazyTiling9Alt.hh \
+	external/fastjet/internal/TilingExtent.hh
 tmp/external/fastjet/BasicRandom.$(ObjSuf): \
 	external/fastjet/BasicRandom.$(SrcSuf) \
 	external/fastjet/internal/BasicRandom.hh
@@ -841,7 +864,11 @@ tmp/external/fastjet/ClusterSequence.$(ObjSuf): \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/ClusterSequenceStructure.hh \
-	external/fastjet/version.hh
+	external/fastjet/version.hh \
+	external/fastjet/internal/LazyTiling9Alt.hh \
+	external/fastjet/internal/LazyTiling9.hh \
+	external/fastjet/internal/LazyTiling25.hh \
+	external/fastjet/internal/LazyTiling9SeparateGhosts.hh
 tmp/external/fastjet/JetDefinition.$(ObjSuf): \
 	external/fastjet/JetDefinition.$(SrcSuf) \
 	external/fastjet/JetDefinition.hh \
@@ -913,6 +940,10 @@ tmp/external/fastjet/tools/RestFrameNSubjettinessTagger.$(ObjSuf): \
 tmp/external/fastjet/tools/JetMedianBackgroundEstimator.$(ObjSuf): \
 	external/fastjet/tools/JetMedianBackgroundEstimator.$(SrcSuf) \
 	external/fastjet/tools/JetMedianBackgroundEstimator.hh
+tmp/external/fastjet/tools/Recluster.$(ObjSuf): \
+	external/fastjet/tools/Recluster.$(SrcSuf) \
+	external/fastjet/tools/Recluster.hh \
+	external/fastjet/CompositeJetStructure.hh
 tmp/external/fastjet/tools/MassDropTagger.$(ObjSuf): \
 	external/fastjet/tools/MassDropTagger.$(SrcSuf)
 tmp/external/fastjet/tools/JHTopTagger.$(ObjSuf): \
@@ -922,7 +953,8 @@ tmp/external/fastjet/tools/GridMedianBackgroundEstimator.$(ObjSuf): \
 	external/fastjet/tools/GridMedianBackgroundEstimator.hh
 tmp/external/fastjet/tools/Filter.$(ObjSuf): \
 	external/fastjet/tools/Filter.$(SrcSuf) \
-	external/fastjet/tools/Filter.hh
+	external/fastjet/tools/Filter.hh \
+	external/fastjet/tools/Recluster.hh
 tmp/external/fastjet/tools/Pruner.$(ObjSuf): \
 	external/fastjet/tools/Pruner.$(SrcSuf) \
 	external/fastjet/tools/Pruner.hh \
@@ -1003,12 +1035,16 @@ tmp/external/fastjet/plugins/EECambridge/EECambridgePlugin.$(ObjSuf): \
 	external/fastjet/plugins/EECambridge/EECambridgePlugin.$(SrcSuf) \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/NNH.hh
+tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf): \
+	external/fastjet/contribs/SoftKiller/SoftKiller.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/MeasureFunction.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/MeasureFunction.$(SrcSuf)
+tmp/external/fastjet/contribs/Nsubjettiness/NjettinessDefinition.$(ObjSuf): \
+	external/fastjet/contribs/Nsubjettiness/NjettinessDefinition.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/Njettiness.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/Njettiness.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/AxesFinder.$(ObjSuf): \
@@ -1119,11 +1155,15 @@ DELPHES_OBJ +=  \
 	tmp/external/ExRootAnalysis/ExRootTask.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootProgressBar.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootUtilities.$(ObjSuf) \
+	tmp/external/fastjet/LazyTiling9SeparateGhosts.$(ObjSuf) \
+	tmp/external/fastjet/TilingExtent.$(ObjSuf) \
 	tmp/external/fastjet/Dnn2piCylinder.$(ObjSuf) \
 	tmp/external/fastjet/GhostedAreaSpec.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequenceActiveArea.$(ObjSuf) \
+	tmp/external/fastjet/LazyTiling9.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequence_Delaunay.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequenceArea.$(ObjSuf) \
+	tmp/external/fastjet/LazyTiling25.$(ObjSuf) \
 	tmp/external/fastjet/Voronoi.$(ObjSuf) \
 	tmp/external/fastjet/Selector.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequence_TiledN2.$(ObjSuf) \
@@ -1131,8 +1171,10 @@ DELPHES_OBJ +=  \
 	tmp/external/fastjet/LimitedWarning.$(ObjSuf) \
 	tmp/external/fastjet/CompositeJetStructure.$(ObjSuf) \
 	tmp/external/fastjet/DnnPlane.$(ObjSuf) \
+	tmp/external/fastjet/RectangularGrid.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequence_DumbN3.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequencePassiveArea.$(ObjSuf) \
+	tmp/external/fastjet/LazyTiling9Alt.$(ObjSuf) \
 	tmp/external/fastjet/BasicRandom.$(ObjSuf) \
 	tmp/external/fastjet/ClusterSequenceAreaBase.$(ObjSuf) \
 	tmp/external/fastjet/PseudoJetStructureBase.$(ObjSuf) \
@@ -1158,6 +1200,7 @@ DELPHES_OBJ +=  \
 	tmp/external/fastjet/tools/Subtractor.$(ObjSuf) \
 	tmp/external/fastjet/tools/RestFrameNSubjettinessTagger.$(ObjSuf) \
 	tmp/external/fastjet/tools/JetMedianBackgroundEstimator.$(ObjSuf) \
+	tmp/external/fastjet/tools/Recluster.$(ObjSuf) \
 	tmp/external/fastjet/tools/MassDropTagger.$(ObjSuf) \
 	tmp/external/fastjet/tools/JHTopTagger.$(ObjSuf) \
 	tmp/external/fastjet/tools/GridMedianBackgroundEstimator.$(ObjSuf) \
@@ -1192,9 +1235,11 @@ DELPHES_OBJ +=  \
 	tmp/external/fastjet/plugins/GridJet/GridJetPlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/Jade/JadePlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/EECambridge/EECambridgePlugin.$(ObjSuf) \
+	tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/MeasureFunction.$(ObjSuf) \
+	tmp/external/fastjet/contribs/Nsubjettiness/NjettinessDefinition.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/Njettiness.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/AxesFinder.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.$(ObjSuf) \
@@ -1370,7 +1415,8 @@ external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh: \
 
 external/fastjet/JetDefinition.hh: \
 	external/fastjet/internal/numconsts.hh \
-	external/fastjet/PseudoJet.hh
+	external/fastjet/PseudoJet.hh \
+	external/fastjet/ClusterSequence.hh
 	@touch $@
 
 modules/ConstituentFilter.h: \
@@ -1416,12 +1462,24 @@ modules/JetPileUpSubtractor.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+external/fastjet/internal/LazyTiling25.hh: \
+	external/fastjet/internal/MinHeap.hh \
+	external/fastjet/ClusterSequence.hh \
+	external/fastjet/internal/LazyTiling9Alt.hh \
+	external/fastjet/internal/LazyTiling9.hh
+	@touch $@
+
 external/fastjet/Error.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
 
 external/fastjet/contribs/Nsubjettiness/Njettiness.hh: \
-	external/fastjet/PseudoJet.hh
+	external/fastjet/PseudoJet.hh \
+	external/fastjet/SharedPtr.hh
+	@touch $@
+
+external/fastjet/internal/TilingExtent.hh: \
+	external/fastjet/ClusterSequence.hh
 	@touch $@
 
 modules/Efficiency.h: \
@@ -1433,7 +1491,8 @@ modules/TrackPileUpSubtractor.h: \
 	@touch $@
 
 external/fastjet/tools/GridMedianBackgroundEstimator.hh: \
-	external/fastjet/tools/BackgroundEstimatorBase.hh
+	external/fastjet/tools/BackgroundEstimatorBase.hh \
+	external/fastjet/RectangularGrid.hh
 	@touch $@
 
 external/fastjet/internal/DnnPlane.hh: \
@@ -1456,12 +1515,23 @@ external/fastjet/ClusterSequence1GhostPassiveArea.hh: \
 	external/fastjet/ClusterSequenceActiveArea.hh
 	@touch $@
 
+external/fastjet/internal/LazyTiling9Alt.hh: \
+	external/fastjet/internal/MinHeap.hh \
+	external/fastjet/ClusterSequence.hh
+	@touch $@
+
+external/fastjet/RectangularGrid.hh: \
+	external/fastjet/PseudoJet.hh \
+	external/fastjet/Selector.hh
+	@touch $@
+
 modules/PileUpMerger.h: \
 	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/internal/DynamicNearestNeighbours.hh: \
-	external/fastjet/internal/numconsts.hh
+	external/fastjet/internal/numconsts.hh \
+	external/fastjet/Error.hh
 	@touch $@
 
 external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh: \
@@ -1485,6 +1555,12 @@ external/fastjet/tools/Pruner.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/WrappedStructure.hh \
 	external/fastjet/tools/Transformer.hh
+	@touch $@
+
+external/fastjet/internal/LazyTiling9.hh: \
+	external/fastjet/internal/MinHeap.hh \
+	external/fastjet/ClusterSequence.hh \
+	external/fastjet/internal/LazyTiling9Alt.hh
 	@touch $@
 
 modules/PileUpJetID.h: \
@@ -1609,6 +1685,12 @@ external/ExRootAnalysis/ExRootTask.h: \
 external/fastjet/tools/Subtractor.hh: \
 	external/fastjet/tools/Transformer.hh \
 	external/fastjet/tools/BackgroundEstimatorBase.hh
+	@touch $@
+
+external/fastjet/internal/LazyTiling9SeparateGhosts.hh: \
+	external/fastjet/internal/MinHeap.hh \
+	external/fastjet/ClusterSequence.hh \
+	external/fastjet/internal/LazyTiling9Alt.hh
 	@touch $@
 
 external/fastjet/AreaDefinition.hh: \

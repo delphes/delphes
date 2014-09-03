@@ -1,10 +1,10 @@
 #ifndef __FASTJET_TOOLS_PRUNER_HH__
 #define __FASTJET_TOOLS_PRUNER_HH__
 
-//STARTHEADER
-// $Id: Pruner.hh 2616 2011-09-30 18:03:40Z salam $
+//FJSTARTHEADER
+// $Id: Pruner.hh 3481 2014-07-29 17:24:12Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/WrappedStructure.hh"
@@ -42,6 +44,11 @@ class Pruner;
 class PrunerStructure;
 class PruningRecombiner;
 class PruningPlugin;
+
+// This tells third-party code that the pruner structure 
+// stores Rcut info; the alternative is for the user to 
+// get the information from the version number
+#define FASTJET_PRUNER_STRUCTURE_STORES_RCUT
 
 //----------------------------------------------------------------------
 /// @ingroup tools_generic
@@ -134,8 +141,8 @@ public:
   ///  \param zcut_dyn    dynamic pt-fraction cut in the pruning
   ///  \param Rcut_dyn    dynamic angular distance cut in the pruning
   Pruner(const JetDefinition &jet_def, 
-         FunctionOfPseudoJet<double> *zcut_dyn,
-         FunctionOfPseudoJet<double> *Rcut_dyn);
+         const FunctionOfPseudoJet<double> *zcut_dyn,
+         const FunctionOfPseudoJet<double> *Rcut_dyn);
 
   /// action on a single jet
   virtual PseudoJet result(const PseudoJet &jet) const;
@@ -151,15 +158,21 @@ private:
   /// area support)
   bool _check_explicit_ghosts(const PseudoJet &jet) const;
 
-  /// return a pointer to a "common" recombiner if there is one,
-  /// alternatively a null pointer.
-  const JetDefinition::Recombiner * _get_common_recombiner(const PseudoJet &jet) const;
+  /// see if there is a common recombiner among the pieces; if there
+  /// is return true and set jet_def_for_recombiner so that the
+  /// recombiner can be taken from that JetDefinition. Otherwise,
+  /// return false. 'assigned' is initially false; when true, each
+  /// time we meet a new jet definition, we'll check it shares the
+  /// same recombiner as jet_def_for_recombiner.
+  bool _check_common_recombiner(const PseudoJet &jet, 
+				JetDefinition &jet_def_for_recombiner,
+				bool assigned=false) const;
 
   JetDefinition _jet_def; ///< the internal jet definition
   double _zcut;        	  ///< the pt-fraction cut
   double _Rcut_factor;    ///< the angular separation cut factor
-  FunctionOfPseudoJet<double> *_zcut_dyn; ///< dynamic zcut
-  FunctionOfPseudoJet<double> *_Rcut_dyn; ///< dynamic Rcut
+  const FunctionOfPseudoJet<double> *_zcut_dyn; ///< dynamic zcut
+  const FunctionOfPseudoJet<double> *_Rcut_dyn; ///< dynamic Rcut
   bool   _get_recombiner_from_jet; ///< true for minimal constructor,
                                    ///< causes recombiner to be set equal 
                                    ///< to that already used in the jet 
@@ -193,8 +206,17 @@ public:
   /// The resulting vector is sorted in pt
   std::vector<PseudoJet> extra_jets() const;
 
+  /// return the value of Rcut that was used for this specific pruning.
+  double Rcut() const {return _Rcut;}
+
+  /// return the value of Rcut that was used for this specific pruning.
+  double zcut() const {return _zcut;}
+
 protected:
   friend class Pruner; ///< to allow setting the internal information
+
+private:
+  double _Rcut, _zcut;
 };
 
 //----------------------------------------------------------------------

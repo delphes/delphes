@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: ClosestPair2D.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/internal/ClosestPair2D.hh"
 
@@ -35,7 +37,6 @@
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
-const unsigned int huge_unsigned = 4294967295U;
 const unsigned int twopow31      = 2147483648U;
 
 using namespace std;
@@ -182,6 +183,10 @@ void ClosestPair2D::closest_pair(unsigned int & ID1, unsigned int & ID2,
   ID1 = _heap->minloc();
   ID2 = _ID(_points[ID1].neighbour);
   distance2 = _points[ID1].neighbour_dist2;
+  // we make the swap explicitly in the std namespace to avoid
+  // potential conflict with the fastjet::swap introduced by
+  // SharedPtr.
+  // This is only an issue because we are in the fastjet namespace
   if (ID1 > ID2) std::swap(ID1,ID2);
 }
 

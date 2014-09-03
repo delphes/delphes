@@ -10,6 +10,11 @@
 
 // History of changes compared to the original MidPointAlgorithm.cc file
 // 
+// 2014-08-13 Matteo Cacciari and Gavin Salam
+//        * changed a number of int -> unsigned (and in one case
+//          added explicit conversion to int) to eliminate
+//          long-standing compiler warnings
+//
 // 2009-01-17  Gregory Soyez  <soyez@fastjet.fr>
 // 
 //        * put the code in the fastjet::cdf namespace
@@ -67,11 +72,13 @@ void MidPointAlgorithm::findStableConesFromMidPoints(std::vector<PhysicsTower>& 
   // distanceOK[i-1][j] = Is distance between stableCones i and j (i>j) less than 2*_coneRadius?
   std::vector< std::vector<bool> > distanceOK;
   distanceOK.resize(stableCones.size() - 1);
-  for(int nCluster1 = 1; nCluster1 < stableCones.size(); nCluster1++){
+  // MC+GPS 2014-08-13, replaced int with unsigned
+  for(unsigned nCluster1 = 1; nCluster1 < stableCones.size(); nCluster1++){
     distanceOK[nCluster1 - 1].resize(nCluster1);
     double cluster1Rapidity = stableCones[nCluster1].fourVector.y();
     double cluster1Phi      = stableCones[nCluster1].fourVector.phi();
-    for(int nCluster2 = 0; nCluster2 < nCluster1; nCluster2++){
+    // MC+GPS 2014-08-13, replaced int with unsigned
+    for(unsigned nCluster2 = 0; nCluster2 < nCluster1; nCluster2++){
       double cluster2Rapidity = stableCones[nCluster2].fourVector.y();
       double cluster2Phi      = stableCones[nCluster2].fourVector.phi();
       double dRapidity = fabs(cluster1Rapidity - cluster2Rapidity);
@@ -93,10 +100,12 @@ void MidPointAlgorithm::findStableConesFromMidPoints(std::vector<PhysicsTower>& 
 
   // Loop over all combinations. Calculate MidPoint. Make midPointClusters.
   bool reduceConeSize = false;
-  for(int iPair = 0; iPair < pairs.size(); iPair++){
+  // MC+GPS 2014-08-13, replaced int with unsigned
+  for(unsigned iPair = 0; iPair < pairs.size(); iPair++){
     // Calculate rapidity, phi and pT of MidPoint.
     LorentzVector midPoint(0,0,0,0);
-    for(int iPairMember = 0; iPairMember < pairs[iPair].size(); iPairMember++)
+    // MC+GPS 2014-08-13, replaced int with unsigned
+    for(unsigned iPairMember = 0; iPairMember < pairs[iPair].size(); iPairMember++)
       midPoint.add(stableCones[pairs[iPair][iPairMember]].fourVector);
     iterateCone(midPoint.y(),midPoint.phi(),midPoint.pt(),towers,stableCones,reduceConeSize);
   }
@@ -173,10 +182,12 @@ void MidPointAlgorithm::addClustersToPairs(std::vector<int>& testPair, std::vect
   int nextClusterStart = 0;
   if(testPair.size())
     nextClusterStart = testPair.back() + 1;
-  for(int nextCluster = nextClusterStart; nextCluster <= distanceOK.size(); nextCluster++){
+  // MC+GPS 2014-08-13, replaced int nextCluster with unsigned
+  for(unsigned nextCluster = nextClusterStart; nextCluster <= distanceOK.size(); nextCluster++){
     // Is new SeedCone less than 2*_coneRadius apart from all clusters in testPair?
     bool addCluster = true;
-    for(int iCluster = 0; iCluster < testPair.size() && addCluster; iCluster++)
+    // MC+GPS 2014-08-13, replaced int iCluster with unsigned
+    for(unsigned iCluster = 0; iCluster < testPair.size() && addCluster; iCluster++)
       if(!distanceOK[nextCluster - 1][testPair[iCluster]])
 	addCluster = false;
     if(addCluster){
@@ -186,7 +197,8 @@ void MidPointAlgorithm::addClustersToPairs(std::vector<int>& testPair, std::vect
       if(testPair.size() > 1)
 	pairs.push_back(testPair);
       // If not bigger than allowed, find more clusters within 2*_coneRadius.
-      if(testPair.size() < maxClustersInPair)
+      // GPS+MC 2014-08-13, replaced testPair.size() with int(testPair.size())
+      if(int(testPair.size()) < maxClustersInPair)
 	addClustersToPairs(testPair,pairs,distanceOK,maxClustersInPair);
       // All combinations containing testPair found. Remove last element.
       testPair.pop_back();

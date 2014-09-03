@@ -146,7 +146,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef FASTJET_PACKAGE_STRING 
-#define FASTJET_PACKAGE_STRING  "FastJet 3.0.6" 
+#define FASTJET_PACKAGE_STRING  "FastJet 3.1.0-beta.1" 
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -156,7 +156,7 @@
 
 /* Define to the version of this package. */
 #ifndef FASTJET_PACKAGE_VERSION 
-#define FASTJET_PACKAGE_VERSION  "3.0.6" 
+#define FASTJET_PACKAGE_VERSION  "3.1.0-beta.1" 
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
@@ -166,7 +166,32 @@
 
 /* Version number of package */
 #ifndef FASTJET_VERSION 
-#define FASTJET_VERSION  "3.0.6" 
+#define FASTJET_VERSION  "3.1.0-beta.1" 
+#endif
+
+/* Major version of this package */
+#ifndef FASTJET_VERSION_MAJOR 
+#define FASTJET_VERSION_MAJOR  3 
+#endif
+
+/* Minor version of this package */
+#ifndef FASTJET_VERSION_MINOR 
+#define FASTJET_VERSION_MINOR  1 
+#endif
+
+/* Version of the package under the form XYYZZ (instead of X.Y.Z) */
+#ifndef FASTJET_VERSION_NUMBER 
+#define FASTJET_VERSION_NUMBER  30103 
+#endif
+
+/* Patch version of this package */
+#ifndef FASTJET_VERSION_PATCHLEVEL 
+#define FASTJET_VERSION_PATCHLEVEL  3 
+#endif
+
+/* Pre-release version of this package */
+#ifndef FASTJET_VERSION_PRERELEASE 
+#define FASTJET_VERSION_PRERELEASE  ".1.0-beta.1" 
 #endif
  
 /* once: _INCLUDE_FASTJET_CONFIG_AUTO_H */

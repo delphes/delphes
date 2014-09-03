@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision::                                                              $//
-// $Date::                                                                  $//
+// $Revision:: 268                                                          $//
+// $Date:: 2009-03-12 21:24:16 +0100 (Thu, 12 Mar 2009)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPLIT_MERGE_H__

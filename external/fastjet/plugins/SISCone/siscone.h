@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision::                                                              $//
-// $Date::                                                                  $//
+// $Revision:: 325                                                          $//
+// $Date:: 2011-11-25 12:41:17 +0100 (Fri, 25 Nov 2011)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SISCONE_H__

@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: Dnn3piCylinder.hh 2577 2011-09-13 15:11:38Z salam $
+//FJSTARTHEADER
+// $Id: Dnn3piCylinder.hh 3442 2014-07-24 07:20:49Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef DROP_CGAL // in case we do not have the code for CGAL
@@ -69,16 +71,16 @@ class Dnn3piCylinder : public DynamicNearestNeighbours {
 
   /// Returns the index of  the nearest neighbour of point labelled
   /// by ii (assumes ii is valid)
-  int NearestNeighbourIndex(const int & ii) const ;
+  int NearestNeighbourIndex(const int ii) const ;
 
   /// Returns the distance to the nearest neighbour of point labelled
   /// by index ii (assumes ii is valid)
-  double NearestNeighbourDistance(const int & ii) const ;
+  double NearestNeighbourDistance(const int ii) const ;
 
   /// Returns true iff the given index corresponds to a point that
   /// exists in the DNN structure (meaning that it has been added, and
   /// not removed in the meantime)
-  bool Valid(const int & index) const;
+  bool Valid(const int index) const;
 
   void RemoveAndAddPoints(const std::vector<int> & indices_to_remove,
 			  const std::vector<EtaPhi> & points_to_add,
@@ -203,7 +205,7 @@ class Dnn3piCylinder : public DynamicNearestNeighbours {
 /// of this algorithm -- depending on whether or not the user has
 /// initialised the class with instructions to ignore this problem the
 /// program will detect and ignore it, or crash.
-inline int Dnn3piCylinder::NearestNeighbourIndex(const int & current) const {
+inline int Dnn3piCylinder::NearestNeighbourIndex(const int current) const {
   int main_index = _mirror_info[current].main_index;
   int mirror_index = _mirror_info[current].mirror_index;
   int plane_index;
@@ -228,7 +230,7 @@ inline int Dnn3piCylinder::NearestNeighbourIndex(const int & current) const {
   return this_cylinder_index;
 }
 
-inline double Dnn3piCylinder::NearestNeighbourDistance(const int & current) const {
+inline double Dnn3piCylinder::NearestNeighbourDistance(const int current) const {
   int main_index = _mirror_info[current].main_index;
   int mirror_index = _mirror_info[current].mirror_index;
   if (mirror_index == INEXISTENT_VERTEX ) {
@@ -243,7 +245,7 @@ inline double Dnn3piCylinder::NearestNeighbourDistance(const int & current) cons
  
 }
 
-inline bool Dnn3piCylinder::Valid(const int & index) const {
+inline bool Dnn3piCylinder::Valid(const int index) const {
   return (_DNN->Valid(_mirror_info[index].main_index));
 }
 

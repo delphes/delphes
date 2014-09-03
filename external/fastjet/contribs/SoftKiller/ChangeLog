@@ -1,0 +1,99 @@
+2014-08-17  Gavin Salam  <gavin.salam@cern.ch>
+
+	* NEWS:
+	* VERSION:
+	release of version 1.0.0
+
+2014-08-16  Matteo Cacciari <cacciari@lpthe.jusssieu.fr>
+
+        * AUTHORS
+        * README
+        Some typos fixed and small tweaks
+
+2014-08-11  Gavin Salam  <gavin.salam@cern.ch> + Gregory (later)
+
+	* SoftKiller.hh|cc:
+	replaced index()->tile_index() and is_good() -> tile_is_good() in
+	line with name changes in RectangularGrid
+
+2014-08-11  Gavin Salam  <gavin.salam@cern.ch>
+
+	* SoftKiller.cc:
+	added a constructor that takes a RectangularGrid and implemented
+	support for the is_good(itile) aspect of RectangularGrid.
+
+	Rather than doing a direct push_back of the PJs that pass the cut,
+	introduced an intermediate stage of a vector of indices; gains
+	about a factor of two in that part of the code; 
+
+	For both above changes, see
+	issue-tracker/2014-08-08-testing-rect-grid/README
+
+2014-08-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* SoftKiller.cc: 
+	added check for all_tiles_equal_area(), in view of possible future
+	cases where they don't (some thought would then be needed).
+
+2014-08-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* SoftKiller.hh|cc:
+	started experimenting with using a rectangular grid that is being
+	developed in FJ3.1. Still preliminary, and controlled through a
+	symbol FJC_SOFTKILLER_USEFJGRID that is set in the header
+
+2014-07-16  Gavin Salam  <gavin.salam@cern.ch>
+
+	* Makefile:
+	added dependencies
+
+	* example.cc:
+	added output of the pt threshold.
+
+	* SoftKiller.hh|cc:
+	added a constructor that allows the user to specify separate
+	rapmin, rapmax, as well as different requested rapidity and
+	azimuth cell spacing.
+
+	added an apply(...) member, which enables access also to the
+	pt_threshold.
+
+	sifter is now by default an uninitialised Selector (and the
+	description and code simply ignore it if it's uninitialised).
+
+	grid contents now stored in a C++ vector rather than a C-style
+	array. 
+
+	+ various mods to comments
+
+	* example.ref:
+	updated this to reflect new output of pt threshold info.
+
+	* NEWS:
+	added a draft entry for the 1.0.0 release
+
+2014-07-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* README:
+	added a desctription of the contrib
+
+2014-07-09  Gregory Soyez  <soyez@fastjet.fr>
+
+	* AUTHORS:
+	included the arXiv number
+
+2014-05-15  Gregory Soyez  <soyez@fastjet.fr>
+
+	* VERSION:
+	set version number to 1.0.0-alpha-PUWS14.1 in preparation for a
+	fastjet-contrib release for the pileup-workshop at CERN on May
+	2014.
+
+2014-04-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Imported the soft killer code from the fast implementation we've
+	  used for the results in the paper.
+
+2014-04-29  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Initial creation

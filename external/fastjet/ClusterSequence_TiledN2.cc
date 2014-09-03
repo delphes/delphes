@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: ClusterSequence_TiledN2.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,10 +26,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
-// The plain N^2 part of the ClusterSequence class -- separated out
+// The tiled N^2 part of the ClusterSequence class -- separated out
 // from the rest of the class implementation so as to speed up
 // compilation of this particular part while it is under test.
 
@@ -38,6 +40,7 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/internal/MinHeap.hh"
+#include "fastjet/internal/TilingExtent.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -93,22 +96,26 @@ void ClusterSequence::_initialise_tiles() {
   _n_tiles_phi   = max(3,int(floor(twopi/default_size)));
   _tile_size_phi = twopi / _n_tiles_phi; // >= _Rparam and fits in 2pi
 
-  // always include zero rapidity in the tiling region
-  _tiles_eta_min = 0.0;
-  _tiles_eta_max = 0.0;
-  // but go no further than following
-  const double maxrap = 7.0;
+  TilingExtent tiling_analysis(*this);
+  _tiles_eta_min = tiling_analysis.minrap();
+  _tiles_eta_max = tiling_analysis.maxrap();
 
-  // and find out how much further one should go
-  for(unsigned int i = 0; i < _jets.size(); i++) {
-    double eta = _jets[i].rap();
-    // first check if eta is in range -- to avoid taking into account
-    // very spurious rapidities due to particles with near-zero kt.
-    if (abs(eta) < maxrap) {
-      if (eta < _tiles_eta_min) {_tiles_eta_min = eta;}
-      if (eta > _tiles_eta_max) {_tiles_eta_max = eta;}
-    }
-  }
+  // // always include zero rapidity in the tiling region
+  // _tiles_eta_min = 0.0;
+  // _tiles_eta_max = 0.0;
+  // // but go no further than following
+  // const double maxrap = 7.0;
+  // 
+  // // and find out how much further one should go
+  // for(unsigned int i = 0; i < _jets.size(); i++) {
+  //   double eta = _jets[i].rap();
+  //   // first check if eta is in range -- to avoid taking into account
+  //   // very spurious rapidities due to particles with near-zero kt.
+  //   if (abs(eta) < maxrap) {
+  //     if (eta < _tiles_eta_min) {_tiles_eta_min = eta;}
+  //     if (eta > _tiles_eta_max) {_tiles_eta_max = eta;}
+  //   }
+  // }
 
   // now adjust the values
   _tiles_ieta_min = int(floor(_tiles_eta_min/_tile_size_eta));
@@ -166,7 +173,7 @@ void ClusterSequence::_initialise_tiles() {
 
 //----------------------------------------------------------------------
 /// return the tile index corresponding to the given eta,phi point
-int ClusterSequence::_tile_index(const double & eta, const double & phi) const {
+int ClusterSequence::_tile_index(const double eta, const double phi) const {
   int ieta, iphi;
   if      (eta <= _tiles_eta_min) {ieta = 0;}
   else if (eta >= _tiles_eta_max) {ieta = _tiles_ieta_max-_tiles_ieta_min;}
@@ -248,6 +255,23 @@ void ClusterSequence::_add_neighbours_to_tile_union(const int tile_index,
 /// Like _add_neighbours_to_tile_union, but only adds neighbours if 
 /// their "tagged" status is false; when a neighbour is added its
 /// tagged status is set to true.
+///
+/// Note that with a high level of warnings (-pedantic -Wextra -ansi,
+/// gcc complains about tile_index maybe being used uninitialised for
+/// oldB in ClusterSequence::_minheap_faster_tiled_N2_cluster(). We
+/// have explicitly checked that it was harmless so we could disable
+/// the gcc warning by hand using the construct below
+///
+///  #pragma GCC diagnostic push
+///  #pragma GCC diagnostic ignored "-Wpragmas"
+///  #pragma GCC diagnostic ignored "-Wuninitialized"
+///  #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+///    ...
+///  #pragma GCC diagnostic pop
+///
+/// the @GCC diagnostic push/pop directive was only introduced in
+/// gcc-4.6, so for broader usage, we'd need to insert #pragma GCC
+/// diagnostic ignored "-Wpragmas" at the top of this file
 inline void ClusterSequence::_add_untagged_neighbours_to_tile_union(
                const int tile_index, 
 	       vector<int> & tile_union, int & n_near_tiles)  {
@@ -273,7 +297,7 @@ void ClusterSequence::_tiled_N2_cluster() {
   TiledJet * briefjets = new TiledJet[n];
   TiledJet * jetA = briefjets, * jetB;
   TiledJet oldB;
-  oldB.tile_index=0; // prevents a gcc warning  
+  oldB.tile_index=0; // prevents a gcc warning
 
   // will be used quite deep inside loops, but declare it here so that
   // memory (de)allocation gets done only once
@@ -516,7 +540,7 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
   TiledJet * briefjets = new TiledJet[n];
   TiledJet * jetA = briefjets, * jetB;
   TiledJet oldB;
-  oldB.tile_index=0; // prevents a gcc warning  
+  oldB.tile_index=0; // prevents a gcc warning
 
   // will be used quite deep inside loops, but declare it here so that
   // memory (de)allocation gets done only once
@@ -554,7 +578,6 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
     // no need to do it for LH tiles, since they are implicitly done
     // when we set NN for both jetA and jetB on the RH tiles.
   }
-
   
   // now create the diJ (where J is i's NN) table -- remember that 
   // we differ from standard normalisation here by a factor of R2
@@ -720,8 +743,6 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
   delete[] briefjets;
 }
 
-
-
 //----------------------------------------------------------------------
 /// run a tiled clustering, with our minheap for keeping track of the
 /// smallest dij
@@ -734,7 +755,6 @@ void ClusterSequence::_minheap_faster_tiled_N2_cluster() {
   TiledJet * jetA = briefjets, * jetB;
   TiledJet oldB;
   oldB.tile_index=0; // prevents a gcc warning
-  
 
   // will be used quite deep inside loops, but declare it here so that
   // memory (de)allocation gets done only once

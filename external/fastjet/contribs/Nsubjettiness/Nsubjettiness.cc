@@ -4,6 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
+//  $Id: Nsubjettiness.cc 597 2014-04-16 23:07:55Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //

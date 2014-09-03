@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: JetMedianBackgroundEstimator.cc 3517 2014-08-01 14:23:13Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,24 +26,35 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
 #include <fastjet/ClusterSequenceArea.hh>
 #include <fastjet/ClusterSequenceStructure.hh>
 #include <iostream>
+#include <sstream>
 
 FASTJET_BEGIN_NAMESPACE     // defined in fastjet/internal/base.hh
 
 using namespace std;
 
 double BackgroundJetScalarPtDensity::result(const PseudoJet & jet) const {
-  std::vector<PseudoJet> constituents = jet.constituents();
+  // do not include the ghosts in the list of constituents to have a
+  // correct behaviour when _pt_power is <= 0
+  std::vector<PseudoJet> constituents = (!SelectorIsPureGhost())(jet.constituents());
   double scalar_pt = 0;
   for (unsigned i = 0; i < constituents.size(); i++) {
     scalar_pt += pow(constituents[i].perp(), _pt_power);
   }
   return scalar_pt / jet.area();
+}
+
+
+std::string BackgroundJetScalarPtDensity::description() const {
+  ostringstream oss;
+  oss << "BackgroundScalarJetPtDensity";
+  if (_pt_power != 1.0) oss << " with pt_power = " << _pt_power;
+  return oss.str();
 }
 
 
@@ -71,7 +84,7 @@ LimitedWarning JetMedianBackgroundEstimator::_warnings_preliminary;
 JetMedianBackgroundEstimator::JetMedianBackgroundEstimator(const Selector &rho_range,
                                          const JetDefinition &jet_def,
                                          const AreaDefinition &area_def)
-  : _rho_range(rho_range), _jet_def(jet_def), _area_def(area_def) {
+  : _rho_range(rho_range), _jet_def(jet_def), _area_def(area_def){
 
   // initialise things decently
   reset();
@@ -260,6 +273,58 @@ double JetMedianBackgroundEstimator::sigma(const PseudoJet &jet) {
 
 
 //----------------------------------------------------------------------
+// returns rho_m (particle-masses contribution to the 4-vector density)
+double JetMedianBackgroundEstimator::rho_m() const {
+  if (! has_rho_m()){
+    throw Error("JetMediamBackgroundEstimator: rho_m requested but rho_m calculation is disabled (either eplicitly or due to the presence of a jet density class).");
+  }
+  if (_rho_range.takes_reference())
+    throw Error("The background estimation is obtained from a selector that takes a reference jet. rho(PseudoJet) should be used in that case");
+  _recompute_if_needed();
+  return _rho_m;
+}
+
+
+//----------------------------------------------------------------------
+// returns sigma_m (particle-masses contribution to the 4-vector
+// density); must be multipled by sqrt(area) to get fluctuations
+// for a region of a given area.
+double JetMedianBackgroundEstimator::sigma_m() const{
+  if (! has_rho_m()){
+    throw Error("JetMediamBackgroundEstimator: sigma_m requested but rho_m/sigma_m calculation is disabled (either explicitly or due to the presence of a jet density class).");
+  }
+  if (_rho_range.takes_reference())
+    throw Error("The background estimation is obtained from a selector that takes a reference jet. rho(PseudoJet) should be used in that case");
+  _recompute_if_needed();
+  return _sigma_m;
+}
+
+//----------------------------------------------------------------------
+// returns rho_m locally at the position of a given jet. As for
+// rho(jet), it is non-const.
+double JetMedianBackgroundEstimator::rho_m(const PseudoJet & jet)  {
+  _recompute_if_needed(jet);
+  double our_rho = _rho_m;
+  if (_rescaling_class != 0) { 
+    our_rho *= (*_rescaling_class)(jet);
+  }
+  return our_rho;
+}
+
+
+//----------------------------------------------------------------------
+// returns sigma_m locally at the position of a given jet. As for
+// rho(jet), it is non-const.
+double JetMedianBackgroundEstimator::sigma_m(const PseudoJet & jet){
+  _recompute_if_needed(jet);
+  double our_sigma = _sigma_m;
+  if (_rescaling_class != 0) { 
+    our_sigma *= (*_rescaling_class)(jet);
+  }
+  return our_sigma;
+}
+
+//----------------------------------------------------------------------
 // configuring behaviour
 //----------------------------------------------------------------------
 // reset to default values
@@ -270,8 +335,11 @@ void JetMedianBackgroundEstimator::reset(){
   set_use_area_4vector();  // true by default
   set_provide_fj2_sigma(false);
 
+  _enable_rho_m = true;
+
   // reset the computed values
   _rho = _sigma = 0.0;
+  _rho_m = _sigma_m = 0.0;
   _n_jets_used = _n_empty_jets = 0;
   _empty_area = _mean_area = 0.0;
 
@@ -288,7 +356,7 @@ void JetMedianBackgroundEstimator::reset(){
 // median will be calculated; if the pointer is null then pt/area
 // is used (as occurs also if this function is not called).
 void JetMedianBackgroundEstimator::set_jet_density_class(const FunctionOfPseudoJet<double> * jet_density_class_in) {
-  _warnings_preliminary.warn("JetMedianBackgroundEstimator::set_jet_density_class: density classes are still preliminary in FastJet 3.0. Their interface may differ in future releases (without guaranteeing backward compatibility).");
+  _warnings_preliminary.warn("JetMedianBackgroundEstimator::set_jet_density_class: density classes are still preliminary in FastJet 3.1. Their interface may differ in future releases (without guaranteeing backward compatibility). Note that since FastJet 3.1, rho_m and sigma_m are accessible direclty in JetMedianBackgroundEstimator and GridMedianBackgroundEstimator(with no need for a density class).");
   _jet_density_class = jet_density_class_in;
   _uptodate = false;
 }
@@ -337,7 +405,8 @@ void JetMedianBackgroundEstimator::_compute() const {
 
   // fill the vector of pt/area (or the quantity from the jet density class) 
   //  - in the range
-  vector<double> vector_for_median;
+  vector<double> vector_for_median_pt;
+  vector<double> vector_for_median_dt;
   double total_area  = 0.0;
   _n_jets_used = 0;
 
@@ -345,34 +414,53 @@ void JetMedianBackgroundEstimator::_compute() const {
   vector<PseudoJet> selected_jets = _rho_range(_included_jets);
 
   // compute the pt/area for the selected jets
+  double median_input_pt, median_input_dt=0.0;
+  BackgroundJetPtMDensity m_density;
+  bool do_rho_m = has_rho_m();
   for (unsigned i = 0; i < selected_jets.size(); i++) {
     const PseudoJet & current_jet = selected_jets[i];
 
     double this_area = (_use_area_4vector) ? current_jet.area_4vector().perp() : current_jet.area(); 
-
     if (this_area>0){
-      double median_input;
+      // for the pt component, we either use pt or the user-provided
+      // density class
       if (_jet_density_class == 0) {
-        median_input = current_jet.perp()/this_area;
+        median_input_pt = current_jet.perp()/this_area;
       } else {
-        median_input = (*_jet_density_class)(current_jet);
+        median_input_pt = (*_jet_density_class)(current_jet);
       }
+
+      // handle the rho_m part if requested
+      // note that we're using the scalar area as a normalisation inside the
+      // density class!
+      if (do_rho_m) 
+	median_input_dt = m_density(current_jet);
+    
+      // perform rescaling if needed
       if (_rescaling_class != 0) {
-        median_input /= (*_rescaling_class)(current_jet);
+	double resc = (*_rescaling_class)(current_jet);;
+        median_input_pt /= resc;
+        median_input_dt /= resc;
       }
-      vector_for_median.push_back(median_input);
+      
+      // store the result for future computation of the median
+      vector_for_median_pt.push_back(median_input_pt);
+      if (do_rho_m) 
+	vector_for_median_dt.push_back(median_input_dt);
+
       total_area  += this_area;
       _n_jets_used++;
     } else {
       _warnings_zero_area.warn("JetMedianBackgroundEstimator::_compute(...): discarded jet with zero area. Zero-area jets may be due to (i) too large a ghost area (ii) a jet being outside the ghost range (iii) the computation not being done using an appropriate algorithm (kt;C/A).");
     }
-      
   }
   
   // there is nothing inside our region, so answer will always be zero
-  if (vector_for_median.size() == 0) {
+  if (vector_for_median_pt.size() == 0) {
     _rho        = 0.0;
     _sigma      = 0.0;
+    _rho_m      = 0.0;
+    _sigma_m    = 0.0;
     _mean_area  = 0.0;
     return;
   }
@@ -391,12 +479,19 @@ void JetMedianBackgroundEstimator::_compute() const {
   total_area  += _empty_area;
 
   double stand_dev;
-  _median_and_stddev(vector_for_median, _n_empty_jets, _rho, stand_dev, 
+  _median_and_stddev(vector_for_median_pt, _n_empty_jets, _rho, stand_dev, 
                      _provide_fj2_sigma);
 
   // process and store the results (_rho was already stored above)
   _mean_area  = total_area / total_njets;
   _sigma      = stand_dev * sqrt(_mean_area);
+
+  // compute the rho_m part now
+  if (do_rho_m){
+    _median_and_stddev(vector_for_median_dt, _n_empty_jets, _rho_m, stand_dev, 
+		       _provide_fj2_sigma);
+    _sigma_m = stand_dev * sqrt(_mean_area);
+  }
 
   // record that the computation has been performed  
   _uptodate = true;
@@ -435,7 +530,6 @@ void JetMedianBackgroundEstimator::_check_jet_alg_good_for_median() const{
     _warnings.warn("JetMedianBackgroundEstimator: jet_def being used may not be suitable for estimating diffuse backgrounds (good alternatives are kt, cam)");
   }
 }
-
 
 
 

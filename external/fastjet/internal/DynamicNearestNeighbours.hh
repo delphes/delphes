@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: DynamicNearestNeighbours.hh 2687 2011-11-14 11:17:51Z soyez $
+//FJSTARTHEADER
+// $Id: DynamicNearestNeighbours.hh 3619 2014-08-13 14:17:19Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_DYNAMICNEARESTNEIGHBOURS_HH__
@@ -36,6 +38,7 @@
 #include<sstream>
 #include<cassert>
 #include "fastjet/internal/numconsts.hh"
+#include "fastjet/Error.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -67,17 +70,11 @@ public:
 /// class corresponding to errors that will be thrown by Dynamic
 /// Nearest Neighbours code
 /// \endif
-class DnnError {
+class DnnError : public Error {
 public:
   // constructors
-  DnnError() {;};
-  DnnError(const std::string & message_in) {
-    _message = message_in; std::cerr << message_in << std::endl;};
-
-  std::string message() const {return _message;};
-
-private:
-  std::string _message;
+  //DnnError() {}
+  DnnError(const std::string & message_in) : Error(message_in) {}
 };
 
 
@@ -111,16 +108,16 @@ public:
 
   /// Returns the index of the nearest neighbour of point labelled
   /// by ii (assumes ii is valid)
-  virtual int NearestNeighbourIndex(const int & ii) const = 0;
+  virtual int NearestNeighbourIndex(const int ii) const = 0;
 
   /// Returns the distance to the nearest neighbour of point labelled
   /// by index ii (assumes ii is valid)
-  virtual double NearestNeighbourDistance(const int & ii) const = 0;
+  virtual double NearestNeighbourDistance(const int ii) const = 0;
 
   /// Returns true iff the given index corresponds to a point that
   /// exists in the DNN structure (meaning that it has been added, and
   /// not removed in the meantime)
-  virtual bool Valid(const int & index) const = 0;
+  virtual bool Valid(const int index) const = 0;
 
   /// remove the points labelled by the std::vector indices_to_remove, and
   /// add the points specified by the std::vector points_to_add
@@ -140,7 +137,7 @@ public:
 
   /// Remove the point labelled by index and return the list of
   /// points whose nearest neighbours have changed in the process
-  inline void RemovePoint (const int & index,
+  inline void RemovePoint (const int index,
 			   std::vector<int> & indices_of_updated_neighbours) {
     std::vector<int> indices_added;
     std::vector<EtaPhi> points_to_add;
@@ -157,7 +154,7 @@ public:
   /// nearest neighbour has changed (the list includes index3, i.e. the new
   /// point).
   inline void RemoveCombinedAddCombination(
-			const int & index1, const int & index2,
+			const int index1, const int index2,
 			const EtaPhi & newpoint,
 			int & index3,
 			std::vector<int> & indices_of_updated_neighbours) {

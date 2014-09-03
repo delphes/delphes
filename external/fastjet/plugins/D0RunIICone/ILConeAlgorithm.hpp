@@ -48,7 +48,6 @@
 // ProtoJet.hpp
 //
 // 2012-06-12  Gregory Soyez  <soyez@fastjet.fr>
-//
 //        * Replaced addItem(...) by this->addItem(...) to allow
 //          compilation with gcc 4.7 which no longer performs
 //          unqualified template lookups. See

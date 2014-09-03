@@ -1,10 +1,10 @@
 #ifndef __FASTJET_TOOLS_FILTER_HH__
 #define __FASTJET_TOOLS_FILTER_HH__
 
-//STARTHEADER
-// $Id: Filter.hh 2694 2011-11-14 22:27:51Z salam $
+//FJSTARTHEADER
+// $Id: Filter.hh 3494 2014-07-30 20:38:48Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/Selector.hh>
@@ -97,7 +99,7 @@ public:
   /// trivial ctor
   /// Note: this is just for derived classes
   ///       a Filter initialised through this constructor will not work!
-  Filter() : _Rfiltfunc(0){};
+  Filter() : _Rfiltfunc(0), _initialised(false){};
 
   /// define a filter that decomposes a jet into subjets using a
   /// generic JetDefinition and then keeps only a subset of these
@@ -112,7 +114,7 @@ public:
   /// obtained with a cluster sequence with area support and explicit
   /// ghosts
   Filter(JetDefinition subjet_def, Selector selector, double rho = 0.0) : 
-    _subjet_def(subjet_def), _Rfiltfunc(0), _Rfilt(-1), _selector(selector), _rho(rho), _subtractor(0) {}
+    _subjet_def(subjet_def), _Rfiltfunc(0), _Rfilt(-1), _selector(selector), _rho(rho), _subtractor(0), _initialised(true) {}
 
   /// Same as the full constructor (see above) but just specifying the radius
   /// By default, Cambridge-Aachen is used
@@ -120,7 +122,7 @@ public:
   /// recombiner, that one will be used
   ///  \param Rfilt   the filtering radius
   Filter(double Rfilt, Selector selector, double rho = 0.0) : 
-    _Rfiltfunc(0), _Rfilt(Rfilt), _selector(selector), _rho(rho), _subtractor(0) { 
+    _Rfiltfunc(0), _Rfilt(Rfilt), _selector(selector), _rho(rho), _subtractor(0), _initialised(true) { 
     if (_Rfilt<0)
       throw Error("Attempt to create a Filter with a negative filtering radius");
   }
@@ -132,14 +134,14 @@ public:
   /// recombiner, that one will be used
   ///  \param Rfilt_func   the filtering radius function of a PseudoJet
   Filter(FunctionOfPseudoJet<double> *Rfilt_func, Selector selector, double rho = 0.0) : 
-    _Rfiltfunc(Rfilt_func), _Rfilt(-1), _selector(selector), _rho(rho), _subtractor(0) {}
+    _Rfiltfunc(Rfilt_func), _Rfilt(-1), _selector(selector), _rho(rho), _subtractor(0), _initialised(true) {}
 
   /// default dtor
   virtual ~Filter(){};
 
   /// Set a subtractor that is applied to all individual subjets before
   /// deciding which ones to keep. It takes precedence over a non-zero rho.
-  void set_subtractor(const Transformer * subtractor) {_subtractor = subtractor;}
+  void set_subtractor(const FunctionOfPseudoJet<PseudoJet> * subtractor) {_subtractor = subtractor;}
 
   /// runs the filtering and sets kept and rejected to be the jets of interest
   /// (with non-zero rho, they will have been subtracted).
@@ -158,47 +160,22 @@ private:
   /// Sets filtered_elements to be all the subjets on which filtering will work.
   /// It also sets the subjet_def to be used in joining things (the bit of
   /// subjet def that is of interest for later is the recombiner).
-  void _set_filtered_elements(const PseudoJet & jet,
-                              std::vector<PseudoJet> & filtered_elements,
-                              JetDefinition & subjet_def,
-                              bool & discard_area) const;
+  ///
+  /// this returns true if teh optimisation trick for C/A reclustering has been used
+  bool _set_filtered_elements(const PseudoJet & jet,
+                              std::vector<PseudoJet> & filtered_elements) const;
   
-  /// set the filtered elements in the simple case of C/A+C/A
-  void _set_filtered_elements_cafilt(const PseudoJet & jet,
-                                     std::vector<PseudoJet> & filtered_elements,
-                                     double Rfilt) const;
-
-  /// set the filtered elements in the generic re-clustering case
-  void _set_filtered_elements_generic(const PseudoJet & jet, 
-                                      std::vector<PseudoJet> & filtered_elements,
-                                      const JetDefinition & subjet_def,
-				      bool do_areas) const;
-
   /// gather the information about what is kept and rejected under the
   /// form of a PseudoJet with a special ClusterSequenceInfo
+  ///
+  /// The last argument (ca_optimisation_used) should be true if the
+  /// optimisation trick for C/A reclustering has been used (in which
+  /// case some extra tests have to be run for non-explicit-ghost
+  /// areas)
   PseudoJet _finalise(const PseudoJet & jet, 
                       std::vector<PseudoJet> & kept, 
                       std::vector<PseudoJet> & rejected,
-                      const JetDefinition & subjet_def,
-                      const bool discard_area) const;
-
-  // a series of checks
-  //--------------------------------------------------------------------
-  /// get the pieces down to the fundamental pieces
-  bool _get_all_pieces(const PseudoJet &jet, std::vector<PseudoJet> &all_pieces) const;
-
-  /// get the common recombiner to all pieces (NULL if none)
-  const JetDefinition::Recombiner* _get_common_recombiner(const std::vector<PseudoJet> &all_pieces) const;
-
-  /// check if one can apply the simplified trick for C/A subjets
-  bool _check_ca(const std::vector<PseudoJet> &all_pieces) const;
-
-  /// check if the jet (or all its pieces) have explicit ghosts
-  /// (assuming the jet has area support
-  ///
-  /// Note that if the jet has an associated cluster sequence that is no
-  /// longer valid, an error will be thrown
-  bool _check_explicit_ghosts(const std::vector<PseudoJet> &all_pieces) const;
+		      bool ca_optimisation_used) const;
 
   bool _uses_subtraction() const {return (_subtractor || _rho != 0);}
 
@@ -208,7 +185,9 @@ private:
   double _Rfilt;               ///< a constant specifying the subjet radius (with C/A)
   Selector _selector;  ///< the subjet selection criterium
   double _rho;                 ///< the background density (used for subtraction when possible)
-  const Transformer * _subtractor; ///< for subtracting bkgd density from subjets
+  const FunctionOfPseudoJet<PseudoJet> * _subtractor; ///< for subtracting bkgd density from subjets
+
+  bool _initialised;    ///< true when the Filter has been properly intialised
 };
 
 

@@ -151,6 +151,10 @@ public:
   virtual std::string description () const;
   virtual void run_clustering(ClusterSequence &) const ;
 
+  /// returns true because this plugin is intended for spherical
+  /// geometries (i.e. it's an e+e- algorithm).
+  virtual bool is_spherical() const {return true;}
+
 protected:
   virtual void reset_stored_plugin() const;
 

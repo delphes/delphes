@@ -87,16 +87,31 @@
 #define PACKAGE_NAME "FastJet"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "FastJet 3.0.6"
+#define PACKAGE_STRING "FastJet 3.1.0-beta.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fastjet"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.0.6"
+#define PACKAGE_VERSION "3.1.0-beta.1"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.0.6"
+#define VERSION "3.1.0-beta.1"
+
+/* Major version of this package */
+#define VERSION_MAJOR 3
+
+/* Minor version of this package */
+#define VERSION_MINOR 1
+
+/* Version of the package under the form XYYZZ (instead of X.Y.Z) */
+#define VERSION_NUMBER 30103
+
+/* Patch version of this package */
+#define VERSION_PATCHLEVEL 3
+
+/* Pre-release version of this package */
+#define VERSION_PRERELEASE ".1.0-beta.1"

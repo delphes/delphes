@@ -206,7 +206,12 @@ void SISConePlugin::run_clustering(ClusterSequence & clust_seq) const {
   extras->_jet_def_plugin = this;
 
   // give the extras object to the cluster sequence.
-  clust_seq.plugin_associate_extras(std::auto_ptr<ClusterSequence::Extras>(extras));
+  // 
+  // As of v3.1 of FastJet, extras are automatically owned (as
+  // SharedPtr) by the ClusterSequence and auto_ptr is deprecated. So
+  // we can use a simple pointer here
+  //clust_seq.plugin_associate_extras(std::auto_ptr<ClusterSequence::Extras>(extras));
+  clust_seq.plugin_associate_extras(extras);
 }
 
 

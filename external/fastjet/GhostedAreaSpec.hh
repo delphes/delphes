@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: GhostedAreaSpec.hh 2728 2011-11-20 14:18:59Z salam $
+//FJSTARTHEADER
+// $Id: GhostedAreaSpec.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_GHOSTEDAREASPEC_HH__
@@ -121,8 +123,10 @@ public:
   void _initialize();
 
   // for accessing values set by the user
-  inline double ghost_etamax () const {return _ghost_maxrap;}
+  inline double ghost_rapmax () const {return _ghost_maxrap;}
   inline double ghost_maxrap () const {return _ghost_maxrap;}
+  inline double ghost_etamax () const {return _ghost_maxrap;}
+  inline double ghost_maxeta () const {return _ghost_maxrap;}
   inline double ghost_area   () const {return _ghost_area   ;}
   inline double grid_scatter () const {return _grid_scatter;}
   inline double pt_scatter   () const {return _pt_scatter  ;}
@@ -139,8 +143,10 @@ public:
 
   // when explicitly modifying values, sometimes call the initializer
   inline void set_ghost_area   (double val) {_ghost_area    = val; _initialize();}
-  inline void set_ghost_etamax (double val) {_ghost_maxrap = val; _initialize();}
+  inline void set_ghost_rapmax (double val) {_ghost_maxrap = val; _initialize();}
   inline void set_ghost_maxrap (double val) {_ghost_maxrap = val; _initialize();}
+  inline void set_ghost_etamax (double val) {_ghost_maxrap = val; _initialize();}
+  inline void set_ghost_maxeta (double val) {_ghost_maxrap = val; _initialize();}
   inline void set_grid_scatter (double val) {_grid_scatter   = val; }
   inline void set_pt_scatter   (double val) {_pt_scatter     = val; }
   inline void set_mean_ghost_pt(double val) {_mean_ghost_pt  = val; }

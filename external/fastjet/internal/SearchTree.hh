@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: SearchTree.hh 3107 2013-05-03 15:47:47Z salam $
+//FJSTARTHEADER
+// $Id: SearchTree.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_SEARCHTREE_HH__
@@ -187,9 +189,14 @@ template<class T> void SearchTree<T>::Node::reset_parents_link_to_me(typename Se
 template<class T> class SearchTree<T>::circulator{
 public:
 
-  // so that it can access out _node object;
+  // so that it can access our _node object;
   // note: "class U" needed for clang (v1.1 branches/release_27) compilation
-  template<class U> friend class SearchTree<U>::const_circulator;
+  // 2014-07-22: as reported by Torbjorn Sjostrand,
+  // the next line was giving a warning with Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)
+  // (dependent nested name specifier 'SearchTree<U>::' for friend class declaration is not supported)
+  // Just commenting it out, things still seem to work; same with a template of type T
+  //template<class U> friend class SearchTree<U>::const_circulator;
+  friend class SearchTree<T>::const_circulator;
   friend class SearchTree<T>;
 
   circulator() : _node(NULL) {}

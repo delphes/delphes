@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: LimitedWarning.cc 3619 2014-08-13 14:17:19Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/LimitedWarning.hh"
 #include <sstream>
@@ -39,12 +41,12 @@ std::list< LimitedWarning::Summary > LimitedWarning::_global_warnings_summary;
 int LimitedWarning::_max_warn_default = 5;
 
 
-/// output a warning to ostr
-void LimitedWarning::warn(const std::string & warning) {
-  warn(warning, _default_ostr);
-}
+// /// output a warning to ostr
+// void LimitedWarning::warn(const std::string & warning) {
+//   warn(warning, _default_ostr);
+// }
 
-void LimitedWarning::warn(const std::string & warning, std::ostream * ostr) {
+void LimitedWarning::warn(const char * warning, std::ostream * ostr) {
   if (_this_warning_summary == 0) {
     // prepare the information for the summary
     _global_warnings_summary.push_back(Summary(warning, 0));
@@ -53,7 +55,7 @@ void LimitedWarning::warn(const std::string & warning, std::ostream * ostr) {
   if (_n_warn_so_far < _max_warn) {
     // prepare the warning within a string stream
     ostringstream warnstr;
-    warnstr << "WARNING: ";
+    warnstr << "WARNING from FastJet: ";
     warnstr << warning;
     _n_warn_so_far++;
     if (_n_warn_so_far == _max_warn) warnstr << " (LAST SUCH WARNING)";

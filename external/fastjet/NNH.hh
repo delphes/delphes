@@ -1,10 +1,10 @@
 #ifndef __FASTJET_NNH_HH__
 #define __FASTJET_NNH_HH__
 
-//STARTHEADER
-// $Id: NNH.hh 3203 2013-09-15 07:49:50Z salam $
+//FJSTARTHEADER
+// $Id: NNH.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2009, Matteo Cacciari, Gavin Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include<fastjet/ClusterSequence.hh>
 
@@ -137,7 +139,7 @@ public:
 private:
   class NNBJ; // forward declaration
   
-  /// establish the nearest neighbour for jet, and cross check constistency
+  /// establish the nearest neighbour for jet, and cross check consistency
   /// of distances for the other jets that are encountered. Assumes
   /// jet not contained within begin...end
   void set_NN_crosscheck(NNBJ * jet, NNBJ * begin, NNBJ * end);
