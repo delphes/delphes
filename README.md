@@ -2,22 +2,29 @@ Quick start with Delphes
 ========================
 
 Commands to get the code:
+
 ```
 wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.2.tar.gz
 
 tar -zxf Delphes-3.1.2.tar.gz
 ```
+
 Commands to compile the code:
+
 ```
 cd Delphes-3.1.2
 
 make
 ```
+
 Finally, we can run Delphes:
+
 ```
 ./DelphesHepMC
 ```
+
 Command line parameters:
+
 ```
 ./DelphesHepMC config_file output_file [input_file(s)]
   config_file - configuration file in Tcl format
@@ -25,16 +32,21 @@ Command line parameters:
   input_file(s) - input file(s) in HepMC format,
   with no input_file, or when input_file is -, read standard input.
 ```
+
 Let's simulate some Z->ee events:
+
 ```
 wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
 gunzip z_ee.hep.gz
 ./DelphesSTDHEP examples/delphes_card_CMS.tcl delphes_output.root z_ee.hep
 ```
+
 or
+
 ```
 curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP examples/delphes_card_CMS.tcl delphes_output.root
 ```
+
 For more detailed documentation, please visit 
 
 https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
@@ -46,16 +58,20 @@ Simple analysis using TTree::Draw
 Now we can start ROOT and look at the data stored in the output ROOT file.
 
 Start ROOT and load Delphes shared library:
+
 ```
 root -l
 gSystem->Load("libDelphes");
 ```
+
 Open ROOT file and do some basic analysis using Draw or TBrowser:
+
 ```
 TFile::Open("delphes_output.root");
 Delphes->Draw("Electron.PT");
 TBrowser browser;
 ```
+
 Note 1: Delphes - tree name, it can be learned e.g. from TBrowser
 
 Note 2: Electron - branch name; PT - variable (leaf) of this branch
@@ -76,11 +92,14 @@ Analysis macro consists of histogram booking, event loop (histogram filling),
 histogram display.
 
 Start ROOT and load Delphes shared library:
+
 ```
 root -l
 gSystem->Load("libDelphes");
 ```
+
 Basic analysis macro:
+
 ```
 {
   // Create chain of root trees
@@ -124,17 +143,21 @@ Basic analysis macro:
 }
 ```
 
+
 More advanced macro-based analysis
 ==================================
 
 The 'examples' directory contains ROOT macros Example1.C, Example2.C and Example3.C.
 
 Here are the commands to run these ROOT macros:
+
 ```
 root -l
 .X examples/Example1.C("delphes_output.root");
 ```
+
 or
+
 ```
 root -l examples/Example1.C\(\"delphes_output.root\"\)
 ```
