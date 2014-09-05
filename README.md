@@ -159,5 +159,5 @@ root -l
 or
 
 ```
-root -l examples/Example1.C\(\"delphes_output.root\"\)
+root -l examples/Example1.C'("delphes_output.root")'
 ```
