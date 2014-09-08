@@ -28,6 +28,7 @@ set ExecutionPath {
 
   MissingET
 
+  NeutrinoFilter
   GenJetFinder
   FastJetFinder
 
@@ -415,12 +416,34 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
+
+#####################
+# Neutrino Filter
+#####################
+
+module PdgCodeFilter NeutrinoFilter {
+  
+  set InputArray Delphes/stableParticles
+  set OutputArray filteredParticles
+
+  set PTMin 0.0
+  
+  add PdgCode {12}
+  add PdgCode {14}
+  add PdgCode {16}
+  add PdgCode {-12}
+  add PdgCode {-14}
+  add PdgCode {-16}
+
+}
+
+
 #####################
 # MC truth jet finder
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+  set InputArray NeutrinoFilter/filteredParticles
 
   set OutputArray jets
 
@@ -430,6 +453,9 @@ module FastJetFinder GenJetFinder {
 
   set JetPTMin 20.0
 }
+
+
+
 
 ############
 # Jet finder

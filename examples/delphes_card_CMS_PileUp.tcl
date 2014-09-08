@@ -21,7 +21,8 @@ set ExecutionPath {
   TrackPileUpSubtractor
   NeutralTowerMerger
   EFlowMerger
-
+  
+  NeutrinoFilter
   GenJetFinder
 
   Rho
@@ -66,7 +67,7 @@ module PileUpMerger PileUpMerger {
   set PileUpFile MinBias.pileup
 
   # average expected pile up
-  set MeanPileUp 10
+  set MeanPileUp 50
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.10
@@ -386,11 +387,33 @@ module FastJetFinder Rho {
 }
 
 #####################
+# Neutrino Filter
+#####################
+
+module PdgCodeFilter NeutrinoFilter {
+  
+  set InputArray Delphes/stableParticles
+  set OutputArray filteredParticles
+
+  set PTMin 0.0
+  
+  add PdgCode {12}
+  add PdgCode {14}
+  add PdgCode {16}
+  add PdgCode {-12}
+  add PdgCode {-14}
+  add PdgCode {-16}
+
+}
+
+
+
+#####################
 # MC truth jet finder
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+  set InputArray NeutrinoFilter/filteredParticles
 
   set OutputArray jets
 
