@@ -1,4 +1,9 @@
 /*
+
+Simple macro showing how to access branches from the delphes output root file,
+loop over events, and plot simple quantities such as the jet pt and the di-electron invariant
+mass. 
+
 root -l examples/Example1.C\(\"delphes_output.root\"\)
 */
 
@@ -40,7 +45,7 @@ void Example1(const char *inputFile)
       histJetPT->Fill(jet->PT);
       
       // Print jet transverse momentum
-      cout << jet->PT << endl;
+      cout << "Jet pt: "<<jet->PT << endl;
     }
 
     Electron *elec1, *elec2;
