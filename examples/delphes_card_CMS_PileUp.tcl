@@ -1,4 +1,3 @@
-
 #######################################
 # Order of execution of various modules
 #######################################
@@ -20,6 +19,7 @@ set ExecutionPath {
   Calorimeter
   TrackPileUpSubtractor
   NeutralTowerMerger
+  EFlowMergerAllTracks
   EFlowMerger
   
   NeutrinoFilter
@@ -347,6 +347,18 @@ module Merger NeutralTowerMerger {
   set OutputArray eflowTowers
 }
 
+##################################
+# Energy flow merger (all tracks)
+##################################
+
+module Merger EFlowMergerAllTracks {
+# add InputArray InputArray
+  add InputArray TrackMerger/tracks
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
+  set OutputArray eflow
+}
+
 
 ####################
 # Energy flow merger
@@ -605,7 +617,7 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray EFlowMerger/eflow
+  add InputArray EFlowMergerAllTracks/eflow
   set MomentumOutputArray momentum
 }
 
