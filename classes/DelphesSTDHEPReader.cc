@@ -403,9 +403,6 @@ void DelphesSTDHEPReader::ReadSTDHEP4()
 {
   u_int number;
 
-  // version
-  xdr_string(fInputXDR, &fBuffer, 100);
-
   // Extracting the event weight
   xdr_double(fInputXDR, &fWeight);
 
