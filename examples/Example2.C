@@ -1,5 +1,5 @@
 /*
-root -l examples/Example2.C\(\"delphes_output.root\"\)
+root -l examples/Example2.C'("delphes_output.root")'
 */
 
 #include "TH1.h"

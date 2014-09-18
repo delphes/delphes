@@ -1,5 +1,5 @@
 /*
-root -l examples/MemoryUsage.C\(\"ps_output.txt\"\)
+root -l examples/MemoryUsage.C'("ps_output.txt")'
 */
 
 #include "Riostream.h"

@@ -1,5 +1,5 @@
 /*
-root -l examples/EventDisplay.C\(\"examples/delphes_card_CMS.tcl\",\"delphes_output.root\"\)
+root -l examples/EventDisplay.C'("examples/delphes_card_CMS.tcl","delphes_output.root")'
 ShowEvent(1);
 ShowEvent(2);
 */

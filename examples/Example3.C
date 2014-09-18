@@ -1,5 +1,5 @@
 /*
-root -l examples/Example3.C\(\"delphes_output.root\"\)
+root -l examples/Example3.C'("delphes_output.root")'
 */
 
 //------------------------------------------------------------------------------
