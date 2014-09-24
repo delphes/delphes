@@ -128,6 +128,11 @@ void SimpleCalorimeter::Init()
     cout << itFractionMap->first << "   " << itFractionMap->second.first  << "   " << itFractionMap->second.second << endl;
   }
 */
+
+  // read min E value for towers to be saved
+  fEnergyMin = GetDouble("TowerMinEnergy", 0.0); 
+  fSigmaMin  = GetDouble("TowerMinSignificance", 0.0); 
+ 
   // read resolution formulas
   fResolutionFormula->Compile(GetString("ResolutionFormula", "0"));
  
@@ -383,6 +388,10 @@ void SimpleCalorimeter::FinalizeTower()
   energy = LogNormal(fTowerEnergy, sigma);
   time = (fTowerWeightTime < 1.0E-09 ) ? 0 : fTowerTime/fTowerWeightTime;
 
+  sigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+  
+  energy = (energy < fEnergyMin || energy < fSigmaMin*sigma) ? 0 : energy;
+  
   eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
   phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
 
@@ -404,7 +413,7 @@ void SimpleCalorimeter::FinalizeTower()
   
   // fill energy flow candidates
   energy -= fTrackEnergy;
-  if(energy < 0.0) energy = 0.0;
+  if(energy < fEnergyMin || energy < fSigmaMin*fResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy)) energy = 0.0;
    
   // save energy excess as an energy flow tower
   if(energy > 0.0)

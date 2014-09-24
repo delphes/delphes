@@ -53,6 +53,12 @@ private:
   
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
+  Double_t fEcalEnergyMin;
+  Double_t fHcalEnergyMin;
+  
+  Double_t fEcalSigmaMin;
+  Double_t fHcalSigmaMin;
+
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
 
