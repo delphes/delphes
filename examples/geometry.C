@@ -20,7 +20,6 @@
 using namespace std;
 
 // TODO: asymmetric detector
-// TODO: generalize for FCC-like config: >1 calorimeter & flexibility in module names
 class Delphes3DGeometry {
    public:
      Delphes3DGeometry(TGeoManager *geom = NULL);
@@ -184,21 +183,34 @@ void Delphes3DGeometry::readFile(const char *configFile,
 }
 
 TGeoVolume* Delphes3DGeometry::getDetector(bool withTowers) {
-   TGeoVolume *top = geom_->MakeBox("Delphes3DGeometry", vacuum_, 1500, 1500, 2300); // determine the size from what we know about the detector TODO
+   // compute the envelope
+   Double_t system_radius = tk_radius_+calo_barrel_thickness_+3*contingency_;
+   Double_t system_length = tk_length_+TMath::Max(calo_endcap_coneThickness_,calo_endcap_thickness_)+3*contingency_;
+   // the detector volume
+   TGeoVolume *top = geom_->MakeBox("Delphes3DGeometry", vacuum_, system_radius, system_radius, system_length);
+   // build the detector
    addTracker(top);
    addCalorimeters(top); // TODO: allow for more than one calo
    addMuonDets(top);
    if (withTowers) {
      addCaloTowers(top);
    }
+   // return the result
    return top;
 }
 
-//TODO: there should be a cut by two cones to limit the acceptance in eta
 //typically from ChargedHadronTrackingEfficiency 
 void Delphes3DGeometry::addTracker(TGeoVolume *top) {
-   // tracker: a cylinder
-   TGeoVolume *tracker = geom_->MakeTube("tracker", tkmed_, 0., tk_radius_, tk_length_);
+   // tracker: a cylinder with two cones substracted
+   TGeoCone* forwardCone = new TGeoCone("forwardTkAcceptance",(tk_length_/2.+0.05),0.,tk_radius_,(tk_length_)*2.*exp(-tk_etamax_)/(1-exp(-2.*tk_etamax_)),tk_radius_);
+   TGeoTranslation *tr1  = new TGeoTranslation("tkacc1",0., 0., tk_length_/2.);
+   tr1->RegisterYourself();
+   TGeoRotation *negz    = new TGeoRotation("tknegz",0,180,0);
+   negz->RegisterYourself();
+   TGeoCombiTrans  *tr2  = new TGeoCombiTrans("tkacc2",0.,0.,-tk_length_/2.,negz);
+   tr2->RegisterYourself();
+   TGeoCompositeShape* tracker_cs = new TGeoCompositeShape("tracker_cs","forwardTkAcceptance:tkacc1+forwardTkAcceptance:tkacc2");
+   TGeoVolume *tracker = new TGeoVolume("tracker",tracker_cs,tkmed_);   
    tracker->SetLineColor(kYellow);
    top->AddNode(tracker,1);
 }
