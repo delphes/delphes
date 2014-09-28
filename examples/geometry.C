@@ -26,7 +26,10 @@ class Delphes3DGeometry {
      Delphes3DGeometry(TGeoManager *geom = NULL);
      ~Delphes3DGeometry() {}
 
-     void readFile(const char* filename);
+     void readFile(const char* filename, const char* ParticlePropagator="ParticlePropagator",
+                                         const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
+                                         const char* MuonEfficiency="MuonEfficiency",
+                                         const char* Calorimeters="Calorimeter");
 
      void setContingency(Double_t contingency) { contingency_ = contingency; }
      void setCaloBarrelThickness(Double_t thickness) { calo_barrel_thickness_ = thickness; }
@@ -56,6 +59,7 @@ class Delphes3DGeometry {
      Double_t muonSystem_thickn_;
      Double_t tk_radius_;
      Double_t tk_length_;
+     Double_t tk_etamax_;
      Double_t calo_endcap_etamax_;
      Double_t muonSystem_etamax_;
      Double_t calo_barrel_innerRadius_;
@@ -97,24 +101,49 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
    // read these parameters from the Delphes Card (with default values)
    tk_radius_ = 120.;
    tk_length_ = 150.;
+   tk_etamax_ = 3.0;
    calo_endcap_etamax_ = 2.6;
    muonSystem_etamax_  = 2.4;
 }
 
-void Delphes3DGeometry::readFile(const char *configFile) {
+void Delphes3DGeometry::readFile(const char *configFile,
+                                 const char* ParticlePropagator, const char* TrackingEfficiency,
+                                 const char* MuonEfficiency, const char* Calorimeters) {
 
    ExRootConfReader *confReader = new ExRootConfReader;
    confReader->ReadFile(configFile);
 
-   tk_radius_ = confReader->GetDouble("ParticlePropagator::Radius", 1.0)*100;		// tk_radius
-   tk_length_ = confReader->GetDouble("ParticlePropagator::HalfLength", 3.0)*100; 	// tk_length
+   tk_radius_ = confReader->GetDouble(Form("%s::Radius",ParticlePropagator), 1.0)*100;		// tk_radius
+   tk_length_ = confReader->GetDouble(Form("%s::HalfLength",ParticlePropagator), 3.0)*100; 	// tk_length
 
-   TString muonEffFormula = confReader->GetString("MuonEfficiency::EfficiencyFormula","abs(eta)<2.0");
+   {
+   TString tkEffFormula = confReader->GetString(Form("%s::EfficiencyFormula",TrackingEfficiency),"abs(eta)<3.0");
+   tkEffFormula.ReplaceAll("pt","x");
+   tkEffFormula.ReplaceAll("eta","y");
+   tkEffFormula.ReplaceAll("phi","0.");
+   TF2* tkEffFunction = new TF2("tkEff",tkEffFormula,0,1000,-10,10);
+   TH1F etaHisto("eta","eta",100,5.,-5.);
+   Double_t pt,eta;
+   for(int i=0;i<1000;++i) {
+     tkEffFunction->GetRandom2(pt,eta);
+     etaHisto.Fill(eta);
+   }
+   Int_t bin = -1;
+   bin = etaHisto.FindFirstBinAbove(0.5);
+   Double_t etamin = (bin>-1) ? etaHisto.GetBinLowEdge(bin) : -10.;
+   bin = etaHisto.FindLastBinAbove(0.5);
+   Double_t etamax = (bin>-1) ? etaHisto.GetBinLowEdge(bin+1) : -10.;
+   tk_etamax_ = TMath::Max(fabs(etamin),fabs(etamax)); 						// tk_etamax
+   delete tkEffFunction;
+   }
+
+   {
+   TString muonEffFormula = confReader->GetString(Form("%s::EfficiencyFormula",MuonEfficiency),"abs(eta)<2.0");
    muonEffFormula.ReplaceAll("pt","x");
    muonEffFormula.ReplaceAll("eta","y");
    muonEffFormula.ReplaceAll("phi","0.");
    TF2* muEffFunction = new TF2("muEff",muonEffFormula,0,1000,-10,10);
-   TH1F etaHisto("eta","eta",100,5.,-5.);
+   TH1F etaHisto("eta2","eta2",100,5.,-5.);
    Double_t pt,eta;
    for(int i=0;i<1000;++i) {
      muEffFunction->GetRandom2(pt,eta);
@@ -127,10 +156,11 @@ void Delphes3DGeometry::readFile(const char *configFile) {
    Double_t etamax = (bin>-1) ? etaHisto.GetBinLowEdge(bin+1) : -10.;
    muonSystem_etamax_ = TMath::Max(fabs(etamin),fabs(etamax));				// muonSystem_etamax
    delete muEffFunction;
+   }
        
    caloBinning_.clear();								// calo binning
    ExRootConfParam paramEtaBins, paramPhiBins;
-   ExRootConfParam param = confReader->GetParam("Calorimeter::EtaPhiBins");
+   ExRootConfParam param = confReader->GetParam(Form("%s::EtaPhiBins",Calorimeters));
    Int_t size = param.GetSize();
    for(int i = 0; i < size/2; ++i) {
      paramEtaBins = param[i*2];
@@ -139,8 +169,8 @@ void Delphes3DGeometry::readFile(const char *configFile) {
      caloBinning_.insert(std::make_pair(paramEtaBins[0].GetDouble(),paramPhiBins.GetSize()-1));
    }
 
-   calo_endcap_etamax_ = TMath::Max(fabs(caloBinning_.begin()->first),fabs(caloBinning_.rbegin()->first)); // calo_endcap_etamax_
- 
+   if (size>0) calo_endcap_etamax_ = TMath::Max(fabs(caloBinning_.begin()->first),fabs(caloBinning_.rbegin()->first)); // calo_endcap_etamax_
+
    delete confReader;
 
    calo_barrel_innerRadius_   = tk_radius_+contingency_;
@@ -156,7 +186,7 @@ void Delphes3DGeometry::readFile(const char *configFile) {
 TGeoVolume* Delphes3DGeometry::getDetector(bool withTowers) {
    TGeoVolume *top = geom_->MakeBox("Delphes3DGeometry", vacuum_, 1500, 1500, 2300); // determine the size from what we know about the detector TODO
    addTracker(top);
-   addCalorimeters(top);
+   addCalorimeters(top); // TODO: allow for more than one calo
    addMuonDets(top);
    if (withTowers) {
      addCaloTowers(top);
@@ -164,6 +194,8 @@ TGeoVolume* Delphes3DGeometry::getDetector(bool withTowers) {
    return top;
 }
 
+//TODO: there should be a cut by two cones to limit the acceptance in eta
+//typically from ChargedHadronTrackingEfficiency 
 void Delphes3DGeometry::addTracker(TGeoVolume *top) {
    // tracker: a cylinder
    TGeoVolume *tracker = geom_->MakeTube("tracker", tkmed_, 0., tk_radius_, tk_length_);
@@ -310,7 +342,10 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top) {
    delete[] nphi;
 }
 
-void geometry(const char* filename = "delphes_card_CMS.tcl")
+void geometry(const char* filename = "delphes_card_CMS.tcl", const char* ParticlePropagator="ParticlePropagator",
+                                                             const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
+                                                             const char* MuonEfficiency="MuonEfficiency",
+                                                             const char* Calorimeters="Calorimeter") 
 {
    gSystem->Load("libGeom");
    gSystem->Load("../libDelphes");
@@ -322,7 +357,7 @@ void geometry(const char* filename = "delphes_card_CMS.tcl")
 
    // build the detector
    Delphes3DGeometry det3D;
-   det3D.readFile(filename);
+   det3D.readFile(filename,ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
    top->AddNode(det3D.getDetector(true),1);
 
    // draw it
