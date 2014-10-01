@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
@@ -205,7 +206,7 @@ TGeoVolume* Delphes3DGeometry::getDetector(bool withTowers) {
 
 std::pair<Double_t, Double_t> Delphes3DGeometry::addTracker(TGeoVolume *top) {
    // tracker: a cylinder with two cones substracted
-   TGeoCone* forwardCone = new TGeoCone("forwardTkAcceptance",(tk_length_/2.+0.05),0.,tk_radius_,(tk_length_)*2.*exp(-tk_etamax_)/(1-exp(-2.*tk_etamax_)),tk_radius_);
+   new TGeoCone("forwardTkAcceptance",(tk_length_/2.+0.05),0.,tk_radius_,(tk_length_)*2.*exp(-tk_etamax_)/(1-exp(-2.*tk_etamax_)),tk_radius_);
    TGeoTranslation *tr1  = new TGeoTranslation("tkacc1",0., 0., tk_length_/2.);
    tr1->RegisterYourself();
    TGeoRotation *negz    = new TGeoRotation("tknegz",0,180,0);
@@ -316,7 +317,7 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char* name,
      }
      ++etaslice;
    }
-   nEtaBins = ++etaslice;
+   nEtaBins = etaslice;
    for(int i=0;i<nEtaBins-1;++i) { // loop on the eta slices
      vertices[8]  = -dx[i]; vertices[9]  = y[i];
      vertices[10] = -dx[i]; vertices[11] = y[i+1];
@@ -357,11 +358,11 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char* name,
      ++etaslice;
    }
    nEtaBins = etaslice;
-   for(int i=0;i<nEtaBins;++i) { // loop on the eta slices
-     vertices[8]  = -r[i+1]*sin(TMath::Pi()/20.); vertices[9]  = r[i+1]*cos(TMath::Pi()/20.);
-     vertices[10] = -r[i]*sin(TMath::Pi()/20.);   vertices[11] = r[i]*cos(TMath::Pi()/20.);
-     vertices[12] =  r[i]*sin(TMath::Pi()/20.);   vertices[13] = r[i]*cos(TMath::Pi()/20.);
-     vertices[14] =  r[i+1]*sin(TMath::Pi()/20.); vertices[15] = r[i+1]*cos(TMath::Pi()/20.);
+   for(int i=0;i<nEtaBins-1;++i) { // loop on the eta slices
+     vertices[8]  = -r[i+1]*sin(TMath::Pi()/nphi[i]); vertices[9]  = r[i+1]*cos(TMath::Pi()/nphi[i]);
+     vertices[10] = -r[i]*sin(TMath::Pi()/nphi[i]);   vertices[11] = r[i]*cos(TMath::Pi()/nphi[i]);
+     vertices[12] =  r[i]*sin(TMath::Pi()/nphi[i]);   vertices[13] = r[i]*cos(TMath::Pi()/nphi[i]);
+     vertices[14] =  r[i+1]*sin(TMath::Pi()/nphi[i]); vertices[15] = r[i+1]*cos(TMath::Pi()/nphi[i]);
      new TGeoArb8(Form("%sfwdtower%d",name,i),R/2., vertices); // tower in the proper eta slice, at phi=0
      // intersection between the tower and the calo_endcap
      TGeoCompositeShape *finalfwdtower_cs = new TGeoCompositeShape(Form("%sffwdtower%d_cs",name,i),Form("%sfwdtower%d:%s_towerdz*%s_endcap_cs",name,i,name,name));
