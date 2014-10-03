@@ -247,6 +247,12 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
+  set EcalTowerMinEnergy 0.50
+  set HcalTowerMinEnergy 1.00
+
+  set EcalTowerMinSignificance 1.0
+  set HcalTowerMinSignificance 1.0
+
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
@@ -665,7 +671,7 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
 
 #  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
+  add Branch Calorimeter/towers Tower Tower
 
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower

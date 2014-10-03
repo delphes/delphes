@@ -211,6 +211,12 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
+  set EcalTowerMinEnergy 0.5
+  set HcalTowerMinEnergy 1.0
+
+  set EcalTowerMinSignificance 1.0
+  set HcalTowerMinSignificance 1.0
+   
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
