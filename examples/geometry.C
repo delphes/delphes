@@ -278,7 +278,7 @@ std::pair<Double_t, Double_t> Delphes3DGeometry::addMuonDets(TGeoVolume *top, co
    TGeoTranslation *trm2 = new TGeoTranslation(Form("%sEndcap2_position",name),0.,0.,-muonSystem_length);
    trm1->RegisterYourself();
    top->AddNode(muon_endcap,1,trm1);
-   top->AddNode(muon_endcap,1,trm2);
+   top->AddNode(muon_endcap,2,trm2);
    return std::make_pair(muonSystem_radius,muonSystem_length);
 }
 
@@ -396,6 +396,59 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
 
    // draw it
    geom->CloseGeometry();
-   top->Draw();
+   //top->Draw();
+   //TFile* file = new TFile("DelpheGeom.root","RECREATE");
+   //top->Write("DelphesGeometry");
+   //file->Close();
+
+   TEveManager::Create();
+
+   //TFile::SetCacheFileDir(".");
+   //gGeoManager = gEve->GetGeometry("DelpheGeom.root");
+   gGeoManager->DefaultColors();
+
+   TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
+
+   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
+   trk->SetVisLevel(6);
+   gEve->AddGlobalElement(trk);
+
+   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
+   calo->SetVisLevel(3);
+   gEve->AddGlobalElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   gEve->AddGlobalElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   gEve->AddGlobalElement(calo);
+
+   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
+   muon->SetVisLevel(4);
+   gEve->AddGlobalElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   gEve->AddGlobalElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   gEve->AddGlobalElement(muon);
+
+   gEve->FullRedraw3D(kTRUE);
+
+   // EClipType not exported to CINT (see TGLUtil.h):
+   // 0 - no clip, 1 - clip plane, 2 - clip box
+   TGLViewer *v = gEve->GetDefaultGLViewer();
+   v->GetClipSet()->SetClipType(1);
+   v->ColorSet().Background().SetColor(kMagenta+4);
+   v->SetGuideState(TGLUtil::kAxesEdge, kTRUE, kFALSE, 0);
+   v->RefreshPadEditor(v);
+
+   v->CurrentCamera().RotateRad(-1.2, 0.5);
+   v->DoDraw();
+
 }
 
