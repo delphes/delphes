@@ -76,12 +76,20 @@ class Delphes3DGeometry {
                                          const char* MuonEfficiency="MuonEfficiency",
                                          const char* Calorimeters="Calorimeter");
 
+     void loadFromFile(const char* filename, const char* name="DelphesGeometry");
+     void save(const char* filename, const char* name="DelphesGeometry");
+
      void setContingency(Double_t contingency) { contingency_ = contingency; }
      void setCaloBarrelThickness(Double_t thickness) { calo_barrel_thickness_ = thickness; }
      void setCaloEndcapThickness(Double_t thickness) { calo_endcap_thickness_ = thickness; }
      void setMuonSystemThickness(Double_t thickness) { muonSystem_thickn_ = thickness; }
 
      TGeoVolume* getDetector(bool withTowers = true);
+
+     Double_t getTrackerRadius() const { return tk_radius_; }
+     Double_t getTrackerHalfLength() const { return tk_length_; }
+     Double_t getBField() const { return tk_Bz_; }
+     std::pair<TAxis*, TAxis*> getCaloAxes() { return std::make_pair(etaAxis_,phiAxis_); }
 
    private:
      std::pair<Double_t, Double_t> addTracker(TGeoVolume *top);
@@ -98,6 +106,9 @@ class Delphes3DGeometry {
      TGeoMedium *calomed_;
      TGeoMedium *mudetmed_;
 
+     TAxis* etaAxis_;
+     TAxis* phiAxis_;
+
      Double_t contingency_;
      Double_t calo_barrel_thickness_;
      Double_t calo_endcap_thickness_;
@@ -105,6 +116,7 @@ class Delphes3DGeometry {
      Double_t tk_radius_;
      Double_t tk_length_;
      Double_t tk_etamax_;
+     Double_t tk_Bz_;
 
      std::vector<std::string> calorimeters_;
      std::vector<std::string> muondets_;
@@ -118,6 +130,7 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
 
    //--- the geometry manager
    geom_ = geom==NULL? gGeoManager : geom;
+   gGeoManager->DefaultColors();
 
    //--- define some materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
@@ -138,9 +151,12 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
    muonSystem_thickn_ = 10.;
 
    // read these parameters from the Delphes Card (with default values)
+   etaAxis_   = NULL;
+   phiAxis_   = NULL;
    tk_radius_ = 120.;
    tk_length_ = 150.;
    tk_etamax_ = 3.0;
+   tk_Bz_     = 1.;
 }
 
 void Delphes3DGeometry::readFile(const char *configFile,
@@ -152,6 +168,7 @@ void Delphes3DGeometry::readFile(const char *configFile,
 
    tk_radius_ = confReader->GetDouble(Form("%s::Radius",ParticlePropagator), 1.0)*100;		// tk_radius
    tk_length_ = confReader->GetDouble(Form("%s::HalfLength",ParticlePropagator), 3.0)*100; 	// tk_length
+   tk_Bz_     = confReader->GetDouble("ParticlePropagator::Bz", 0.0);                           // tk_Bz
 
    {
    TString tkEffFormula = confReader->GetString(Form("%s::EfficiencyFormula",TrackingEfficiency),"abs(eta)<3.0");
@@ -216,6 +233,15 @@ void Delphes3DGeometry::readFile(const char *configFile,
      }
      caloBinning_[*calo] = caloBinning;
    }
+
+   set< pair<Double_t, Int_t> > caloBinning = caloBinning_[*calorimeters_.begin()];
+   Double_t *etaBins = new Double_t[caloBinning.size()]; // note that this is the eta binning of the first calo
+   unsigned int i = 0;
+   for(set< pair<Double_t, Int_t> >::const_iterator itEtaSet = caloBinning.begin(); itEtaSet != caloBinning.end(); ++itEtaSet) {
+     etaBins[i++] = itEtaSet.first;
+   }
+   etaAxis_ = new TAxis(caloBinning.size() - 1, etaBins);
+   phiAxis_ = new TAxis(72, -TMath::Pi(), TMath::Pi()); // note that this is fixed while #phibins could vary, also with eta, which doesn't seem possible in ROOT
 
    delete confReader;
 
@@ -426,71 +452,61 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char* name,
 
 void delphes_event_display(const char *configFile, const char *inputFile)
 {
-   // to be the main function, initializes the application.
+   // to be the main function...
 
-  gSystem->Load("libDelphesDisplay");
+   // initialize the application
+   gSystem->Load("libDelphesDisplay");
+   TEveManager::Create(kTRUE, "IV");
 
-  TEveManager::Create(kTRUE, "IV");
+   // build the detector
+   Delphes3DGeometry det3D;
+   det3D.readFile(filename,ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
+   gRadius = det3D.getTrackerRadius();
+   gHalfLength = det3D.getTrackerHalfLength();
+   gBz = det3D.getBField();
+   gEtaAxis = det3D.getCaloAxes().first;
+   gPhiAxis = det3D.getCaloAxes().second;
+   TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
+   TEveElementList *geometry = new TEveElementList("Geometry");
+   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
+   trk->SetVisLevel(6);
+   geometry->AddElement(trk);
+   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
+   calo->SetVisLevel(3);
+   geometry->AddElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   geometry->AddElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   geometry->AddElement(calo);
+   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
+   muon->SetVisLevel(4);
+   geometry->AddElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   geometry->AddElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   geometry->AddElement(muon);
 
-//------------------------------------ TODO: this should be moved to the geometry class
-  ExRootConfParam param, paramEtaBins;
-  Long_t i, j, size, sizeEtaBins;
-  set< Double_t > etaSet;
-  set< Double_t >::iterator itEtaSet;
+   // Create chain of root trees
+   gChain.Add(inputFile);
 
-  Double_t *etaBins;
-
-  ExRootConfReader *confReader = new ExRootConfReader;
-  confReader->ReadFile(configFile);
-
-  gRadius = confReader->GetDouble("ParticlePropagator::Radius", 1.0);
-  gHalfLength = confReader->GetDouble("ParticlePropagator::HalfLength", 3.0);
-  gBz = confReader->GetDouble("ParticlePropagator::Bz", 0.0);
-
-
-  // read eta and phi bins
-  param = confReader->GetParam("Calorimeter::EtaPhiBins");
-  size = param.GetSize();
-  etaSet.clear();
-  for(i = 0; i < size/2; ++i)
-  {
-    paramEtaBins = param[i*2];
-    sizeEtaBins = paramEtaBins.GetSize();
-
-    for(j = 0; j < sizeEtaBins; ++j)
-    {
-      etaSet.insert(paramEtaBins[j].GetDouble());
-    }
-  }
-
-  delete confReader;
-
-  etaBins = new Double_t[etaSet.size()];
-  i = 0;
-
-  for(itEtaSet = etaSet.begin(); itEtaSet != etaSet.end(); ++itEtaSet)
-  {
-    etaBins[i] = *itEtaSet;
-    ++i;
-  }
-
-  gEtaAxis = new TAxis(etaSet.size() - 1, etaBins);
-  gPhiAxis = new TAxis(72, -TMath::Pi(), TMath::Pi()); // note that this is fixed while #phibins could vary, also with eta, which doesn't seem possible in ROOT
-//-----------------------------------------------------------------------
-
-  // Create chain of root trees
-  gChain.Add(inputFile);
-
-  // Create object of class ExRootTreeReader
+   // Create object of class ExRootTreeReader
    printf("*** Opening Delphes data file ***\n");
-  gTreeReader = new ExRootTreeReader(&gChain);
+   gTreeReader = new ExRootTreeReader(&gChain);
 
-  // Get pointers to branches
-  //TODO make it configurable, for more objects (or can we guess from the config?)
-  gBranchTower = gTreeReader->UseBranch("Tower");
-  gBranchTrack = gTreeReader->UseBranch("Track");
-  gBranchJet   = gTreeReader->UseBranch("Jet");
+   // Get pointers to branches
+   gBranchTower = gTreeReader->UseBranch("Tower");
+   gBranchTrack = gTreeReader->UseBranch("Track");
+   gBranchJet   = gTreeReader->UseBranch("Jet");
 
+//TODO make it configurable, for more objects (or can we guess from the config?)
 // idea: for pf objects, we could use the TEveCompound to show track + cluster ??? (nice display but little meaning)
 // for MET and SHT, show an arrow (tooltip = title)
 // for electrons and muons, create additional track collections
@@ -513,51 +529,51 @@ void delphes_event_display(const char *configFile, const char *inputFile)
   add Branch ScalarHT/energy ScalarHT ScalarHT
 */
 
-  // data
-  gCaloData = new DelphesCaloData(2); 
-  gCaloData->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
-  gCaloData->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
-  gCaloData->SetEtaBins(gEtaAxis);
-  gCaloData->SetPhiBins(gPhiAxis);
-  gCaloData->IncDenyDestroy();
+   // data
+   gCaloData = new DelphesCaloData(2); 
+   gCaloData->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
+   gCaloData->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
+   gCaloData->SetEtaBins(gEtaAxis);
+   gCaloData->SetPhiBins(gPhiAxis);
+   gCaloData->IncDenyDestroy();
 
-  gJetList = new TEveElementList("Jets");
-  gEve->AddElement(gJetList);
+   gJetList = new TEveElementList("Jets");
+   gEve->AddElement(gJetList);
 
-  gTrackList = new TEveTrackList("Tracks");
-  gTrackList->SetMainColor(kBlue);
-  gTrackList->SetMarkerColor(kRed);
-  gTrackList->SetMarkerStyle(kCircle);
-  gTrackList->SetMarkerSize(0.5);
-  gEve->AddElement(gTrackList);
+   gTrackList = new TEveTrackList("Tracks");
+   gTrackList->SetMainColor(kBlue);
+   gTrackList->SetMarkerColor(kRed);
+   gTrackList->SetMarkerStyle(kCircle);
+   gTrackList->SetMarkerSize(0.5);
+   gEve->AddElement(gTrackList);
 
-  TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
-  trkProp->SetMagField(0.0, 0.0, -gBz);
-  trkProp->SetMaxR(gRadius*100.0);
-  trkProp->SetMaxZ(gHalfLength*100.0);
+   TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
+   trkProp->SetMagField(0.0, 0.0, -gBz);
+   trkProp->SetMaxR(gRadius*100.0);
+   trkProp->SetMaxZ(gHalfLength*100.0);
 
-  // viewers and scenes
+   // viewers and scenes
 
-  TEveCalo3D *calo = new TEveCalo3D(gCaloData);
-  calo->SetBarrelRadius(gRadius*100.0);  //TODO get it from geometry class
-  calo->SetEndCapPos(gHalfLength*100.0); //TODO get it from geometry class
+   TEveCalo3D *calo = new TEveCalo3D(gCaloData);
+   calo->SetBarrelRadius(gRadius*100.0);
+   calo->SetEndCapPos(gHalfLength*100.0);
 
-  gStyle->SetPalette(1, 0);
-  TEveCaloLego *lego = new TEveCaloLego(gCaloData);
-  lego->InitMainTrans();
-  lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
-  lego->SetAutoRebin(kFALSE);
-  lego->Set2DMode(TEveCaloLego::kValSizeOutline);
+   gStyle->SetPalette(1, 0);
+   TEveCaloLego *lego = new TEveCaloLego(gCaloData);
+   lego->InitMainTrans();
+   lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
+   lego->SetAutoRebin(kFALSE);
+   lego->Set2DMode(TEveCaloLego::kValSizeOutline);
 
-  gDelphesDisplay = new DelphesDisplay;
-  gEve->AddGlobalElement(geometry);
-  gEve->AddGlobalElement(calo);
-  gDelphesDisplay->ImportGeomRPhi(geometry);
-  gDelphesDisplay->ImportCaloRPhi(calo);
-  gDelphesDisplay->ImportGeomRhoZ(geometry);
-  gDelphesDisplay->ImportCaloRhoZ(calo);
-  gDelphesDisplay->ImportCaloLego(lego);
-  gEve->Redraw3D(kTRUE);
+   gDelphesDisplay = new DelphesDisplay;
+   gEve->AddGlobalElement(geometry);
+   gEve->AddGlobalElement(calo);
+   gDelphesDisplay->ImportGeomRPhi(geometry);
+   gDelphesDisplay->ImportCaloRPhi(calo);
+   gDelphesDisplay->ImportGeomRhoZ(geometry);
+   gDelphesDisplay->ImportCaloRhoZ(calo);
+   gDelphesDisplay->ImportCaloLego(lego);
+   gEve->Redraw3D(kTRUE);
 
 }
 
