@@ -19,9 +19,53 @@
 #include "TMath.h"
 #include "TSystem.h"
 
+/*
+ * alice_esd.C : GUI complete
+ * assembly.C: sauvegarde as shape-extract -> implement in the geometry class (read/write)
+ * histobrowser.C: intégration d'histogrammes dans le display (on pourrait avoir Pt, eta, phi pour les principales collections)
+ * also from alice_esd: summary html table
+ * 
+ */
 using namespace std;
 
+// Forward declarations.
+class Delphes3DGeometry;
+class ExRootTreeReader;
+class DelphesCaloData;
+class DelphesDisplay;
+void make_gui();
+void load_event();
+void delphes_read();
+
+// Configuration and global variables.
+Int_t event_id           = 0; // Current event id.
+Double_t gRadius = 1.29;
+Double_t gHalfLength = 3.0;
+Double_t gBz = 3.8;
+
+TAxis *gEtaAxis = 0;
+TAxis *gPhiAxis = 0;
+
+TChain gChain("Delphes");
+
+ExRootTreeReader *gTreeReader = 0;
+
+TClonesArray *gBranchTower = 0;
+TClonesArray *gBranchTrack = 0;
+TClonesArray *gBranchJet = 0;
+
+DelphesCaloData *gCaloData = 0;
+TEveElementList *gJetList = 0;
+TEveTrackList *gTrackList = 0;
+
+DelphesDisplay *gDelphesDisplay = 0;
+
+/******************************************************************************/
+// Construction of the geometry
+/******************************************************************************/
+
 // TODO: asymmetric detector
+
 class Delphes3DGeometry {
    public:
      Delphes3DGeometry(TGeoManager *geom = NULL);
@@ -376,6 +420,327 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char* name,
    delete[] nphi;
 }
 
+/******************************************************************************/
+// Initialization and steering functions
+/******************************************************************************/
+
+void delphes_event_display(const char *configFile, const char *inputFile)
+{
+   // to be the main function, initializes the application.
+
+  gSystem->Load("libDelphesDisplay");
+
+  TEveManager::Create(kTRUE, "IV");
+
+//------------------------------------ TODO: this should be moved to the geometry class
+  ExRootConfParam param, paramEtaBins;
+  Long_t i, j, size, sizeEtaBins;
+  set< Double_t > etaSet;
+  set< Double_t >::iterator itEtaSet;
+
+  Double_t *etaBins;
+
+  ExRootConfReader *confReader = new ExRootConfReader;
+  confReader->ReadFile(configFile);
+
+  gRadius = confReader->GetDouble("ParticlePropagator::Radius", 1.0);
+  gHalfLength = confReader->GetDouble("ParticlePropagator::HalfLength", 3.0);
+  gBz = confReader->GetDouble("ParticlePropagator::Bz", 0.0);
+
+
+  // read eta and phi bins
+  param = confReader->GetParam("Calorimeter::EtaPhiBins");
+  size = param.GetSize();
+  etaSet.clear();
+  for(i = 0; i < size/2; ++i)
+  {
+    paramEtaBins = param[i*2];
+    sizeEtaBins = paramEtaBins.GetSize();
+
+    for(j = 0; j < sizeEtaBins; ++j)
+    {
+      etaSet.insert(paramEtaBins[j].GetDouble());
+    }
+  }
+
+  delete confReader;
+
+  etaBins = new Double_t[etaSet.size()];
+  i = 0;
+
+  for(itEtaSet = etaSet.begin(); itEtaSet != etaSet.end(); ++itEtaSet)
+  {
+    etaBins[i] = *itEtaSet;
+    ++i;
+  }
+
+  gEtaAxis = new TAxis(etaSet.size() - 1, etaBins);
+  gPhiAxis = new TAxis(72, -TMath::Pi(), TMath::Pi()); // note that this is fixed while #phibins could vary, also with eta, which doesn't seem possible in ROOT
+//-----------------------------------------------------------------------
+
+  // Create chain of root trees
+  gChain.Add(inputFile);
+
+  // Create object of class ExRootTreeReader
+   printf("*** Opening Delphes data file ***\n");
+  gTreeReader = new ExRootTreeReader(&gChain);
+
+  // Get pointers to branches
+  //TODO make it configurable, for more objects (or can we guess from the config?)
+  gBranchTower = gTreeReader->UseBranch("Tower");
+  gBranchTrack = gTreeReader->UseBranch("Track");
+  gBranchJet   = gTreeReader->UseBranch("Jet");
+
+// idea: for pf objects, we could use the TEveCompound to show track + cluster ??? (nice display but little meaning)
+// for MET and SHT, show an arrow (tooltip = title)
+// for electrons and muons, create additional track collections
+// for photons, use TEveStraightLineSet
+
+/*
+  add Branch Calorimeter/eflowTracks EFlowTrack Track
+  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
+  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+
+  add Branch GenJetFinder/jets GenJet Jet
+
+  add Branch UniqueObjectFinder/jets Jet Jet
+
+  add Branch UniqueObjectFinder/electrons Electron Electron
+  add Branch UniqueObjectFinder/photons Photon Photon
+  add Branch UniqueObjectFinder/muons Muon Muon
+
+  add Branch MissingET/momentum MissingET MissingET
+  add Branch ScalarHT/energy ScalarHT ScalarHT
+*/
+
+  // data
+  gCaloData = new DelphesCaloData(2); 
+  gCaloData->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
+  gCaloData->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
+  gCaloData->SetEtaBins(gEtaAxis);
+  gCaloData->SetPhiBins(gPhiAxis);
+  gCaloData->IncDenyDestroy();
+
+  gJetList = new TEveElementList("Jets");
+  gEve->AddElement(gJetList);
+
+  gTrackList = new TEveTrackList("Tracks");
+  gTrackList->SetMainColor(kBlue);
+  gTrackList->SetMarkerColor(kRed);
+  gTrackList->SetMarkerStyle(kCircle);
+  gTrackList->SetMarkerSize(0.5);
+  gEve->AddElement(gTrackList);
+
+  TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
+  trkProp->SetMagField(0.0, 0.0, -gBz);
+  trkProp->SetMaxR(gRadius*100.0);
+  trkProp->SetMaxZ(gHalfLength*100.0);
+
+  // viewers and scenes
+
+  TEveCalo3D *calo = new TEveCalo3D(gCaloData);
+  calo->SetBarrelRadius(gRadius*100.0);  //TODO get it from geometry class
+  calo->SetEndCapPos(gHalfLength*100.0); //TODO get it from geometry class
+
+  gStyle->SetPalette(1, 0);
+  TEveCaloLego *lego = new TEveCaloLego(gCaloData);
+  lego->InitMainTrans();
+  lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
+  lego->SetAutoRebin(kFALSE);
+  lego->Set2DMode(TEveCaloLego::kValSizeOutline);
+
+  gDelphesDisplay = new DelphesDisplay;
+  gEve->AddGlobalElement(geometry);
+  gEve->AddGlobalElement(calo);
+  gDelphesDisplay->ImportGeomRPhi(geometry);
+  gDelphesDisplay->ImportCaloRPhi(calo);
+  gDelphesDisplay->ImportGeomRhoZ(geometry);
+  gDelphesDisplay->ImportCaloRhoZ(calo);
+  gDelphesDisplay->ImportCaloLego(lego);
+  gEve->Redraw3D(kTRUE);
+
+}
+
+//______________________________________________________________________________
+void load_event()
+{
+   // Load event specified in global event_id.
+   // The contents of previous event are removed.
+
+   printf("Loading event %d.\n", event_id);
+
+   gEve->GetViewers()->DeleteAnnotations();
+
+   if(gCaloData) gCaloData->ClearTowers();
+   if(gJetList) gJetList->DestroyElements();
+   if(gTrackList) gTrackList->DestroyElements();
+
+   delphes_read();
+
+   TEveElement* top = gEve->GetCurrentEvent();
+   gDelphesDisplay->DestroyEventRPhi();
+   gDelphesDisplay->ImportEventRPhi(top);
+   gDelphesDisplay->DestroyEventRhoZ();
+   gDelphesDisplay->ImportEventRhoZ(top);
+
+   //update_html_summary();
+
+   gEve->Redraw3D(kFALSE, kTRUE);
+}
+
+void delphes_read()
+{
+
+  TIter itTower(gBranchTower);
+  TIter itTrack(gBranchTrack);
+  TIter itJet(gBranchJet);
+
+  Tower *tower;
+  Track *track;
+  Jet *jet;
+
+  TEveJetCone *eveJetCone;
+  TEveTrack *eveTrack;
+
+  Int_t counter;
+
+  TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
+  if(event >= gTreeReader->GetEntries()) return;
+
+  // Load selected branches with data from specified event
+  gTreeReader->ReadEntry(event_id);
+  // Loop over all towers
+  itTower.Reset();
+  while((tower = (Tower *) itTower.Next()))
+  {
+    gCaloData->AddTower(tower->Edges[0], tower->Edges[1], tower->Edges[2], tower->Edges[3]);
+    gCaloData->FillSlice(0, tower->Eem);
+    gCaloData->FillSlice(1, tower->Ehad);
+  }
+  gCaloData->DataChanged();
+  // Loop over all tracks
+  itTrack.Reset();
+  counter = 0;
+  while((track = (Track *) itTrack.Next()))
+  {
+    TParticle pb(track->PID, 1, 0, 0, 0, 0,
+                 track->P4().Px(), track->P4().Py(),
+                 track->P4().Pz(), track->P4().E(),
+                 track->X, track->Y, track->Z, 0.0);
+
+    eveTrack = new TEveTrack(&pb, counter, trkProp);
+    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+    eveTrack->SetStdTitle();
+    eveTrack->SetAttLineAttMarker(gTrackList);
+
+    switch(TMath::Abs(track->PID))
+    {
+      case 11:
+        eveTrack->SetLineColor(kRed);
+        break;
+      case 13:
+        eveTrack->SetLineColor(kGreen);
+        break;
+      default:
+        eveTrack->SetLineColor(kBlue);
+    }
+    gTrackList->AddElement(eveTrack);
+    eveTrack->MakeTrack();
+  }
+  // Loop over all jets
+  itJet.Reset();
+  counter = 0;
+  while((jet = (Jet *) itJet.Next()))
+  {
+    eveJetCone = new TEveJetCone();
+    eveJetCone->SetName(Form("jet [%d]", counter++));
+    eveJetCone->SetMainTransparency(60);
+    eveJetCone->SetLineColor(kYellow);
+    eveJetCone->SetCylinder(gRadius*100.0 - 10, gHalfLength*100.0 - 10);
+    eveJetCone->SetPickable(kTRUE);
+    eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
+    gJetList->AddElement(eveJetCone);
+  }
+}
+
+
+/******************************************************************************/
+// GUI
+/******************************************************************************/
+
+//______________________________________________________________________________
+// 
+// EvNavHandler class is needed to connect GUI signals.
+
+class EvNavHandler
+{     
+public:
+   void Fwd()
+   {  
+      if (event_id < tree->GetEntries() - 1) {
+         ++event_id;
+         load_event();
+      } else {
+         printf("Already at last event.\n");
+      }
+   }
+   void Bck()
+   {
+      if (event_id > 0) {
+         --event_id;
+         load_event();
+      } else {
+         printf("Already at first event.\n");
+      }
+   }
+};
+
+//______________________________________________________________________________
+void make_gui()
+{
+   // Create minimal GUI for event navigation.
+   // TODO: better GUI could be made based on the ch15 of the manual (Writing a GUI)
+
+   // add a tab on the left
+   TEveBrowser* browser = gEve->GetBrowser();
+   browser->StartEmbedding(TRootBrowser::kLeft);
+
+   // set the main title
+   TGMainFrame* frmMain = new TGMainFrame(gClient->GetRoot(), 1000, 600);
+   frmMain->SetWindowName("Delphes Event Display");
+   frmMain->SetCleanup(kDeepCleanup);
+
+   // build the navigation menu
+   TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
+   {
+      TString icondir;
+      if(gSystem->Getenv("ROOTSYS"))
+        icondir = Form("%s/icons/", gSystem->Getenv("ROOTSYS"));
+      if(!gSystem->OpenDirectory(icondir)) 
+        icondir = Form("%s/icons/", (const char*)gSystem->GetFromPipe("root-config --etcdir") );
+      TGPictureButton* b = 0;
+      EvNavHandler    *fh = new EvNavHandler;
+
+      b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
+      hf->AddFrame(b);
+      b->Connect("Clicked()", "EvNavHandler", fh, "Bck()");
+
+      b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
+      hf->AddFrame(b);
+      b->Connect("Clicked()", "EvNavHandler", fh, "Fwd()");
+   }
+   frmMain->AddFrame(hf);
+   frmMain->MapSubwindows();
+   frmMain->Resize();
+   frmMain->MapWindow();
+   browser->StopEmbedding();
+   browser->SetTabTitle("Event Control", 0);
+}
+
+/******************************************************************************/
+// MAIN 
+/******************************************************************************/
+
 void geometry(const char* filename = "delphes_card_CMS.tcl", const char* ParticlePropagator="ParticlePropagator",
                                                              const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
                                                              const char* MuonEfficiency="MuonEfficiency",
@@ -401,7 +766,8 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
    //top->Write("DelphesGeometry");
    //file->Close();
 
-   TEveManager::Create();
+   TEveManager::Create(kTRUE, "IV");
+
 
    //TFile::SetCacheFileDir(".");
    //gGeoManager = gEve->GetGeometry("DelpheGeom.root");
@@ -450,5 +816,8 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
    v->CurrentCamera().RotateRad(-1.2, 0.5);
    v->DoDraw();
 
+   make_gui();
+   // load_event();
+   // gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
 }
 
