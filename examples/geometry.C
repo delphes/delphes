@@ -13,11 +13,32 @@
 #include "TGeoTube.h"
 #include "TGeoCone.h"
 #include "TGeoArb8.h"
-//#include "../external/ExRootAnalysis/ExRootConfReader.h"
+//#include "external/ExRootAnalysis/ExRootConfReader.h"
+//#include "external/ExRootAnalysis/ExRootTreeReader.h"
+//#include "display/DelphesCaloData.h"
+//#include "display/DelphesDisplay.h"
+//#include "classes/DelphesClasses.h"
 #include "TF2.h"
 #include "TH1F.h"
+#include "TChain.h"
+#include "TEveElement.h"
+#include "TEveJetCone.h"
+#include "TEveTrack.h"
+#include "TEveTrackPropagator.h"
+#include "TEveCalo.h"
 #include "TMath.h"
 #include "TSystem.h"
+#include "TEveManager.h"
+#include "TEveGeoNode.h"
+#include "TEveTrans.h"
+#include "TEveViewer.h"
+#include "TEveBrowser.h"
+#include "TRootBrowser.h"
+#include "TGLViewer.h"
+#include "TGButton.h"
+#include "TCollection.h"
+#include "TClonesArray.h"
+#include "TGLClip.h"
 
 /*
  * alice_esd.C : GUI complete
@@ -130,7 +151,7 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
 
    //--- the geometry manager
    geom_ = geom==NULL? gGeoManager : geom;
-   gGeoManager->DefaultColors();
+   //gGeoManager->DefaultColors();
 
    //--- define some materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
@@ -236,9 +257,9 @@ void Delphes3DGeometry::readFile(const char *configFile,
 
    set< pair<Double_t, Int_t> > caloBinning = caloBinning_[*calorimeters_.begin()];
    Double_t *etaBins = new Double_t[caloBinning.size()]; // note that this is the eta binning of the first calo
-   unsigned int i = 0;
+   unsigned int ii = 0;
    for(set< pair<Double_t, Int_t> >::const_iterator itEtaSet = caloBinning.begin(); itEtaSet != caloBinning.end(); ++itEtaSet) {
-     etaBins[i++] = itEtaSet.first;
+     etaBins[ii++] = itEtaSet->first;
    }
    etaAxis_ = new TAxis(caloBinning.size() - 1, etaBins);
    phiAxis_ = new TAxis(72, -TMath::Pi(), TMath::Pi()); // note that this is fixed while #phibins could vary, also with eta, which doesn't seem possible in ROOT
@@ -455,18 +476,22 @@ void delphes_event_display(const char *configFile, const char *inputFile)
    // to be the main function...
 
    // initialize the application
-   gSystem->Load("libDelphesDisplay");
+   gSystem->Load("../libDelphesDisplay");
+   TGeoManager *geom = new TGeoManager("delphes", "Delphes geometry");
    TEveManager::Create(kTRUE, "IV");
 
    // build the detector
    Delphes3DGeometry det3D;
-   det3D.readFile(filename,ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
+   //det3D.readFile(configFile,ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
+   det3D.readFile(configFile);//TODO fix this
+   //top->AddNode(det3D.getDetector(true),1);
    gRadius = det3D.getTrackerRadius();
    gHalfLength = det3D.getTrackerHalfLength();
    gBz = det3D.getBField();
    gEtaAxis = det3D.getCaloAxes().first;
    gPhiAxis = det3D.getCaloAxes().second;
-   TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
+   //TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
+   TGeoVolume* top = det3D.getDetector(true);
    TEveElementList *geometry = new TEveElementList("Geometry");
    TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
    trk->SetVisLevel(6);
@@ -493,6 +518,7 @@ void delphes_event_display(const char *configFile, const char *inputFile)
    muon->SetVisLevel(4);
    muon->UseNodeTrans();
    geometry->AddElement(muon);
+   gGeoManager->DefaultColors();
 
    // Create chain of root trees
    gChain.Add(inputFile);
@@ -554,11 +580,11 @@ void delphes_event_display(const char *configFile, const char *inputFile)
 
    // viewers and scenes
 
-   TEveCalo3D *calo = new TEveCalo3D(gCaloData);
-   calo->SetBarrelRadius(gRadius*100.0);
-   calo->SetEndCapPos(gHalfLength*100.0);
+   TEveCalo3D *calo3d = new TEveCalo3D(gCaloData);
+   calo3d->SetBarrelRadius(gRadius*100.0);
+   calo3d->SetEndCapPos(gHalfLength*100.0);
 
-   gStyle->SetPalette(1, 0);
+   //gStyle->SetPalette(1, 0);
    TEveCaloLego *lego = new TEveCaloLego(gCaloData);
    lego->InitMainTrans();
    lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
@@ -567,11 +593,11 @@ void delphes_event_display(const char *configFile, const char *inputFile)
 
    gDelphesDisplay = new DelphesDisplay;
    gEve->AddGlobalElement(geometry);
-   gEve->AddGlobalElement(calo);
+   gEve->AddGlobalElement(calo3d);
    gDelphesDisplay->ImportGeomRPhi(geometry);
-   gDelphesDisplay->ImportCaloRPhi(calo);
+   gDelphesDisplay->ImportCaloRPhi(calo3d);
    gDelphesDisplay->ImportGeomRhoZ(geometry);
-   gDelphesDisplay->ImportCaloRhoZ(calo);
+   gDelphesDisplay->ImportCaloRhoZ(calo3d);
    gDelphesDisplay->ImportCaloLego(lego);
    gEve->Redraw3D(kTRUE);
 
@@ -593,7 +619,7 @@ void load_event()
 
    delphes_read();
 
-   TEveElement* top = gEve->GetCurrentEvent();
+   TEveElement* top = (TEveElement*)gEve->GetCurrentEvent();
    gDelphesDisplay->DestroyEventRPhi();
    gDelphesDisplay->ImportEventRPhi(top);
    gDelphesDisplay->DestroyEventRhoZ();
@@ -621,7 +647,7 @@ void delphes_read()
   Int_t counter;
 
   TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
-  if(event >= gTreeReader->GetEntries()) return;
+  if(event_id >= gTreeReader->GetEntries()) return;
 
   // Load selected branches with data from specified event
   gTreeReader->ReadEntry(event_id);
@@ -693,7 +719,7 @@ class EvNavHandler
 public:
    void Fwd()
    {  
-      if (event_id < tree->GetEntries() - 1) {
+      if (event_id < gTreeReader->GetEntries() - 1) {
          ++event_id;
          load_event();
       } else {
@@ -762,8 +788,13 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
                                                              const char* MuonEfficiency="MuonEfficiency",
                                                              const char* Calorimeters="Calorimeter") 
 {
+
+
    gSystem->Load("libGeom");
    gSystem->Load("../libDelphes");
+   delphes_event_display("delphes_card_CMS.tcl", "../delphes_output.root"); //TODO propagate parameters
+   return;
+/*
    TGeoManager *geom = new TGeoManager("delphes", "Delphes geometry");
 
    // make the top container volume -> designed to contain a "big" detector (ATLAS)
@@ -835,5 +866,6 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
    make_gui();
    // load_event();
    // gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
+   */
 }
 
