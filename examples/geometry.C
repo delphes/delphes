@@ -156,6 +156,8 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
    //--- define some materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7); // placeholder
+   matVacuum->SetTransparency(85); //TODO: tune
+   matAl->SetTransparency(85); //TODO: tune
 
    //--- define some media
    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
@@ -187,8 +189,8 @@ void Delphes3DGeometry::readFile(const char *configFile,
    ExRootConfReader *confReader = new ExRootConfReader;
    confReader->ReadFile(configFile);
 
-   tk_radius_ = confReader->GetDouble(Form("%s::Radius",ParticlePropagator), 1.0)*100;		// tk_radius
-   tk_length_ = confReader->GetDouble(Form("%s::HalfLength",ParticlePropagator), 3.0)*100; 	// tk_length
+   tk_radius_ = confReader->GetDouble(Form("%s::Radius",ParticlePropagator), 1.0)*100.;		// tk_radius
+   tk_length_ = confReader->GetDouble(Form("%s::HalfLength",ParticlePropagator), 3.0)*100.; 	// tk_length
    tk_Bz_     = confReader->GetDouble("ParticlePropagator::Bz", 0.0);                           // tk_Bz
 
    {
@@ -490,8 +492,56 @@ void delphes_event_display(const char *configFile, const char *inputFile)
    gBz = det3D.getBField();
    gEtaAxis = det3D.getCaloAxes().first;
    gPhiAxis = det3D.getCaloAxes().second;
+
+
+/*
+   // make the top container volume -> designed to contain a "big" detector (ATLAS)
+   TGeoVolume *top = geom->MakeBox("TOP", 0, 1500, 1500, 2300);
+   geom->SetTopVolume(top);
+
+   // build the detector
+   top->AddNode(det3D.getDetector(true),1);
+   geom->CloseGeometry();
+
+   gGeoManager->DefaultColors();
+
+   TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
+
+   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
+   trk->SetVisLevel(6);
+   gEve->AddGlobalElement(trk);
+
+   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
+   calo->SetVisLevel(3);
+   gEve->AddGlobalElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   gEve->AddGlobalElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   gEve->AddGlobalElement(calo);
+
+   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
+   muon->SetVisLevel(4);
+   gEve->AddGlobalElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   gEve->AddGlobalElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   gEve->AddGlobalElement(muon);
+
+*/
+
+
    //TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
-   TGeoVolume* top = det3D.getDetector(true);
+   //TGeoVolume* top = det3D.getDetector(true);
+   TGeoVolume* top = det3D.getDetector(false); //TODO: can this be set in the GUI?
+   geom->SetTopVolume(top);
    TEveElementList *geometry = new TEveElementList("Geometry");
    TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
    trk->SetVisLevel(6);
@@ -518,7 +568,7 @@ void delphes_event_display(const char *configFile, const char *inputFile)
    muon->SetVisLevel(4);
    muon->UseNodeTrans();
    geometry->AddElement(muon);
-   gGeoManager->DefaultColors();
+   //gGeoManager->DefaultColors();
 
    // Create chain of root trees
    gChain.Add(inputFile);
@@ -575,14 +625,14 @@ void delphes_event_display(const char *configFile, const char *inputFile)
 
    TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
    trkProp->SetMagField(0.0, 0.0, -gBz);
-   trkProp->SetMaxR(gRadius*100.0);
-   trkProp->SetMaxZ(gHalfLength*100.0);
+   trkProp->SetMaxR(gRadius);
+   trkProp->SetMaxZ(gHalfLength);
 
    // viewers and scenes
 
    TEveCalo3D *calo3d = new TEveCalo3D(gCaloData);
-   calo3d->SetBarrelRadius(gRadius*100.0);
-   calo3d->SetEndCapPos(gHalfLength*100.0);
+   calo3d->SetBarrelRadius(gRadius);
+   calo3d->SetEndCapPos(gHalfLength);
 
    //gStyle->SetPalette(1, 0);
    TEveCaloLego *lego = new TEveCaloLego(gCaloData);
@@ -698,7 +748,7 @@ void delphes_read()
     eveJetCone->SetName(Form("jet [%d]", counter++));
     eveJetCone->SetMainTransparency(60);
     eveJetCone->SetLineColor(kYellow);
-    eveJetCone->SetCylinder(gRadius*100.0 - 10, gHalfLength*100.0 - 10);
+    eveJetCone->SetCylinder(gRadius - 10, gHalfLength - 10);
     eveJetCone->SetPickable(kTRUE);
     eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
     gJetList->AddElement(eveJetCone);
@@ -792,8 +842,24 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
 
    gSystem->Load("libGeom");
    gSystem->Load("../libDelphes");
+
    delphes_event_display("delphes_card_CMS.tcl", "../delphes_output.root"); //TODO propagate parameters
-   return;
+   make_gui();
+   load_event();
+   gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
+
+   // EClipType not exported to CINT (see TGLUtil.h):
+   // 0 - no clip, 1 - clip plane, 2 - clip box
+   TGLViewer *v = gEve->GetDefaultGLViewer();
+   Double_t plane[4] = { 0., 1., 0., 0. };
+   //v->GetClipSet()->SetClipState(1,plane);
+   //v->GetClipSet()->SetClipType(1);
+   //v->ColorSet().Background().SetColor(kMagenta+4);
+   //v->SetGuideState(TGLUtil::kAxesEdge, kTRUE, kFALSE, 0);
+   v->RefreshPadEditor(v);
+   v->CurrentCamera().RotateRad(-1.2, 0.5);
+   v->DoDraw();
+
 /*
    TGeoManager *geom = new TGeoManager("delphes", "Delphes geometry");
 
@@ -862,10 +928,6 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
 
    v->CurrentCamera().RotateRad(-1.2, 0.5);
    v->DoDraw();
-
-   make_gui();
-   // load_event();
-   // gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
-   */
+*/
 }
 
