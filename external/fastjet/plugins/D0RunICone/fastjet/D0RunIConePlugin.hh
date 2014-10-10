@@ -31,6 +31,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
+#include "fastjet/internal/base.hh" // namespace macros (include explicitly to help Doxygen)
 #include "D0RunIBaseConePlugin.hh"
 
 // questionable whether this should be in fastjet namespace or not...

@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: PseudoJet.cc 3565 2014-08-11 15:24:39Z salam $
+// $Id: PseudoJet.cc 3652 2014-09-03 13:31:13Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -860,6 +860,7 @@ PseudoJet join(const PseudoJet & j1){
 // build a "CompositeJet" from two PseudoJet
 PseudoJet join(const PseudoJet & j1, const PseudoJet & j2){
   vector<PseudoJet> pieces;
+  pieces.reserve(2);
   pieces.push_back(j1);
   pieces.push_back(j2);
   return join(pieces);
@@ -868,6 +869,7 @@ PseudoJet join(const PseudoJet & j1, const PseudoJet & j2){
 // build a "CompositeJet" from 3 PseudoJet
 PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3){
   vector<PseudoJet> pieces;
+  pieces.reserve(3);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);
@@ -877,6 +879,7 @@ PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3)
 // build a "CompositeJet" from 4 PseudoJet
 PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3, const PseudoJet & j4){
   vector<PseudoJet> pieces;
+  pieces.reserve(4);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);

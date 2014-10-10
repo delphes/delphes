@@ -2,7 +2,7 @@
 #define __FASTJET_SELECTOR_HH__
 
 //FJSTARTHEADER
-// $Id: Selector.hh 3504 2014-08-01 06:07:54Z soyez $
+// $Id: Selector.hh 3711 2014-09-29 13:54:51Z salam $
 //
 // Copyright (c) 2009-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -304,15 +304,15 @@ public:
     return *this;
   }
 
-  /// class that gets throw when a Selector is applied despite it not
+  /// class that gets thrown when a Selector is applied despite it not
   /// having a valid underlying worker.
   class InvalidWorker : public Error {
   public:
     InvalidWorker() : Error("Attempt to use Selector with no valid underlying worker") {}
   };
 
-  /// class that gets throw when a Selector is applied despite it not
-  /// having a valid underlying worker.
+  /// class that gets thrown when the area is requested from a Selector for which
+  /// the area is not meaningful
   class InvalidArea : public Error {
   public:
     InvalidArea() : Error("Attempt to obtain area from Selector for which this is not meaningful") {}

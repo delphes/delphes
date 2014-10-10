@@ -6,6 +6,7 @@
 // forward declaration of the siscone classes we'll need
 namespace siscone{
   class Csiscone;
+  class Cjet;
 }
 
 
@@ -73,13 +74,14 @@ public:
 
   /// enum for the different split-merge scale choices;
   /// Note that order _must_ be the same as in siscone
-  enum SplitMergeScale {SM_pt,     ///< transverse momentum (E-scheme), IR unsafe
-                        SM_Et,     ///< transverse energy (E-scheme), not long. boost invariant
-                                   ///< original run-II choice [may not be implemented]
-                        SM_mt,     ///< transverse mass (E-scheme), IR safe except
-                                   ///< in decays of two identical narrow heavy particles
-                        SM_pttilde ///< pt-scheme pt = \sum_{i in jet} |p_{ti}|, should
-                                   ///< be IR safe in all cases
+  enum SplitMergeScale {
+    SM_pt,     ///< transverse momentum (E-scheme), IR unsafe
+    SM_Et,     ///< transverse energy (E-scheme), not long. boost invariant
+               ///< original run-II choice [may not be implemented]
+    SM_mt,     ///< transverse mass (E-scheme), IR safe except
+               ///< in decays of two identical narrow heavy particles
+    SM_pttilde ///< pt-scheme pt = \sum_{i in jet} |p_{ti}|, should
+               ///< be IR safe in all cases
   };
 
 
@@ -107,7 +109,8 @@ public:
     _split_merge_scale     = split_merge_scale_in;
     _split_merge_stopping_scale = split_merge_stopping_scale_in;
     _ghost_sep_scale       = 0.0;
-    _use_pt_weighted_splitting = false;}
+    _use_pt_weighted_splitting = false;
+    _user_scale = 0;}
 
 
   /// Backwards compatible constructor for the SISCone Plugin class
@@ -124,7 +127,8 @@ public:
     _caching               = caching_in;
     _split_merge_stopping_scale = 0.0;
     _split_merge_scale     = split_merge_on_transverse_mass_in ? SM_mt : SM_pttilde;
-    _ghost_sep_scale       = 0.0;}
+    _ghost_sep_scale       = 0.0;
+    _user_scale = 0;}
   
   /// backwards compatible constructor for the SISCone Plugin class
   /// (avoid using this in future).
@@ -140,7 +144,8 @@ public:
     _split_merge_scale     = SM_mt;
     _split_merge_stopping_scale = 0.0;
     _ghost_sep_scale       = 0.0;
-    _use_pt_weighted_splitting = false;}
+    _use_pt_weighted_splitting = false;
+    _user_scale = 0;}
 
   /// minimum pt for a protojet to be considered in the split-merge step
   /// of the algorithm
@@ -190,6 +195,53 @@ private:
   static std::auto_ptr<siscone::Csiscone      > stored_siscone;
 };
 
+
+/////\class SISConePlugin::UserScaleBase::StructureType
+///// the structure that allows to store the information contained
+///// into a siscone::Cjet (built internally in SISCone from a stable
+///// cone) into a PseudoJet
+//class SISConePlugin::UserScaleBase::StructureType : public PseudoJetStructureBase {
+//public:
+//  StructureType(const siscone::Cjet & jet, const ClusterSequence &cs)
+//    : _jet(jet), _cs(cs){}
+//
+//  //--------------------------------------------------
+//  // members inherited from the base class
+//  /// the textual descripotion
+//  virtual std::string description() const;
+//
+//  /// this structure has constituents
+//  virtual bool has_constituents() const {return true;}
+//
+//  /// retrieve the constituents 
+//  ///
+//  /// if you simply need to iterate over the constituents, it will be
+//  /// faster to access them via constituent(i)
+//  virtual std::vector<PseudoJet> constituents(const PseudoJet & /*reference*/) const;
+//
+//  //--------------------------------------------------
+//  // additional information relevant for this structure
+//
+//  /// returns the number of constituents
+//  unsigned int size() const;
+//
+//  /// returns the index (in the original particle list) of the ith
+//  /// constituent
+//  int constituent_index(unsigned int i) const;
+//
+//  /// returns the ith constituent (as a PseusoJet)
+//  const PseudoJet & constituent(unsigned int i) const;
+//
+//  /// returns the scalar pt of this stable cone
+//  double pt_tilde() const;
+//
+//  /// returns the sm_var2 (signed ordering variable squared) for this stable cone
+//  double ordering_var2() const;
+//
+//protected:
+//  const siscone::Cjet &_jet;  ///< a dreference to the internal jet in SISCone
+//  const ClusterSequence &_cs; ///< a reference to the CS (for access to the particles)
+//};
 
 //======================================================================
 /// @ingroup extra_info

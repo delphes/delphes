@@ -1,7 +1,7 @@
 #ifndef __FASTJET_TOOLS_RECLUSTER_HH__
 #define __FASTJET_TOOLS_RECLUSTER_HH__
 
-// $Id: Recluster.hh 3632 2014-08-15 10:42:53Z salam $
+// $Id: Recluster.hh 3714 2014-09-30 09:47:31Z soyez $
 //
 // Copyright (c) 2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -37,6 +37,7 @@
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 //----------------------------------------------------------------------
+/// @ingroup tools_generic
 /// \class Recluster
 /// Recluster a jet's constituents with a new jet definition.
 ///

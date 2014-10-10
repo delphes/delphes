@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: JetDefinition.cc 3492 2014-07-30 16:58:20Z soyez $
+// $Id: JetDefinition.cc 3677 2014-09-09 22:45:25Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -269,6 +269,15 @@ string JetDefinition::DefaultRecombiner::description() const {
     return "boost-invariant pt scheme recombination";
   case BIpt2_scheme:
     return "boost-invariant pt2 scheme recombination";
+  case WTA_pt_scheme:
+    return "pt-ordered Winner-Takes-All recombination";
+  // Energy-ordering can lead to dangerous situations with particles at
+  // rest. We instead implement the WTA_modp_scheme
+  //
+  //   case WTA_E_scheme:
+  //     return "energy-ordered Winner-Takes-All recombination";
+  case WTA_modp_scheme:
+    return "|3-momentum|-ordered Winner-Takes-All recombination";
   default:
     ostringstream err;
     err << "DefaultRecombiner: unrecognized recombination scheme " 
@@ -308,6 +317,52 @@ void JetDefinition::DefaultRecombiner::recombine(
     weighta = pa.perp2(); 
     weightb = pb.perp2();
     break;
+  case WTA_pt_scheme:{
+    const PseudoJet & phard = (pa.pt2() >= pb.pt2()) ? pa : pb;
+    /// keep y,phi and m from the hardest, sum pt
+    pab.reset_PtYPhiM(pa.pt()+pb.pt(), 
+                      phard.rap(), phard.phi(), phard.m());
+    return;}
+  // Energy-ordering can lead to dangerous situations with particles at
+  // rest. We instead implement the WTA_modp_scheme
+  //
+  //   case WTA_E_scheme:{
+  //     const PseudoJet & phard = (pa.E() >= pb.E()) ? pa : pb;
+  //     /// keep 3-momentum direction and mass from the hardest, sum energies
+  //     ///
+  //     /// If the particle with the largest energy is at rest, the sum
+  //     /// remains at rest, implying that the mass of the sum is larger
+  //     /// than the mass of pa.
+  //     double Eab = pa.E() + pb.E();
+  //     double scale = (phard.modp2()==0.0)
+  //       ? 0.0
+  //       : sqrt((Eab*Eab - phard.m2())/phard.modp2());
+  //     pab.reset(phard.px()*scale, phard.py()*scale, phard.pz()*scale, Eab);
+  //     return;}
+  case WTA_modp_scheme:{
+    // Note: we need to compute both a and b modp. And we need pthard
+    // and its modp. If we want to avoid repeating the test and do
+    // only 2 modp calculations, we'd have to duplicate the code (or
+    // use a pair<const PJ&>). An alternative is to write modp_soft as
+    // modp_ab-modp_hard but this could suffer from larger rounding
+    // errors
+    bool a_hardest = (pa.modp2() >= pb.modp2());
+    const PseudoJet & phard = a_hardest ? pa : pb;
+    const PseudoJet & psoft = a_hardest ? pb : pa;
+    /// keep 3-momentum direction and mass from the hardest, sum modp
+    ///
+    /// If the hardest particle is at rest, the sum remains at rest
+    /// (the energy of the sum is therefore the mass of pa)
+    double modp_hard = phard.modp();
+    double modp_ab = modp_hard + psoft.modp();
+    if (phard.modp2()==0.0){
+      pab.reset(0.0, 0.0, 0.0, phard.m());
+    } else {
+      double scale = modp_ab/modp_hard;
+      pab.reset(phard.px()*scale, phard.py()*scale, phard.pz()*scale,
+                sqrt(modp_ab*modp_ab + phard.m2()));
+    }
+    return;}
   default:
     ostringstream err;
     err << "DefaultRecombiner: unrecognized recombination scheme " 
@@ -343,6 +398,9 @@ void JetDefinition::DefaultRecombiner::preprocess(PseudoJet & p) const {
   case E_scheme:
   case BIpt_scheme:
   case BIpt2_scheme:
+  case WTA_pt_scheme:
+  //case WTA_E_scheme:
+  case WTA_modp_scheme:
     break;
   case pt_scheme:
   case pt2_scheme:

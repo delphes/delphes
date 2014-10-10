@@ -87,8 +87,8 @@ public:
   /// ctor with simple initialisation
   ///  \param rapmax     the maximal absolute rapidity extent of the grid
   ///  \param cell_size  the grid spacing (equivalently, cell size)
-  RectangularGrid(double rapmax, double cell_size) :
-      _ymax(rapmax), _ymin(-rapmax), 
+  RectangularGrid(double rapmax_in, double cell_size) :
+      _ymax(rapmax_in), _ymin(-rapmax_in), 
       _requested_drap(cell_size), _requested_dphi(cell_size) {
     _setup_grid();
   }
@@ -102,10 +102,10 @@ public:
   ///                        which tiles are good; a tile is good if
   ///                        a massless 4-vector at the center of the tile passes
   ///                        the selection
-  RectangularGrid(double rapmin, double rapmax, double drap, double dphi,
+  RectangularGrid(double rapmin_in, double rapmax_in, double drap_in, double dphi_in,
                   Selector tile_selector = Selector()) 
-    : _ymax(rapmax), _ymin(rapmin), 
-      _requested_drap(drap), _requested_dphi(dphi),
+    : _ymax(rapmax_in), _ymin(rapmin_in), 
+      _requested_drap(drap_in), _requested_dphi(dphi_in),
       _tile_selector(tile_selector)
   {
     _setup_grid();

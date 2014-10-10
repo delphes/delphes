@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 268                                                          $//
-// $Date:: 2009-03-12 21:24:16 +0100 (Thu, 12 Mar 2009)                     $//
+// $Revision:: 367                                                          $//
+// $Date:: 2014-09-04 15:57:37 +0200 (Thu, 04 Sep 2014)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPLIT_MERGE_H__
@@ -140,7 +140,7 @@ public:
   /// the following parameter controls the variable we're using for 
   /// the split-merge process i.e. the variable we use for 
   ///  1. ordering jet candidates;
-  ///  2. computing te overlap fraction of two candidates.
+  ///  2. computing the overlap fraction of two candidates.
   /// The default value uses pttile (p-scheme pt). Other alternatives are
   /// pt, mt=sqrt(pt^2+m^2)=sqrt(E^2-pz^2) or Et. 
   /// NOTE: Modifying the default choice can have nasty effects:
@@ -150,7 +150,7 @@ public:
   ///   soft particle.  Hence, we highly recommand to keep this to
   ///   the default value i.e.  to use pt only for the purpose of
   ///   investigating the IR issue
-  /// - using Et is safe but do not respect boost invariance
+  /// - using Et is safe but does not respect boost invariance
   /// - using mt solves the IR unsafety issues with the pt variable
   ///   for QCD jets but the IR unsafety remains for nack-to-back 
   ///   jets of unstable narrow-width particles (e.g. Higgs).
@@ -233,6 +233,52 @@ class Csplit_merge{
   /// full clearance
   int full_clear();
 
+  ///////////////////////////////////////
+  // user-defined stable-cone ordering //
+  ///////////////////////////////////////
+
+  /// \class Cuser_scale_base
+  /// base class for user-defined ordering of stable cones
+  ///
+  /// derived classes have to implement the () operator that returns
+  /// the scale associated with a given jet.
+  class Cuser_scale_base{
+  public:
+    /// empty virtual dtor
+    virtual ~Cuser_scale_base(){}
+
+    /// the scale associated with a given jet
+    ///
+    /// "progressive removal" iteratively removes the stable cone with
+    /// the largest scale
+    virtual double operator()(const Cjet & jet) const = 0;
+
+    /// returns true when the scale associated with jet a is larger than
+    /// the scale associated with jet b
+    ///
+    /// By default this does a simple direct comparison but it can be
+    /// overloaded for higher precision [recommended if possible]
+    ///
+    /// This function assumes that a.sm_var2 and b.sm_var2 have been
+    /// correctly initialised with the signed squared output of
+    /// operator(), as is by default the case when is_larger is called
+    /// from within siscone.
+    virtual bool is_larger(const Cjet & a, const Cjet & b) const{
+      return (a.sm_var2 > b.sm_var2);
+    }
+  };
+
+  /// associate a user-defined scale to order the stable cones
+  ///
+  /// Note that this is only used in "progressive-removal mode",
+  /// e.g. in add_hardest_protocone_to_jets().
+  void set_user_scale(const Cuser_scale_base * user_scale_in){
+    _user_scale = user_scale_in;
+  }
+
+  /// return the user-defined scale (NULL if none)
+  const Cuser_scale_base * user_scale() const { return _user_scale; }
+
 
   /////////////////////////////////
   // main parts of the algorithm //
@@ -255,6 +301,18 @@ class Csplit_merge{
    * \return 0 on success, 1 on error
    */
   int add_protocones(std::vector<Cmomentum> *protocones, double R2, double ptmin=0.0);
+
+  /**
+   * remove the hardest protocone and declare it a jet 
+   * \param protocones  list of protocones (initial jet candidates)
+   * \param R2          cone radius (squared)
+   * \param ptmin       minimal pT allowed for jets
+   * \return 0 on success, 1 on error
+   *
+   * The list of remaining particles (and the uncollinear-hard ones)
+   * is updated.
+   */
+  int add_hardest_protocone_to_jets(std::vector<Cmomentum> *protocones, double R2, double ptmin=0.0);
 
   /**
    * really do the splitting and merging
@@ -313,16 +371,21 @@ class Csplit_merge{
   /// member used for detailed comparisons of pt's
   Csplit_merge_ptcomparison ptcomparison;
 
-  /// stop split--merge when the SM_var of the hardest protojet 
-  /// is below this cut-off. 
-  /// This is not collinear-safe so you should not use this
-  /// variable unless you really know what you are doing
+  /// stop split--merge or progressive-removal when the squared SM_var
+  /// of the hardest protojet is below this cut-off. Note that this is
+  /// a signed square (ie SM_var*|SM_var|) to be able to handle
+  /// negative values.
+  ///
   /// Note that the cut-off is set on the variable squared.
   double SM_var2_hardest_cut_off;
 
   /// pt cutoff for the particles to put in p_uncol_hard 
   /// this is meant to allow removing soft particles in the
   /// stable-cone search.
+  ///
+  /// This is not collinear-safe so you should not use this
+  /// variable unless you really know what you are doing
+  /// Note that the cut-off is set on the variable squared.
   double stable_cone_soft_pt2_cutoff;
 
  private:
@@ -388,6 +451,10 @@ class Csplit_merge{
    * This will be false by default
    */
   bool use_pt_weighted_splitting;
+
+  /// use a user-defined scale to order the stable cones and jet
+  /// candidates
+  const Cuser_scale_base *_user_scale;
 
 #ifdef ALLOW_MERGE_IDENTICAL_PROTOCONES
   /// checkxor for the candidates (to avoid having twice the same contents)

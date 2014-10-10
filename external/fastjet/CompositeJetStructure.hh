@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: CompositeJetStructure.hh 3453 2014-07-25 07:44:32Z soyez $
+// $Id: CompositeJetStructure.hh 3652 2014-09-03 13:31:13Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -243,6 +243,7 @@ template<typename T> PseudoJet join(const PseudoJet & j1,
 template<typename T> PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, 
 				    const JetDefinition::Recombiner & recombiner){
   std::vector<PseudoJet> pieces;
+  pieces.reserve(2);
   pieces.push_back(j1);
   pieces.push_back(j2);
   return join<T>(pieces, recombiner);
@@ -254,6 +255,7 @@ template<typename T> PseudoJet join(const PseudoJet & j1, const PseudoJet & j2,
 				    const PseudoJet & j3, 
 				    const JetDefinition::Recombiner & recombiner){
   std::vector<PseudoJet> pieces;
+  pieces.reserve(3);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);
@@ -266,6 +268,7 @@ template<typename T> PseudoJet join(const PseudoJet & j1, const PseudoJet & j2,
 				    const PseudoJet & j3, const PseudoJet & j4, 
 				    const JetDefinition::Recombiner & recombiner){
   std::vector<PseudoJet> pieces;
+  pieces.reserve(4);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);

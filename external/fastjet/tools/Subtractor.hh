@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: Subtractor.hh 3584 2014-08-12 12:40:10Z soyez $
+// $Id: Subtractor.hh 3670 2014-09-08 14:17:59Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -31,6 +31,7 @@
 #ifndef __FASTJET_TOOLS_SUBTRACTOR_HH__
 #define __FASTJET_TOOLS_SUBTRACTOR_HH__
 
+#include "fastjet/internal/base.hh"     // namespace macros (include explicitly to help Doxygen)
 #include "fastjet/tools/Transformer.hh" // to derive Subtractor from Transformer
 #include "fastjet/tools/BackgroundEstimatorBase.hh" // used as a ctor argument
 
@@ -68,6 +69,10 @@ public:
   /// pt density per unit area (which must be positive)
   Subtractor(double rho);
 
+  /// define a subtractor that uses a fixed value of rho and rho_m;
+  /// both must be >= 0;
+  Subtractor(double rho, double rho_m);
+
   /// default constructor
   Subtractor() : _bge(0), _rho(_invalid_rho) { set_defaults(); }
 
@@ -95,8 +100,8 @@ public:
   /// compatibility with FastJet 3.0) but is highly likely to change
   /// in a future release of FastJet
   void set_use_rho_m(bool use_rho_m_in = true){
-    if (_bge == 0) {
-      throw Error("Subtractor: rho_m support works only for Subtractors constructed with background estimator");
+    if (_bge == 0  && _rho_m < 0) {
+      throw Error("Subtractor: rho_m support works only for Subtractors constructed with a background estimator or an explicit rho_m value");
     }
     _use_rho_m=use_rho_m_in;
   }
@@ -175,8 +180,8 @@ protected:
   /// the tool used to estimate the background
   /// if has to be mutable in case its underlying selector takes a reference jet
   mutable BackgroundEstimatorBase * _bge;
-  /// the fixed value of rho to use if the user has selected that option
-  double _rho;
+  /// the fixed value of rho and/or rho_m to use if the user has selected that option
+  double _rho, _rho_m;
 
   // configuration parameters/flags
   bool _use_rho_m;   ///< include the rho_m correction

@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: Subtractor.cc 3594 2014-08-12 15:25:11Z soyez $
+// $Id: Subtractor.cc 3670 2014-09-08 14:17:59Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -42,12 +42,23 @@ const double Subtractor::_invalid_rho = -numeric_limits<double>::infinity();
 //----------------------------------------------------------------------
 // ctor
 Subtractor::Subtractor(double rho) : _bge(0), _rho(rho) {
-  assert(_rho>0.0);
+  if (_rho<0.0) throw Error("Subtractor(rho) was passed a negative rho value; rho should be >= 0");
   set_defaults();
 }
 
 //----------------------------------------------------------------------
+// ctor
+Subtractor::Subtractor(double rho, double rho_m) : _bge(0), _rho(rho) {
+  if (_rho<0.0) throw Error("Subtractor(rho, rho_m) was passed a negative rho value; rho should be >= 0");
+  if (rho_m<0.0) throw Error("Subtractor(rho, rho_m) was passed a negative rho_m value; rho_m should be >= 0");
+  set_defaults();
+  _rho_m = rho_m;
+  set_use_rho_m(true);
+}
+
+//----------------------------------------------------------------------
 void Subtractor::set_defaults(){
+  _rho_m = _invalid_rho;
   _use_rho_m = false; // likely to change in future releases!!
   _safe_mass = false; // likely to change in future releases!!
 
@@ -59,7 +70,7 @@ void Subtractor::set_defaults(){
 // perform the subtraction of a given jet
 PseudoJet Subtractor::result(const PseudoJet & jet) const {
   if (!jet.has_area()){
-    throw Error("Trying to subtract a jet without area support");
+    throw Error("Subtractor::result(...): Trying to subtract a jet without area support");
   }
 
   PseudoJet known_lv, known_pu;
@@ -151,6 +162,7 @@ std::string Subtractor::description() const{
   } else if (_rho != _invalid_rho) {
     ostringstream ostr;
     ostr << "Subtractor that uses a fixed value of rho = " << _rho;
+    if (use_rho_m()) ostr << " and rho_m = " << _rho_m;
     return ostr.str();
   } else {
     return "Uninitialised subtractor";
@@ -168,7 +180,7 @@ PseudoJet Subtractor::_amount_to_subtract(const PseudoJet &jet) const{
   } else if (_rho != _invalid_rho) {
     rho = _rho;
   } else {
-    throw Error("default Subtractor does not have any information about the background, which is needed to perform the subtraction");
+    throw Error("Subtractor::_amount_to_subtract(...): default Subtractor does not have any information about the background, needed to perform the subtraction");
   }
 
   PseudoJet area = jet.area_4vector();
@@ -177,13 +189,22 @@ PseudoJet Subtractor::_amount_to_subtract(const PseudoJet &jet) const{
   double const rho_m_warning_threshold = 1e-5;
 
   // add an optional contribution from the unknown particles masses
-  if (_use_rho_m){
-    assert(_bge != 0); // test done in "set_use_rho_m()"
-    to_subtract += _bge->rho_m(jet) * PseudoJet(0.0, 0.0, area.pz(), area.E());
+  if (_use_rho_m) {
+    double rho_m;
+    
+    if (_bge != 0) {
+      if (!_bge->has_rho_m()) throw Error("Subtractor::_amount_to_subtract(...): requested subtraction with rho_m from a background estimator, but the estimator does not have rho_m support");
+      rho_m = _bge->rho_m(jet);
+    } else if (_rho_m != _invalid_rho) {
+      rho_m = _rho_m;
+    } else {
+      throw Error("Subtractor::_amount_to_subtract(...): default Subtractor does not have any information about the background rho_m, needed to perform the rho_m subtraction");
+    }
+    to_subtract += rho_m * PseudoJet(0.0, 0.0, area.pz(), area.E());
   } else if (_bge && 
              _bge->has_rho_m() && 
              _bge->rho_m(jet) > rho_m_warning_threshold * rho) {
-    _unused_rho_m_warning.warn("Background estimator indicates non-zero rho_m, but use_rho_m()==false in subtractor; consider calling set_use_rho_m(true) to include the rho_m information");
+    _unused_rho_m_warning.warn("Subtractor::_amount_to_subtract(...): Background estimator indicates non-zero rho_m, but use_rho_m()==false in subtractor; consider calling set_use_rho_m(true) to include the rho_m information");
   }
 
   return to_subtract;
