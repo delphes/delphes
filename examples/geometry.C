@@ -41,7 +41,6 @@
 #include "TGLClip.h"
 
 /*
- * alice_esd.C : GUI complete
  * assembly.C: sauvegarde as shape-extract -> implement in the geometry class (read/write)
  * histobrowser.C: intégration d'histogrammes dans le display (on pourrait avoir Pt, eta, phi pour les principales collections)
  * also from alice_esd: summary html table
@@ -156,6 +155,7 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
    //--- define some materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7); // placeholder
+   //TODO: create different materials for different subdetectors???
    matVacuum->SetTransparency(85); //TODO: tune
    matAl->SetTransparency(85); //TODO: tune
 
@@ -473,73 +473,20 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char* name,
 // Initialization and steering functions
 /******************************************************************************/
 
-void delphes_event_display(const char *configFile, const char *inputFile)
+void delphes_event_display(const char *configFile, const char *inputFile, const Delphes3DGeometry& det3D)
 {
-   // to be the main function...
 
    // initialize the application
-   gSystem->Load("../libDelphesDisplay");
-   TGeoManager *geom = new TGeoManager("delphes", "Delphes geometry");
    TEveManager::Create(kTRUE, "IV");
+   TGeoManager* geom = gGeoManager;
 
    // build the detector
-   Delphes3DGeometry det3D;
-   //det3D.readFile(configFile,ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
-   det3D.readFile(configFile);//TODO fix this
-   //top->AddNode(det3D.getDetector(true),1);
    gRadius = det3D.getTrackerRadius();
    gHalfLength = det3D.getTrackerHalfLength();
    gBz = det3D.getBField();
    gEtaAxis = det3D.getCaloAxes().first;
    gPhiAxis = det3D.getCaloAxes().second;
 
-
-/*
-   // make the top container volume -> designed to contain a "big" detector (ATLAS)
-   TGeoVolume *top = geom->MakeBox("TOP", 0, 1500, 1500, 2300);
-   geom->SetTopVolume(top);
-
-   // build the detector
-   top->AddNode(det3D.getDetector(true),1);
-   geom->CloseGeometry();
-
-   gGeoManager->DefaultColors();
-
-   TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
-
-   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
-   trk->SetVisLevel(6);
-   gEve->AddGlobalElement(trk);
-
-   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
-   calo->SetVisLevel(3);
-   gEve->AddGlobalElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   gEve->AddGlobalElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   gEve->AddGlobalElement(calo);
-
-   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
-   muon->SetVisLevel(4);
-   gEve->AddGlobalElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   gEve->AddGlobalElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   gEve->AddGlobalElement(muon);
-
-*/
-
-
-   //TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
-   //TGeoVolume* top = det3D.getDetector(true);
    TGeoVolume* top = det3D.getDetector(false); //TODO: can this be set in the GUI?
    geom->SetTopVolume(top);
    TEveElementList *geometry = new TEveElementList("Geometry");
@@ -839,11 +786,17 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
                                                              const char* Calorimeters="Calorimeter") 
 {
 
-
+   // load the libraries
    gSystem->Load("libGeom");
    gSystem->Load("../libDelphes");
+   gSystem->Load("../libDelphesDisplay");
 
-   delphes_event_display("delphes_card_CMS.tcl", "../delphes_output.root"); //TODO propagate parameters
+   // create the detector representation
+   Delphes3DGeometry det3D(new TGeoManager("delphes", "Delphes geometry"));
+   det3D.readFile(filename, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
+
+   // create the application items
+   delphes_event_display("delphes_card_CMS.tcl", "../delphes_output.root", det3D);
    make_gui();
    load_event();
    gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
@@ -860,74 +813,5 @@ void geometry(const char* filename = "delphes_card_CMS.tcl", const char* Particl
    v->CurrentCamera().RotateRad(-1.2, 0.5);
    v->DoDraw();
 
-/*
-   TGeoManager *geom = new TGeoManager("delphes", "Delphes geometry");
-
-   // make the top container volume -> designed to contain a "big" detector (ATLAS)
-   TGeoVolume *top = geom->MakeBox("TOP", 0, 1500, 1500, 2300);
-   geom->SetTopVolume(top);
-
-   // build the detector
-   Delphes3DGeometry det3D;
-   det3D.readFile(filename,ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
-   top->AddNode(det3D.getDetector(true),1);
-
-   // draw it
-   geom->CloseGeometry();
-   //top->Draw();
-   //TFile* file = new TFile("DelpheGeom.root","RECREATE");
-   //top->Write("DelphesGeometry");
-   //file->Close();
-
-   TEveManager::Create(kTRUE, "IV");
-
-
-   //TFile::SetCacheFileDir(".");
-   //gGeoManager = gEve->GetGeometry("DelpheGeom.root");
-   gGeoManager->DefaultColors();
-
-   TGeoVolume* top = gGeoManager->GetTopVolume()->FindNode("Delphes3DGeometry_1")->GetVolume();
-
-   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
-   trk->SetVisLevel(6);
-   gEve->AddGlobalElement(trk);
-
-   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
-   calo->SetVisLevel(3);
-   gEve->AddGlobalElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   gEve->AddGlobalElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   gEve->AddGlobalElement(calo);
-
-   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
-   muon->SetVisLevel(4);
-   gEve->AddGlobalElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   gEve->AddGlobalElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   gEve->AddGlobalElement(muon);
-
-   gEve->FullRedraw3D(kTRUE);
-
-   // EClipType not exported to CINT (see TGLUtil.h):
-   // 0 - no clip, 1 - clip plane, 2 - clip box
-   TGLViewer *v = gEve->GetDefaultGLViewer();
-   v->GetClipSet()->SetClipType(1);
-   v->ColorSet().Background().SetColor(kMagenta+4);
-   v->SetGuideState(TGLUtil::kAxesEdge, kTRUE, kFALSE, 0);
-   v->RefreshPadEditor(v);
-
-   v->CurrentCamera().RotateRad(-1.2, 0.5);
-   v->DoDraw();
-*/
 }
 
