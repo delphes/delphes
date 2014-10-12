@@ -73,9 +73,11 @@ ExRootTreeReader *gTreeReader = 0;
 TClonesArray *gBranchTower = 0;
 TClonesArray *gBranchTrack = 0;
 TClonesArray *gBranchJet = 0;
+TClonesArray *gBranchMet = 0;
 
 DelphesCaloData *gCaloData = 0;
 TEveElementList *gJetList = 0;
+TEveArrow *gMet = 0;
 TEveTrackList *gTrackList = 0;
 
 DelphesDisplay *gDelphesDisplay = 0;
@@ -528,6 +530,7 @@ void delphes_event_display(const char *configFile, const char *inputFile, const 
    gBranchTower = gTreeReader->UseBranch("Tower");
    gBranchTrack = gTreeReader->UseBranch("Track");
    gBranchJet   = gTreeReader->UseBranch("Jet");
+   gBranchMet   = gTreeReader->UseBranch("MissingET");
 
 //TODO make it configurable, for more objects (or can we guess from the config?)
 // idea: for pf objects, we could use the TEveCompound to show track + cluster ??? (nice display but little meaning)
@@ -562,6 +565,13 @@ void delphes_event_display(const char *configFile, const char *inputFile, const 
 
    gJetList = new TEveElementList("Jets");
    gEve->AddElement(gJetList);
+
+   gMet = new TEveArrow(1., 0., 0., 0., 0., 0.);
+   gMet->SetMainColor(kViolet);
+   gMet->SetTubeR(0.02);
+   gMet->SetPickable(kTRUE);
+   gMet->SetName("Missing Et");
+   gEve->GetCurrentEvent()->AddElement(gMet);
 
    gTrackList = new TEveTrackList("Tracks");
    gTrackList->SetMainColor(kBlue);
@@ -633,15 +643,18 @@ void delphes_read()
   TIter itTower(gBranchTower);
   TIter itTrack(gBranchTrack);
   TIter itJet(gBranchJet);
+  TIter itMet(gBranchMet);
 
   Tower *tower;
   Track *track;
   Jet *jet;
+  MissingET *MET;
 
   TEveJetCone *eveJetCone;
   TEveTrack *eveTrack;
 
   Int_t counter;
+  Float_t maxPt = 0.;
 
   TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
   if(event_id >= gTreeReader->GetEntries()) return;
@@ -685,6 +698,7 @@ void delphes_read()
     }
     gTrackList->AddElement(eveTrack);
     eveTrack->MakeTrack();
+    maxPt = maxPt > track->PT ? maxPt : track->PT;
   }
   // Loop over all jets
   itJet.Reset();
@@ -699,6 +713,22 @@ void delphes_read()
     eveJetCone->SetPickable(kTRUE);
     eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
     gJetList->AddElement(eveJetCone);
+    maxPt = maxPt > jet->PT ? maxPt : jet->PT;
+  }
+
+  // Missing Et
+  // recipe: gRadius * MET/maxpt(tracks, jets)
+  itMet.Reset();
+  while((MET = (MissingET*) itMet.Next())) {
+    delete gMet;
+    gMet = new TEveArrow((gRadius * MET->MET/maxPt)*cos(MET->Phi), (gRadius * MET->MET/maxPt)*sin(MET->Phi), 0., 0., 0., 0.);
+    gMet->SetMainColor(kViolet);
+//    gMet->SetTubeR(0.04);
+    gMet->SetPickable(kTRUE);
+    gMet->SetName("Missing Et");
+    gMet->SetTitle(Form("Missing Et (%.1f GeV)",MET->MET));
+    gMet->ProjectAllChildren();
+    gEve->GetCurrentEvent()->AddElement(gMet);
   }
 }
 
