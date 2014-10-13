@@ -60,6 +60,7 @@ void delphes_read();
 // Configuration and global variables.
 Int_t event_id           = 0; // Current event id.
 Double_t gRadius = 1.29;
+Double_t gTotRadius = 2.0;
 Double_t gHalfLength = 3.0;
 Double_t gBz = 3.8;
 
@@ -72,13 +73,21 @@ ExRootTreeReader *gTreeReader = 0;
 
 TClonesArray *gBranchTower = 0;
 TClonesArray *gBranchTrack = 0;
+TClonesArray *gBranchEle = 0;
+TClonesArray *gBranchMuon = 0;
+TClonesArray *gBranchPhoton = 0;
 TClonesArray *gBranchJet = 0;
+TClonesArray *gBranchGenJet = 0;
 TClonesArray *gBranchMet = 0;
 
 DelphesCaloData *gCaloData = 0;
 TEveElementList *gJetList = 0;
+TEveElementList *gGenJetList = 0;
 TEveArrow *gMet = 0;
 TEveTrackList *gTrackList = 0;
+TEveTrackList *gElectronList = 0;
+TEveTrackList *gMuonList = 0;
+TEveTrackList *gPhotonList = 0;
 
 DelphesDisplay *gDelphesDisplay = 0;
 
@@ -109,6 +118,7 @@ class Delphes3DGeometry {
      TGeoVolume* getDetector(bool withTowers = true);
 
      Double_t getTrackerRadius() const { return tk_radius_; }
+     Double_t getDetectorRadius() const { return muonSystem_radius_; }
      Double_t getTrackerHalfLength() const { return tk_length_; }
      Double_t getBField() const { return tk_Bz_; }
      std::pair<TAxis*, TAxis*> getCaloAxes() { return std::make_pair(etaAxis_,phiAxis_); }
@@ -135,6 +145,7 @@ class Delphes3DGeometry {
      Double_t calo_barrel_thickness_;
      Double_t calo_endcap_thickness_;
      Double_t muonSystem_thickn_;
+     Double_t muonSystem_radius_;
      Double_t tk_radius_;
      Double_t tk_length_;
      Double_t tk_etamax_;
@@ -182,6 +193,7 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
    tk_length_ = 150.;
    tk_etamax_ = 3.0;
    tk_Bz_     = 1.;
+   muonSystem_radius_ = 200.;
 }
 
 void Delphes3DGeometry::readFile(const char *configFile,
@@ -267,6 +279,8 @@ void Delphes3DGeometry::readFile(const char *configFile,
    }
    etaAxis_ = new TAxis(caloBinning.size() - 1, etaBins);
    phiAxis_ = new TAxis(72, -TMath::Pi(), TMath::Pi()); // note that this is fixed while #phibins could vary, also with eta, which doesn't seem possible in ROOT
+
+   muonSystem_radius_ = tk_radius_ + contingency_ + (contingency_+calo_barrel_thickness_)*calorimeters_.size() + muonSystem_thickn_;
 
    delete confReader;
 
@@ -484,6 +498,7 @@ void delphes_event_display(const char *configFile, const char *inputFile, const 
 
    // build the detector
    gRadius = det3D.getTrackerRadius();
+   gTotRadius = det3D.getDetectorRadius();
    gHalfLength = det3D.getTrackerHalfLength();
    gBz = det3D.getBField();
    gEtaAxis = det3D.getCaloAxes().first;
@@ -527,33 +542,15 @@ void delphes_event_display(const char *configFile, const char *inputFile, const 
    gTreeReader = new ExRootTreeReader(&gChain);
 
    // Get pointers to branches
-   gBranchTower = gTreeReader->UseBranch("Tower");
-   gBranchTrack = gTreeReader->UseBranch("Track");
-   gBranchJet   = gTreeReader->UseBranch("Jet");
-   gBranchMet   = gTreeReader->UseBranch("MissingET");
-
 //TODO make it configurable, for more objects (or can we guess from the config?)
-// idea: for pf objects, we could use the TEveCompound to show track + cluster ??? (nice display but little meaning)
-// for MET and SHT, show an arrow (tooltip = title)
-// for electrons and muons, create additional track collections
-// for photons, use TEveStraightLineSet
-
-/*
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
-  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
-
-  add Branch GenJetFinder/jets GenJet Jet
-
-  add Branch UniqueObjectFinder/jets Jet Jet
-
-  add Branch UniqueObjectFinder/electrons Electron Electron
-  add Branch UniqueObjectFinder/photons Photon Photon
-  add Branch UniqueObjectFinder/muons Muon Muon
-
-  add Branch MissingET/momentum MissingET MissingET
-  add Branch ScalarHT/energy ScalarHT ScalarHT
-*/
+   gBranchTower  = gTreeReader->UseBranch("Tower");
+   gBranchTrack  = gTreeReader->UseBranch("Track");
+   gBranchEle    = gTreeReader->UseBranch("Electron");
+   gBranchMuon   = gTreeReader->UseBranch("Muon");
+   gBranchPhoton = gTreeReader->UseBranch("Photon");
+   gBranchJet    = gTreeReader->UseBranch("Jet");
+   gBranchGenJet = gTreeReader->UseBranch("GenJet");
+   gBranchMet    = gTreeReader->UseBranch("MissingET");
 
    // data
    gCaloData = new DelphesCaloData(2); 
@@ -564,7 +561,14 @@ void delphes_event_display(const char *configFile, const char *inputFile, const 
    gCaloData->IncDenyDestroy();
 
    gJetList = new TEveElementList("Jets");
+   gJetList->SetMainColor(kYellow);
    gEve->AddElement(gJetList);
+
+   gGenJetList = new TEveElementList("GenJets");
+   gGenJetList->SetMainColor(kCyan);
+   gGenJetList->SetRnrSelf(false);
+   gGenJetList->SetRnrChildren(false);
+   gEve->AddElement(gGenJetList);
 
    gMet = new TEveArrow(1., 0., 0., 0., 0., 0.);
    gMet->SetMainColor(kViolet);
@@ -573,15 +577,50 @@ void delphes_event_display(const char *configFile, const char *inputFile, const 
    gMet->SetName("Missing Et");
    gEve->GetCurrentEvent()->AddElement(gMet);
 
+   TEveTrackPropagator *trkProp;
+
+   gElectronList = new TEveTrackList("Electrons");
+   gElectronList->SetMainColor(kRed);
+   gElectronList->SetMarkerColor(kViolet);
+   gElectronList->SetMarkerStyle(kCircle);
+   gElectronList->SetMarkerSize(0.5);
+   gEve->AddElement(gElectronList);
+   trkProp = gElectronList->GetPropagator();
+   trkProp->SetMagField(0.0, 0.0, -gBz);
+   trkProp->SetMaxR(gRadius);
+   trkProp->SetMaxZ(gHalfLength);
+
+   gMuonList = new TEveTrackList("Muons");
+   gMuonList->SetMainColor(kGreen);
+   gMuonList->SetMarkerColor(kViolet);
+   gMuonList->SetMarkerStyle(kCircle);
+   gMuonList->SetMarkerSize(0.5);
+   gEve->AddElement(gMuonList);
+   trkProp = gMuonList->GetPropagator();
+   trkProp->SetMagField(0.0, 0.0, -gBz);
+   trkProp->SetMaxR(gTotRadius);
+   trkProp->SetMaxZ(gHalfLength);
+
    gTrackList = new TEveTrackList("Tracks");
    gTrackList->SetMainColor(kBlue);
    gTrackList->SetMarkerColor(kRed);
    gTrackList->SetMarkerStyle(kCircle);
    gTrackList->SetMarkerSize(0.5);
    gEve->AddElement(gTrackList);
-
-   TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
+   trkProp = gTrackList->GetPropagator();
    trkProp->SetMagField(0.0, 0.0, -gBz);
+   trkProp->SetMaxR(gRadius);
+   trkProp->SetMaxZ(gHalfLength);
+
+   gPhotonList= new TEveTrackList("Photons");
+   gPhotonList->SetMainColor(kYellow);
+   gPhotonList->SetLineStyle(7);
+   gPhotonList->SetMarkerColor(kViolet);
+   gPhotonList->SetMarkerStyle(kCircle);
+   gPhotonList->SetMarkerSize(0.5);
+   gEve->AddElement(gPhotonList);
+   trkProp = gPhotonList->GetPropagator();
+   trkProp->SetMagField(0.0, 0.0, 0.0);
    trkProp->SetMaxR(gRadius);
    trkProp->SetMaxZ(gHalfLength);
 
@@ -622,7 +661,11 @@ void load_event()
 
    if(gCaloData) gCaloData->ClearTowers();
    if(gJetList) gJetList->DestroyElements();
+   if(gGenJetList) gGenJetList->DestroyElements();
    if(gTrackList) gTrackList->DestroyElements();
+   if(gElectronList) gElectronList->DestroyElements();
+   if(gMuonList) gMuonList->DestroyElements();
+   if(gPhotonList) gPhotonList->DestroyElements();
 
    delphes_read();
 
@@ -642,11 +685,18 @@ void delphes_read()
 
   TIter itTower(gBranchTower);
   TIter itTrack(gBranchTrack);
+  TIter itElectron(gBranchEle);
+  TIter itPhoton(gBranchPhoton);
+  TIter itMuon(gBranchMuon);
   TIter itJet(gBranchJet);
+  TIter itGenJet(gBranchGenJet);
   TIter itMet(gBranchMet);
 
   Tower *tower;
   Track *track;
+  Electron *electron;
+  Muon *muon;
+  Photon *photon;
   Jet *jet;
   MissingET *MET;
 
@@ -657,10 +707,12 @@ void delphes_read()
   Float_t maxPt = 0.;
 
   TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
+  TEveTrackPropagator *photProp = gPhotonList->GetPropagator();
   if(event_id >= gTreeReader->GetEntries()) return;
 
   // Load selected branches with data from specified event
   gTreeReader->ReadEntry(event_id);
+
   // Loop over all towers
   itTower.Reset();
   while((tower = (Tower *) itTower.Next()))
@@ -670,11 +722,11 @@ void delphes_read()
     gCaloData->FillSlice(1, tower->Ehad);
   }
   gCaloData->DataChanged();
+
   // Loop over all tracks
   itTrack.Reset();
   counter = 0;
-  while((track = (Track *) itTrack.Next()))
-  {
+  while((track = (Track *) itTrack.Next())) {
     TParticle pb(track->PID, 1, 0, 0, 0, 0,
                  track->P4().Px(), track->P4().Py(),
                  track->P4().Pz(), track->P4().E(),
@@ -684,36 +736,102 @@ void delphes_read()
     eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
     eveTrack->SetStdTitle();
     eveTrack->SetAttLineAttMarker(gTrackList);
-
-    switch(TMath::Abs(track->PID))
-    {
-      case 11:
-        eveTrack->SetLineColor(kRed);
-        break;
-      case 13:
-        eveTrack->SetLineColor(kGreen);
-        break;
-      default:
-        eveTrack->SetLineColor(kBlue);
-    }
     gTrackList->AddElement(eveTrack);
+    eveTrack->SetLineColor(kBlue);
     eveTrack->MakeTrack();
     maxPt = maxPt > track->PT ? maxPt : track->PT;
   }
+
+  // Loop over all electrons
+  itElectron.Reset();
+  counter = 0;
+  while((electron = (Electron *) itElectron.Next())) {
+    TParticle pb(electron->Charge<0?11:-11, 1, 0, 0, 0, 0,
+                 electron->P4().Px(), electron->P4().Py(),
+                 electron->P4().Pz(), electron->P4().E(),
+                 0., 0., 0., 0.);
+
+    eveTrack = new TEveTrack(&pb, counter, trkProp);
+    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+    eveTrack->SetStdTitle();
+    eveTrack->SetAttLineAttMarker(gElectronList);
+    gElectronList->AddElement(eveTrack);
+    eveTrack->SetLineColor(kRed);
+    eveTrack->MakeTrack();
+    maxPt = maxPt > electron->PT ? maxPt : electron->PT;
+  }
+
+  // Loop over all photons
+  itPhoton.Reset();
+  counter = 0;
+  while((photon = (Photon *) itPhoton.Next())) {
+    TParticle pb(22, 1, 0, 0, 0, 0,
+                 photon->P4().Px(), photon->P4().Py(),
+                 photon->P4().Pz(), photon->P4().E(),
+                 0., 0., 0., 0.);
+
+    eveTrack = new TEveTrack(&pb, counter, photProp);
+    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+    eveTrack->SetStdTitle();
+    eveTrack->SetAttLineAttMarker(gPhotonList);
+    gPhotonList->AddElement(eveTrack);
+    eveTrack->SetLineColor(kYellow);
+    eveTrack->MakeTrack();
+    maxPt = maxPt > photon->PT ? maxPt : photon->PT;
+  }
+
+  // Loop over all muons
+  itMuon.Reset();
+  counter = 0;
+  while((muon = (Muon *) itMuon.Next())) {
+    TParticle pb(muon->Charge<0?13:-13, 1, 0, 0, 0, 0,
+                 muon->P4().Px(), muon->P4().Py(),
+                 muon->P4().Pz(), muon->P4().E(),
+                 0., 0., 0., 0.);
+
+    eveTrack = new TEveTrack(&pb, counter, trkProp);
+    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+    eveTrack->SetStdTitle();
+    eveTrack->SetAttLineAttMarker(gMuonList);
+    gMuonList->AddElement(eveTrack);
+    eveTrack->SetLineColor(kGreen);
+    eveTrack->MakeTrack();
+    maxPt = maxPt > muon->PT ? maxPt : muon->PT;
+  }
+
   // Loop over all jets
   itJet.Reset();
   counter = 0;
   while((jet = (Jet *) itJet.Next()))
   {
     eveJetCone = new TEveJetCone();
+    eveJetCone->SetTitle(Form("jet [%d]: Pt=%f, Eta=%f, \nPhi=%f, M=%f",counter,jet->PT, jet->Eta, jet->Phi, jet->Mass));
     eveJetCone->SetName(Form("jet [%d]", counter++));
     eveJetCone->SetMainTransparency(60);
     eveJetCone->SetLineColor(kYellow);
+    eveJetCone->SetFillColor(kYellow);
     eveJetCone->SetCylinder(gRadius - 10, gHalfLength - 10);
     eveJetCone->SetPickable(kTRUE);
     eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
     gJetList->AddElement(eveJetCone);
     maxPt = maxPt > jet->PT ? maxPt : jet->PT;
+  }
+
+  // Loop over all genjets
+  itJet.Reset();
+  counter = 0;
+  while((jet = (Jet *) itGenJet.Next()))
+  {
+    eveJetCone = new TEveJetCone();
+    eveJetCone->SetTitle(Form("jet [%d]: Pt=%f, Eta=%f, \nPhi=%f, M=%f",counter,jet->PT, jet->Eta, jet->Phi, jet->Mass));
+    eveJetCone->SetName(Form("jet [%d]", counter++));
+    eveJetCone->SetMainTransparency(60);
+    eveJetCone->SetLineColor(kCyan);
+    eveJetCone->SetFillColor(kCyan);
+    eveJetCone->SetCylinder(gRadius - 10, gHalfLength - 10);
+    eveJetCone->SetPickable(kTRUE);
+    eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
+    gGenJetList->AddElement(eveJetCone);
   }
 
   // Missing Et
@@ -723,7 +841,9 @@ void delphes_read()
     delete gMet;
     gMet = new TEveArrow((gRadius * MET->MET/maxPt)*cos(MET->Phi), (gRadius * MET->MET/maxPt)*sin(MET->Phi), 0., 0., 0., 0.);
     gMet->SetMainColor(kViolet);
-//    gMet->SetTubeR(0.04);
+    gMet->SetTubeR(0.04);
+    gMet->SetConeR(0.08);
+    gMet->SetConeL(0.10);
     gMet->SetPickable(kTRUE);
     gMet->SetName("Missing Et");
     gMet->SetTitle(Form("Missing Et (%.1f GeV)",MET->MET));
