@@ -31,6 +31,7 @@
 
 #include "display/DelphesDisplay.h"
 #include "display/DelphesCaloData.h"
+#include "display/DelphesBranchElement.h"
 
 #ifdef __CINT__
 
@@ -40,6 +41,9 @@
 
 #pragma link C++ class DelphesDisplay+;
 #pragma link C++ class DelphesCaloData+;
+#pragma link C++ class DelphesBranchElement<DelphesCaloData>-!;
+#pragma link C++ class DelphesBranchElement<TEveElementList>-!;
+#pragma link C++ class DelphesBranchElement<TEveTrackList>-!;
 
 #endif
 
