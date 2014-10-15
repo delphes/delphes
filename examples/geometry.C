@@ -18,7 +18,7 @@
 //#include "external/ExRootAnalysis/ExRootTreeReader.h"
 //#include "display/DelphesCaloData.h"
 //#include "display/DelphesDisplay.h"
-//#include "display/DelphesBranchElement.h"
+#include "../display/DelphesBranchElement.h"
 //#include "classes/DelphesClasses.h"
 #include "TF2.h"
 #include "TH1F.h"
@@ -61,6 +61,10 @@ template<typename EveContainer> class DelphesBranchElement;
 void make_gui();
 void load_event();
 void delphes_read();
+void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element);
+void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element);
+void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element);
+void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element);
 void readConfig(const char *configFile, const Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays);
 
 // Configuration and global variables.
@@ -495,16 +499,16 @@ void readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<De
    Int_t nBranches = branches.GetSize()/3;
    DelphesBranchElement<TEveTrackList>* tlist;
    DelphesBranchElement<DelphesCaloData>* clist;
-   DelphesBranchElement<TEveTrackList>* elist;
+   DelphesBranchElement<TEveElementList>* elist;
    for(Int_t b = 0; b<nBranches; ++b) {
      TString input = branches[b*3].GetString();
      TString name = branches[b*3+1].GetString();
      TString className = branches[b*3+2].GetString();
      if(className=="Track") {
        if(input.Contains("eflow",TString::kIgnoreCase) || name.Contains("eflow",TString::kIgnoreCase)) continue; //no eflow
-       elist = new DelphesBranchElement<TEveTrackList>(name,"track",kBlue);
-       elements.push_back(elist);
-       TEveTrackPropagator *trkProp = elist->GetContainer()->GetPropagator();
+       tlist = new DelphesBranchElement<TEveTrackList>(name,"track",kBlue);
+       elements.push_back(tlist);
+       TEveTrackPropagator *trkProp = tlist->GetContainer()->GetPropagator();
        trkProp->SetMagField(0., 0., -tk_Bz);
        trkProp->SetMaxR(tk_radius);
        trkProp->SetMaxZ(tk_length);
@@ -621,15 +625,20 @@ void delphes_event_display(const char *configFile, const char *inputFile, Delphe
    gDelphesDisplay->ImportGeomRPhi(geometry);
    gDelphesDisplay->ImportGeomRhoZ(geometry);
    // find the first calo data and use that to initialize the calo display
-   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++Data) {
+   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
      if(TString((*data)->GetType())=="tower") {
-       TEveCalo3D *calo3d = new TEveCalo3D((*data)->GetContainer());
+//TODO: why do I have to split this in two lines??? seems a cint bug?
+       DelphesBranchElement<DelphesCaloData>* data_tmp = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>(*data);
+       DelphesCaloData* container =  data_tmp->GetContainer();
+//       DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>((*data))->GetContainer();
+       assert(container);
+       TEveCalo3D *calo3d = new TEveCalo3D(container);
        calo3d->SetBarrelRadius(gRadius);
        calo3d->SetEndCapPos(gHalfLength);
        gEve->AddGlobalElement(calo3d);
        gDelphesDisplay->ImportCaloRPhi(calo3d);
        gDelphesDisplay->ImportCaloRhoZ(calo3d);
-       TEveCaloLego *lego = new TEveCaloLego((*data)->GetContainer());
+       TEveCaloLego *lego = new TEveCaloLego(container);
        lego->InitMainTrans();
        lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
        lego->SetAutoRebin(kFALSE);
@@ -652,8 +661,8 @@ void load_event()
 
    // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
-   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++Data) {
-     (*data)->Reset()
+   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
+     (*data)->Reset();
    }
 
    // read the new event
@@ -690,25 +699,25 @@ void delphes_read()
   for(; data<gArrays.end() && element<gElements.end(); ++data, ++element) {
     TString type = (*element)->GetType();
     // keep the most generic track collection for the end
-    if(type=="track" && (*element)->GetClassName()=="Track" && nTracks=0) {
+    if(type=="track" && TString((*element)->GetClassName())=="Track" && nTracks==0) {
       data_tracks = data;
       element_tracks = element;
       nTracks = (*data_tracks)->GetEntries();
       continue;
     }
     // branch on the element type
-    // TODO : I understand that we will have to cast the elements.
     if(type=="tower") delphes_read_towers(*data,*element);
     else if(type=="track" || type=="photon") delphes_read_tracks(*data,*element);
     else if(type=="jet") delphes_read_jets(*data,*element);
     else if(type=="vector") delphes_read_vectors(*data,*element);
   }
   // finish whith what we consider to be the main track collection
-  if(nTracks>0) delphes_read_tracks(*data,(*element)->GetContainer());
+  if(nTracks>0) delphes_read_tracks(*data,*element);
 }
 
-void delphes_read_towers(TClonesArray* data, DelphesBranchElement<TEveElementList>* element) {
-  DelphesCaloData* container = element->GetContainer();
+void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element) {
+  DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>(element)->GetContainer();
+  assert(container);
   // Loop over all towers
   TIter itTower(data);
   Tower *tower;
@@ -721,8 +730,9 @@ void delphes_read_towers(TClonesArray* data, DelphesBranchElement<TEveElementLis
   container->DataChanged();
 }
 
-void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>* element) {
-  TEveTrackList* container = element->GetContainer();
+void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element) {
+  TEveTrackList* container = dynamic_cast<DelphesBranchElement<TEveTrackList>*>(element)->GetContainer();
+  assert(container);
   TString className = element->GetClassName();
   TIter itTrack(data);
   Int_t counter = 0;
@@ -740,7 +750,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
-      eveTrack->SetAttLineAttMarker(gTrackList);
+      eveTrack->SetAttLineAttMarker(container);
       container->AddElement(eveTrack);
       eveTrack->SetLineColor(element->GetColor());
       eveTrack->MakeTrack();
@@ -748,7 +758,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
   } else if(className=="Electron") {
     // Loop over all electrons
     Electron *electron;
-    while((electron = (Electron *) itElectron.Next())) {
+    while((electron = (Electron *) itTrack.Next())) {
       TParticle pb(electron->Charge<0?11:-11, 1, 0, 0, 0, 0,
                    electron->P4().Px(), electron->P4().Py(),
                    electron->P4().Pz(), electron->P4().E(),
@@ -757,7 +767,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
-      eveTrack->SetAttLineAttMarker(gElectronList);
+      eveTrack->SetAttLineAttMarker(container);
       container->AddElement(eveTrack);
       eveTrack->SetLineColor(element->GetColor());
       eveTrack->MakeTrack();
@@ -765,7 +775,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
   } else if(className=="Muon") {
     // Loop over all muons
     Muon *muon;
-    while((muon = (Muon *) itMuon.Next())) {
+    while((muon = (Muon *) itTrack.Next())) {
       TParticle pb(muon->Charge<0?13:-13, 1, 0, 0, 0, 0,
                    muon->P4().Px(), muon->P4().Py(),
                    muon->P4().Pz(), muon->P4().E(),
@@ -774,7 +784,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
-      eveTrack->SetAttLineAttMarker(gMuonList);
+      eveTrack->SetAttLineAttMarker(container);
       container->AddElement(eveTrack);
       eveTrack->SetLineColor(element->GetColor());
       eveTrack->MakeTrack();
@@ -782,7 +792,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
   } else if(className=="Photon") {
     // Loop over all photons
     Photon *photon;
-    while((photon = (Photon *) itPhoton.Next())) {
+    while((photon = (Photon *) itTrack.Next())) {
       TParticle pb(22, 1, 0, 0, 0, 0,
                    photon->P4().Px(), photon->P4().Py(),
                    photon->P4().Pz(), photon->P4().E(),
@@ -791,7 +801,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
-      eveTrack->SetAttLineAttMarker(gPhotonList);
+      eveTrack->SetAttLineAttMarker(container);
       container->AddElement(eveTrack);
       eveTrack->SetLineColor(element->GetColor());
       eveTrack->MakeTrack();
@@ -799,8 +809,9 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>
   }
 }
 
-void delphes_read_jets(TClonesArray* data, DelphesBranchElement<TEveElementList>* element) {
-  TEveElementList* container = element->GetContainer();
+void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element) {
+  TEveElementList* container = dynamic_cast<DelphesBranchElement<TEveElementList>*>(element)->GetContainer();
+  assert(container);
   TIter itJet(data);
   Jet *jet;
   TEveJetCone *eveJetCone;
@@ -821,8 +832,9 @@ void delphes_read_jets(TClonesArray* data, DelphesBranchElement<TEveElementList>
   }
 }
 
-void delphes_read_vectors(TClonesArray* data, DelphesBranchElement<TEveElementList>* element) {
-  TEveElementList* container = element->GetContainer();
+void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element) {
+  TEveElementList* container = dynamic_cast<DelphesBranchElement<TEveElementList>*>(element)->GetContainer();
+  assert(container);
   TIter itMet(data);
   MissingET *MET;
   TEveArrow *eveMet;
