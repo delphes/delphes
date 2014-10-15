@@ -30,7 +30,8 @@
 class DelphesBranchBase
 {
   public:
-    DelphesBranchBase(const char* name="", const char*type="", const enum EColor color=kBlack):name_(name),type_(type),color_(color) {}
+    DelphesBranchBase():color_(kBlack) {}
+    DelphesBranchBase(const char* name, const char*type, const enum EColor color):name_(name),type_(type),color_(color) {}
     virtual ~DelphesBranchBase() {};
     const char* GetName() const { return (const char*)name_; }
     const char* GetType() const { return (const char*)type_; }
@@ -49,9 +50,8 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
 {
   public:
     // constructor
-    DelphesBranchElement(const char* name="", const char*type="", const enum EColor color=kBlack):DelphesBranchBase(name, type, color) {
-      throw std::exception();
-    }
+    DelphesBranchElement():DelphesBranchBase() {}
+    DelphesBranchElement(const char* name, const char*type, const enum EColor color):DelphesBranchBase(name, type, color) {}
 
     // destructor
     virtual ~DelphesBranchElement() { delete data_; }
@@ -60,7 +60,7 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
     EveContainer* GetContainer() { return data_; }
 
     // resets the collection (before moving to the next event)
-    virtual void Reset() {};
+    virtual void Reset() = 0;
 
     // template class name
     virtual const char* GetClassName() { return data_->ClassName(); }
@@ -70,15 +70,113 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
 };
 
 // special case for calo towers
-template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, const char*type, const enum EColor color);
-template<> void DelphesBranchElement<DelphesCaloData>::Reset();
+template<> class DelphesBranchElement<DelphesCaloData>: public DelphesBranchBase
+{
+  public:
+    // constructor
+    DelphesBranchElement():DelphesBranchBase() {}
+    DelphesBranchElement(const char* name, const char*type, const enum EColor color):DelphesBranchBase(name, type, color) {
+      if(TString(type)=="tower") {
+        data_ = new DelphesCaloData(2);
+        data_->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
+        data_->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
+        data_->IncDenyDestroy();
+      } else {
+        throw std::exception();
+      }
+    }
+
+    // destructor
+    virtual ~DelphesBranchElement() { delete data_; }
+
+    // get the container (ElementList, TrackList, or CaloData)
+    DelphesCaloData* GetContainer() { return data_; }
+
+    // resets the collection (before moving to the next event)
+    virtual void Reset() { data_->ClearTowers(); }
+
+    // template class name
+    virtual const char* GetClassName() { return data_->ClassName(); }
+
+  private:
+    DelphesCaloData* data_;
+};
+//template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, const char*type, const enum EColor color);
+//template<> void DelphesBranchElement<DelphesCaloData>::Reset();
 
 // special case for element lists
-template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, const char*type, const enum EColor color);
-template<> void DelphesBranchElement<TEveElementList>::Reset();
+template<> class DelphesBranchElement<TEveElementList>: public DelphesBranchBase
+{
+  public:
+    // constructor
+    DelphesBranchElement():DelphesBranchBase() {}
+    DelphesBranchElement(const char* name, const char*type, const enum EColor color):DelphesBranchBase(name, type, color) {
+      if(TString(type)=="vector" || TString(type)=="jet") {
+        data_ = new TEveElementList(name);
+        data_->SetMainColor(color_);
+      } else {
+        throw std::exception();
+      }
+    }
+
+    // destructor
+    virtual ~DelphesBranchElement() { delete data_; }
+
+    // get the container (ElementList, TrackList, or CaloData)
+    TEveElementList* GetContainer() { return data_; }
+
+    // resets the collection (before moving to the next event)
+    virtual void Reset() { data_->DestroyElements(); }
+
+    // template class name
+    virtual const char* GetClassName() { return data_->ClassName(); }
+
+  private:
+    TEveElementList* data_;
+};
+//template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, const char*type, const enum EColor color);
+//template<> void DelphesBranchElement<TEveElementList>::Reset();
 
 // special case for track lists
-template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, const char*type, const enum EColor color);
-template<> void DelphesBranchElement<TEveTrackList>::Reset();
+template<> class DelphesBranchElement<TEveTrackList>: public DelphesBranchBase
+{
+  public:
+    // constructor
+    DelphesBranchElement():DelphesBranchBase() {}
+    DelphesBranchElement(const char* name, const char*type, const enum EColor color):DelphesBranchBase(name, type, color) {
+      if(TString(type)=="track") {
+        data_ = new TEveTrackList(name);
+        data_->SetMainColor(color_);
+        data_->SetMarkerColor(color_);
+        data_->SetMarkerStyle(kCircle);
+        data_->SetMarkerSize(0.5);
+      } else if(TString(type)=="photon") {
+        data_ = new TEveTrackList(name);
+        data_->SetMainColor(color_);
+        data_->SetMarkerColor(color_);
+        data_->SetMarkerStyle(kCircle);
+        data_->SetMarkerSize(0.5);
+      } else {
+        throw std::exception();
+      }
+    }
+
+    // destructor
+    virtual ~DelphesBranchElement() { delete data_; }
+
+    // get the container (ElementList, TrackList, or CaloData)
+    TEveTrackList* GetContainer() { return data_; }
+
+    // resets the collection (before moving to the next event)
+    virtual void Reset() { data_->DestroyElements(); }
+
+    // template class name
+    virtual const char* GetClassName() { return data_->ClassName(); }
+
+  private:
+    TEveTrackList* data_;
+};
+//template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, const char*type, const enum EColor color);
+//template<> void DelphesBranchElement<TEveTrackList>::Reset();
 
 #endif //DelphesBranchElement_h
