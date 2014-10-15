@@ -70,30 +70,12 @@ Double_t gTotRadius = 2.0;
 Double_t gHalfLength = 3.0;
 Double_t gBz = 3.8;
 
-TAxis *gEtaAxis = 0;
-TAxis *gPhiAxis = 0;
-
 TChain gChain("Delphes");
 
 ExRootTreeReader *gTreeReader = 0;
 
-TClonesArray *gBranchTower = 0;
-TClonesArray *gBranchTrack = 0;
-TClonesArray *gBranchEle = 0;
-TClonesArray *gBranchMuon = 0;
-TClonesArray *gBranchPhoton = 0;
-TClonesArray *gBranchJet = 0;
-TClonesArray *gBranchGenJet = 0;
-TClonesArray *gBranchMet = 0;
-
-DelphesCaloData *gCaloData = 0;
-TEveElementList *gJetList = 0;
-TEveElementList *gGenJetList = 0;
-TEveElementList *gMetList = 0;
-TEveTrackList *gTrackList = 0;
-TEveTrackList *gElectronList = 0;
-TEveTrackList *gMuonList = 0;
-TEveTrackList *gPhotonList = 0;
+std::vector<DelphesBranchBase*> gElements;
+std::vector<TClonesArray*> gArrays;
 
 DelphesDisplay *gDelphesDisplay = 0;
 
@@ -574,6 +556,7 @@ void readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<De
        trkProp->SetMaxR(tk_radius);
        trkProp->SetMaxZ(tk_length);
      }
+//TODO one possible simplification could be to add the array to the element class.
      arrays.push_back(gTreeReader->UseBranch(name));
    }
 }
@@ -590,8 +573,6 @@ void delphes_event_display(const char *configFile, const char *inputFile, Delphe
    gTotRadius = det3D.getDetectorRadius();
    gHalfLength = det3D.getTrackerHalfLength();
    gBz = det3D.getBField();
-   gEtaAxis = det3D.getCaloAxes().first;
-   gPhiAxis = det3D.getCaloAxes().second;
 
    //TODO specific to some classical detector... could use better the det3D
    TGeoVolume* top = det3D.getDetector(false);
@@ -632,113 +613,32 @@ void delphes_event_display(const char *configFile, const char *inputFile, Delphe
    gTreeReader = new ExRootTreeReader(&gChain);
 
    // prepare data collections
-   std::vector<DelphesBranchBase*> elements;
-   std::vector<TClonesArray*> arrays;
-   readConfig(configFile, det3D, elements, arrays);
-   // Get pointers to branches
-   // TODO not needed. use arrays above.
-   gBranchTower  = gTreeReader->UseBranch("Tower");
-   gBranchTrack  = gTreeReader->UseBranch("Track");
-   gBranchEle    = gTreeReader->UseBranch("Electron");
-   gBranchMuon   = gTreeReader->UseBranch("Muon");
-   gBranchPhoton = gTreeReader->UseBranch("Photon");
-   gBranchJet    = gTreeReader->UseBranch("Jet");
-   gBranchGenJet = gTreeReader->UseBranch("GenJet");
-   gBranchMet    = gTreeReader->UseBranch("MissingET");
-
-   // data
-   // TODO not needed. use elements above
-   gCaloData = new DelphesCaloData(2); 
-   gCaloData->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
-   gCaloData->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
-   gCaloData->SetEtaBins(gEtaAxis);
-   gCaloData->SetPhiBins(gPhiAxis);
-   gCaloData->IncDenyDestroy();
-
-   gJetList = new TEveElementList("Jets");
-   gJetList->SetMainColor(kYellow);
-   gEve->AddElement(gJetList);
-
-   gGenJetList = new TEveElementList("GenJets");
-   gGenJetList->SetMainColor(kCyan);
-   gGenJetList->SetRnrSelf(false);
-   gGenJetList->SetRnrChildren(false);
-   gEve->AddElement(gGenJetList);
-
-   gMetList = new TEveElementList("Missing Et");
-   gMetList->SetMainColor(kViolet);
-   gEve->AddElement(gMetList);
-
-   TEveTrackPropagator *trkProp;
-
-   gElectronList = new TEveTrackList("Electrons");
-   gElectronList->SetMainColor(kRed);
-   gElectronList->SetMarkerColor(kViolet);
-   gElectronList->SetMarkerStyle(kCircle);
-   gElectronList->SetMarkerSize(0.5);
-   gEve->AddElement(gElectronList);
-   trkProp = gElectronList->GetPropagator();
-   trkProp->SetMagField(0.0, 0.0, -gBz);
-   trkProp->SetMaxR(gRadius);
-   trkProp->SetMaxZ(gHalfLength);
-
-   gMuonList = new TEveTrackList("Muons");
-   gMuonList->SetMainColor(kGreen);
-   gMuonList->SetMarkerColor(kViolet);
-   gMuonList->SetMarkerStyle(kCircle);
-   gMuonList->SetMarkerSize(0.5);
-   gEve->AddElement(gMuonList);
-   trkProp = gMuonList->GetPropagator();
-   trkProp->SetMagField(0.0, 0.0, -gBz);
-   trkProp->SetMaxR(gTotRadius);
-   trkProp->SetMaxZ(gHalfLength);
-
-   gTrackList = new TEveTrackList("Tracks");
-   gTrackList->SetMainColor(kBlue);
-   gTrackList->SetMarkerColor(kRed);
-   gTrackList->SetMarkerStyle(kCircle);
-   gTrackList->SetMarkerSize(0.5);
-   gEve->AddElement(gTrackList);
-   trkProp = gTrackList->GetPropagator();
-   trkProp->SetMagField(0.0, 0.0, -gBz);
-   trkProp->SetMaxR(gRadius);
-   trkProp->SetMaxZ(gHalfLength);
-
-   gPhotonList= new TEveTrackList("Photons");
-   gPhotonList->SetMainColor(kYellow);
-   gPhotonList->SetLineStyle(7);
-   gPhotonList->SetMarkerColor(kViolet);
-   gPhotonList->SetMarkerStyle(kCircle);
-   gPhotonList->SetMarkerSize(0.5);
-   gEve->AddElement(gPhotonList);
-   trkProp = gPhotonList->GetPropagator();
-   trkProp->SetMagField(0.0, 0.0, 0.0);
-   trkProp->SetMaxR(gRadius);
-   trkProp->SetMaxZ(gHalfLength);
+   readConfig(configFile, det3D, gElements, gArrays);
 
    // viewers and scenes
-
-   TEveCalo3D *calo3d = new TEveCalo3D(gCaloData);
-   calo3d->SetBarrelRadius(gRadius);
-   calo3d->SetEndCapPos(gHalfLength);
-
-   //gStyle->SetPalette(1, 0);
-   TEveCaloLego *lego = new TEveCaloLego(gCaloData);
-   lego->InitMainTrans();
-   lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
-   lego->SetAutoRebin(kFALSE);
-   lego->Set2DMode(TEveCaloLego::kValSizeOutline);
-
    gDelphesDisplay = new DelphesDisplay;
    gEve->AddGlobalElement(geometry);
-   gEve->AddGlobalElement(calo3d);
    gDelphesDisplay->ImportGeomRPhi(geometry);
-   gDelphesDisplay->ImportCaloRPhi(calo3d);
    gDelphesDisplay->ImportGeomRhoZ(geometry);
-   gDelphesDisplay->ImportCaloRhoZ(calo3d);
-   gDelphesDisplay->ImportCaloLego(lego);
+   // find the first calo data and use that to initialize the calo display
+   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++Data) {
+     if(TString((*data)->GetType())=="tower") {
+       TEveCalo3D *calo3d = new TEveCalo3D((*data)->GetContainer());
+       calo3d->SetBarrelRadius(gRadius);
+       calo3d->SetEndCapPos(gHalfLength);
+       gEve->AddGlobalElement(calo3d);
+       gDelphesDisplay->ImportCaloRPhi(calo3d);
+       gDelphesDisplay->ImportCaloRhoZ(calo3d);
+       TEveCaloLego *lego = new TEveCaloLego((*data)->GetContainer());
+       lego->InitMainTrans();
+       lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
+       lego->SetAutoRebin(kFALSE);
+       lego->Set2DMode(TEveCaloLego::kValSizeOutline);
+       gDelphesDisplay->ImportCaloLego(lego);
+       break;
+     }
+   }
    gEve->Redraw3D(kTRUE);
-
 }
 
 //______________________________________________________________________________
@@ -747,209 +647,200 @@ void load_event()
    // Load event specified in global event_id.
    // The contents of previous event are removed.
 
+   //TODO move this to the status bar ???
    printf("Loading event %d.\n", event_id);
 
+   // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
+   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++Data) {
+     (*data)->Reset()
+   }
 
-   //TODO use the elements vector and call Reset for all
-   if(gCaloData) gCaloData->ClearTowers();
-   if(gJetList) gJetList->DestroyElements();
-   if(gMetList) gMetList->DestroyElements();
-   if(gGenJetList) gGenJetList->DestroyElements();
-   if(gTrackList) gTrackList->DestroyElements();
-   if(gElectronList) gElectronList->DestroyElements();
-   if(gMuonList) gMuonList->DestroyElements();
-   if(gPhotonList) gPhotonList->DestroyElements();
-
+   // read the new event
    delphes_read();
 
+   // update display
    TEveElement* top = (TEveElement*)gEve->GetCurrentEvent();
    gDelphesDisplay->DestroyEventRPhi();
    gDelphesDisplay->ImportEventRPhi(top);
    gDelphesDisplay->DestroyEventRhoZ();
    gDelphesDisplay->ImportEventRhoZ(top);
-
    //update_html_summary();
-
    gEve->Redraw3D(kFALSE, kTRUE);
 }
 
 void delphes_read()
 {
 
-  //TODO use the existing arrays in std loop.
-  TIter itTower(gBranchTower);
-  TIter itTrack(gBranchTrack);
-  TIter itElectron(gBranchEle);
-  TIter itPhoton(gBranchPhoton);
-  TIter itMuon(gBranchMuon);
-  TIter itJet(gBranchJet);
-  TIter itGenJet(gBranchGenJet);
-  TIter itMet(gBranchMet);
-
-  Tower *tower;
-  Track *track;
-  Electron *electron;
-  Muon *muon;
-  Photon *photon;
-  Jet *jet;
-  MissingET *MET;
-
-  TEveJetCone *eveJetCone;
-  TEveTrack *eveTrack;
-  TEveArrow *eveMet;
-
-  Int_t counter;
-  Float_t maxPt = 0.;
-
-  TEveTrackPropagator *trkProp = gTrackList->GetPropagator();
-  TEveTrackPropagator *photProp = gPhotonList->GetPropagator();
-  if(event_id >= gTreeReader->GetEntries()) return;
+  // safety
+  if(event_id >= gTreeReader->GetEntries() || event_id<0 ) return;
 
   // Load selected branches with data from specified event
   gTreeReader->ReadEntry(event_id);
 
+  // loop over selected branches, and apply the proper recipe to fill the collections.
+  // this is basically to loop on gArrays to fill gElements.
 
-  //TODO the code below should go in small methods.
-  //it's maybe time to convert that in a class.
+//TODO: one option would be to have templated methods in the element classes. We could simply call "element.fill()"
+  std::vector<TClonesArray*>::iterator data = gArrays.begin();
+  std::vector<DelphesBranchBase*>::iterator element = gElements.begin();
+  std::vector<TClonesArray*>::iterator data_tracks = gArrays.begin();
+  std::vector<DelphesBranchBase*>::iterator element_tracks = gElements.begin();
+  Int_t nTracks = 0;
+  for(; data<gArrays.end() && element<gElements.end(); ++data, ++element) {
+    TString type = (*element)->GetType();
+    // keep the most generic track collection for the end
+    if(type=="track" && (*element)->GetClassName()=="Track" && nTracks=0) {
+      data_tracks = data;
+      element_tracks = element;
+      nTracks = (*data_tracks)->GetEntries();
+      continue;
+    }
+    // branch on the element type
+    // TODO : I understand that we will have to cast the elements.
+    if(type=="tower") delphes_read_towers(*data,*element);
+    else if(type=="track" || type=="photon") delphes_read_tracks(*data,*element);
+    else if(type=="jet") delphes_read_jets(*data,*element);
+    else if(type=="vector") delphes_read_vectors(*data,*element);
+  }
+  // finish whith what we consider to be the main track collection
+  if(nTracks>0) delphes_read_tracks(*data,(*element)->GetContainer());
+}
 
+void delphes_read_towers(TClonesArray* data, DelphesBranchElement<TEveElementList>* element) {
+  DelphesCaloData* container = element->GetContainer();
   // Loop over all towers
-  itTower.Reset();
+  TIter itTower(data);
+  Tower *tower;
   while((tower = (Tower *) itTower.Next()))
   {
-    gCaloData->AddTower(tower->Edges[0], tower->Edges[1], tower->Edges[2], tower->Edges[3]);
-    gCaloData->FillSlice(0, tower->Eem);
-    gCaloData->FillSlice(1, tower->Ehad);
+    container->AddTower(tower->Edges[0], tower->Edges[1], tower->Edges[2], tower->Edges[3]);
+    container->FillSlice(0, tower->Eem);
+    container->FillSlice(1, tower->Ehad);
   }
-  gCaloData->DataChanged();
+  container->DataChanged();
+}
 
-  // Loop over all tracks
-  itTrack.Reset();
-  counter = 0;
-  while((track = (Track *) itTrack.Next())) {
-    TParticle pb(track->PID, 1, 0, 0, 0, 0,
-                 track->P4().Px(), track->P4().Py(),
-                 track->P4().Pz(), track->P4().E(),
-                 track->X, track->Y, track->Z, 0.0);
+void delphes_read_tracks(TClonesArray* data, DelphesBranchElement<TEveTrackList>* element) {
+  TEveTrackList* container = element->GetContainer();
+  TString className = element->GetClassName();
+  TIter itTrack(data);
+  Int_t counter = 0;
+  TEveTrack *eveTrack;
+  TEveTrackPropagator *trkProp = container->GetPropagator();
+  if(className=="Track") {
+    // Loop over all tracks
+    Track *track;
+    while((track = (Track *) itTrack.Next())) {
+      TParticle pb(track->PID, 1, 0, 0, 0, 0,
+                   track->P4().Px(), track->P4().Py(),
+                   track->P4().Pz(), track->P4().E(),
+                   track->X, track->Y, track->Z, 0.0);
 
-    eveTrack = new TEveTrack(&pb, counter, trkProp);
-    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
-    eveTrack->SetStdTitle();
-    eveTrack->SetAttLineAttMarker(gTrackList);
-    gTrackList->AddElement(eveTrack);
-    eveTrack->SetLineColor(kBlue);
-    eveTrack->MakeTrack();
-    maxPt = maxPt > track->PT ? maxPt : track->PT;
+      eveTrack = new TEveTrack(&pb, counter, trkProp);
+      eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+      eveTrack->SetStdTitle();
+      eveTrack->SetAttLineAttMarker(gTrackList);
+      container->AddElement(eveTrack);
+      eveTrack->SetLineColor(element->GetColor());
+      eveTrack->MakeTrack();
+    }
+  } else if(className=="Electron") {
+    // Loop over all electrons
+    Electron *electron;
+    while((electron = (Electron *) itElectron.Next())) {
+      TParticle pb(electron->Charge<0?11:-11, 1, 0, 0, 0, 0,
+                   electron->P4().Px(), electron->P4().Py(),
+                   electron->P4().Pz(), electron->P4().E(),
+                   0., 0., 0., 0.);
+
+      eveTrack = new TEveTrack(&pb, counter, trkProp);
+      eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+      eveTrack->SetStdTitle();
+      eveTrack->SetAttLineAttMarker(gElectronList);
+      container->AddElement(eveTrack);
+      eveTrack->SetLineColor(element->GetColor());
+      eveTrack->MakeTrack();
   }
+  } else if(className=="Muon") {
+    // Loop over all muons
+    Muon *muon;
+    while((muon = (Muon *) itMuon.Next())) {
+      TParticle pb(muon->Charge<0?13:-13, 1, 0, 0, 0, 0,
+                   muon->P4().Px(), muon->P4().Py(),
+                   muon->P4().Pz(), muon->P4().E(),
+                   0., 0., 0., 0.);
 
-  // Loop over all electrons
-  itElectron.Reset();
-  counter = 0;
-  while((electron = (Electron *) itElectron.Next())) {
-    TParticle pb(electron->Charge<0?11:-11, 1, 0, 0, 0, 0,
-                 electron->P4().Px(), electron->P4().Py(),
-                 electron->P4().Pz(), electron->P4().E(),
-                 0., 0., 0., 0.);
+      eveTrack = new TEveTrack(&pb, counter, trkProp);
+      eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+      eveTrack->SetStdTitle();
+      eveTrack->SetAttLineAttMarker(gMuonList);
+      container->AddElement(eveTrack);
+      eveTrack->SetLineColor(element->GetColor());
+      eveTrack->MakeTrack();
+    }
+  } else if(className=="Photon") {
+    // Loop over all photons
+    Photon *photon;
+    while((photon = (Photon *) itPhoton.Next())) {
+      TParticle pb(22, 1, 0, 0, 0, 0,
+                   photon->P4().Px(), photon->P4().Py(),
+                   photon->P4().Pz(), photon->P4().E(),
+                   0., 0., 0., 0.);
 
-    eveTrack = new TEveTrack(&pb, counter, trkProp);
-    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
-    eveTrack->SetStdTitle();
-    eveTrack->SetAttLineAttMarker(gElectronList);
-    gElectronList->AddElement(eveTrack);
-    eveTrack->SetLineColor(kRed);
-    eveTrack->MakeTrack();
-    maxPt = maxPt > electron->PT ? maxPt : electron->PT;
+      eveTrack = new TEveTrack(&pb, counter, trkProp);
+      eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
+      eveTrack->SetStdTitle();
+      eveTrack->SetAttLineAttMarker(gPhotonList);
+      container->AddElement(eveTrack);
+      eveTrack->SetLineColor(element->GetColor());
+      eveTrack->MakeTrack();
+    }
   }
+}
 
-  // Loop over all photons
-  itPhoton.Reset();
-  counter = 0;
-  while((photon = (Photon *) itPhoton.Next())) {
-    TParticle pb(22, 1, 0, 0, 0, 0,
-                 photon->P4().Px(), photon->P4().Py(),
-                 photon->P4().Pz(), photon->P4().E(),
-                 0., 0., 0., 0.);
-
-    eveTrack = new TEveTrack(&pb, counter, photProp);
-    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
-    eveTrack->SetStdTitle();
-    eveTrack->SetAttLineAttMarker(gPhotonList);
-    gPhotonList->AddElement(eveTrack);
-    eveTrack->SetLineColor(kYellow);
-    eveTrack->MakeTrack();
-    maxPt = maxPt > photon->PT ? maxPt : photon->PT;
-  }
-
-  // Loop over all muons
-  itMuon.Reset();
-  counter = 0;
-  while((muon = (Muon *) itMuon.Next())) {
-    TParticle pb(muon->Charge<0?13:-13, 1, 0, 0, 0, 0,
-                 muon->P4().Px(), muon->P4().Py(),
-                 muon->P4().Pz(), muon->P4().E(),
-                 0., 0., 0., 0.);
-
-    eveTrack = new TEveTrack(&pb, counter, trkProp);
-    eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
-    eveTrack->SetStdTitle();
-    eveTrack->SetAttLineAttMarker(gMuonList);
-    gMuonList->AddElement(eveTrack);
-    eveTrack->SetLineColor(kGreen);
-    eveTrack->MakeTrack();
-    maxPt = maxPt > muon->PT ? maxPt : muon->PT;
-  }
-
+void delphes_read_jets(TClonesArray* data, DelphesBranchElement<TEveElementList>* element) {
+  TEveElementList* container = element->GetContainer();
+  TIter itJet(data);
+  Jet *jet;
+  TEveJetCone *eveJetCone;
   // Loop over all jets
-  itJet.Reset();
-  counter = 0;
+  Int_t counter = 0;
   while((jet = (Jet *) itJet.Next()))
   {
     eveJetCone = new TEveJetCone();
     eveJetCone->SetTitle(Form("jet [%d]: Pt=%f, Eta=%f, \nPhi=%f, M=%f",counter,jet->PT, jet->Eta, jet->Phi, jet->Mass));
     eveJetCone->SetName(Form("jet [%d]", counter++));
     eveJetCone->SetMainTransparency(60);
-    eveJetCone->SetLineColor(kYellow);
-    eveJetCone->SetFillColor(kYellow);
+    eveJetCone->SetLineColor(element->GetColor());
+    eveJetCone->SetFillColor(element->GetColor());
     eveJetCone->SetCylinder(gRadius - 10, gHalfLength - 10);
     eveJetCone->SetPickable(kTRUE);
     eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
-    gJetList->AddElement(eveJetCone);
-    maxPt = maxPt > jet->PT ? maxPt : jet->PT;
+    container->AddElement(eveJetCone);
   }
+}
 
-  // Loop over all genjets
-  itJet.Reset();
-  counter = 0;
-  while((jet = (Jet *) itGenJet.Next()))
-  {
-    eveJetCone = new TEveJetCone();
-    eveJetCone->SetTitle(Form("jet [%d]: Pt=%f, Eta=%f, \nPhi=%f, M=%f",counter,jet->PT, jet->Eta, jet->Phi, jet->Mass));
-    eveJetCone->SetName(Form("jet [%d]", counter++));
-    eveJetCone->SetMainTransparency(60);
-    eveJetCone->SetLineColor(kCyan);
-    eveJetCone->SetFillColor(kCyan);
-    eveJetCone->SetCylinder(gRadius - 10, gHalfLength - 10);
-    eveJetCone->SetPickable(kTRUE);
-    eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
-    gGenJetList->AddElement(eveJetCone);
-  }
-
+void delphes_read_vectors(TClonesArray* data, DelphesBranchElement<TEveElementList>* element) {
+  TEveElementList* container = element->GetContainer();
+  TIter itMet(data);
+  MissingET *MET;
+  TEveArrow *eveMet;
   // Missing Et
-  // recipe: gRadius * MET/maxpt(tracks, jets)
-  itMet.Reset();
+  Double_t maxPt = 50.;
+  // TODO to be changed as we don't have access to maxPt anymore. MET scale could be a general parameter set in GUI
   while((MET = (MissingET*) itMet.Next())) {
     eveMet = new TEveArrow((gRadius * MET->MET/maxPt)*cos(MET->Phi), (gRadius * MET->MET/maxPt)*sin(MET->Phi), 0., 0., 0., 0.);
-    eveMet->SetMainColor(kViolet);
+    eveMet->SetMainColor(element->GetColor());
     eveMet->SetTubeR(0.04);
     eveMet->SetConeR(0.08);
     eveMet->SetConeL(0.10);
     eveMet->SetPickable(kTRUE);
     eveMet->SetName("Missing Et");
     eveMet->SetTitle(Form("Missing Et (%.1f GeV)",MET->MET));
-    gMetList->AddElement(eveMet);
+    container->AddElement(eveMet);
   }
 }
-
 
 /******************************************************************************/
 // GUI

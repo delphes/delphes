@@ -41,8 +41,6 @@
 
 #pragma link C++ class DelphesDisplay+;
 #pragma link C++ class DelphesCaloData+;
-//#pragma link C++ function DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char*, const char*, const enum EColor);
-//#pragma link C++ function DelphesBranchElement<DelphesCaloData>::Reset();
 #pragma link C++ class DelphesBranchElement<DelphesCaloData>;
 #pragma link C++ class DelphesBranchElement<TEveElementList>;
 #pragma link C++ class DelphesBranchElement<TEveTrackList>;
