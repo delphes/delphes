@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include <utility>
 #include <algorithm>
 #include "TGeoManager.h"
@@ -105,6 +106,14 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    // prepare data collections
    readConfig(configFile, det3D, gElements, gArrays);
+   for(std::vector<DelphesBranchBase*>::iterator element = gElements.begin(); element<gElements.end(); ++element) {
+     DelphesBranchElement<TEveTrackList>*   item_v1 = dynamic_cast<DelphesBranchElement<TEveTrackList>*>(*element);
+     DelphesBranchElement<DelphesCaloData>* item_v2 = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>(*element);
+     DelphesBranchElement<TEveElementList>* item_v3 = dynamic_cast<DelphesBranchElement<TEveElementList>*>(*element);
+     if(item_v1) gEve->AddElement(item_v1->GetContainer());
+     if(item_v2) gEve->AddElement(item_v2->GetContainer());
+     if(item_v3) gEve->AddElement(item_v3->GetContainer());
+   }
 
    // viewers and scenes
    gDelphesDisplay = new DelphesDisplay;
@@ -132,8 +141,8 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
      }
    }
 
-   make_gui();
-   load_event();
+   //make_gui();
+   //load_event();
    gEve->Redraw3D(kTRUE);   
 
 }
@@ -228,6 +237,7 @@ void DelphesEventDisplay::load_event()
    //TODO move this to the status bar ???
    printf("Loading event %d.\n", event_id);
 
+
    // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
    for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
@@ -237,6 +247,10 @@ void DelphesEventDisplay::load_event()
    // read the new event
    delphes_read();
 
+//TODO: it blocks somewhere below....
+//TODO: also the event content has one weird entry "TEveCalData" -> corruption????
+//other observation: projections appear in the 3D view ! -> seems to indicate that we have a common problem there.
+//should check the content of the elements vector when filling them
    // update display
    TEveElement* top = (TEveElement*)gEve->GetCurrentEvent();
    gDelphesDisplay->DestroyEventRPhi();
