@@ -1,95 +1,144 @@
-#include <set>
-#include <map>
+#include <cassert>
 #include <utility>
-#include <vector>
 #include <algorithm>
-#include <sstream>
-#include <exception>
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
-#include "TGeoMedium.h"
-#include "TGeoNode.h"
-#include "TGeoCompositeShape.h"
-#include "TGeoMatrix.h"
-#include "TGeoTube.h"
-#include "TGeoCone.h"
-#include "TGeoArb8.h"
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 #include "display/DelphesCaloData.h"
-#include "display/DelphesDisplay.h"
 #include "display/DelphesBranchElement.h"
 #include "display/Delphes3DGeometry.h"
+#include "display/DelphesEventDisplay.h"
 #include "classes/DelphesClasses.h"
-#include "TF2.h"
-#include "TH1F.h"
-#include "TChain.h"
 #include "TEveElement.h"
 #include "TEveJetCone.h"
 #include "TEveTrack.h"
 #include "TEveTrackPropagator.h"
 #include "TEveCalo.h"
-#include "TMath.h"
-#include "TSystem.h"
 #include "TEveManager.h"
 #include "TEveGeoNode.h"
 #include "TEveTrans.h"
 #include "TEveViewer.h"
 #include "TEveBrowser.h"
-#include "TRootBrowser.h"
-#include "TGLViewer.h"
-#include "TGButton.h"
-#include "TCollection.h"
-#include "TClonesArray.h"
-#include "TGLClip.h"
 #include "TEveArrow.h"
+#include "TMath.h"
+#include "TSystem.h"
+#include "TRootBrowser.h"
+#include "TGButton.h"
+#include "TClonesArray.h"
 
-/*
- * assembly.C: sauvegarde as shape-extract -> implement in the geometry class (read/write)
- * histobrowser.C: intégration d'histogrammes dans le display (on pourrait avoir Pt, eta, phi pour les principales collections)
- * also from alice_esd: summary html table
- * 
- */
-using namespace std;
+DelphesEventDisplay::DelphesEventDisplay()
+{
+   event_id = 0;
+   tkRadius_ = 1.29;
+   totRadius_ = 2.0;
+   tkHalfLength_ = 3.0;
+   bz_ = 3.8;
+   chain_ = new TChain("Delphes");
+   gTreeReader = 0;
+   gDelphesDisplay = 0;
+}
 
-// Forward declarations.
-class Delphes3DGeometry;
-class ExRootTreeReader;
-class DelphesCaloData;
-class DelphesDisplay;
-class DelphesBranchBase;
-template<typename EveContainer> class DelphesBranchElement;
-void make_gui();
-void load_event();
-void delphes_read();
-void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element);
-void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element);
-void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element);
-void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element);
-void readConfig(const char *configFile, const Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays);
+DelphesEventDisplay::~DelphesEventDisplay()
+{
+   delete chain_;
+}
 
-// Configuration and global variables.
-Int_t event_id           = 0; // Current event id.
-Double_t gRadius = 1.29;
-Double_t gTotRadius = 2.0;
-Double_t gHalfLength = 3.0;
-Double_t gBz = 3.8;
+DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inputFile, Delphes3DGeometry& det3D)
+{
+   event_id = 0;
+   tkRadius_ = 1.29;
+   totRadius_ = 2.0;
+   tkHalfLength_ = 3.0;
+   bz_ = 3.8;
+   chain_ = new TChain("Delphes");
+   gTreeReader = 0;
+   gDelphesDisplay = 0;
 
-TChain gChain("Delphes");
+   // initialize the application
+   TEveManager::Create(kTRUE, "IV");
+   TGeoManager* geom = gGeoManager;
 
-ExRootTreeReader *gTreeReader = 0;
+   // build the detector
+   tkRadius_ = det3D.getTrackerRadius();
+   totRadius_ = det3D.getDetectorRadius();
+   tkHalfLength_ = det3D.getTrackerHalfLength();
+   bz_ = det3D.getBField();
 
-std::vector<DelphesBranchBase*> gElements;
-std::vector<TClonesArray*> gArrays;
+   //TODO specific to some classical detector... could use better the det3D
+   TGeoVolume* top = det3D.getDetector(false);
+   geom->SetTopVolume(top);
+   TEveElementList *geometry = new TEveElementList("Geometry");
+   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
+   trk->SetVisLevel(6);
+   geometry->AddElement(trk);
+   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
+   calo->SetVisLevel(3);
+   geometry->AddElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   geometry->AddElement(calo);
+   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
+   calo->SetVisLevel(3);
+   calo->UseNodeTrans();
+   geometry->AddElement(calo);
+   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
+   muon->SetVisLevel(4);
+   geometry->AddElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   geometry->AddElement(muon);
+   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
+   muon->SetVisLevel(4);
+   muon->UseNodeTrans();
+   geometry->AddElement(muon);
+   //gGeoManager->DefaultColors();
 
-DelphesDisplay *gDelphesDisplay = 0;
+   // Create chain of root trees
+   chain_->Add(inputFile);
 
-/******************************************************************************/
-// Initialization and steering functions
-/******************************************************************************/
+   // Create object of class ExRootTreeReader
+   printf("*** Opening Delphes data file ***\n");
+   gTreeReader = new ExRootTreeReader(chain_);
 
+   // prepare data collections
+   readConfig(configFile, det3D, gElements, gArrays);
+
+   // viewers and scenes
+   gDelphesDisplay = new DelphesDisplay;
+   gEve->AddGlobalElement(geometry);
+   gDelphesDisplay->ImportGeomRPhi(geometry);
+   gDelphesDisplay->ImportGeomRhoZ(geometry);
+   // find the first calo data and use that to initialize the calo display
+   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
+     if(TString((*data)->GetType())=="tower") {
+       DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>((*data))->GetContainer();
+       assert(container);
+       TEveCalo3D *calo3d = new TEveCalo3D(container);
+       calo3d->SetBarrelRadius(tkRadius_);
+       calo3d->SetEndCapPos(tkHalfLength_);
+       gEve->AddGlobalElement(calo3d);
+       gDelphesDisplay->ImportCaloRPhi(calo3d);
+       gDelphesDisplay->ImportCaloRhoZ(calo3d);
+       TEveCaloLego *lego = new TEveCaloLego(container);
+       lego->InitMainTrans();
+       lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
+       lego->SetAutoRebin(kFALSE);
+       lego->Set2DMode(TEveCaloLego::kValSizeOutline);
+       gDelphesDisplay->ImportCaloLego(lego);
+       break;
+     }
+   }
+
+   make_gui();
+   load_event();
+   gEve->Redraw3D(kTRUE);   
+
+}
 // function that parses the config to extract the branches of interest and prepare containers
-void readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays) {
+void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays) {
    ExRootConfReader *confReader = new ExRootConfReader;
    confReader->ReadFile(configFile);
    Double_t tk_radius = det3D.getTrackerRadius();
@@ -169,93 +218,9 @@ void readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<De
    }
 }
 
-void delphes_event_display(const char *configFile, const char *inputFile, Delphes3DGeometry& det3D)
-{
-
-   // initialize the application
-   TEveManager::Create(kTRUE, "IV");
-   TGeoManager* geom = gGeoManager;
-
-   // build the detector
-   gRadius = det3D.getTrackerRadius();
-   gTotRadius = det3D.getDetectorRadius();
-   gHalfLength = det3D.getTrackerHalfLength();
-   gBz = det3D.getBField();
-
-   //TODO specific to some classical detector... could use better the det3D
-   TGeoVolume* top = det3D.getDetector(false);
-   geom->SetTopVolume(top);
-   TEveElementList *geometry = new TEveElementList("Geometry");
-   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
-   trk->SetVisLevel(6);
-   geometry->AddElement(trk);
-   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
-   calo->SetVisLevel(3);
-   geometry->AddElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   geometry->AddElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   geometry->AddElement(calo);
-   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
-   muon->SetVisLevel(4);
-   geometry->AddElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   geometry->AddElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   geometry->AddElement(muon);
-   //gGeoManager->DefaultColors();
-
-   // Create chain of root trees
-   gChain.Add(inputFile);
-
-   // Create object of class ExRootTreeReader
-   printf("*** Opening Delphes data file ***\n");
-   gTreeReader = new ExRootTreeReader(&gChain);
-
-   // prepare data collections
-   readConfig(configFile, det3D, gElements, gArrays);
-
-   // viewers and scenes
-   gDelphesDisplay = new DelphesDisplay;
-   gEve->AddGlobalElement(geometry);
-   gDelphesDisplay->ImportGeomRPhi(geometry);
-   gDelphesDisplay->ImportGeomRhoZ(geometry);
-   // find the first calo data and use that to initialize the calo display
-   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
-     if(TString((*data)->GetType())=="tower") {
-//TODO: why do I have to split this in two lines??? seems a cint bug?
-       DelphesBranchElement<DelphesCaloData>* data_tmp = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>(*data);
-       DelphesCaloData* container =  data_tmp->GetContainer();
-//       DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>((*data))->GetContainer();
-       assert(container);
-       TEveCalo3D *calo3d = new TEveCalo3D(container);
-       calo3d->SetBarrelRadius(gRadius);
-       calo3d->SetEndCapPos(gHalfLength);
-       gEve->AddGlobalElement(calo3d);
-       gDelphesDisplay->ImportCaloRPhi(calo3d);
-       gDelphesDisplay->ImportCaloRhoZ(calo3d);
-       TEveCaloLego *lego = new TEveCaloLego(container);
-       lego->InitMainTrans();
-       lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
-       lego->SetAutoRebin(kFALSE);
-       lego->Set2DMode(TEveCaloLego::kValSizeOutline);
-       gDelphesDisplay->ImportCaloLego(lego);
-       break;
-     }
-   }
-   gEve->Redraw3D(kTRUE);
-}
 
 //______________________________________________________________________________
-void load_event()
+void DelphesEventDisplay::load_event()
 {
    // Load event specified in global event_id.
    // The contents of previous event are removed.
@@ -282,7 +247,7 @@ void load_event()
    gEve->Redraw3D(kFALSE, kTRUE);
 }
 
-void delphes_read()
+void DelphesEventDisplay::delphes_read()
 {
 
   // safety
@@ -319,7 +284,7 @@ void delphes_read()
   if(nTracks>0) delphes_read_tracks(*data,*element);
 }
 
-void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element) {
+void DelphesEventDisplay::delphes_read_towers(TClonesArray* data, DelphesBranchBase* element) {
   DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>(element)->GetContainer();
   assert(container);
   // Loop over all towers
@@ -334,7 +299,7 @@ void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element) {
   container->DataChanged();
 }
 
-void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element) {
+void DelphesEventDisplay::delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element) {
   TEveTrackList* container = dynamic_cast<DelphesBranchElement<TEveTrackList>*>(element)->GetContainer();
   assert(container);
   TString className = element->GetClassName();
@@ -413,7 +378,7 @@ void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element) {
   }
 }
 
-void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element) {
+void DelphesEventDisplay::delphes_read_jets(TClonesArray* data, DelphesBranchBase* element) {
   TEveElementList* container = dynamic_cast<DelphesBranchElement<TEveElementList>*>(element)->GetContainer();
   assert(container);
   TIter itJet(data);
@@ -429,14 +394,14 @@ void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element) {
     eveJetCone->SetMainTransparency(60);
     eveJetCone->SetLineColor(element->GetColor());
     eveJetCone->SetFillColor(element->GetColor());
-    eveJetCone->SetCylinder(gRadius - 10, gHalfLength - 10);
+    eveJetCone->SetCylinder(tkRadius_ - 10, tkHalfLength_ - 10);
     eveJetCone->SetPickable(kTRUE);
     eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
     container->AddElement(eveJetCone);
   }
 }
 
-void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element) {
+void DelphesEventDisplay::delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element) {
   TEveElementList* container = dynamic_cast<DelphesBranchElement<TEveElementList>*>(element)->GetContainer();
   assert(container);
   TIter itMet(data);
@@ -446,7 +411,7 @@ void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element) {
   Double_t maxPt = 50.;
   // TODO to be changed as we don't have access to maxPt anymore. MET scale could be a general parameter set in GUI
   while((MET = (MissingET*) itMet.Next())) {
-    eveMet = new TEveArrow((gRadius * MET->MET/maxPt)*cos(MET->Phi), (gRadius * MET->MET/maxPt)*sin(MET->Phi), 0., 0., 0., 0.);
+    eveMet = new TEveArrow((tkRadius_ * MET->MET/maxPt)*cos(MET->Phi), (tkRadius_ * MET->MET/maxPt)*sin(MET->Phi), 0., 0., 0., 0.);
     eveMet->SetMainColor(element->GetColor());
     eveMet->SetTubeR(0.04);
     eveMet->SetConeR(0.08);
@@ -462,35 +427,7 @@ void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element) {
 // GUI
 /******************************************************************************/
 
-//______________________________________________________________________________
-// 
-// EvNavHandler class is needed to connect GUI signals.
-
-class EvNavHandler
-{     
-public:
-   void Fwd()
-   {  
-      if (event_id < gTreeReader->GetEntries() - 1) {
-         ++event_id;
-         load_event();
-      } else {
-         printf("Already at last event.\n");
-      }
-   }
-   void Bck()
-   {
-      if (event_id > 0) {
-         --event_id;
-         load_event();
-      } else {
-         printf("Already at first event.\n");
-      }
-   }
-};
-
-//______________________________________________________________________________
-void make_gui()
+void DelphesEventDisplay::make_gui()
 {
    // Create minimal GUI for event navigation.
    // TODO: better GUI could be made based on the ch15 of the manual (Writing a GUI)
@@ -513,7 +450,7 @@ void make_gui()
       if(!gSystem->OpenDirectory(icondir)) 
         icondir = Form("%s/icons/", (const char*)gSystem->GetFromPipe("root-config --etcdir") );
       TGPictureButton* b = 0;
-      EvNavHandler    *fh = new EvNavHandler;
+      EvNavHandler    *fh = new EvNavHandler(this);
 
       b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
       hf->AddFrame(b);
@@ -529,44 +466,5 @@ void make_gui()
    frmMain->MapWindow();
    browser->StopEmbedding();
    browser->SetTabTitle("Event Control", 0);
-}
-
-/******************************************************************************/
-// MAIN 
-/******************************************************************************/
-
-void geometry(const char* filename = "delphes_card_CMS.tcl", const char* ParticlePropagator="ParticlePropagator",
-                                                             const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
-                                                             const char* MuonEfficiency="MuonEfficiency",
-                                                             const char* Calorimeters="Calorimeter") 
-{
-
-   // load the libraries
-   gSystem->Load("libGeom");
-   //gSystem->Load("../libDelphes");
-   gSystem->Load("../libDelphesDisplay");
-
-   // create the detector representation
-   Delphes3DGeometry det3D(new TGeoManager("delphes", "Delphes geometry"));
-   det3D.readFile(filename, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
-
-   // create the application items
-   delphes_event_display("delphes_card_CMS.tcl", "../delphes_output.root", det3D); //TODO root file as input cfg
-   make_gui();
-   load_event();
-   gEve->Redraw3D(kTRUE); // Reset camera after the first event has been shown.
-
-   // EClipType not exported to CINT (see TGLUtil.h):
-   // 0 - no clip, 1 - clip plane, 2 - clip box
-   TGLViewer *v = gEve->GetDefaultGLViewer();
-   //Double_t plane[4] = { 0., 1., 0., 0. };
-   //v->GetClipSet()->SetClipState(1,plane);
-   //v->GetClipSet()->SetClipType(1);
-   //v->ColorSet().Background().SetColor(kMagenta+4);
-   //v->SetGuideState(TGLUtil::kAxesEdge, kTRUE, kFALSE, 0);
-   v->RefreshPadEditor(v);
-   v->CurrentCamera().RotateRad(-1.2, 0.5);
-   v->DoDraw();
-
 }
 
