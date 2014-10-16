@@ -30,14 +30,14 @@
 
 DelphesEventDisplay::DelphesEventDisplay()
 {
-   event_id = 0;
+   event_id_ = 0;
    tkRadius_ = 1.29;
    totRadius_ = 2.0;
    tkHalfLength_ = 3.0;
    bz_ = 3.8;
    chain_ = new TChain("Delphes");
-   gTreeReader = 0;
-   gDelphesDisplay = 0;
+   treeReader_ = 0;
+   delphesDisplay_ = 0;
 }
 
 DelphesEventDisplay::~DelphesEventDisplay()
@@ -47,14 +47,14 @@ DelphesEventDisplay::~DelphesEventDisplay()
 
 DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inputFile, Delphes3DGeometry& det3D)
 {
-   event_id = 0;
+   event_id_ = 0;
    tkRadius_ = 1.29;
    totRadius_ = 2.0;
    tkHalfLength_ = 3.0;
    bz_ = 3.8;
    chain_ = new TChain("Delphes");
-   gTreeReader = 0;
-   gDelphesDisplay = 0;
+   treeReader_ = 0;
+   delphesDisplay_ = 0;
 
    // initialize the application
    TEveManager::Create(kTRUE, "IV");
@@ -102,11 +102,11 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    // Create object of class ExRootTreeReader
    printf("*** Opening Delphes data file ***\n");
-   gTreeReader = new ExRootTreeReader(chain_);
+   treeReader_ = new ExRootTreeReader(chain_);
 
    // prepare data collections
-   readConfig(configFile, det3D, gElements, gArrays);
-   for(std::vector<DelphesBranchBase*>::iterator element = gElements.begin(); element<gElements.end(); ++element) {
+   readConfig(configFile, det3D, elements_, arrays_);
+   for(std::vector<DelphesBranchBase*>::iterator element = elements_.begin(); element<elements_.end(); ++element) {
      DelphesBranchElement<TEveTrackList>*   item_v1 = dynamic_cast<DelphesBranchElement<TEveTrackList>*>(*element);
      DelphesBranchElement<TEveElementList>* item_v2 = dynamic_cast<DelphesBranchElement<TEveElementList>*>(*element);
      if(item_v1) gEve->AddElement(item_v1->GetContainer());
@@ -114,12 +114,12 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    }
 
    // viewers and scenes
-   gDelphesDisplay = new DelphesDisplay;
+   delphesDisplay_ = new DelphesDisplay;
    gEve->AddGlobalElement(geometry);
-   gDelphesDisplay->ImportGeomRPhi(geometry);
-   gDelphesDisplay->ImportGeomRhoZ(geometry);
+   delphesDisplay_->ImportGeomRPhi(geometry);
+   delphesDisplay_->ImportGeomRhoZ(geometry);
    // find the first calo data and use that to initialize the calo display
-   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
+   for(std::vector<DelphesBranchBase*>::iterator data=elements_.begin();data<elements_.end();++data) {
      if(TString((*data)->GetType())=="tower") { // we could also use GetClassName()=="DelphesCaloData"
        DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>((*data))->GetContainer();
        assert(container);
@@ -127,20 +127,20 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
        calo3d->SetBarrelRadius(tkRadius_);
        calo3d->SetEndCapPos(tkHalfLength_);
        gEve->AddGlobalElement(calo3d);
-       gDelphesDisplay->ImportCaloRPhi(calo3d);
-       gDelphesDisplay->ImportCaloRhoZ(calo3d);
+       delphesDisplay_->ImportCaloRPhi(calo3d);
+       delphesDisplay_->ImportCaloRhoZ(calo3d);
        TEveCaloLego *lego = new TEveCaloLego(container);
        lego->InitMainTrans();
        lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
        lego->SetAutoRebin(kFALSE);
        lego->Set2DMode(TEveCaloLego::kValSizeOutline);
-       gDelphesDisplay->ImportCaloLego(lego);
+       delphesDisplay_->ImportCaloLego(lego);
        break;
      }
    }
 
-   //make_gui(); //TODO put back!
-   //load_event(); //TODO put back!
+   make_gui();
+   load_event();
    gEve->Redraw3D(kTRUE);   
 
 }
@@ -216,7 +216,7 @@ void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& 
        continue;
      }
 //TODO one possible simplification could be to add the array to the element class.
-     arrays.push_back(gTreeReader->UseBranch(name));
+     arrays.push_back(treeReader_->UseBranch(name));
    }
    // second loop for tracks
    for(Int_t b = 0; b<nBranches; ++b) {
@@ -231,7 +231,7 @@ void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& 
        trkProp->SetMagField(0., 0., -tk_Bz);
        trkProp->SetMaxR(tk_radius);
        trkProp->SetMaxZ(tk_length);
-       arrays.push_back(gTreeReader->UseBranch(name));
+       arrays.push_back(treeReader_->UseBranch(name));
      }
    }
 }
@@ -240,16 +240,16 @@ void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& 
 //______________________________________________________________________________
 void DelphesEventDisplay::load_event()
 {
-   // Load event specified in global event_id.
+   // Load event specified in global event_id_.
    // The contents of previous event are removed.
 
    //TODO move this to the status bar ???
-   printf("Loading event %d.\n", event_id);
+   printf("Loading event %d.\n", event_id_);
 
 
    // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
-   for(std::vector<DelphesBranchBase*>::iterator data=gElements.begin();data<gElements.end();++data) {
+   for(std::vector<DelphesBranchBase*>::iterator data=elements_.begin();data<elements_.end();++data) {
      (*data)->Reset();
    }
 
@@ -258,10 +258,10 @@ void DelphesEventDisplay::load_event()
 
    // update display
    TEveElement* top = (TEveElement*)gEve->GetCurrentEvent();
-   gDelphesDisplay->DestroyEventRPhi();
-   gDelphesDisplay->ImportEventRPhi(top);
-   gDelphesDisplay->DestroyEventRhoZ();
-   gDelphesDisplay->ImportEventRhoZ(top);
+   delphesDisplay_->DestroyEventRPhi();
+   delphesDisplay_->ImportEventRPhi(top);
+   delphesDisplay_->DestroyEventRhoZ();
+   delphesDisplay_->ImportEventRhoZ(top);
    //update_html_summary();
    gEve->Redraw3D(kFALSE, kTRUE);
 }
@@ -270,18 +270,18 @@ void DelphesEventDisplay::delphes_read()
 {
 
   // safety
-  if(event_id >= gTreeReader->GetEntries() || event_id<0 ) return;
+  if(event_id_ >= treeReader_->GetEntries() || event_id_<0 ) return;
 
   // Load selected branches with data from specified event
-  gTreeReader->ReadEntry(event_id);
+  treeReader_->ReadEntry(event_id_);
 
   // loop over selected branches, and apply the proper recipe to fill the collections.
-  // this is basically to loop on gArrays to fill gElements.
+  // this is basically to loop on arrays_ to fill elements_.
 
 //TODO: one option would be to have templated methods in the element classes. We could simply call "element.fill()"
-  std::vector<TClonesArray*>::iterator data = gArrays.begin();
-  std::vector<DelphesBranchBase*>::iterator element = gElements.begin();
-  for(; data<gArrays.end() && element<gElements.end(); ++data, ++element) {
+  std::vector<TClonesArray*>::iterator data = arrays_.begin();
+  std::vector<DelphesBranchBase*>::iterator element = elements_.begin();
+  for(; data<arrays_.end() && element<elements_.end(); ++data, ++element) {
     TString type = (*element)->GetType();
     // branch on the element type
     if(type=="tower") delphes_read_towers(*data,*element);
@@ -473,15 +473,14 @@ void DelphesEventDisplay::make_gui()
       if(!gSystem->OpenDirectory(icondir)) 
         icondir = Form("%s/icons/", (const char*)gSystem->GetFromPipe("root-config --etcdir") );
       TGPictureButton* b = 0;
-      EvNavHandler    *fh = new EvNavHandler(this);
 
       b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
       hf->AddFrame(b);
-      b->Connect("Clicked()", "EvNavHandler", fh, "Bck()");
+      b->Connect("Clicked()", "DelphesEventDisplay", this, "Bck()");
 
       b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
       hf->AddFrame(b);
-      b->Connect("Clicked()", "EvNavHandler", fh, "Fwd()");
+      b->Connect("Clicked()", "DelphesEventDisplay", this, "Fwd()");
    }
    frmMain->AddFrame(hf);
    frmMain->MapSubwindows();

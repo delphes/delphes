@@ -20,6 +20,7 @@
 #define DelphesEventDisplay_h
 
 #include <vector>
+#include <iostream>
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 #include "display/DelphesDisplay.h"
 #include "display/Delphes3DGeometry.h"
@@ -39,12 +40,10 @@ class DelphesEventDisplay
     DelphesEventDisplay();
     DelphesEventDisplay(const char *configFile, const char *inputFile, Delphes3DGeometry& det3D);
     ~DelphesEventDisplay();
-    Int_t event_id;
-    ExRootTreeReader *gTreeReader;
-    void load_event();
 
   private:
     void make_gui();
+    void load_event();
     void delphes_read();
     void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element);
     void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element);
@@ -53,41 +52,33 @@ class DelphesEventDisplay
     void readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays);
 
     // Configuration and global variables.
+    Int_t event_id_;
+    ExRootTreeReader *treeReader_;
     Double_t tkRadius_, totRadius_, tkHalfLength_, bz_;
     TChain* chain_;
-    std::vector<DelphesBranchBase*> gElements;
-    std::vector<TClonesArray*> gArrays;
-    DelphesDisplay *gDelphesDisplay;
+    std::vector<DelphesBranchBase*> elements_;
+    std::vector<TClonesArray*> arrays_;
+    DelphesDisplay *delphesDisplay_;
 
-    // EvNavHandler class is needed to connect GUI signals.
-    class EvNavHandler
-    {     
-      public:
-      
-         EvNavHandler(DelphesEventDisplay* display):display_(display) {}
+    // gui controls
+  public:
+     void Fwd() {  
+        if (event_id_ < treeReader_->GetEntries() - 1) {
+           ++event_id_;
+           load_event();
+        } else {
+           printf("Already at last event.\n");
+        }
+     }
 
-         ~EvNavHandler() {}
-
-         void Fwd() {  
-            if (display_->event_id < display_->gTreeReader->GetEntries() - 1) {
-               ++(display_->event_id);
-               display_->load_event();
-            } else {
-               printf("Already at last event.\n");
-            }
-         }
-
-         void Bck() {
-            if (display_->event_id > 0) {
-               --(display_->event_id);
-               display_->load_event();
-            } else {
-               printf("Already at first event.\n");
-            }
-         }
-       private:
-         DelphesEventDisplay* display_;
-    };
+     void Bck() {
+        if (event_id_ > 0) {
+           --event_id_;
+           load_event();
+        } else {
+           printf("Already at first event.\n");
+        }
+     }
 };
 
 #endif //DelphesEventDisplay_h
