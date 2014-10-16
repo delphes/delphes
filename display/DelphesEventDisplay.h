@@ -44,7 +44,6 @@ class DelphesEventDisplay
   private:
     void make_gui();
     void load_event();
-    void delphes_read();
     void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element);
     void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element);
     void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element);

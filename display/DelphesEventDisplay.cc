@@ -65,37 +65,18 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    totRadius_ = det3D.getDetectorRadius();
    tkHalfLength_ = det3D.getTrackerHalfLength();
    bz_ = det3D.getBField();
-
-   //TODO specific to some classical detector... could use better the det3D
    TGeoVolume* top = det3D.getDetector(false);
    geom->SetTopVolume(top);
    TEveElementList *geometry = new TEveElementList("Geometry");
-   TEveGeoTopNode* trk = new TEveGeoTopNode(gGeoManager, top->FindNode("tracker_1"));
-   trk->SetVisLevel(6);
-   geometry->AddElement(trk);
-   TEveGeoTopNode* calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_barrel_1"));
-   calo->SetVisLevel(3);
-   geometry->AddElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_1"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   geometry->AddElement(calo);
-   calo = new TEveGeoTopNode(gGeoManager, top->FindNode("Calorimeter_endcap_2"));
-   calo->SetVisLevel(3);
-   calo->UseNodeTrans();
-   geometry->AddElement(calo);
-   TEveGeoTopNode* muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_barrel_1"));
-   muon->SetVisLevel(4);
-   geometry->AddElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_1"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   geometry->AddElement(muon);
-   muon = new TEveGeoTopNode(gGeoManager, top->FindNode("muons_endcap_2"));
-   muon->SetVisLevel(4);
-   muon->UseNodeTrans();
-   geometry->AddElement(muon);
-   //gGeoManager->DefaultColors();
+   TObjArray* nodes = top->GetNodes();
+   TIter itNodes(nodes);
+   TGeoNode* nodeobj;
+   TEveGeoTopNode* node;
+   while((nodeobj = (TGeoNode*)itNodes.Next())) {
+     node = new TEveGeoTopNode(gGeoManager,nodeobj);
+     node->UseNodeTrans();
+     geometry->AddElement(node);
+   }
 
    // Create chain of root trees
    chain_->Add(inputFile);
@@ -144,6 +125,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    gEve->Redraw3D(kTRUE);   
 
 }
+
 // function that parses the config to extract the branches of interest and prepare containers
 void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays) {
    ExRootConfReader *confReader = new ExRootConfReader;
@@ -215,7 +197,6 @@ void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& 
      } else {
        continue;
      }
-//TODO one possible simplification could be to add the array to the element class.
      arrays.push_back(treeReader_->UseBranch(name));
    }
    // second loop for tracks
@@ -236,16 +217,16 @@ void DelphesEventDisplay::readConfig(const char *configFile, Delphes3DGeometry& 
    }
 }
 
-
-//______________________________________________________________________________
 void DelphesEventDisplay::load_event()
 {
    // Load event specified in global event_id_.
    // The contents of previous event are removed.
 
+   // safety
+   if(event_id_ >= treeReader_->GetEntries() || event_id_<0 ) return;
+
    //TODO move this to the status bar ???
    printf("Loading event %d.\n", event_id_);
-
 
    // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
@@ -253,8 +234,21 @@ void DelphesEventDisplay::load_event()
      (*data)->Reset();
    }
 
-   // read the new event
-   delphes_read();
+   // Load selected branches with data from specified event
+   treeReader_->ReadEntry(event_id_);
+
+   // loop over selected branches, and apply the proper recipe to fill the collections.
+   // this is basically to loop on arrays_ to fill elements_.
+   std::vector<TClonesArray*>::iterator data = arrays_.begin();
+   std::vector<DelphesBranchBase*>::iterator element = elements_.begin();
+   for(; data<arrays_.end() && element<elements_.end(); ++data, ++element) {
+     TString type = (*element)->GetType();
+     // branch on the element type
+     if(type=="tower") delphes_read_towers(*data,*element);
+     else if(type=="track" || type=="photon" || type=="electron" || type=="muon" || type=="genparticle") delphes_read_tracks(*data,*element);
+     else if(type=="jet") delphes_read_jets(*data,*element);
+     else if(type=="vector") delphes_read_vectors(*data,*element);
+   }
 
    // update display
    TEveElement* top = (TEveElement*)gEve->GetCurrentEvent();
@@ -263,32 +257,8 @@ void DelphesEventDisplay::load_event()
    delphesDisplay_->DestroyEventRhoZ();
    delphesDisplay_->ImportEventRhoZ(top);
    //update_html_summary();
+
    gEve->Redraw3D(kFALSE, kTRUE);
-}
-
-void DelphesEventDisplay::delphes_read()
-{
-
-  // safety
-  if(event_id_ >= treeReader_->GetEntries() || event_id_<0 ) return;
-
-  // Load selected branches with data from specified event
-  treeReader_->ReadEntry(event_id_);
-
-  // loop over selected branches, and apply the proper recipe to fill the collections.
-  // this is basically to loop on arrays_ to fill elements_.
-
-//TODO: one option would be to have templated methods in the element classes. We could simply call "element.fill()"
-  std::vector<TClonesArray*>::iterator data = arrays_.begin();
-  std::vector<DelphesBranchBase*>::iterator element = elements_.begin();
-  for(; data<arrays_.end() && element<elements_.end(); ++data, ++element) {
-    TString type = (*element)->GetType();
-    // branch on the element type
-    if(type=="tower") delphes_read_towers(*data,*element);
-    else if(type=="track" || type=="photon" || type=="electron" || type=="muon" || type=="genparticle") delphes_read_tracks(*data,*element);
-    else if(type=="jet") delphes_read_jets(*data,*element);
-    else if(type=="vector") delphes_read_vectors(*data,*element);
-  }
 }
 
 void DelphesEventDisplay::delphes_read_towers(TClonesArray* data, DelphesBranchBase* element) {
