@@ -1,20 +1,20 @@
 
-void evdisplay(const char* filename = "delphes_card_CMS.tcl", const char* ParticlePropagator="ParticlePropagator",
-                                                              const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
-                                                              const char* MuonEfficiency="MuonEfficiency",
-                                                              const char* Calorimeters="Calorimeter") 
+void evdisplay(const char* configfile = "delphes_card_CMS.tcl", const char* datafile = "delphes_output.root",
+               const char* ParticlePropagator="ParticlePropagator",
+               const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
+               const char* MuonEfficiency="MuonEfficiency",
+               const char* Calorimeters="Calorimeter") 
 {
-
    // load the libraries
    gSystem->Load("libGeom");
    gSystem->Load("../libDelphesDisplay");
 
    // create the detector representation
    Delphes3DGeometry det3D(new TGeoManager("delphes", "Delphes geometry"));
-   det3D.readFile(filename, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
+   det3D.readFile(configfile, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
 
    // create the application items
-   DelphesEventDisplay* display = new DelphesEventDisplay("delphes_card_CMS.tcl", "../delphes_output.root", det3D);
+   DelphesEventDisplay* display = new DelphesEventDisplay(configfile, datafile, det3D);
 
 /*
    // EClipType not exported to CINT (see TGLUtil.h):
