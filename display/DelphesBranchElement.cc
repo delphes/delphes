@@ -42,6 +42,7 @@ template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const cha
     }
 template<> void DelphesBranchElement<TEveElementList>::Reset() { data_->DestroyElements(); }
 
+//TODO: does the type really make sense?
 // special case for track lists
 template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, const char*type, const enum EColor color):DelphesBranchBase(name, type, color) {
       if(TString(type)=="track") {
@@ -57,7 +58,12 @@ template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char*
         data_->SetMarkerStyle(kCircle);
         data_->SetMarkerSize(0.5);
       } else {
-        throw std::exception();
+        data_ = new TEveTrackList(name);
+        data_->SetMainColor(color_);
+        data_->SetMarkerColor(color_);
+        data_->SetMarkerStyle(kCircle);
+        data_->SetMarkerSize(0.5);
+        //throw std::exception();
       }
     }
 template<> void DelphesBranchElement<TEveTrackList>::Reset() { data_->DestroyElements(); }
