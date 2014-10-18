@@ -25,6 +25,7 @@
 #include "display/DelphesDisplay.h"
 #include "display/Delphes3DGeometry.h"
 #include "TChain.h"
+#include "TAxis.h"
 #include "TClonesArray.h"
 
 /*
@@ -44,19 +45,15 @@ class DelphesEventDisplay
   private:
     void make_gui();
     void load_event();
-    void delphes_read_towers(TClonesArray* data, DelphesBranchBase* element);
-    void delphes_read_tracks(TClonesArray* data, DelphesBranchBase* element);
-    void delphes_read_jets(TClonesArray* data, DelphesBranchBase* element);
-    void delphes_read_vectors(TClonesArray* data, DelphesBranchBase* element);
-    void readConfig(const char *configFile, Delphes3DGeometry& det3D, std::vector<DelphesBranchBase*>& elements, std::vector<TClonesArray*>& arrays);
+    void readConfig(const char *configFile, std::vector<DelphesBranchBase*>& elements);
 
     // Configuration and global variables.
     Int_t event_id_;
     ExRootTreeReader *treeReader_;
-    Double_t tkRadius_, totRadius_, tkHalfLength_, bz_;
+    Double_t tkRadius_, totRadius_, tkHalfLength_, muHalfLength_, bz_;
+    TAxis *etaAxis_, *phiAxis_;
     TChain* chain_;
     std::vector<DelphesBranchBase*> elements_;
-    std::vector<TClonesArray*> arrays_;
     DelphesDisplay *delphesDisplay_;
 
     // gui controls
