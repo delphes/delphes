@@ -144,7 +144,10 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
      }
    }
 
+   // the GUI: control panel, summary tab
    make_gui();
+
+   //ready...
    load_event();
    gEve->Redraw3D(kTRUE);   
 
@@ -298,5 +301,14 @@ void DelphesEventDisplay::make_gui()
    frmMain->MapWindow();
    browser->StopEmbedding();
    browser->SetTabTitle("Event Control", 0);
+
+   // the summary tab
+   htmlSummary_ = new DelphesHtmlSummary("Delphes Event Display Summary Table");
+   TEveWindowSlot* slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
+   gHtml_ = new TGHtml(0, 100, 100);
+   TEveWindowFrame *wf = slot->MakeFrame(gHtml_);
+   gHtml_->MapSubwindows();
+   wf->SetElementName("Summary");
+
 }
 

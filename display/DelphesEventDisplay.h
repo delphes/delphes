@@ -24,8 +24,10 @@
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 #include "display/DelphesDisplay.h"
 #include "display/Delphes3DGeometry.h"
+#include "display/DelphesHtmlSummary.h"
 #include "TChain.h"
 #include "TAxis.h"
+#include "TGHtml.h"
 #include "TClonesArray.h"
 
 /*
@@ -55,6 +57,8 @@ class DelphesEventDisplay
     TChain* chain_;
     std::vector<DelphesBranchBase*> elements_;
     DelphesDisplay *delphesDisplay_;
+    DelphesHtmlSummary *htmlSummary_;
+    TGHtml *gHtml_;
 
     // gui controls
   public:

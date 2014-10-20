@@ -7,6 +7,7 @@ void evdisplay(const char* configfile = "delphes_card_CMS.tcl", const char* data
 {
    // load the libraries
    gSystem->Load("libGeom");
+   gSystem->Load("libGuiHtml");
    gSystem->Load("../libDelphesDisplay");
 
    // create the detector representation
