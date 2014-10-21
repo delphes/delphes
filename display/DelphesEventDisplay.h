@@ -45,6 +45,7 @@ class DelphesEventDisplay
     ~DelphesEventDisplay();
 
   private:
+    void update_html_summary();
     void make_gui();
     void load_event();
     void readConfig(const char *configFile, std::vector<DelphesBranchBase*>& elements);

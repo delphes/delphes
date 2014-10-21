@@ -45,6 +45,7 @@
 #include "TRootBrowser.h"
 #include "TGButton.h"
 #include "TClonesArray.h"
+#include "TEveEventManager.h"
 
 DelphesEventDisplay::DelphesEventDisplay()
 {
@@ -254,9 +255,69 @@ void DelphesEventDisplay::load_event()
    delphesDisplay_->ImportEventRPhi(top);
    delphesDisplay_->DestroyEventRhoZ();
    delphesDisplay_->ImportEventRhoZ(top);
-   //update_html_summary();
+   update_html_summary();
 
    gEve->Redraw3D(kFALSE, kTRUE);
+}
+
+void DelphesEventDisplay::update_html_summary()
+{
+   // Update summary of current event.
+
+   TEveElement::List_i i;
+   TEveElement::List_i j;
+   Int_t k;
+   TEveElement *el;
+   DelphesHtmlObjTable *table;
+   TEveEventManager *mgr = gEve ? gEve->GetCurrentEvent() : 0;
+   if (mgr) {
+      htmlSummary_->Clear("D");
+      for (i=mgr->BeginChildren(); i!=mgr->EndChildren(); ++i) {
+         el = ((TEveElement*)(*i));
+         if (el->IsA() == TEvePointSet::Class()) {
+            TEvePointSet *ps = (TEvePointSet *)el;
+            TString ename  = ps->GetElementName();
+            TString etitle = ps->GetElementTitle();
+            if (ename.First('\'') != kNPOS)
+               ename.Remove(ename.First('\''));
+            etitle.Remove(0, 2);
+            Int_t nel = atoi(etitle.Data());
+            table = htmlSummary_->AddTable(ename, 0, nel);
+         }
+         else if (el->IsA() == TEveTrackList::Class()) {
+            TEveTrackList *tracks = (TEveTrackList *)el;
+            TString ename  = tracks->GetElementName();
+            if (ename.First('\'') != kNPOS)
+               ename.Remove(ename.First('\''));
+            table = htmlSummary_->AddTable(ename.Data(), 5, 
+                     tracks->NumChildren(), kTRUE, "first");
+            table->SetLabel(0, "Momentum");
+            table->SetLabel(1, "P_t");
+            table->SetLabel(2, "Phi");
+            table->SetLabel(3, "Theta");
+            table->SetLabel(4, "Eta");
+            k=0;
+            for (j=tracks->BeginChildren(); j!=tracks->EndChildren(); ++j) {
+               Float_t p     = ((TEveTrack*)(*j))->GetMomentum().Mag();
+               table->SetValue(0, k, p);
+               Float_t pt    = ((TEveTrack*)(*j))->GetMomentum().Perp();
+               table->SetValue(1, k, pt);
+               Float_t phi   = ((TEveTrack*)(*j))->GetMomentum().Phi();
+               table->SetValue(2, k, phi);
+               Float_t theta = ((TEveTrack*)(*j))->GetMomentum().Theta();
+               table->SetValue(3, k, theta);
+               Float_t eta   = theta>0.0005 && theta<3.1413 ? ((TEveTrack*)(*j))->GetMomentum().Eta() : 1e10;
+               table->SetValue(4, k, eta);
+               ++k;
+            }
+         }
+      }
+      htmlSummary_->Build();
+      gHtml_->Clear();
+      gHtml_->ParseText((char*)htmlSummary_->Html().Data());
+      gHtml_->Layout();
+   }
+  
 }
 
 /******************************************************************************/
