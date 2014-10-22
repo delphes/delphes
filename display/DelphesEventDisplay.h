@@ -25,10 +25,12 @@
 #include "display/DelphesDisplay.h"
 #include "display/Delphes3DGeometry.h"
 #include "display/DelphesHtmlSummary.h"
+#include "display/DelphesPlotSummary.h"
 #include "TChain.h"
 #include "TAxis.h"
 #include "TGHtml.h"
 #include "TClonesArray.h"
+#include "TGStatusBar.h"
 
 /*
  * assembly.C: sauvegarde as shape-extract -> implement in the geometry class (read/write)
@@ -60,6 +62,8 @@ class DelphesEventDisplay
     DelphesDisplay *delphesDisplay_;
     DelphesHtmlSummary *htmlSummary_;
     TGHtml *gHtml_;
+    DelphesPlotSummary *plotSummary_;
+    TGStatusBar* fStatusBar_;
 
     // gui controls
   public:

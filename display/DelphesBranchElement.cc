@@ -26,7 +26,7 @@
 #include <iostream>
 
 // special case for calo towers
-template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color):DelphesBranchBase(name, branch, color) {
+template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
     data_ = new DelphesCaloData(2);
     data_->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
     data_->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
@@ -48,7 +48,7 @@ template<> void DelphesBranchElement<DelphesCaloData>::ReadBranch() {
 }
 
 // special case for element lists
-template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color):DelphesBranchBase(name, branch, color) {
+template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
     data_ = new TEveElementList(name);
     data_->SetMainColor(color_);
 }
@@ -77,10 +77,8 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
     MissingET *MET;
     TEveArrow *eveMet;
     // Missing Et
-    Double_t maxPt = 50.;
-    // TODO to be changed as we don't have access to maxPt anymore. MET scale could be a general parameter set in GUI
     while((MET = (MissingET*) itMet.Next())) {
-      eveMet = new TEveArrow((tkRadius_ * MET->MET/maxPt)*cos(MET->Phi), (tkRadius_ * MET->MET/maxPt)*sin(MET->Phi), 0., 0., 0., 0.);
+      eveMet = new TEveArrow((tkRadius_ * MET->MET/maxPt_)*cos(MET->Phi), (tkRadius_ * MET->MET/maxPt_)*sin(MET->Phi), 0., 0., 0., 0.);
       eveMet->SetMainColor(GetColor());
       eveMet->SetTubeR(0.04);
       eveMet->SetConeR(0.08);
@@ -94,7 +92,7 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
 }
 
 // special case for track lists
-template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color):DelphesBranchBase(name, branch, color) {
+template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
   data_ = new TEveTrackList(name);
   data_->SetMainColor(color_);
   data_->SetMarkerColor(color_);
@@ -184,6 +182,7 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
   } else if(type=="GenParticle") { // CASE 5: GENPARTICLES
     GenParticle *particle;
     while((particle = (GenParticle *) itTrack.Next())) {
+      if(particle->Status != 1) continue;
       TParticle pb(particle->PID, particle->Status, particle->M1, particle->M2, particle->D1, particle->D2,
                    particle->P4().Px(), particle->P4().Py(),
                    particle->P4().Pz(), particle->P4().E(),

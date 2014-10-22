@@ -44,8 +44,11 @@
 #include "TSystem.h"
 #include "TRootBrowser.h"
 #include "TGButton.h"
+#include "TRootEmbeddedCanvas.h"
 #include "TClonesArray.h"
 #include "TEveEventManager.h"
+#include "TCanvas.h"
+#include "TH1F.h"
 
 DelphesEventDisplay::DelphesEventDisplay()
 {
@@ -80,6 +83,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    // initialize the application
    TEveManager::Create(kTRUE, "IV");
+   fStatusBar_ = gEve->GetBrowser()->GetStatusBar();
    TGeoManager* geom = gGeoManager;
 
    // build the detector
@@ -107,7 +111,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    chain_->Add(inputFile);
 
    // Create object of class ExRootTreeReader
-   printf("*** Opening Delphes data file ***\n");
+   fStatusBar_->SetText("Opening Delphes data file", 1);
    treeReader_ = new ExRootTreeReader(chain_);
 
    // prepare data collections
@@ -149,6 +153,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    make_gui();
 
    //ready...
+   fStatusBar_->SetText("Ready.", 1);
    load_event();
    gEve->Redraw3D(kTRUE);   
 
@@ -234,8 +239,8 @@ void DelphesEventDisplay::load_event()
    // safety
    if(event_id_ >= treeReader_->GetEntries() || event_id_<0 ) return;
 
-   //TODO move this to the status bar ???
-   printf("Loading event %d.\n", event_id_);
+   // message
+   fStatusBar_->SetText(Form("Loading event %d.", event_id_), 1);
 
    // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
@@ -256,8 +261,10 @@ void DelphesEventDisplay::load_event()
    delphesDisplay_->DestroyEventRhoZ();
    delphesDisplay_->ImportEventRhoZ(top);
    update_html_summary();
+   //TODO: update plot tab (show current event on top)
 
    gEve->Redraw3D(kFALSE, kTRUE);
+   fStatusBar_->SetText(Form("Loaded event %d.", event_id_), 1);
 }
 
 void DelphesEventDisplay::update_html_summary()
@@ -369,7 +376,44 @@ void DelphesEventDisplay::make_gui()
    gHtml_ = new TGHtml(0, 100, 100);
    TEveWindowFrame *wf = slot->MakeFrame(gHtml_);
    gHtml_->MapSubwindows();
-   wf->SetElementName("Summary");
+   wf->SetElementName("Summary tables");
+
+   // plot tab
+   slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
+   TEveWindowTab* tab = slot->MakeTab();
+   tab->SetElementName("Summary plots");
+   tab->SetShowTitleBar(kFALSE);
+   plotSummary_ = new DelphesPlotSummary(tab);
+   plotSummary_->Init(elements_);
+   plotSummary_->FillSample(treeReader_); //TODO later, control it via a GUI button.
+   plotSummary_->FillEvent(); //TODO later move to event loop
+
+   //for test
+   TH1F* h;
+   TRootEmbeddedCanvas* trec;
+   TCanvas* gCanvas_;
+
+   slot = tab->NewSlot();
+   trec = new TRootEmbeddedCanvas();
+   gCanvas_ = trec->GetCanvas();
+   wf = slot->MakeFrame(trec);
+   wf->SetElementName("Tracks");
+   h = new TH1F("tracks","tracks",100,0,100);
+   gCanvas_->cd();
+   h->Draw();
+
+   slot = tab->NewSlot();
+   trec = new TRootEmbeddedCanvas();
+   gCanvas_ = trec->GetCanvas();
+   wf = slot->MakeFrame(trec);
+   wf->SetElementName("Electrons");
+   h = new TH1F("electrons","electrons",100,0,100);
+   gCanvas_->cd();
+   h->Draw();
+ 
+   // TODO: here we have, for each collection, Pt,Eta,Phi for all, leading, subleading
+   // for each event, we will then add a marker with the current value and/or a histo for current event.
+   // this means to create one tab with subtabs (one per collection). 
 
 }
 

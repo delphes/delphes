@@ -33,7 +33,7 @@
 class DelphesBranchBase
 {
   public:
-    DelphesBranchBase(const char* name="", TClonesArray* branch=NULL, const enum EColor color=kBlack):name_(name),branch_(branch),color_(color) {}
+    DelphesBranchBase(const char* name="", TClonesArray* branch=NULL, const enum EColor color=kBlack, Float_t maxPt=50.):name_(name),branch_(branch),color_(color) {}
     virtual ~DelphesBranchBase() {}
     const char* GetName() const { return (const char*)name_; }
     const char* GetType() const { return branch_ ? branch_->GetClass()->GetName() : "None"; }
@@ -45,6 +45,7 @@ class DelphesBranchBase
 
   protected:
     TString name_;
+    Float_t maxPt_;
     TClonesArray* branch_;
     const enum EColor color_;
     Float_t tkRadius_,tkHalfLength_, tk_Bz_;
@@ -55,7 +56,7 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
 {
   public:
     // constructor
-    DelphesBranchElement(const char* name="", TClonesArray* branch=NULL, const enum EColor color=kBlack):DelphesBranchBase(name, branch, color) {
+    DelphesBranchElement(const char* name="", TClonesArray* branch=NULL, const enum EColor color=kBlack, Float_t maxPt=50.):DelphesBranchBase(name, branch, color, maxPt) {
       throw std::exception();
     }
 
@@ -84,17 +85,17 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
 #if !defined(__CINT__) && !defined(__CLING__)
 
 // special case for calo towers
-template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color);
+template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt);
 template<> void DelphesBranchElement<DelphesCaloData>::Reset();
 template<> void DelphesBranchElement<DelphesCaloData>::ReadBranch();
 
 // special case for element lists
-template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color);
+template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt);
 template<> void DelphesBranchElement<TEveElementList>::Reset();
 template<> void DelphesBranchElement<TEveElementList>::ReadBranch();
 
 // special case for track lists
-template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color);
+template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt);
 template<> void DelphesBranchElement<TEveTrackList>::SetTrackingVolume(Float_t r, Float_t l, Float_t Bz);
 template<> void DelphesBranchElement<TEveTrackList>::Reset();
 template<> void DelphesBranchElement<TEveTrackList>::ReadBranch();
