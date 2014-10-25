@@ -83,6 +83,7 @@ void DelphesPlotSummary::Draw() {
     std::vector<TMarker*> eventMarkers = eventMarkers_[it->first];
     for(Int_t i=0;i<9;++i) {
       c->cd(i+1);
+      if(histograms[i]->GetEntries()==0) continue;
       histograms[i]->Draw();
       if(i<3) {
         eventProfiles[i]->Draw("same");
