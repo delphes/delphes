@@ -25,6 +25,8 @@
 #include "TEveVector.h"
 #include <iostream>
 
+//TODO implement GetVectors()
+
 // special case for calo towers
 template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
     data_ = new DelphesCaloData(2);
@@ -45,6 +47,19 @@ template<> void DelphesBranchElement<DelphesCaloData>::ReadBranch() {
     }
     data_->DataChanged();
   }
+}
+template<> std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::GetVectors() {
+  std::vector<TLorentzVector> output;
+  if(TString(GetType())=="Tower") {
+    TIter itTower(branch_);
+    Tower *tower;
+    while((tower = (Tower *) itTower.Next())) {
+      TLorentzVector v;
+      v.SetPtEtaPhiM(tower->Eem+tower->Ehad,(tower->Edges[0]+tower->Edges[1])/2.,(tower->Edges[2]+tower->Edges[3])/2.,0.);
+      output.push_back(v);
+    }
+  }
+  return output;
 }
 
 // special case for element lists
@@ -89,6 +104,29 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
       data_->AddElement(eveMet);
     }
   }
+}
+template<> std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors() {
+  std::vector<TLorentzVector> output;
+  if(TString(GetType())=="Jet") {
+    TIter itJet(branch_);
+    Jet *jet;
+    // Loop over all jets
+    while((jet = (Jet *) itJet.Next())) {
+      TLorentzVector v;
+      v.SetPtEtaPhiM(jet->PT, jet->Eta, jet->Phi, jet->Mass);
+      output.push_back(v);
+    }
+  } else if(TString(GetType())=="MissingET") {
+    TIter itMet(branch_);
+    MissingET *MET;
+    // Missing Et
+    while((MET = (MissingET*) itMet.Next())) {
+      TLorentzVector v;
+      v.SetPtEtaPhiM(MET->MET,MET->Eta,MET->Phi,0.);
+      output.push_back(v);
+    }
+  }
+  return output;
 }
 
 // special case for track lists
@@ -197,4 +235,37 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       eveTrack->MakeTrack();
     }
   }
+}
+template<> std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors() {
+  std::vector<TLorentzVector> output;
+  TString type = GetType();
+  TIter itTrack(branch_);
+  if(type=="Track") { // CASE 1: TRACKS
+    Track *track;
+    while((track = (Track *) itTrack.Next())) {
+      output.push_back(track->P4());
+    }
+  } else if(type=="Electron") { // CASE 2: ELECTRONS
+    Electron *electron;
+    while((electron = (Electron *) itTrack.Next())) {
+      output.push_back(electron->P4());
+    }
+  } else if(type=="Muon") { // CASE 3: MUONS
+    Muon *muon;
+    while((muon = (Muon *) itTrack.Next())) {
+      output.push_back(muon->P4());
+    }
+  } else if(type=="Photon") { // CASE 4: PHOTONS
+    Photon *photon;
+    while((photon = (Photon *) itTrack.Next())) {
+      output.push_back(photon->P4());
+    }
+  } else if(type=="GenParticle") { // CASE 5: GENPARTICLES
+    GenParticle *particle;
+    while((particle = (GenParticle *) itTrack.Next())) {
+      if(particle->Status != 1) continue;
+        output.push_back(particle->P4());
+    }
+  }
+  return output;
 }

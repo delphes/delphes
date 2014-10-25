@@ -155,6 +155,9 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    //ready...
    fStatusBar_->SetText("Ready.", 1);
    load_event();
+   plotSummary_->FillSample(treeReader_, event_id_); //TODO later, control it via a GUI button.
+   plotSummary_->FillEvent(); //TODO later move to event loop
+   plotSummary_->Draw();
    gEve->Redraw3D(kTRUE);   
 
 }
@@ -385,35 +388,5 @@ void DelphesEventDisplay::make_gui()
    tab->SetShowTitleBar(kFALSE);
    plotSummary_ = new DelphesPlotSummary(tab);
    plotSummary_->Init(elements_);
-   plotSummary_->FillSample(treeReader_); //TODO later, control it via a GUI button.
-   plotSummary_->FillEvent(); //TODO later move to event loop
-
-   //for test
-   TH1F* h;
-   TRootEmbeddedCanvas* trec;
-   TCanvas* gCanvas_;
-
-   slot = tab->NewSlot();
-   trec = new TRootEmbeddedCanvas();
-   gCanvas_ = trec->GetCanvas();
-   wf = slot->MakeFrame(trec);
-   wf->SetElementName("Tracks");
-   h = new TH1F("tracks","tracks",100,0,100);
-   gCanvas_->cd();
-   h->Draw();
-
-   slot = tab->NewSlot();
-   trec = new TRootEmbeddedCanvas();
-   gCanvas_ = trec->GetCanvas();
-   wf = slot->MakeFrame(trec);
-   wf->SetElementName("Electrons");
-   h = new TH1F("electrons","electrons",100,0,100);
-   gCanvas_->cd();
-   h->Draw();
- 
-   // TODO: here we have, for each collection, Pt,Eta,Phi for all, leading, subleading
-   // for each event, we will then add a marker with the current value and/or a histo for current event.
-   // this means to create one tab with subtabs (one per collection). 
-
 }
 

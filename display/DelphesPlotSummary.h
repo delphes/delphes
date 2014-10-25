@@ -16,13 +16,17 @@ class DelphesPlotSummary
     DelphesPlotSummary(TEveWindowTab* tab);
     virtual ~DelphesPlotSummary();
     void Init(std::vector<DelphesBranchBase*>& elements);
-    void FillSample(ExRootTreeReader* treeReader);
+    void FillSample(ExRootTreeReader* treeReader, Int_t event_id);
     void FillEvent();
+    void Draw();
 
   private:
     TEveWindowTab* tab_;
-    std::vector<TCanvas*> canvases;
-    std::map< TString, std::vector<TH1F*> > histograms;
+    std::map< TString, TCanvas* >           canvases_;
+    std::map< TString, std::vector<TH1F*> > histograms_;
+    std::vector<DelphesBranchBase*>* elements_;
+    std::map< TString, std::vector<TMarker*> > eventMarkers_;
+    std::map< TString, std::vector<TH1F*> > eventProfiles_;
 
 };
 

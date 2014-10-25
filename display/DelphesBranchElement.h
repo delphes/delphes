@@ -42,6 +42,7 @@ class DelphesBranchBase
     virtual void Reset() = 0;
     virtual void SetTrackingVolume(Float_t r, Float_t l, Float_t Bz=0.) { tkRadius_ = r; tkHalfLength_ = l; tk_Bz_ = Bz; }
     virtual void ReadBranch() = 0;
+    virtual std::vector<TLorentzVector> GetVectors() = 0;
 
   protected:
     TString name_;
@@ -78,6 +79,9 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
     // read the branch and fill elements for display
     virtual void ReadBranch() {}
 
+    // return the vector for all elements
+    virtual std::vector<TLorentzVector> GetVectors() { std::vector<TLorentzVector> v; return v; }
+
   private:
     EveContainer* data_;
 };
@@ -88,17 +92,20 @@ template<typename EveContainer> class DelphesBranchElement: public DelphesBranch
 template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt);
 template<> void DelphesBranchElement<DelphesCaloData>::Reset();
 template<> void DelphesBranchElement<DelphesCaloData>::ReadBranch();
+template<> std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::GetVectors();
 
 // special case for element lists
 template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt);
 template<> void DelphesBranchElement<TEveElementList>::Reset();
 template<> void DelphesBranchElement<TEveElementList>::ReadBranch();
+template<> std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors();
 
 // special case for track lists
 template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt);
 template<> void DelphesBranchElement<TEveTrackList>::SetTrackingVolume(Float_t r, Float_t l, Float_t Bz);
 template<> void DelphesBranchElement<TEveTrackList>::Reset();
 template<> void DelphesBranchElement<TEveTrackList>::ReadBranch();
+template<> std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors();
 
 #endif // CINT, CLING
 
