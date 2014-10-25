@@ -1,10 +1,14 @@
 #include "display/DelphesPlotSummary.h"
 #include "TRootEmbeddedCanvas.h"
+#include <algorithm>
 
+bool vecsorter (TLorentzVector i,TLorentzVector j) { return (i.Pt()>j.Pt()); }
 
 DelphesPlotSummary::DelphesPlotSummary(TEveWindowTab* tab):tab_(tab) {}
 
 DelphesPlotSummary::~DelphesPlotSummary() {}
+
+//TODO: sort the vectors before filling.
 
 void DelphesPlotSummary::Init(std::vector<DelphesBranchBase*>& elements) {
   elements_ = &elements;
@@ -49,6 +53,7 @@ void DelphesPlotSummary::FillSample(ExRootTreeReader* treeReader, Int_t event_id
     treeReader->ReadEntry(i);
     for(std::vector<DelphesBranchBase*>::iterator element = elements_->begin();element<elements_->end();++element) {
       std::vector<TLorentzVector> vectors = (*element)->GetVectors();
+      std::sort(vectors.begin(), vectors.end(), vecsorter); 
       std::vector<TH1F*> histograms = histograms_[(*element)->GetName()];
       for(std::vector<TLorentzVector>::iterator it=vectors.begin(); it<vectors.end();++it) {
         histograms[0]->Fill(it->Pt());
@@ -79,11 +84,15 @@ void DelphesPlotSummary::Draw() {
     for(Int_t i=0;i<9;++i) {
       c->cd(i+1);
       histograms[i]->Draw();
-      if(i<3) 
+      if(i<3) {
         eventProfiles[i]->Draw("same");
-      else
-        eventMarkers[i-3]->Draw("same");
+      } else {
+        if(eventMarkers.size()>(unsigned int)(i-3)) {
+          eventMarkers[i-3]->Draw("same");
+        }
+      }
     }
+    c->Update();
   } 
 }
 
@@ -103,9 +112,10 @@ void DelphesPlotSummary::FillEvent() {
   eventProfiles_.clear();
   // loop over the elements and fill markers with event data
   TMarker *m;
-  std::vector<TMarker*> mv;
   for(std::vector<DelphesBranchBase*>::iterator element = elements_->begin();element<elements_->end();++element) {
+    std::vector<TMarker*> mv;
     std::vector<TLorentzVector> vectors = (*element)->GetVectors();
+    std::sort(vectors.begin(), vectors.end(), vecsorter); 
     std::vector<TH1F*> histograms = histograms_[(*element)->GetName()];
     TH1F* h1 = (TH1F*)histograms[0]->Clone(); h1->Reset(); h1->SetLineColor(kBlue);
     TH1F* h2 = (TH1F*)histograms[1]->Clone(); h2->Reset(); h2->SetLineColor(kBlue);
@@ -115,19 +125,19 @@ void DelphesPlotSummary::FillEvent() {
       h2->Fill(it->Eta());
       h3->Fill(it->Phi());
       if(it==vectors.begin()) {
-        m = new TMarker(it->Pt(),0,29); m->SetMarkerColor(kBlue);
+        m = new TMarker(it->Pt(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
         mv.push_back(m);
-        m = new TMarker(it->Eta(),0,29); m->SetMarkerColor(kBlue);
+        m = new TMarker(it->Eta(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
         mv.push_back(m);
-        m = new TMarker(it->Phi(),0,29); m->SetMarkerColor(kBlue);
+        m = new TMarker(it->Phi(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
         mv.push_back(m);
       }
       if(it==vectors.begin()+1) {
-        m = new TMarker(it->Pt(),0,29); m->SetMarkerColor(kBlue);
+        m = new TMarker(it->Pt(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
         mv.push_back(m);
-        m = new TMarker(it->Eta(),0,29); m->SetMarkerColor(kBlue);
+        m = new TMarker(it->Eta(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
         mv.push_back(m);
-        m = new TMarker(it->Phi(),0,29); m->SetMarkerColor(kBlue);
+        m = new TMarker(it->Phi(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
         mv.push_back(m);
       }
     }

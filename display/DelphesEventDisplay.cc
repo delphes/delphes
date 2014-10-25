@@ -154,10 +154,8 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    //ready...
    fStatusBar_->SetText("Ready.", 1);
-   load_event();
    plotSummary_->FillSample(treeReader_, event_id_); //TODO later, control it via a GUI button.
-   plotSummary_->FillEvent(); //TODO later move to event loop
-   plotSummary_->Draw();
+   load_event();
    gEve->Redraw3D(kTRUE);   
 
 }
@@ -264,7 +262,8 @@ void DelphesEventDisplay::load_event()
    delphesDisplay_->DestroyEventRhoZ();
    delphesDisplay_->ImportEventRhoZ(top);
    update_html_summary();
-   //TODO: update plot tab (show current event on top)
+   plotSummary_->FillEvent();
+   plotSummary_->Draw();
 
    gEve->Redraw3D(kFALSE, kTRUE);
    fStatusBar_->SetText(Form("Loaded event %d.", event_id_), 1);
