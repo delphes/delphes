@@ -33,8 +33,8 @@ endif
 
 ifneq ($(PROMC),)
 HAS_PROMC = true
-CXXFLAGS += -I$(PROMC)/include
-DELPHES_LIBS += -L$(PROMC)/lib -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
+CXXFLAGS += -I$(PROMC)/include -I$(PROMC)/src 
+DELPHES_LIBS += -L$(PROMC)/lib -lpromc -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
 endif
 
 ifneq ($(PYTHIA8),)
@@ -237,35 +237,12 @@ tmp/readers/DelphesProMC.$(ObjSuf): \
 	classes/DelphesFactory.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootProgressBar.h \
-	external/ProMC/ProMCBook.h
+	external/ExRootAnalysis/ExRootProgressBar.h
 EXECUTABLE +=  \
 	DelphesProMC$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesProMC.$(ObjSuf)
-
-tmp/external/ProMC/ProMCBook.$(ObjSuf): \
-	external/ProMC/ProMCBook.$(SrcSuf)
-tmp/external/ProMC/ProMC.pb.$(ObjSuf): \
-	external/ProMC/ProMC.pb.$(SrcSuf)
-tmp/external/ProMC/ProMCStat.pb.$(ObjSuf): \
-	external/ProMC/ProMCStat.pb.$(SrcSuf)
-tmp/external/ProMC/ProMCHeader.pb.$(ObjSuf): \
-	external/ProMC/ProMCHeader.pb.$(SrcSuf)
-tmp/external/ProMC/ProMCDescription.pb.$(ObjSuf): \
-	external/ProMC/ProMCDescription.pb.$(SrcSuf)
-DELPHES_OBJ +=  \
-	tmp/external/ProMC/ProMCBook.$(ObjSuf) \
-	tmp/external/ProMC/ProMC.pb.$(ObjSuf) \
-	tmp/external/ProMC/ProMCStat.pb.$(ObjSuf) \
-	tmp/external/ProMC/ProMCHeader.pb.$(ObjSuf) \
-	tmp/external/ProMC/ProMCDescription.pb.$(ObjSuf)
-
-ifeq ($(HAS_PYTHIA8),true)
-DELPHES_OBJ +=  \
-	
-endif
 
 endif
 

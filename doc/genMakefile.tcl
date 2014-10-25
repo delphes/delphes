@@ -224,8 +224,8 @@ endif
 
 ifneq ($(PROMC),)
 HAS_PROMC = true
-CXXFLAGS += -I$(PROMC)/include
-DELPHES_LIBS += -L$(PROMC)/lib -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
+CXXFLAGS += -I$(PROMC)/include -I$(PROMC)/src 
+DELPHES_LIBS += -L$(PROMC)/lib -lpromc -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
 endif
 
 ifneq ($(PYTHIA8),)
@@ -267,7 +267,6 @@ puts {}
 
 puts {ifeq ($(HAS_PROMC),true)}
 executableDeps {readers/DelphesProMC.cpp}
-sourceDeps {DELPHES} {external/ProMC/*.cc}
 puts {endif}
 puts {}
 
