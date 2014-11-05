@@ -8,8 +8,6 @@ DelphesPlotSummary::DelphesPlotSummary(TEveWindowTab* tab):tab_(tab) {}
 
 DelphesPlotSummary::~DelphesPlotSummary() {}
 
-//TODO: sort the vectors before filling.
-
 void DelphesPlotSummary::Init(std::vector<DelphesBranchBase*>& elements) {
   elements_ = &elements;
   // loop on the elements, and create tabs
@@ -97,7 +95,7 @@ void DelphesPlotSummary::Draw() {
   } 
 }
 
-void DelphesPlotSummary::FillEvent() {
+void DelphesPlotSummary::FillEvent() { //TODO make it faster... try to reuse objects and simply change the values
   // clear previous markers
   for(std::map< TString, std::vector<TMarker*> >::iterator mv = eventMarkers_.begin(); mv!=eventMarkers_.end();++mv) {
     for(std::vector<TMarker*>::iterator m = mv->second.begin(); m<mv->second.end();++m) {

@@ -44,6 +44,9 @@
 #include "TSystem.h"
 #include "TRootBrowser.h"
 #include "TGButton.h"
+#include "TGTextEntry.h"
+#include "TGProgressBar.h"
+#include "TGNumberEntry.h"
 #include "TRootEmbeddedCanvas.h"
 #include "TClonesArray.h"
 #include "TEveEventManager.h"
@@ -112,6 +115,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    // Create object of class ExRootTreeReader
    fStatusBar_->SetText("Opening Delphes data file", 1);
+   gSystem->ProcessEvents();
    treeReader_ = new ExRootTreeReader(chain_);
 
    // prepare data collections
@@ -154,7 +158,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    //ready...
    fStatusBar_->SetText("Ready.", 1);
-   plotSummary_->FillSample(treeReader_, event_id_); //TODO later, control it via a GUI button.
+   gSystem->ProcessEvents();
    load_event();
    gEve->Redraw3D(kTRUE);   
 
@@ -242,6 +246,7 @@ void DelphesEventDisplay::load_event()
 
    // message
    fStatusBar_->SetText(Form("Loading event %d.", event_id_), 1);
+   gSystem->ProcessEvents();
 
    // clear the previous event
    gEve->GetViewers()->DeleteAnnotations();
@@ -267,6 +272,7 @@ void DelphesEventDisplay::load_event()
 
    gEve->Redraw3D(kFALSE, kTRUE);
    fStatusBar_->SetText(Form("Loaded event %d.", event_id_), 1);
+   gSystem->ProcessEvents();
 }
 
 void DelphesEventDisplay::update_html_summary()
@@ -336,10 +342,10 @@ void DelphesEventDisplay::update_html_summary()
 void DelphesEventDisplay::make_gui()
 {
    // Create minimal GUI for event navigation.
-   // TODO: better GUI could be made based on the ch15 of the manual (Writing a GUI)
 
    // add a tab on the left
    TEveBrowser* browser = gEve->GetBrowser();
+   browser->SetWindowName("Delphes Event Display");
    browser->StartEmbedding(TRootBrowser::kLeft);
 
    // set the main title
@@ -348,24 +354,47 @@ void DelphesEventDisplay::make_gui()
    frmMain->SetCleanup(kDeepCleanup);
 
    // build the navigation menu
-   TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
+   TString icondir;
+   if(gSystem->Getenv("ROOTSYS"))
+     icondir = Form("%s/icons/", gSystem->Getenv("ROOTSYS"));
+   if(!gSystem->OpenDirectory(icondir)) 
+     icondir = Form("%s/icons/", (const char*)gSystem->GetFromPipe("root-config --etcdir") );
+   TGGroupFrame* vf = new TGGroupFrame(frmMain,"Event navigation",kVerticalFrame | kFitWidth );
    {
-      TString icondir;
-      if(gSystem->Getenv("ROOTSYS"))
-        icondir = Form("%s/icons/", gSystem->Getenv("ROOTSYS"));
-      if(!gSystem->OpenDirectory(icondir)) 
-        icondir = Form("%s/icons/", (const char*)gSystem->GetFromPipe("root-config --etcdir") );
-      TGPictureButton* b = 0;
+     TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
+     {
+        TGPictureButton* b = 0;
 
-      b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
-      hf->AddFrame(b);
-      b->Connect("Clicked()", "DelphesEventDisplay", this, "Bck()");
+        b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
+        hf->AddFrame(b, new TGLayoutHints(kLHintsLeft | kLHintsCenterY , 10, 2, 10, 10));
+        b->Connect("Clicked()", "DelphesEventDisplay", this, "Bck()");
 
-      b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
-      hf->AddFrame(b);
-      b->Connect("Clicked()", "DelphesEventDisplay", this, "Fwd()");
+        numberEntry_ = new TGNumberEntry(hf,0,9,-1,TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, treeReader_->GetEntries());
+        hf->AddFrame(numberEntry_, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY , 2, 0, 10, 10));
+        numberEntry_->Connect("ValueSet(Long_t)", "DelphesEventDisplay", this, "GoTo(Long_t)");
+        
+        b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
+        hf->AddFrame(b, new TGLayoutHints(kLHintsRight | kLHintsCenterY , 2, 10, 10, 10));
+        b->Connect("Clicked()", "DelphesEventDisplay", this, "Fwd()");
+  
+     }
+     vf->AddFrame(hf, new TGLayoutHints(kLHintsExpandX , 2, 2, 2, 2));
+
+     progress_ = new TGHProgressBar(frmMain, TGProgressBar::kFancy, 100);
+     progress_->SetMax( treeReader_->GetEntries());
+     progress_->ShowPosition(kTRUE, kFALSE, "Event %.0f");
+     progress_->SetBarColor("green");
+     vf->AddFrame(progress_, new TGLayoutHints(kLHintsExpandX, 10, 10, 5, 5));
    }
-   frmMain->AddFrame(hf);
+   frmMain->AddFrame(vf, new TGLayoutHints(kLHintsExpandX , 5, 5, 5, 5));
+   vf = new TGGroupFrame(frmMain,"Batch operations",kVerticalFrame | kFitWidth );
+   {
+        TGTextButton *b = new TGTextButton(vf, "Initialize Summary Plots");
+        vf->AddFrame(b, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY | kLHintsExpandX, 10, 10, 10, 10));
+        b->Connect("Clicked()", "DelphesEventDisplay", this, "InitSummaryPlots()");
+   }
+   frmMain->AddFrame(vf, new TGLayoutHints(kLHintsExpandX , 5, 5, 5, 5));
+
    frmMain->MapSubwindows();
    frmMain->Resize();
    frmMain->MapWindow();

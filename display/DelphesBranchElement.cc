@@ -25,8 +25,6 @@
 #include "TEveVector.h"
 #include <iostream>
 
-//TODO implement GetVectors()
-
 // special case for calo towers
 template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
     data_ = new DelphesCaloData(2);

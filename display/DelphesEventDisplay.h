@@ -31,6 +31,10 @@
 #include "TGHtml.h"
 #include "TClonesArray.h"
 #include "TGStatusBar.h"
+#include "TGNumberEntry.h"
+#include "TGProgressBar.h"
+
+
 
 /*
  * assembly.C: sauvegarde as shape-extract -> implement in the geometry class (read/write)
@@ -64,12 +68,17 @@ class DelphesEventDisplay
     TGHtml *gHtml_;
     DelphesPlotSummary *plotSummary_;
     TGStatusBar* fStatusBar_;
+    TGNumberEntry* numberEntry_; // event_id
+    TGHProgressBar* progress_; // event_id
+    
 
     // gui controls
   public:
      void Fwd() {  
-        if (event_id_ < treeReader_->GetEntries() - 1) {
+        if (event_id_ < treeReader_->GetEntries() - 2) {
            ++event_id_;
+           numberEntry_->SetIntNumber(event_id_);
+           progress_->SetPosition(event_id_);
            load_event();
         } else {
            printf("Already at last event.\n");
@@ -79,11 +88,30 @@ class DelphesEventDisplay
      void Bck() {
         if (event_id_ > 0) {
            --event_id_;
+           numberEntry_->SetIntNumber(event_id_);
+           progress_->SetPosition(event_id_);
            load_event();
         } else {
            printf("Already at first event.\n");
         }
      }
+
+    void GoTo(Long_t ev) {
+      Int_t event = Int_t(numberEntry_->GetNumber());
+      if (event < treeReader_->GetEntries()-1) {
+        event_id_ = event;
+        progress_->SetPosition(event_id_);  //TODO we could provide a signal related to event_id changes
+        load_event();
+      } else {
+        printf("Error: no such event.\n");
+      }
+    }
+
+    void InitSummaryPlots() {
+      plotSummary_->FillSample(treeReader_, event_id_); // TODO we could add a signal to give the progress
+      plotSummary_->FillEvent();
+      plotSummary_->Draw();
+    }
 };
 
 #endif //DelphesEventDisplay_h
