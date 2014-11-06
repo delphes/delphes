@@ -357,7 +357,12 @@ DELPHES_DICT_PCM +=  \
 tmp/display/DisplayDict.$(SrcSuf): \
 	display/DisplayLinkDef.h \
 	display/DelphesDisplay.h \
-	display/DelphesCaloData.h
+	display/DelphesCaloData.h \
+	display/DelphesBranchElement.h \
+	display/Delphes3DGeometry.h \
+	display/DelphesEventDisplay.h \
+	display/DelphesHtmlSummary.h \
+	display/DelphesPlotSummary.h
 DisplayDict$(PcmSuf): \
 	tmp/display/DisplayDict$(PcmSuf) \
 	tmp/display/DisplayDict.$(SrcSuf)
@@ -1211,11 +1216,40 @@ endif
 tmp/display/DelphesDisplay.$(ObjSuf): \
 	display/DelphesDisplay.$(SrcSuf) \
 	display/DelphesDisplay.h
+tmp/display/DelphesPlotSummary.$(ObjSuf): \
+	display/DelphesPlotSummary.$(SrcSuf) \
+	display/DelphesPlotSummary.h
+tmp/display/DelphesBranchElement.$(ObjSuf): \
+	display/DelphesBranchElement.$(SrcSuf) \
+	display/DelphesBranchElement.h \
+	classes/DelphesClasses.h
+tmp/display/DelphesEventDisplay.$(ObjSuf): \
+	display/DelphesEventDisplay.$(SrcSuf) \
+	external/ExRootAnalysis/ExRootConfReader.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	display/DelphesCaloData.h \
+	display/DelphesBranchElement.h \
+	display/Delphes3DGeometry.h \
+	display/DelphesEventDisplay.h \
+	classes/DelphesClasses.h
+tmp/display/DelphesHtmlSummary.$(ObjSuf): \
+	display/DelphesHtmlSummary.$(SrcSuf) \
+	display/DelphesHtmlSummary.h
+tmp/display/Delphes3DGeometry.$(ObjSuf): \
+	display/Delphes3DGeometry.$(SrcSuf) \
+	display/Delphes3DGeometry.h \
+	external/ExRootAnalysis/ExRootConfReader.h \
+	classes/DelphesClasses.h
 tmp/display/DelphesCaloData.$(ObjSuf): \
 	display/DelphesCaloData.$(SrcSuf) \
 	display/DelphesCaloData.h
 DISPLAY_OBJ +=  \
 	tmp/display/DelphesDisplay.$(ObjSuf) \
+	tmp/display/DelphesPlotSummary.$(ObjSuf) \
+	tmp/display/DelphesBranchElement.$(ObjSuf) \
+	tmp/display/DelphesEventDisplay.$(ObjSuf) \
+	tmp/display/DelphesHtmlSummary.$(ObjSuf) \
+	tmp/display/Delphes3DGeometry.$(ObjSuf) \
 	tmp/display/DelphesCaloData.$(ObjSuf)
 
 ifeq ($(HAS_PYTHIA8),true)
@@ -1437,6 +1471,10 @@ modules/PileUpMerger.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+display/DelphesBranchElement.h: \
+	display/DelphesCaloData.h
+	@touch $@
+
 external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
@@ -1474,6 +1512,14 @@ external/fastjet/version.hh: \
 
 modules/MomentumSmearing.h: \
 	classes/DelphesModule.h
+	@touch $@
+
+display/DelphesEventDisplay.h: \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	display/DelphesDisplay.h \
+	display/Delphes3DGeometry.h \
+	display/DelphesHtmlSummary.h \
+	display/DelphesPlotSummary.h
 	@touch $@
 
 modules/TauTagging.h: \
@@ -1560,6 +1606,10 @@ modules/ImpactParameterSmearing.h: \
 
 modules/Hector.h: \
 	classes/DelphesModule.h
+	@touch $@
+
+display/DelphesPlotSummary.h: \
+	external/ExRootAnalysis/ExRootTreeReader.h
 	@touch $@
 
 modules/Weighter.h: \
