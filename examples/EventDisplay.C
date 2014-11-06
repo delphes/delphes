@@ -1,12 +1,12 @@
 /* Example:
- * root -l 'evdisplay.C("delphes_card_CMS.tcl","../delphes_output.root")'
+ * root -l 'EventDisplay.C("delphes_card_CMS.tcl","../delphes_output.root")'
  */
 
-void evdisplay(const char* configfile = "delphes_card_CMS.tcl", const char* datafile = "delphes_output.root",
-               const char* ParticlePropagator="ParticlePropagator",
-               const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
-               const char* MuonEfficiency="MuonEfficiency",
-               const char* Calorimeters="Calorimeter") 
+void EventDisplay(const char* configfile = "delphes_card_CMS.tcl", const char* datafile = "delphes_output.root",
+                  const char* ParticlePropagator="ParticlePropagator",
+                  const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
+                  const char* MuonEfficiency="MuonEfficiency",
+                  const char* Calorimeters="Calorimeter") 
 {
    // load the libraries
    gSystem->Load("libGeom");
