@@ -429,5 +429,8 @@ void DelphesEventDisplay::make_gui()
    tab->SetShowTitleBar(kFALSE);
    plotSummary_ = new DelphesPlotSummary(tab);
    plotSummary_->Init(elements_);
+   plotSummary_->Connect("Progress(Int_t)", "DelphesEventDisplay", this, "DisplayProgress(Int_t)");
+
 }
+
 

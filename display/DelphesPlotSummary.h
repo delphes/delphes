@@ -9,9 +9,12 @@
 #include "TEveWindow.h"
 #include "DelphesBranchElement.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
+#include <RQ_OBJECT.h>
+
 
 class DelphesPlotSummary
 {
+    RQ_OBJECT("DelphesPlotSummary")
   public:
     DelphesPlotSummary(TEveWindowTab* tab);
     virtual ~DelphesPlotSummary();
@@ -19,6 +22,7 @@ class DelphesPlotSummary
     void FillSample(ExRootTreeReader* treeReader, Int_t event_id);
     void FillEvent();
     void Draw();
+    void Progress(Int_t); // *SIGNAL*
 
   private:
     TEveWindowTab* tab_;

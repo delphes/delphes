@@ -26,6 +26,7 @@
 #include "display/Delphes3DGeometry.h"
 #include "display/DelphesHtmlSummary.h"
 #include "display/DelphesPlotSummary.h"
+#include "TSystem.h"
 #include "TChain.h"
 #include "TAxis.h"
 #include "TGHtml.h"
@@ -104,9 +105,14 @@ class DelphesEventDisplay
     }
 
     void InitSummaryPlots() {
-      plotSummary_->FillSample(treeReader_, event_id_); // TODO we could add a signal to give the progress
+      plotSummary_->FillSample(treeReader_, event_id_);
       plotSummary_->FillEvent();
       plotSummary_->Draw();
+    }
+
+    void DisplayProgress(Int_t p) { //TODO replace by a progress bar
+         fStatusBar_->SetText(Form("Processing... %d %%",p), 1);
+         gSystem->ProcessEvents();
     }
 };
 

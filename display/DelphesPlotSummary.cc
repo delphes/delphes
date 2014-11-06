@@ -8,6 +8,11 @@ DelphesPlotSummary::DelphesPlotSummary(TEveWindowTab* tab):tab_(tab) {}
 
 DelphesPlotSummary::~DelphesPlotSummary() {}
 
+void DelphesPlotSummary::Progress(Int_t p)
+{
+  Emit("Progress(Int_t)",p);
+}
+
 void DelphesPlotSummary::Init(std::vector<DelphesBranchBase*>& elements) {
   elements_ = &elements;
   // loop on the elements, and create tabs
@@ -47,7 +52,8 @@ void DelphesPlotSummary::Init(std::vector<DelphesBranchBase*>& elements) {
 }
 
 void DelphesPlotSummary::FillSample(ExRootTreeReader* treeReader, Int_t event_id) {
-  for(Int_t i=0;i<treeReader->GetEntries();++i) {
+  Int_t entries = treeReader->GetEntries();
+  for(Int_t i=0;i<entries;++i) {
     treeReader->ReadEntry(i);
     for(std::vector<DelphesBranchBase*>::iterator element = elements_->begin();element<elements_->end();++element) {
       std::vector<TLorentzVector> vectors = (*element)->GetVectors();
@@ -69,8 +75,10 @@ void DelphesPlotSummary::FillSample(ExRootTreeReader* treeReader, Int_t event_id
         }
       }
     }
+    Progress(int(100*i/entries));
   }
   treeReader->ReadEntry(event_id);
+  Progress(100);
 }
 
 void DelphesPlotSummary::Draw() {

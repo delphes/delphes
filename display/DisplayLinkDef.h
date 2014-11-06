@@ -35,6 +35,7 @@
 #include "display/Delphes3DGeometry.h"
 #include "display/DelphesEventDisplay.h"
 #include "display/DelphesHtmlSummary.h"
+#include "display/DelphesPlotSummary.h"
 
 #ifdef __CINT__
 
@@ -51,6 +52,7 @@
 #pragma link C++ class DelphesEventDisplay;
 #pragma link C++ class DelphesHtmlObjTable;
 #pragma link C++ class DelphesHtmlSummary;
+#pragma link C++ class DelphesPlotSummary;
 
 #endif
 
