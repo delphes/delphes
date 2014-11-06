@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DDROP_CGAL")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
 # Declare ROOT dependency
-find_package(ROOT COMPONENTS EG Eve GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
+find_package(ROOT COMPONENTS EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
 include(${ROOT_USE_FILE})
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
