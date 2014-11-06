@@ -33,6 +33,7 @@
 #include "TGStatusBar.h"
 #include "TGNumberEntry.h"
 #include "TGProgressBar.h"
+#include <RQ_OBJECT.h>
 
 
 
@@ -45,10 +46,12 @@
 
 class DelphesEventDisplay
 {
+    RQ_OBJECT("DelphesEventDisplay")
   public:
     DelphesEventDisplay();
     DelphesEventDisplay(const char *configFile, const char *inputFile, Delphes3DGeometry& det3D);
     ~DelphesEventDisplay();
+    void EventChanged(Int_t); // *SIGNAL*
 
   private:
     void update_html_summary();
@@ -58,6 +61,7 @@ class DelphesEventDisplay
 
     // Configuration and global variables.
     Int_t event_id_;
+    Int_t event_id_tmp_;
     ExRootTreeReader *treeReader_;
     Double_t tkRadius_, totRadius_, tkHalfLength_, muHalfLength_, bz_;
     TAxis *etaAxis_, *phiAxis_;
@@ -68,18 +72,12 @@ class DelphesEventDisplay
     TGHtml *gHtml_;
     DelphesPlotSummary *plotSummary_;
     TGStatusBar* fStatusBar_;
-    TGNumberEntry* numberEntry_; // event_id
-    TGHProgressBar* progress_; // event_id
     
-
     // gui controls
   public:
      void Fwd() {  
         if (event_id_ < treeReader_->GetEntries() - 2) {
-           ++event_id_;
-           numberEntry_->SetIntNumber(event_id_);
-           progress_->SetPosition(event_id_);
-           load_event();
+           EventChanged(event_id_+1);
         } else {
            printf("Already at last event.\n");
         }
@@ -87,21 +85,19 @@ class DelphesEventDisplay
 
      void Bck() {
         if (event_id_ > 0) {
-           --event_id_;
-           numberEntry_->SetIntNumber(event_id_);
-           progress_->SetPosition(event_id_);
-           load_event();
+           EventChanged(event_id_-1);
         } else {
            printf("Already at first event.\n");
         }
      }
 
-    void GoTo(Long_t ev) {
-      Int_t event = Int_t(numberEntry_->GetNumber());
-      if (event < treeReader_->GetEntries()-1) {
-        event_id_ = event;
-        progress_->SetPosition(event_id_);  //TODO we could provide a signal related to event_id changes
-        load_event();
+    void PreSetEv(char* ev) {
+      event_id_tmp_ = Int_t(atoi(ev));
+    }
+
+    void GoTo() {
+      if (event_id_tmp_>=0 && event_id_tmp_ < treeReader_->GetEntries()-1) {
+        EventChanged(event_id_tmp_);
       } else {
         printf("Error: no such event.\n");
       }

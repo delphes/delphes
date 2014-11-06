@@ -73,6 +73,16 @@ DelphesEventDisplay::~DelphesEventDisplay()
    delete chain_;
 }
 
+void DelphesEventDisplay::EventChanged(Int_t e)
+{
+  if( e!= event_id_ ) {
+    event_id_ = e;
+    Emit("EventChanged(Int_t)",e);
+    load_event();
+  }
+}
+
+
 DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inputFile, Delphes3DGeometry& det3D)
 {
    event_id_ = 0;
@@ -369,9 +379,11 @@ void DelphesEventDisplay::make_gui()
         hf->AddFrame(b, new TGLayoutHints(kLHintsLeft | kLHintsCenterY , 10, 2, 10, 10));
         b->Connect("Clicked()", "DelphesEventDisplay", this, "Bck()");
 
-        numberEntry_ = new TGNumberEntry(hf,0,9,-1,TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, treeReader_->GetEntries());
-        hf->AddFrame(numberEntry_, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY , 2, 0, 10, 10));
-        numberEntry_->Connect("ValueSet(Long_t)", "DelphesEventDisplay", this, "GoTo(Long_t)");
+        TGNumberEntry* numberEntry = new TGNumberEntry(hf,0,9,-1,TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, treeReader_->GetEntries());
+        hf->AddFrame(numberEntry, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY , 2, 0, 10, 10));
+        this->Connect("EventChanged(Int_t)","TGNumberEntry",numberEntry,"SetIntNumber(Long_t)");
+        numberEntry->GetNumberEntry()->Connect("TextChanged(char*)", "DelphesEventDisplay", this, "PreSetEv(char*)");
+        numberEntry->GetNumberEntry()->Connect("ReturnPressed()", "DelphesEventDisplay", this, "GoTo()");
         
         b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoForward.gif"));
         hf->AddFrame(b, new TGLayoutHints(kLHintsRight | kLHintsCenterY , 2, 10, 10, 10));
@@ -380,11 +392,12 @@ void DelphesEventDisplay::make_gui()
      }
      vf->AddFrame(hf, new TGLayoutHints(kLHintsExpandX , 2, 2, 2, 2));
 
-     progress_ = new TGHProgressBar(frmMain, TGProgressBar::kFancy, 100);
-     progress_->SetMax( treeReader_->GetEntries());
-     progress_->ShowPosition(kTRUE, kFALSE, "Event %.0f");
-     progress_->SetBarColor("green");
-     vf->AddFrame(progress_, new TGLayoutHints(kLHintsExpandX, 10, 10, 5, 5));
+     TGHProgressBar* progress = new TGHProgressBar(frmMain, TGProgressBar::kFancy, 100);
+     progress->SetMax( treeReader_->GetEntries());
+     progress->ShowPosition(kTRUE, kFALSE, "Event %.0f");
+     progress->SetBarColor("green");
+     vf->AddFrame(progress, new TGLayoutHints(kLHintsExpandX, 10, 10, 5, 5));
+     this->Connect("EventChanged(Int_t)","TGHProgressBar",progress,"SetPosition(Float_t)");
    }
    frmMain->AddFrame(vf, new TGLayoutHints(kLHintsExpandX , 5, 5, 5, 5));
    vf = new TGGroupFrame(frmMain,"Batch operations",kVerticalFrame | kFitWidth );
