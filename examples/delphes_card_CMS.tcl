@@ -488,8 +488,8 @@ module EnergyScale JetEnergyScale {
   set InputArray FastJetFinder/jets
   set OutputArray jets
 
- # scale formula for jets
-  set ScaleFormula {1.00}
+  # scale formula for jets
+  set ScaleFormula {sqrt( (2.5 - 0.15*(abs(eta)))^2 / pt + 1.0 )}
 }
 
 ###########
