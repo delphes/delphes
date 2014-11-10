@@ -157,7 +157,7 @@ void ParticlePropagator::Process()
 
     if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
     {
-      // solve pt2*t^2 + 2*(px*x + py*y)*t + (fRadius2 - x*x - y*y) = 0
+      // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
       tmp = px*y - py*x;
       discr2 = pt2*fRadius2 - tmp*tmp;
 
