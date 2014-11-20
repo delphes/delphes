@@ -191,7 +191,7 @@ void IdentificationMap::Process()
          // cout<<"Final PID: "<<candidate->PID<<endl;
 	
 	  fOutputArray->Add(candidate);
-        
+          break;
       }
      }	
 	
