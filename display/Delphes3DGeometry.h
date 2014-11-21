@@ -34,7 +34,7 @@
 
 class Delphes3DGeometry {
    public:
-     Delphes3DGeometry(TGeoManager *geom = NULL);
+     Delphes3DGeometry(TGeoManager *geom = NULL, bool transp = false);
      ~Delphes3DGeometry() {}
 
      void readFile(const char* filename, const char* ParticlePropagator="ParticlePropagator",

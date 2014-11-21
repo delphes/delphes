@@ -414,6 +414,9 @@ void DelphesEventDisplay::make_gui()
    browser->StopEmbedding();
    browser->SetTabTitle("Event Control", 0);
 
+   // Geometry tab
+   // TODO add a tab with the full geometry
+   
    // the summary tab
    htmlSummary_ = new DelphesHtmlSummary("Delphes Event Display Summary Table");
    TEveWindowSlot* slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());

@@ -14,10 +14,16 @@ void EventDisplay(const char* configfile = "delphes_card_CMS.tcl", const char* d
    gSystem->Load("../libDelphesDisplay");
 
    // create the detector representation
-   Delphes3DGeometry det3D(new TGeoManager("delphes", "Delphes geometry"));
+   Delphes3DGeometry det3D(new TGeoManager("delphes", "Delphes geometry"), true);
    det3D.readFile(configfile, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
 
    // create the application
    DelphesEventDisplay* display = new DelphesEventDisplay(configfile, datafile, det3D);
+
+   // another view of the geometry, in another window and without transparency
+   Delphes3DGeometry det3D_geom(new TGeoManager("delphes", "Delphes geometry"), false);
+   det3D_geom.readFile(configfile, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
+   new TCanvas;
+   det3D_geom.getDetector()->Draw();
 }
 
