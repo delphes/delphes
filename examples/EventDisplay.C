@@ -1,5 +1,6 @@
 /* Example:
  * root -l 'EventDisplay.C("delphes_card_CMS.tcl","../delphes_output.root")'
+ * root -l 'EventDisplay.C("delphes_card_FCC_basic.tcl","../delphes_output.root","ParticlePropagator","ChargedHadronTrackingEfficiency","MuonTrackingEfficiency","Ecal,Hcal")'
  */
 
 void EventDisplay(const char* configfile = "delphes_card_CMS.tcl", const char* datafile = "delphes_output.root",
