@@ -379,29 +379,21 @@ module Merger EFlowMerger {
 }
 
 
+
 #############
 # Rho pile-up
 #############
 
-module FastJetFinder Rho {
-#  set InputArray Calorimeter/towers
+module FastJetGridMedianEstimator Rho {
+  
   set InputArray EFlowMerger/eflow
-
-  set ComputeRho true
   set RhoOutputArray rho
 
-  # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
-  set AreaAlgorithm 5
+  # etamin etamax gridsize_eta gridsize_phi 
+  
+  add GridRange 0.0 2.5 1.0 1.0
+  add GridRange 2.5 5.0 1.0 1.0
 
-  # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 4
-  set ParameterR 0.6
-  set GhostEtaMax 5.0
-
-  add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 5.0
-
-  set JetPTMin 0.0
 }
 
 #####################
