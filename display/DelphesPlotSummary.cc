@@ -48,6 +48,31 @@ void DelphesPlotSummary::Init(std::vector<DelphesBranchBase*>& elements) {
     h = new TH1F(Form("sl%sPhi",(*data)->GetName()),Form("subleading %s Phi",(*data)->GetName()),100,0,-1);
     histograms.push_back(h);
     histograms_[(*data)->GetName()] = histograms;
+    // the event histograms
+    TH1F* h1 = (TH1F*)histograms[0]->Clone(); h1->Reset(); h1->SetLineColor(kBlue);
+    TH1F* h2 = (TH1F*)histograms[1]->Clone(); h2->Reset(); h2->SetLineColor(kBlue);
+    TH1F* h3 = (TH1F*)histograms[2]->Clone(); h3->Reset(); h3->SetLineColor(kBlue);
+    std::vector<TH1F*> hv;
+    hv.push_back(h1);
+    hv.push_back(h2);
+    hv.push_back(h3);
+    eventProfiles_[(*data)->GetName()] = hv;
+    // the event markers
+    TMarker *m;
+    std::vector<TMarker*> mv;
+    m = new TMarker(0,0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
+    mv.push_back(m);
+    m = new TMarker(0,0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
+    mv.push_back(m);
+    m = new TMarker(0,0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
+    mv.push_back(m);
+    m = new TMarker(0,0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
+    mv.push_back(m);
+    m = new TMarker(0,0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
+    mv.push_back(m);
+    m = new TMarker(0,0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
+    mv.push_back(m);
+    eventMarkers_[(*data)->GetName()] = mv;
   }
 }
 
@@ -94,65 +119,48 @@ void DelphesPlotSummary::Draw() {
       if(i<3) {
         eventProfiles[i]->Draw("same");
       } else {
-        if(eventMarkers.size()>(unsigned int)(i-3)) {
-          eventMarkers[i-3]->Draw("same");
-        }
+        eventMarkers[i-3]->Draw("same");
       }
     }
     c->Update();
   } 
 }
 
-void DelphesPlotSummary::FillEvent() { //TODO make it faster... try to reuse objects and simply change the values
-  // clear previous markers
-  for(std::map< TString, std::vector<TMarker*> >::iterator mv = eventMarkers_.begin(); mv!=eventMarkers_.end();++mv) {
-    for(std::vector<TMarker*>::iterator m = mv->second.begin(); m<mv->second.end();++m) {
-      delete *m;
-    }
-  }
-  eventMarkers_.clear();
+void DelphesPlotSummary::FillEvent() {
+  // clear event histograms and markers
   for(std::map< TString, std::vector<TH1F*> >::iterator hv = eventProfiles_.begin(); hv!=eventProfiles_.end();++hv) {
     for(std::vector<TH1F*>::iterator h = hv->second.begin(); h<hv->second.end();++h) {
-      delete *h;
+      (*h)->Reset();
     }
   }
-  eventProfiles_.clear();
+  for(std::map< TString, std::vector<TMarker*> >::iterator mv = eventMarkers_.begin(); mv!=eventMarkers_.end();++mv) {
+    for(std::vector<TMarker*>::iterator m = mv->second.begin(); m<mv->second.end();++m) {
+      (*m)->SetMarkerSize(0);
+    }
+  }
   // loop over the elements and fill markers with event data
-  TMarker *m;
   for(std::vector<DelphesBranchBase*>::iterator element = elements_->begin();element<elements_->end();++element) {
-    std::vector<TMarker*> mv;
     std::vector<TLorentzVector> vectors = (*element)->GetVectors();
     std::sort(vectors.begin(), vectors.end(), vecsorter); 
-    std::vector<TH1F*> histograms = histograms_[(*element)->GetName()];
-    TH1F* h1 = (TH1F*)histograms[0]->Clone(); h1->Reset(); h1->SetLineColor(kBlue);
-    TH1F* h2 = (TH1F*)histograms[1]->Clone(); h2->Reset(); h2->SetLineColor(kBlue);
-    TH1F* h3 = (TH1F*)histograms[2]->Clone(); h3->Reset(); h3->SetLineColor(kBlue);
+    std::vector<TH1F*> hv = eventProfiles_[(*element)->GetName()];
+    TH1F* h1 = hv[0]; h1->Reset();
+    TH1F* h2 = hv[1]; h1->Reset();
+    TH1F* h3 = hv[2]; h1->Reset();
+    std::vector<TMarker*> mv = eventMarkers_[(*element)->GetName()];
     for(std::vector<TLorentzVector>::iterator it=vectors.begin(); it<vectors.end();++it) {
       h1->Fill(it->Pt());
       h2->Fill(it->Eta());
       h3->Fill(it->Phi());
       if(it==vectors.begin()) {
-        m = new TMarker(it->Pt(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
-        mv.push_back(m);
-        m = new TMarker(it->Eta(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
-        mv.push_back(m);
-        m = new TMarker(it->Phi(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
-        mv.push_back(m);
+        mv[0]->SetX(it->Pt()); mv[0]->SetMarkerSize(3);
+        mv[1]->SetX(it->Eta()); mv[1]->SetMarkerSize(3);
+        mv[2]->SetX(it->Phi()); mv[2]->SetMarkerSize(3);
       }
       if(it==vectors.begin()+1) {
-        m = new TMarker(it->Pt(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
-        mv.push_back(m);
-        m = new TMarker(it->Eta(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
-        mv.push_back(m);
-        m = new TMarker(it->Phi(),0,29); m->SetMarkerColor(kBlue); m->SetMarkerSize(3);
-        mv.push_back(m);
+        mv[3]->SetX(it->Pt()); mv[3]->SetMarkerSize(3);
+        mv[4]->SetX(it->Eta()); mv[4]->SetMarkerSize(3);
+        mv[5]->SetX(it->Phi()); mv[5]->SetMarkerSize(3);
       }
     }
-    std::vector<TH1F*> hv;
-    hv.push_back(h1);
-    hv.push_back(h2);
-    hv.push_back(h3);
-    eventProfiles_[(*element)->GetName()] = hv;
-    eventMarkers_[(*element)->GetName()] = mv;
   }
 }

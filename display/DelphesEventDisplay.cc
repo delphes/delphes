@@ -155,7 +155,8 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
        delphesDisplay_->ImportCaloRhoZ(calo3d);
        TEveCaloLego *lego = new TEveCaloLego(container);
        lego->InitMainTrans();
-       lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
+ //    lego->RefMainTrans().SetScale(TMath::TwoPi(), TMath::TwoPi(), TMath::Pi());
+       lego->RefMainTrans().SetScale(100, 100, TMath::Pi());
        lego->SetAutoRebin(kFALSE);
        lego->Set2DMode(TEveCaloLego::kValSizeOutline);
        delphesDisplay_->ImportCaloLego(lego);
@@ -414,9 +415,6 @@ void DelphesEventDisplay::make_gui()
    browser->StopEmbedding();
    browser->SetTabTitle("Event Control", 0);
 
-   // Geometry tab
-   // TODO add a tab with the full geometry
-   
    // the summary tab
    htmlSummary_ = new DelphesHtmlSummary("Delphes Event Display Summary Table");
    TEveWindowSlot* slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());

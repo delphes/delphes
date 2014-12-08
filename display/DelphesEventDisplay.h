@@ -110,7 +110,7 @@ class DelphesEventDisplay
       plotSummary_->Draw();
     }
 
-    void DisplayProgress(Int_t p) { //TODO replace by a progress bar
+    void DisplayProgress(Int_t p) { 
          fStatusBar_->SetText(Form("Processing... %d %%",p), 1);
          gSystem->ProcessEvents();
     }
