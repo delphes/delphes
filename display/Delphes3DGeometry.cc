@@ -41,7 +41,7 @@
 
 using namespace std;
 
-Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
+Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom, bool transp) {
 
    //--- the geometry manager
    geom_ = geom==NULL? gGeoManager : geom;
@@ -50,8 +50,10 @@ Delphes3DGeometry::Delphes3DGeometry(TGeoManager *geom) {
    //--- define some materials
    TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0,0,0);
    TGeoMaterial *matAl = new TGeoMaterial("Al", 26.98,13,2.7); // placeholder
-   matVacuum->SetTransparency(85);
-   matAl->SetTransparency(85);
+   if(transp) {
+     matVacuum->SetTransparency(85);
+     matAl->SetTransparency(85);
+   }
 
    //--- define some media
    TGeoMedium *Vacuum = new TGeoMedium("Vacuum",1, matVacuum);
