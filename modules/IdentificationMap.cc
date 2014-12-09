@@ -19,7 +19,7 @@
 
 /** \class IdentificationMap
  *
- *  Converts particles with some PDG code into another particle, according to parametrized probability as fction of pt eta
+ *  Converts particles with some PDG code into another particle, according to parametrized probability as function of pt eta
  given by user. 
  *
  *  $Date: 2014-08-07 14:57:44 +0100 (Thu, 07 Aug 2014) $
