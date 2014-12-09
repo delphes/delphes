@@ -300,6 +300,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/FastJetGridMedianEstimator.h \
 	modules/ParticlePropagator.h \
 	modules/Efficiency.h \
+	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
 	modules/MomentumSmearing.h \
 	modules/ImpactParameterSmearing.h \
@@ -695,6 +696,15 @@ tmp/modules/PdgCodeFilter.$(ObjSuf): \
 tmp/modules/EnergyScale.$(ObjSuf): \
 	modules/EnergyScale.$(SrcSuf) \
 	modules/EnergyScale.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/IdentificationMap.$(ObjSuf): \
+	modules/IdentificationMap.$(SrcSuf) \
+	modules/IdentificationMap.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -1163,6 +1173,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
+	tmp/modules/IdentificationMap.$(ObjSuf) \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/MomentumSmearing.$(ObjSuf) \
@@ -1486,6 +1497,14 @@ classes/DelphesModule.h: \
 	external/ExRootAnalysis/ExRootTask.h
 	@touch $@
 
+modules/IdentificationMap.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/ExampleModule.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -1495,10 +1514,6 @@ modules/EnergyScale.h: \
 	@touch $@
 
 modules/Merger.h: \
-	classes/DelphesModule.h
-	@touch $@
-
-modules/ExampleModule.h: \
 	classes/DelphesModule.h
 	@touch $@
 
