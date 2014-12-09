@@ -49,6 +49,8 @@ Quick start with Delphes
 
 2) Simulate p p -> b b~ events 
 
+
+  wget http://cp3.irmp.ucl.ac.be/downloads/pp2bb.hep.tgz
   tar -xzvf pp2bb.hep.tgz
   ./DelphesSTDHEP examples/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
 
@@ -57,88 +59,4 @@ For more details, please visit:
 
 https://cp3.irmp.ucl.ac.be/projects/delphes
 
-
-
-Simple analysis using TTree::Draw
-=================================
-
-Now we can start ROOT and look at the data stored in the output ROOT file.
-
-Start ROOT and load Delphes shared library:
-
-   root -l
-   gSystem->Load("libDelphes");
-
-Open ROOT file and do some basic analysis using Draw or TBrowser:
-
-   TFile::Open("delphes_output.root");
-   Delphes->Draw("Track.PT");
-   TBrowser browser;
-
-Note 1: Delphes - tree name, it can be learned e.g. from TBrowser
-
-Note 2: Track - branch name; PT - variable (leaf) of this branch
-
-Complete description of all branches can be found in
-
-   doc/RootTreeDescription.html
-
-This information is also available at
-
-   https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
-
-
-Macro-based analysis
-====================
-
-Analysis macro consists of histogram booking, event loop (histogram filling),
-histogram display.
-
-Start ROOT and load Delphes shared library:
-
-   root -l
-   gSystem->Load("libDelphes");
-
-Basic analysis macro:
-
-{
-  // Create chain of root trees
-  TChain chain("Delphes");
-  chain.Add("delphes_output.root");
-  
-  // Create object of class ExRootTreeReader
-  ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-  Long64_t numberOfEntries = treeReader->GetEntries();
-  
-  // Get pointers to branches used in this analysis
-  TClonesArray *branchTrack = treeReader->UseBranch("Track");
-
-  // Book histograms
-  TH1 *histTrackPT = new TH1F("track pt", "track P_{T}", 50, 0.0, 20.0);
-
-  // Loop over all events
-  for(Int_t entry = 0; entry < numberOfEntries; ++entry)
-  {
-
-    // Load selected branches with data from specified event
-    treeReader->ReadEntry(entry);
-  
-    // If event contains at least 1 track
-    if(branchTrack->GetEntries() > 0)
-    {
-      // Take first track
-      Track *track = (Track*) branchTrack->At(0);
-      
-      // Plot track transverse momentum
-      histTrackPT->Fill(track->PT);
-      
-      // Print electron transverse momentum and Particle Data Group ID
-      cout << track->PID<< "   " << track->PT << endl;
-    }
-
-  }
-
-  // Show resulting histograms
-  histTrackPT->Draw();
-}
 
