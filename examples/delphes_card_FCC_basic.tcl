@@ -14,6 +14,7 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
+  AngularSmearing
   ImpactParameterSmearing
   
   Ecal
@@ -51,12 +52,12 @@ module ParticlePropagator ParticlePropagator {
   set MuonOutputArray muons
 
   # radius of the magnetic field coverage, in m
-  set Radius 5.00
+  set Radius 2.60
   # half-length of the magnetic field coverage, in m
-  set HalfLength 12.00
+  set HalfLength 6.00
 
   # magnetic field
-  set Bz 5.0
+  set Bz 6.0
 }
 
 ####################################
@@ -72,9 +73,9 @@ module Efficiency ChargedHadronTrackingEfficiency {
   # tracking efficiency formula for charged hadrons
   set EfficiencyFormula {                                                    (pt <= 0.1)   * (0.00) + \
                                            (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.75) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0)                  * (0.99) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.70) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0)                  * (0.98) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0)                  * (0.95) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.60) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0)                  * (0.90) + \
                          (abs(eta) > 4.0)                                                  * (0.00)}
 			 
 }
@@ -128,14 +129,10 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
   # resolution formula for charged hadrons
-  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.01) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.03) + \
-                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.03) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 1.0e1) * (0.02) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 2.0e2)                * (0.05)}
+  set ResolutionFormula {    (abs(eta) <= 1.5)                   * (pt > 0.1) * (0.01 + pt*2.e-5) + \
+                             (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1) * (0.02 + pt*3.e-5)}
+
+
 }
 
 #################################
@@ -166,18 +163,10 @@ module MomentumSmearing MuonMomentumSmearing {
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
   # resolution formula for muons
-  set ResolutionFormula {                  (abs(eta) <= 0.5) * (pt > 0.1   && pt <= 5.0)   * (0.02) + \
-                                           (abs(eta) <= 0.5) * (pt > 5.0   && pt <= 1.0e2) * (0.015) + \
-                                           (abs(eta) <= 0.5) * (pt > 1.0e2 && pt <= 2.0e2) * (0.03) + \
-                                           (abs(eta) <= 0.5) * (pt > 2.0e2)                * (0.05 + pt*1.e-4) + \
-                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 0.1   && pt <= 5.0)   * (0.03) + \
-                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 5.0   && pt <= 1.0e2) * (0.02) + \
-                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 1.0e2 && pt <= 2.0e2) * (0.04) + \
-                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05 + pt*1.e-4) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 5.0)   * (0.04) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 5.0   && pt <= 1.0e2) * (0.035) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0e2 && pt <= 2.0e2) * (0.05) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 2.0e2)                * (0.05 + pt*1.e-4)}
+  set ResolutionFormula {    (abs(eta) <= 1.5)                   * (pt > 0.1) * (0.01 + pt*5.e-6) + \
+                             (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 0.1) * (0.02 + pt*1.e-5)}
+
+
 }
 
 ##############
@@ -192,18 +181,36 @@ module Merger TrackMerger {
   set OutputArray tracks
 }
 
+
+################################
+# Track angular smearing
+################################
+
+module AngularSmearing AngularSmearing {
+  set InputArray TrackMerger/tracks
+  set OutputArray tracks
+
+
+  # angular smearing  in eta formula as a function of pt and eta
+  set EtaResolutionFormula { 0.001 }
+
+  # angular smearing  in phi formula as a function of pt and eta
+  set PhiResolutionFormula { 0.001 }
+
+}
+
 ################################
 # Track impact parameter smearing
 ################################
 
 module ImpactParameterSmearing ImpactParameterSmearing {
-  set InputArray TrackMerger/tracks
+  set InputArray AngularSmearing/tracks
   set OutputArray tracks
 
 
-# absolute impact parameter smearing formula (in mm) as a function of pt and eta
-set ResolutionFormula {(pt > 0.1  && pt <= 5.0)   * (0.010) + \
-                       (pt > 5.0)                 * (0.005)}
+  # absolute impact parameter smearing formula (in mm) as a function of pt and eta
+  set ResolutionFormula {(pt > 0.1  && pt <= 5.0)   * (0.010) + \
+                         (pt > 5.0)                 * (0.005)}
 
 }
 
@@ -218,38 +225,27 @@ module SimpleCalorimeter Ecal {
   set TowerOutputArray ecalTowers
   set EFlowTowerOutputArray eflowPhotons
   
+  set TowerMinEnergy 0.5
+  set TowerMinSignificance 1.0
+  
   set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
-
-  # 5 degrees towers
+   
+  # 0.5 degree towers
   set PhiBins {}
-  for {set i -36} {$i <= 36} {incr i} {
-    add PhiBins [expr {$i * $pi/36.0}]
-  }
-  foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.653} {
-    add EtaPhiBins $eta $PhiBins
+  for {set i -360} {$i <= 360} {incr i} {
+    add PhiBins [expr {$i * $pi/360.0}]
   }
 
-  # 10 degrees towers
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
-  foreach eta {-4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.95 -2.868 -2.65 -2.5 -2.322 -2.172 -2.043 -1.93 -1.83 -1.74 -1.653 1.74 1.83 1.93 2.043 2.172 2.322 2.5 2.65 2.868 2.95 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525} {
+  # 0.01 unit in eta up to eta = 3
+  for {set i -300} {$i <= 300} {incr i} {
+    set eta [expr {$i * 0.01}]
     add EtaPhiBins $eta $PhiBins
   }
-
-  # 20 degrees towers
-  set PhiBins {}
-  for {set i -9} {$i <= 9} {incr i} {
-    add PhiBins [expr {$i * $pi/9.0}]
-  }
-  foreach eta {6 -5.6 -5.3 -5 -4.7 -4.525 4.7 5 5.3 5.6 6} {
-    add EtaPhiBins $eta $PhiBins
-  }
+  
   # default energy fractions {abs(PDG code)} {fraction of energy deposited in ECAL}
   
   add EnergyFraction {0} {0.0}
@@ -272,8 +268,10 @@ module SimpleCalorimeter Ecal {
   add EnergyFraction {3122} {0.3}
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula {                     (abs(eta) <= 4.0) * sqrt(energy^2*0.005^2 + energy*0.02^2) + \
-                            (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.05^2  + energy*1.00^2)}
+  
+  # This is the CMS ECAL resolution, extended up eta = 6.0
+  set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.003^2 + energy*0.029^2 + 0.125^2)  + \
+                 	  (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.107^2 + energy*2.08^2)}
 
  
 }
@@ -289,39 +287,29 @@ module SimpleCalorimeter Hcal {
   set TowerOutputArray hcalTowers
   set EFlowTowerOutputArray eflowNeutralHadrons
   
+  set TowerMinEnergy 1.0
+  set TowerMinSignificance 1.0
+ 
   set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
-
-  # 5 degrees towers
+ 
+ 
+  # 5 degree towers
   set PhiBins {}
-  for {set i -36} {$i <= 36} {incr i} {
-    add PhiBins [expr {$i * $pi/36.0}]
-  }
-  foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.653} {
-    add EtaPhiBins $eta $PhiBins
+  for {set i -72} {$i <= 72} {incr i} {
+    add PhiBins [expr {$i * $pi/75.0}]
   }
 
-  # 10 degrees towers
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
-  foreach eta {-4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.95 -2.868 -2.65 -2.5 -2.322 -2.172 -2.043 -1.93 -1.83 -1.74 -1.653 1.74 1.83 1.93 2.043 2.172 2.322 2.5 2.65 2.868 2.95 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525} {
+  # 0.05 unit in eta up to eta = 3
+  for {set i -60} {$i <= 60} {incr i} {
+    set eta [expr {$i * 0.05}]
     add EtaPhiBins $eta $PhiBins
   }
-
-  # 20 degrees towers
-  set PhiBins {}
-  for {set i -9} {$i <= 9} {incr i} {
-    add PhiBins [expr {$i * $pi/9.0}]
-  }
-  foreach eta {6 -5.6 -5.3 -5 -4.7 -4.525 4.7 5 5.3 5.6 6} {
-    add EtaPhiBins $eta $PhiBins
-  }
-  
+ 
+   
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
   add EnergyFraction {0} {1.0}
   # energy fractions for e, gamma and pi0
@@ -342,11 +330,14 @@ module SimpleCalorimeter Hcal {
   add EnergyFraction {310} {0.7}
   add EnergyFraction {3122} {0.7}
 
-   # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula {                     (abs(eta) <= 4.0) * sqrt(energy^2*0.03^2 + energy*0.50^2) + \
-                            (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
-}
+  # set HCalResolutionFormula {resolution formula as a function of eta and energy}
+  
+  # This is the ATLAS HCAL resolution, extended up eta = 6.0
+  set HCalResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
+                             (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.0500^2 + energy*0.706^2) + \
+                             (abs(eta) > 3.2 && abs(eta) <= 6.0) * sqrt(energy^2*0.09420^2 + energy*1.00^2)}
 
+}
 
 ####################
 # Tower Merger (in case not using e-flow algorithm)
@@ -427,7 +418,7 @@ module FastJetFinder GenJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.5
 
-  set JetPTMin 5.0
+  set JetPTMin 100.0
 }
 
 ############
@@ -444,7 +435,7 @@ module FastJetFinder FastJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.5
 
-  set JetPTMin 5.0
+  set JetPTMin 100.0
 }
 
 ##################
