@@ -46,17 +46,18 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
 
-#include "ProMC/ProMC.pb.h"
-#include "ProMC/ProMCBook.h"
-#include "ProMC/ProMCHeader.pb.h"
+#include "ProMC.pb.h"
+#include "ProMCBook.h"
+#include "ProMCHeader.pb.h"
 
 using namespace std;
 
 //---------------------------------------------------------------------------
 
-void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *factory,
-  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray,
-  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
+void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
+  ExRootTreeBranch *branch, DelphesFactory *factory,
+  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray,
+  TObjArray *partonOutputArray, TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   Int_t i;
 
@@ -106,8 +107,15 @@ void ConvertInput(ProMCEvent &event, ExRootTreeBranch *branch, DelphesFactory *f
   {
     pid = mutableParticles->pdg_id(i);
     status = mutableParticles->status(i);
-    px = mutableParticles->px(i); py = mutableParticles->py(i); pz = mutableParticles->pz(i); mass = mutableParticles->mass(i);
-    x = mutableParticles->x(i); y = mutableParticles->y(i); z = mutableParticles->z(i); t = mutableParticles->t(i);
+
+    px = mutableParticles->px(i)/momentumUnit;
+    py = mutableParticles->py(i)/momentumUnit;
+    pz = mutableParticles->pz(i)/momentumUnit;
+    mass = mutableParticles->mass(i)/momentumUnit;
+    x = mutableParticles->x(i)/positionUnit;
+    y = mutableParticles->y(i)/positionUnit;
+    z = mutableParticles->z(i)/positionUnit;
+    t = mutableParticles->t(i)/positionUnit;
 
     candidate = factory->NewCandidate();
 
@@ -171,6 +179,7 @@ int main(int argc, char *argv[])
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
+  double momentumUnit = 1.0, positionUnit = 1.0;
 
   if(argc < 4)
   {
@@ -223,6 +232,13 @@ int main(int argc, char *argv[])
 
       inputFile = new ProMCBook(argv[i], "r");
 
+      ProMCHeader header = inputFile->getHeader();
+
+      momentumUnit = static_cast<double>(header.momentumunit());
+      positionUnit = static_cast<double>(header.lengthunit());
+
+
+
       if(inputFile == NULL)
       {
         message << "can't open " << argv[i] << endl;
@@ -247,9 +263,10 @@ int main(int argc, char *argv[])
         readStopWatch.Stop();
 
         procStopWatch.Start();
-        ConvertInput(event, branchEvent, factory,
-          allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
-          &readStopWatch, &procStopWatch);
+        ConvertInput(event, momentumUnit, positionUnit,
+          branchEvent, factory,
+          allParticleOutputArray, stableParticleOutputArray,
+          partonOutputArray, &readStopWatch, &procStopWatch);
         modularDelphes->ProcessTask();
         procStopWatch.Stop();
 

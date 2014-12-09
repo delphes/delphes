@@ -66,7 +66,10 @@ private:
 
   ExRootTreeBranch *fObjArrays; //!
 
+#if !defined(__CINT__) && !defined(__CLING__)
   std::map< const TClass*, ExRootTreeBranch* > fBranches; //!
+#endif
+
   std::set< TObject* > fPool; //!
   
   ClassDef(DelphesFactory, 1)

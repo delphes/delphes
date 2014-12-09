@@ -88,7 +88,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
   pdg = TDatabasePDG::Instance();
 
-  for(i = 0; i < pythia->event.size(); ++i)
+  for(i = 1; i < pythia->event.size(); ++i)
   {
     Pythia8::Particle &particle = pythia->event[i];
 

@@ -131,7 +131,7 @@ void PileUpMergerPythia8::Process()
     dz = gRandom->Gaus(0.0, fZVertexSpread);
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 
-    for(i = 0; i < fPythia->event.size(); ++i)
+    for(i = 1; i < fPythia->event.size(); ++i)
     {
       Pythia8::Particle &particle = fPythia->event[i];
 

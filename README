@@ -136,4 +136,4 @@ Here are the commands to run these ROOT macros:
 
 or
 
-   root -l examples/Example1.C\(\"delphes_output.root\"\)
+   root -l examples/Example1.C'("delphes_output.root")'

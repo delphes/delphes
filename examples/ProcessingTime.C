@@ -1,5 +1,5 @@
 /*
-root -l examples/ProcessingTime.C\(\"delphes_output.root\"\)
+root -l examples/ProcessingTime.C'("delphes_output.root")'
 */
 
 static const Font_t kExRootFont = 42;

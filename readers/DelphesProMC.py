@@ -133,7 +133,7 @@ def ConvertInput(name, momentumUnit, lengthUnit, branch, factory,
 
 ################################################################################
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 4:
   print " Usage: DelphesProMC.py config_file output_file input_file(s)"
   sys.exit(1)
 

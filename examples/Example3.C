@@ -1,9 +1,8 @@
 /*
-
 This macro shows how to access the particle-level reference for reconstructed objects.
 It is also shown how to loop over the jet constituents. 
 
-root -l examples/Example3.C\(\"delphes_output.root\"\)
+root -l examples/Example3.C'("delphes_output.root")'
 */
 
 //------------------------------------------------------------------------------
