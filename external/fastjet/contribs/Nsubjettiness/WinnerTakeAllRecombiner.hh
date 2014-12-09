@@ -4,6 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
+//  $Id: WinnerTakeAllRecombiner.hh 670 2014-06-06 01:24:42Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -49,7 +50,9 @@ public:
    virtual std::string description() const;
    
    /// recombine pa and pb and put result into pab
-   virtual void recombine(const fastjet::PseudoJet & pa, const fastjet::PseudoJet & pb, fastjet::PseudoJet & pab) const;
+   virtual void recombine(const fastjet::PseudoJet & pa,
+                          const fastjet::PseudoJet & pb,
+                          fastjet::PseudoJet & pab) const;
 
 private:
 	double _alpha; //power of (pt/E) term when recombining particles

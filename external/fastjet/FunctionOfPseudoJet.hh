@@ -1,10 +1,10 @@
 #ifndef __FASTJET_FUNCTION_OF_PSEUDOJET_HH__
 #define __FASTJET_FUNCTION_OF_PSEUDOJET_HH__
 
-//STARTHEADER
-// $Id: FunctionOfPseudoJet.hh 2577 2011-09-13 15:11:38Z salam $
+//FJSTARTHEADER
+// $Id: FunctionOfPseudoJet.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include <fastjet/PseudoJet.hh>
 #include <fastjet/Selector.hh>
@@ -48,8 +50,12 @@ public:
   /// default ctor
   FunctionOfPseudoJet(){}
 
-  /// ctor that creates a constant function
-  FunctionOfPseudoJet(const TOut &constant_value);
+  // ctor that creates a constant function
+  //----------
+  // this declaration was present in versions of FJ from 3.0.0 to 3.0.6,
+  // but never implemented. It is being removed from 3.0.7 upwards
+  // to avoid misleading users
+  //FunctionOfPseudoJet(const TOut &constant_value);
 
   /// default dtor (virtual to allow safe polymorphism)
   virtual ~FunctionOfPseudoJet(){}

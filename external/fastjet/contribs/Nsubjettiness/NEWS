@@ -1,0 +1,83 @@
+-------------------------
+Version 2
+-------------------------
+
+This is a streamlining of the N-subjettiness code, developed mainly by TJ
+Wilkason.  The core functionality is unchanged, but classes have been
+dramatically reorganized to allow for later expansion.  Because the API for
+Njettiness has changed, we have called this v2 (http://semver.org).
+
+Note that we have maintain backwards compatibility for the typical ways that
+Nsubjettiness was used.  In particular, all of the Nsubjettiness class code in
+the example file v1.0.3 from still compiles, as does the NjettinessPlugin class
+code that uses the default measure.
+
+The key new features are:
+
+  * NsubjettinessRatio:  Direct access to tau_N / tau_M (the most requested
+    feature)
+  * MeasureDefinition to allow access to both normalized and unnormalized measures
+  * AxesDefinition to allow for access to more general axes modes
+  * Winner-Take-All recombination axes:  a faster way to find axes than beta = 1
+    minimization, but with comparable performance.
+  * TauComponents to get access to the pieces of the N-(sub)jettiness
+    calculation.
+  * For clarity, split the example file into an example_basic_usage and
+    example_advanced_usage
+  * In Nsubjettiness, access to seedAxes() and currentAxes() to figure out the
+    axes used before and after minimization.
+  * In Nsubjettiness, access to currentSubjets() to get the subjet fourvectors.
+
+
+-- 2.1.0:  (July 9, 2014) Inclusion of MeasureDefinition/AxesDefinition interface.
+           This was the first publicly available version of Nsubjettiness v2.
+-- 2.0.0:  Initial release of v2.0.  This was never officially made public.
+
+-------------------------
+Version 1
+-------------------------
+
+This was a new release using FastJet contrib framework, primary developed by
+Jesse Thaler.
+
+-- 1.0.3:  Added inlines to fix compile issue (thanks Matthew Low)
+-- 1.0.2:  Fixed potential dependency issue (thanks FJ authors)
+-- 1.0.1:  Fixed memory leak in Njettiness.hh (thanks FJ authors)
+-- 1.0.0:  New release using FastJet contrib framework.  This includes a new
+makefile and a simplified example program.
+
+-------------------------
+Previous Versions
+-------------------------
+
+The previous versions of this code were developed initially by Ken Van Tilburg,
+tweaked by Jesse Thaler, and made into a robust FastJet add on by Chris
+Vermilion.
+
+Previous versions available from:
+   http://jthaler.net/jets/Njettiness-0.5.1.tar.gz (Experimental Version)
+   http://jthaler.net/jets/Njettiness-0.4.1.tar.gz (Stable Version)
+
+Previous version history:
+-- 0.5.1:  For Njettiness Plugin, added access to currentTau values and axes via
+           ClusterSequence::Extras class.  (thanks to Dinko Ferencek and John
+           Paul Chou)
+-- 0.5.0:  Corrected fatal error in ConstituentTauValue (TauValue unaffected).
+           Started process of allowing for more general measures and alternative
+           minimization schemes. Extremely preliminary inclusion of alternative
+           "geometric" measure.
+-- 0.4.1:  Corrected bug where a too-small value of Rcut would cause the
+           minimization procedure to fail (thanks Marat Freytsis, Brian Shuve)
+-- 0.4.0:  Adding Nsubjettiness FunctionOfPseudoJet<float>.  Re-organizing file
+           structure and doing some re-naming to clarify Njettiness vs.
+           Nsubjettiness.  Some speedup in UpdateAxes code. (CKV)
+-- 0.3.2:  Returns zero instead of a segmentation fault when the number of
+           particles in a jet is smaller than the N value in tau_N (thanks
+           Grigory Ovanesyan)
+-- 0.3.2:  Fixed -Wshadow errors (thanks Grigory Ovanesyan)
+-- 0.3.1:  Fixed stray comma/semicolon compiler error (thanks Grigory Ovanesyan)
+-- 0.3.1:  Corrected tarbomb issue (thanks Jonathan Walsh)
+-- 0.3.1:  Added anti-kT seeds as option
+-- 0.3.1:  Fixed bug in minimization code with R_cutoff (thanks Chris Vermilion)
+-- 0.3.1:  Added getPartition() and getJets() functions as helper functions for
+           Chris Vermilion. (JT)

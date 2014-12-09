@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: PseudoJet.cc 3652 2014-09-03 13:31:13Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #include "fastjet/Error.hh"
@@ -175,6 +177,10 @@ PseudoJet operator- (const PseudoJet & jet1, const PseudoJet & jet2) {
 //----------------------------------------------------------------------
 // return the product, coeff * jet
 PseudoJet operator* (double coeff, const PseudoJet & jet) {
+  // see the comment in operator*= about ensuring valid rap phi
+  // before a multiplication to handle case of multiplication by
+  // zero, while maintaining rapidity and phi
+  jet._ensure_valid_rap_phi(); 
   //return PseudoJet(coeff*jet.four_mom());
   // the following code is hopefully more efficient
   PseudoJet coeff_times_jet(jet);
@@ -197,6 +203,14 @@ PseudoJet operator/ (const PseudoJet & jet, double coeff) {
 //----------------------------------------------------------------------
 /// multiply the jet's momentum by the coefficient
 void PseudoJet::operator*=(double coeff) {
+  // operator*= aims to maintain the rapidity and azimuth
+  // for the PseudoJet; if they have already been evaluated
+  // this is fine, but if they haven't and coeff is sufficiently
+  // small as to cause a zero or underflow result, then a subsequent
+  // invocation of rap or phi will lead to a non-sensical result. 
+  // So, here, we preemptively ensure that rapidity and phi
+  // are correctly cached
+  _ensure_valid_rap_phi(); 
   _px *= coeff;
   _py *= coeff;
   _pz *= coeff;
@@ -260,8 +274,8 @@ bool operator==(const PseudoJet & jet, const double val) {
 
 
 //----------------------------------------------------------------------
-/// transform this jet (given in lab) into a jet in the rest
-/// frame of prest
+/// transform this jet (given in the rest frame of prest) into a jet
+/// in the lab frame 
 //
 // NB: code adapted from that in herwig f77 (checked how it worked
 // long ago)
@@ -287,8 +301,8 @@ PseudoJet & PseudoJet::boost(const PseudoJet & prest) {
 
 
 //----------------------------------------------------------------------
-/// transform this jet (given in the rest frame of prest) into a jet
-/// in the lab frame;
+/// transform this jet (given in lab) into a jet in the rest
+/// frame of prest  
 //
 // NB: code adapted from that in herwig f77 (checked how it worked
 // long ago)
@@ -586,7 +600,7 @@ bool PseudoJet::has_exclusive_subjets() const{
 //
 // an Error is thrown if this PseudoJet has no currently valid
 // associated ClusterSequence
-std::vector<PseudoJet> PseudoJet::exclusive_subjets (const double & dcut) const {
+std::vector<PseudoJet> PseudoJet::exclusive_subjets (const double dcut) const {
   return validated_structure_ptr()->exclusive_subjets(*this, dcut);
 }
 
@@ -597,7 +611,7 @@ std::vector<PseudoJet> PseudoJet::exclusive_subjets (const double & dcut) const 
 //
 // an Error is thrown if this PseudoJet has no currently valid
 // associated ClusterSequence
-int PseudoJet::n_exclusive_subjets(const double & dcut) const {
+int PseudoJet::n_exclusive_subjets(const double dcut) const {
   return validated_structure_ptr()->n_exclusive_subjets(*this, dcut);
 }
 
@@ -846,6 +860,7 @@ PseudoJet join(const PseudoJet & j1){
 // build a "CompositeJet" from two PseudoJet
 PseudoJet join(const PseudoJet & j1, const PseudoJet & j2){
   vector<PseudoJet> pieces;
+  pieces.reserve(2);
   pieces.push_back(j1);
   pieces.push_back(j2);
   return join(pieces);
@@ -854,6 +869,7 @@ PseudoJet join(const PseudoJet & j1, const PseudoJet & j2){
 // build a "CompositeJet" from 3 PseudoJet
 PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3){
   vector<PseudoJet> pieces;
+  pieces.reserve(3);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);
@@ -863,6 +879,7 @@ PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3)
 // build a "CompositeJet" from 4 PseudoJet
 PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3, const PseudoJet & j4){
   vector<PseudoJet> pieces;
+  pieces.reserve(4);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);

@@ -1,10 +1,10 @@
 #ifndef __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
 #define __FASTJET_PSEUDOJET_STRUCTURE_BASE_HH__
 
-//STARTHEADER
-// $Id: PseudoJetStructureBase.hh 3071 2013-04-01 12:52:46Z cacciari $
+//FJSTARTHEADER
+// $Id: PseudoJetStructureBase.hh 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #include "fastjet/internal/base.hh"
@@ -155,6 +157,11 @@ public:
   /// just getting that list of constituents.
   ///
   /// By default, throws an Error
+  ///
+  /// Note: in a future major release of FastJet (4 or higher), 
+  /// "const double & dcut" may be replaced with "const double dcut",
+  /// requiring a modification of derived classes that overload
+  /// this function.
   virtual std::vector<PseudoJet> exclusive_subjets(const PseudoJet &reference, const double & dcut) const;
 
   /// return the size of exclusive_subjets(...); still n ln n with same
@@ -162,6 +169,11 @@ public:
   /// exclusive_subjets.size()
   ///
   /// By default, throws an Error
+  ///
+  /// Note: in a future major release of FastJet (4 or higher), 
+  /// "const double & dcut" may be replaced with "const double dcut",
+  /// requiring a modification of derived classes that overload
+  /// this function.
   virtual int n_exclusive_subjets(const PseudoJet &reference, const double & dcut) const;
 
   /// return the list of subjets obtained by unclustering the supplied

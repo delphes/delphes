@@ -19,8 +19,10 @@ set ExecutionPath {
   Calorimeter
   TrackPileUpSubtractor
   NeutralTowerMerger
+  EFlowMergerAllTracks
   EFlowMerger
-
+  
+  NeutrinoFilter
   GenJetFinder
 
   Rho
@@ -246,6 +248,12 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
+  set EcalTowerMinEnergy 0.50
+  set HcalTowerMinEnergy 1.00
+
+  set EcalTowerMinSignificance 1.0
+  set HcalTowerMinSignificance 1.0
+
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
@@ -306,7 +314,7 @@ module Calorimeter Calorimeter {
   # http://villaolmo.mib.infn.it/ICATPP9th_2005/Calorimetry/Schram.p.pdf
   set HCalResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
                              (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.0500^2 + energy*0.706^2) + \
-                             (abs(eta) > 3.2 && abs(eta) <= 4.9) * sqrt(energy^2*0.9420^2 + energy*0.075^2)}
+                             (abs(eta) > 3.2 && abs(eta) <= 4.9) * sqrt(energy^2*0.09420^2 + energy*1.00^2)}
 }
 
 ##########################
@@ -335,6 +343,18 @@ module Merger NeutralTowerMerger {
   set OutputArray eflowTowers
 }
 
+##################################
+# Energy flow merger (all tracks)
+##################################
+
+module Merger EFlowMergerAllTracks {
+# add InputArray InputArray
+  add InputArray TrackMerger/tracks
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
+  set OutputArray eflow
+}
+
 
 ####################
 # Energy flow merger
@@ -348,29 +368,41 @@ module Merger EFlowMerger {
   set OutputArray eflow
 }
 
-
 #############
 # Rho pile-up
 #############
 
-module FastJetFinder Rho {
+module FastJetGridMedianEstimator Rho {
+  
   set InputArray Calorimeter/towers
-
-  set ComputeRho true
   set RhoOutputArray rho
 
-  # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
-  set AreaAlgorithm 5
+  # etamin etamax gridsize_eta gridsize_phi 
+  
+  add GridRange 0.0 2.5 0.5 0.5
+  add GridRange 2.5 5.0 0.5 0.5
 
-  # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 4
-  set ParameterR 0.6
-  set GhostEtaMax 5.0
-  set RhoEtaMax 5.0
+}
 
-  add RhoEtaRange 0.0 5.0
 
-  set JetPTMin 0.0
+#####################
+# Neutrino Filter
+#####################
+
+module PdgCodeFilter NeutrinoFilter {
+  
+  set InputArray Delphes/stableParticles
+  set OutputArray filteredParticles
+
+  set PTMin 0.0
+  
+  add PdgCode {12}
+  add PdgCode {14}
+  add PdgCode {16}
+  add PdgCode {-12}
+  add PdgCode {-14}
+  add PdgCode {-16}
+
 }
 
 #####################
@@ -378,7 +410,7 @@ module FastJetFinder Rho {
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+  set InputArray NeutrinoFilter/filteredParticles
 
   set OutputArray jets
 
@@ -544,7 +576,7 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray EFlowMerger/eflow
+  add InputArray EFlowMergerAllTracks/eflow
   set MomentumOutputArray momentum
 }
 
@@ -643,7 +675,7 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
 
 #  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
+  add Branch Calorimeter/towers Tower Tower
 
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower

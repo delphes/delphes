@@ -1,10 +1,10 @@
 #ifndef __FASTJET_BACKGROUND_ESTIMATOR_HH__
 #define __FASTJET_BACKGROUND_ESTIMATOR_HH__
 
-//STARTHEADER
-// $Id: JetMedianBackgroundEstimator.hh 2689 2011-11-14 14:51:06Z soyez $
+//FJSTARTHEADER
+// $Id: JetMedianBackgroundEstimator.hh 3517 2014-08-01 14:23:13Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include <fastjet/ClusterSequenceAreaBase.hh>
 #include <fastjet/AreaDefinition.hh>
@@ -120,7 +122,8 @@ public:
   /// \param rho_range   the Selector specifying which jets will be considered
   ///
   JetMedianBackgroundEstimator(const Selector &rho_range = SelectorIdentity())
-    : _rho_range(rho_range), _jet_def(JetDefinition()) { reset(); }
+    : _rho_range(rho_range), _jet_def(JetDefinition()),
+      _enable_rho_m(true){ reset(); }
   
 
   /// default dtor
@@ -167,6 +170,10 @@ public:
     _uptodate = false;
   }
 
+  /// determine whether the automatic calculation of rho_m and sigma_m
+  /// is enabled (by default true)
+  void set_compute_rho_m(bool enable){ _enable_rho_m = enable;}
+
   //\}
 
 
@@ -200,6 +207,34 @@ public:
   /// determination of sigma
   virtual bool has_sigma() {return true;}
 
+  //----------------------------------------------------------------
+  // now do the same thing for rho_m and sigma_m
+
+  /// returns rho_m, the purely longitudinal, particle-mass-induced
+  /// component of the background density per unit area
+  virtual double rho_m() const;
+
+  /// returns sigma_m, a measure of the fluctuations in the purely
+  /// longitudinal, particle-mass-induced component of the background
+  /// density per unit area; must be multipled by sqrt(area) to get
+  /// fluctuations for a region of a given area.
+  virtual double sigma_m() const;
+
+  /// Returns rho_m locally at the jet position. As for rho(jet), it is non-const.
+  virtual double rho_m(const PseudoJet & /*jet*/);
+
+  /// Returns sigma_m locally at the jet position. As for rho(jet), it is non-const.
+  virtual double sigma_m(const PseudoJet & /*jet*/);
+
+  /// Returns true if this background estimator has support for
+  /// determination of rho_m.
+  ///
+  /// In te presence of a density class, support for rho_m is
+  /// automatically disabled
+  ///
+  /// Note that support for sigma_m is automatic is one has sigma and
+  /// rho_m support.
+  virtual bool has_rho_m() const {return _enable_rho_m && (_jet_density_class == 0);}
   //\}
   
   /// @name  retrieving additional useful information
@@ -207,21 +242,41 @@ public:
   //----------------------------------------------------------------
   /// Returns the mean area of the jets used to actually compute the
   /// background properties in the last call of rho() or sigma()
+  /// If the configuration has changed in the meantime, throw an error.
   double mean_area() const{
-    _recompute_if_needed();
+    if (!_uptodate)
+      throw Error("JetMedianBackgroundEstimator::mean_area(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
+    //_recompute_if_needed();
     return _mean_area;
   }
   
   /// returns the number of jets used to actually compute the
   /// background properties in the last call of rho() or sigma()
+  /// If the configuration has changed in the meantime, throw an error.
   unsigned int n_jets_used() const{
-    _recompute_if_needed();
+    if (!_uptodate)
+      throw Error("JetMedianBackgroundEstimator::n_jets_used(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
+    //_recompute_if_needed();
     return _n_jets_used;
+  }
+
+  /// returns the jets used to actually compute the background
+  /// properties
+  std::vector<PseudoJet> jets_used() const{
+    if (!_uptodate) throw Error("JetMedianBackgroundEstimator::n_jets_used(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
+    _check_csa_alive();
+    std::vector<PseudoJet> tmp_jets = _rho_range(_included_jets);
+    std::vector<PseudoJet> used_jets;
+    for (unsigned int i=0; i<tmp_jets.size(); i++){
+      if (tmp_jets[i].area()>0) used_jets.push_back(tmp_jets[i]);
+    }
+    return used_jets;
   }
 
   /// Returns the estimate of the area (within the range defined by
   /// the selector) that is not occupied by jets. The value is that
   /// for the last call of rho() or sigma()
+  /// If the configuration has changed in the meantime, throw an error.
   ///
   /// The answer is defined to be zero if the area calculation
   /// involved explicit ghosts; if the area calculation was an active
@@ -233,13 +288,16 @@ public:
   /// The result here is just the cached result of the corresponding
   /// call to the ClusterSequenceAreaBase function.
   double empty_area() const{
-    _recompute_if_needed();
+    if (!_uptodate)
+      throw Error("JetMedianBackgroundEstimator::empty_area(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
+    //_recompute_if_needed();
     return _empty_area;
   }
 
   /// Returns the number of empty jets used when computing the
   /// background properties. The value is that for the last call of
   /// rho() or sigma().
+  /// If the configuration has changed in the meantime, throw an error.
   ///
   /// If the area has explicit ghosts the result is zero; for active
   /// areas it is the number of internal pure ghost jets that pass the
@@ -249,7 +307,9 @@ public:
   /// The result here is just the cached result of the corresponding
   /// call to the ClusterSequenceAreaBase function.
   double n_empty_jets() const{
-    _recompute_if_needed();
+    if (!_uptodate)
+      throw Error("JetMedianBackgroundEstimator::n_empty_jets(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
+    //_recompute_if_needed();
     return _n_empty_jets;
   }
 
@@ -360,22 +420,25 @@ private:
   /// background estimation (i.e. either kt or C/A)
   /// Issue a warning otherwise
   void _check_jet_alg_good_for_median() const;
-  
+
   // the basic parameters of this class (passed through the variou ctors)
   Selector _rho_range;                   ///< range to compute the background in
   JetDefinition _jet_def;                ///< the jet def to use for teh clustering
   AreaDefinition _area_def;              ///< the area def to use for teh clustering
   std::vector<PseudoJet> _included_jets; ///< jets to be used
   
-  // the tunable aprameters of the class
+  // the tunable parameters of the class
   bool _use_area_4vector;
   bool _provide_fj2_sigma;
   const FunctionOfPseudoJet<double> * _jet_density_class;
   //SharedPtr<BackgroundRescalingBase> _rescaling_class_sharedptr;
+  bool _enable_rho_m;
   
   // the actual results of the computation
   mutable double _rho;               ///< background estimated density per unit area
   mutable double _sigma;             ///< background estimated fluctuations
+  mutable double _rho_m;             ///< "mass" background estimated density per unit area
+  mutable double _sigma_m;           ///< "mass" background estimated fluctuations
   mutable double _mean_area;         ///< mean area of the jets used to estimate the background
   mutable unsigned int _n_jets_used; ///< number of jets used to estimate the background
   mutable double _n_empty_jets;      ///< number of empty (pure-ghost) jets
@@ -428,7 +491,7 @@ public:
 
   virtual double result(const PseudoJet & jet) const;
 
-  virtual std::string description() const {return "BackgroundScalarJetPtDensity";}
+  virtual std::string description() const;
 
 private:
   double _pt_power;

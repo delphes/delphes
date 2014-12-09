@@ -1,11 +1,10 @@
-// $Id$
-//
 //  Nsubjettiness Package
 //  Questions/Comments?  jthaler@jthaler.net
 //
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
+//  $Id: NjettinessPlugin.hh 671 2014-06-10 17:47:52Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -48,23 +47,7 @@ namespace contrib {
 // TODO:  This class should probably be merged with TauComponents, since both have access
 // to similar information
 class NjettinessExtras : public ClusterSequence::Extras {
-   private:
    
-      TauComponents _tau_components;
-      std::vector<fastjet::PseudoJet> _jets;
-      std::vector<fastjet::PseudoJet> _axes;
-      
-      int labelOf(const fastjet::PseudoJet& jet) const {
-         int thisJet = -1;
-         for (unsigned int i = 0; i < _jets.size(); i++) {
-            if (_jets[i].cluster_hist_index() == jet.cluster_hist_index()) {
-               thisJet = i;
-               break;
-            }
-         }
-         return thisJet;
-      }
-      
    public:
       NjettinessExtras(TauComponents tau_components, std::vector<fastjet::PseudoJet> jets, std::vector<fastjet::PseudoJet> axes) : _tau_components(tau_components), _jets(jets), _axes(axes) {}
       
@@ -73,11 +56,12 @@ class NjettinessExtras : public ClusterSequence::Extras {
       std::vector<fastjet::PseudoJet> jets() const {return _jets;}
       std::vector<fastjet::PseudoJet> axes() const {return _axes;}
       
-      double totalTau(const fastjet::PseudoJet& jet) const {
+      double totalTau(const fastjet::PseudoJet& /*jet*/) const {
          return _tau_components.tau();
       }
+      
       double subTau(const fastjet::PseudoJet& jet) const {
-         if (labelOf(jet) == -1) return NAN;
+         if (labelOf(jet) == -1) return std::numeric_limits<double>::quiet_NaN(); // nonsense
          return _tau_components.jet_pieces()[labelOf(jet)];
       }
       
@@ -92,7 +76,23 @@ class NjettinessExtras : public ClusterSequence::Extras {
       bool has_njettiness_extras(const fastjet::PseudoJet& jet) const {
          return (labelOf(jet) >= 0);
       }
-
+   
+private:
+   
+   TauComponents _tau_components;
+   std::vector<fastjet::PseudoJet> _jets;
+   std::vector<fastjet::PseudoJet> _axes;
+   
+   int labelOf(const fastjet::PseudoJet& jet) const {
+      int thisJet = -1;
+      for (unsigned int i = 0; i < _jets.size(); i++) {
+         if (_jets[i].cluster_hist_index() == jet.cluster_hist_index()) {
+            thisJet = i;
+            break;
+         }
+      }
+      return thisJet;
+   }
 };
 
 inline const NjettinessExtras * njettiness_extras(const fastjet::PseudoJet& jet) {
@@ -121,14 +121,14 @@ inline const NjettinessExtras * njettiness_extras(const fastjet::ClusterSequence
  * onepass_kt_axes      : one-pass minimization seeded by kt (pretty good)
  * onepass_wta_kt_axes  : one-pass minimization seeded by wta_kt
  *
- * For the unnormalized_measure, N-jettiness is defined as:
+ * For the UnnormalizedMeasure(beta), N-jettiness is defined as:
  *
  * tau_N = Sum_{all particles i} p_T^i min((DR_i1)^beta, (DR_i2)^beta, ...)
  *
  *   DR_ij is the distance sqrt(Delta_phi^2 + Delta_rap^2) between particle i
  *   and jet j.
  * 
- * The normalized_meausure include an extra parameter R0, and the various cutoff
+ * The NormalizedMeausure include an extra parameter R0, and the various cutoff
  * measures include an Rcutoff, which effectively defines an angular cutoff
  * similar in effect to a cone-jet radius.
  *
@@ -137,21 +137,54 @@ inline const NjettinessExtras * njettiness_extras(const fastjet::ClusterSequence
 class NjettinessPlugin : public JetDefinition::Plugin {
 public:
 
+   // Constructor with same arguments as Nsubjettiness.
    NjettinessPlugin(int N,
-                    Njettiness::AxesMode axes_mode,
-                    Njettiness::MeasureMode measure_mode,
-                    double para1 = NAN,
-                    double para2 = NAN,
-                    double para3 = NAN,
-                    double para4 = NAN);
+                    const AxesDefinition & axes_def,
+                    const MeasureDefinition & measure_def)
+   : _njettinessFinder(axes_def, measure_def), _N(N) {}
+   
+   
+   // Alternative constructors that define the measure via enums and parameters
+   // These constructors are likely be removed
+   NjettinessPlugin(int N,
+                 Njettiness::AxesMode axes_mode,
+                 Njettiness::MeasureMode measure_mode)
+   : _njettinessFinder(axes_mode, measure_mode, 0), _N(N) {}
+   
+   
+   NjettinessPlugin(int N,
+                 Njettiness::AxesMode axes_mode,
+                 Njettiness::MeasureMode measure_mode,
+                 double para1)
+   : _njettinessFinder(axes_mode, measure_mode, 1, para1), _N(N) {}
+   
+   
+   NjettinessPlugin(int N,
+                 Njettiness::AxesMode axes_mode,
+                 Njettiness::MeasureMode measure_mode,
+                 double para1,
+                 double para2)
+   : _njettinessFinder(axes_mode, measure_mode, 2, para1, para2), _N(N) {}
+   
+   
+   NjettinessPlugin(int N,
+                 Njettiness::AxesMode axes_mode,
+                 Njettiness::MeasureMode measure_mode,
+                 double para1,
+                 double para2,
+                 double para3)
+   : _njettinessFinder(axes_mode, measure_mode, 3, para1, para2, para3), _N(N) {}
+
 
    // Old constructor for backwards compatibility with v1.0,
-   // where normalized_cutoff_measure was the only option
+   // where NormalizedCutoffMeasure was the only option
    NjettinessPlugin(int N,
                     Njettiness::AxesMode mode,
                     double beta,
                     double R0,
-                    double Rcutoff=std::numeric_limits<double>::max());
+                    double Rcutoff=std::numeric_limits<double>::max())
+   : _njettinessFinder(mode, NormalizedCutoffMeasure(beta, R0, Rcutoff)), _N(N) {}
+
 
 
    // The things that are required by base class.
@@ -163,8 +196,8 @@ public:
 
 private:
 
+   Njettiness _njettinessFinder;
    int _N;
-   mutable Njettiness _njettinessFinder; // TODO:  should muck with this so run_clustering can be const without this mutable
 
 };
 

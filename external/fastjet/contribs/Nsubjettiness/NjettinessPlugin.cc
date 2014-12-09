@@ -4,6 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
+//  $Id: NjettinessPlugin.cc 663 2014-06-03 21:26:41Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -28,28 +29,33 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 namespace contrib{
 
 
-// Constructor with same arguments as Nsubjettiness.
-NjettinessPlugin::NjettinessPlugin(int N, Njettiness::AxesMode axes_mode, Njettiness::MeasureMode measure_mode, double para1, double para2, double para3, double para4)
-  : _N(N), _njettinessFinder(axes_mode, measure_mode, para1, para2, para3, para4) {}
-
-// Old constructor for compatibility
-NjettinessPlugin::NjettinessPlugin(int N, Njettiness::AxesMode mode, double beta, double R0, double Rcutoff)
-   : _N(N), _njettinessFinder(mode, Njettiness::normalized_cutoff_measure, beta, R0, Rcutoff) {}
 
 std::string NjettinessPlugin::description() const {return "N-jettiness jet finder";}
 
+
 // Clusters the particles according to the Njettiness jet algorithm
-// TODO: this code should be revisited to see if if can be made more clear.
+// Apologies for the complication with this code, but we need to make
+// a fake jet clustering tree.  The partitioning is done by getPartitionList
 void NjettinessPlugin::run_clustering(ClusterSequence& cs) const
 {
    std::vector<fastjet::PseudoJet> particles = cs.jets();
+
+   // HACK: remove area information from particles (in case this is called by
+   // a ClusterSequenceArea.  Will be fixed in a future FastJet release)
+   for (unsigned i = 0; i < particles.size(); i++) {
+      particles[i].set_structure_shared_ptr(SharedPtr<PseudoJetStructureBase>());
+   }
+   
+   
    _njettinessFinder.getTau(_N, particles);
-   std::vector<std::list<int> > partition = _njettinessFinder.getPartition(particles);
+
+   std::vector<std::list<int> > partition = _njettinessFinder.getPartitionList(particles);
 
    std::vector<fastjet::PseudoJet> jet_indices_for_extras;
 
    // output clusterings for each jet
-   for (size_t i = 0; i < partition.size(); ++i) {
+   for (size_t i0 = 0; i0 < partition.size(); ++i0) {
+      size_t i = partition.size() - 1 - i0; // reversed order of reading to match axes order
       std::list<int>& indices = partition[i];
       if (indices.size() == 0) continue;
       while (indices.size() > 1) {
@@ -68,6 +74,9 @@ void NjettinessPlugin::run_clustering(ClusterSequence& cs) const
       cs.plugin_record_iB_recombination(finalJet, fakeDib);
       jet_indices_for_extras.push_back(cs.jets()[finalJet]);  // Get the four vector for the final jets to compare later.
    }
+
+   //HACK:  Re-reverse order of reading to match CS order
+   reverse(jet_indices_for_extras.begin(),jet_indices_for_extras.end());
 
    NjettinessExtras * extras = new NjettinessExtras(_njettinessFinder.currentTauComponents(),jet_indices_for_extras,_njettinessFinder.currentAxes());
    cs.plugin_associate_extras(std::auto_ptr<ClusterSequence::Extras>(extras));

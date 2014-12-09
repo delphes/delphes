@@ -21,6 +21,58 @@ template<> PseudoJet::PseudoJet(const siscone::Cmomentum & four_vector) {
                       four_vector.E);
 }
 
+//======================================================================
+// wrap-up around siscone's user-defined scales
+namespace siscone_plugin_internal{
+  /// @ingroup internal
+  /// \class SISConeUserScale
+  /// class that makes the transition between the internal SISCone
+  /// user-defined scale choice (using SISCone's Cjet) and
+  /// user-defined scale choices in the plugn above (using FastJet's
+  /// PseudoJets)
+  class SISConeUserScale  : public siscone::Csplit_merge::Cuser_scale_base{
+  public:
+    /// ctor takes the "fastjet-style" user-defined scale as well as a
+    /// reference to the current cluster sequence (to access the
+    /// particles if needed)
+    SISConeUserScale(const SISConePlugin::UserScaleBase *user_scale,
+		     const ClusterSequence &cs)
+      : _user_scale(user_scale), _cs(cs){}
+
+    /// returns the scale associated to a given jet
+    virtual double operator()(const siscone::Cjet &jet) const{
+      return _user_scale->result(_build_PJ_from_Cjet(jet));
+    }
+
+    /// returns true id the scasle associated to jet a is larger than
+    /// the scale associated to jet b
+    virtual bool is_larger(const siscone::Cjet &a, const siscone::Cjet &b) const{
+      return _user_scale->is_larger(_build_PJ_from_Cjet(a), _build_PJ_from_Cjet(b));
+    }
+
+  private:
+    /// constructs a PseudoJet from a siscone::Cjet
+    ///
+    /// Note that it is tempting to overload the PseudoJet ctor. This
+    /// would not work because down the line we need to access the
+    /// original PseudoJet through the ClusterSequence and therefore
+    /// the PseudoJet structure needs to be aware of the
+    /// ClusterSequence.
+    PseudoJet _build_PJ_from_Cjet(const siscone::Cjet &jet) const{
+      PseudoJet j(jet.v.px, jet.v.py, jet.v.pz, jet.v.E);
+      j.set_structure_shared_ptr(SharedPtr<PseudoJetStructureBase>(
+                                   new SISConePlugin::UserScaleBaseStructureType<siscone::Cjet>(jet,_cs)));      
+      return j;
+    }
+
+    const SISConePlugin::UserScaleBase *_user_scale;
+    const ClusterSequence & _cs;
+  };
+}
+
+// end of the internal material
+//======================================================================
+
 
 /////////////////////////////////////////////
 // static members declaration              //
@@ -44,12 +96,23 @@ string SISConePlugin::description () const {
 
   desc << "SISCone jet algorithm with " ;
   desc << "cone_radius = "       << cone_radius        () << ", ";
-  desc << "overlap_threshold = " << overlap_threshold  () << ", ";
+  if (_progressive_removal)
+    desc << "progressive-removal mode, ";
+  else  
+    desc << "overlap_threshold = " << overlap_threshold  () << ", ";
   desc << "n_pass_max = "        << n_pass_max         () << ", ";
   desc << "protojet_ptmin = "    << protojet_ptmin()      << ", ";
-  desc <<  sm_scale_string                                << ", ";
-  desc << "caching turned "      << (caching() ? on : off);
-  desc << ", SM stop scale = "     << _split_merge_stopping_scale;
+  if (_progressive_removal && _user_scale) {
+    desc << "using a user-defined scale for ordering of stable cones";
+    string user_scale_desc = _user_scale->description();
+    if (user_scale_desc != "") desc << " (" << user_scale_desc << ")";
+  } else {
+    desc <<  sm_scale_string;
+  }
+  if (!_progressive_removal){
+    desc << ", caching turned "      << (caching() ? on : off);
+    desc << ", SM stop scale = "     << _split_merge_stopping_scale;
+  }
 
   // add a note to the description if we use the pt-weighted splitting
   if (_use_pt_weighted_splitting){
@@ -84,7 +147,7 @@ void SISConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
   bool new_siscone = true; // by default we'll be running it
 
-  if (caching()) {
+  if (caching() && !_progressive_removal) {
 
     // Establish if we have a cached run with the same R, npass and
     // particles. If not then do any tidying up / reallocation that's
@@ -137,9 +200,21 @@ void SISConePlugin::run_clustering(ClusterSequence & clust_seq) const {
     
     // run the jet finding
     //cout << "plg sms: " << split_merge_scale() << endl;
-    siscone->compute_jets(siscone_momenta, cone_radius(), overlap_threshold(),
-			  n_pass_max(), protojet_or_ghost_ptmin(), 
-			  Esplit_merge_scale(split_merge_scale()));
+    if (_progressive_removal){
+      // handle the optional user-defined scale choice
+      SharedPtr<siscone_plugin_internal::SISConeUserScale> internal_scale;
+      if (_user_scale){
+	internal_scale.reset(new siscone_plugin_internal::SISConeUserScale(_user_scale, clust_seq));
+	siscone->set_user_scale(internal_scale.get());
+      }
+      siscone->compute_jets_progressive_removal(siscone_momenta, cone_radius(),
+						n_pass_max(), protojet_or_ghost_ptmin(), 
+						Esplit_merge_scale(split_merge_scale()));
+    } else {
+      siscone->compute_jets(siscone_momenta, cone_radius(), overlap_threshold(),
+			    n_pass_max(), protojet_or_ghost_ptmin(), 
+			    Esplit_merge_scale(split_merge_scale()));
+    }
   } else {
     // rerun the jet finding
     // just run the overlap part of the jets.
@@ -154,6 +229,10 @@ void SISConePlugin::run_clustering(ClusterSequence & clust_seq) const {
   // allocate space for the extras object
   SISConeExtras * extras = new SISConeExtras(n);
 
+  // the ordering in which the inclusive jets are transfered here is
+  // deliberate and ensures that when a user asks for
+  // inclusive_jets(), they are provided in the order in which SISCone
+  // created them.
   for (int ijet = njet-1; ijet >= 0; ijet--) {
     const Cjet & jet = siscone->jets[ijet]; // shorthand
     
@@ -206,12 +285,67 @@ void SISConePlugin::run_clustering(ClusterSequence & clust_seq) const {
   extras->_jet_def_plugin = this;
 
   // give the extras object to the cluster sequence.
-  clust_seq.plugin_associate_extras(std::auto_ptr<ClusterSequence::Extras>(extras));
+  // 
+  // As of v3.1 of FastJet, extras are automatically owned (as
+  // SharedPtr) by the ClusterSequence and auto_ptr is deprecated. So
+  // we can use a simple pointer here
+  //clust_seq.plugin_associate_extras(std::auto_ptr<ClusterSequence::Extras>(extras));
+  clust_seq.plugin_associate_extras(extras);
 }
 
 
 void SISConePlugin::reset_stored_plugin() const{
   stored_plugin.reset( new SISConePlugin(*this));
 }
+
+// //======================================================================
+// // material to handle user-defined scales
+// 
+// //--------------------------------------------------
+// // SISCone structure type
+// 
+// // the textual descripotion
+// std::string SISConePlugin::UserScaleBase::StructureType::description() const{
+//   return "PseudoJet wrapping a siscone::Cjet stable cone"; 
+// }
+// 
+// // retrieve the constituents
+// //
+// // if you simply need to iterate over the constituents, it will be
+// // faster to access them via constituent(i)
+// vector<PseudoJet> SISConePlugin::UserScaleBase::StructureType::constituents(const PseudoJet &) const{ 
+//   vector<PseudoJet> constits;
+//   constits.reserve(_jet.n);
+//   for (unsigned int i=0; i<(unsigned int)_jet.n;i++)
+//     constits.push_back(constituent(i));
+//   return constits;
+// }
+// 
+// // returns the number of constituents
+// unsigned int SISConePlugin::UserScaleBase::StructureType::size() const{
+//   return _jet.n;
+// }
+// 
+// // returns the index (in the original particle list) of the ith
+// // constituent
+// int SISConePlugin::UserScaleBase::StructureType::constituent_index(unsigned int i) const{ 
+//   return _jet.contents[i];
+// }
+// 
+// // returns the ith constituent (as a PseusoJet)
+// const PseudoJet & SISConePlugin::UserScaleBase::StructureType::constituent(unsigned int i) const{
+//   return _cs.jets()[_jet.contents[i]];
+// }
+// 
+// // returns the scalar pt of this stable cone
+// double SISConePlugin::UserScaleBase::StructureType::pt_tilde() const{
+//   return _jet.pt_tilde;
+// }
+// 
+// // returns the sm_var2 (signed ordering variable squared) for this stable cone
+// double SISConePlugin::UserScaleBase::StructureType::ordering_var2() const{
+//   return _jet.sm_var2;
+// }
+
 
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh

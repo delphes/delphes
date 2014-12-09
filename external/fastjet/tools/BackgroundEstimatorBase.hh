@@ -1,10 +1,10 @@
 #ifndef __FASTJET_BACKGROUND_ESTIMATOR_BASE_HH__
 #define __FASTJET_BACKGROUND_ESTIMATOR_BASE_HH__
 
-//STARTHEADER
-// $Id: BackgroundEstimatorBase.hh 2689 2011-11-14 14:51:06Z soyez $
+//FJSTARTHEADER
+// $Id: BackgroundEstimatorBase.hh 3516 2014-08-01 14:07:58Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include <fastjet/ClusterSequenceAreaBase.hh>
 #include <fastjet/FunctionOfPseudoJet.hh>
@@ -42,9 +44,8 @@ FASTJET_BEGIN_NAMESPACE     // defined in fastjet/internal/base.hh
 /// \class BackgroundEstimatorBase
 ///
 /// Abstract base class that provides the basic interface for classes
-/// that estimate levels of background radiation in hadrion and
+/// that estimate levels of background radiation in hadron and
 /// heavy-ion collider events.
-///
 ///
 class BackgroundEstimatorBase {
 public:
@@ -98,8 +99,42 @@ public:
   /// returns true if this background estimator has support for
   /// determination of sigma
   virtual bool has_sigma() {return false;}
+
+  //----------------------------------------------------------------
+  // now do the same thing for rho_m and sigma_m
+
+  /// returns rho_m, the purely longitudinal, particle-mass-induced
+  /// component of the background density per unit area
+  virtual double rho_m() const{
+    throw Error("rho_m() not supported for this Background Estimator");
+  }
+
+  /// returns sigma_m, a measure of the fluctuations in the purely
+  /// longitudinal, particle-mass-induced component of the background
+  /// density per unit area; must be multipled by sqrt(area) to get
+  /// fluctuations for a region of a given area.
+  virtual double sigma_m() const { 
+    throw Error("sigma_m() not supported for this Background Estimator");
+  }
+
+  /// Returns rho_m locally at the jet position. As for rho(jet), it is non-const.
+  virtual double rho_m(const PseudoJet & /*jet*/){
+    throw Error("rho_m(jet) not supported for this Background Estimator");
+  }
+
+  /// Returns sigma_m locally at the jet position. As for rho(jet), it is non-const.
+  virtual double sigma_m(const PseudoJet & /*jet*/) { 
+    throw Error("sigma_m(jet) not supported for this Background Estimator");
+  }
+
+  /// Returns true if this background estimator has support for
+  /// determination of rho_m.
+  ///
+  /// Note that support for sigma_m is automatic is one has sigma and
+  /// rho_m support.
+  virtual bool has_rho_m() const {return false;}
   //\}
-  
+
 
   /// @name configuring the behaviour
   //\{
@@ -113,6 +148,9 @@ public:
   ///
   /// The BackgroundRescalingYPolynomial class can be used to get a
   /// rescaling that depends just on rapidity.
+  ///
+  /// There is currently no support for different rescaling classes 
+  /// for rho and rho_m determinations.
   virtual void set_rescaling_class(const FunctionOfPseudoJet<double> * rescaling_class_in) { _rescaling_class = rescaling_class_in; }
 
   /// return the pointer to the jet density class

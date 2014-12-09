@@ -28,6 +28,7 @@ set ExecutionPath {
 
   MissingET
 
+  NeutrinoFilter
   GenJetFinder
   FastJetFinder
 
@@ -210,6 +211,12 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
+  set EcalTowerMinEnergy 0.5
+  set HcalTowerMinEnergy 1.0
+
+  set EcalTowerMinSignificance 1.0
+  set HcalTowerMinSignificance 1.0
+   
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
@@ -415,12 +422,34 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
+
+#####################
+# Neutrino Filter
+#####################
+
+module PdgCodeFilter NeutrinoFilter {
+  
+  set InputArray Delphes/stableParticles
+  set OutputArray filteredParticles
+
+  set PTMin 0.0
+  
+  add PdgCode {12}
+  add PdgCode {14}
+  add PdgCode {16}
+  add PdgCode {-12}
+  add PdgCode {-14}
+  add PdgCode {-16}
+
+}
+
+
 #####################
 # MC truth jet finder
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+  set InputArray NeutrinoFilter/filteredParticles
 
   set OutputArray jets
 
@@ -430,6 +459,9 @@ module FastJetFinder GenJetFinder {
 
   set JetPTMin 20.0
 }
+
+
+
 
 ############
 # Jet finder
@@ -456,8 +488,8 @@ module EnergyScale JetEnergyScale {
   set InputArray FastJetFinder/jets
   set OutputArray jets
 
- # scale formula for jets
-  set ScaleFormula {1.00}
+  # scale formula for jets
+  set ScaleFormula {sqrt( (2.5 - 0.15*(abs(eta)))^2 / pt + 1.0 )}
 }
 
 ###########

@@ -1,10 +1,10 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: ClusterSequenceVoronoiArea.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2006-2007 Matteo Cacciari, Gavin Salam and Gregory Soyez
+// Copyright (c) 2006-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
-// This file is part of a simple command-line handling environment
+// This file is part of FastJet.
 //
 //  FastJet is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/ClusterSequenceVoronoiArea.hh"
 #include "fastjet/internal/Voronoi.hh"
@@ -275,6 +277,7 @@ void ClusterSequenceVoronoiArea::_initializeVA () {
   // transfer the areas to our local structure
   //  -- first the initial ones
   _voronoi_area.reserve(2*n_particles());
+  _voronoi_area_4vector.reserve(2*n_particles());
   for (unsigned int i=0; i<n_particles(); i++) {
     _voronoi_area.push_back(_pa_calc->area(i));
     // make a stab at a 4-vector area

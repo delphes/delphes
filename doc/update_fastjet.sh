@@ -1,4 +1,4 @@
-version=3.0.6
+version=3.1.0
 
 #wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
 
@@ -88,5 +88,10 @@ rename .cpp .cc SISCone/*.cpp
 mkdir -p TrackJet/fastjet
 cp -a ../../fastjet-${version}/plugins/TrackJet/*.cc TrackJet
 cp -a ../../fastjet-${version}/plugins/TrackJet/fastjet/*.hh TrackJet/fastjet
+
+sed -i 's/#include "fastjet\//#include "/' D0RunICone/fastjet/D0RunIpre96ConePlugin.hh
+sed -i 's/#include "fastjet\//#include "/' D0RunICone/fastjet/D0RunIConePlugin.hh
+
+sed -i 's/#include "siscone\//#include "/' SISCone/SISConePlugin.cc
 
 cd -

@@ -1,10 +1,10 @@
 #ifndef __GRID_MEDIAN_BACKGROUND_ESTIMATOR_HH__
 #define __GRID_MEDIAN_BACKGROUND_ESTIMATOR_HH__
 
-//STARTHEADER
-// $Id: GridMedianBackgroundEstimator.hh 2580 2011-09-13 17:25:43Z salam $
+//FJSTARTHEADER
+// $Id: GridMedianBackgroundEstimator.hh 3610 2014-08-13 09:49:28Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,10 +29,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #include "fastjet/tools/BackgroundEstimatorBase.hh"
+
+// if defined then we'll use the RectangularGrid class
+//
+// (For FastJet 3.2, maybe remove the symbol and simply clean up the
+// code below to use exclusively the RectangularGrid)
+#define FASTJET_GMBGE_USEFJGRID
+
+#ifdef FASTJET_GMBGE_USEFJGRID
+#include "fastjet/RectangularGrid.hh"
+#endif
+
+
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -60,19 +74,44 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 ///   Note also that in this case one needs to call rho(jet) instead of
 ///   rho() [Without rescaling, they are identical]
 ///
-class GridMedianBackgroundEstimator : public BackgroundEstimatorBase {
+class GridMedianBackgroundEstimator : public BackgroundEstimatorBase
+#ifdef FASTJET_GMBGE_USEFJGRID
+                                                                    , RectangularGrid
+#endif 
+{
+
 public:
   /// @name  constructors and destructors
   //\{
+#ifdef FASTJET_GMBGE_USEFJGRID
   //----------------------------------------------------------------
   ///   \param ymax   maximal absolute rapidity extent of the grid
   ///   \param requested_grid_spacing   size of the grid cell. The
   ///            "real" cell size could differ due e.g. to the 2pi
   ///             periodicity in azimuthal angle (size, not area)
   GridMedianBackgroundEstimator(double ymax, double requested_grid_spacing) :
+    RectangularGrid(ymax, requested_grid_spacing),
+    _has_particles(false), _enable_rho_m(true) {} 
+
+  //----------------------------------------------------------------
+  /// Constructor based on a user's fully specified RectangularGrid
+  GridMedianBackgroundEstimator(const RectangularGrid & grid) :
+    RectangularGrid(grid),
+    _has_particles(false), _enable_rho_m(true) {
+    if (!RectangularGrid::is_initialised()) 
+      throw Error("attempt to construct GridMedianBackgroundEstimator with uninitialised RectangularGrid");
+  }    
+
+#else  // alternative in old framework where we didn't have the rectangular grid
+  GridMedianBackgroundEstimator(double ymax, double requested_grid_spacing) :
     _ymin(-ymax), _ymax(ymax), 
     _requested_grid_spacing(requested_grid_spacing),
-    _has_particles(false){setup_grid();}
+    _has_particles(false), _enable_rho_m(true)
+  {
+     setup_grid();
+  }
+#endif // FASTJET_GMBGE_USEFJGRID
+
   //\}
 
 
@@ -83,6 +122,10 @@ public:
   /// tell the background estimator that it has a new event, composed
   /// of the specified particles.
   void set_particles(const std::vector<PseudoJet> & particles);
+
+  /// determine whether the automatic calculation of rho_m and sigma_m
+  /// is enabled (by default true)
+  void set_compute_rho_m(bool enable){ _enable_rho_m = enable;}
 
   //\}
 
@@ -113,9 +156,34 @@ public:
   /// determination of sigma
   bool has_sigma() {return true;}
 
+  //-----------------------------------------------------------------
+  /// Returns rho_m, the purely longitudinal, particle-mass-induced
+  /// component of the background density per unit area
+  double rho_m() const;
+
+  /// returns sigma_m, a measure of the fluctuations in the purely
+  /// longitudinal, particle-mass-induced component of the background
+  /// density per unit area; must be multipled by sqrt(area) to get
+  /// fluctuations for a region of a given area.
+  double sigma_m() const;
+
+  /// Returns rho_m locally at the jet position. As for rho(jet), it is non-const.
+  double rho_m(const PseudoJet & jet);
+
+  /// Returns sigma_m locally at the jet position. As for rho(jet), it is non-const.
+  double sigma_m(const PseudoJet & jet);
+
+  /// Returns true if this background estimator has support for
+  /// determination of rho_m.
+  ///
+  /// Note that support for sigma_m is automatic is one has sigma and
+  /// rho_m support.
+  bool has_rho_m() const {return _enable_rho_m;}
+
+
   /// returns the area of the grid cells (all identical, but
   /// referred to as "mean" area for uniformity with JetMedianBGE).
-  double mean_area() const {return _cell_area;}
+  double mean_area() const {return mean_tile_area();}
   //\}
 
   /// @name configuring the behaviour
@@ -133,6 +201,10 @@ public:
   ///
   /// Note that this has to be called BEFORE any attempt to do an
   /// actual computation
+  ///
+  /// The same profile will be used for both pt and mt (this is
+  /// probabaly a good approximation since the particle density
+  /// changes is what dominates the rapidity profile)
   virtual void set_rescaling_class(const FunctionOfPseudoJet<double> * rescaling_class);
 
   //\}
@@ -148,24 +220,37 @@ public:
 
 
 private:
+
+#ifndef FASTJET_GMBGE_USEFJGRID
+
   /// configure the grid
   void setup_grid();
 
   /// retrieve the grid cell index for a given PseudoJet
-  int igrid(const PseudoJet & p) const;
+  int tile_index(const PseudoJet & p) const;
+
+  // information about the grid
+  double _ymin, _ymax, _dy, _dphi, _requested_grid_spacing, _tile_area;
+  int _ny, _nphi, _ntotal;
+
+  int n_tiles() const {return _ntotal;}
+  int n_good_tiles() const {return n_tiles();}
+  int tile_is_good(int /* itile */) const {return true;}
+
+  double mean_tile_area() const {return _tile_area;}
+#endif // FASTJET_GMBGE_USEFJGRID
+
 
   /// verify that particles have been set and throw an error if not
   void verify_particles_set() const;
 
-  // information about the grid
-  double _ymin, _ymax, _dy, _dphi, _requested_grid_spacing, _cell_area;
-  int _ny, _nphi, _ntotal;
-
   // information abotu the event
-  std::vector<double> _scalar_pt;
+  //std::vector<double> _scalar_pt;
+  double _rho, _sigma, _rho_m, _sigma_m;
   bool _has_particles;
+  bool _enable_rho_m;
 
-  // various warnings to let people aware of potential dangers
+  // various warnings to inform people of potential dangers
   LimitedWarning _warning_rho_of_jet;
   LimitedWarning _warning_rescaling;
 };

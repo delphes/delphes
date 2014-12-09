@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: GridMedianBackgroundEstimator.cc 3555 2014-08-11 09:56:35Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #include "fastjet/tools/GridMedianBackgroundEstimator.hh"
@@ -32,23 +34,96 @@ using namespace std;
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
+
 //----------------------------------------------------------------------
 // setting a new event
 //----------------------------------------------------------------------
 // tell the background estimator that it has a new event, composed
 // of the specified particles.
 void GridMedianBackgroundEstimator::set_particles(const vector<PseudoJet> & particles) {
-  fill(_scalar_pt.begin(), _scalar_pt.end(), 0.0);
-  for (unsigned i = 0; i < particles.size(); i++) {
-    int j = igrid(particles[i]);
-    if (j >= 0){
-      if (_rescaling_class == 0)
-        _scalar_pt[j] += particles[i].perp();
-      else
-        _scalar_pt[j] += particles[i].perp()/(*_rescaling_class)(particles[i]);
+  vector<double> scalar_pt(n_tiles(), 0.0);
+
+#ifdef FASTJET_GMBGE_USEFJGRID
+  assert(all_tiles_equal_area());
+  //assert(n_good_tiles() == n_tiles()); // not needed now that we have an implementation
+#endif
+
+  // check if we need to compute only rho or both rho and rho_m
+  if (_enable_rho_m){
+    // both rho and rho_m
+    //
+    // this requires a few other variables
+    vector<double> scalar_dt(n_tiles(), 0.0);
+    double pt, dt;
+    for (unsigned i = 0; i < particles.size(); i++) {
+      int j = tile_index(particles[i]);
+      if (j >= 0){
+	pt = particles[i].pt();
+	dt = particles[i].mt() - pt;
+	if (_rescaling_class == 0){
+	  scalar_pt[j] += pt;
+	  scalar_dt[j] += dt;
+	} else {
+	  double r = (*_rescaling_class)(particles[i]);
+	  scalar_pt[j] += pt/r;
+	  scalar_dt[j] += dt/r;
+	}
+      }
+    }
+    // sort things for _percentile
+    sort(scalar_dt.begin(), scalar_dt.end());
+
+    // compute rho_m and sigma_m (see comment below for the
+    // normaliosation of sigma)
+    double p50 = _percentile(scalar_dt, 0.5);
+    _rho_m   = p50 / mean_tile_area();
+    _sigma_m = (p50-_percentile(scalar_dt, (1.0-0.6827)/2.0))/sqrt(mean_tile_area());
+  } else {
+    // only rho
+    //fill(_scalar_pt.begin(), _scalar_pt.end(), 0.0);
+    for (unsigned i = 0; i < particles.size(); i++) {
+      int j = tile_index(particles[i]);
+      if (j >= 0){
+	if (_rescaling_class == 0){
+	  scalar_pt[j] += particles[i].pt();
+	} else {
+	  scalar_pt[j] += particles[i].pt()/(*_rescaling_class)(particles[i]);
+	}
+      }
     }
   }
-  sort(_scalar_pt.begin(), _scalar_pt.end());
+
+  // if there are some "bad" tiles, then we need to exclude them from
+  // the calculation of the median. We'll do this by condensing the
+  // scalar_pt vector down to just the values for the tiles that are
+  // good.
+  //
+  // tested answers look right in "issue" 2014-08-08-testing-rect-grid
+  if (n_good_tiles() != n_tiles()) {
+    int newn = 0;
+    for (unsigned i = 0; i < scalar_pt.size(); i++) {
+      if (tile_is_good(i)) {
+        // clang gets confused with the SharedPtr swap if we don't
+        // have std:: here
+        std::swap(scalar_pt[i],scalar_pt[newn]);
+        newn++;
+      }
+    }
+    scalar_pt.resize(newn);
+  }
+
+  // in all cases, carry on with the computation of rho
+  // 
+  // first sort
+  sort(scalar_pt.begin(), scalar_pt.end());
+
+  // then compute rho
+  //
+  // watch out: by definition, our sigma is the standard deviation of
+  // the pt density multiplied by the square root of the cell area
+  double p50 = _percentile(scalar_pt, 0.5);
+  _rho   = p50 / mean_tile_area();
+  _sigma = (p50-_percentile(scalar_pt, (1.0-0.6827)/2.0))/sqrt(mean_tile_area());
 
   _has_particles = true;
 }
@@ -60,7 +135,7 @@ void GridMedianBackgroundEstimator::set_particles(const vector<PseudoJet> & part
 // get rho, the median background density per unit area
 double GridMedianBackgroundEstimator::rho() const {
   verify_particles_set();
-  return _percentile(_scalar_pt, 0.5) / _cell_area;
+  return _rho;
 }
 
 
@@ -70,11 +145,7 @@ double GridMedianBackgroundEstimator::rho() const {
 // given area.
 double GridMedianBackgroundEstimator::sigma() const{
   verify_particles_set();
-  // watch out: by definition, our sigma is the standard deviation of
-  // the pt density multiplied by the square root of the cell area
-  return (_percentile(_scalar_pt, 0.5) -
-          _percentile(_scalar_pt, (1.0-0.6827)/2.0)
-          )/sqrt(_cell_area);
+  return _sigma; 
 }
 
 //----------------------------------------------------------------------
@@ -84,7 +155,7 @@ double GridMedianBackgroundEstimator::sigma() const{
 // could depend on the position of the jet last used for a rho(jet)
 // determination.
 double GridMedianBackgroundEstimator::rho(const PseudoJet & jet)  {
-  verify_particles_set();
+  //verify_particles_set();
   double rescaling = (_rescaling_class == 0) ? 1.0 : (*_rescaling_class)(jet);
   return rescaling*rho();
 }
@@ -94,9 +165,51 @@ double GridMedianBackgroundEstimator::rho(const PseudoJet & jet)  {
 // get sigma, the background fluctuations per unit area, locally at
 // the position of a given jet. As for rho(jet), it is non-const.
 double GridMedianBackgroundEstimator::sigma(const PseudoJet & jet){
-  verify_particles_set();
+  //verify_particles_set();
   double rescaling = (_rescaling_class == 0) ? 1.0 : (*_rescaling_class)(jet);
   return rescaling*sigma();
+}
+
+//----------------------------------------------------------------------
+// returns rho_m (particle-masses contribution to the 4-vector density)
+double GridMedianBackgroundEstimator::rho_m() const {
+  if (! _enable_rho_m){
+    throw Error("GridMediamBackgroundEstimator: rho_m requested but rho_m calculation has been disabled.");
+  }
+  verify_particles_set();
+  return _rho_m;
+}
+
+
+//----------------------------------------------------------------------
+// returns sigma_m (particle-masses contribution to the 4-vector
+// density); must be multipled by sqrt(area) to get fluctuations
+// for a region of a given area.
+double GridMedianBackgroundEstimator::sigma_m() const{
+  if (! _enable_rho_m){
+    throw Error("GridMediamBackgroundEstimator: sigma_m requested but rho_m/sigma_m calculation has been disabled.");
+  }
+  verify_particles_set();
+  return _sigma_m; 
+}
+
+//----------------------------------------------------------------------
+// returns rho_m locally at the position of a given jet. As for
+// rho(jet), it is non-const.
+double GridMedianBackgroundEstimator::rho_m(const PseudoJet & jet)  {
+  //verify_particles_set();
+  double rescaling = (_rescaling_class == 0) ? 1.0 : (*_rescaling_class)(jet);
+  return rescaling*rho_m();
+}
+
+
+//----------------------------------------------------------------------
+// returns sigma_m locally at the position of a given jet. As for
+// rho(jet), it is non-const.
+double GridMedianBackgroundEstimator::sigma_m(const PseudoJet & jet){
+  //verify_particles_set();
+  double rescaling = (_rescaling_class == 0) ? 1.0 : (*_rescaling_class)(jet);
+  return rescaling*sigma_m();
 }
 
 //----------------------------------------------------------------------
@@ -111,8 +224,13 @@ void GridMedianBackgroundEstimator::verify_particles_set() const {
 //----------------------------------------------------------------------
 string GridMedianBackgroundEstimator::description() const { 
   ostringstream desc;
+#ifdef FASTJET_GMBGE_USEFJGRID
+  desc << "GridMedianBackgroundEstimator, with " << RectangularGrid::description();
+#else
   desc << "GridMedianBackgroundEstimator, with grid extension |y| < " << _ymax 
-       << " and requested grid spacing = " << _requested_grid_spacing;
+       << ", and grid cells of size dy x dphi = " << _dy << " x " << _dphi
+       << " (requested size = " << _requested_grid_spacing << ")";
+#endif
   return desc.str();
 }       
 
@@ -143,6 +261,7 @@ void GridMedianBackgroundEstimator::set_rescaling_class(const FunctionOfPseudoJe
 }
 
 
+#ifndef FASTJET_GMBGE_USEFJGRID
 //----------------------------------------------------------------------
 // protected material
 //----------------------------------------------------------------------
@@ -167,14 +286,14 @@ void GridMedianBackgroundEstimator::setup_grid() {
   assert(_ny >= 1 && _nphi >= 1);
 
   _ntotal = _nphi * _ny;
-  _scalar_pt.resize(_ntotal);
-  _cell_area = _dy * _dphi;
+  //_scalar_pt.resize(_ntotal);
+  _tile_area = _dy * _dphi;
 }
 
 
 //----------------------------------------------------------------------
-// retrieve the grid cell index for a given PseudoJet
-int GridMedianBackgroundEstimator::igrid(const PseudoJet & p) const {
+// retrieve the grid tile index for a given PseudoJet
+int GridMedianBackgroundEstimator::tile_index(const PseudoJet & p) const {
   // directly taking int does not work for values between -1 and 0
   // so use floor instead
   // double iy_double = (p.rap() - _ymin) / _dy;
@@ -192,10 +311,12 @@ int GridMedianBackgroundEstimator::igrid(const PseudoJet & p) const {
   assert(iphi >= 0 && iphi <= _nphi);
   if (iphi == _nphi) iphi = 0; // just in case of rounding errors
 
-  int igrid_res = iy*_nphi + iphi;
-  assert (igrid_res >= 0 && igrid_res < _ny*_nphi);
-  return igrid_res;
+  int index_res = iy*_nphi + iphi;
+  assert (index_res >= 0 && index_res < _ny*_nphi);
+  return index_res;
 }
+#endif // FASTJET_GMBGE_USEFJGRID
+
 
 
 FASTJET_END_NAMESPACE        // defined in fastjet/internal/base.hh

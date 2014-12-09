@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: CompositeJetStructure.hh 3071 2013-04-01 12:52:46Z cacciari $
+//FJSTARTHEADER
+// $Id: CompositeJetStructure.hh 3652 2014-09-03 13:31:13Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 
 #ifndef __FASTJET_COMPOSITEJET_STRUCTURE_HH__
@@ -109,11 +111,27 @@ public:
   /// In this case, it will be true if all pieces are pure ghost
   virtual bool is_pure_ghost(const PseudoJet &reference) const;
 
-  // allow to modify the area information
-  // (for use in join())
-  //------------------------------------------------------------------------------
-  void set_area_information(PseudoJet *area_4vector_ptr){
-    _area_4vector_ptr = area_4vector_ptr;
+  //unused: // allows one to modify the area information
+  //unused: // (for use in join())
+  //unused: //
+  //unused: // This member cannot be used by users who need to create a jet with
+  //unused: // user-supplied area information, because it sets only the 4-vector
+  //unused: // part of the area, but not all the other area information
+  //unused: // (e.g. scalar area) -- that other information is always deduced
+  //unused: // dynamically from the individual constituents.
+  //unused: // ------------------------------------------------------------------------------
+  //unused: void set_area_information(PseudoJet *area_4vector_ptr){
+  //unused:   _area_4vector_ptr = area_4vector_ptr;
+  //unused: }
+
+  /// disable the area of the composite jet
+  /// 
+  /// this can be used e.g. to discard the area of a composite jet
+  /// made of pieces with non-explicit-ghost area since the area may
+  /// by erroneous in that case
+  void discard_area(){
+    if (_area_4vector_ptr) delete _area_4vector_ptr;
+    _area_4vector_ptr = 0;
   }
 
 #endif  // __FJCORE__
@@ -225,6 +243,7 @@ template<typename T> PseudoJet join(const PseudoJet & j1,
 template<typename T> PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, 
 				    const JetDefinition::Recombiner & recombiner){
   std::vector<PseudoJet> pieces;
+  pieces.reserve(2);
   pieces.push_back(j1);
   pieces.push_back(j2);
   return join<T>(pieces, recombiner);
@@ -236,6 +255,7 @@ template<typename T> PseudoJet join(const PseudoJet & j1, const PseudoJet & j2,
 				    const PseudoJet & j3, 
 				    const JetDefinition::Recombiner & recombiner){
   std::vector<PseudoJet> pieces;
+  pieces.reserve(3);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);
@@ -248,6 +268,7 @@ template<typename T> PseudoJet join(const PseudoJet & j1, const PseudoJet & j2,
 				    const PseudoJet & j3, const PseudoJet & j4, 
 				    const JetDefinition::Recombiner & recombiner){
   std::vector<PseudoJet> pieces;
+  pieces.reserve(4);
   pieces.push_back(j1);
   pieces.push_back(j2);
   pieces.push_back(j3);

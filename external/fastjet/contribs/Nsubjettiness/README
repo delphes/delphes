@@ -1,0 +1,244 @@
+--------------------------------------------------------------------------------
+Nsubjettiness Package
+--------------------------------------------------------------------------------
+
+The Nsubjettiness package is based on the physics described in:
+
+   Identifying Boosted Objects with N-subjettiness.
+   Jesse Thaler and Ken Van Tilburg.
+   JHEP 1103:015 (2011), arXiv:1011.2268.
+
+   Maximizing Boosted Top Identification by Minimizing N-subjettiness. 
+   Jesse Thaler and Ken Van Tilburg. 
+   JHEP 1202:093 (2012), arXiv:1108.2701.
+
+New in v2.0 is the winner-take-all axis, which is described in:
+
+   Jet Shapes with the Broadening Axis. 
+   Andrew J. Larkoski, Duff Neill, and Jesse Thaler. 
+   JHEP 1404:017 (2014), arXiv:1401.2158.
+
+as well as in unpublished work by Gavin Salam.
+
+--------------------------------------------------------------------------------
+Core Classes
+--------------------------------------------------------------------------------
+
+There are various ways to access N-(sub)jettiness variables, described
+in more detail below:
+
+Nsubjettiness       [Nsubjettiness.hh]:
+   A FunctionOfPseudoJet<double> interface to measure N-subjettiness
+   (Recommended for most users)
+NsubjettinessRatio  [Nsubjettiness.hh]:
+   A FunctionOfPseudoJet<double> interface to measure ratios of
+   two different N-subjettiness (i.e. tau3/tau2)
+NjettinessPlugin    [NjettinessPlugin.hh]:
+   A FastJet plugin for finding jets by minimizing N-jettiness
+   (Recommended for advanced users)
+Njettiness          [Njettiness.hh]:
+   Access to the core Njettiness code.
+   (Not recommended for users, since the interface might change)
+
+The code assumes that you have FastJet 3.
+
+--------------------------------------------------------------------------------
+Basic Usage: Nsubjettiness and NsubjettinessRatio  [Nsubjettiness.hh]
+--------------------------------------------------------------------------------
+
+Most users will only need to use the Nsubjettiness class.  The basic
+functionality is given by:
+
+   Nsubjettiness nSub(N, AxesDefinition, MeasureDefinition)
+   // N specifies the number of (sub) jets to measure
+   // AxesDefinition is WTA_KT_Axes, OnePass_KT_Axes, etc.
+   // MeasureDefinition is UnnormalizedMeasure(beta),
+   //                      NormalizedMeasure(beta,R0), etc.
+      
+   // get tau value
+   double tauN = nSub.result(PseudoJet);
+
+Also available are ratios of N-subjettiness values
+    NsubjettinessRatio nSubRatio(N, M, AxesDefinition,
+                                 MeasureDefinition)
+    // N and M give tau_N / tau_M, all other options the same
+
+--------------------------------------------------------------------------------
+AxesDefinition  [NjettinessDefinition.hh]
+--------------------------------------------------------------------------------
+
+N-(sub)jettiness requires choosing axes as well as a measure (see below). There
+are a number of axes choices available to the user, though modes with a (*) are
+recommended. Arguments in parentheses are parameters that the user must set.
+
+Axes can be found using standard recursive clustering procedures.  New is the
+option to use the "winner-take-all" recombination scheme:
+(*) KT_Axes           // exclusive kt axes
+    CA_Axes           // exclusive ca axes
+    AntiKT_Axes(R0)   // inclusive hardest axes with antikt, R0 = radius
+(*) WTA_KT_Axes       // exclusive kt with winner-take-all recombination
+    WTA_CA_Axes       // exclusive ca with winner-take-all recombination
+
+One can also run a minimization routine to find a (local) minimum of
+N-(sub)jettiness:
+(*) OnePass_KT_Axes          // one-pass minimization from kt starting point
+    OnePass_CA_Axes          // one-pass min. from ca starting point
+    OnePass_AntiKT(R0)       // one-pass min. from antikt starting point,R0=rad
+(*) OnePass_WTA_KT_Axes      // one-pass min. from wta_kt starting point
+    OnePass_WTA_CA_Axes      // one-pass min. from wta_ca starting point
+
+In general, it is difficult to finding the global minimum, but this mode
+attempts to do so
+    MultiPass_Axes(Npass)    // axes that (attempt to) minimize N-subjettiness
+                             // (NPass = 100 is typical)
+
+Finally, one can set manual axes:
+    Manual_Axes          // set your own axes with setAxes()
+    OnePass_Manual_Axes  // one-pass minimization from manual starting point
+
+For most cases, running with OnePass_KT_Axes or OnePass_WTA_KT_Axes gives
+reasonable results (and the results are IRC safe).  Because it uses random
+number seeds, MultiPass_Axes is not IRC safe (and the code is rather slow).  Note
+that for the minimization routines, beta = 1.1 is faster than beta = 1, with
+comparable performance.
+
+--------------------------------------------------------------------------------
+MeasureDefinition  [NjettinessDefinition.hh]
+--------------------------------------------------------------------------------
+
+At the moment, there are only a few measures.  Note that each one has a
+different number of parameters.  The one indicated by (*)
+is the one recommended for use by users new to Nsubjettiness.
+
+The original N-subjettiness measures are:
+    NormalizedMeasure(beta,R0)  //default normalized measure with
+                                //parameters beta and R0 (dimensionless)
+(*) UnnormalizedMeasure(beta)   //default unnormalized measure with just
+                                //parameter beta (dimensionful)
+
+There are also measures that incorporate a radial cutoff:
+    NormalizedCutoffMeasure(beta,R0,Rcutoff) //normalized measure with
+                                             //additional Rcutoff
+    UnnormalizedCutoffMeasure(beta,Rcutoff)  //unnormalized measure with
+                                             //additional Rcutoff
+
+In beta testing are "geometric" measures where distances are measured using the
+Lorentz dot product (N.B. the formula for the geometric measure is likely to
+change since there should be separate beam and jet beta factors.)
+    GeometricMeasure(beta)               //geometric measure with exponent beta
+    GeometricCutoffMeasure(beta,Rcutoff) //geometric measure with Rcutoff
+
+--------------------------------------------------------------------------------
+A note on beta dependence
+--------------------------------------------------------------------------------
+
+The angular exponent in N-subjettiness is called beta.  The original
+N-subjettiness paper advocated beta = 1, but it is now understood that different
+beta values can be useful in different contexts.  The two main choices are:
+
+beta = 1:  aka broadening/girth/width measure
+   wta_kt_axes are approximately the same as minimizing beta = 1 measure
+
+beta = 2:  aka thrust/mass measure
+   kt_axes are approximately the same as minimizing beta = 2 measure
+
+N.B. The minimization routines are only valid for 1 < beta < 3.
+
+For quark/gluon discrimination with N = 1, beta~0.2 with wta_kt_axes appears
+to be a good choice. 
+
+--------------------------------------------------------------------------------
+TauComponents  [MeasureFunction.hh]
+--------------------------------------------------------------------------------
+
+For most users, they will only need the value of N-subjettiness (i.e. tau)
+itself.  For advanced users, they can access individual tau components (i.e. 
+the individual numerator pieces, the denominator, etc.)  
+
+   TauComponents tauComp = nSub.component_result(jet);
+   vector<double> numer = tauComp.jet_pieces_numerator(); //tau for each subjet
+   double denom = tauComp.denominator();  //normalization factor
+
+--------------------------------------------------------------------------------
+WinnerTakeAllRecombiner  [WinnerTakeAllRecombiner.hh]
+--------------------------------------------------------------------------------
+
+New for version 2.0 of Nsubjettiness are winner-take-all axes.  They are found
+with the help of the WinnerTakeAllRecombiner. This class defines a new
+recombination scheme for clustering particles. This scheme recombines two
+PseudoJets into a PseudoJet with pT of the sum of the two input PseudoJet pTs
+and direction of the harder PseudoJet.  This is a "recoil-free" recombination
+scheme that guarantees that the axes is aligned with one of the input particles.
+It is IRC safe.  Axes found with the standard E-scheme recombiner at similar to
+the beta = 2 minimization, while winner-take-all is similar to the beta = 1
+measure.
+
+Note that the WinnerTakeAllRecombiner can be used outside of Nsubjettiness
+itself for jet finding.  For example, the direction of anti-kT jets found
+with the WinnerTakeAllRecombiner is particularly robust against soft jet
+contamination.
+
+--------------------------------------------------------------------------------
+Advanced Usage:  NjettinessPlugin  [NjettinessPlugin.hh]
+--------------------------------------------------------------------------------
+
+The Njettiness FastJet plugin represents an exclusive jet finder (yielding a
+fixed N number of jets). The algorithm finds N axes, and jets are simply the sum
+of particles closest to a given axis (or unclustered if they are closest to the
+beam).  The axes finding methods and measures are the same as for Nsubjettiness.
+
+   NjettinessPlugin plugin(N, AxesDefinition, MeasureDefinition);
+   JetDefinition def(&plugin);
+   ClusterSequence cs(vector<PseudoJet>,def);
+   vector<PseudoJet> jets = cs.inclusive_jets();
+
+Note that despite being an exclusive jet algorithm, one finds the jets using the
+inclusive_jets() call.
+
+--------------------------------------------------------------------------------
+Very Advanced Usage:  Njettiness  [Njettiness.hh]
+--------------------------------------------------------------------------------
+
+Most users will want to use the Nsubjettiness or NjettinessPlugin classes to
+access N-(sub)jettiness information.  For direct access to the Njettiness class,
+one can use Njettiness.hh directly. This class is still evolving, so users who
+wish to extend its functionality should contact the authors first.
+
+--------------------------------------------------------------------------------
+Technical Details
+--------------------------------------------------------------------------------
+
+In general, the user will never need access to these header files.  Here is a
+brief description about how they are used to help the calculation of
+N-(sub)jettiness:
+
+AxesFinder.hh:
+
+The AxesFinder class (and derived classes) defines the axes used in the
+calculation of N-(sub)jettiness.  These axes can be defined from the exclusive
+jets from a kT or CA algorithm, the hardest jets from an anti-kT algorithm,
+manually, or from minimization of N-jettiness.  In the future, the user will be
+able to write their own axes finder, though currently the interface is still
+evolving.  At the moment, the user should stick to the options allowed by
+AxesDefinition.
+
+MeasureFunction.hh:
+
+The MeasureFunction class (and derived classes) defines the measure by which
+N-(sub)jettiness is calculated. This measure is calculated between each
+particle and its corresponding axis, and then summed and normalized to
+produce N-(sub)jettiness. The default measure for this calculation is
+pT*dR^beta, where dR is the rapidity-azimuth distance between the particle
+and its axis, and beta is the angular exponent.  Again, in the future the user
+will be able to write their own measures, but for the time being, only the
+predefined MeasureDefinition values should be used.
+
+--------------------------------------------------------------------------------
+Known Issues
+--------------------------------------------------------------------------------
+
+-- The MultiPass_Axes mode gives different answers on different runs, since
+   random numbers are used.
+-- In rare cases, one pass minimization can give a larger value of Njettiness
+   than without minimization.
+-- Nsubjettiness is not thread safe, since there are mutables in Njettiness.

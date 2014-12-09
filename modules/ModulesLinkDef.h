@@ -32,6 +32,7 @@
 #include "modules/Delphes.h"
 
 #include "modules/FastJetFinder.h"
+#include "modules/FastJetGridMedianEstimator.h"
 #include "modules/ParticlePropagator.h"
 #include "modules/Efficiency.h"
 #include "modules/EnergySmearing.h"
@@ -55,6 +56,7 @@
 #include "modules/PileUpJetID.h"
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
+#include "modules/PdgCodeFilter.h"
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
@@ -69,6 +71,7 @@
 #pragma link C++ class Delphes+;
 
 #pragma link C++ class FastJetFinder+;
+#pragma link C++ class FastJetGridMedianEstimator+;
 #pragma link C++ class ParticlePropagator+;
 #pragma link C++ class Efficiency+;
 #pragma link C++ class EnergySmearing+;
@@ -92,6 +95,7 @@
 #pragma link C++ class PileUpJetID+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
+#pragma link C++ class PdgCodeFilter+;
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;

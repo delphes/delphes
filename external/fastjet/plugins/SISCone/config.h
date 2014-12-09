@@ -48,7 +48,7 @@
 #define PACKAGE_NAME "SISCone"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "SISCone 2.0.6"
+#define PACKAGE_STRING "SISCone 3.0.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "siscone"
@@ -57,10 +57,10 @@
 /* #undef PACKAGE_URL */
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.0.6"
+#define PACKAGE_VERSION "3.0.0"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "2.0.6"
+#define VERSION "3.0.0"

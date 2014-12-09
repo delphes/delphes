@@ -37,6 +37,10 @@
 /* The TrackJet plugin is enabled */
 #define ENABLE_PLUGIN_TRACKJET /**/
 
+/* defined if demangling is enabled at configure time and is supported through
+   the GNU C++ ABI */
+/* #undef HAVE_DEMANGLING_SUPPORT */
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
@@ -87,16 +91,31 @@
 #define PACKAGE_NAME "FastJet"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "FastJet 3.0.6"
+#define PACKAGE_STRING "FastJet 3.1.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fastjet"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.0.6"
+#define PACKAGE_VERSION "3.1.0"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.0.6"
+#define VERSION "3.1.0"
+
+/* Major version of this package */
+#define VERSION_MAJOR 3
+
+/* Minor version of this package */
+#define VERSION_MINOR 1
+
+/* Version of the package under the form XYYZZ (instead of X.Y.Z) */
+#define VERSION_NUMBER 30100
+
+/* Patch version of this package */
+#define VERSION_PATCHLEVEL 0
+
+/* Pre-release version of this package */
+/* #undef VERSION_PRERELEASE */

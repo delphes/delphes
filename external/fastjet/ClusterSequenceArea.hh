@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: ClusterSequenceArea.hh 2690 2011-11-14 14:57:54Z soyez $
+//FJSTARTHEADER
+// $Id: ClusterSequenceArea.hh 3484 2014-07-29 21:39:39Z soyez $
 //
-// Copyright (c) 2006-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2006-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #ifndef __FASTJET_CLUSTERSEQUENCEAREA_HH__
 #define __FASTJET_CLUSTERSEQUENCEAREA_HH__
@@ -244,9 +246,11 @@ template<class L> void ClusterSequenceArea::initialize_and_run_cswa(
 						    _area_def.ghost_spec());
     break;
   default:
-    std::cerr << "Error: unrecognized area_type in ClusterSequenceArea:" 
-              << _area_def.area_type() << std::endl;
-    exit(-1);
+    std::ostringstream err;
+    err << "Error: unrecognized area_type in ClusterSequenceArea:" 
+	<< _area_def.area_type();
+    throw Error(err.str());
+    //exit(-1);
   }
   // now copy across the information from the area base class
   _area_base = std::auto_ptr<ClusterSequenceAreaBase>(_area_base_ptr);

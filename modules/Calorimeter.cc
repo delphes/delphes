@@ -152,6 +152,15 @@ void Calorimeter::Init()
     cout << itFractionMap->first << "   " << itFractionMap->second.first  << "   " << itFractionMap->second.second << endl;
   }
 */
+
+  // read min E value for towers to be saved
+  fEcalEnergyMin = GetDouble("EcalTowerMinEnergy", 0.0); 
+  fHcalEnergyMin = GetDouble("HcalTowerMinEnergy", 0.0); 
+  
+  fEcalSigmaMin  = GetDouble("EcalTowerMinSignificance", 0.0); 
+  fHcalSigmaMin  = GetDouble("HcalTowerMinSignificance", 0.0); 
+
+ 
   // read resolution formulas
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
   fHCalResolutionFormula->Compile(GetString("HCalResolutionFormula", "0"));
@@ -431,6 +440,10 @@ void Calorimeter::FinalizeTower()
   Double_t ecalTime, hcalTime, time;
 
   if(!fTower) return;
+//  cout<<"----------------------"<<endl;
+//  cout<<"Finalize Tower"<<endl;
+//  cout<<""<<endl;
+
 
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
 
@@ -447,6 +460,13 @@ void Calorimeter::FinalizeTower()
 
   hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
   hcalTime = (fTowerHCalWeightTime < 1.0E-09 ) ? 0 : fTowerHCalTime/fTowerHCalWeightTime;
+
+  
+  ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
+  hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
+
+  ecalEnergy = (ecalEnergy < fEcalEnergyMin || ecalEnergy < fEcalSigmaMin*ecalSigma) ? 0 : ecalEnergy;
+  hcalEnergy = (hcalEnergy < fHcalEnergyMin || hcalEnergy < fHcalSigmaMin*hcalSigma) ? 0 : hcalEnergy;
 
   energy = ecalEnergy + hcalEnergy;
   time = (TMath::Sqrt(ecalEnergy)*ecalTime + TMath::Sqrt(hcalEnergy)*hcalTime)/(TMath::Sqrt(ecalEnergy) + TMath::Sqrt(hcalEnergy)); 
@@ -470,9 +490,7 @@ void Calorimeter::FinalizeTower()
   fTower->Edges[2] = fTowerEdges[2];
   fTower->Edges[3] = fTowerEdges[3];
 
-
-  // fill calorimeter towers
-  if(energy > 0.0)
+  if( energy > 0.0 )
   {
     if(fTowerPhotonHits > 0 && fTowerTrackHits == 0)
     {
@@ -492,15 +510,13 @@ void Calorimeter::FinalizeTower()
   }
 
   ecalEnergy -= fTrackECalEnergy;
-  if(ecalEnergy < 0.0) ecalEnergy = 0.0;
+  if(ecalEnergy < fEcalEnergyMin || ecalEnergy < fEcalSigmaMin*fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy)) ecalEnergy = 0.0;
 
   hcalEnergy -= fTrackHCalEnergy;
-  if(hcalEnergy < 0.0) hcalEnergy = 0.0;
+  if(hcalEnergy < fHcalEnergyMin || hcalEnergy < fHcalSigmaMin*fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy)) hcalEnergy = 0.0;
 
   energy = ecalEnergy + hcalEnergy;
 
-  
-  // save ECAL and/or HCAL energy excess as an energy flow tower
   if(ecalEnergy > 0.0)
   {
     // create new photon tower
@@ -514,7 +530,6 @@ void Calorimeter::FinalizeTower()
 
     fEFlowPhotonOutputArray->Add(tower);
   }
-
   if(hcalEnergy > 0.0)
   {
     // create new neutral hadron tower

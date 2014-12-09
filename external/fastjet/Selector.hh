@@ -1,10 +1,10 @@
 #ifndef __FASTJET_SELECTOR_HH__
 #define __FASTJET_SELECTOR_HH__
 
-//STARTHEADER
-// $Id: Selector.hh 3203 2013-09-15 07:49:50Z salam $
+//FJSTARTHEADER
+// $Id: Selector.hh 3711 2014-09-29 13:54:51Z salam $
 //
-// Copyright (c) 2009-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -15,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/PseudoJet.hh"
 #ifndef __FJCORE__
@@ -66,14 +68,19 @@ public:
   // basic operations for checking what gets selected
   //----------------------------------------------------------
 
-  /// returns true if a given object passes the selection criterion.
-  /// This has to be overloaded by derived workers
+  /// returns true if a given object passes the selection criterion,
+  /// and is the main function that needs to be overloaded by derived
+  /// workers. 
+  ///
+  /// NB: this function is used only if applies_jet_by_jet() returns
+  /// true. If it does not, then derived classes are expected to
+  /// (re)implement the terminator function()
   virtual bool pass(const PseudoJet & jet) const = 0;
 
   /// For each jet that does not pass the cuts, this routine sets the 
-  /// pointer to 0. 
+  /// pointer to 0.
   ///
-  /// It does not assume that the PseudoJet* passed as argumetn are not NULL
+  /// It does not assume that the PseudoJet* passed as argument are not NULL
   virtual void terminator(std::vector<const PseudoJet *> & jets) const {
     for (unsigned i = 0; i < jets.size(); i++) {
       if (jets[i] && !pass(*jets[i])) jets[i] = NULL;
@@ -132,6 +139,7 @@ public:
   virtual double known_area() const{
     throw Error("this selector has no computable area");
   }
+
 };
 
 //----------------------------------------------------------------------
@@ -149,7 +157,6 @@ public:
   /// Note that the Selector takes ownership of the pointer to the
   /// worker (and so will delete automatically when appropriate).
   Selector(SelectorWorker * worker_in) {_worker.reset(worker_in);}
-
 
 #ifndef __FJCORE__
   /// ctor from a RangeDefinition
@@ -185,6 +192,18 @@ public:
   /// This will often be more efficient that getting the vector of objects that
   /// passes and then evaluating the size of the vector
   unsigned int count(const std::vector<PseudoJet> & jets) const;
+
+  /// Return the 4-vector sum of the objects that pass the selection.
+  ///
+  /// This will often be more efficient that getting the vector of objects that
+  /// passes and then evaluating the size of the vector
+  PseudoJet sum(const std::vector<PseudoJet> & jets) const;
+
+  /// Return the scalar pt sum of the objects that pass the selection.
+  ///
+  /// This will often be more efficient that getting the vector of objects that
+  /// passes and then evaluating the size of the vector
+  double scalar_pt_sum(const std::vector<PseudoJet> & jets) const;
 
   /// sift the input jets into two vectors -- those that pass the selector
   /// and those that do not
@@ -285,15 +304,15 @@ public:
     return *this;
   }
 
-  /// class that gets throw when a Selector is applied despite it not
+  /// class that gets thrown when a Selector is applied despite it not
   /// having a valid underlying worker.
   class InvalidWorker : public Error {
   public:
     InvalidWorker() : Error("Attempt to use Selector with no valid underlying worker") {}
   };
 
-  /// class that gets throw when a Selector is applied despite it not
-  /// having a valid underlying worker.
+  /// class that gets thrown when the area is requested from a Selector for which
+  /// the area is not meaningful
   class InvalidArea : public Error {
   public:
     InvalidArea() : Error("Attempt to obtain area from Selector for which this is not meaningful") {}
@@ -432,20 +451,20 @@ Selector SelectorNHardest(unsigned int n);
 
 /// select objets within a distance 'radius' from the location of the
 /// reference jet, set by Selector::set_reference(...)
-Selector SelectorCircle(const double & radius); 
+Selector SelectorCircle(const double radius); 
 
 /// select objets with distance from the reference jet is between 'radius_in'
 /// and 'radius_out'; the reference jet is set by Selector::set_reference(...)
-Selector SelectorDoughnut(const double & radius_in, const double & radius_out); 
+Selector SelectorDoughnut(const double radius_in, const double radius_out); 
 
 /// select objets within a rapidity distance 'half_width' from the
 /// location of the reference jet, set by Selector::set_reference(...)
-Selector SelectorStrip(const double & half_width);
+Selector SelectorStrip(const double half_width);
 
 /// select objets within rapidity distance 'half_rap_width' from the
 /// reference jet and azimuthal-angle distance within 'half_phi_width'; the
 /// reference jet is set by Selector::set_reference(...)
-Selector SelectorRectangle(const double & half_rap_width, const double & half_phi_width);
+Selector SelectorRectangle(const double half_rap_width, const double half_phi_width);
 
 
 /// select objects that carry at least a fraction "fraction" of the

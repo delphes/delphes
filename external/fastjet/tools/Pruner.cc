@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: Pruner.cc 3481 2014-07-29 17:24:12Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/tools/Pruner.hh"
 #include "fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh"
@@ -46,12 +48,12 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 //----------------------------------------------------------------------
 // alternative (dynamic) ctor
-//  \param jet_def the jet definition for the internal clustering
+//  \param jet_def     the jet definition for the internal clustering
 //  \param zcut_dyn    dynamic pt-fraction cut in the pruning
 //  \param Rcut_dyn    dynamic angular distance cut in the pruning
 Pruner::Pruner(const JetDefinition &jet_def, 
-         FunctionOfPseudoJet<double> *zcut_dyn,
-         FunctionOfPseudoJet<double> *Rcut_dyn)
+         const FunctionOfPseudoJet<double> *zcut_dyn,
+         const FunctionOfPseudoJet<double> *Rcut_dyn)
   : _jet_def(jet_def), _zcut(0), _Rcut_factor(0),
     _zcut_dyn(zcut_dyn), _Rcut_dyn(Rcut_dyn), _get_recombiner_from_jet(false)  {
   assert(_zcut_dyn != 0 && _Rcut_dyn != 0);
@@ -73,27 +75,19 @@ PseudoJet Pruner::result(const PseudoJet &jet) const{
   double Rcut = (_Rcut_dyn) ? (*_Rcut_dyn)(jet) : _Rcut_factor * 2.0*jet.m()/jet.perp();
   double zcut = (_zcut_dyn) ? (*_zcut_dyn)(jet) : _zcut;
   PruningPlugin * pruning_plugin;
+
   // for some constructors, we get the recombiner from the 
-  // input jet -- some acrobatics are needed (see plans for FJ3.1
-  // for a hopefully better solution).
+  // input jet -- some acrobatics are needed
   if (_get_recombiner_from_jet) {
-    const JetDefinition::Recombiner * common_recombiner = 
-                                              _get_common_recombiner(jet);
-    if (common_recombiner) {
-      JetDefinition jet_def = _jet_def;
-      if (typeid(*common_recombiner) == typeid(JetDefinition::DefaultRecombiner)) {
-        RecombinationScheme scheme = 
-          static_cast<const JetDefinition::DefaultRecombiner *>(common_recombiner)->scheme();
-        jet_def.set_recombination_scheme(scheme);
-      } else {
-        jet_def.set_recombiner(common_recombiner);
-      }
-      pruning_plugin = new PruningPlugin(jet_def, zcut, Rcut);
-    } else {
-      // if there wasn't a common recombiner, we just use the default
-      // recombiner that was in _jet_def
-      pruning_plugin = new PruningPlugin(_jet_def, zcut, Rcut);
+    JetDefinition jet_def = _jet_def;
+
+    // if all the pieces have a shared recombiner, we'll use that
+    // one. Otherwise, use the one from _jet_def as a fallback.
+    JetDefinition jet_def_for_recombiner;
+    if (_check_common_recombiner(jet, jet_def_for_recombiner)){
+      jet_def.set_recombiner(jet_def_for_recombiner);
     }
+    pruning_plugin = new PruningPlugin(jet_def, zcut, Rcut);
   } else {
     pruning_plugin = new PruningPlugin(_jet_def, zcut, Rcut);
   }
@@ -121,6 +115,8 @@ PseudoJet Pruner::result(const PseudoJet &jet) const{
   
   PseudoJet result_local = SelectorNHardest(1)(cs->inclusive_jets())[0];
   PrunerStructure * s = new PrunerStructure(result_local);
+  s->_Rcut = Rcut;
+  s->_zcut = zcut;
   result_local.set_structure_shared_ptr(SharedPtr<PseudoJetStructureBase>(s));
   
   // make sure things remain persistent -- i.e. tell the jet definition
@@ -154,33 +150,38 @@ bool Pruner::_check_explicit_ghosts(const PseudoJet &jet) const{
   return false;
 }
 
-// see if there is a common recombiner among the pieces; if there
-// is return a pointer to it; otherwise, return NULL.
-// 
-// NB: this way of doing things is not ideal, because quite some work
-//     is needed to get a correct handling of the final recombiner
-//     (e.g. default v. non-default). In future add
-//     set_recombiner(jet_def) to JetDefinition, maybe also add
-//     an invalid_scheme to the default recombiner and then 
-//     do all the work below directly with a JetDefinition directly
-//     together with JD::has_same_recombiner(...)
-const JetDefinition::Recombiner * Pruner::_get_common_recombiner(const PseudoJet &jet) const{
-  if (jet.has_associated_cluster_sequence())
-    return jet.validated_cs()->jet_def().recombiner();
+// see if there is a common recombiner among the pieces; if there is
+// return true and set jet_def_for_recombiner so that the recombiner
+// can be taken from that JetDefinition. Otherwise, return
+// false. 'assigned' is initially false; when true, each time we meet
+// a new jet definition, we'll check it shares the same recombiner as
+// jet_def_for_recombiner.
+bool Pruner::_check_common_recombiner(const PseudoJet &jet, 
+				      JetDefinition &jet_def_for_recombiner,
+				      bool assigned) const{
+  if (jet.has_associated_cluster_sequence()){
+    // if the jet def for recombination has already been assigned, check if we have the same
+    if (assigned)
+      return jet.validated_cs()->jet_def().has_same_recombiner(jet_def_for_recombiner);
+
+    // otherwise, assign it.
+    jet_def_for_recombiner = jet.validated_cs()->jet_def();
+    assigned = true;
+    return true;
+  }
 
   // if the jet has pieces, recurse in the pieces
   if (jet.has_pieces()){
     vector<PseudoJet> pieces = jet.pieces();
-    if (pieces.size() == 0) return 0;
-    const JetDefinition::Recombiner * reco = _get_common_recombiner(pieces[0]);
-    for (unsigned int i=1;i<pieces.size(); i++)
-      if (_get_common_recombiner(pieces[i]) != reco) return 0;
+    if (pieces.size() == 0) return false;
+    for (unsigned int i=0;i<pieces.size(); i++)
+      if (!_check_common_recombiner(pieces[i], jet_def_for_recombiner, assigned)) return false;
     // never returned false, so we're OK.
-    return reco;
+    return true;
   }
 
   // return false for any other (unknown) structure
-  return 0;
+  return false;
 }
 
 

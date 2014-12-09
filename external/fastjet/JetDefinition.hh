@@ -1,7 +1,10 @@
-//STARTHEADER
-// $Id: JetDefinition.hh 2687 2011-11-14 11:17:51Z soyez $
+#ifndef __FASTJET_JETDEFINITION_HH__
+#define __FASTJET_JETDEFINITION_HH__
+
+//FJSTARTHEADER
+// $Id: JetDefinition.hh 3677 2014-09-09 22:45:25Z soyez $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +15,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,10 +29,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
-
-#ifndef __FASTJET_JETDEFINITION_HH__
-#define __FASTJET_JETDEFINITION_HH__
+//FJENDHEADER
 
 #include<cassert>
 #include "fastjet/internal/numconsts.hh"
@@ -46,7 +48,45 @@ std::string fastjet_version_string();
 /// the various options for the algorithmic strategy to adopt in
 /// clustering events with kt and cambridge style algorithms.
 enum Strategy {
-  /// fastest form about 500..10^4
+  /// Like N2MHTLazy9 in a number of respects, but does not calculate
+  /// ghost-ghost distances and so does not carry out ghost-ghost
+  /// recombination. 
+  ///
+  /// If you want active ghosted areas, then this is only suitable for
+  /// use with the anti-kt algorithm (or genkt with negative p), and
+  /// does not produce any pure ghost jets. If used with active areas
+  /// with Kt or Cam algorithms it will actually produce a passive
+  /// area.
+  /// 
+  /// Particles are deemed to be ghosts if their pt is below a
+  /// threshold (currently 1e-50, hard coded as ghost_limit in
+  /// LazyTiling9SeparateGhosts).
+  ///
+  /// Currently for events with a couple of thousand normal particles
+  /// and O(10k) ghosts, this can be quicker than N2MHTLazy9, which
+  /// would otherwise be the best strategy. 
+  ///
+  /// New in FJ3.1
+  N2MHTLazy9AntiKtSeparateGhosts   = -10, 
+  /// only looks into a neighbouring tile for a particle's nearest
+  /// neighbour (NN) if that particle's in-tile NN is further than the
+  /// distance to the edge of the neighbouring tile. Uses tiles of
+  /// size R and a 3x3 tile grid around the particle.
+  /// New in FJ3.1
+  N2MHTLazy9   = -7, 
+  /// Similar to N2MHTLazy9, but uses tiles of size R/2 and a 5x5 tile
+  /// grid around the particle.
+  /// New in FJ3.1
+  N2MHTLazy25   = -6, 
+  /// Like to N2MHTLazy9 but uses slightly different optimizations,
+  /// e.g. for calculations of distance to nearest tile; as of
+  /// 2014-07-18 it is slightly slower and not recommended for
+  /// production use. To considered deprecated.
+  /// New in FJ3.1
+  N2MHTLazy9Alt   = -5, 
+  /// faster that N2Tiled above about 500 particles; differs from it
+  /// by retainig the di(closest j) distances in a MinHeap (sort of
+  /// priority queue) rather than a simple vector. 
   N2MinHeapTiled   = -4, 
   /// fastest from about 50..500
   N2Tiled     = -3, 
@@ -56,7 +96,8 @@ enum Strategy {
   N2Plain     = -1, 
   /// worse even than the usual N^3 algorithms
   N3Dumb      =  0, 
-  /// automatic selection of the best (based on N)
+  /// automatic selection of the best (based on N), including 
+  /// the LazyTiled strategies that are new to FJ3.1
   Best        =  1, 
   /// best of the NlnN variants -- best overall for N>10^4.
   /// (Does not work for R>=2pi)
@@ -78,6 +119,9 @@ enum Strategy {
   /// variant), for use exclusively with the Cambridge algorithm. 
   /// (Does not work for R>=2pi)
   NlnNCam      = 12, // 2piMultD
+  /// the automatic strategy choice that was being made in FJ 3.0
+  /// (restricted to strategies that were present in FJ 3.0)
+  BestFJ30     =  21, 
   /// the plugin has been used...
   plugin_strategy = 999
 };
@@ -86,6 +130,9 @@ enum Strategy {
 //======================================================================
 /// \enum JetAlgorithm
 /// the various families of jet-clustering algorithm
+//
+// [Remember to update the "is_spherical()" routine if any further
+// spherical algorithms are added to the list below]
 enum JetAlgorithm {
   /// the longitudinally invariant kt algorithm
   kt_algorithm=0,
@@ -101,11 +148,14 @@ enum JetAlgorithm {
   ///       diB = 1/kti^{2p}
   /// where p = extra_param()
   genkt_algorithm=3, 
-  /// a version of cambridge with a special distance measure for particles
-  /// whose pt is < extra_param()
+  /// a version of cambridge with a special distance measure for
+  /// particles whose pt is < extra_param(); this is not usually
+  /// intended for end users, but is instead automatically selected
+  /// when requesting a passive Cambridge area.
   cambridge_for_passive_algorithm=11,
   /// a version of genkt with a special distance measure for particles
   /// whose pt is < extra_param() [relevant for passive areas when p<=0]
+  /// ***** NB: THERE IS CURRENTLY NO IMPLEMENTATION FOR THIS ALG *******
   genkt_for_passive_algorithm=13, 
   //.................................................................
   /// the e+e- kt algorithm
@@ -130,7 +180,15 @@ const JetAlgorithm aachen_algorithm = cambridge_algorithm;
 const JetAlgorithm cambridge_aachen_algorithm = cambridge_algorithm;
 
 //======================================================================
-/// the various recombination schemes
+/// The various recombination schemes
+///
+/// Note that the schemes that recombine with non-linear weighting of
+/// the directions (e.g. pt2, winner-takes-all) are collinear safe
+/// only for algorithms with a suitable ordering of the
+/// recombinations: orderings in which, for particles of comparable
+/// energies, small-angle clusterings take place before large-angle
+/// clusterings. This property is satisfied by all gen-kt algorithms.
+/// 
 enum RecombinationScheme {
   /// summing the 4-momenta
   E_scheme=0,
@@ -152,6 +210,24 @@ enum RecombinationScheme {
   /// pt^2 weighted recombination of y,phi (and summing of pt's)
   /// no preprocessing
   BIpt2_scheme=6,
+  /// pt-based Winner-Takes-All (WTA) recombination: the
+  /// result of the recombination has the rapidity, azimuth and mass
+  /// of the the PseudoJet with the larger pt, and a pt equal to the
+  /// sum of the two pt's
+  WTA_pt_scheme=7,
+  /// mod-p-based Winner-Takes-All (WTA) recombination: the result of
+  /// the recombination gets the 3-vector direction and mass of the
+  /// PseudoJet with the larger |3-momentum| (modp), and a
+  /// |3-momentum| equal to the scalar sum of the two |3-momenta|.
+  WTA_modp_scheme=8,
+  // Energy-ordering can lead to dangerous situations with particles at
+  // rest. We instead implement the WTA_modp_scheme
+  //
+  // // energy-based Winner-Takes-All (WTA) recombination: the result of
+  // // the recombination gets the 3-vector direction and mass of the
+  // // PseudoJet with the larger energy, and an energy equal to the
+  // // to the sum of the two energies
+  // WTA_E_scheme=8,
   /// for the user's external scheme
   external_scheme = 99
 };
@@ -243,9 +319,8 @@ public:
                 double xtra_param_in,
                 const Recombiner * recombiner_in,
                 Strategy strategy_in = Best) {
-    *this = JetDefinition(jet_algorithm_in, R_in, external_scheme, strategy_in);
+    *this = JetDefinition(jet_algorithm_in, R_in, xtra_param_in, external_scheme, strategy_in);
     _recombiner = recombiner_in;
-    set_extra_param(xtra_param_in);
   }
 
   /// a default constructor which creates a jet definition that is in
@@ -283,6 +358,13 @@ public:
                 Strategy strategy_in,
                 RecombinationScheme recomb_scheme_in = E_scheme,
                 int nparameters_in = 1);
+
+  /// cluster the supplied particles and returns a vector of resulting
+  /// jets, sorted by pt (or energy in the case of spherical,
+  /// i.e. e+e-, algorithms). This routine currently only makes
+  /// sense for "inclusive" type algorithms.
+  template <class L> 
+  std::vector<PseudoJet> operator()(const std::vector<L> & particles) const;
   
   /// R values larger than max_allowable_R are not allowed.
   ///
@@ -296,20 +378,40 @@ public:
   void set_recombination_scheme(RecombinationScheme);
 
   /// set the recombiner class to the one provided
+  ///
+  /// Note that in order to associate to a jet definition a recombiner
+  /// from another jet definition, it is strongly recommended to use
+  /// the set_recombiner(const JetDefinition &) method below. The
+  /// latter correctly handles the situations where the jet definition
+  /// owns the recombiner (i.e. where delete_recombiner_when_unused
+  /// has been called). In such cases, using set_recombiner(const
+  /// Recombiner *) may lead to memory corruption.
   void set_recombiner(const Recombiner * recomb) {
-    if (_recombiner_shared()) _recombiner_shared.reset(recomb);
+    if (_shared_recombiner()) _shared_recombiner.reset(recomb);
     _recombiner = recomb;
     _default_recombiner = DefaultRecombiner(external_scheme);
   }
 
+  /// set the recombiner to be the same as the one of 'other_jet_def'
+  ///
+  /// Note that this is the recommended method to associate to a jet
+  /// definition the recombiner from another jet definition. Compared
+  /// to the set_recombiner(const Recombiner *) above, it correctly
+  /// handles the case where the jet definition owns the recombiner
+  /// (i.e. where delete_recombiner_when_unused has been called)
+  void set_recombiner(const JetDefinition &other_jet_def);
+
   /// calling this tells the JetDefinition to handle the deletion of
-  /// the recombiner when it is no longer used
+  /// the recombiner when it is no longer used. (Should not be called
+  /// if the recombiner was initialised from a JetDef whose recombiner
+  /// was already scheduled to delete itself - memory handling will
+  /// already be automatic across both JetDef's in that case).
   void delete_recombiner_when_unused();
 
   /// return a pointer to the plugin 
   const Plugin * plugin() const {return _plugin;};
 
-  /// allows to let the JetDefinition handle the deletion of the
+  /// calling this causes the JetDefinition to handle the deletion of the
   /// plugin when it is no longer used
   void delete_plugin_when_unused();
 
@@ -332,7 +434,7 @@ public:
   /// (re)set the general purpose extra parameter
   void set_extra_param(double xtra_param) {_extra_param = xtra_param;}
 
-  /// return a pointer to the currently defined recombiner. 
+  /// returns a pointer to the currently defined recombiner. 
   ///
   /// Warning: the pointer may be to an internal recombiner (for
   /// default recombination schemes), in which case if the
@@ -346,12 +448,26 @@ public:
     return _recombiner == 0 ? & _default_recombiner : _recombiner;}
 
   /// returns true if the current jet definitions shares the same
-  /// recombiner as teh one passed as an argument
+  /// recombiner as the one passed as an argument
   bool has_same_recombiner(const JetDefinition &other_jd) const;
+
+  /// returns true if the jet definition involves an algorithm
+  /// intended for use on a spherical geometry (e.g. e+e- algorithms,
+  /// as opposed to most pp algorithms, which use a cylindrical,
+  /// rapidity-phi geometry).
+  bool is_spherical() const;
 
   /// return a textual description of the current jet definition 
   std::string description() const;
 
+  /// returns a description not including the recombiner information
+  std::string description_no_recombiner() const;
+
+  /// a short textual description of the algorithm jet_alg
+  static std::string algorithm_description(const JetAlgorithm jet_alg);
+
+  /// the number of parameters associated to a given jet algorithm
+  static unsigned int n_parameters_for_algorithm(const JetAlgorithm jet_alg);
 
 public:
   //======================================================================
@@ -461,6 +577,12 @@ public:
     /// cluster sequence
     virtual bool exclusive_sequence_meaningful() const {return false;}
 
+    /// returns true if the plugin implements an algorithm intended
+    /// for use on a spherical geometry (e.g. e+e- algorithms, as
+    /// opposed to most pp algorithms, which use a cylindrical,
+    /// rapidity-phi geometry).
+    virtual bool is_spherical() const {return false;}
+
     /// a destructor to be replaced if necessary in derived classes...
     virtual ~Plugin() {};
   };
@@ -480,7 +602,7 @@ private:
   // so that we don't have to worry about deleting it etc...
   DefaultRecombiner _default_recombiner;
   const Recombiner * _recombiner;
-  SharedPtr<const Recombiner> _recombiner_shared;
+  SharedPtr<const Recombiner> _shared_recombiner;
 
 };
 
@@ -515,9 +637,11 @@ PseudoJet join(const PseudoJet & j1, const PseudoJet & j2, const PseudoJet & j3,
 	       const JetDefinition::Recombiner & recombiner);
 
 
-
-
-
 FASTJET_END_NAMESPACE
+
+// include ClusterSequence which includes the implementation of the 
+// templated JetDefinition::operator()(...) member
+#include "fastjet/ClusterSequence.hh"
+
 
 #endif // __FASTJET_JETDEFINITION_HH__

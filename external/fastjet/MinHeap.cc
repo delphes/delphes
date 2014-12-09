@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: MinHeap.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/internal/MinHeap.hh"
 #include<iostream>
@@ -42,7 +44,7 @@ using namespace std;
 ///     _heap[2].minloc points to smallest entry in other half of heap
 ///
 ///   . for _heap[i], the "parent" is to be found at (i-1)/2
-void MinHeap::_initialise(const std::vector<double> & values){
+void MinHeap::initialise(const std::vector<double> & values){
   
   // fill the high-range of the heap with the largest possible value
   // (minloc of each entry is itself)

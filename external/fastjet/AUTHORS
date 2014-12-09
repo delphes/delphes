@@ -9,9 +9,9 @@ at http://arxiv.org/abs/1111.6097
 
 ----------------------------------------------------------------------
 
-Many people have provided bug reports, suggestions for development and
-in some cases explicit code for plugin algorithms. We would in
-particular like to thank
+Many people have provided bug reports, suggestions for development,
+documentation and in some cases explicit code for plugin
+algorithms. We would in particular like to thank
 
 Vanya Belyaev
 Andy Buckley
@@ -31,8 +31,10 @@ Torbjorn Sjostrand
 Lars Sonnenschein
 Hartmut Stadie
 Mark Sutton
+Jesse Thaler
 Chris Vermilion
 Markus Wobisch 
+Christopher Young
 
 ----------------------------------------------------------------------
 

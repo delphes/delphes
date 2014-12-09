@@ -4,6 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
+//  $Id: WinnerTakeAllRecombiner.cc 597 2014-04-16 23:07:55Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -32,7 +33,6 @@ std::string WinnerTakeAllRecombiner::description() const {
 }
 
 // recombine pa and pb by creating pab with energy of the sum of particle energies in the direction of the harder particle
-
 // updated recombiner to use more general form of a metric equal to E*(pT/E)^(alpha), which reduces to pT*cosh(rap)^(1-alpha)
 // alpha is specified by the user. The default is alpha = 1, which is the typical behavior. alpha = 2 provides a metric which more 
 // favors central jets

@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision::                                                              $//
-// $Date::                                                                  $//
+// $Revision:: 225                                                          $//
+// $Date:: 2008-05-20 16:59:47 +0200 (Tue, 20 May 2008)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 //! \file defines.h

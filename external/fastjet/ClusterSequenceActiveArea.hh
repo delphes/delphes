@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id: ClusterSequenceActiveArea.hh 2687 2011-11-14 11:17:51Z soyez $
+//FJSTARTHEADER
+// $Id: ClusterSequenceActiveArea.hh 3619 2014-08-13 14:17:19Z salam $
 //
-// Copyright (c) 2005-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #ifndef __FASTJET_CLUSTERSEQUENCEACTIVEAREA_HH__
 #define __FASTJET_CLUSTERSEQUENCEACTIVEAREA_HH__
@@ -82,6 +84,9 @@ public:
   /// enum providing a variety of tentative strategies for estimating
   /// the background (e.g. non-jet) activity in a highly populated event; the
   /// one that has been most extensively tested is median.
+  /// 
+  /// These strategies are OBSOLETE and deprecated (see comment
+  /// for pt_per_unit_area).
   enum mean_pt_strategies{median=0, non_ghost_median, pttot_over_areatot, 
 			  pttot_over_areatot_cut, mean_ratio_cut, play,
 			  median_4vector};
@@ -92,20 +97,12 @@ public:
   /// subset of the jets for the background estimation, those that
   /// have pt/area > median(pt/area)*range.
   ///
-  /// NB: This call is OBSOLETE; use media_pt_per_unit_area from the
-  //      ClusterSequenceAreaBase class instead
+  /// NB: This call is OBSOLETE and deprecated; use a
+  /// JetMedianBackgroundEstimator or GridMedianBackgroundEstimator
+  /// instead.
   double pt_per_unit_area(mean_pt_strategies strat=median, 
                           double range=2.0 ) const;
 
-  // following code removed -- now dealt with by AreaBase class (and
-  // this definition here conflicts with it).
-//   /// fits a form pt_per_unit_area(y) = a + b*y^2 in the range
-//   /// abs(y)<raprange (for negative raprange, it defaults to
-//   /// _safe_rap_for_area).
-//   void parabolic_pt_per_unit_area(double & a,double & b, double raprange=-1.0,
-// 				  double exclude_above=-1.0, 
-// 				  bool use_area_4vector=false ) const;
-// 
   /// rewrite the empty area from the parent class, so as to use
   /// all info at our disposal
   /// return the total area, corresponding to a given Selector, that

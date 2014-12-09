@@ -1,15 +1,10 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: TrackJetPlugin.cc 3433 2014-07-23 08:17:03Z salam $
 //
-// Copyright (c) 2007-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
-// This file is part of FastJet. It contains code that has been
-// obtained from the Rivet project by Leif Lonnblad, Andy Buckley and
-// Jon Butterworth. See http://www.hepforge.org/downloads/rivet.
-// Rivet is free software released under the terms of the GNU Public
-// License(v2).
-// Changes from the original file are listed below.
+// This file is part of FastJet.
 //
 //  FastJet is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -17,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +26,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 // History of changes from the original TrackJet.cc file in Rivet <=1.1.2
 // 

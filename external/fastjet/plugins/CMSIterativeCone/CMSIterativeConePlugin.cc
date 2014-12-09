@@ -1,39 +1,32 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: CMSIterativeConePlugin.cc 1504 2009-04-10 13:39:48Z salam $
 //
-// Copyright (c) 2007-2011, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
-// Copyright (c) ????-????, CMS [for the iterative-cone code itself]
+// Copyright (c) 2007-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
-// This file is part of FastJet. It contains code that has been
-// obtained from the CMS collaboration, revision 1.14 of the
-// CMSIterativeConeAlgorithm.cc file in CMSSW, see
-//   http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoJets/JetAlgorithms/src/CMSIterativeConeAlgorithm.cc?hideattic=0&revision=1.14&view=markup
+// This file is part of FastJet.
 //
-// Permission has been granted by the CMS collaboration to release it
-// in FastJet under the terms of the GNU Public License(v2) (see the
-// COPYING file in the main FastJet directory for details).
-// Changes from the original file are listed below.
+//  FastJet is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation; either version 2 of the License, or
+//  (at your option) any later version.
 //
-// FastJet is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
+//  The algorithms that underlie FastJet have required considerable
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
+//  FastJet as part of work towards a scientific publication, please
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
-// The algorithms that underlie FastJet have required considerable
-// development and are described in hep-ph/0512210. If you use
-// FastJet as part of work towards a scientific publication, please
-// include a citation to the FastJet paper.
+//  FastJet is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
 //
-// FastJet is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with FastJet. If not, see <http://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License
+//  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 // List of changes compared to the original CMS code (revision 1.14 of
 // CMSIterativeConeAlgorithm.cc)

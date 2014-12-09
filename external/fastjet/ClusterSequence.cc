@@ -1,7 +1,7 @@
-//STARTHEADER
-// $Id$
+//FJSTARTHEADER
+// $Id: ClusterSequence.cc 3685 2014-09-11 20:15:00Z salam $
 //
-// Copyright (c) 2005-2013, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -12,9 +12,11 @@
 //  (at your option) any later version.
 //
 //  The algorithms that underlie FastJet have required considerable
-//  development and are described in hep-ph/0512210. If you use
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
 //  FastJet as part of work towards a scientific publication, please
-//  include a citation to the FastJet paper.
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
 //
 //  FastJet is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,13 +26,19 @@
 //  You should have received a copy of the GNU General Public License
 //  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
-//ENDHEADER
+//FJENDHEADER
 
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/ClusterSequenceStructure.hh"
 #include "fastjet/version.hh" // stores the current version number
+#include "fastjet/internal/LazyTiling9Alt.hh"
+#include "fastjet/internal/LazyTiling9.hh"
+#include "fastjet/internal/LazyTiling25.hh"
+#ifndef __FJCORE__
+#include "fastjet/internal/LazyTiling9SeparateGhosts.hh"
+#endif  // __FJCORE__
 #include<iostream>
 #include<sstream>
 #include<fstream>
@@ -186,7 +194,7 @@ void ClusterSequence::signal_imminent_self_deletion() const {
 
 //DEP //----------------------------------------------------------------------
 //DEP void ClusterSequence::_initialise_and_run (
-//DEP 				  const double & R,
+//DEP 				  const double R,
 //DEP 				  const Strategy & strategy,
 //DEP 				  const bool & writeout_combinations) {
 //DEP 
@@ -272,6 +280,12 @@ void ClusterSequence::_initialise_and_run_no_decant () {
   //             with 6MB cache; tests performed with lines such as
   //             ./fastjet_timing_plugins -kt -nhardest 30 -repeat 50000 -strategy -3 -R 0.5 -nev 1  <  ../../data/Pythia-PtMin1000-LHC-1000ev.dat
   if (_strategy == Best) {
+    _strategy = _best_strategy();
+#ifdef DROP_CGAL
+    // fall back strategy for large N when CGAL is missing
+    if (_strategy == NlnN) _strategy = N2MHTLazy25;
+#endif  // DROP_CGAL
+  } else if (_strategy == BestFJ30) {
     int N = _jets.size();
     //if (N <= 55*max(0.5,min(1.0,_Rparam))) {// old empirical scaling with R
     //----------------------
@@ -323,7 +337,7 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
   // run the code containing the selected strategy
   // 
-  // We order the strategies stqrting from the ones used by the Best
+  // We order the strategies starting from the ones used by the Best
   // strategy in the order of increasing N, then the remaining ones
   // again in the order of increasing N.
   if (_strategy == N2Plain) {
@@ -333,6 +347,42 @@ void ClusterSequence::_initialise_and_run_no_decant () {
     this->_faster_tiled_N2_cluster();
   } else if (_strategy == N2MinHeapTiled) {
     this->_minheap_faster_tiled_N2_cluster();
+  } else if (_strategy == N2MHTLazy9Alt) {
+    // attempt to use an external tiling routine -- it manipulates
+    // the CS history via the plugin mechanism
+    _plugin_activated = true;
+    LazyTiling9Alt tiling(*this);
+    tiling.run();
+    _plugin_activated = false;
+
+  } else if (_strategy == N2MHTLazy25) {
+    // attempt to use an external tiling routine -- it manipulates
+    // the CS history via the plugin mechanism
+    _plugin_activated = true;
+    LazyTiling25 tiling(*this);
+    tiling.run();
+    _plugin_activated = false;
+
+  } else if (_strategy == N2MHTLazy9) {
+    // attempt to use an external tiling routine -- it manipulates
+    // the CS history via the plugin mechanism
+    _plugin_activated = true;
+    LazyTiling9 tiling(*this);
+    tiling.run();
+    _plugin_activated = false;
+
+#ifndef __FJCORE__
+  } else if (_strategy == N2MHTLazy9AntiKtSeparateGhosts) {
+    // attempt to use an external tiling routine -- it manipulates
+    // the CS history via the plugin mechanism
+    _plugin_activated = true;
+    LazyTiling9SeparateGhosts tiling(*this);
+    tiling.run();
+    _plugin_activated = false;
+#else 
+    throw Error("N2MHTLazy9AntiKtSeparateGhosts strategy not supported with FJCORE");
+#endif  // __FJCORE__
+
   } else if (_strategy == NlnN) {
     this->_delaunay_cluster();
   } else if (_strategy == NlnNCam) {
@@ -358,7 +408,7 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
 // these needs to be defined outside the class definition.
 bool ClusterSequence::_first_time = true;
-int ClusterSequence::_n_exclusive_warnings = 0;
+LimitedWarning ClusterSequence::_exclusive_warnings;
 
 
 //----------------------------------------------------------------------
@@ -472,8 +522,6 @@ void ClusterSequence::_fill_initial_history () {
 
 
 //----------------------------------------------------------------------
-// Return the component corresponding to the specified index.
-// taken from CLHEP
 string ClusterSequence::strategy_string (Strategy strategy_in)  const {
   string strategy;
   switch(strategy_in) {
@@ -491,6 +539,14 @@ string ClusterSequence::strategy_string (Strategy strategy_in)  const {
     strategy = "N2MinHeapTiled"; break;
   case N2PoorTiled:
     strategy = "N2PoorTiled"; break;
+  case N2MHTLazy9:
+    strategy = "N2MHTLazy9"; break;
+  case N2MHTLazy9Alt:
+    strategy = "N2MHTLazy9Alt"; break;
+  case N2MHTLazy25:
+    strategy = "N2MHTLazy25"; break;
+  case N2MHTLazy9AntiKtSeparateGhosts:
+    strategy = "N2MHTLazy9AntiKtSeparateGhosts"; break;
   case N3Dumb:
     strategy = "N3Dumb"; break;
   case NlnNCam4pi:
@@ -527,6 +583,150 @@ double ClusterSequence::jet_scale_for_algorithm(
       return 1.0/kt2;
     } else {return 1.0;}
   } else {throw Error("Unrecognised jet algorithm");}
+}
+
+//----------------------------------------------------------------------
+// returns a suggestion for the best strategy to use on event
+// multiplicity, algorithm, R, etc.
+//
+// Some of the work to establish the best strategy is collected in
+// issue-tracker/2014-07-auto-strategy-selection;
+// transition_fit_v2.fit indicates the results of the fits that we're
+// using here. (Automatically generated by transition_fit_v2.gp).
+//
+// The transition to NlnN is always present, and it is the the
+// caller's responsibility to drop back down to N2MHTLazy25 if NlnN
+// isn't available.
+//
+// This routine should be called only if the jet alg is one of kt,
+// antikt, cam or genkt.
+Strategy ClusterSequence::_best_strategy() const {
+  int N = _jets.size();
+  // define bounded R, always above 0.1, because we don't trust any
+  // of our parametrizations below R = 0.1
+  double bounded_R = max(_Rparam, 0.1);
+
+  // the very first test thing is a quick hard-coded test to decide
+  // if we immediately opt for N2Plain
+  if (N <= 30 || N <= 39.0/(bounded_R + 0.6)) {
+    return N2Plain;
+  } 
+  
+  // Define objects that describe our various boundaries. A prefix N_
+  // indicates that boundary is for N, while L_ means it's for log(N).
+  //
+  // Hopefully having them static will ensure minimal overhead
+  // in creating them; collecting them in one place should
+  // help with updates?
+  //
+  const static _Parabola N_Tiled_to_MHT_lowR             (-45.4947,54.3528,44.6283);
+  const static _Parabola L_MHT_to_MHTLazy9_lowR          (0.677807,-1.05006,10.6994);
+  const static _Parabola L_MHTLazy9_to_MHTLazy25_akt_lowR(0.169967,-0.512589,12.1572);
+  const static _Parabola L_MHTLazy9_to_MHTLazy25_kt_lowR (0.16237,-0.484612,12.3373);
+  const static _Parabola L_MHTLazy9_to_MHTLazy25_cam_lowR = L_MHTLazy9_to_MHTLazy25_kt_lowR;
+  const static _Parabola L_MHTLazy25_to_NlnN_akt_lowR    (0.0472051,-0.22043,15.9196);
+  const static _Parabola L_MHTLazy25_to_NlnN_kt_lowR     (0.118609,-0.326811,14.8287);
+  const static _Parabola L_MHTLazy25_to_NlnN_cam_lowR    (0.10119,-0.295748,14.3924);
+
+  const static _Line     L_Tiled_to_MHTLazy9_medR         (-1.31304,7.29621);
+  const static _Parabola L_MHTLazy9_to_MHTLazy25_akt_medR = L_MHTLazy9_to_MHTLazy25_akt_lowR;
+  const static _Parabola L_MHTLazy9_to_MHTLazy25_kt_medR  = L_MHTLazy9_to_MHTLazy25_kt_lowR;
+  const static _Parabola L_MHTLazy9_to_MHTLazy25_cam_medR = L_MHTLazy9_to_MHTLazy25_cam_lowR;
+  const static _Parabola L_MHTLazy25_to_NlnN_akt_medR     = L_MHTLazy25_to_NlnN_akt_lowR;
+  const static _Parabola L_MHTLazy25_to_NlnN_kt_medR      = L_MHTLazy25_to_NlnN_kt_lowR;
+  const static _Parabola L_MHTLazy25_to_NlnN_cam_medR     = L_MHTLazy25_to_NlnN_cam_lowR;
+
+  const static double    N_Plain_to_MHTLazy9_largeR         = 75;
+  const static double    N_MHTLazy9_to_MHTLazy25_akt_largeR = 700;
+  const static double    N_MHTLazy9_to_MHTLazy25_kt_largeR  = 1000;
+  const static double    N_MHTLazy9_to_MHTLazy25_cam_largeR = 1000;
+  const static double    N_MHTLazy25_to_NlnN_akt_largeR     = 100000;
+  const static double    N_MHTLazy25_to_NlnN_kt_largeR      = 40000;
+  const static double    N_MHTLazy25_to_NlnN_cam_largeR     = 15000;
+
+  // We have timing studies only for kt, cam and antikt; for other
+  // algorithms we set the local jet_algorithm variable to the one of
+  // kt,cam,antikt that we think will be closest in behaviour to the
+  // other alg.
+  JetAlgorithm jet_algorithm;
+  if (_jet_algorithm == genkt_algorithm) {
+    // for genkt, then we set the local jet_algorithm variable (used
+    // only for strategy choice) to be either kt or antikt, depending on
+    // the p value.
+    double p   = jet_def().extra_param();
+    if (p < 0.0) jet_algorithm = antikt_algorithm;
+    else         jet_algorithm =     kt_algorithm;
+  } else if (_jet_algorithm == cambridge_for_passive_algorithm) {
+    // we assume (but haven't tested) that using the kt-alg timing
+    // transitions should be adequate for cambridge_for_passive_algorithm
+    jet_algorithm = kt_algorithm;
+  } else {
+    jet_algorithm = _jet_algorithm;
+  }
+
+  if (bounded_R < 0.65) {
+    // low R case
+    if          (N    < N_Tiled_to_MHT_lowR(bounded_R))              return N2Tiled;
+    double logN = log(double(N));
+    if          (logN < L_MHT_to_MHTLazy9_lowR(bounded_R))           return N2MinHeapTiled;
+    else {
+      if (jet_algorithm == antikt_algorithm){
+        if      (logN < L_MHTLazy9_to_MHTLazy25_akt_lowR(bounded_R)) return N2MHTLazy9;
+        else if (logN < L_MHTLazy25_to_NlnN_akt_lowR(bounded_R))     return N2MHTLazy25;
+        else                                                         return NlnN;
+      } else if (jet_algorithm == kt_algorithm){
+        if      (logN < L_MHTLazy9_to_MHTLazy25_kt_lowR(bounded_R))  return N2MHTLazy9;
+        else if (logN < L_MHTLazy25_to_NlnN_kt_lowR(bounded_R))      return N2MHTLazy25;
+        else                                                         return NlnN;
+      } else if (jet_algorithm == cambridge_algorithm)  {
+        if      (logN < L_MHTLazy9_to_MHTLazy25_cam_lowR(bounded_R)) return N2MHTLazy9;
+        else if (logN < L_MHTLazy25_to_NlnN_cam_lowR(bounded_R))     return N2MHTLazy25;
+        else                                                         return NlnNCam;
+      }
+    }
+  } else if (bounded_R < 0.5*pi) {
+    // medium R case
+    double logN = log(double(N));
+    if      (logN < L_Tiled_to_MHTLazy9_medR(bounded_R))             return N2Tiled;
+    else {
+      if (jet_algorithm == antikt_algorithm){
+        if      (logN < L_MHTLazy9_to_MHTLazy25_akt_medR(bounded_R)) return N2MHTLazy9;
+        else if (logN < L_MHTLazy25_to_NlnN_akt_medR(bounded_R))     return N2MHTLazy25;
+        else                                                         return NlnN;
+      } else if (jet_algorithm == kt_algorithm){
+        if      (logN < L_MHTLazy9_to_MHTLazy25_kt_medR(bounded_R))  return N2MHTLazy9;
+        else if (logN < L_MHTLazy25_to_NlnN_kt_medR(bounded_R))      return N2MHTLazy25;
+        else                                                         return NlnN;
+      } else if (jet_algorithm == cambridge_algorithm)  {
+        if      (logN < L_MHTLazy9_to_MHTLazy25_cam_medR(bounded_R)) return N2MHTLazy9;
+        else if (logN < L_MHTLazy25_to_NlnN_cam_medR(bounded_R))     return N2MHTLazy25;
+        else                                                         return NlnNCam;
+      }
+    }
+  } else {
+    // large R case (R > pi/2)
+    if      (N    < N_Plain_to_MHTLazy9_largeR)                      return N2Plain;
+    else {
+      if (jet_algorithm == antikt_algorithm){
+        if      (N < N_MHTLazy9_to_MHTLazy25_akt_largeR)             return N2MHTLazy9;
+        else if (N < N_MHTLazy25_to_NlnN_akt_largeR)                 return N2MHTLazy25;
+        else                                                         return NlnN;
+      } else if (jet_algorithm == kt_algorithm){
+        if      (N < N_MHTLazy9_to_MHTLazy25_kt_largeR)              return N2MHTLazy9;
+        else if (N < N_MHTLazy25_to_NlnN_kt_largeR)                  return N2MHTLazy25;
+        else                                                         return NlnN;
+      } else if (jet_algorithm == cambridge_algorithm)  {
+        if      (N < N_MHTLazy9_to_MHTLazy25_cam_largeR)             return N2MHTLazy9;
+        else if (N < N_MHTLazy25_to_NlnN_cam_largeR)                 return N2MHTLazy25;
+        else                                                         return NlnNCam;
+      }
+    }
+  }
+  
+  bool code_should_never_reach_here = false;
+  assert(code_should_never_reach_here); 
+  return N2MHTLazy9;
+
 }
 
 
@@ -661,7 +861,7 @@ void ClusterSequence::plugin_record_ij_recombination(
 
 //----------------------------------------------------------------------
 // return all inclusive jets with pt > ptmin
-vector<PseudoJet> ClusterSequence::inclusive_jets (const double & ptmin) const{
+vector<PseudoJet> ClusterSequence::inclusive_jets (const double ptmin) const{
   double dcut = ptmin*ptmin;
   int i = _history.size() - 1; // last jet
   vector<PseudoJet> jets_local;
@@ -713,7 +913,7 @@ vector<PseudoJet> ClusterSequence::inclusive_jets (const double & ptmin) const{
 //----------------------------------------------------------------------
 // return the number of exclusive jets that would have been obtained
 // running the algorithm in exclusive mode with the given dcut
-int ClusterSequence::n_exclusive_jets (const double & dcut) const {
+int ClusterSequence::n_exclusive_jets (const double dcut) const {
 
   // first locate the point where clustering would have stopped (i.e. the
   // first time max_dij_so_far > dcut)
@@ -732,7 +932,7 @@ int ClusterSequence::n_exclusive_jets (const double & dcut) const {
 //----------------------------------------------------------------------
 // return all exclusive jets that would have been obtained running
 // the algorithm in exclusive mode with the given dcut
-vector<PseudoJet> ClusterSequence::exclusive_jets (const double & dcut) const {
+vector<PseudoJet> ClusterSequence::exclusive_jets (const double dcut) const {
   int njets = n_exclusive_jets(dcut);
   return exclusive_jets(njets);
 }
@@ -741,7 +941,7 @@ vector<PseudoJet> ClusterSequence::exclusive_jets (const double & dcut) const {
 //----------------------------------------------------------------------
 // return the jets obtained by clustering the event to n jets.
 // Throw an error if there are fewer than n particles.
-vector<PseudoJet> ClusterSequence::exclusive_jets (const int & njets) const {
+vector<PseudoJet> ClusterSequence::exclusive_jets (const int njets) const {
 
   // make sure the user does not ask for more than jets than there
   // were particles in the first place.
@@ -758,11 +958,11 @@ vector<PseudoJet> ClusterSequence::exclusive_jets (const int & njets) const {
 //----------------------------------------------------------------------
 // return the jets obtained by clustering the event to n jets.
 // If there are fewer than n particles, simply return all particles
-vector<PseudoJet> ClusterSequence::exclusive_jets_up_to (const int & njets) const {
+vector<PseudoJet> ClusterSequence::exclusive_jets_up_to (const int njets) const {
 
   // provide a warning when extracting exclusive jets for algorithms 
   // that does not support it explicitly.
-  // Native algorithm that support it are: kt, ee_kt, cambridge, 
+  // Native algorithm that support it are: kt, ee_kt, Cambridge/Aachen, 
   //   genkt and ee_genkt (both with p>=0)
   // For plugins, we check Plugin::exclusive_sequence_meaningful()
   if (( _jet_def.jet_algorithm() != kt_algorithm) &&
@@ -772,10 +972,8 @@ vector<PseudoJet> ClusterSequence::exclusive_jets_up_to (const int & njets) cons
 	(_jet_def.jet_algorithm() != ee_genkt_algorithm)) || 
        (_jet_def.extra_param() <0)) &&
       ((_jet_def.jet_algorithm() != plugin_algorithm) ||
-       (!_jet_def.plugin()->exclusive_sequence_meaningful())) &&
-      (_n_exclusive_warnings < 5)) {
-    _n_exclusive_warnings++;
-    cerr << "FastJet WARNING: dcut and exclusive jets for jet-finders other than kt should be interpreted with care." << endl;
+       (!_jet_def.plugin()->exclusive_sequence_meaningful()))) {
+    _exclusive_warnings.warn("dcut and exclusive jets for jet-finders other than kt, C/A or genkt with p>=0 should be interpreted with care.");
   }
 
 
@@ -828,7 +1026,7 @@ vector<PseudoJet> ClusterSequence::exclusive_jets_up_to (const int & njets) cons
 //----------------------------------------------------------------------
 /// return the dmin corresponding to the recombination that went from
 /// n+1 to n jets
-double ClusterSequence::exclusive_dmerge (const int & njets) const {
+double ClusterSequence::exclusive_dmerge (const int njets) const {
   assert(njets >= 0);
   if (njets >= _initial_n) {return 0.0;}
   return _history[2*_initial_n-njets-1].dij;
@@ -840,7 +1038,7 @@ double ClusterSequence::exclusive_dmerge (const int & njets) const {
 /// up to the one that led to an n-jet final state; identical to
 /// exclusive_dmerge, except in cases where the dmin do not increase
 /// monotonically.
-double ClusterSequence::exclusive_dmerge_max (const int & njets) const {
+double ClusterSequence::exclusive_dmerge_max (const int njets) const {
   assert(njets >= 0);
   if (njets >= _initial_n) {return 0.0;}
   return _history[2*_initial_n-njets-1].max_dij_so_far;
@@ -852,7 +1050,7 @@ double ClusterSequence::exclusive_dmerge_max (const int & njets) const {
 /// of the exclusive algorithm) that would be obtained when running
 /// the algorithm with the given dcut.
 std::vector<PseudoJet> ClusterSequence::exclusive_subjets 
-   (const PseudoJet & jet, const double & dcut) const {
+   (const PseudoJet & jet, const double dcut) const {
 
   set<const history_element*> subhist;
 
@@ -875,7 +1073,7 @@ std::vector<PseudoJet> ClusterSequence::exclusive_subjets
 /// coefficient, but marginally more efficient than manually taking
 /// exclusive_subjets.size()
 int ClusterSequence::n_exclusive_subjets(const PseudoJet & jet, 
-                        const double & dcut) const {
+                        const double dcut) const {
   set<const history_element*> subhist;
   // get the set of history elements that correspond to subjets at
   // scale dcut
@@ -1180,7 +1378,7 @@ void ClusterSequence::print_jets_for_root(const std::vector<PseudoJet> & jets_in
 // Not yet. Perhaps in a future release
 // //----------------------------------------------------------------------
 // // print out all inclusive jets with pt > ptmin
-// void ClusterSequence::print_jets (const double & ptmin) const{
+// void ClusterSequence::print_jets (const double ptmin) const{
 //     vector<PseudoJet> jets = sorted_by_pt(inclusive_jets(ptmin));
 // 
 //     for (size_t j = 0; j < jets.size(); j++) {
@@ -1256,9 +1454,9 @@ void ClusterSequence::add_constituents (
 //----------------------------------------------------------------------
 // initialise the history in a standard way
 void ClusterSequence::_add_step_to_history (
-	       const int & step_number, const int & parent1, 
-	       const int & parent2, const int & jetp_index,
-	       const double & dij) {
+	       const int step_number, const int parent1, 
+	       const int parent2, const int jetp_index,
+	       const double dij) {
 
   history_element element;
   element.parent1 = parent1;
@@ -1428,8 +1626,8 @@ void ClusterSequence::_extract_tree_parents(
 /// jet_i and jet_j (assuming a distance dij) and returns the index
 /// of the recombined jet, newjet_k.
 void ClusterSequence::_do_ij_recombination_step(
-                               const int & jet_i, const int & jet_j, 
-			       const double & dij, 
+                               const int jet_i, const int jet_j, 
+			       const double dij, 
 			       int & newjet_k) {
 
   // Create the new jet by recombining the first two.
@@ -1465,7 +1663,7 @@ void ClusterSequence::_do_ij_recombination_step(
 /// carries out the bookkeeping associated with the step of recombining
 /// jet_i with the beam
 void ClusterSequence::_do_iB_recombination_step(
-				  const int & jet_i, const double & diB) {
+				  const int jet_i, const double diB) {
   // get history index
   int newstep_k = _history.size();
 

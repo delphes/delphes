@@ -28,6 +28,7 @@ set ExecutionPath {
 
   MissingET
 
+  NeutrinoFilter
   GenJetFinder
   FastJetFinder
 
@@ -205,6 +206,12 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
+  set EcalTowerMinEnergy 0.50
+  set HcalTowerMinEnergy 1.00
+
+  set EcalTowerMinSignificance 1.0
+  set HcalTowerMinSignificance 1.0
+  
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
@@ -265,7 +272,7 @@ module Calorimeter Calorimeter {
   # http://villaolmo.mib.infn.it/ICATPP9th_2005/Calorimetry/Schram.p.pdf
   set HCalResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
                              (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.0500^2 + energy*0.706^2) + \
-                             (abs(eta) > 3.2 && abs(eta) <= 4.9) * sqrt(energy^2*0.9420^2 + energy*0.075^2)}
+                             (abs(eta) > 3.2 && abs(eta) <= 4.9) * sqrt(energy^2*0.09420^2 + energy*1.00^2)}
 }
 
 ####################
@@ -405,12 +412,33 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
+
+#####################
+# Neutrino Filter
+#####################
+
+module PdgCodeFilter NeutrinoFilter {
+  
+  set InputArray Delphes/stableParticles
+  set OutputArray filteredParticles
+
+  set PTMin 0.0
+  
+  add PdgCode {12}
+  add PdgCode {14}
+  add PdgCode {16}
+  add PdgCode {-12}
+  add PdgCode {-14}
+  add PdgCode {-16}
+
+}
+
 #####################
 # MC truth jet finder
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+  set InputArray NeutrinoFilter/filteredParticles
 
   set OutputArray jets
 
@@ -420,6 +448,7 @@ module FastJetFinder GenJetFinder {
 
   set JetPTMin 20.0
 }
+
 
 ############
 # Jet finder
@@ -445,8 +474,8 @@ module EnergyScale JetEnergyScale {
   set InputArray FastJetFinder/jets
   set OutputArray jets
 
- # scale formula for jets
-  set ScaleFormula {1.00}
+  # scale formula for jets 
+  set ScaleFormula {  sqrt( (3.0 - 0.2*(abs(eta)))^2 / pt + 1.0 )  }
 }
 
 ###########

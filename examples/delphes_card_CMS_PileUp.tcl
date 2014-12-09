@@ -1,4 +1,3 @@
-
 #######################################
 # Order of execution of various modules
 #######################################
@@ -20,8 +19,10 @@ set ExecutionPath {
   Calorimeter
   TrackPileUpSubtractor
   NeutralTowerMerger
+  EFlowMergerAllTracks
   EFlowMerger
-
+  
+  NeutrinoFilter
   GenJetFinder
 
   Rho
@@ -66,7 +67,7 @@ module PileUpMerger PileUpMerger {
   set PileUpFile MinBias.pileup
 
   # average expected pile up
-  set MeanPileUp 10
+  set MeanPileUp 50
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.10
@@ -253,6 +254,12 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
+  set EcalTowerMinEnergy 0.5
+  set HcalTowerMinEnergy 1.0
+
+  set EcalTowerMinSignificance 1.0
+  set HcalTowerMinSignificance 1.0
+
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
@@ -346,6 +353,18 @@ module Merger NeutralTowerMerger {
   set OutputArray eflowTowers
 }
 
+##################################
+# Energy flow merger (all tracks)
+##################################
+
+module Merger EFlowMergerAllTracks {
+# add InputArray InputArray
+  add InputArray TrackMerger/tracks
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
+  set OutputArray eflow
+}
+
 
 ####################
 # Energy flow merger
@@ -360,37 +379,51 @@ module Merger EFlowMerger {
 }
 
 
+
 #############
 # Rho pile-up
 #############
 
-module FastJetFinder Rho {
-#  set InputArray Calorimeter/towers
+module FastJetGridMedianEstimator Rho {
+  
   set InputArray EFlowMerger/eflow
-
-  set ComputeRho true
   set RhoOutputArray rho
 
-  # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
-  set AreaAlgorithm 5
+  # etamin etamax gridsize_eta gridsize_phi 
+  
+  add GridRange 0.0 2.5 1.0 1.0
+  add GridRange 2.5 5.0 1.0 1.0
 
-  # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 4
-  set ParameterR 0.6
-  set GhostEtaMax 5.0
-
-  add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 5.0
-
-  set JetPTMin 0.0
 }
+
+#####################
+# Neutrino Filter
+#####################
+
+module PdgCodeFilter NeutrinoFilter {
+  
+  set InputArray Delphes/stableParticles
+  set OutputArray filteredParticles
+
+  set PTMin 0.0
+  
+  add PdgCode {12}
+  add PdgCode {14}
+  add PdgCode {16}
+  add PdgCode {-12}
+  add PdgCode {-14}
+  add PdgCode {-16}
+
+}
+
+
 
 #####################
 # MC truth jet finder
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+  set InputArray NeutrinoFilter/filteredParticles
 
   set OutputArray jets
 
@@ -582,7 +615,7 @@ module Isolation MuonIsolation {
 
 module Merger MissingET {
 # add InputArray InputArray
-  add InputArray EFlowMerger/eflow
+  add InputArray EFlowMergerAllTracks/eflow
   set MomentumOutputArray momentum
 }
 
