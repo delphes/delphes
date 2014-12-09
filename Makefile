@@ -323,6 +323,7 @@ ClassesDict$(PcmSuf): \
 tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ModulesLinkDef.h \
 	modules/Delphes.h \
+	modules/AngularSmearing.h \
 	modules/ParticlePropagator.h \
 	modules/Efficiency.h \
 	modules/IdentificationMap.h \
@@ -496,6 +497,15 @@ tmp/modules/Delphes.$(ObjSuf): \
 tmp/modules/Calorimeter.$(ObjSuf): \
 	modules/Calorimeter.$(SrcSuf) \
 	modules/Calorimeter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/AngularSmearing.$(ObjSuf): \
+	modules/AngularSmearing.$(SrcSuf) \
+	modules/AngularSmearing.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -850,6 +860,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
+	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
 	tmp/modules/IdentificationMap.$(ObjSuf) \
@@ -1534,6 +1545,10 @@ classes/DelphesModule.h: \
 	external/ExRootAnalysis/ExRootTask.h
 	@touch $@
 
+modules/AngularSmearing.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 modules/IdentificationMap.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -1542,15 +1557,15 @@ modules/ExampleModule.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/Merger.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
 
 modules/EnergyScale.h: \
-	classes/DelphesModule.h
-	@touch $@
-
-modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
 

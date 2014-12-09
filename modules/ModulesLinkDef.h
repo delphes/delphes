@@ -31,6 +31,7 @@
 
 #include "modules/Delphes.h"
 
+#include "modules/AngularSmearing.h"
 #include "modules/ParticlePropagator.h"
 #include "modules/Efficiency.h"
 #include "modules/IdentificationMap.h"
@@ -69,6 +70,7 @@
 
 #pragma link C++ class Delphes+;
 
+#pragma link C++ class AngularSmearing+;
 #pragma link C++ class ParticlePropagator+;
 #pragma link C++ class Efficiency+;
 #pragma link C++ class IdentificationMap+;
