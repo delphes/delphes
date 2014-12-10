@@ -180,38 +180,24 @@ void IdentificationMap::Process()
 
       Pi = formula->Eval(pt, eta);
     
-     // cout<<"PdgIn: "<<pdgIn<<", PdgOut: "<<pdgOut<<", Pi = "<<Pi<<endl;
-    
       // check that sum of probabilities does not exceed 1.
-      
       P = (P - Pi)/P;
 	
-      if( P < 0.0 ) 
-      {
-       // cout<<"Sum of probabilities exceeds 1 for particle ID "<<pdgIn<<", check formulas in IdentificationMap module"<<endl;
-	continue;
-      }
+      if( P < 0.0 ) continue;
       else
       {
       
-        //randomly assign a PID to particle according to map
-      
-        Double_t rndm = gRandom->Uniform();
-       // cout<<"Random number vs P //  "<<rndm<<"  "<<P<<endl;
-     
-        if(rndm > P)
-        //if(gRandom->Uniform() > P)
-        {
-         // cout<<"particle "<<candidate->PID<<" --> ";
-	
-	  //change PID of particle
-          if(pdgOut != 0) candidate->PID = charge*pdgOut;
-         // cout<<"Final PID: "<<candidate->PID<<endl;
-	
-	  fOutputArray->Add(candidate);
-          break;
-      }
-     }	
+       //randomly assign a PID to particle according to map
+       Double_t rndm = gRandom->Uniform();
+       
+       if(rndm > P)
+       {
+         //change PID of particle
+         if(pdgOut != 0) candidate->PID = charge*pdgOut;
+         fOutputArray->Add(candidate);
+         break;
+       }
+      }	
 	
     }
       
