@@ -45,22 +45,15 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/ClusterSequence.hh"
-#include "fastjet/Selector.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/tools/JetMedianBackgroundEstimator.hh"
 
-#include "fastjet/plugins/SISCone/fastjet/SISConePlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
-
-#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
-#include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
-#include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
-#include "fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh"
+// #include "fastjet/contrib/Nsubjettiness.hh"
+// #include "fastjet/contrib/Njettiness.hh"
+// #include "fastjet/contrib/NjettinessPlugin.hh"
+// #include "fastjet/contrib/WinnerTakeAllRecombiner.hh"
 
 using namespace std;
 using namespace fastjet;
-using namespace fastjet::contrib;
+// using namespace fastjet::contrib;
 
 //---------------------------------------------------------------------------
 
@@ -75,7 +68,7 @@ void SignalHandler(int sig)
 
 int main(int argc, char *argv[])
 {
-  char appName[] = "StandaloneHepMC";
+  char appName[] = "ExternalFastJetHepMC";
   stringstream message;
   FILE *inputFile = 0;
   ExRootConfReader *confReader = 0;
@@ -92,7 +85,7 @@ int main(int argc, char *argv[])
   TLorentzVector momentum;
 
   JetDefinition *definition = 0;
-  JetDefinition::Recombiner *recomb = 0;
+//  JetDefinition::Recombiner *recomb = 0;
   vector<PseudoJet> inputList, outputList;
   PseudoJet jet;
 
@@ -144,8 +137,9 @@ int main(int argc, char *argv[])
     modularDelphes->InitTask();
 
     ClusterSequence::print_banner();
-    recomb = new WinnerTakeAllRecombiner();
-    definition = new JetDefinition(antikt_algorithm, 0.5, recomb, Best);
+//    recomb = new WinnerTakeAllRecombiner();
+//    definition = new JetDefinition(antikt_algorithm, 0.5, recomb, Best);
+    definition = new JetDefinition(antikt_algorithm, 0.5);
 
     inputArray = modularDelphes->ImportArray("Calorimeter/towers");
     inputIterator = inputArray->MakeIterator();
@@ -212,7 +206,27 @@ int main(int argc, char *argv[])
             }
             ClusterSequence sequence(inputList, *definition);
             outputList.clear();
-            outputList = sorted_by_pt(sequence.inclusive_jets(10.0));
+            outputList = sorted_by_pt(sequence.inclusive_jets(0.0));
+
+            // tell the user what was done
+            //  - the description of the algorithm used
+            //  - show the inclusive jets as
+            //      {index, rapidity, phi, pt}
+            //----------------------------------------------------------
+            if(eventCounter == skipEvents + 1)
+            {
+              cout << "Ran " << definition->description() << endl;
+
+              // label the columns
+              printf("%5s %15s %15s %15s\n","jet #", "rapidity", "phi", "pt");
+
+              // print out the details for each jet
+              for (unsigned int i = 0; i < outputList.size(); i++) {
+                printf("%5u %15.8f %15.8f %15.8f\n",
+                       i, outputList[i].rap(), outputList[i].phi(),
+                       outputList[i].perp());
+              }
+            }
           }
 
           modularDelphes->Clear();
@@ -229,6 +243,9 @@ int main(int argc, char *argv[])
     modularDelphes->FinishTask();
 
     cout << "** Exiting..." << endl;
+
+    delete definition;
+//    delete recomb;
 
     delete reader;
     delete modularDelphes;
