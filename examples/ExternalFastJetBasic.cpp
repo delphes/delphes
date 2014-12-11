@@ -16,6 +16,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+
+First, you need to set DELPHES_DIR, FASTJET_DIR and ROOT_DIR:
+
+DELPHES_DIR=<path to Delphes installation>
+FASTJET_DIR=<path to FastJet installation>
+ROOT_DIR=<path to ROOT installation>
+
+Then run the following commands to build ExternalFastJetBasic:
+
+DELPHES_LIB="-L$DELPHES_DIR -lDelphesNoFastJet"
+
+FASTJET_INC=`$FASTJET_DIR/bin/fastjet-config --cxxflags`
+FASTJET_LIB=`$FASTJET_DIR/bin/fastjet-config --libs`
+
+ROOT_INC=`$ROOT_DIR/bin/root-config --incdir`
+ROOT_LIB=`$ROOT_DIR/bin/root-config --libs`
+
+CXXFLAGS="$FASTJET_INC -I$ROOT_INC -I$DELPHES_DIR -I$DELPHES_DIR/external"
+LDFLAGS="$FASTJET_LIB $ROOT_LIB $DELPHES_LIB"
+
+g++ $CXXFLAGS $LDFLAGS ExternalFastJetBasic.cpp -o ExternalFastJetBasic
+
+*/
+
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

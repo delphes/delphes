@@ -17,7 +17,7 @@ root -l examples/DelphesBrowser.C
   TObjArray *stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
   TObjArray *partonOutputArray = modularDelphes->ExportArray("partons");
 
-  confReader->ReadFile("examples/delphes_card_CMS.tcl");
+  confReader->ReadFile("cards/delphes_card_CMS.tcl");
 
   modularDelphes->SetConfReader(confReader);
   modularDelphes->SetTreeWriter(treeWriter);
