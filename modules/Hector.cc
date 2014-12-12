@@ -89,7 +89,7 @@ void Hector::Init()
   fEtaMin = GetDouble("EtaMin", 5.0);
 
   fBeamLine = new H_BeamLine(fDirection, fBeamLineLength + 0.1);
-  fBeamLine->fill(GetString("BeamLineFile", "examples/LHCB1IR5_5TeV.tfs"), fDirection, GetString("IPName", "IP5"));
+  fBeamLine->fill(GetString("BeamLineFile", "cards/LHCB1IR5_5TeV.tfs"), fDirection, GetString("IPName", "IP5"));
   fBeamLine->offsetElements(fOffsetS, fOffsetX);
   fBeamLine->calcMatrix();
 

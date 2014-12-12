@@ -29,11 +29,11 @@ Let's simulate some Z->ee events:
 
    wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
    gunzip z_ee.hep.gz
-   ./DelphesSTDHEP examples/delphes_card_CMS.tcl delphes_output.root z_ee.hep
+   ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
 
 or
 
-   curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP examples/delphes_card_CMS.tcl delphes_output.root
+   curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root
 
 For more detailed documentation, please visit 
 

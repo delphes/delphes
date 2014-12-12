@@ -52,7 +52,7 @@ Quick start with Delphes
 
   wget http://cp3.irmp.ucl.ac.be/downloads/pp2bb.hep.tgz
   tar -xzvf pp2bb.hep.tgz
-  ./DelphesSTDHEP examples/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
+  ./DelphesSTDHEP cards/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
 
 
 For more details, please visit:
