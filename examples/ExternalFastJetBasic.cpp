@@ -35,7 +35,7 @@ ROOT_DIR=<path to ROOT installation>
 
 Then run the following commands to build the executable:
 
-DELPHES_LIB="-L$DELPHES_DIR -lDelphesNoFastJet"
+DELPHES_LIB="-Wl,-rpath $DELPHES_DIR -L$DELPHES_DIR -lDelphesNoFastJet"
 
 FASTJET_INC=`$FASTJET_DIR/bin/fastjet-config --cxxflags`
 FASTJET_LIB=`$FASTJET_DIR/bin/fastjet-config --libs`
@@ -48,7 +48,7 @@ LDFLAGS="$FASTJET_LIB $ROOT_LIB $DELPHES_LIB"
 
 g++ $CXXFLAGS $LDFLAGS examples/ExternalFastJetBasic.cpp -o examples/ExternalFastJetBasic
 
-Then run from the main Delphes dir:
+Then run:
 
 ./examples/ExternalFastJetBasic cards/delphes_card_CMS_NoFastJet.tcl
 
