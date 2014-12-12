@@ -18,13 +18,22 @@
 
 /*
 
-First, you need to set DELPHES_DIR, FASTJET_DIR and ROOT_DIR:
+
+########################################################################
+
+
+This simple example shows how to use Delphes with an external fastjet installation.
+Events are specified via the multidimentionnal array "EVENTS" (for an example reading 
+an hepmc file see ExternalFastJetHepMC.cpp). 
+
+In order to run this example you first, you need to set the paths to your Delphes, FastJet
+and ROOT installations (DELPHES_DIR, FASTJET_DIR and ROOT_DIR):
 
 DELPHES_DIR=<path to Delphes installation>
 FASTJET_DIR=<path to FastJet installation>
 ROOT_DIR=<path to ROOT installation>
 
-Then run the following commands to build ExternalFastJetBasic:
+Then run the following commands to build the executable:
 
 DELPHES_LIB="-L$DELPHES_DIR -lDelphesNoFastJet"
 
@@ -37,7 +46,15 @@ ROOT_LIB=`$ROOT_DIR/bin/root-config --libs`
 CXXFLAGS="$FASTJET_INC -I$ROOT_INC -I$DELPHES_DIR -I$DELPHES_DIR/external"
 LDFLAGS="$FASTJET_LIB $ROOT_LIB $DELPHES_LIB"
 
-g++ $CXXFLAGS $LDFLAGS ExternalFastJetBasic.cpp -o ExternalFastJetBasic
+g++ $CXXFLAGS $LDFLAGS examples/ExternalFastJetBasic.cpp -o examples/ExternalFastJetBasic
+
+Then run from the main Delphes dir:
+
+./examples/ExternalFastJetBasic cards/delphes_card_CMS_NoFastJet.tcl
+
+
+########################################################################
+
 
 */
 
@@ -94,7 +111,13 @@ float EVENTS[NEVENTS][NPARTICLES][11] =
 
 //---------------------------------------------------------------------------
 
+
+// this function converts input event array into Delphes candidates (defined below)
+
 void ConvertInput(Int_t event, DelphesFactory *factory, TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray);
+
+
+//----------------------------------------------------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
@@ -148,27 +171,42 @@ int main(int argc, char *argv[])
 
     modularDelphes->InitTask();
 
+    
+    // fastjet definition
     ClusterSequence::print_banner();
     definition = new JetDefinition(antikt_algorithm, 0.5);
-
-    inputArray = modularDelphes->ImportArray("Calorimeter/towers");
+    
+    // Define your input candidates to fastjet (by default particle-flow objects).
+    // If you want pure calorimeter towers change "EFlowMerger/eflow" into "Calorimeter/towers":
+     
+    inputArray = modularDelphes->ImportArray("EFlowMerger/eflow");
+      
     inputIterator = inputArray->MakeIterator();
 
     // Event loop
     for(event = 0; event < NEVENTS; ++event)
     {
       modularDelphes->Clear();
+      
+      // convert EVENT input array into Delphes internal format
       ConvertInput(event, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+      
+      // run Delphes reconstruction
       modularDelphes->ProcessTask();
 
       inputList.clear();
       inputIterator->Reset();
+      
+      
+      // pass delphes candidates to fastjet clustering  
       while((candidate = static_cast<Candidate*>(inputIterator->Next())))
       {
         momentum = candidate->Momentum;
         jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
         inputList.push_back(jet);
       }
+     
+      // run clustering 
       ClusterSequence sequence(inputList, *definition);
       outputList.clear();
       outputList = sorted_by_pt(sequence.inclusive_jets(0.0));
@@ -203,6 +241,9 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------
 
 void ConvertInput(Int_t event, DelphesFactory *factory, TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
 {

@@ -17,14 +17,20 @@
  */
 
 /*
+########################################################################
 
-First, you need to set DELPHES_DIR, FASTJET_DIR and ROOT_DIR:
+
+This simple example shows how to use Delphes with an external fastjet installation.
+Events in hepmc format are read via the DelphesHepMC reader. 
+
+In order to run this example you first, you need to set the paths to your Delphes, FastJet
+and ROOT installations (DELPHES_DIR, FASTJET_DIR and ROOT_DIR):
 
 DELPHES_DIR=<path to Delphes installation>
 FASTJET_DIR=<path to FastJet installation>
 ROOT_DIR=<path to ROOT installation>
 
-Then run the following commands to build ExternalFastJetHepMC:
+Then run the following commands to build the executable:
 
 DELPHES_LIB="-L$DELPHES_DIR -lDelphesNoFastJet"
 
@@ -37,7 +43,14 @@ ROOT_LIB=`$ROOT_DIR/bin/root-config --libs`
 CXXFLAGS="$FASTJET_INC -I$ROOT_INC -I$DELPHES_DIR -I$DELPHES_DIR/external"
 LDFLAGS="$FASTJET_LIB $ROOT_LIB $DELPHES_LIB"
 
-g++ $CXXFLAGS $LDFLAGS ExternalFastJetHepMC.cpp -o ExternalFastJetHepMC
+g++ $CXXFLAGS $LDFLAGS examples/ExternalFastJetHepMC.cpp -o examples/ExternalFastJetHepMC
+
+Then run from the main Delphes dir (you need an event file in hepmc format):
+
+./examples/ExternalFastJetHepMC cards/delphes_card_CMS_NoFastJet.tcl file.hepmc
+
+
+########################################################################
 
 */
 
@@ -162,12 +175,22 @@ int main(int argc, char *argv[])
     modularDelphes->InitTask();
 
     ClusterSequence::print_banner();
+
 //    recomb = new WinnerTakeAllRecombiner();
 //    definition = new JetDefinition(antikt_algorithm, 0.5, recomb, Best);
+  
     definition = new JetDefinition(antikt_algorithm, 0.5);
+    
+    
+    // Define your input candidates to fastjet (by default particle-flow objects).
+    // If you want pure calorimeter towers change "EFlowMerger/eflow" into "Calorimeter/towers":
+     
+    inputArray = modularDelphes->ImportArray("EFlowMerger/eflow");
 
-    inputArray = modularDelphes->ImportArray("Calorimeter/towers");
     inputIterator = inputArray->MakeIterator();
+
+
+    // start reading hepmc file
 
     i = 2;
     do
@@ -203,6 +226,7 @@ int main(int argc, char *argv[])
         }
       }
 
+      
       reader->SetInputFile(inputFile);
 
       // Loop over all objects
@@ -213,32 +237,43 @@ int main(int argc, char *argv[])
         reader->ReadBlock(factory, allParticleOutputArray,
         stableParticleOutputArray, partonOutputArray) && !interrupted)
       {
-        if(reader->EventReady())
+	
+	 // loop over events
+	if(reader->EventReady())
         {
           ++eventCounter;
 
           if(eventCounter > skipEvents)
           {
-            modularDelphes->ProcessTask();
+            
+	    // run delphes reconstruction
+	    modularDelphes->ProcessTask();
             
             inputList.clear();
             inputIterator->Reset();
-            while((candidate = static_cast<Candidate*>(inputIterator->Next())))
+	
+	
+	    // pass delphes candidates to fastjet clustering  
+             while((candidate = static_cast<Candidate*>(inputIterator->Next())))
             {
               momentum = candidate->Momentum;
               jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
               inputList.push_back(jet);
             }
-            ClusterSequence sequence(inputList, *definition);
+           
+	    // run fastjet clustering 
+	    ClusterSequence sequence(inputList, *definition);
             outputList.clear();
             outputList = sorted_by_pt(sequence.inclusive_jets(0.0));
 
-            // tell the user what was done
+            
+	    // Prints for the first event:
             //  - the description of the algorithm used
             //  - show the inclusive jets as
             //      {index, rapidity, phi, pt}
             //----------------------------------------------------------
-            if(eventCounter == skipEvents + 1)
+           
+	    if(eventCounter == skipEvents + 1)
             {
               cout << "Ran " << definition->description() << endl;
 
@@ -257,7 +292,7 @@ int main(int argc, char *argv[])
           modularDelphes->Clear();
           reader->Clear();
         }
-      }
+      } // end of event loop
 
       if(inputFile != stdin) fclose(inputFile);
 
