@@ -1,6 +1,6 @@
 /*
 This macro shows how to access the particle-level reference for reconstructed objects.
-It is also shown how to loop over the jet constituents. 
+It is also shown how to loop over the jet constituents.
 
 root -l examples/Example3.C'("delphes_output.root")'
 */
@@ -181,7 +181,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
       plots->fTrackDeltaEta->Fill((particle->Eta - track->Eta)/particle->Eta);
     }
 
-  //  cout<<"--  New event -- "<<endl;
+    // cout << "--  New event -- " << endl;
 
     // Loop over all jets in event
     for(i = 0; i < branchJet->GetEntriesFast(); ++i)
@@ -190,7 +190,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
 
       momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
 
-      //cout<<"Looping over jet constituents. Jet pt: "<<jet->PT<<", eta: "<<jet->Eta<<", phi: "<<jet->Phi<<endl;      
+      // cout<<"Looping over jet constituents. Jet pt: "<<jet->PT<<", eta: "<<jet->Eta<<", phi: "<<jet->Phi<<endl;
 
       // Loop over all jet's constituents
       for(j = 0; j < jet->Constituents.GetEntriesFast(); ++j)
@@ -203,19 +203,19 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
         if(object->IsA() == GenParticle::Class())
         {
           particle = (GenParticle*) object;
-          //cout << "    GenPart pt: " << particle->PT << ", eta: " << particle->Eta << ", phi: " << particle->Phi << endl;
+          // cout << "    GenPart pt: " << particle->PT << ", eta: " << particle->Eta << ", phi: " << particle->Phi << endl;
           momentum += particle->P4();
         }
         else if(object->IsA() == Track::Class())
         {
           track = (Track*) object;
-          //cout << "    Track pt: " << track->PT << ", eta: " << track->Eta << ", phi: " << track->Phi << endl;
+          // cout << "    Track pt: " << track->PT << ", eta: " << track->Eta << ", phi: " << track->Phi << endl;
           momentum += track->P4();
         }
         else if(object->IsA() == Tower::Class())
         {
           tower = (Tower*) object;
-          //cout << "    Tower pt: " << tower->ET << ", eta: " << tower->Eta << ", phi: " << tower->Phi << endl;
+          // cout << "    Tower pt: " << tower->ET << ", eta: " << tower->Eta << ", phi: " << tower->Phi << endl;
           momentum += tower->P4();
         }
       }
