@@ -56,7 +56,7 @@ proc dictDeps {dictPrefix args} {
 
   global prefix suffix srcSuf objSuf pcmSuf
 
-  set dict [eval glob -nocomplain $args]
+  set dict [lsort [eval glob -nocomplain $args]]
 
   set dictSrcFiles {}
   set dictObjFiles {}
@@ -90,7 +90,7 @@ proc sourceDeps {srcPrefix args} {
 
   global prefix suffix srcSuf objSuf
 
-  set source [eval glob -nocomplain $args]
+  set source [lsort [eval glob -nocomplain $args]]
 
   set srcObjFiles {}
   set srcObjFilesFastJet {}
@@ -126,7 +126,7 @@ proc tclDeps {} {
 
   global prefix suffix srcSuf objSuf
 
-  set source [glob -nocomplain {external/tcl/*.c}]
+  set source [lsort [glob -nocomplain {external/tcl/*.c}]]
 
   set srcObjFiles {}
 
@@ -150,7 +150,7 @@ proc executableDeps {args} {
 
   global prefix suffix objSuf exeSuf
 
-  set executable [eval glob -nocomplain $args]
+  set executable [lsort [eval glob -nocomplain $args]]
 
   set exeFiles {}
 
@@ -400,7 +400,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a CHANGELOG CREDITS README VERSION Makefile configure classes converters display doc examples external modules python readers $(DISTDIR)
+	@cp -a CHANGELOG CREDITS README VERSION Makefile configure cards classes converters display doc examples external modules python readers $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)
