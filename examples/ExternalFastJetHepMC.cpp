@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 /*
 ########################################################################
 
@@ -51,7 +52,6 @@ Then run (you need an event file in hepmc format):
 
 
 ########################################################################
-
 */
 
 #include <stdexcept>
