@@ -17,7 +17,7 @@ awk '
     print "  <meta NAME=\"keywords\" CONTENT=\"root, tree, ntuple, format, description\">"
     print "  <title>root tree description</title>"
     print "  <style>"
-    print "    body { font-family: sans-serif; max-width: 800px; line-height: 1.4; margin-left: auto; margin-right: auto; padding-left: 1em; padding-right: 1em; }"
+    print "    body { font-family: sans-serif; max-width: 800px; line-height: 1.4; margin-left: auto; margin-right: auto; padding: 0em 1em 3em 1em; }"
     print "    h1 { font-weight: normal; }"
     print "    td, th { border: 1px solid #d3d3d3; padding: 0.1em 0.3em; }"
     print "    th { text-align: left; background-color: #f5f5f5; }"
