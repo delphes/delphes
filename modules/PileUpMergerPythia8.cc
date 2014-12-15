@@ -40,7 +40,7 @@
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
 
-#include "Pythia8/Pythia.h"
+#include "Pythia.h"
 
 #include "TMath.h"
 #include "TString.h"
