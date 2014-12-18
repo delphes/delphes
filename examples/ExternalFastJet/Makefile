@@ -3,14 +3,16 @@
 #
 # You need to set ROOT_DIR, DELPHES_DIR and FASTJET_DIR for your project.
 
+# FastJet directory
+FASTJET_DIR = /opt/fastjet
+
 # ROOT directory
-ROOT_DIR = /work/root/root_5.34.18
+ROOT_DIR = /opt/root
 
 # Delphes directory
 DELPHES_DIR = ../..
 
-# FastJet directory
-FASTJET_DIR = /work/FastJet/fastjet_3.1.0
+#
 
 CXXFLAGS += $(shell $(FASTJET_DIR)/bin/fastjet-config --cxxflags)
 CXXFLAGS += -I$(shell $(ROOT_DIR)/bin/root-config --incdir)
