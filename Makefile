@@ -41,13 +41,13 @@ ifneq ($(PYTHIA8),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -I$(PYTHIA8)/include
 CXXFLAGS += -I$(PYTHIA8)/include/Pythia8
-OPT_LIBS += -L$(PYTHIA8)/lib -lpythia8 -lLHAPDF -lgfortran -lz
+OPT_LIBS += -L$(PYTHIA8)/lib -lpythia8 -ldl
 else
 ifneq ($(PYTHIA8DATA),)
 HAS_PYTHIA8 = true
 CXXFLAGS += -I$(PYTHIA8DATA)/../include
 CXXFLAGS += -I$(PYTHIA8DATA)/../include/Pythia8
-OPT_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -lLHAPDF -lgfortran -lz
+OPT_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -ldl
 endif
 endif
 
@@ -148,35 +148,6 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootUtilities.h
-ExternalFastJetBasic$(ExeSuf): \
-	tmp/examples/ExternalFastJetBasic.$(ObjSuf)
-
-tmp/examples/ExternalFastJetBasic.$(ObjSuf): \
-	examples/ExternalFastJetBasic.cpp \
-	modules/Delphes.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootProgressBar.h \
-	external/fastjet/PseudoJet.hh \
-	external/fastjet/JetDefinition.hh \
-	external/fastjet/ClusterSequence.hh
-ExternalFastJetHepMC$(ExeSuf): \
-	tmp/examples/ExternalFastJetHepMC.$(ObjSuf)
-
-tmp/examples/ExternalFastJetHepMC.$(ObjSuf): \
-	examples/ExternalFastJetHepMC.cpp \
-	modules/Delphes.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesHepMCReader.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootProgressBar.h \
-	external/fastjet/PseudoJet.hh \
-	external/fastjet/JetDefinition.hh \
-	external/fastjet/ClusterSequence.hh
 EXECUTABLE +=  \
 	hepmc2pileup$(ExeSuf) \
 	lhco2root$(ExeSuf) \
@@ -184,9 +155,7 @@ EXECUTABLE +=  \
 	root2lhco$(ExeSuf) \
 	root2pileup$(ExeSuf) \
 	stdhep2pileup$(ExeSuf) \
-	Example1$(ExeSuf) \
-	ExternalFastJetBasic$(ExeSuf) \
-	ExternalFastJetHepMC$(ExeSuf)
+	Example1$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
@@ -195,9 +164,7 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/root2lhco.$(ObjSuf) \
 	tmp/converters/root2pileup.$(ObjSuf) \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
-	tmp/examples/Example1.$(ObjSuf) \
-	tmp/examples/ExternalFastJetBasic.$(ObjSuf) \
-	tmp/examples/ExternalFastJetHepMC.$(ObjSuf)
+	tmp/examples/Example1.$(ObjSuf)
 
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
@@ -1492,16 +1459,6 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
 
-external/fastjet/internal/ClosestPair2D.hh: \
-	external/fastjet/internal/ClosestPair2DBase.hh \
-	external/fastjet/internal/SearchTree.hh \
-	external/fastjet/internal/MinHeap.hh
-	@touch $@
-
-modules/FastJetGridMedianEstimator.h: \
-	classes/DelphesModule.h
-	@touch $@
-
 external/fastjet/ClusterSequence.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
@@ -1510,6 +1467,16 @@ external/fastjet/ClusterSequence.hh: \
 	external/fastjet/LimitedWarning.hh \
 	external/fastjet/FunctionOfPseudoJet.hh \
 	external/fastjet/ClusterSequenceStructure.hh
+	@touch $@
+
+external/fastjet/internal/ClosestPair2D.hh: \
+	external/fastjet/internal/ClosestPair2DBase.hh \
+	external/fastjet/internal/SearchTree.hh \
+	external/fastjet/internal/MinHeap.hh
+	@touch $@
+
+modules/FastJetGridMedianEstimator.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/internal/MinHeap.hh: \
@@ -1535,14 +1502,14 @@ external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh: \
 	external/fastjet/LimitedWarning.hh
 	@touch $@
 
-modules/ConstituentFilter.h: \
-	classes/DelphesModule.h
-	@touch $@
-
 external/fastjet/JetDefinition.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequence.hh
+	@touch $@
+
+modules/ConstituentFilter.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 modules/Calorimeter.h: \
