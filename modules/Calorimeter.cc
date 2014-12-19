@@ -179,7 +179,7 @@ void Calorimeter::Init()
   fEFlowPhotonOutputArray = ExportArray(GetString("EFlowPhotonOutputArray", "eflowPhotons"));
   fEFlowNeutralHadronOutputArray = ExportArray(GetString("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
 
-  fDitherTowerCenter = GetBool("DitherTowerCenters", true);
+  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
 }
 
 //------------------------------------------------------------------------------
