@@ -144,6 +144,7 @@ void Calorimeter::Init()
 
     fFractionMap[param[i*2].GetInt()] = make_pair(ecalFraction, hcalFraction);
   }
+
 /*
   TFractionMap::iterator itFractionMap;
   for(itFractionMap = fFractionMap.begin(); itFractionMap != fFractionMap.end(); ++itFractionMap)
@@ -153,12 +154,14 @@ void Calorimeter::Init()
 */
 
   // read min E value for towers to be saved
-  fEcalEnergyMin = GetDouble("EcalTowerMinEnergy", 0.0);
-  fHcalEnergyMin = GetDouble("HcalTowerMinEnergy", 0.0);
+  fECalEnergyMin = GetDouble("ECalMinEnergy", 0.0);
+  fHCalEnergyMin = GetDouble("HCalMinEnergy", 0.0);
 
-  fEcalSigmaMin  = GetDouble("EcalTowerMinSignificance", 0.0);
-  fHcalSigmaMin  = GetDouble("HcalTowerMinSignificance", 0.0);
+  fECalSigmaMin  = GetDouble("ECalMinSignificance", 0.0);
+  fHCalSigmaMin  = GetDouble("HCalMinSignificance", 0.0);
 
+  // switch on or off the dithering of the center of calorimeter towers
+  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
 
   // read resolution formulas
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
@@ -179,7 +182,6 @@ void Calorimeter::Init()
   fEFlowPhotonOutputArray = ExportArray(GetString("EFlowPhotonOutputArray", "eflowPhotons"));
   fEFlowNeutralHadronOutputArray = ExportArray(GetString("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
 
-  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
 }
 
 //------------------------------------------------------------------------------
@@ -439,23 +441,13 @@ void Calorimeter::FinalizeTower()
   Double_t ecalTime, hcalTime, time;
 
   if(!fTower) return;
-//  cout<<"----------------------"<<endl;
-//  cout<<"Finalize Tower"<<endl;
-//  cout<<""<<endl;
-
 
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
-
-//  ecalEnergy = gRandom->Gaus(fTowerECalEnergy, ecalSigma);
-//  if(ecalEnergy < 0.0) ecalEnergy = 0.0;
 
   ecalEnergy = LogNormal(fTowerECalEnergy, ecalSigma);
   ecalTime = (fTowerECalWeightTime < 1.0E-09 ) ? 0 : fTowerECalTime/fTowerECalWeightTime;
 
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
-
-//  hcalEnergy = gRandom->Gaus(fTowerHCalEnergy, hcalSigma);
-//  if(hcalEnergy < 0.0) hcalEnergy = 0.0;
 
   hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
   hcalTime = (fTowerHCalWeightTime < 1.0E-09 ) ? 0 : fTowerHCalTime/fTowerHCalWeightTime;
@@ -464,8 +456,8 @@ void Calorimeter::FinalizeTower()
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
 
-  ecalEnergy = (ecalEnergy < fEcalEnergyMin || ecalEnergy < fEcalSigmaMin*ecalSigma) ? 0 : ecalEnergy;
-  hcalEnergy = (hcalEnergy < fHcalEnergyMin || hcalEnergy < fHcalSigmaMin*hcalSigma) ? 0 : hcalEnergy;
+  ecalEnergy = (ecalEnergy < fECalEnergyMin || ecalEnergy < fECalSigmaMin*ecalSigma) ? 0 : ecalEnergy;
+  hcalEnergy = (hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalSigmaMin*hcalSigma) ? 0 : hcalEnergy;
 
   energy = ecalEnergy + hcalEnergy;
   time = (TMath::Sqrt(ecalEnergy)*ecalTime + TMath::Sqrt(hcalEnergy)*hcalTime)/(TMath::Sqrt(ecalEnergy) + TMath::Sqrt(hcalEnergy));
@@ -483,7 +475,6 @@ void Calorimeter::FinalizeTower()
 
   pt = energy / TMath::CosH(eta);
 
- // fTower->Position.SetXYZT(-time, 0.0, 0.0, time);
   fTower->Position.SetPtEtaPhiE(1.0, eta, phi, time);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
@@ -514,10 +505,10 @@ void Calorimeter::FinalizeTower()
   }
 
   ecalEnergy -= fTrackECalEnergy;
-  if(ecalEnergy < fEcalEnergyMin || ecalEnergy < fEcalSigmaMin*fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy)) ecalEnergy = 0.0;
+  if(ecalEnergy < fECalEnergyMin || ecalEnergy < fECalSigmaMin*fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy)) ecalEnergy = 0.0;
 
   hcalEnergy -= fTrackHCalEnergy;
-  if(hcalEnergy < fHcalEnergyMin || hcalEnergy < fHcalSigmaMin*fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy)) hcalEnergy = 0.0;
+  if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalSigmaMin*fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy)) hcalEnergy = 0.0;
 
   energy = ecalEnergy + hcalEnergy;
 
@@ -547,10 +538,6 @@ void Calorimeter::FinalizeTower()
 
     fEFlowNeutralHadronOutputArray->Add(tower);
   }
-
-
-
-
 }
 
 //------------------------------------------------------------------------------

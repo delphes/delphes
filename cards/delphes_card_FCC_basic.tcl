@@ -17,8 +17,8 @@ set ExecutionPath {
   AngularSmearing
   ImpactParameterSmearing
   
-  Ecal
-  Hcal
+  ECal
+  HCal
   
   TowerMerger
   EFlowMerger
@@ -218,7 +218,7 @@ module ImpactParameterSmearing ImpactParameterSmearing {
 #   ECAL
 #############
 
-module SimpleCalorimeter Ecal {
+module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray ImpactParameterSmearing/tracks
 
@@ -280,7 +280,7 @@ module SimpleCalorimeter Ecal {
 #   HCAL
 #############
 
-module SimpleCalorimeter Hcal {
+module SimpleCalorimeter HCal {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray ImpactParameterSmearing/tracks
 
@@ -345,8 +345,8 @@ module SimpleCalorimeter Hcal {
 
 module Merger TowerMerger {
 # add InputArray InputArray
-  add InputArray Ecal/ecalTowers
-  add InputArray Hcal/hcalTowers
+  add InputArray ECal/ecalTowers
+  add InputArray HCal/hcalTowers
   set OutputArray towers
 }
 
@@ -357,8 +357,8 @@ module Merger TowerMerger {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray ImpactParameterSmearing/tracks
-  add InputArray Ecal/eflowPhotons
-  add InputArray Hcal/eflowNeutralHadrons
+  add InputArray ECal/eflowPhotons
+  add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
 
@@ -511,8 +511,8 @@ module TreeWriter TreeWriter {
   add Branch GenJetFinder/jets GenJet Jet
   
   add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
-  add Branch Hcal/eflowNeutralHadrons NeutralHadron Tower
-  add Branch Ecal/eflowPhotons Photon Photon
+  add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
+  add Branch ECal/eflowPhotons Photon Photon
 
   add Branch ElectronEnergySmearing/electrons Electron Electron
   add Branch MuonMomentumSmearing/muons Muon Muon
