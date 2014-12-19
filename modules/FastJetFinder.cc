@@ -236,13 +236,11 @@ void FastJetFinder::Process()
 {
   Candidate *candidate, *constituent;
   TLorentzVector momentum;
-  
-  TLorentzVector constmomentum;
-  
+
   Double_t deta, dphi, detaMax, dphiMax;
-  Double_t time, weightTime, avTime;
+  Double_t time, timeWeight;
   Int_t number;
-  Double_t rho = 0;
+  Double_t rho = 0.0;
   PseudoJet jet, area;
   vector<PseudoJet> inputList, outputList;
   ClusterSequence *sequence;
@@ -304,27 +302,23 @@ void FastJetFinder::Process()
   {
     jet = *itOutputList;
     if(fJetAlgorithm == 7) jet = join(jet.constituents());
-    
+
     momentum.SetPxPyPzE(jet.px(), jet.py(), jet.pz(), jet.E());
-    
+
     area.reset(0.0, 0.0, 0.0, 0.0);
     if(fAreaDefinition) area = itOutputList->area_4vector();
 
     candidate = factory->NewCandidate();
 
-    time=0;
-    weightTime=0;
+    time = 0.0;
+    timeWeight = 0.0;
 
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
 
-    constmomentum.SetPxPyPzE(0.0,0.0,0.0,0.0);;
-
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
-
-      constmomentum += constituent->Momentum;
 
       deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
@@ -332,15 +326,13 @@ void FastJetFinder::Process()
       if(dphi > dphiMax) dphiMax = dphi;
 
       time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
-      weightTime += TMath::Sqrt(constituent->Momentum.E());
+      timeWeight += TMath::Sqrt(constituent->Momentum.E());
 
       candidate->AddCandidate(constituent);
     }
 
-    avTime = time/weightTime;
-
     candidate->Momentum = momentum;
-    candidate->Position.SetT(avTime);
+    candidate->Position.SetT(time/timeWeight);
     candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
 
     candidate->DeltaEta = detaMax;
