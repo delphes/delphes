@@ -66,8 +66,8 @@ private:
   Double_t fTowerECalTime, fTowerHCalTime;
   Double_t fTrackECalTime, fTrackHCalTime;
 
-  Double_t fTowerECalWeightTime, fTowerHCalWeightTime;
-  Double_t fTrackECalWeightTime, fTrackHCalWeightTime;
+  Double_t fTowerECalTimeWeight, fTowerHCalTimeWeight;
+  Double_t fTrackECalTimeWeight, fTrackHCalTimeWeight;
 
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
