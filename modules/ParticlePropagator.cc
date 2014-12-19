@@ -294,6 +294,7 @@ void ParticlePropagator::Process()
         candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*c_light*1.0E3);
 
         candidate->Momentum = candidateMomentum;
+        candidate->Dxy = dxy*1.0E3;
         candidate->Xd = xd*1.0E3;
         candidate->Yd = yd*1.0E3;
         candidate->Zd = zd*1.0E3;
