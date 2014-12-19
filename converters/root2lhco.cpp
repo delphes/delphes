@@ -107,7 +107,9 @@ private:
 //------------------------------------------------------------------------------
 
 LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile) :
-  fTriggerWord(0), fEventNumber(1), fTreeReader(0), fOutputFile(0)
+  fTriggerWord(0), fEventNumber(1), fTreeReader(0), fOutputFile(0),
+  fBranchEvent(0), fBranchTrack(0), fBranchTower(0), fBranchPhoton(0),
+  fBranchElectron(0), fBranchMuon(0), fBranchJet(0), fBranchMissingET(0)
 {
   fTreeReader = treeReader;
   fOutputFile = outputFile;
@@ -116,24 +118,31 @@ LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile) :
   fBranchEvent = fTreeReader->UseBranch("Event");
   // reconstructed tracks
   fBranchTrack = fTreeReader->UseBranch("Track");
-  fItTrack = fBranchTrack->MakeIterator();
   // calorimeter towers
   fBranchTower = fTreeReader->UseBranch("Tower");
-  fItTower = fBranchTower->MakeIterator();
   // reconstructed photons
   fBranchPhoton = fTreeReader->UseBranch("Photon");
-  fItPhoton = fBranchPhoton->MakeIterator();
   // reconstructed electrons
   fBranchElectron = fTreeReader->UseBranch("Electron");
-  fItElectron = fBranchElectron->MakeIterator();
   // reconstructed muons
   fBranchMuon = fTreeReader->UseBranch("Muon");
-  fItMuon = fBranchMuon->MakeIterator();
   // reconstructed jets
   fBranchJet = fTreeReader->UseBranch("Jet");
-  fItJet = fBranchJet->MakeIterator();
   // missing transverse energy
   fBranchMissingET = fTreeReader->UseBranch("MissingET");
+
+  if(!fBranchEvent || !fBranchTrack || !fBranchTower || !fBranchPhoton ||
+     !fBranchElectron || !fBranchMuon || !fBranchJet || !fBranchMissingET)
+  {
+    throw runtime_error("ROOT file doesn't contain all required branches");
+  }
+
+  fItTrack = fBranchTrack->MakeIterator();
+  fItTower = fBranchTower->MakeIterator();
+  fItPhoton = fBranchPhoton->MakeIterator();
+  fItElectron = fBranchElectron->MakeIterator();
+  fItMuon = fBranchMuon->MakeIterator();
+  fItJet = fBranchJet->MakeIterator();
 }
 
 //------------------------------------------------------------------------------
