@@ -19,7 +19,6 @@
 
 /** \class FastJetGridMedianEstimator
  *
- *
  *  Computes median energy density per event using a fixed grid.
  *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve

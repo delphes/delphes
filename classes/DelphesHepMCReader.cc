@@ -21,11 +21,6 @@
  *
  *  Reads HepMC file
  *
- *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

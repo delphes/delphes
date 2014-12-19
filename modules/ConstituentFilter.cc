@@ -21,10 +21,6 @@
  *
  *  Drops all input objects that are not constituents of any jet.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

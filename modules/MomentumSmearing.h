@@ -23,10 +23,6 @@
  *
  *  Performs transverse momentum resolution smearing.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

@@ -26,10 +26,6 @@
  *  its half-length, centered at (0,0,0) and with its axis
  *  oriented along the z-axis.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

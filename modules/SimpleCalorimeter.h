@@ -24,10 +24,6 @@
  *  Fills SimpleCalorimeter towers, performs SimpleCalorimeter resolution smearing,
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
- *  $Date: 2014-04-16 15:29:31 +0200 (Wed, 16 Apr 2014) $
- *  $Revision: 1364 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

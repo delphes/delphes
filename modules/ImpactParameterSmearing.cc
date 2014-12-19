@@ -20,9 +20,6 @@
  *
  *  Performs transverse impact parameter smearing.
  *
- *  $Date: 2014-16-03 14:57:44 +0100   
- *
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */

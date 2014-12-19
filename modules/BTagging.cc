@@ -23,10 +23,6 @@
  *  applies b-tagging efficiency (miss identification rate) formulas
  *  and sets b-tagging flags 
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

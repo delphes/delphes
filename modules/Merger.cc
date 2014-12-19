@@ -22,10 +22,6 @@
  *  Merges multiple input arrays into one output array
  *  and sums transverse momenta of all input objects.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

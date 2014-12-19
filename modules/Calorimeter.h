@@ -24,10 +24,6 @@
  *  Fills calorimeter towers, performs calorimeter resolution smearing,
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

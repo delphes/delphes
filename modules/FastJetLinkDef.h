@@ -21,10 +21,6 @@
  *
  *  Lists classes to be included in cint dicitonary
  *
- *  $Date: 2014-04-16 17:17:35 +0200 (Wed, 16 Apr 2014) $
- *  $Revision: 1369 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

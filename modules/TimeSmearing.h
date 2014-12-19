@@ -23,8 +23,6 @@
  *
  *  Performs transverse time smearing.
  *
- *  $Date: 2013-12-12 14:57:44 +0100 (Tue, 12 Dec 2013) $
- *
  *  \author Michele Selvaggi - UCL, Louvain-la-Neuve
  *
  */

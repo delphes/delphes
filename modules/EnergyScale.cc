@@ -21,10 +21,6 @@
  *
  *  Applies energy scale.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

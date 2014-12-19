@@ -22,7 +22,6 @@
  *
  *  \author S. Zenz, December 2013
  *
- *
  */
 
 #include "modules/PileUpJetID.h"

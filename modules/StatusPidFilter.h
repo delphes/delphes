@@ -26,10 +26,6 @@
  *  Removes all generated particles except electrons, muons, taus,
  *  and particles with status == 3.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author J. Hirschauer - FNAL
  *
  */

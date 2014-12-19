@@ -20,11 +20,6 @@
  *
  *  Merges particles from pile-up sample into event
  *
- *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Selvaggi - UCL, Louvain-la-Neuve
  *
  */

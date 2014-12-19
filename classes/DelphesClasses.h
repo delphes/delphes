@@ -25,10 +25,6 @@
  *  Function CompareXYZ sorts objects by the variable XYZ that MUST be
  *  present in the data members of the root tree class of the branch.
  *
- *  $Date: 2008-06-04 13:57:24 $
- *  $Revision: 1.1 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

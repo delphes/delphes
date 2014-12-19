@@ -23,10 +23,6 @@
  *
  *  Finds uniquely identified photons, electrons, taus and jets.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

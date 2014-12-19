@@ -23,10 +23,6 @@
  *
  *  Selects candidates from the InputArray according to the efficiency formula.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

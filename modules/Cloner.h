@@ -23,9 +23,6 @@
  *
  *  Clone candidate array
  *
- *  $Date$
- *  $Revision$
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */

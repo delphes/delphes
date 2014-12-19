@@ -21,10 +21,6 @@
  *
  *  Apply a weight depending on PDG code.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

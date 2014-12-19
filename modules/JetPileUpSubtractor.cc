@@ -21,9 +21,6 @@
  *
  *  Subtract pile-up contribution from jets using the fastjet area method
  *
- *  $Date: 2012-11-18 15:57:08 +0100 (Sun, 18 Nov 2012) $
- *  $Revision: 814 $
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */

@@ -21,10 +21,6 @@
  *
  *  Finds uniquely identified photons, electrons and jets.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

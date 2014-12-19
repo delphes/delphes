@@ -23,10 +23,6 @@
  *
  *  Subtract pile-up contribution from tracks.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

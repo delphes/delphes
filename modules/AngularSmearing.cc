@@ -21,10 +21,6 @@
  *
  *  Performs transverse angular resolution smearing.
  *
- *  $Date: 2014-06-17 16:58:53 +0100  $
- *
- *
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */

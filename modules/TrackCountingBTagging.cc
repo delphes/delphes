@@ -21,10 +21,6 @@
  *
  *  b-tagging algorithm based on counting tracks with large impact parameter
  *
- *  $Date: 2014-03-27 12:39:14 +0200 (Fri, 27 March 2014) $
- *  $Revision: 1099 $
- *
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */

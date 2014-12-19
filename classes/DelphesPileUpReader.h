@@ -23,11 +23,6 @@
  *
  *  Reads pile-up binary file
  *
- *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

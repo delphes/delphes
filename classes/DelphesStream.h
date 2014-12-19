@@ -23,11 +23,6 @@
  *
  *  Provides an interface to manipulate c strings as if they were input streams
  *
- *
- *  $Date: 2012-11-15 13:57:55 $
- *  $Revision: 1.1 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

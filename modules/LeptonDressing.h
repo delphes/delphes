@@ -21,7 +21,6 @@
 
 /** \class LeptonDressing
  *
- *
  *  \author P. Demin && A. Mertens - UCL, Louvain-la-Neuve
  *
  */

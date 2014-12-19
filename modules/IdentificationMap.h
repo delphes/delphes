@@ -22,12 +22,8 @@
 
 /** \class IdentificationMap
  *
- *  Converts particles with some PDG code into another particle, according to parametrized probability as function of pt eta
- given by user. 
- *
- *  $Date: 2014-08-07 14:57:44 +0100 (Thu, 07 Aug 2014) $
- *  $Revision: 905 $
- *
+ *  Converts particles with some PDG code into another particle,
+ *  according to parametrized probability.
  *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
@@ -51,11 +47,11 @@ public:
   void Finish();
 
 private:
-  
+
   typedef std::multimap< Int_t, std::pair<Int_t , DelphesFormula * > > TMisIDMap; //!
-  
+
   TMisIDMap fEfficiencyMap;
-  
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

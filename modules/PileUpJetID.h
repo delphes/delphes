@@ -25,7 +25,6 @@
  *
  *  \author S. Zenz, December 2013
  *
- *
  */
 
 

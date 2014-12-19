@@ -3,10 +3,6 @@
  *
  *  Functions simplifying ROOT tree analysis
  *
- *  $Date: 2008-06-04 13:57:57 $
- *  $Revision: 1.1 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

@@ -23,10 +23,6 @@
  *
  *  Propagates candidates using Hector library.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

@@ -24,10 +24,6 @@
  *  Main Delphes module.
  *  Controls execution of all other modules.
  *
- *  $Date$
- *  $Revision$
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
