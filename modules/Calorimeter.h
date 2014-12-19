@@ -62,18 +62,20 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
-  
+
   Double_t fTowerECalTime, fTowerHCalTime;
   Double_t fTrackECalTime, fTrackHCalTime;
-   
+
   Double_t fTowerECalWeightTime, fTowerHCalWeightTime;
   Double_t fTrackECalWeightTime, fTrackHCalWeightTime;
-  
+
   Int_t fTowerTrackHits, fTowerPhotonHits;
+
+  Bool_t fDitherTowerCenter;
 
   Double_t fEcalEnergyMin;
   Double_t fHcalEnergyMin;
-  
+
   Double_t fEcalSigmaMin;
   Double_t fHcalSigmaMin;
 
@@ -102,7 +104,7 @@ private:
 
   TObjArray *fTowerOutputArray; //!
   TObjArray *fPhotonOutputArray; //!
- 
+
   TObjArray *fEFlowTrackOutputArray; //!
   TObjArray *fEFlowPhotonOutputArray; //!
   TObjArray *fEFlowNeutralHadronOutputArray; //!
