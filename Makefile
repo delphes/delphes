@@ -1969,7 +1969,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a CHANGELOG CREDITS README VERSION Makefile configure cards classes converters display doc examples external modules python readers $(DISTDIR)
+	@cp -a CHANGELOG COPYING CREDITS README VERSION Makefile configure cards classes converters display doc examples external modules python readers $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)
