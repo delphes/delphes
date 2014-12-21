@@ -211,11 +211,11 @@ module Calorimeter Calorimeter {
   set TowerOutputArray towers
   set PhotonOutputArray photons
 
-  set ECalMinEnergy 0.5
-  set HCalMinEnergy 1.0
+  set ECalEnergyMin 0.5
+  set HCalEnergyMin 1.0
 
-  set ECalMinSignificance 1.0
-  set HCalMinSignificance 1.0
+  set ECalEnergySignificanceMin 1.0
+  set HCalEnergySignificanceMin 1.0
    
   set EFlowTrackOutputArray eflowTracks
   set EFlowPhotonOutputArray eflowPhotons

@@ -70,8 +70,8 @@ private:
   Double_t fECalEnergyMin;
   Double_t fHCalEnergyMin;
 
-  Double_t fECalSigmaMin;
-  Double_t fHCalSigmaMin;
+  Double_t fECalEnergySignificanceMin;
+  Double_t fHCalEnergySignificanceMin;
 
   Bool_t fDitherTowerCenter;
 
