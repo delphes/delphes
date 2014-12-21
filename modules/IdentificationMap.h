@@ -48,9 +48,9 @@ public:
 
 private:
 
-  typedef std::multimap< Int_t, std::pair<Int_t , DelphesFormula * > > TMisIDMap; //!
+  typedef std::multimap< Int_t, std::pair< Int_t, DelphesFormula * > > TMisIDMap; //!
 
-  TMisIDMap fEfficiencyMap;
+  TMisIDMap fEfficiencyMap; //!
 
   TIterator *fItInputArray; //!
 
