@@ -21,7 +21,7 @@ set ExecutionPath {
   NeutralTowerMerger
   EFlowMergerAllTracks
   EFlowMerger
-  
+
   NeutrinoFilter
   GenJetFinder
 
@@ -373,14 +373,19 @@ module Merger EFlowMerger {
 #############
 
 module FastJetGridMedianEstimator Rho {
-  
+
   set InputArray Calorimeter/towers
   set RhoOutputArray rho
 
-  # etamin etamax gridsize_eta gridsize_phi 
-  
-  add GridRange 0.0 2.5 0.5 0.5
-  add GridRange 2.5 5.0 0.5 0.5
+  # add GridRange rapmin rapmax drap dphi
+  # rapmin - the minimum rapidity extent of the grid
+  # rapmax - the maximum rapidity extent of the grid
+  # drap - the grid spacing in rapidity
+  # dphi - the grid spacing in azimuth
+
+  add GridRange -5.0 -2.5 1.0 1.0
+  add GridRange -2.5 2.5 1.0 1.0
+  add GridRange 2.5 5.0 1.0 1.0
 
 }
 
@@ -390,12 +395,12 @@ module FastJetGridMedianEstimator Rho {
 #####################
 
 module PdgCodeFilter NeutrinoFilter {
-  
+
   set InputArray Delphes/stableParticles
   set OutputArray filteredParticles
 
   set PTMin 0.0
-  
+
   add PdgCode {12}
   add PdgCode {14}
   add PdgCode {16}
