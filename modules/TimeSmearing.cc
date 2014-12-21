@@ -43,7 +43,7 @@
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -94,22 +94,22 @@ void TimeSmearing::Process()
   Candidate *candidate, *mother;
   Double_t t;
   const Double_t c_light = 2.99792458E8;
-  
+
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     t = candidatePosition.T()*1.0E-3/c_light;
-    
+
     // apply smearing formula
     t = gRandom->Gaus(t, fTimeResolution);
-   
+
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
     candidate->Position.SetT(t*1.0E3*c_light);
-    
+
     candidate->AddCandidate(mother);
-        
+
     fOutputArray->Add(candidate);
   }
 }

@@ -46,11 +46,11 @@ public:
 private:
 
   Double_t fTimeResolution;
- 
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
-  
+
   TObjArray *fOutputArray; //!
 
   ClassDef(TimeSmearing, 1)

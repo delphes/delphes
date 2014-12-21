@@ -64,12 +64,12 @@ void TrackCountingBTagging::Init()
 {
   fBitNumber = GetInt("BitNumber", 0);
 
-  fPtMin     = GetDouble("TrackPtMin", 1.0);
-  fDeltaR    = GetDouble("DeltaR", 0.3);
-  fIPmax     = GetDouble("TrackIPMax", 2.0);
+  fPtMin = GetDouble("TrackPtMin", 1.0);
+  fDeltaR = GetDouble("DeltaR", 0.3);
+  fIPmax = GetDouble("TrackIPMax", 2.0);
 
-  fSigMin    = GetDouble("SigMin", 6.5);
-  fNtracks   = GetInt("Ntracks", 3);
+  fSigMin = GetDouble("SigMin", 6.5);
+  fNtracks = GetInt("Ntracks", 3);
 
   // import input array(s)
 
@@ -123,18 +123,18 @@ void TrackCountingBTagging::Process()
       tpx = trkMomentum.Px();
       tpy = trkMomentum.Py();
 
-      xd   = track->Xd;
-      yd   = track->Yd;
-      dxy  = TMath::Abs(track->Dxy);
+      xd = track->Xd;
+      yd = track->Yd;
+      dxy = TMath::Abs(track->Dxy);
       ddxy = track->SDxy;
 
       if(tpt < fPtMin) continue;
-      if(dr  > fDeltaR) continue;
+      if(dr > fDeltaR) continue;
       if(dxy > fIPmax) continue;
 
-      sign  = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
+      sign = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
 
-      ip  = sign*dxy;
+      ip = sign*dxy;
       sip = ip / TMath::Abs(ddxy);
 
       if(sip > fSigMin) count++;

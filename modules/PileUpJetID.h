@@ -53,7 +53,7 @@ private:
   // If set to true, may have weird results for PFCHS
   // If set to false, uses everything within dR < fParameterR even if in other jets &c.
   // Results should be very similar for PF
-  Int_t fUseConstituents; 
+  Int_t fUseConstituents;
 
   Bool_t fAverageEachTower;
 
@@ -61,14 +61,14 @@ private:
 
   const TObjArray *fJetInputArray; //!
 
-  const TObjArray *fTrackInputArray; // SCZ
-  const TObjArray *fNeutralInputArray; 
+  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fNeutralInputArray; //!
 
-  TIterator *fItTrackInputArray; // SCZ
-  TIterator *fItNeutralInputArray; // SCZ
+  TIterator *fItTrackInputArray; //!
+  TIterator *fItNeutralInputArray; //!
 
   TObjArray *fOutputArray; //!
-  
+
   TIterator *fItVertexInputArray; //!
   const TObjArray *fVertexInputArray; //!
 

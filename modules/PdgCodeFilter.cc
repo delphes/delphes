@@ -18,7 +18,7 @@
 
 /** \class PdgCodeFilter
  *
- *  Removes particles with specific pdg codes 
+ *  Removes particles with specific PDG codes
  *
  *  \author M. Selvaggi
  *
@@ -39,7 +39,7 @@
 #include "TFormula.h"
 #include "TRandom3.h"
 #include "TObjArray.h"
-//#include "TDatabasePDG.h"
+#include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
 #include <algorithm>
@@ -66,28 +66,28 @@ PdgCodeFilter::~PdgCodeFilter()
 
 void PdgCodeFilter::Init()
 {
-  
+
   ExRootConfParam param;
   Size_t i, size;
-  
+
   // PT threshold
   fPTMin = GetDouble("PTMin", 0.0);
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
- 
+
   param = GetParam("PdgCode");
   size = param.GetSize();
 
   // read PdgCodes to be filtered out from the data card
- 
+
   fPdgCodes.clear();
   for(i = 0; i < size; ++i)
   {
     fPdgCodes.push_back(param[i].GetInt());
   }
-  
+
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
 }
@@ -114,13 +114,13 @@ void PdgCodeFilter::Process()
     pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     pt = candidateMomentum.Pt();
-    
+
     pass = kTRUE;
 
-    if( pt < fPTMin ) pass = kFALSE;
-    if( find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end() ) pass = kFALSE;
+    if(pt < fPTMin) pass = kFALSE;
+    if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
 
-    if (pass) fOutputArray->Add(candidate);
+    if(pass) fOutputArray->Add(candidate);
   }
 }
 

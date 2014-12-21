@@ -23,7 +23,7 @@
 
 /** \class Efficiency
  *
- *  Removes particles with specific pdg codes 
+ *  Removes particles with specific pdg codes
   *
  *  \author M. Selvaggi
  *
@@ -49,8 +49,8 @@ public:
 private:
 
   Double_t fPTMin; //!
-  
-  std::vector<Int_t> fPdgCodes; 
+
+  std::vector<Int_t> fPdgCodes;
 
   TIterator *fItInputArray; //!
 
