@@ -29,7 +29,7 @@
 
 #include "classes/DelphesModule.h"
 
-#include <map>
+#include <vector>
 
 class TObjArray;
 class TIterator;
@@ -37,7 +37,7 @@ class TIterator;
 namespace fastjet {
   class JetDefinition;
   class AreaDefinition;
-  class Selector;
+  class JetMedianBackgroundEstimator;
   namespace contrib {
     class NjettinessPlugin;
   }
@@ -99,7 +99,15 @@ private:
   // -- voronoi areas --
   Double_t fEffectiveRfact;
 
-  std::map< Double_t, Double_t > fEtaRangeMap; //!
+#if !defined(__CINT__) && !defined(__CLING__)
+  struct TEstimatorStruct
+  {
+    fastjet::JetMedianBackgroundEstimator *estimator;
+    Double_t etaMin, etaMax;
+  };
+
+  std::vector< TEstimatorStruct > fEstimators; //!
+#endif
 
   TIterator *fItInputArray; //!
 
