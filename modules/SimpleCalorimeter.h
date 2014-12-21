@@ -58,17 +58,20 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerEnergy;
   Double_t fTrackEnergy;
-  
+
   Double_t fTowerTime;
   Double_t fTrackTime;
-   
-  Double_t fTowerWeightTime;
-  Double_t fTrackWeightTime;
-  
+
+  Double_t fTowerTimeWeight;
+  Double_t fTrackTimeWeight;
+
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
   Double_t fEnergyMin;
-  Double_t fSigmaMin;
+
+  Double_t fEnergySignificanceMin;
+
+  Bool_t fDitherTowerCenter;
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
@@ -79,11 +82,11 @@ private:
   std::vector < Long64_t > fTowerHits;
 
   std::vector < Double_t > fTowerFractions;
-  
+
   std::vector < Double_t > fTrackFractions;
- 
+
   DelphesFormula *fResolutionFormula; //!
- 
+
   TIterator *fItParticleInputArray; //!
   TIterator *fItTrackInputArray; //!
 
@@ -91,9 +94,9 @@ private:
   const TObjArray *fTrackInputArray; //!
 
   TObjArray *fTowerOutputArray; //!
- 
+
   TObjArray *fEFlowTowerOutputArray; //!
- 
+
   TObjArray *fTowerTrackArray; //!
   TIterator *fItTowerTrackArray; //!
 

@@ -225,8 +225,8 @@ module SimpleCalorimeter ECal {
   set TowerOutputArray ecalTowers
   set EFlowTowerOutputArray eflowPhotons
   
-  set TowerMinEnergy 0.5
-  set TowerMinSignificance 1.0
+  set EnergyMin 0.5
+  set EnergySignificanceMin 1.0
   
   set pi [expr {acos(-1)}]
 
@@ -287,8 +287,8 @@ module SimpleCalorimeter HCal {
   set TowerOutputArray hcalTowers
   set EFlowTowerOutputArray eflowNeutralHadrons
   
-  set TowerMinEnergy 1.0
-  set TowerMinSignificance 1.0
+  set EnergyMin 1.0
+  set EnergySignificanceMin 1.0
  
   set pi [expr {acos(-1)}]
 
