@@ -76,7 +76,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 ///
 class GridMedianBackgroundEstimator : public BackgroundEstimatorBase
 #ifdef FASTJET_GMBGE_USEFJGRID
-                                                                    , RectangularGrid
+                                                                    , public RectangularGrid
 #endif 
 {
 
@@ -92,6 +92,20 @@ public:
   GridMedianBackgroundEstimator(double ymax, double requested_grid_spacing) :
     RectangularGrid(ymax, requested_grid_spacing),
     _has_particles(false), _enable_rho_m(true) {} 
+
+  /// ctor with more control over initialisation
+  ///  \param rapmin         the minimum rapidity extent of the grid
+  ///  \param rapmax         the maximum rapidity extent of the grid
+  ///  \param drap           the grid spacing in rapidity
+  ///  \param dphi           the grid spacing in azimuth
+  ///  \param tile_selector  optional (geometric) selector to specify
+  ///                        which tiles are good; a tile is good if
+  ///                        a massless 4-vector at the center of the tile passes
+  ///                        the selection
+  GridMedianBackgroundEstimator(double rapmin_in, double rapmax_in, double drap_in, double dphi_in,
+                                Selector tile_selector = Selector()) :
+    RectangularGrid(rapmin_in, rapmax_in, drap_in, dphi_in, tile_selector),
+    _has_particles(false), _enable_rho_m(true) {}
 
   //----------------------------------------------------------------
   /// Constructor based on a user's fully specified RectangularGrid

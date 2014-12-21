@@ -29,20 +29,13 @@
  */
 
 #include "classes/DelphesModule.h"
-#include <map>
-#include <utility>
-
+#include <vector>
 
 class TObjArray;
 class TIterator;
 
 namespace fastjet {
-  class JetDefinition;
-  class AreaDefinition;
-  class Selector;
-  namespace contrib {
-    class NjettinessPlugin;
-  }
+  class GridMedianBackgroundEstimator;
 }
 
 class FastJetGridMedianEstimator: public DelphesModule
@@ -57,11 +50,9 @@ public:
   void Finish();
 
 private:
-  
-  typedef std::map< std::pair< Double_t , Double_t > , std::pair< Double_t , Double_t > > TGrid; //!
-    
-  TGrid fGrid; //!
- 
+
+  std::vector< fastjet::GridMedianBackgroundEstimator * > fEstimators; //!
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
