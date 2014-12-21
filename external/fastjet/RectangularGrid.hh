@@ -41,6 +41,8 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 /// Class to indicate generic structure of tilings
 class TilingBase {
 public:
+  virtual ~TilingBase() {}
+
   /// returns the index of the tile in which p is located, or -1 if p
   /// is outside the tiling region
   virtual int tile_index(const PseudoJet & p) const = 0;

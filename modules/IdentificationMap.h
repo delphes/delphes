@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,12 +22,8 @@
 
 /** \class IdentificationMap
  *
- *  Converts particles with some PDG code into another particle, according to parametrized probability as function of pt eta
- given by user. 
- *
- *  $Date: 2014-08-07 14:57:44 +0100 (Thu, 07 Aug 2014) $
- *  $Revision: 905 $
- *
+ *  Converts particles with some PDG code into another particle,
+ *  according to parametrized probability.
  *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
@@ -51,11 +47,11 @@ public:
   void Finish();
 
 private:
-  
+
   typedef std::multimap< Int_t, std::pair<Int_t , DelphesFormula * > > TMisIDMap; //!
-  
+
   TMisIDMap fEfficiencyMap;
-  
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

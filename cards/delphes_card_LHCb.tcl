@@ -19,8 +19,8 @@ set ExecutionPath {
  
   IdentificationMap
   
-  Ecal
-  Hcal
+  ECal
+  HCal
 
   TreeWriter
 }
@@ -216,7 +216,7 @@ module IdentificationMap IdentificationMap {
 #   ECAL
 #############
 
-module SimpleCalorimeter Ecal {
+module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray IdentificationMap/tracks
 
@@ -291,7 +291,7 @@ module SimpleCalorimeter Ecal {
 #   HCAL
 #############
 
-module SimpleCalorimeter Hcal {
+module SimpleCalorimeter HCal {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray IdentificationMap/tracks
 
@@ -368,8 +368,8 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
 
   add Branch IdentificationMap/tracks Track Track
-  add Branch Hcal/eflowNeutralHadrons NeutralHadron Tower
-  add Branch Ecal/eflowPhotons Photon Photon
+  add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
+  add Branch ECal/eflowPhotons Photon Photon
  
 }
 

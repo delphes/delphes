@@ -9,28 +9,6 @@ fi
 
 awk '
   BEGIN {
-    print "<!doctype html>"
-    print "<html>"
-
-    print "<head>"
-    print "  <meta HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=iso-8859-1\">"
-    print "  <meta NAME=\"keywords\" CONTENT=\"root, tree, ntuple, format, description\">"
-    print "  <title>root tree description</title>"
-    print "  <style>"
-    print "    body { font-family: sans-serif; max-width: 800px; line-height: 1.4; margin-left: auto; margin-right: auto; padding: 0em 1em 3em 1em; }"
-    print "    h1 { font-weight: normal; }"
-    print "    td, th { border: 1px solid #d3d3d3; padding: 0.1em 0.3em; }"
-    print "    th { text-align: left; background-color: #f5f5f5; }"
-    print "    tr.even td { background-color: #f5f5f5; }"
-    print "    tr.class td { font-weight: bold; padding-top: 1em; }"
-    print "  </style>"
-    print "</head>"
-
-    print "<body>"
-
-    print "<h1>ROOT Tree Description</h1>"
-    print "<p>Description of all classes used to store output data.</p>"
-
     print "<table>"
     print "<tr><th>Parameter</th>"
     print "<th>Definition</th>"
@@ -79,5 +57,4 @@ awk '
   END {
     print_line(name, comment, even, 1);
     print "</table>"
-    print "</body></html>"
   }' `dirname $0`/../classes/DelphesClasses.h > $1

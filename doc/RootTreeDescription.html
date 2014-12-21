@@ -1,661 +1,668 @@
+<!doctype html>
 <html>
 <head>
   <meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
   <meta NAME="keywords" CONTENT="root, tree, ntuple, format, description">
   <title>root tree description</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; line-height: 1.4; margin-left: auto; margin-right: auto; padding: 0em 1em 3em 1em; }
+    h1 { font-weight: normal; }
+    td, th { border: 1px solid #d3d3d3; padding: 0.1em 0.3em; }
+    th { text-align: left; background-color: #f5f5f5; }
+    tr.even td { background-color: #f5f5f5; }
+    tr.class td { font-weight: bold; padding-top: 1em; }
+  </style>
 </head>
 <body>
-<H1>root tree description</H1>
-<hr>
-<H2>Classes</H2>
-<hr>
-<table style="border: 1px dotted;" align="center" border="0" cellpadding="7" cellspacing="3" widt="95%">
-<tr><td><b>Parameter</b></td>
-<td><b>Definition</b></td>
-<td><b>How it was calculated</b></td></tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Event"><H3>Event</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<h1>ROOT Tree Description</h1>
+<p>Description of all classes used to store output data.</p>
+<table>
+<tr><th>Parameter</th>
+<th>Definition</th>
+<th>How it was calculated</th></tr>
+<tr class="class"><td colspan="3" id="Event">class Event</td></tr>
+<tr class="even">
   <td>Number</td>
   <td>event number</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="LHCOEvent"><H3>LHCOEvent</H3><hr></td></tr>
-<tr bgcolor="#ffffff">
+<tr class="class"><td colspan="3" id="LHCOEvent">class LHCOEvent</td></tr>
+<tr class="odd">
   <td><a href="#Event">Event</a></td>
   <td>LHCOEvent inherits all Event parameters</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Trigger</td>
   <td>trigger word</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="LHEFEvent"><H3>LHEFEvent</H3><hr></td></tr>
-<tr bgcolor="#ffffff">
+<tr class="class"><td colspan="3" id="LHEFEvent">class LHEFEvent</td></tr>
+<tr class="odd">
   <td><a href="#Event">Event</a></td>
   <td>LHEFEvent inherits all Event parameters</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>ProcessID</td>
   <td>subprocess code for the event </td>
   <td> hepup.IDPRUP</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Weight</td>
   <td>weight for the event </td>
   <td> hepup.XWGTUP</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>ScalePDF</td>
   <td>scale in GeV used in the calculation of the PDFs in the event </td>
   <td> hepup.SCALUP</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>AlphaQED</td>
   <td>value of the QED coupling used in the event </td>
   <td> hepup.AQEDUP</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>AlphaQCD</td>
   <td>value of the QCD coupling used in the event </td>
   <td> hepup.AQCDUP</td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="HepMCEvent"><H3>HepMCEvent</H3><hr></td></tr>
-<tr bgcolor="#ffffff">
+<tr class="class"><td colspan="3" id="HepMCEvent">class HepMCEvent</td></tr>
+<tr class="odd">
   <td><a href="#Event">Event</a></td>
   <td>HepMCEvent inherits all Event parameters</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>ProcessID</td>
   <td>unique signal process id </td>
   <td> signal_process_id()</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>MPI</td>
   <td>number of multi parton interactions </td>
   <td> mpi ()</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Weight</td>
   <td>weight for the event</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Scale</td>
   <td>energy scale, see hep-ph/0109068 </td>
   <td> event_scale()</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>AlphaQED</td>
   <td>QED coupling, see hep-ph/0109068 </td>
   <td> alphaQED()</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>AlphaQCD</td>
   <td>QCD coupling, see hep-ph/0109068 </td>
   <td> alphaQCD()</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>ID1</td>
   <td>flavour code of first parton </td>
   <td> pdf_info()->id1()</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>ID2</td>
   <td>flavour code of second parton </td>
   <td> pdf_info()->id2()</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>X1</td>
   <td>fraction of beam momentum carried by first parton ("beam side") </td>
   <td> pdf_info()->x1()</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>X2</td>
   <td>fraction of beam momentum carried by second parton ("target side") </td>
   <td> pdf_info()->x2()</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>ScalePDF</td>
   <td>Q-scale used in evaluation of PDF's (in GeV) </td>
   <td> pdf_info()->scalePDF()</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>PDF1</td>
   <td>PDF (id1, x1, Q) </td>
   <td> pdf_info()->pdf1()</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>PDF2</td>
   <td>PDF (id2, x2, Q) </td>
   <td> pdf_info()->pdf2()</td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="GenParticle"><H3>GenParticle</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="GenParticle">class GenParticle</td></tr>
+<tr class="even">
   <td>PID</td>
   <td>particle HEP ID number </td>
   <td> hepevt.idhep[number]</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Status</td>
   <td>particle status </td>
   <td> hepevt.isthep[number]</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>IsPU</td>
   <td>0 or 1 for particles from pile-up interactions</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>M1</td>
   <td>particle 1st mother </td>
   <td> hepevt.jmohep[number][0] - 1</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>M2</td>
   <td>particle 2nd mother </td>
   <td> hepevt.jmohep[number][1] - 1</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>D1</td>
   <td>particle 1st daughter </td>
   <td> hepevt.jdahep[number][0] - 1</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>D2</td>
   <td>particle last daughter </td>
   <td> hepevt.jdahep[number][1] - 1</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Charge</td>
   <td>particle charge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Mass</td>
   <td>particle mass</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>E</td>
   <td>particle energy </td>
   <td> hepevt.phep[number][3]</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Px</td>
   <td>particle momentum vector (x component) </td>
   <td> hepevt.phep[number][0]</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Py</td>
   <td>particle momentum vector (y component) </td>
   <td> hepevt.phep[number][1]</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Pz</td>
   <td>particle momentum vector (z component) </td>
   <td> hepevt.phep[number][2]</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>PT</td>
   <td>particle transverse momentum</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Eta</td>
   <td>particle pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Phi</td>
   <td>particle azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Rapidity</td>
   <td>particle rapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>T</td>
   <td>particle vertex position (t component) </td>
   <td> hepevt.vhep[number][3]</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>X</td>
   <td>particle vertex position (x component) </td>
   <td> hepevt.vhep[number][0]</td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Y</td>
   <td>particle vertex position (y component) </td>
   <td> hepevt.vhep[number][1]</td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Z</td>
   <td>particle vertex position (z component) </td>
   <td> hepevt.vhep[number][2]</td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Vertex"><H3>Vertex</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Vertex">class Vertex</td></tr>
+<tr class="even">
   <td>T</td>
   <td>vertex position (t component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>X</td>
   <td>vertex position (x component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Y</td>
   <td>vertex position (y component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Z</td>
   <td>vertex position (z component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="MissingET"><H3>MissingET</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="MissingET">class MissingET</td></tr>
+<tr class="even">
   <td>MET</td>
   <td>mising transverse energy</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>mising energy pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>mising energy azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="ScalarHT"><H3>ScalarHT</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="ScalarHT">class ScalarHT</td></tr>
+<tr class="even">
   <td>HT</td>
   <td>scalar sum of transverse momenta</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Rho"><H3>Rho</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Rho">class Rho</td></tr>
+<tr class="even">
   <td>Rho</td>
   <td>rho energy density</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Edges[2]</td>
   <td>pseudorapidity range edges</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Weight"><H3>Weight</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Weight">class Weight</td></tr>
+<tr class="even">
   <td>Weight</td>
   <td>weight for the event</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Photon"><H3>Photon</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Photon">class Photon</td></tr>
+<tr class="even">
   <td>PT</td>
   <td>photon transverse momentum</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>photon pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>photon azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>E</td>
   <td>photon energy</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>EhadOverEem</td>
   <td>ratio of the hadronic versus electromagnetic energy deposited in the calorimeter</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Particles</td>
   <td>references to generated particles</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Electron"><H3>Electron</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Electron">class Electron</td></tr>
+<tr class="even">
   <td>PT</td>
   <td>electron transverse momentum</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>electron pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>electron azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Charge</td>
   <td>electron charge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>EhadOverEem</td>
   <td>ratio of the hadronic versus electromagnetic energy deposited in the calorimeter</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Particle</td>
   <td>reference to generated particle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Muon"><H3>Muon</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Muon">class Muon</td></tr>
+<tr class="even">
   <td>PT</td>
   <td>muon transverse momentum</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>muon pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>muon azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Charge</td>
   <td>muon charge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Particle</td>
   <td>reference to generated particle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Jet"><H3>Jet</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Jet">class Jet</td></tr>
+<tr class="even">
   <td>PT</td>
   <td>jet transverse momentum</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>jet pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>jet azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Mass</td>
   <td>jet invariant mass</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>BTag</td>
   <td>0 or 1 for a jet that has been tagged as containing a heavy quark</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>TauTag</td>
   <td>0 or 1 for a jet that has been tagged as a tau</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Charge</td>
   <td>tau charge</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>EhadOverEem</td>
   <td>ratio of the hadronic versus electromagnetic energy deposited in the calorimeter</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>NCharged</td>
   <td>number of charged constituents </td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>NNeutrals</td>
   <td>number of neutral constituents </td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Beta</td>
   <td>(sum pt of charged pile-up constituents)/(sum pt of charged constituents) </td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>BetaStar</td>
   <td>(sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents) </td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>MeanSqDeltaR</td>
   <td>average distance (squared) between constituent and jet weighted by pt (squared) of constituent</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>PTD</td>
   <td>average pt between constituent and jet weighted by pt of constituent</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>FracPt[5]</td>
   <td>(sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents) </td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Tau1</td>
   <td>1-subjettiness</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Tau2</td>
   <td>2-subjettiness</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Tau3</td>
   <td>3-subjettiness</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Tau4</td>
   <td>4-subjettiness</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Tau5</td>
   <td>5-subjettiness</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Constituents</td>
   <td>references to constituents</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Particles</td>
   <td>references to generated particles</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Track"><H3>Track</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Track">class Track</td></tr>
+<tr class="even">
   <td>PID</td>
   <td>HEP ID number</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Charge</td>
   <td>track charge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>PT</td>
   <td>track transverse momentum</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>track pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>track azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>EtaOuter</td>
   <td>track pseudorapidity at the tracker edge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>PhiOuter</td>
   <td>track azimuthal angle at the tracker edge</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>X</td>
   <td>track vertex position (x component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Y</td>
   <td>track vertex position (y component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Z</td>
   <td>track vertex position (z component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>T</td>
   <td>track vertex position (z component)</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>XOuter</td>
   <td>track position (x component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>YOuter</td>
   <td>track position (y component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>ZOuter</td>
   <td>track position (z component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>TOuter</td>
   <td>track position (z component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Particle</td>
   <td>reference to generated particle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="Tower"><H3>Tower</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="Tower">class Tower</td></tr>
+<tr class="even">
   <td>ET</td>
   <td>calorimeter tower transverse energy</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Eta</td>
   <td>calorimeter tower pseudorapidity</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Phi</td>
   <td>calorimeter tower azimuthal angle</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>E</td>
   <td>calorimeter tower energy</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Eem</td>
   <td>calorimeter tower electromagnetic energy</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Ehad</td>
   <td>calorimeter tower hadronic energy</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Edges[4]</td>
   <td>calorimeter tower edges</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Particles</td>
   <td>references to generated particles</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff"><td colspan=3><hr><a name="HectorHit"><H3>HectorHit</H3><hr></td></tr>
-<tr bgcolor="#eeeeee">
+<tr class="class"><td colspan="3" id="HectorHit">class HectorHit</td></tr>
+<tr class="even">
   <td>E</td>
   <td>reconstructed energy [GeV]</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Tx</td>
   <td>angle of the momentum in the horizontal (x,z) plane [urad]</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>Ty</td>
   <td>angle of the momentum in the verical (y,z) plane [urad]</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>T</td>
   <td>time of flight to the detector [s]</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>X</td>
   <td>horizontal distance to the beam [um]</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Y</td>
   <td>vertical distance to the beam [um]</td>
   <td></td>
 </tr>
-<tr bgcolor="#eeeeee">
+<tr class="even">
   <td>S</td>
   <td>distance to the interaction point [m]</td>
   <td></td>
 </tr>
-<tr bgcolor="#ffffff">
+<tr class="odd">
   <td>Particle</td>
   <td>reference to generated particle</td>
   <td></td>

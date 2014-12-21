@@ -3,10 +3,6 @@
  *
  *  Class showing progress bar
  *
- *  $Date: 2008-06-04 13:57:55 $
- *  $Revision: 1.1 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */

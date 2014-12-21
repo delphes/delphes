@@ -1,16 +1,12 @@
 
 /** \class ExRootTreeBranch
-*
-*  Class handling object creation
-*  It is also used for output ROOT tree branches
-*
-*  $Date: 2008-06-04 13:57:56 $
-*  $Revision: 1.1 $
-*
-*
-*  \author P. Demin - UCL, Louvain-la-Neuve
-*
-*/
+ *
+ *  Class handling object creation
+ *  It is also used for output ROOT tree branches
+ *
+ *  \author P. Demin - UCL, Louvain-la-Neuve
+ *
+ */
 
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 

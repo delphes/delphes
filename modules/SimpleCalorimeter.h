@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,10 +23,6 @@
  *
  *  Fills SimpleCalorimeter towers, performs SimpleCalorimeter resolution smearing,
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
- *
- *  $Date: 2014-04-16 15:29:31 +0200 (Wed, 16 Apr 2014) $
- *  $Revision: 1364 $
- *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -62,17 +58,20 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerEnergy;
   Double_t fTrackEnergy;
-  
+
   Double_t fTowerTime;
   Double_t fTrackTime;
-   
-  Double_t fTowerWeightTime;
-  Double_t fTrackWeightTime;
-  
+
+  Double_t fTowerTimeWeight;
+  Double_t fTrackTimeWeight;
+
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
   Double_t fEnergyMin;
-  Double_t fSigmaMin;
+
+  Double_t fEnergySignificanceMin;
+
+  Bool_t fDitherTowerCenter;
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
@@ -83,11 +82,11 @@ private:
   std::vector < Long64_t > fTowerHits;
 
   std::vector < Double_t > fTowerFractions;
-  
+
   std::vector < Double_t > fTrackFractions;
- 
+
   DelphesFormula *fResolutionFormula; //!
- 
+
   TIterator *fItParticleInputArray; //!
   TIterator *fItTrackInputArray; //!
 
@@ -95,9 +94,9 @@ private:
   const TObjArray *fTrackInputArray; //!
 
   TObjArray *fTowerOutputArray; //!
- 
+
   TObjArray *fEFlowTowerOutputArray; //!
- 
+
   TObjArray *fTowerTrackArray; //!
   TIterator *fItTowerTrackArray; //!
 

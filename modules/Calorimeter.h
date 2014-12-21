@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,10 +23,6 @@
  *
  *  Fills calorimeter towers, performs calorimeter resolution smearing,
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
- *
- *  $Date$
- *  $Revision$
- *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -62,20 +58,22 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
-  
+
   Double_t fTowerECalTime, fTowerHCalTime;
   Double_t fTrackECalTime, fTrackHCalTime;
-   
-  Double_t fTowerECalWeightTime, fTowerHCalWeightTime;
-  Double_t fTrackECalWeightTime, fTrackHCalWeightTime;
-  
+
+  Double_t fTowerECalTimeWeight, fTowerHCalTimeWeight;
+  Double_t fTrackECalTimeWeight, fTrackHCalTimeWeight;
+
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
-  Double_t fEcalEnergyMin;
-  Double_t fHcalEnergyMin;
-  
-  Double_t fEcalSigmaMin;
-  Double_t fHcalSigmaMin;
+  Double_t fECalEnergyMin;
+  Double_t fHCalEnergyMin;
+
+  Double_t fECalEnergySignificanceMin;
+  Double_t fHCalEnergySignificanceMin;
+
+  Bool_t fDitherTowerCenter;
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
@@ -102,7 +100,7 @@ private:
 
   TObjArray *fTowerOutputArray; //!
   TObjArray *fPhotonOutputArray; //!
- 
+
   TObjArray *fEFlowTrackOutputArray; //!
   TObjArray *fEFlowPhotonOutputArray; //!
   TObjArray *fEFlowNeutralHadronOutputArray; //!

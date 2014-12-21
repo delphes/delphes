@@ -1,24 +1,23 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
 /** \class FastJetGridMedianEstimator
- *
  *
  *  Computes median energy density per event using a fixed grid.
  *
@@ -94,36 +93,44 @@ FastJetGridMedianEstimator::~FastJetGridMedianEstimator()
 
 void FastJetGridMedianEstimator::Init()
 {
-  // read eta ranges
-
-  ExRootConfParam param = GetParam("GridRange");
+  ExRootConfParam param;
   Long_t i, size;
-  
-  fGrid.clear();
+  Double_t drap, dphi, rapMin, rapMax;
+
+  // read rapidity ranges
+
+  param = GetParam("GridRange");
   size = param.GetSize();
+
+  fEstimators.clear();
   for(i = 0; i < size/4; ++i)
   {
-    fGrid[make_pair(param[i*4].GetDouble(), param[i*4 + 1].GetDouble())] = make_pair(param[i*4 + 2].GetDouble(), param[i*4 + 3].GetDouble());
-    //cout<<param[i*4].GetDouble()<<","<<  param[i*4 + 1].GetDouble()<<","<< param[i*4 + 2].GetDouble()<<","<< param[i*4 + 3].GetDouble()<<endl;
-
+    rapMin = param[i*4].GetDouble();
+    rapMax = param[i*4 + 1].GetDouble();
+    drap = param[i*4 + 2].GetDouble();
+    dphi = param[i*4 + 3].GetDouble();
+    fEstimators.push_back(new GridMedianBackgroundEstimator(rapMin, rapMax, drap, dphi));
   }
- 
-  
-  //cout<<fGrid[make_pair(0.0,2.5)].first<<","<<fGrid[make_pair(0.0,2.5)].second<<endl;
- 
- // import input array
+
+  // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
   fItInputArray = fInputArray->MakeIterator();
 
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
-  
 }
 
 //------------------------------------------------------------------------------
 
 void FastJetGridMedianEstimator::Finish()
 {
+  vector< GridMedianBackgroundEstimator * >::iterator itEstimators;
+
+  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
+  {
+    if(*itEstimators) delete *itEstimators;
+  }
+
   if(fItInputArray) delete fItInputArray;
 }
 
@@ -133,18 +140,17 @@ void FastJetGridMedianEstimator::Process()
 {
   Candidate *candidate;
   TLorentzVector momentum;
-  Double_t deta, dphi, detaMin, detaMax;
   Int_t number;
   Double_t rho = 0;
   PseudoJet jet;
-  vector<PseudoJet> inputList, outputList;
-  
-  std::map< std::pair< Double_t , Double_t > , std::pair< Double_t , Double_t > >::iterator itGrid;
-  
+  vector< PseudoJet > inputList, outputList;
+
+  vector< GridMedianBackgroundEstimator * >::iterator itEstimators;;
+
   DelphesFactory *factory = GetFactory();
- 
+
   inputList.clear();
- 
+
   // loop over input objects
   fItInputArray->Reset();
   number = 0;
@@ -157,44 +163,18 @@ void FastJetGridMedianEstimator::Process()
     ++number;
   }
 
- 
   // compute rho and store it
-  
-  // cout<<"caio"<<endl;
-  for(itGrid = fGrid.begin(); itGrid != fGrid.end(); ++itGrid)
-  {
-   //Selector select_rapidity = SelectorAbsRapRange(itEtaRangeMap->first, itEtaRangeMap->second);
-   // JetMedianBackgroundEstimator estimator(select_rapidity, *fDefinition, *fAreaDefinition);
-      
-    //cout<<itGrid->first.first<<endl;
-   
-    detaMin = (itGrid->first).first;
-    detaMax = (itGrid->first).second;
-    deta    = (itGrid->second).first;
-    dphi    = (itGrid->second).second;
-    
-    //cout<<detaMin<<","<<detaMax<<","<<deta<<","<<dphi<<endl;
-    
-    
-    RectangularGrid grid(detaMin, detaMax, deta, dphi);
-    //cout<<grid.is_initialised()<<endl;
-    //cout<<grid.rapmin()<<","<<grid.rapmax()<<","<<grid.drap()<<","<<grid.dphi()<<endl;
-      
-    GridMedianBackgroundEstimator estimator(grid);
-      
-    estimator.set_particles(inputList);
-      
-    //cout<<estimator.description()<<endl;
-      
-    rho = estimator.rho();
-    //cout<<rho<<endl;      
 
+  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
+  {
+    (*itEstimators)->set_particles(inputList);
+
+    rho = (*itEstimators)->rho();
 
     candidate = factory->NewCandidate();
     candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
-    candidate->Edges[0] = detaMin;
-    candidate->Edges[1] = detaMax;
+    candidate->Edges[0] = (*itEstimators)->rapmin();
+    candidate->Edges[1] = (*itEstimators)->rapmax();
     fRhoOutputArray->Add(candidate);
   }
- 
 }

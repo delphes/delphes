@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,10 +23,6 @@
  *  from a given vertex to a cylinder defined by its radius,
  *  its half-length, centered at (0,0,0) and with its axis
  *  oriented along the z-axis.
- *
- *  $Date$
- *  $Revision$
- *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -123,8 +119,8 @@ void ParticlePropagator::Process()
   Double_t t_z, t_r, t_ra, t_rb;
   Double_t tmp, discr, discr2;
   Double_t delta, gammam, omega, asinrho;
-  Double_t ang_mom, rcu, rc2, dxy, xd, yd, zd;
-  
+  Double_t rcu, rc2, dxy, xd, yd, zd;
+
   const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
@@ -161,7 +157,7 @@ void ParticlePropagator::Process()
       tmp = px*y - py*x;
       discr2 = pt2*fRadius2 - tmp*tmp;
 
-      if(discr2 < 0)
+      if(discr2 < 0.0)
       {
         // no solutions
         continue;
@@ -171,14 +167,14 @@ void ParticlePropagator::Process()
       discr = TMath::Sqrt(discr2);
       t1 = (-tmp + discr)/pt2;
       t2 = (-tmp - discr)/pt2;
-      t = (t1 < 0) ? t2 : t1;
+      t = (t1 < 0.0) ? t2 : t1;
 
       z_t = z + pz*t;
       if(TMath::Abs(z_t) > fHalfLength)
       {
         t3 = (+fHalfLength - z) / pz;
         t4 = (-fHalfLength - z) / pz;
-        t = (t3 < 0) ? t4 : t3;
+        t = (t3 < 0.0) ? t4 : t3;
       }
 
       x_t = x + px*t;
@@ -212,17 +208,17 @@ void ParticlePropagator::Process()
     else
     {
 
-      // 1.  initial transverse momentum p_{T0} : Part->pt
-      //     initial transverse momentum direction \phi_0 = -atan(p_X0/p_Y0)
-      //     relativistic gamma : gamma = E/mc² ; gammam = gamma \times m
-      //     giration frequency \omega = q/(gamma m) fBz
-      //     helix radius r = p_T0 / (omega gamma m)
+      // 1.  initial transverse momentum p_{T0}: Part->pt
+      //     initial transverse momentum direction phi_0 = -atan(p_X0/p_Y0)
+      //     relativistic gamma: gamma = E/mc^2; gammam = gamma * m
+      //     gyration frequency omega = q/(gamma m) fBz
+      //     helix radius r = p_{T0} / (omega gamma m)
 
-      gammam = e*1.0E9 / (c_light*c_light);      // gammam in [eV/c²]
-      omega = q * fBz / (gammam);                // omega is here in [ 89875518 / s]
+      gammam = e*1.0E9 / (c_light*c_light);      // gammam in [eV/c^2]
+      omega = q * fBz / (gammam);                // omega is here in [89875518/s]
       r = pt / (q * fBz) * 1.0E9/c_light;        // in [m]
 
-      phi_0 = TMath::ATan2(py, px); // [rad] in [-pi; pi]
+      phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
 
       // 2. helix axis coordinates
       x_c = x + r*TMath::Sin(phi_0);
@@ -234,19 +230,17 @@ void ParticlePropagator::Process()
 
       rcu = TMath::Abs(r);
       rc2 = r_c*r_c;
-     
+
       // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
-      xd = x_c*x_c*x_c - x_c*rcu*r_c + x_c*y_c*y_c; 
-      xd  = ( rc2 > 0.0 ) ? xd / rc2 : -999;
-      yd  = y_c*(-rcu*r_c + rc2);
-      yd  = ( rc2 > 0.0 ) ? yd / rc2 : -999;
-      zd  = z + (TMath::Sqrt(xd*xd+yd*yd) - TMath::Sqrt(x*x+y*y))*pz/pt;
+      xd = x_c*x_c*x_c - x_c*rcu*r_c + x_c*y_c*y_c;
+      xd = (rc2 > 0.0) ? xd / rc2 : -999;
+      yd = y_c*(-rcu*r_c + rc2);
+      yd = (rc2 > 0.0) ? yd / rc2 : -999;
+      zd = z + (TMath::Sqrt(xd*xd + yd*yd) - TMath::Sqrt(x*x + y*y))*pz/pt;
 
       // calculate impact paramater
-      ang_mom = (xd*py - yd*px);
-      dxy = ang_mom/pt;
-    
-         
+      dxy = (xd*py - yd*px)/pt;
+
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
@@ -273,12 +267,12 @@ void ParticlePropagator::Process()
         t5 = (delta - TMath::Pi() - asinrho) / omega;
         t6 = (delta - TMath::Pi() + asinrho) / omega;
 
-        if(t1 < 0) t1 = 1.0E99;
-        if(t2 < 0) t2 = 1.0E99;
-        if(t3 < 0) t3 = 1.0E99;
-        if(t4 < 0) t4 = 1.0E99;
-        if(t5 < 0) t5 = 1.0E99;
-        if(t6 < 0) t6 = 1.0E99;
+        if(t1 < 0.0) t1 = 1.0E99;
+        if(t2 < 0.0) t2 = 1.0E99;
+        if(t3 < 0.0) t3 = 1.0E99;
+        if(t4 < 0.0) t4 = 1.0E99;
+        if(t5 < 0.0) t5 = 1.0E99;
+        if(t6 < 0.0) t6 = 1.0E99;
 
         t_ra = TMath::Min(t1, TMath::Min(t2, t3));
         t_rb = TMath::Min(t4, TMath::Min(t5, t6));
@@ -300,11 +294,12 @@ void ParticlePropagator::Process()
         candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*c_light*1.0E3);
 
         candidate->Momentum = candidateMomentum;
-	candidate->Xd = xd*1.0E3; 
-	candidate->Yd = yd*1.0E3;
+        candidate->Dxy = dxy*1.0E3;
+        candidate->Xd = xd*1.0E3;
+        candidate->Yd = yd*1.0E3;
         candidate->Zd = zd*1.0E3;
-	
-	candidate->AddCandidate(mother);
+
+        candidate->AddCandidate(mother);
 
         fOutputArray->Add(candidate);
         switch(TMath::Abs(candidate->PID))

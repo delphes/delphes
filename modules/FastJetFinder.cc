@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -20,10 +20,6 @@
 /** \class FastJetFinder
  *
  *  Finds jets using FastJet library.
- *
- *  $Date$
- *  $Revision$
- *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -240,13 +236,11 @@ void FastJetFinder::Process()
 {
   Candidate *candidate, *constituent;
   TLorentzVector momentum;
-  
-  TLorentzVector constmomentum;
-  
+
   Double_t deta, dphi, detaMax, dphiMax;
-  Double_t time, weightTime, avTime;
+  Double_t time, timeWeight;
   Int_t number;
-  Double_t rho = 0;
+  Double_t rho = 0.0;
   PseudoJet jet, area;
   vector<PseudoJet> inputList, outputList;
   ClusterSequence *sequence;
@@ -308,27 +302,23 @@ void FastJetFinder::Process()
   {
     jet = *itOutputList;
     if(fJetAlgorithm == 7) jet = join(jet.constituents());
-    
+
     momentum.SetPxPyPzE(jet.px(), jet.py(), jet.pz(), jet.E());
-    
+
     area.reset(0.0, 0.0, 0.0, 0.0);
     if(fAreaDefinition) area = itOutputList->area_4vector();
 
     candidate = factory->NewCandidate();
 
-    time=0;
-    weightTime=0;
+    time = 0.0;
+    timeWeight = 0.0;
 
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
 
-    constmomentum.SetPxPyPzE(0.0,0.0,0.0,0.0);;
-
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
-
-      constmomentum += constituent->Momentum;
 
       deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
@@ -336,15 +326,13 @@ void FastJetFinder::Process()
       if(dphi > dphiMax) dphiMax = dphi;
 
       time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
-      weightTime += TMath::Sqrt(constituent->Momentum.E());
+      timeWeight += TMath::Sqrt(constituent->Momentum.E());
 
       candidate->AddCandidate(constituent);
     }
 
-    avTime = time/weightTime;
-
     candidate->Momentum = momentum;
-    candidate->Position.SetT(avTime);
+    candidate->Position.SetT(time/timeWeight);
     candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
 
     candidate->DeltaEta = detaMax;

@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -24,7 +24,6 @@
  *  CMS PileUp Jet ID Variables, based on http://cds.cern.ch/record/1581583
  *
  *  \author S. Zenz, December 2013
- *  
  *
  */
 
@@ -54,7 +53,7 @@ private:
   // If set to true, may have weird results for PFCHS
   // If set to false, uses everything within dR < fParameterR even if in other jets &c.
   // Results should be very similar for PF
-  Int_t fUseConstituents; 
+  Int_t fUseConstituents;
 
   Bool_t fAverageEachTower;
 
@@ -62,14 +61,14 @@ private:
 
   const TObjArray *fJetInputArray; //!
 
-  const TObjArray *fTrackInputArray; // SCZ
-  const TObjArray *fNeutralInputArray; 
+  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fNeutralInputArray; //!
 
-  TIterator *fItTrackInputArray; // SCZ
-  TIterator *fItNeutralInputArray; // SCZ
+  TIterator *fItTrackInputArray; //!
+  TIterator *fItNeutralInputArray; //!
 
   TObjArray *fOutputArray; //!
-  
+
   TIterator *fItVertexInputArray; //!
   const TObjArray *fVertexInputArray; //!
 

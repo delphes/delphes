@@ -37,10 +37,10 @@ for entry in range(0, numberOfEntries):
   if branchJet.GetEntries() > 0:
     # Take first jet
     jet = branchJet.At(0)
-    
+
     # Plot jet transverse momentum
     histJetPT.Fill(jet.PT)
-    
+
     # Print jet transverse momentum
     print jet.PT
 

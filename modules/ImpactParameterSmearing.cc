@@ -1,17 +1,17 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *  
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -20,13 +20,10 @@
  *
  *  Performs transverse impact parameter smearing.
  *
- *  $Date: 2014-16-03 14:57:44 +0100   
- *
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */
- 
+
 
 #include "modules/ImpactParameterSmearing.h"
 
@@ -46,7 +43,7 @@
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -98,59 +95,53 @@ void ImpactParameterSmearing::Finish()
 void ImpactParameterSmearing::Process()
 {
   Candidate *candidate, *particle, *mother;
-  Double_t xd, yd, zd, dxy, dz, sx, sy, sz, ddxy, ddz;
-  Double_t pt, eta, px, py, ang_mom;
-
- // cout<<"New event"<<endl;
+  Double_t xd, yd, zd, dxy, sx, sy, sz, ddxy;
+  Double_t pt, eta, px, py;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-  
-    //take momentum before smearing (otherwise apply double smearing on dxy)
+
+    // take momentum before smearing (otherwise apply double smearing on dxy)
     particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
-  
+
     const TLorentzVector &candidateMomentum = particle->Momentum;
-    //  const TLorentzVector &candidateMomentum = candidate->Momentum;
-    
+
     eta = candidateMomentum.Eta();
     pt = candidateMomentum.Pt();
     px = candidateMomentum.Px();
     py = candidateMomentum.Py();
-      
+
     // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
     xd =  candidate->Xd;
     yd =  candidate->Yd;
     zd =  candidate->Zd;
-   
-    // calculate smeared values   
-    sx = gRandom->Gaus(0,fFormula->Eval(pt, eta));
-    sy = gRandom->Gaus(0,fFormula->Eval(pt, eta));
-    sz = gRandom->Gaus(0,fFormula->Eval(pt, eta));
-     
+
+    // calculate smeared values
+    sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
+    sy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
+    sz = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
+
     xd += sx;
     yd += sy;
-    zd += sz; 
-     
-    // calculate impact paramater (after-smearing)
-    ang_mom = (xd*py - yd*px);
-    dxy = ang_mom/pt;
-    dz = zd;
-  
-    ddxy = gRandom->Gaus(0,fFormula->Eval(pt, eta));
-    ddz = gRandom->Gaus(0,fFormula->Eval(pt, eta));
-  
-    //fill smeared values in candidate
+    zd += sz;
+
+    // calculate impact parameter (after-smearing)
+    dxy = (xd*py - yd*px)/pt;
+
+    ddxy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
+
+    // fill smeared values in candidate
     mother = candidate;
-    
+
     candidate = static_cast<Candidate*>(candidate->Clone());
     candidate->Xd = xd;
     candidate->Yd = yd;
     candidate->Zd = zd;
-    
+
     candidate->Dxy = dxy;
     candidate->SDxy = ddxy;
-      
+
     candidate->AddCandidate(mother);
     fOutputArray->Add(candidate);
   }

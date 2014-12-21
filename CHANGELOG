@@ -1,3 +1,18 @@
+3.2.0:
+  moved code repository to [GitHub](http://github.com/delphes/delphes)
+  moved configuration files from examples to cards directory
+  new event display, with automatic discovery of the object collections, navigation controls, and 3D  geometry sketch (for more details, see [event display manual](/workbook/event-display))
+  updated FastJet library to 3.1.0
+  added zero suppression in Calorimeter modules
+  added FastJetGridMedianEstimator module (provides fixed grid eta-dependent average pile-up density)
+  added AngularSmearing module (to smear track eta,phi)
+  added PdgCodeFilter (to veto particle with given PID from collections)
+  added IdentificationMap (allows to apply (mis)-identification)
+  added Example4.C (provide and example on how to compute the jet energy scale)
+  added examples (examples/ExternalFastJetBasic.cpp and examples/ExternalFastJetHepMC.cpp) on how to run Delphes as a library with external FastJet installation
+  updated example for FCC studies (cards/delphes_card_FCC_basic.tcl)
+  added example for LHCb studies (cards/delphes_card_LHCb.tcl)
+
 3.1.2:
   fixed smearing of (z,t) vertex distribution in the PileUpMerger module
 

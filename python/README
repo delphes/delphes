@@ -17,7 +17,7 @@ In the present directory, there are two examples:
   - simpleConfig.py
   - SimpleEventSelection.py
   - LeptonControlPlots.py
-* Basic ttbar analysis
+ * Basic ttbar analysis
   - topConfig.py
   - TtbarEventSelection.py
   - TopReconstruction.py
