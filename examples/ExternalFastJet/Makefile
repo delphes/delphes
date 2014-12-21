@@ -20,7 +20,7 @@ CXXFLAGS += -I$(DELPHES_DIR) -I$(DELPHES_DIR)/external
 
 LDFLAGS += $(shell $(FASTJET_DIR)/bin/fastjet-config --libs)
 LDFLAGS += $(shell $(ROOT_DIR)/bin/root-config --libs) -lEG
-LDFLAGS += -Wl,-rpath=$(DELPHES_DIR) -L$(DELPHES_DIR) -lDelphesNoFastJet
+LDFLAGS += -Wl,-rpath,$(DELPHES_DIR) -L$(DELPHES_DIR) -lDelphesNoFastJet
 
 all: ExternalFastJetBasic ExternalFastJetHepMC
 
