@@ -385,9 +385,9 @@ module FastJetGridMedianEstimator Rho {
   # drap - the grid spacing in rapidity
   # dphi - the grid spacing in azimuth
 
-  add GridRange -5.0 -2.5 0.5 0.5
+  add GridRange -5.0 -2.5 1.0 1.0
   add GridRange -2.5 2.5 0.5 0.5
-  add GridRange 2.5 5.0 0.5 0.5
+  add GridRange 2.5 5.0 1.0 1.0
 
 }
 
