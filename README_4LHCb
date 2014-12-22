@@ -1,7 +1,7 @@
 Delphes 4 LHCb
 ==============
 
-The card "delphes_card_prelLHCb.tcl" contains a preliminary parametrization of the LHCb detector. 
+The card "delphes_card_LHCb.tcl" contains a preliminary parametrization of the LHCb detector. 
 
 - ParticlePropagator
 
@@ -23,7 +23,7 @@ performance.
 
 - IdentificationMap
 
-This module is a recent addition in order to map particle misindentification rates
+This module is a recent addition in order to map particle misidentification rates
 and reconstruction efficiencies. 
 
 An example is given in the card but can be expanded if needed. 
@@ -45,18 +45,17 @@ Quick start with Delphes
 
 1) Compile:
 
-   make
+  make
 
 2) Simulate p p -> b b~ events 
 
-
-  wget http://cp3.irmp.ucl.ac.be/downloads/pp2bb.hep.tgz
-  tar -xzvf pp2bb.hep.tgz
-  ./DelphesSTDHEP cards/delphes_card_prelLHCb.tcl delphes_output.root pp2bb.hep
+  wget http://cp3.irmp.ucl.ac.be/downloads/pp_bb.hep.gz
+  gunzip pp_bb.hep.gz
+  ./DelphesSTDHEP cards/delphes_card_LHCb.tcl delphes_output.root pp_bb.hep
 
 
 For more details, please visit:
 
-https://cp3.irmp.ucl.ac.be/projects/delphes
+  https://cp3.irmp.ucl.ac.be/projects/delphes
 
 
