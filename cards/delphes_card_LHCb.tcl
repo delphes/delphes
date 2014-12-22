@@ -7,18 +7,18 @@
 #######################################
 
 set ExecutionPath {
-  
+
   ParticlePropagator
-  
+
   ChargedHadronMomentumSmearing
   ElectronEnergySmearing
   MuonMomentumSmearing
 
   TrackMerger
   ImpactParameterSmearing
- 
+
   IdentificationMap
-  
+
   ECal
   HCal
 
@@ -40,10 +40,10 @@ module ParticlePropagator ParticlePropagator {
   set MuonOutputArray muons
 
   # radius of the magnetic field coverage, in m
- 
+
   set Radius 3.31
- 
-  
+
+
   # half-length of the magnetic field coverage, in m
   set HalfLength 12.0
 
@@ -52,12 +52,12 @@ module ParticlePropagator ParticlePropagator {
 
   # Need to veto anything with theta > 0.269 rad  -> eta = 2
   #                            theta < 0.0135 rad -> eta = 5
-  
-  # tracker and calos are at approx 0.269 rad, R = 12*tan(0.269) 
+
+  # tracker and calos are at approx 0.269 rad, R = 12*tan(0.269)
 
 }
 
-  
+
 ########################################
 # Momentum resolution for charged tracks
 ########################################
@@ -83,7 +83,7 @@ module EnergySmearing ElectronEnergySmearing {
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
   # resolution formula for electrons
-  set ResolutionFormula { (eta > 2.0  && eta <= 5.0) * (energy > 0.1   && energy <= 8.0) * (energy*0.05) + \ 
+  set ResolutionFormula { (eta > 2.0  && eta <= 5.0) * (energy > 0.1   && energy <= 8.0) * (energy*0.05) +
                           (eta > 2.0  && eta <= 5.0) * (energy > 8.0)                    *  sqrt(energy^2*0.015^2 + energy*0.10^2)}
   }
 
@@ -138,54 +138,54 @@ set ResolutionFormula {0.0116 + 0.0234/pt}
 module IdentificationMap IdentificationMap {
   set InputArray ImpactParameterSmearing/tracks
   set OutputArray tracks
-  
+
   # {PID in} {PID out} {formula}
   # make sure "PID in" and "PID out" have the same charge (e.g {-13} {211} or {-321} {211})
   # {211} {-13} is equivalent to {-211} {13} (and needs to be written once only...)
-  
-  
-  
-  
-  
-  
-  # --- pions --- 
-  
-  add EfficiencyFormula {211} {211} {      (eta <= 2.0)                                  * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *       (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *       (pt >= 0.8)* (0.95) + \
+
+
+
+
+
+
+  # --- pions ---
+
+  add EfficiencyFormula {211} {211} {      (eta <= 2.0)                                  * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *       (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *       (pt >= 0.8)* (0.95) +
 					   (eta > 5.0)                                   * (0.00)}
-  
-  add EfficiencyFormula {211} {-13} {      (eta <= 2.0)                                 * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *      (pt >= 0.8)* (0.005 + 0.0663*exp(-0.13*pt*cosh(eta))) + \
+
+  add EfficiencyFormula {211} {-13} {      (eta <= 2.0)                                 * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *      (pt >= 0.8)* (0.005 + 0.0663*exp(-0.13*pt*cosh(eta))) +
 					   (eta > 5.0)                                  * (0.00)}
 
-  
+
  # --- kaons ---
- 
-  
-  add EfficiencyFormula {321} {321} {      (eta <= 2.0)                                  * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *       (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *       (pt >= 0.8)* (0.95) + \
+
+
+  add EfficiencyFormula {321} {321} {      (eta <= 2.0)                                  * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *       (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *       (pt >= 0.8)* (0.95) +
 					   (eta > 5.0)                                   * (0.00)}
-					   
-  add EfficiencyFormula {321} {-13} {      (eta <= 2.0)                                 * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *      (pt >= 0.8)* (0.005 + 0.086*exp(-0.11*pt*cosh(eta))) + \
+
+  add EfficiencyFormula {321} {-13} {      (eta <= 2.0)                                 * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *      (pt >= 0.8)* (0.005 + 0.086*exp(-0.11*pt*cosh(eta))) +
 					   (eta > 5.0)                                  * (0.00)}
 
 
  # --- protons ---
- 
-  
-  add EfficiencyFormula {2212} {2212} {    (eta <= 2.0)                                  * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *       (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *       (pt >= 0.8)* (0.95) + \
+
+
+  add EfficiencyFormula {2212} {2212} {    (eta <= 2.0)                                  * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *       (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *       (pt >= 0.8)* (0.95) +
 					   (eta > 5.0)                                   * (0.00)}
-					   
-  add EfficiencyFormula {2212} {-13} {     (eta <= 2.0)                                 * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *      (pt >= 0.8)* (0.002) + \
+
+  add EfficiencyFormula {2212} {-13} {     (eta <= 2.0)                                 * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *      (pt >= 0.8)* (0.002) +
 					   (eta > 5.0)                                  * (0.00)}
 
 
@@ -194,17 +194,17 @@ module IdentificationMap IdentificationMap {
 
 
 
-  add EfficiencyFormula {-13} {-13} {      (eta <= 2.0)                                * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8)* (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *     (pt >= 0.8)* (0.97) + \
+  add EfficiencyFormula {-13} {-13} {      (eta <= 2.0)                                * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.8)* (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *     (pt >= 0.8)* (0.97) +
                                            (eta > 5.0)                                 * (0.00)}
 
- 
+
  # efficiency for other charged particles (should be always {0} {0} {formula})
- 
-  add EfficiencyFormula {0} {0}     {      (eta <= 2.0)                                * (0.00) + \
-                                           (eta > 2.0  && eta <= 5.0) *     (pt < 0.8) * (0.00) + \
-					   (eta > 2.0  && eta <= 5.0) *     (pt > 0.8) * (0.95) + \
+
+  add EfficiencyFormula {0} {0}     {      (eta <= 2.0)                                * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *     (pt < 0.8) * (0.00) +
+					   (eta > 2.0  && eta <= 5.0) *     (pt > 0.8) * (0.95) +
                                            (eta > 5.0)                                 * (0.00)}
 
 }
@@ -222,7 +222,12 @@ module SimpleCalorimeter ECal {
 
   set TowerOutputArray ecalTowers
   set EFlowTowerOutputArray eflowPhotons
-  
+
+  set EnergyMin 0.0
+  set EnergySignificanceMin 0.0
+
+  set SmearTowerCenter true
+
   set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
@@ -240,7 +245,7 @@ module SimpleCalorimeter ECal {
     set eta [expr {3.2 + $i * 0.02}]
     add EtaPhiBins $eta $PhiBins
   }
-  
+
     # 1.25 degree towers
   set PhiBins {}
   for {set i -135} {$i <= 135} {incr i} {
@@ -284,7 +289,7 @@ module SimpleCalorimeter ECal {
   add EnergyFraction {310} {0.3}
   add EnergyFraction {3122} {0.3}
 
-   set ResolutionFormula {(eta <= 5.0 && eta > 2.0) * sqrt(energy^2*0.015^2 + energy*0.10^2)}
+  set ResolutionFormula {(eta <= 5.0 && eta > 2.0) * sqrt(energy^2*0.015^2 + energy*0.10^2)}
 }
 
 #############
@@ -297,7 +302,12 @@ module SimpleCalorimeter HCal {
 
   set TowerOutputArray hcalTowers
   set EFlowTowerOutputArray eflowNeutralHadrons
-  
+
+  set EnergyMin 0.0
+  set EnergySignificanceMin 0.0
+
+  set SmearTowerCenter true
+
   set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
@@ -329,7 +339,7 @@ module SimpleCalorimeter HCal {
   }
 
 
-   
+
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
   add EnergyFraction {0} {1.0}
   # energy fractions for e, gamma and pi0
@@ -351,7 +361,7 @@ module SimpleCalorimeter HCal {
   add EnergyFraction {3122} {0.7}
 
   set ResolutionFormula { (eta <= 5.0 && eta > 2.0) * sqrt(energy^2*0.05^2 + energy*0.80^2)}
-  }
+}
 
 
 ##################
@@ -359,17 +369,17 @@ module SimpleCalorimeter HCal {
 ##################
 
 # tracks, towers and eflow objects are not stored by default in the output.
-# if needed (for jet constituent or other studies), uncomment the relevant 
-# "add Branch ..." lines. 
+# if needed (for jet constituent or other studies), uncomment the relevant
+# "add Branch ..." lines.
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
- 
+
   add Branch Delphes/allParticles Particle GenParticle
 
   add Branch IdentificationMap/tracks Track Track
   add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
   add Branch ECal/eflowPhotons Photon Photon
- 
+
 }
 
