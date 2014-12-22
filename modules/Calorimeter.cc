@@ -157,7 +157,7 @@ void Calorimeter::Init()
   fHCalEnergySignificanceMin = GetDouble("HCalEnergySignificanceMin", 0.0);
 
   // switch on or off the dithering of the center of calorimeter towers
-  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
+  fSmearTowerCenter = GetBool("SmearTowerCenter", true);
 
   // read resolution formulas
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
@@ -455,7 +455,7 @@ void Calorimeter::FinalizeTower()
   energy = ecalEnergy + hcalEnergy;
   time = (TMath::Sqrt(ecalEnergy)*ecalTime + TMath::Sqrt(hcalEnergy)*hcalTime)/(TMath::Sqrt(ecalEnergy) + TMath::Sqrt(hcalEnergy));
 
-  if(fDitherTowerCenter)
+  if(fSmearTowerCenter)
   {
     eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
     phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);

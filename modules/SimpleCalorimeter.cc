@@ -150,7 +150,7 @@ void SimpleCalorimeter::Init()
   fEnergySignificanceMin = GetDouble("EnergySignificanceMin", 0.0);
 
   // switch on or off the dithering of the center of calorimeter towers
-  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
+  fSmearTowerCenter = GetBool("SmearTowerCenter", true);
 
   // read resolution formulas
   fResolutionFormula->Compile(GetString("ResolutionFormula", "0"));
@@ -408,7 +408,7 @@ void SimpleCalorimeter::FinalizeTower()
 
   if(energy < fEnergyMin || energy < fEnergySignificanceMin*sigma) energy = 0.0;
 
-  if(fDitherTowerCenter)
+  if(fSmearTowerCenter)
   {
     eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
     phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);

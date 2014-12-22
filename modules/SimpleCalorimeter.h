@@ -71,7 +71,7 @@ private:
 
   Double_t fEnergySignificanceMin;
 
-  Bool_t fDitherTowerCenter;
+  Bool_t fSmearTowerCenter;
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
