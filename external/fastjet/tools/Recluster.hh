@@ -1,7 +1,7 @@
 #ifndef __FASTJET_TOOLS_RECLUSTER_HH__
 #define __FASTJET_TOOLS_RECLUSTER_HH__
 
-// $Id: Recluster.hh 3714 2014-09-30 09:47:31Z soyez $
+// $Id: Recluster.hh 3760 2014-12-19 10:05:10Z soyez $
 //
 // Copyright (c) 2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -49,7 +49,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 ///
 /// Alternatively, Recluster can be constructed from a jet algorithm
 /// and an optional radius. In that case the recombiner is
-/// systematically obtained fromn the jet being processed (unless you
+/// systematically obtained from the jet being processed (unless you
 /// call set_acquire_recombiner(false)). If only the jet algorithm is
 /// specified, a default radius of max_allowable_R will be assumed if
 /// needed.
@@ -123,7 +123,7 @@ public:
   /// to use Recluster with an algorithm that requires an extra
   /// parameter (like the genkt algorithm), please specify the jet
   /// definition fully using the constructor above.
-  Recluster(JetAlgorithm snew_jet_alg, double new_jet_radius, Keep keep_in = keep_only_hardest);
+  Recluster(JetAlgorithm new_jet_alg, double new_jet_radius, Keep keep_in = keep_only_hardest);
 
   /// constructor with just a jet algorithm, but no jet radius. If the
   /// algorithm requires a jet radius, JetDefinition::max_allowable_R will be used. 

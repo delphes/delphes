@@ -2,7 +2,7 @@
 #define __GRID_MEDIAN_BACKGROUND_ESTIMATOR_HH__
 
 //FJSTARTHEADER
-// $Id: GridMedianBackgroundEstimator.hh 3610 2014-08-13 09:49:28Z salam $
+// $Id: GridMedianBackgroundEstimator.hh 3778 2014-12-24 09:28:09Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -76,7 +76,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 ///
 class GridMedianBackgroundEstimator : public BackgroundEstimatorBase
 #ifdef FASTJET_GMBGE_USEFJGRID
-                                                                    , public RectangularGrid
+                                    , public RectangularGrid
 #endif 
 {
 
@@ -93,20 +93,6 @@ public:
     RectangularGrid(ymax, requested_grid_spacing),
     _has_particles(false), _enable_rho_m(true) {} 
 
-  /// ctor with more control over initialisation
-  ///  \param rapmin         the minimum rapidity extent of the grid
-  ///  \param rapmax         the maximum rapidity extent of the grid
-  ///  \param drap           the grid spacing in rapidity
-  ///  \param dphi           the grid spacing in azimuth
-  ///  \param tile_selector  optional (geometric) selector to specify
-  ///                        which tiles are good; a tile is good if
-  ///                        a massless 4-vector at the center of the tile passes
-  ///                        the selection
-  GridMedianBackgroundEstimator(double rapmin_in, double rapmax_in, double drap_in, double dphi_in,
-                                Selector tile_selector = Selector()) :
-    RectangularGrid(rapmin_in, rapmax_in, drap_in, dphi_in, tile_selector),
-    _has_particles(false), _enable_rho_m(true) {}
-
   //----------------------------------------------------------------
   /// Constructor based on a user's fully specified RectangularGrid
   GridMedianBackgroundEstimator(const RectangularGrid & grid) :
@@ -115,6 +101,23 @@ public:
     if (!RectangularGrid::is_initialised()) 
       throw Error("attempt to construct GridMedianBackgroundEstimator with uninitialised RectangularGrid");
   }    
+
+  //---------------------------------------------------------------- 
+  /// Constructor with the explicit parameters for the underlying
+  /// RectangularGrid
+  ///
+  ///  \param rapmin         the minimum rapidity extent of the grid
+  ///  \param rapmax         the maximum rapidity extent of the grid
+  ///  \param drap           the grid spacing in rapidity
+  ///  \param dphi           the grid spacing in azimuth
+  ///  \param tile_selector  optional (geometric) selector to specify 
+  ///                        which tiles are good; a tile is good if
+  ///                        a massless 4-vector at the center of the tile passes
+  ///                        the selection
+  GridMedianBackgroundEstimator(double rapmin_in, double rapmax_in, double drap_in, double dphi_in,
+                                Selector tile_selector = Selector()) :
+    RectangularGrid(rapmin_in, rapmax_in, drap_in, dphi_in, tile_selector),
+    _has_particles(false), _enable_rho_m(true) {}
 
 #else  // alternative in old framework where we didn't have the rectangular grid
   GridMedianBackgroundEstimator(double ymax, double requested_grid_spacing) :

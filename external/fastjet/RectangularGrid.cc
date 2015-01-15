@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id$
+// $Id: RectangularGrid.cc 3771 2014-12-22 21:13:22Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //

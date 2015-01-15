@@ -1,6 +1,6 @@
 version=3.1.1
 
-#wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
+wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
 
 tar -zxf fastjet-${version}.tar.gz
 mkdir -p fastjet/plugins
