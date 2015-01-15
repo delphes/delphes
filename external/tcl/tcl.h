@@ -680,15 +680,6 @@ typedef struct Tcl_DString {
 #define TCL_EXACT	1
 
 /*
- * Flag values passed to Tcl_RecordAndEval.
- * WARNING: these bit choices must not conflict with the bit choices
- * for evalFlag bits in tclInt.h!!
- */
-
-#define TCL_NO_EVAL		0x10000
-#define TCL_EVAL_GLOBAL		0x20000
-
-/*
  * Special freeProc values that may be passed to Tcl_SetResult (see
  * the man page for details):
  */
@@ -1410,10 +1401,6 @@ EXTERN void		Tcl_QueueEvent _ANSI_ARGS_((Tcl_Event *evPtr,
 EXTERN int		Tcl_Read _ANSI_ARGS_((Tcl_Channel chan,
 	        	    char *bufPtr, int toRead));
 EXTERN void		Tcl_ReapDetachedProcs _ANSI_ARGS_((void));
-EXTERN int		Tcl_RecordAndEval _ANSI_ARGS_((Tcl_Interp *interp,
-			    char *cmd, int flags));
-EXTERN int		Tcl_RecordAndEvalObj _ANSI_ARGS_((Tcl_Interp *interp,
-			    Tcl_Obj *cmdPtr, int flags));
 EXTERN Tcl_RegExp	Tcl_RegExpCompile _ANSI_ARGS_((Tcl_Interp *interp,
 			    char *string));
 EXTERN int		Tcl_RegExpExec _ANSI_ARGS_((Tcl_Interp *interp,

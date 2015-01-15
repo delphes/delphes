@@ -1395,8 +1395,6 @@ tmp/external/tcl/tclGet.$(ObjSuf): \
 	external/tcl/tclGet.c
 tmp/external/tcl/tclHash.$(ObjSuf): \
 	external/tcl/tclHash.c
-tmp/external/tcl/tclHistory.$(ObjSuf): \
-	external/tcl/tclHistory.c
 tmp/external/tcl/tclIndexObj.$(ObjSuf): \
 	external/tcl/tclIndexObj.c
 tmp/external/tcl/tclLink.$(ObjSuf): \
@@ -1435,7 +1433,6 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclExecute.$(ObjSuf) \
 	tmp/external/tcl/tclGet.$(ObjSuf) \
 	tmp/external/tcl/tclHash.$(ObjSuf) \
-	tmp/external/tcl/tclHistory.$(ObjSuf) \
 	tmp/external/tcl/tclIndexObj.$(ObjSuf) \
 	tmp/external/tcl/tclLink.$(ObjSuf) \
 	tmp/external/tcl/tclListObj.$(ObjSuf) \
