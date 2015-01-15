@@ -1409,8 +1409,6 @@ tmp/external/tcl/tclObj.$(ObjSuf): \
 	external/tcl/tclObj.c
 tmp/external/tcl/tclParse.$(ObjSuf): \
 	external/tcl/tclParse.c
-tmp/external/tcl/tclPosixStr.$(ObjSuf): \
-	external/tcl/tclPosixStr.c
 tmp/external/tcl/tclPreserve.$(ObjSuf): \
 	external/tcl/tclPreserve.c
 tmp/external/tcl/tclProc.$(ObjSuf): \
@@ -1444,7 +1442,6 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclNamesp.$(ObjSuf) \
 	tmp/external/tcl/tclObj.$(ObjSuf) \
 	tmp/external/tcl/tclParse.$(ObjSuf) \
-	tmp/external/tcl/tclPosixStr.$(ObjSuf) \
 	tmp/external/tcl/tclPreserve.$(ObjSuf) \
 	tmp/external/tcl/tclProc.$(ObjSuf) \
 	tmp/external/tcl/tclResolve.$(ObjSuf) \
