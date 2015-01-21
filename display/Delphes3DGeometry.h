@@ -42,9 +42,6 @@ class Delphes3DGeometry {
                                          const char* MuonEfficiency="MuonEfficiency",
                                          const char* Calorimeters="Calorimeter");
 
-     void loadFromFile(const char* filename, const char* name="DelphesGeometry");
-     void save(const char* filename, const char* name="DelphesGeometry");
-
      void setContingency(Double_t contingency) { contingency_ = contingency; }
      void setCaloBarrelThickness(Double_t thickness) { calo_barrel_thickness_ = thickness; }
      void setCaloEndcapThickness(Double_t thickness) { calo_endcap_thickness_ = thickness; }
