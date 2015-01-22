@@ -76,16 +76,6 @@ void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
 {
   fInputFile = inputFile;
   xdrstdio_create(fInputXDR, inputFile, XDR_DECODE);
-
-  xdr_int(fInputXDR, &fBlockType);
-  if(fBlockType != FILEHEADER)
-  {
-    throw runtime_error("Header block not found. File is probably corrupted.");
-  }
-
-  SkipBytes(4);
-
-  ReadFileHeader();
 }
 
 //---------------------------------------------------------------------------
