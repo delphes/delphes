@@ -76,6 +76,15 @@ void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
 {
   fInputFile = inputFile;
   xdrstdio_create(fInputXDR, inputFile, XDR_DECODE);
+
+  xdr_int(fInputXDR, &fBlockType);
+  if(fBlockType != FILEHEADER)
+  {
+    throw runtime_error("Header block not found. File is probably corrupted.");
+  }
+
+  SkipBytes(4);
+
   ReadFileHeader();
 }
 
@@ -106,7 +115,11 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
 
   SkipBytes(4);
 
-  if(fBlockType == EVENTTABLE)
+  if(fBlockType == FILEHEADER)
+  {
+    ReadFileHeader();
+  }
+  else if(fBlockType == EVENTTABLE)
   {
     ReadEventTable();
   }
@@ -176,14 +189,6 @@ void DelphesSTDHEPReader::ReadFileHeader()
 {
   u_int i;
   enum STDHEPVersion {UNKNOWN, V1, V2, V21} version;
-
-  xdr_int(fInputXDR, &fBlockType);
-  if (fBlockType != FILEHEADER)
-  {
-    throw runtime_error("Header block not found. File is probably corrupted.");
-  }
-
-  SkipBytes(4);
 
   // version
   xdr_string(fInputXDR, &fBuffer, 100);
