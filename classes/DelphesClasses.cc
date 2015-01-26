@@ -119,7 +119,7 @@ TLorentzVector Tower::P4()
 Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
-  IsPU(0), IsConstituent(0),
+  IsPU(0), IsRecoPU(0), IsConstituent(0),
   BTag(0), TauTag(0), Eem(0.0), Ehad(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
@@ -132,6 +132,12 @@ Candidate::Candidate() :
   BetaStar(0),
   MeanSqDeltaR(0),
   PTD(0),
+  IsolationVar(-999),
+  IsolationVarRhoCorr(-999),
+  SumPtCharged(-999),
+  SumPtNeutral(-999),
+  SumPtChargedPU(-999),
+  SumPt(-999),
   fFactory(0),
   fArray(0)
 {
@@ -248,6 +254,14 @@ void Candidate::Copy(TObject &obj) const
   object.BetaStar = BetaStar;
   object.MeanSqDeltaR = MeanSqDeltaR;
   object.PTD = PTD;
+  
+  object.IsolationVar = IsolationVar;
+  object.IsolationVarRhoCorr = IsolationVarRhoCorr;
+  object.SumPtCharged = SumPtCharged;
+  object.SumPtNeutral = SumPtNeutral;
+  object.SumPtChargedPU = SumPtChargedPU;
+  object.SumPt = SumPt;
+
   object.FracPt[0] = FracPt[0];
   object.FracPt[1] = FracPt[1];
   object.FracPt[2] = FracPt[2];
@@ -310,6 +324,14 @@ void Candidate::Clear(Option_t* option)
   BetaStar = 0.0;
   MeanSqDeltaR = 0.0;
   PTD = 0.0;
+  
+  IsolationVar = -999;
+  IsolationVarRhoCorr = -999;
+  SumPtCharged = -999;
+  SumPtNeutral = -999;
+  SumPtChargedPU = -999;
+  SumPt = -999;
+  
   FracPt[0] = 0.0;
   FracPt[1] = 0.0;
   FracPt[2] = 0.0;

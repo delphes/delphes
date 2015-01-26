@@ -233,12 +233,12 @@ void Isolation::Process()
     ratioDBeta = sumDBeta/candidateMomentum.Pt();
     ratioRhoCorr = sumRhoCorr/candidateMomentum.Pt();
     
-    candidate->IsolationVarDBeta = ratioDBeta;
+    candidate->IsolationVar = ratioDBeta;
     candidate->IsolationVarRhoCorr = ratioRhoCorr;
-    candidate->chargedEnergy = sumChargedHadron;
-    candidate->neutralEnergy = sumNeutral;
-    candidate->chargedPUEnergy = sumChargedPU;
-    candidate->allParticleEnergy = sumAllParticles;
+    candidate->SumPtCharged = sumCharged;
+    candidate->SumPtNeutral = sumNeutral;
+    candidate->SumPtChargedPU = sumChargedPU;
+    candidate->SumPt = sumAllParticles;
 
     if((fUsePTSum && sumDBeta > fPTSumMax) || ratioDBeta > fPTRatioMax) continue;
     fOutputArray->Add(candidate);

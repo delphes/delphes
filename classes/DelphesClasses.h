@@ -230,6 +230,15 @@ public:
 
   TRefArray Particles; // references to generated particles
 
+  // Isolation variables
+  
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -256,6 +265,15 @@ public:
 
   TRef Particle; // reference to generated particle
 
+  // Isolation variables
+  
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -279,6 +297,15 @@ public:
   Int_t Charge; // muon charge
 
   TRef Particle; // reference to generated particle
+
+   // Isolation variables
+  
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -451,6 +478,8 @@ public:
   Float_t Mass;
 
   Int_t IsPU;
+  Int_t IsRecoPU;
+  
   Int_t IsConstituent;
 
   UInt_t BTag;
@@ -480,6 +509,15 @@ public:
   Float_t  MeanSqDeltaR;
   Float_t  PTD;
   Float_t  FracPt[5];
+
+  // Isolation variables
+  
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
 
   // N-subjettiness variables
 
