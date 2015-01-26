@@ -30,6 +30,7 @@
 #include "classes/DelphesModule.h"
 
 class TObjArray;
+class DelphesTF2;
 
 namespace Pythia8
 {
@@ -49,9 +50,20 @@ public:
 
 private:
 
+  Int_t fPileUpDistribution;
   Double_t fMeanPileUp;
+
   Double_t fZVertexSpread;
+  Double_t fTVertexSpread;
+
+  Double_t fInputBeamSpotX;
+  Double_t fInputBeamSpotY;
+  Double_t fOutputBeamSpotX;
+  Double_t fOutputBeamSpotY;
+
   Double_t fPTMin;
+
+  DelphesTF2 *fFunction; //!
 
   Pythia8::Pythia *fPythia; //!
 
@@ -59,7 +71,8 @@ private:
 
   const TObjArray *fInputArray; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fParticleOutputArray; //!
+  TObjArray *fVertexOutputArray; //!
 
   ClassDef(PileUpMergerPythia8, 1)
 };

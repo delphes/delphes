@@ -52,6 +52,11 @@ private:
   Double_t fZVertexSpread;
   Double_t fTVertexSpread;
 
+  Double_t fInputBeamSpotX;
+  Double_t fInputBeamSpotY;
+  Double_t fOutputBeamSpotX;
+  Double_t fOutputBeamSpotY;
+
   DelphesTF2 *fFunction; //!
 
   DelphesPileUpReader *fReader; //!

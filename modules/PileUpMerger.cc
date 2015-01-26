@@ -79,6 +79,11 @@ void PileUpMerger::Init()
   fZVertexSpread = GetDouble("ZVertexSpread", 0.15);
   fTVertexSpread = GetDouble("TVertexSpread", 1.5E-09);
 
+  fInputBeamSpotX = GetDouble("InputBeamSpotX", 0.0);
+  fInputBeamSpotY = GetDouble("InputBeamSpotY", 0.0);
+  fOutputBeamSpotX = GetDouble("OutputBeamSpotX", 0.0);
+  fOutputBeamSpotY = GetDouble("OutputBeamSpotY", 0.0);
+
   // read vertex smearing formula
 
   fFunction->Compile(GetString("VertexDistributionFormula", "0.0"));
@@ -110,27 +115,31 @@ void PileUpMerger::Process()
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid;
-  Float_t x, y, z, t;
+  Float_t x, y, z, t, vx, vy;
   Float_t px, py, pz, e;
   Double_t dz, dphi, dt;
-  Int_t numberOfEvents, event;
+  Int_t numberOfEvents, event, numberOfParticles;
   Long64_t allEntries, entry;
-  Candidate *candidate, *vertexcandidate;
+  Candidate *candidate, *vertex;
   DelphesFactory *factory;
 
   const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
 
-  // --- Deal with Primary vertex first  ------
+  // --- Deal with primary vertex first  ------
 
   fFunction->GetRandom2(dz, dt);
 
   dt *= c_light*1.0E3; // necessary in order to make t in mm/c
   dz *= 1.0E3; // necessary in order to make z in mm
-
+  vx = 0.0;
+  vy = 0.0;
+  numberOfParticles = fInputArray->GetEntriesFast();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+    vx += candidate->Position.X();
+    vy += candidate->Position.Y();
     z = candidate->Position.Z();
     t = candidate->Position.T();
     candidate->Position.SetZ(z + dz);
@@ -138,11 +147,17 @@ void PileUpMerger::Process()
     fParticleOutputArray->Add(candidate);
   }
 
+  if(numberOfParticles > 0)
+  {
+    vx /= numberOfParticles;
+    vy /= numberOfParticles;
+  }
+
   factory = GetFactory();
 
-  vertexcandidate = factory->NewCandidate();
-  vertexcandidate->Position.SetXYZT(0.0, 0.0, dz, dt);
-  fVertexOutputArray->Add(vertexcandidate);
+  vertex = factory->NewCandidate();
+  vertex->Position.SetXYZT(vx, vy, dz, dt);
+  fVertexOutputArray->Add(vertex);
 
   // --- Then with pile-up vertices  ------
 
@@ -180,12 +195,9 @@ void PileUpMerger::Process()
 
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 
-    vertexcandidate = factory->NewCandidate();
-    vertexcandidate->Position.SetXYZT(0.0, 0.0, dz, dt);
-    vertexcandidate->IsPU = 1;
-
-    fVertexOutputArray->Add(vertexcandidate);
-
+    vx = 0.0;
+    vy = 0.0;
+    numberOfParticles = 0;
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {
       candidate = factory->NewCandidate();
@@ -203,13 +215,31 @@ void PileUpMerger::Process()
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
 
+      x -= fInputBeamSpotX;
+      y -= fInputBeamSpotY;
       candidate->Position.SetXYZT(x, y, z + dz, t + dt);
       candidate->Position.RotateZ(dphi);
+      candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
+
+      vx += candidate->Position.X();
+      vy += candidate->Position.Y();
+      ++numberOfParticles;
 
       fParticleOutputArray->Add(candidate);
     }
+
+    if(numberOfParticles > 0)
+    {
+      vx /= numberOfParticles;
+      vy /= numberOfParticles;
+    }
+
+    vertex = factory->NewCandidate();
+    vertex->Position.SetXYZT(vx, vy, dz, dt);
+    vertex->IsPU = 1;
+
+    fVertexOutputArray->Add(vertex);
   }
 }
 
 //------------------------------------------------------------------------------
-
