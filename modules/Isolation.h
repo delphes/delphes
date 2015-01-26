@@ -58,6 +58,8 @@ private:
 
   Bool_t fUsePTSum;
 
+  Bool_t fVetoLeptons;  
+ 
   IsolationClassifier *fClassifier; //!
 
   ExRootFilter *fFilter;
