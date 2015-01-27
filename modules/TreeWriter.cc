@@ -403,6 +403,15 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->T = position.T()*1.0E-3/c_light;
 
+    // Isolation variables
+       
+    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
+    entry->SumPtCharged = candidate->SumPtCharged ;
+    entry->SumPtNeutral = candidate->SumPtNeutral ;
+    entry->SumPtChargedPU = candidate->SumPtChargedPU ;
+    entry->SumPt = candidate->SumPt ;
+
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
 
     FillParticles(candidate, &entry->Particles);
@@ -441,6 +450,16 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->PT = pt;
 
     entry->T = position.T()*1.0E-3/c_light;
+
+    // Isolation variables
+       
+    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
+    entry->SumPtCharged = candidate->SumPtCharged ;
+    entry->SumPtNeutral = candidate->SumPtNeutral ;
+    entry->SumPtChargedPU = candidate->SumPtChargedPU ;
+    entry->SumPt = candidate->SumPt ;
+
 
     entry->Charge = candidate->Charge;
 
@@ -487,6 +506,15 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->PT = pt;
 
     entry->T = position.T()*1.0E-3/c_light;
+    
+    // Isolation variables
+       
+    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
+    entry->SumPtCharged = candidate->SumPtCharged ;
+    entry->SumPtNeutral = candidate->SumPtNeutral ;
+    entry->SumPtChargedPU = candidate->SumPtChargedPU ;
+    entry->SumPt = candidate->SumPt ;
 
     entry->Charge = candidate->Charge;
 
