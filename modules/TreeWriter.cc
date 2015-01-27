@@ -532,6 +532,8 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->Mass = momentum.M();
 
+    entry->Area = candidate->Area;
+
     entry->DeltaEta = candidate->DeltaEta;
     entry->DeltaPhi = candidate->DeltaPhi;
 

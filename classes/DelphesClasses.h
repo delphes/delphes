@@ -360,6 +360,7 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4();
+  TLorentzVector Area;
 
   ClassDef(Jet, 2)
 };
