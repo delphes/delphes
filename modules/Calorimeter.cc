@@ -149,6 +149,14 @@ void Calorimeter::Init()
   }
 */
 
+  // read min E value for timing measurement in ECAL
+  fTimingEMin = GetDouble("TimingEMin",4.);
+  // For timing
+  // So far this flag needs to be false
+  // Curved extrapolation not supported
+  fElectronsFromTrack = false;
+
+  
   // read min E value for towers to be saved
   fECalEnergyMin = GetDouble("ECalEnergyMin", 0.0);
   fHCalEnergyMin = GetDouble("HCalEnergyMin", 0.0);
@@ -355,15 +363,6 @@ void Calorimeter::Process()
       fTrackECalEnergy = 0.0;
       fTrackHCalEnergy = 0.0;
 
-      fTowerECalTime = 0.0;
-      fTowerHCalTime = 0.0;
-
-      fTrackECalTime = 0.0;
-      fTrackHCalTime = 0.0;
-
-      fTowerECalTimeWeight = 0.0;
-      fTowerHCalTimeWeight = 0.0;
-
       fTowerTrackHits = 0;
       fTowerPhotonHits = 0;
 
@@ -379,24 +378,40 @@ void Calorimeter::Process()
       momentum = track->Momentum;
       position = track->Position;
 
-
       ecalEnergy = momentum.E() * fTrackECalFractions[number];
       hcalEnergy = momentum.E() * fTrackHCalFractions[number];
 
       fTrackECalEnergy += ecalEnergy;
       fTrackHCalEnergy += hcalEnergy;
 
-      fTrackECalTime += TMath::Sqrt(ecalEnergy)*position.T();
-      fTrackHCalTime += TMath::Sqrt(hcalEnergy)*position.T();
+      bool dbg_scz = false;
+      if (dbg_scz) {
+	cout << "   Calorimeter input track has x y z t " << track->Position.X() << " " << track->Position.Y() << " " << track->Position.Z() << " " << track->Position.T() 
+	     << endl;
+	Candidate *prt = static_cast<Candidate*>(track->GetCandidates()->Last());
+	const TLorentzVector &ini = prt->Position;
 
-      fTrackECalTimeWeight += TMath::Sqrt(ecalEnergy);
-      fTrackHCalTimeWeight += TMath::Sqrt(hcalEnergy);
+	cout << "                and parent has x y z t " << ini.X() << " " << ini.Y() << " " << ini.Z() << " " << ini.T();
+
+      }
+      
+      if (ecalEnergy > fTimingEMin && fTower) {
+	if (fElectronsFromTrack) {
+	  //	  cout << " SCZ Debug pushing back track hit E=" << ecalEnergy << " T=" << track->Position.T() << " isPU=" << track->IsPU << " isRecoPU=" << track->IsRecoPU 
+	  //	       << " PID=" << track->PID << endl;
+	  fTower->Ecal_E_t.push_back(std::make_pair<float,float>(ecalEnergy,track->Position.T()));
+	} else {
+	  //	  cout << " Skipping track hit E=" << ecalEnergy << " T=" << track->Position.T() << " isPU=" << track->IsPU << " isRecoPU=" << track->IsRecoPU 
+	  //	       << " PID=" << track->PID << endl;
+	}
+      }
+
 
       fTowerTrackArray->Add(track);
 
       continue;
     }
-
+  
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
 
@@ -411,12 +426,19 @@ void Calorimeter::Process()
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
 
-    fTowerECalTime += TMath::Sqrt(ecalEnergy)*position.T();
-    fTowerHCalTime += TMath::Sqrt(hcalEnergy)*position.T();
-
-    fTowerECalTimeWeight += TMath::Sqrt(ecalEnergy);
-    fTowerHCalTimeWeight += TMath::Sqrt(hcalEnergy);
-
+    if (ecalEnergy > fTimingEMin && fTower) {
+      if (abs(particle->PID) != 11 || !fElectronsFromTrack) {
+	//	cout << " SCZ Debug About to push back particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
+	//   << " PID=" << particle->PID << endl;
+	fTower->Ecal_E_t.push_back(std::make_pair<Float_t,Float_t>(ecalEnergy,particle->Position.T()));
+      } else {
+	
+	// N.B. Only charged particle set to leave ecal energy is the electrons
+	//	cout << " SCZ Debug To avoid double-counting, skipping particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
+	//	     << " PID=" << particle->PID << endl;
+	
+      }
+    }
 
     fTower->AddCandidate(particle);
   }
@@ -433,8 +455,7 @@ void Calorimeter::FinalizeTower()
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalSigma, hcalSigma;
-  Double_t ecalTime, hcalTime, time;
-
+ 
   if(!fTower) return;
 
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
@@ -443,9 +464,6 @@ void Calorimeter::FinalizeTower()
   ecalEnergy = LogNormal(fTowerECalEnergy, ecalSigma);
   hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
 
-  ecalTime = (fTowerECalTimeWeight < 1.0E-09 ) ? 0.0 : fTowerECalTime/fTowerECalTimeWeight;
-  hcalTime = (fTowerHCalTimeWeight < 1.0E-09 ) ? 0.0 : fTowerHCalTime/fTowerHCalTimeWeight;
-
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
 
@@ -453,8 +471,7 @@ void Calorimeter::FinalizeTower()
   if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalEnergySignificanceMin*hcalSigma) hcalEnergy = 0.0;
 
   energy = ecalEnergy + hcalEnergy;
-  time = (TMath::Sqrt(ecalEnergy)*ecalTime + TMath::Sqrt(hcalEnergy)*hcalTime)/(TMath::Sqrt(ecalEnergy) + TMath::Sqrt(hcalEnergy));
-
+    
   if(fSmearTowerCenter)
   {
     eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
@@ -468,7 +485,26 @@ void Calorimeter::FinalizeTower()
 
   pt = energy / TMath::CosH(eta);
 
-  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, time);
+  // Time calculation for tower
+  fTower->Ntimes = 0;
+  Float_t tow_sumT = 0;
+  Float_t tow_sumW = 0;
+  
+  for (Int_t i = 0 ; i < fTower->Ecal_E_t.size() ; i++) 
+  {
+    Float_t w = TMath::Sqrt(fTower->Ecal_E_t[i].first);
+    tow_sumT += w*fTower->Ecal_E_t[i].second;
+    tow_sumW += w;
+    fTower->Ntimes++;
+  }
+  
+  if (tow_sumW > 0.) {
+    fTower->Position.SetPtEtaPhiE(1.0, eta, phi,tow_sumT/tow_sumW);
+  } else {
+    fTower->Position.SetPtEtaPhiE(1.0,eta,phi,999999.);
+  }
+
+
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;

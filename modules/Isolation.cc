@@ -183,6 +183,7 @@ void Isolation::Process()
 
     // loop over all input tracks
     
+    sumNeutral = 0.0;
     sumCharged = 0.0;
     sumChargedPU = 0.0;
     sumAllParticles = 0.0;

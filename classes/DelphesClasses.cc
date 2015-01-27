@@ -132,6 +132,7 @@ Candidate::Candidate() :
   BetaStar(0),
   MeanSqDeltaR(0),
   PTD(0),
+  Ntimes(-1),
   IsolationVar(-999),
   IsolationVarRhoCorr(-999),
   SumPtCharged(-999),
@@ -254,7 +255,7 @@ void Candidate::Copy(TObject &obj) const
   object.BetaStar = BetaStar;
   object.MeanSqDeltaR = MeanSqDeltaR;
   object.PTD = PTD;
-  
+  object.Ntimes = Ntimes; 
   object.IsolationVar = IsolationVar;
   object.IsolationVarRhoCorr = IsolationVarRhoCorr;
   object.SumPtCharged = SumPtCharged;
@@ -275,6 +276,10 @@ void Candidate::Copy(TObject &obj) const
 
   object.fFactory = fFactory;
   object.fArray = 0;
+
+
+  // Copy cluster timing info
+  copy(Ecal_E_t.begin(),Ecal_E_t.end(),back_inserter(object.Ecal_E_t));
 
   if(fArray && fArray->GetEntriesFast() > 0)
   {
@@ -324,6 +329,9 @@ void Candidate::Clear(Option_t* option)
   BetaStar = 0.0;
   MeanSqDeltaR = 0.0;
   PTD = 0.0;
+  
+  Ntimes = 0;
+  Ecal_E_t.clear();
   
   IsolationVar = -999;
   IsolationVarRhoCorr = -999;

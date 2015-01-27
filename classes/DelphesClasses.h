@@ -418,8 +418,9 @@ public:
 
   Float_t E; // calorimeter tower energy
 
-  Float_t T; //particle arrival time of flight
-
+  Float_t T; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
+  Int_t   Ntimes; // number of hits contributing to time measurement
+  
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
 
@@ -509,6 +510,11 @@ public:
   Float_t  MeanSqDeltaR;
   Float_t  PTD;
   Float_t  FracPt[5];
+  
+  //Timing information
+  
+  Int_t    Ntimes;
+  std::vector<std::pair<Float_t,Float_t> > Ecal_E_t; 
 
   // Isolation variables
   
@@ -522,6 +528,9 @@ public:
   // N-subjettiness variables
 
   Float_t Tau[5];
+  
+  
+  
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }

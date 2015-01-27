@@ -361,6 +361,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Edges[3] = candidate->Edges[3];
 
     entry->T = position.T()*1.0E-3/c_light;
+    entry->Ntimes = candidate->Ntimes;    
 
     FillParticles(candidate, &entry->Particles);
   }
