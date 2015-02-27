@@ -73,6 +73,8 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D1 < 0) return -1;
 
+  if(tau->D2 < tau->D1) return -1;
+
   if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
      tau->D2 >= fParticleInputArray->GetEntriesFast())
   {
