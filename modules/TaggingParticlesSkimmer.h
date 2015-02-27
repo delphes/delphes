@@ -16,38 +16,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TauTagging_h
-#define TauTagging_h
+//------------------------------------------------------------------------------
 
-/** \class TauTagging
+#ifndef TaggingParticlesSkimmer_h
+#define TaggingParticlesSkimmer_h
+
+/** \class TaggingParticlesSkimmer
  *
- *  Determines origin of jet,
- *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  Filters particle collection by only keeping gen particles useful for b and tau tagging.
+    tau particles are replaced by their "visible decay".
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi
  *
  */
 
 #include "classes/DelphesModule.h"
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootClassifier.h"
 
-#include <map>
-
+class TIterator;
 class TObjArray;
-class DelphesFormula;
 
 class ExRootFilter;
 class TauTaggingPartonClassifier;
 
-class TauTagging: public DelphesModule
+class TaggingParticlesSkimmer: public DelphesModule
 {
 public:
 
-  TauTagging();
-  ~TauTagging();
+  TaggingParticlesSkimmer();
+  ~TaggingParticlesSkimmer();
 
   void Init();
   void Process();
@@ -55,44 +51,21 @@ public:
 
 private:
 
-  Double_t fDeltaR;
-
-#if !defined(__CINT__) && !defined(__CLING__)
-  std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!
-#endif
+  Double_t fPTMin; //!
+  Double_t fEtaMax; //!
   
   TauTaggingPartonClassifier *fClassifier; //!
   
   ExRootFilter *fFilter;
 
   TIterator *fItPartonInputArray; //!
-  
-  TIterator *fItJetInputArray; //!
-
+ 
+  const TObjArray *fPartonInputArray; //!
   const TObjArray *fParticleInputArray; //!
 
-  const TObjArray *fPartonInputArray; //!
-  
-  const TObjArray *fJetInputArray; //!
+  TObjArray *fOutputArray; //!
 
-  ClassDef(TauTagging, 1)
+  ClassDef(TaggingParticlesSkimmer, 1)
 };
-
-
-//------------------------------------------------------------------------------
-
-class TauTaggingPartonClassifier : public ExRootClassifier
-{
-public:
-
-  TauTaggingPartonClassifier(const TObjArray *array);
-
-  Int_t GetCategory(TObject *object);
-
-  Double_t fEtaMax, fPTMin;
-
-  const TObjArray *fParticleInputArray;
-};
-
 
 #endif
