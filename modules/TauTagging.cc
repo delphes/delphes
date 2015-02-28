@@ -202,10 +202,6 @@ void TauTagging::Process()
   fFilter->Reset();
   tauArray = fFilter->GetSubArray(fClassifier, 0);
 
-  if(tauArray == 0) return;
-
-  TIter itTauArray(tauArray);
-
   // loop over all input jets
   fItJetInputArray->Reset();
   while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
@@ -218,30 +214,32 @@ void TauTagging::Process()
     pt = jetMomentum.Pt();
 
     // loop over all input taus
-    itTauArray.Reset();
-    while((tau = static_cast<Candidate *>(itTauArray.Next())))
-    {
-      if(tau->D1 < 0) continue;
-
-      if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
-         tau->D2 >= fParticleInputArray->GetEntriesFast())
+    if(tauArray){
+      TIter itTauArray(tauArray);
+      while((tau = static_cast<Candidate *>(itTauArray.Next())))
       {
-        throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
-      }
+        if(tau->D1 < 0) continue;
 
-      tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+        if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
+           tau->D2 >= fParticleInputArray->GetEntriesFast())
+        {
+          throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
+        }
 
-      for(i = tau->D1; i <= tau->D2; ++i)
-      {
-        daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
-        if(TMath::Abs(daughter->PID) == 16) continue;
-        tauMomentum += daughter->Momentum;
-      }
+        tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
 
-      if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
-      {
-        pdgCode = 15;
-        charge = tau->Charge;
+        for(i = tau->D1; i <= tau->D2; ++i)
+        {
+          daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
+          if(TMath::Abs(daughter->PID) == 16) continue;
+          tauMomentum += daughter->Momentum;
+        }
+
+        if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
+        {
+          pdgCode = 15;
+          charge = tau->Charge;
+        }
       }
     }
     // find an efficency formula
