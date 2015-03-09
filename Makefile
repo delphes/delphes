@@ -328,6 +328,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PileUpMerger.h \
 	modules/JetPileUpSubtractor.h \
 	modules/TrackPileUpSubtractor.h \
+	modules/TaggingParticlesSkimmer.h \
 	modules/PileUpJetID.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
@@ -335,6 +336,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Cloner.h \
 	modules/Weighter.h \
 	modules/Hector.h \
+	modules/RunPUPPI.h \
 	modules/ExampleModule.h
 ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict$(PcmSuf) \
@@ -519,6 +521,9 @@ tmp/external/Hector/H_VerticalKicker.$(ObjSuf): \
 	external/Hector/H_VerticalKicker.$(SrcSuf)
 tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf): \
 	external/Hector/H_VerticalQuadrupole.$(SrcSuf)
+tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf): \
+	external/PUPPI/puppiCleanContainer.$(SrcSuf) \
+	external/fastjet/Selector.hh
 tmp/modules/AngularSmearing.$(ObjSuf): \
 	modules/AngularSmearing.$(SrcSuf) \
 	modules/AngularSmearing.h \
@@ -728,11 +733,21 @@ tmp/modules/PileUpMergerPythia8.$(ObjSuf): \
 	modules/PileUpMergerPythia8.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
-	classes/DelphesFormula.h \
+	classes/DelphesTF2.h \
 	classes/DelphesPileUpReader.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/RunPUPPI.$(ObjSuf): \
+	modules/RunPUPPI.$(SrcSuf) \
+	modules/RunPUPPI.h \
+	external/PUPPI/puppiCleanContainer.hh \
+	external/PUPPI/RecoObj.hh \
+	external/PUPPI/puppiParticle.hh \
+	external/PUPPI/puppiAlgoBin.hh \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h
 tmp/modules/SimpleCalorimeter.$(ObjSuf): \
 	modules/SimpleCalorimeter.$(SrcSuf) \
 	modules/SimpleCalorimeter.h \
@@ -751,8 +766,9 @@ tmp/modules/StatusPidFilter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
-tmp/modules/TauTagging.$(ObjSuf): \
-	modules/TauTagging.$(SrcSuf) \
+tmp/modules/TaggingParticlesSkimmer.$(ObjSuf): \
+	modules/TaggingParticlesSkimmer.$(SrcSuf) \
+	modules/TaggingParticlesSkimmer.h \
 	modules/TauTagging.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
@@ -760,6 +776,12 @@ tmp/modules/TauTagging.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/TauTagging.$(ObjSuf): \
+	modules/TauTagging.$(SrcSuf) \
+	modules/TauTagging.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h
 tmp/modules/TimeSmearing.$(ObjSuf): \
 	modules/TimeSmearing.$(SrcSuf) \
 	modules/TimeSmearing.h \
@@ -860,6 +882,7 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_TransportMatrices.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalKicker.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
+	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
@@ -882,8 +905,10 @@ DELPHES_OBJ +=  \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
+	tmp/modules/RunPUPPI.$(ObjSuf) \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
+	tmp/modules/TaggingParticlesSkimmer.$(ObjSuf) \
 	tmp/modules/TauTagging.$(ObjSuf) \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
@@ -1531,15 +1556,15 @@ modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-external/fastjet/Selector.hh: \
-	external/fastjet/PseudoJet.hh \
-	external/fastjet/RangeDefinition.hh
-	@touch $@
-
 external/fastjet/internal/Dnn2piCylinder.hh: \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
+	@touch $@
+
+external/fastjet/Selector.hh: \
+	external/fastjet/PseudoJet.hh \
+	external/fastjet/RangeDefinition.hh
 	@touch $@
 
 modules/JetPileUpSubtractor.h: \
@@ -1629,6 +1654,10 @@ external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	external/fastjet/Error.hh
 	@touch $@
 
+modules/RunPUPPI.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 modules/Cloner.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -1674,7 +1703,10 @@ display/DelphesEventDisplay.h: \
 	@touch $@
 
 modules/TauTagging.h: \
-	classes/DelphesModule.h
+	classes/DelphesModule.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 	@touch $@
 
 external/fastjet/GhostedAreaSpec.hh: \
@@ -1746,6 +1778,14 @@ external/fastjet/ClusterSequenceVoronoiArea.hh: \
 	external/fastjet/ClusterSequenceAreaBase.hh
 	@touch $@
 
+external/PUPPI/puppiCleanContainer.hh: \
+	external/PUPPI/RecoObj.hh \
+	external/PUPPI/puppiParticle.hh \
+	external/PUPPI/puppiAlgoBin.hh \
+	external/fastjet/internal/base.hh \
+	external/fastjet/PseudoJet.hh
+	@touch $@
+
 modules/BTagging.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -1768,6 +1808,10 @@ display/DelphesPlotSummary.h: \
 	@touch $@
 
 modules/Weighter.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/TaggingParticlesSkimmer.h: \
 	classes/DelphesModule.h
 	@touch $@
 
