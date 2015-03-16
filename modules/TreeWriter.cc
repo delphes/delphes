@@ -599,11 +599,11 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
    
     //--- N-subjettiness variables ----
     
-    entry->Tau1 = candidate->Tau[0];
-    entry->Tau2 = candidate->Tau[1];
-    entry->Tau3 = candidate->Tau[2];
-    entry->Tau4 = candidate->Tau[3];
-    entry->Tau5 = candidate->Tau[4];
+    entry->Tau[0] = candidate->Tau[0];
+    entry->Tau[1] = candidate->Tau[1];
+    entry->Tau[2] = candidate->Tau[2];
+    entry->Tau[3] = candidate->Tau[3];
+    entry->Tau[4] = candidate->Tau[4];
    
     FillParticles(candidate, &entry->Particles);
   }

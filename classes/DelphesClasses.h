@@ -347,12 +347,8 @@ public:
   Float_t  PTD; // average pt between constituent and jet weighted by pt of constituent
   Float_t  FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents) 
 
-  Float_t Tau1; // 1-subjettiness
-  Float_t Tau2; // 2-subjettiness
-  Float_t Tau3; // 3-subjettiness
-  Float_t Tau4; // 4-subjettiness
-  Float_t Tau5; // 5-subjettiness
-
+  Float_t Tau[5]; // N-subjettiness
+ 
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
 
@@ -362,7 +358,7 @@ public:
   TLorentzVector P4();
   TLorentzVector Area;
 
-  ClassDef(Jet, 2)
+  ClassDef(Jet, 3)
 };
 
 //---------------------------------------------------------------------------
