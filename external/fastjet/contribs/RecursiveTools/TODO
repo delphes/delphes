@@ -1,0 +1,8 @@
+For future releases?
+--------------------
+- JDT:  In Recluster, change "single" to an enum for user clarity?
+  [do we have any other option that "sungle" or "subjets"]
+- JDT:  Should we have a FASTJET_CONTRIB_BEGIN_NAMESPACE?  It would
+  help those of us who use XCode to edit, which is aggressive about
+  auto-indenting. [Consider this for the full contrib??]
+- More generic kinematic cuts?

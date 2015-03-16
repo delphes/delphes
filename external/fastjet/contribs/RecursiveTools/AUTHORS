@@ -1,0 +1,17 @@
+The RecursiveTools FastJet contrib is developed and maintained by:
+
+   Gavin P. Salam <gavin.salam@cern.ch>
+   Gregory Soyez <soyez@fastjet.fr>
+   Jesse Thaler <jthaler@jthaler.net>
+
+The physics is based on:
+
+   [ModifiedMassDropTagger]
+   Towards an understanding of jet substructure.
+   Mrinal Dasgupta, Alessandro Fregoso, Simone Marzani, and Gavin P. Salam.
+   JHEP 1309:029 (2013), arXiv:1307.0007.
+
+   [SoftDrop]
+   Soft Drop.
+   Andrew J. Larkoski, Simone Marzani, Gregory Soyez, and Jesse Thaler.
+   JHEP 1405:146 (2014), arXiv:1402.2657
