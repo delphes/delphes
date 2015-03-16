@@ -348,7 +348,15 @@ public:
   Float_t  FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents) 
 
   Float_t Tau[5]; // N-subjettiness
- 
+  
+  TLorentzVector TrimmedP4[5]; //first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
+  TLorentzVector PrunedP4[5]; //first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  TLorentzVector SoftDroppedP4[5]; //first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  
+  Int_t    NSubJetsTrimmed; // number of subjets trimmed 
+  Int_t    NSubJetsPruned; // number of subjets pruned 
+  Int_t    NSubJetsSoftDropped; // number of subjets soft-dropped 
+   
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
 
@@ -526,8 +534,16 @@ public:
 
   Float_t Tau[5];
   
+  // Other Substructure variables
   
-  
+  TLorentzVector TrimmedP4[5]; //first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
+  TLorentzVector PrunedP4[5]; //first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  TLorentzVector SoftDroppedP4[5]; //first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+ 
+  Int_t    NSubJetsTrimmed; // number of subjets trimmed 
+  Int_t    NSubJetsPruned; // number of subjets pruned 
+  Int_t    NSubJetsSoftDropped; // number of subjets soft-dropped 
+
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -547,7 +563,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 2)
+  ClassDef(Candidate, 3)
 };
 
 #endif // DelphesClasses_h

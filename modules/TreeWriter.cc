@@ -532,6 +532,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
   Double_t pt, signPz, cosTheta, eta, rapidity;
   Double_t ecalEnergy, hcalEnergy;
   const Double_t c_light = 2.99792458E8;
+  Int_t i;
 
   array->Sort();
 
@@ -591,19 +592,21 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->BetaStar = candidate->BetaStar;
     entry->MeanSqDeltaR = candidate->MeanSqDeltaR;
     entry->PTD = candidate->PTD;
-    entry->FracPt[0] = candidate->FracPt[0];
-    entry->FracPt[1] = candidate->FracPt[1];
-    entry->FracPt[2] = candidate->FracPt[2];
-    entry->FracPt[3] = candidate->FracPt[3];
-    entry->FracPt[4] = candidate->FracPt[4];
-   
-    //--- N-subjettiness variables ----
     
-    entry->Tau[0] = candidate->Tau[0];
-    entry->Tau[1] = candidate->Tau[1];
-    entry->Tau[2] = candidate->Tau[2];
-    entry->Tau[3] = candidate->Tau[3];
-    entry->Tau[4] = candidate->Tau[4];
+    //--- Sub-structure variables ----
+    
+    entry->NSubJetsTrimmed     = candidate->NSubJetsTrimmed;
+    entry->NSubJetsPruned      = candidate->NSubJetsPruned; 
+    entry->NSubJetsSoftDropped = candidate->NSubJetsSoftDropped;
+    
+    for(i = 0; i < 5; i++)
+    {
+      entry->FracPt[i]        = candidate -> FracPt[i];
+      entry->Tau[i]           = candidate -> Tau[i];
+      entry->TrimmedP4[i]     = candidate -> TrimmedP4[i];
+      entry->PrunedP4[i]      = candidate -> PrunedP4[i];
+      entry->SoftDroppedP4[i] = candidate -> SoftDroppedP4[i];
+    }
    
     FillParticles(candidate, &entry->Particles);
   }

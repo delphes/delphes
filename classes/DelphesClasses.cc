@@ -128,6 +128,9 @@ Candidate::Candidate() :
   Dxy(0), SDxy(0), Xd(0), Yd(0), Zd(0),
   NCharged(0),
   NNeutrals(0),
+  NSubJetsTrimmed(0),
+  NSubJetsPruned(0), 
+  NSubJetsSoftDropped(0), 
   Beta(0),
   BetaStar(0),
   MeanSqDeltaR(0),
@@ -156,6 +159,21 @@ Candidate::Candidate() :
   Tau[2] = 0.0;
   Tau[3] = 0.0;
   Tau[4] = 0.0;
+  TrimmedP4[0] = 0.0;
+  TrimmedP4[1] = 0.0;
+  TrimmedP4[2] = 0.0;
+  TrimmedP4[3] = 0.0;
+  TrimmedP4[4] = 0.0;
+  PrunedP4[0] = 0.0;
+  PrunedP4[1] = 0.0;
+  PrunedP4[2] = 0.0;
+  PrunedP4[3] = 0.0;
+  PrunedP4[4] = 0.0;
+  SoftDroppedP4[0] = 0.0;
+  SoftDroppedP4[1] = 0.0;
+  SoftDroppedP4[2] = 0.0;
+  SoftDroppedP4[3] = 0.0;
+  SoftDroppedP4[4] = 0.0;
 }
 
 //------------------------------------------------------------------------------
@@ -273,10 +291,29 @@ void Candidate::Copy(TObject &obj) const
   object.Tau[2] = Tau[2];
   object.Tau[3] = Tau[3];
   object.Tau[4] = Tau[4];
+  
+  object.TrimmedP4[0] = TrimmedP4[0];
+  object.TrimmedP4[1] = TrimmedP4[1];
+  object.TrimmedP4[2] = TrimmedP4[2];
+  object.TrimmedP4[3] = TrimmedP4[3];
+  object.TrimmedP4[4] = TrimmedP4[4];
+  object.PrunedP4[0] = PrunedP4[0];
+  object.PrunedP4[1] = PrunedP4[1];
+  object.PrunedP4[2] = PrunedP4[2];
+  object.PrunedP4[3] = PrunedP4[3];
+  object.PrunedP4[4] = PrunedP4[4];
+  object.SoftDroppedP4[0] = SoftDroppedP4[0];
+  object.SoftDroppedP4[1] = SoftDroppedP4[1];
+  object.SoftDroppedP4[2] = SoftDroppedP4[2];
+  object.SoftDroppedP4[3] = SoftDroppedP4[3];
+  object.SoftDroppedP4[4] = SoftDroppedP4[4];
+
+  object.NSubJetsTrimmed     = NSubJetsTrimmed;
+  object.NSubJetsPruned      = NSubJetsPruned;
+  object.NSubJetsSoftDropped = NSubJetsSoftDropped;
 
   object.fFactory = fFactory;
   object.fArray = 0;
-
 
   // Copy cluster timing info
   copy(Ecal_E_t.begin(),Ecal_E_t.end(),back_inserter(object.Ecal_E_t));
@@ -350,6 +387,25 @@ void Candidate::Clear(Option_t* option)
   Tau[2] = 0.0;
   Tau[3] = 0.0;
   Tau[4] = 0.0;
-
+  
+  TrimmedP4[0]= 0.0;
+  TrimmedP4[1]= 0.0;
+  TrimmedP4[2]= 0.0;
+  TrimmedP4[3]= 0.0;
+  TrimmedP4[4]= 0.0;
+  PrunedP4[0]= 0.0;
+  PrunedP4[1]= 0.0;
+  PrunedP4[2]= 0.0;
+  PrunedP4[3]= 0.0;
+  PrunedP4[4]= 0.0;
+  SoftDroppedP4[0]= 0.0;
+  SoftDroppedP4[1]= 0.0;
+  SoftDroppedP4[2]= 0.0;
+  SoftDroppedP4[3]= 0.0;
+  SoftDroppedP4[4]= 0.0;
+  NSubJetsTrimmed     = 0;
+  NSubJetsPruned      = 0;
+  NSubJetsSoftDropped = 0;
+  
   fArray = 0;
 }

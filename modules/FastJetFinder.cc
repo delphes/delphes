@@ -65,6 +65,10 @@
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
 #include "fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh"
 
+#include "fastjet/tools/Filter.hh"
+#include "fastjet/tools/Pruner.hh"
+#include "fastjet/contribs/RecursiveTools/SoftDrop.hh"
+
 using namespace std;
 using namespace fastjet;
 using namespace fastjet::contrib;
@@ -119,6 +123,28 @@ void FastJetFinder::Init()
   fAxisMode = GetInt("AxisMode", 1);
   fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
   fN = GetInt("N", 2);                  // used only if Njettiness is used as jet clustering algo (case 8)
+
+  //-- Trimming parameters --
+  
+  fComputeTrimming = GetBool("ComputeTrimming", false);
+  fRTrim = GetDouble("RTrim", 0.2);
+  fPtFracTrim = GetDouble("PtFracTrim", 0.05);
+  
+
+  //-- Pruning parameters --
+  
+  fComputePruning = GetBool("ComputePruning", false);
+  fZcutPrun = GetDouble("ZcutPrun", 0.1);
+  fRcutPrun = GetDouble("RcutPrun", 0.5);
+  fRPrun = GetDouble("RPrun", 0.8);
+ 
+  //-- SoftDrop parameters --
+  
+  fComputeSoftDrop     = GetBool("ComputeSoftDrop", false);
+  fBetaSoftDrop        = GetDouble("BetaSoftDrop", 0.0);
+  fSymmetryCutSoftDrop = GetDouble("SymmetryCutSoftDrop", 0.1);
+  fR0SoftDrop= GetDouble("R0SoftDrop=", 0.8);
+  
 
   // ---  Jet Area Parameters ---
   fAreaAlgorithm = GetInt("AreaAlgorithm", 0);
@@ -259,7 +285,7 @@ void FastJetFinder::Process()
   Double_t rho = 0.0;
   PseudoJet jet, area;
   ClusterSequence *sequence;
-  vector< PseudoJet > inputList, outputList;
+  vector< PseudoJet > inputList, outputList, subjets;
   vector< PseudoJet >::iterator itInputList, itOutputList;
   vector< TEstimatorStruct >::iterator itEstimators;
 
@@ -351,7 +377,87 @@ void FastJetFinder::Process()
 
     candidate->DeltaEta = detaMax;
     candidate->DeltaPhi = dphiMax;
+       
+    //------------------------------------
+    // Trimming
+    //------------------------------------
 
+     if(fComputeTrimming)
+    {
+
+      fastjet::Filter    trimmer(fastjet::JetDefinition(fastjet::kt_algorithm,fRTrim),fastjet::SelectorPtFractionMin(fPtFracTrim));
+      fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
+      
+      trimmed_jet = join(trimmed_jet.constituents());
+     
+      candidate->TrimmedP4[0].SetPtEtaPhiM(trimmed_jet.pt(), trimmed_jet.eta(), trimmed_jet.phi(), trimmed_jet.m());
+        
+      // four hardest subjets 
+      subjets.clear();
+      subjets = trimmed_jet.pieces();
+      subjets = sorted_by_pt(subjets);
+      
+      candidate->NSubJetsTrimmed = subjets.size();
+
+      for (size_t i = 0; i < subjets.size() and i < 4; i++){
+	if(subjets.at(i).pt() < 0) continue ; 
+ 	candidate->TrimmedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+      }
+    }
+    
+    
+    //------------------------------------
+    // Pruning
+    //------------------------------------
+    
+    
+    if(fComputePruning)
+    {
+
+      fastjet::Pruner    pruner(fastjet::JetDefinition(fastjet::cambridge_algorithm,fRPrun),fZcutPrun,fRcutPrun);
+      fastjet::PseudoJet pruned_jet = pruner(*itOutputList);
+
+      candidate->PrunedP4[0].SetPtEtaPhiM(pruned_jet.pt(), pruned_jet.eta(), pruned_jet.phi(), pruned_jet.m());
+         
+      // four hardest subjet 
+      subjets.clear();
+      subjets = pruned_jet.pieces();
+      subjets = sorted_by_pt(subjets);
+      
+      candidate->NSubJetsPruned = subjets.size();
+
+      for (size_t i = 0; i < subjets.size() and i < 4; i++){
+	if(subjets.at(i).pt() < 0) continue ; 
+  	candidate->PrunedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+      }
+
+    } 
+     
+    //------------------------------------
+    // SoftDrop
+    //------------------------------------
+   
+    if(fComputeSoftDrop)
+    {
+    
+      contrib::SoftDrop  softDrop(fBetaSoftDrop,fSymmetryCutSoftDrop,fR0SoftDrop);
+      fastjet::PseudoJet softdrop_jet = softDrop(*itOutputList);
+      
+      candidate->SoftDroppedP4[0].SetPtEtaPhiM(softdrop_jet.pt(), softdrop_jet.eta(), softdrop_jet.phi(), softdrop_jet.m());
+        
+      // four hardest subjet 
+      
+      subjets.clear();
+      subjets    = softdrop_jet.pieces();
+      subjets    = sorted_by_pt(subjets);
+      candidate->NSubJetsSoftDropped = softdrop_jet.pieces().size();
+
+      for (size_t i = 0; i < subjets.size()  and i < 4; i++){
+	if(subjets.at(i).pt() < 0) continue ; 
+  	candidate->SoftDroppedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+      }
+    }
+  
     // --- compute N-subjettiness with N = 1,2,3,4,5 ----
 
     if(fComputeNsubjettiness)
