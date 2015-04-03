@@ -1079,18 +1079,6 @@ tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(SrcSuf)
-tmp/external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(ObjSuf): \
-	external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(SrcSuf) \
-	external/fastjet/JetDefinition.hh \
-	external/fastjet/ClusterSequenceAreaBase.hh
-tmp/external/fastjet/contribs/RecursiveTools/Recluster.$(ObjSuf): \
-	external/fastjet/contribs/RecursiveTools/Recluster.$(SrcSuf)
-tmp/external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(ObjSuf): \
-	external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(SrcSuf) \
-	external/fastjet/JetDefinition.hh \
-	external/fastjet/ClusterSequenceAreaBase.hh
-tmp/external/fastjet/contribs/RecursiveTools/SoftDrop.$(ObjSuf): \
-	external/fastjet/contribs/RecursiveTools/SoftDrop.$(SrcSuf)
 tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf): \
 	external/fastjet/contribs/SoftKiller/SoftKiller.$(SrcSuf)
 tmp/external/fastjet/plugins/ATLASCone/ATLASConePlugin.$(ObjSuf): \
@@ -1296,10 +1284,6 @@ FASTJET_OBJ +=  \
 	tmp/external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.$(ObjSuf) \
-	tmp/external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(ObjSuf) \
-	tmp/external/fastjet/contribs/RecursiveTools/Recluster.$(ObjSuf) \
-	tmp/external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(ObjSuf) \
-	tmp/external/fastjet/contribs/RecursiveTools/SoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf) \
 	tmp/external/fastjet/plugins/ATLASCone/ATLASConePlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/ATLASCone/Jet.$(ObjSuf) \
