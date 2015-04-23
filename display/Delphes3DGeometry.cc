@@ -19,6 +19,7 @@
 #include "display/Delphes3DGeometry.h"
 #include <set>
 #include <map>
+#include <string>
 #include <utility>
 #include <vector>
 #include <algorithm>
@@ -36,6 +37,7 @@
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "classes/DelphesClasses.h"
 #include "TF2.h"
+#include "TFormula.h"
 #include "TH1F.h"
 #include "TMath.h"
 
@@ -89,13 +91,24 @@ void Delphes3DGeometry::readFile(const char *configFile,
    tk_radius_ = confReader->GetDouble(Form("%s::Radius",ParticlePropagator), 1.0)*100.;		// tk_radius
    tk_length_ = confReader->GetDouble(Form("%s::HalfLength",ParticlePropagator), 3.0)*100.; 	// tk_length
    tk_Bz_     = confReader->GetDouble("ParticlePropagator::Bz", 0.0);                           // tk_Bz
-
+   
+   string buffer;
+   const char *it;
+ 
+   
    {
    TString tkEffFormula = confReader->GetString(Form("%s::EfficiencyFormula",TrackingEfficiency),"abs(eta)<3.0");
    tkEffFormula.ReplaceAll("pt","x");
    tkEffFormula.ReplaceAll("eta","y");
    tkEffFormula.ReplaceAll("phi","0.");
-   TF2* tkEffFunction = new TF2("tkEff",tkEffFormula,0,1000,-10,10);
+ 
+   for(it = tkEffFormula.Data(); *it; ++it)
+   {
+     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+     buffer.push_back(*it);
+   }
+
+   TF2* tkEffFunction = new TF2("tkEff",buffer.c_str(),0,1000,-10,10);
    TH1F etaHisto("eta","eta",100,5.,-5.);
    Double_t pt,eta;
    for(int i=0;i<1000;++i) {
@@ -117,7 +130,15 @@ void Delphes3DGeometry::readFile(const char *configFile,
    muonEffFormula.ReplaceAll("pt","x");
    muonEffFormula.ReplaceAll("eta","y");
    muonEffFormula.ReplaceAll("phi","0.");
-   TF2* muEffFunction = new TF2("muEff",muonEffFormula,0,1000,-10,10);
+   
+   buffer.clear();
+   for(it = muonEffFormula.Data(); *it; ++it)
+   {
+     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+     buffer.push_back(*it);
+   }
+
+   TF2* muEffFunction = new TF2("muEff",buffer.c_str(),0,1000,-10,10);
    TH1F etaHisto("eta2","eta2",100,5.,-5.);
    Double_t pt,eta;
    for(int i=0;i<1000;++i) {
