@@ -154,13 +154,14 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
   trkProp->SetMagField(0., 0., -tk_Bz_);
   trkProp->SetMaxR(tkRadius_);
   trkProp->SetMaxZ(tkHalfLength_);
+  GenParticle *particle;
   if(type=="Track") { // CASE 1: TRACKS
     Track *track;
     while((track = (Track *) itTrack.Next())) {
       TParticle pb(track->PID, 1, 0, 0, 0, 0,
                    track->P4().Px(), track->P4().Py(),
                    track->P4().Pz(), track->P4().E(),
-                   track->X, track->Y, track->Z, 0.0);
+                   track->X/10.0, track->Y/10.0, track->Z/10.0, track->T/10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -172,10 +173,11 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
   } else if(type=="Electron") { // CASE 2: ELECTRONS
     Electron *electron;
     while((electron = (Electron *) itTrack.Next())) {
+      particle = (GenParticle*) electron->Particle.GetObject();
       TParticle pb(electron->Charge<0?11:-11, 1, 0, 0, 0, 0,
                    electron->P4().Px(), electron->P4().Py(),
                    electron->P4().Pz(), electron->P4().E(),
-                   0., 0., 0., 0.);
+                   particle->X/10.0, particle->Y/10.0, particle->Z/10.0, particle->T/10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -187,10 +189,11 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
   } else if(type=="Muon") { // CASE 3: MUONS
     Muon *muon;
     while((muon = (Muon *) itTrack.Next())) {
+      particle = (GenParticle*) muon->Particle.GetObject();
       TParticle pb(muon->Charge<0?13:-13, 1, 0, 0, 0, 0,
                    muon->P4().Px(), muon->P4().Py(),
                    muon->P4().Pz(), muon->P4().E(),
-                   0., 0., 0., 0.);
+                   particle->X/10.0, particle->Y/10.0, particle->Z/10.0, particle->T/10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -205,7 +208,7 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       TParticle pb(22, 1, 0, 0, 0, 0,
                    photon->P4().Px(), photon->P4().Py(),
                    photon->P4().Pz(), photon->P4().E(),
-                   0., 0., 0., 0.);
+                   0.0, 0.0, 0.0, 0.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -222,7 +225,7 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       TParticle pb(particle->PID, particle->Status, particle->M1, particle->M2, particle->D1, particle->D2,
                    particle->P4().Px(), particle->P4().Py(),
                    particle->P4().Pz(), particle->P4().E(),
-                   particle->X, particle->Y, particle->Z, particle->T);
+                   particle->X/10.0, particle->Y/10.0, particle->Z/10.0, particle->T/10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
