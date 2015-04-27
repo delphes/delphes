@@ -161,7 +161,7 @@ void TaggingParticlesSkimmer::Process()
     if(pt < fPTMin) continue;
    
     eta = TMath::Abs(candidate->Momentum.Eta());
-    if(eta < fEtaMax) continue;
+    if(eta > fEtaMax) continue;
         
     fOutputArray->Add(candidate);
   }
