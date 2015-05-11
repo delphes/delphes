@@ -170,7 +170,7 @@ void BTagging::Finish()
 void BTagging::Process()
 {
   Candidate *jet, *parton;
-  Double_t pt, eta, phi;
+  Double_t pt, eta, phi, e;
   TObjArray *partonArray;
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
@@ -193,7 +193,8 @@ void BTagging::Process()
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
     pt = jetMomentum.Pt();
-
+    e = jetMomentum.E();
+    
     // loop over all input partons
     itPartonArray.Reset();
     while((parton = static_cast<Candidate*>(itPartonArray.Next())))
@@ -217,7 +218,7 @@ void BTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficency formula
-    jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta)) << fBitNumber;
+    jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
   }
 }
 

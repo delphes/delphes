@@ -96,7 +96,7 @@ void ImpactParameterSmearing::Process()
 {
   Candidate *candidate, *particle, *mother;
   Double_t xd, yd, zd, dxy, sx, sy, sz, ddxy;
-  Double_t pt, eta, px, py;
+  Double_t pt, eta, px, py, phi, e;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -109,6 +109,9 @@ void ImpactParameterSmearing::Process()
 
     eta = candidateMomentum.Eta();
     pt = candidateMomentum.Pt();
+    phi = candidateMomentum.Phi();
+    e = candidateMomentum.E();
+    
     px = candidateMomentum.Px();
     py = candidateMomentum.Py();
 
@@ -118,9 +121,9 @@ void ImpactParameterSmearing::Process()
     zd =  candidate->Zd;
 
     // calculate smeared values
-    sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
-    sy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
-    sz = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
+    sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    sy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    sz = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     xd += sx;
     yd += sy;
@@ -129,7 +132,7 @@ void ImpactParameterSmearing::Process()
     // calculate impact parameter (after-smearing)
     dxy = (xd*py - yd*px)/pt;
 
-    ddxy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta));
+    ddxy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
     mother = candidate;

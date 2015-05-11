@@ -126,7 +126,7 @@ void IdentificationMap::Finish()
 void IdentificationMap::Process()
 {
   Candidate *candidate;
-  Double_t pt, eta, phi;
+  Double_t pt, eta, phi, e;
   TMisIDMap::iterator itEfficiencyMap;
   pair <TMisIDMap::iterator, TMisIDMap::iterator> range;
   DelphesFormula *formula;
@@ -142,6 +142,8 @@ void IdentificationMap::Process()
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
+    e = candidateMomentum.E();
+   
     pdgCodeIn = candidate->PID;
     charge = candidate->Charge;
 
@@ -163,7 +165,7 @@ void IdentificationMap::Process()
       formula = (it->second).second;
       pdgCodeOut = (it->second).first;
 
-      p = formula->Eval(pt, eta);
+      p = formula->Eval(pt, eta, phi, e);
 
       if(total <= r && r < total + p)
       {
