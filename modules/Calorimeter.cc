@@ -480,59 +480,75 @@ void Calorimeter::FinalizeTower()
 
   if(energy > 0.0)
   {
-    if(fTowerPhotonHits > 0 && fTowerTrackHits == 0)
-    {
-      fPhotonOutputArray->Add(fTower);
-    }
+     bool isCalPhoton = false;
 
-    fTowerOutputArray->Add(fTower);
-  }
+     if(fTowerTrackHits == 0)
+     {
+        // We have a CalPhoton when there are NOT tracks and there ARE photon hits
+        isCalPhoton = (fTowerPhotonHits > 0);
+     }
+     else
+     {
+         // save all the tracks as energy flow tracks
+         fItTowerTrackArray->Reset();
+         while((track = static_cast<Candidate*>(fItTowerTrackArray->Next())))
+         {
+            fEFlowTrackOutputArray->Add(track);
+         }
 
-  // fill energy flow candidates
+         ecalEnergy -= fTrackECalEnergy;
+         hcalEnergy -= fTrackHCalEnergy;
 
-  // save all the tracks as energy flow tracks
-  fItTowerTrackArray->Reset();
-  while((track = static_cast<Candidate*>(fItTowerTrackArray->Next())))
-  {
-    fEFlowTrackOutputArray->Add(track);
-  }
+         ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
+         hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
 
-  ecalEnergy -= fTrackECalEnergy;
-  hcalEnergy -= fTrackHCalEnergy;
+         if(ecalEnergy < fECalEnergyMin || ecalEnergy < fECalEnergySignificanceMin*ecalSigma) ecalEnergy = 0.0;
+         if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalEnergySignificanceMin*hcalSigma) hcalEnergy = 0.0;
 
-  ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
-  hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
+         energy = ecalEnergy + hcalEnergy;
+     }
 
-  if(ecalEnergy < fECalEnergyMin || ecalEnergy < fECalEnergySignificanceMin*ecalSigma) ecalEnergy = 0.0;
-  if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalEnergySignificanceMin*hcalSigma) hcalEnergy = 0.0;
+     // If it's NOT a CalPhoton; add the tower as a whole entity.
+     // Otherwise, the tower will be split into its ECAL and HCAL components,
+     // then added to fPhotonArray and fTowerArray (respectively).
+     // By construction (no track hits), no track subtraction will occur
+     // for CalPhotons
+     if(!isCalPhoton)
+        fTowerOutputArray->Add(fTower);
 
-  energy = ecalEnergy + hcalEnergy;
+     // fill energy flow candidates
 
-  if(ecalEnergy > 0.0)
-  {
-    // create new photon tower
-    tower = static_cast<Candidate*>(fTower->Clone());
+     if(ecalEnergy > 0.0)
+     {
+         // create new photon tower
+         tower = static_cast<Candidate*>(fTower->Clone());
 
-    pt = ecalEnergy / TMath::CosH(eta);
+         pt = ecalEnergy / TMath::CosH(eta);
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
-    tower->Eem = ecalEnergy;
-    tower->Ehad = 0.0;
+         tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
+         tower->Eem = ecalEnergy;
+         tower->Ehad = 0.0;
 
-    fEFlowPhotonOutputArray->Add(tower);
-  }
-  if(hcalEnergy > 0.0)
-  {
-    // create new neutral hadron tower
-    tower = static_cast<Candidate*>(fTower->Clone());
+         fEFlowPhotonOutputArray->Add(tower);
+         if(isCalPhoton)
+		      fPhotonOutputArray->Add(tower);
+     }
 
-    pt = hcalEnergy / TMath::CosH(eta);
+     if(hcalEnergy > 0.0)
+     {
+        // create new neutral hadron tower
+        tower = static_cast<Candidate*>(fTower->Clone());
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
-    tower->Eem = 0.0;
-    tower->Ehad = hcalEnergy;
+        pt = hcalEnergy / TMath::CosH(eta);
 
-    fEFlowNeutralHadronOutputArray->Add(tower);
+        tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
+        tower->Eem = 0.0;
+        tower->Ehad = hcalEnergy;
+
+        fEFlowNeutralHadronOutputArray->Add(tower);
+        if(isCalPhoton)
+           fTowerOutputArray->Add(tower);
+     }
   }
 }
 
