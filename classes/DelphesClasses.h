@@ -83,6 +83,17 @@ public:
 
 //---------------------------------------------------------------------------
 
+class LHEFWeight: public TObject
+{
+public:
+  Int_t ID; // weight ID
+  Float_t Weight; // weight value
+
+  ClassDef(LHEFWeight, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class HepMCEvent: public Event
 {
 public:
