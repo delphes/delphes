@@ -145,6 +145,7 @@ Candidate::Candidate() :
   fFactory(0),
   fArray(0)
 {
+  int i;
   Edges[0] = 0.0;
   Edges[1] = 0.0;
   Edges[2] = 0.0;
@@ -159,21 +160,12 @@ Candidate::Candidate() :
   Tau[2] = 0.0;
   Tau[3] = 0.0;
   Tau[4] = 0.0;
-  TrimmedP4[0] = 0.0;
-  TrimmedP4[1] = 0.0;
-  TrimmedP4[2] = 0.0;
-  TrimmedP4[3] = 0.0;
-  TrimmedP4[4] = 0.0;
-  PrunedP4[0] = 0.0;
-  PrunedP4[1] = 0.0;
-  PrunedP4[2] = 0.0;
-  PrunedP4[3] = 0.0;
-  PrunedP4[4] = 0.0;
-  SoftDroppedP4[0] = 0.0;
-  SoftDroppedP4[1] = 0.0;
-  SoftDroppedP4[2] = 0.0;
-  SoftDroppedP4[3] = 0.0;
-  SoftDroppedP4[4] = 0.0;
+  for(i = 0; i < 5; ++i)
+  {
+    TrimmedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
+    PrunedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
+    SoftDroppedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -333,6 +325,7 @@ void Candidate::Copy(TObject &obj) const
 
 void Candidate::Clear(Option_t* option)
 {
+  int i;
   SetUniqueID(0);
   ResetBit(kIsReferenced);
   PID = 0;
@@ -388,21 +381,13 @@ void Candidate::Clear(Option_t* option)
   Tau[3] = 0.0;
   Tau[4] = 0.0;
   
-  TrimmedP4[0]= 0.0;
-  TrimmedP4[1]= 0.0;
-  TrimmedP4[2]= 0.0;
-  TrimmedP4[3]= 0.0;
-  TrimmedP4[4]= 0.0;
-  PrunedP4[0]= 0.0;
-  PrunedP4[1]= 0.0;
-  PrunedP4[2]= 0.0;
-  PrunedP4[3]= 0.0;
-  PrunedP4[4]= 0.0;
-  SoftDroppedP4[0]= 0.0;
-  SoftDroppedP4[1]= 0.0;
-  SoftDroppedP4[2]= 0.0;
-  SoftDroppedP4[3]= 0.0;
-  SoftDroppedP4[4]= 0.0;
+  for(i = 0; i < 5; ++i)
+  {
+    TrimmedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
+    PrunedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0); 
+    SoftDroppedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
+  }
+
   NSubJetsTrimmed     = 0;
   NSubJetsPruned      = 0;
   NSubJetsSoftDropped = 0;
