@@ -215,7 +215,7 @@ void DelphesLHEFReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventNu
 
 //---------------------------------------------------------------------------
 
-void DelphesLHEFReader::AnalyzeRwgt(ExRootTreeBranch *branch)
+void DelphesLHEFReader::AnalyzeWeight(ExRootTreeBranch *branch)
 {
   LHEFWeight *element;
   vector< pair< int, double > >::const_iterator itWeightList;

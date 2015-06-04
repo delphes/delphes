@@ -58,7 +58,7 @@ public:
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
-  void AnalyzeRwgt(ExRootTreeBranch *branch);
+  void AnalyzeWeight(ExRootTreeBranch *branch);
 
 private:
 

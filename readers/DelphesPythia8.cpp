@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
   TStopwatch readStopWatch, procStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0;
-  ExRootTreeBranch *branchEventLHEF = 0, *branchRwgtLHEF = 0;
+  ExRootTreeBranch *branchEventLHEF = 0, *branchWeightLHEF = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
       reader->SetInputFile(inputFile);
 
       branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
-      branchRwgtLHEF = treeWriter->NewBranch("RwgtLHEF", Weight::Class());
+      branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
 
       allParticleOutputArrayLHEF = modularDelphes->ExportArray("allParticlesLHEF");
       stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
       if(reader)
       {
         reader->AnalyzeEvent(branchEventLHEF, eventCounter, &readStopWatch, &procStopWatch);
-        reader->AnalyzeRwgt(branchRwgtLHEF);
+        reader->AnalyzeWeight(branchWeightLHEF);
       }
 
       treeWriter->Fill();
