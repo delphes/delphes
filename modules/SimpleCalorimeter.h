@@ -1,3 +1,4 @@
+
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
@@ -72,6 +73,8 @@ private:
   Double_t fEnergySignificanceMin;
 
   Bool_t fSmearTowerCenter;
+
+  Bool_t fIsEcal; //! 
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
