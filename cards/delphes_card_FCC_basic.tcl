@@ -434,7 +434,7 @@ module FastJetFinder GenJetFinder {
 ############
 
 module FastJetFinder FastJetFinder {
-#  set InputArray Calorimeter/towers
+#  set InputArray TowerMerger/towers
   set InputArray EFlowMerger/eflow
 
   set OutputArray jets
