@@ -99,7 +99,7 @@ void AngularSmearing::Finish()
 void AngularSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t pt, eta, phi;
+  Double_t pt, eta, phi, e;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -109,11 +109,12 @@ void AngularSmearing::Process()
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
+    e = candidateMomentum.E();
 
     // apply smearing formula for eta,phi
 
-    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta));
-    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta));
+    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e));
+    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e));
     
     if(pt <= 0.0) continue;
 

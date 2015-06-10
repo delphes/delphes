@@ -103,7 +103,7 @@ void EnergyScale::Process()
   {
     momentum = candidate->Momentum;
 
-    scale = fFormula->Eval(momentum.Pt(), momentum.Eta());
+    scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
 
     if(scale > 0.0) momentum *= scale;
 
