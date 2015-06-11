@@ -374,7 +374,7 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4();
+  TLorentzVector P4() const;
   TLorentzVector Area;
 
   ClassDef(Jet, 3)
