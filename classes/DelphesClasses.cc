@@ -120,7 +120,9 @@ Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsConstituent(0),
-  BTag(0), TauTag(0), Eem(0.0), Ehad(0.0),
+  BTag(0), BTagAlgo(0), BTagDefault(0), BTagPhysics(0), BTagNearest2(0), BTagNearest3(0), BTagHeaviest(0), BTagHighestPt(0),
+  FlavorAlgo(0), FlavorDefault(0), FlavorPhysics(0), FlavorNearest2(0), FlavorNearest3(0), FlavorHeaviest(0), FlavorHighestPt(0),
+  TauTag(0), Eem(0.0), Ehad(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
@@ -241,6 +243,20 @@ void Candidate::Copy(TObject &obj) const
   object.IsPU = IsPU;
   object.IsConstituent = IsConstituent;
   object.BTag = BTag;
+  object.BTagAlgo = BTagAlgo;
+  object.BTagDefault = BTagDefault;
+  object.BTagPhysics = BTagPhysics;
+  object.BTagNearest2 = BTagNearest2;
+  object.BTagNearest3 = BTagNearest3;
+  object.BTagHeaviest = BTagHeaviest;
+  object.BTagHighestPt = BTagHighestPt;
+  object.FlavorAlgo = FlavorAlgo;
+  object.FlavorDefault = FlavorDefault;
+  object.FlavorPhysics = FlavorPhysics;
+  object.FlavorNearest2 = FlavorNearest2;
+  object.FlavorNearest3 = FlavorNearest3;
+  object.FlavorHeaviest = FlavorHeaviest;
+  object.FlavorHighestPt = FlavorHighestPt;
   object.TauTag = TauTag;
   object.Eem = Eem;
   object.Ehad = Ehad;
@@ -300,8 +316,8 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedP4[3] = SoftDroppedP4[3];
   object.SoftDroppedP4[4] = SoftDroppedP4[4];
 
-  object.NSubJetsTrimmed     = NSubJetsTrimmed;
-  object.NSubJetsPruned      = NSubJetsPruned;
+  object.NSubJetsTrimmed = NSubJetsTrimmed;
+  object.NSubJetsPruned = NSubJetsPruned;
   object.NSubJetsSoftDropped = NSubJetsSoftDropped;
 
   object.fFactory = fFactory;
@@ -336,6 +352,20 @@ void Candidate::Clear(Option_t* option)
   IsPU = 0;
   IsConstituent = 0;
   BTag = 0;
+  BTagAlgo = 0;
+  BTagDefault = 0;
+  BTagPhysics = 0;
+  BTagNearest2 = 0;
+  BTagNearest3 = 0;
+  BTagHeaviest = 0;
+  BTagHighestPt = 0;
+  FlavorAlgo = 0;
+  FlavorDefault = 0;
+  FlavorPhysics = 0;
+  FlavorNearest2 = 0;
+  FlavorNearest3 = 0;
+  FlavorHeaviest = 0;
+  FlavorHighestPt = 0;
   TauTag = 0;
   Eem = 0.0;
   Ehad = 0.0;
@@ -388,8 +418,8 @@ void Candidate::Clear(Option_t* option)
     SoftDroppedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
   }
 
-  NSubJetsTrimmed     = 0;
-  NSubJetsPruned      = 0;
+  NSubJetsTrimmed = 0;
+  NSubJetsPruned = 0;
   NSubJetsSoftDropped = 0;
   
   fArray = 0;

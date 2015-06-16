@@ -58,6 +58,7 @@
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
 #include "modules/RunPUPPI.h"
+#include "modules/JetFlavourAssociation.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -99,6 +100,7 @@
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
 #pragma link C++ class RunPUPPI+;
+#pragma link C++ class JetFlavourAssociation+;
 #pragma link C++ class ExampleModule+;
 
 #endif

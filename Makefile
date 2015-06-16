@@ -338,6 +338,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Weighter.h \
 	modules/Hector.h \
 	modules/RunPUPPI.h \
+	modules/JetFlavourAssociation.h \
 	modules/ExampleModule.h
 ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict$(PcmSuf) \
@@ -656,6 +657,15 @@ tmp/modules/Isolation.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/JetFlavourAssociation.$(ObjSuf): \
+	modules/JetFlavourAssociation.$(SrcSuf) \
+	modules/JetFlavourAssociation.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/JetPileUpSubtractor.$(ObjSuf): \
 	modules/JetPileUpSubtractor.$(SrcSuf) \
 	modules/JetPileUpSubtractor.h \
@@ -898,6 +908,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/IdentificationMap.$(ObjSuf) \
 	tmp/modules/ImpactParameterSmearing.$(ObjSuf) \
 	tmp/modules/Isolation.$(ObjSuf) \
+	tmp/modules/JetFlavourAssociation.$(ObjSuf) \
 	tmp/modules/JetPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
 	tmp/modules/Merger.$(ObjSuf) \
@@ -1748,6 +1759,11 @@ modules/Delphes.h: \
 
 modules/UniqueObjectFinder.h: \
 	classes/DelphesModule.h
+	@touch $@
+
+modules/JetFlavourAssociation.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
 	@touch $@
 
 modules/TrackCountingBTagging.h: \
