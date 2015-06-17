@@ -86,30 +86,30 @@ Int_t PartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-class PartonClassifierLHEF: public ExRootClassifier
+class ParticleLHEFClassifier: public ExRootClassifier
 {
 public:
 
-  PartonClassifierLHEF() {}
+  ParticleLHEFClassifier() {}
   Int_t GetCategory(TObject *object);
   Double_t fEtaMax, fPTMin;
 };
 
-Int_t PartonClassifierLHEF::GetCategory(TObject *object)
+Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
 {
   // select parton in the parton list
 
-  Candidate *parton = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = parton->Momentum;
+  Candidate *particleLHEF = static_cast<Candidate *>(object);
+  const TLorentzVector &momentum = particleLHEF->Momentum;
   Int_t pdgCode;
 
   // inside the eta && momentum range (be a little bit larger that the tracking coverage
   if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
 
-  pdgCode = TMath::Abs(parton->PID);
-  if(parton->Status == -1) return -1;
+  pdgCode = TMath::Abs(particleLHEF->PID);
+  if(particleLHEF->Status == -1) return -1;
   if(pdgCode != 21 && pdgCode > 5) return -1; // not a parton, skip
-  if(parton->Status != 1) return -1; // if status 3 return
+  if(particleLHEF->Status != 1) return -1; // if status 3 return
 
   return 0;
 }
@@ -117,20 +117,20 @@ Int_t PartonClassifierLHEF::GetCategory(TObject *object)
 //------------------------------------------------------------------------------
 
 JetFlavorAssociation::JetFlavorAssociation() :
-  fClassifier(0), fFilter(0),
-  fItPartonInputArray(0), fItPartonInputArrayLHEF(0),
-  fItJetInputArray(0), fItParticleInputArray(0)
+  fPartonClassifier(0), fPartonFilter(0), fParticleLHEFFilter(0),
+  fItPartonInputArray(0), fItParticleInputArray(0),
+  fItParticleLHEFInputArray(0), fItJetInputArray(0)
 {
-  fClassifier = new PartonClassifier;
-  fClassifierLHEF = new PartonClassifierLHEF;
+  fPartonClassifier = new PartonClassifier;
+  fParticleLHEFClassifier = new ParticleLHEFClassifier;
 }
 
 //------------------------------------------------------------------------------
 
 JetFlavorAssociation::~JetFlavorAssociation()
 {
-  if(fClassifier) delete fClassifier;
-  if(fClassifierLHEF) delete fClassifierLHEF;
+  if(fPartonClassifier) delete fPartonClassifier;
+  if(fParticleLHEFClassifier) delete fParticleLHEFClassifier;
 }
 
 //------------------------------------------------------------------------------
@@ -141,41 +141,40 @@ void JetFlavorAssociation::Init()
 
   fDeltaR = GetDouble("DeltaR", 0.5);
 
-  fClassifier->fPTMin = GetDouble("PartonPTMin", 0.);
-  fClassifier->fEtaMax = GetDouble("PartonEtaMax",2.5);
+  fPartonClassifier->fPTMin = GetDouble("PartonPTMin", 0.0);
+  fPartonClassifier->fEtaMax = GetDouble("PartonEtaMax", 2.5);
 
-  fClassifierLHEF->fPTMin = GetDouble("PartonPTMin", 0.);
-  fClassifierLHEF->fEtaMax = GetDouble("PartonEtaMax",2.5);
+  fParticleLHEFClassifier->fPTMin = GetDouble("PartonPTMin", 0.0);
+  fParticleLHEFClassifier->fEtaMax = GetDouble("PartonEtaMax", 2.5);
 
   // import input array(s)
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
   fItPartonInputArray = fPartonInputArray->MakeIterator();
 
-  fPartonInputArrayLHEF = ImportArray(GetString("PartonInputArrayLHEF", "Delphes/partonsLHEF"));
-  fItPartonInputArrayLHEF = fPartonInputArrayLHEF->MakeIterator();
-
-  fFilter = new ExRootFilter(fPartonInputArray);
-  fFilterLHEF = new ExRootFilter(fPartonInputArrayLHEF);
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
-
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
   fItParticleInputArray = fParticleInputArray->MakeIterator();
 
+  fParticleLHEFInputArray = ImportArray(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"));
+  fItParticleLHEFInputArray = fParticleLHEFInputArray->MakeIterator();
+
+  fPartonFilter = new ExRootFilter(fPartonInputArray);
+  fParticleLHEFFilter = new ExRootFilter(fParticleLHEFInputArray);
+
+  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
+  fItJetInputArray = fJetInputArray->MakeIterator();
 }
 
 //------------------------------------------------------------------------------
 
 void JetFlavorAssociation::Finish()
 {
-  if(fFilter) delete fFilter;
-  if(fFilterLHEF) delete fFilterLHEF;
+  if(fPartonFilter) delete fPartonFilter;
+  if(fParticleLHEFFilter) delete fParticleLHEFFilter;
 
   if(fItJetInputArray) delete fItJetInputArray;
+  if(fItParticleLHEFInputArray) delete fItParticleLHEFInputArray;
   if(fItParticleInputArray) delete fItParticleInputArray;
   if(fItPartonInputArray) delete fItPartonInputArray;
-  if(fItPartonInputArrayLHEF) delete fItPartonInputArrayLHEF;
 }
 
 //------------------------------------------------------------------------------
@@ -184,20 +183,20 @@ void JetFlavorAssociation::Process(){
 
   Candidate *jet;
   TObjArray *partonArray;
-  TObjArray *partonArrayLHEF;
+  TObjArray *partonLHEFArray;
 
   // select quark && gluons
-  fFilter->Reset();
-  partonArray = fFilter->GetSubArray(fClassifier, 0); // get the filtered parton array
+  fPartonFilter->Reset();
+  partonArray = fPartonFilter->GetSubArray(fPartonClassifier, 0); // get the filtered parton array
 
   if(partonArray == 0) return;
   TIter itPartonArray(partonArray);
 
-  fFilterLHEF->Reset();
-  partonArrayLHEF = fFilterLHEF->GetSubArray(fClassifierLHEF, 0); // get the filtered parton array
+  fParticleLHEFFilter->Reset();
+  partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier, 0); // get the filtered parton array
 
-  if(partonArrayLHEF == 0) return;
-  TIter itPartonLHEFArray(partonArrayLHEF);
+  if(partonLHEFArray == 0) return;
+  TIter itPartonLHEFArray(partonLHEFArray);
 
   // loop over all input jets
   fItJetInputArray->Reset();

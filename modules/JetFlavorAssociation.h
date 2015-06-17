@@ -36,7 +36,7 @@ class DelphesFormula;
 
 class ExRootFilter;
 class PartonClassifier;
-class PartonClassifierLHEF;
+class ParticleLHEFClassifier;
 
 class JetFlavorAssociation: public DelphesModule
 {
@@ -49,28 +49,28 @@ public:
   void Process();
   void Finish();
 
-  void GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonArrayLHEF);
-  void GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonArrayLHEF);
+  void GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray);
+  void GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray);
 
 private:
 
-  Double_t  fDeltaR;
+  Double_t fDeltaR;
 
-  PartonClassifier  *fClassifier; //!
-  PartonClassifierLHEF *fClassifierLHEF; //!
+  PartonClassifier *fPartonClassifier; //!
+  ParticleLHEFClassifier *fParticleLHEFClassifier; //!
 
-  ExRootFilter *fFilter;
-  ExRootFilter *fFilterLHEF;
+  ExRootFilter *fPartonFilter;
+  ExRootFilter *fParticleLHEFFilter;
 
   TIterator *fItPartonInputArray; //!
-  TIterator *fItPartonInputArrayLHEF; //!
-  TIterator *fItJetInputArray; //!
   TIterator *fItParticleInputArray; //!
+  TIterator *fItParticleLHEFInputArray; //!
+  TIterator *fItJetInputArray; //!
 
   const TObjArray *fPartonInputArray; //!
-  const TObjArray *fPartonInputArrayLHEF; //!
-  const TObjArray *fJetInputArray; //!
   const TObjArray *fParticleInputArray; //!
+  const TObjArray *fParticleLHEFInputArray; //!
+  const TObjArray *fJetInputArray; //!
 
   ClassDef(JetFlavorAssociation, 1)
 };
