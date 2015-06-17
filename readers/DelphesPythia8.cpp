@@ -210,8 +210,6 @@ int main(int argc, char *argv[])
     stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
     partonOutputArray = modularDelphes->ExportArray("partons");
 
-    modularDelphes->InitTask();
-
     // Initialize Pythia
     pythia = new Pythia8::Pythia;
 
@@ -240,6 +238,8 @@ int main(int argc, char *argv[])
       stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
       partonOutputArrayLHEF = modularDelphes->ExportArray("partonsLHEF");
     }
+
+    modularDelphes->InitTask();
 
     pythia->init();
 
