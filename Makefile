@@ -321,6 +321,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/EnergyScale.h \
 	modules/UniqueObjectFinder.h \
 	modules/TrackCountingBTagging.h \
+	modules/BTaggingCMS.h \
 	modules/BTagging.h \
 	modules/TauTagging.h \
 	modules/TreeWriter.h \
@@ -338,7 +339,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Weighter.h \
 	modules/Hector.h \
 	modules/RunPUPPI.h \
-	modules/JetFlavourAssociation.h \
+	modules/JetFlavorAssociation.h \
 	modules/ExampleModule.h
 ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict$(PcmSuf) \
@@ -544,6 +545,15 @@ tmp/modules/BTagging.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/BTaggingCMS.$(ObjSuf): \
+	modules/BTaggingCMS.$(SrcSuf) \
+	modules/BTaggingCMS.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/Calorimeter.$(ObjSuf): \
 	modules/Calorimeter.$(SrcSuf) \
 	modules/Calorimeter.h \
@@ -657,9 +667,9 @@ tmp/modules/Isolation.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
-tmp/modules/JetFlavourAssociation.$(ObjSuf): \
-	modules/JetFlavourAssociation.$(SrcSuf) \
-	modules/JetFlavourAssociation.h \
+tmp/modules/JetFlavorAssociation.$(ObjSuf): \
+	modules/JetFlavorAssociation.$(SrcSuf) \
+	modules/JetFlavorAssociation.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -896,6 +906,7 @@ DELPHES_OBJ +=  \
 	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
+	tmp/modules/BTaggingCMS.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
@@ -908,7 +919,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/IdentificationMap.$(ObjSuf) \
 	tmp/modules/ImpactParameterSmearing.$(ObjSuf) \
 	tmp/modules/Isolation.$(ObjSuf) \
-	tmp/modules/JetFlavourAssociation.$(ObjSuf) \
+	tmp/modules/JetFlavorAssociation.$(ObjSuf) \
 	tmp/modules/JetPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
 	tmp/modules/Merger.$(ObjSuf) \
@@ -1761,7 +1772,7 @@ modules/UniqueObjectFinder.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-modules/JetFlavourAssociation.h: \
+modules/BTaggingCMS.h: \
 	classes/DelphesModule.h \
 	classes/DelphesClasses.h
 	@touch $@
@@ -1778,6 +1789,11 @@ external/fastjet/ClusterSequenceActiveArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh \
 	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh
+	@touch $@
+
+modules/JetFlavorAssociation.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
 	@touch $@
 
 modules/ParticlePropagator.h: \

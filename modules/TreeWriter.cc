@@ -290,13 +290,13 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
-    
+
     entry->Dxy = candidate->Dxy;
     entry->SDxy = candidate->SDxy ;
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;
-   
+
     const TLorentzVector &momentum = candidate->Momentum;
 
     pt = momentum.Pt();
@@ -361,7 +361,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Edges[3] = candidate->Edges[3];
 
     entry->T = position.T()*1.0E-3/c_light;
-    entry->Ntimes = candidate->Ntimes;    
+    entry->Ntimes = candidate->Ntimes;
 
     FillParticles(candidate, &entry->Particles);
   }
@@ -404,7 +404,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->T = position.T()*1.0E-3/c_light;
 
     // Isolation variables
-       
+
     entry->IsolationVar = candidate->IsolationVar;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
     entry->SumPtCharged = candidate->SumPtCharged ;
@@ -452,7 +452,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->T = position.T()*1.0E-3/c_light;
 
     // Isolation variables
-       
+
     entry->IsolationVar = candidate->IsolationVar;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
     entry->SumPtCharged = candidate->SumPtCharged ;
@@ -506,9 +506,9 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->PT = pt;
 
     entry->T = position.T()*1.0E-3/c_light;
-    
+
     // Isolation variables
-       
+
     entry->IsolationVar = candidate->IsolationVar;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
     entry->SumPtCharged = candidate->SumPtCharged ;
@@ -567,6 +567,23 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->DeltaPhi = candidate->DeltaPhi;
 
     entry->BTag = candidate->BTag;
+
+    entry->BTagAlgo = candidate->BTagAlgo;
+    entry->BTagDefault = candidate->BTagDefault;
+    entry->BTagPhysics = candidate->BTagPhysics;
+    entry->BTagNearest2 = candidate->BTagNearest2;
+    entry->BTagNearest3 = candidate->BTagNearest3;
+    entry->BTagHeaviest = candidate->BTagHeaviest;
+    entry->BTagHighestPt = candidate->BTagHighestPt;
+
+    entry->FlavorAlgo = candidate->FlavorAlgo;
+    entry->FlavorDefault = candidate->FlavorDefault;
+    entry->FlavorPhysics = candidate->FlavorPhysics;
+    entry->FlavorNearest2 = candidate->FlavorNearest2;
+    entry->FlavorNearest3 = candidate->FlavorNearest3;
+    entry->FlavorHeaviest = candidate->FlavorHeaviest;
+    entry->FlavorHighestPt = candidate->FlavorHighestPt;
+
     entry->TauTag = candidate->TauTag;
 
     entry->Charge = candidate->Charge;
@@ -592,22 +609,22 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->BetaStar = candidate->BetaStar;
     entry->MeanSqDeltaR = candidate->MeanSqDeltaR;
     entry->PTD = candidate->PTD;
-    
+
     //--- Sub-structure variables ----
-    
-    entry->NSubJetsTrimmed     = candidate->NSubJetsTrimmed;
-    entry->NSubJetsPruned      = candidate->NSubJetsPruned; 
+
+    entry->NSubJetsTrimmed = candidate->NSubJetsTrimmed;
+    entry->NSubJetsPruned = candidate->NSubJetsPruned;
     entry->NSubJetsSoftDropped = candidate->NSubJetsSoftDropped;
-    
+
     for(i = 0; i < 5; i++)
     {
-      entry->FracPt[i]        = candidate -> FracPt[i];
-      entry->Tau[i]           = candidate -> Tau[i];
-      entry->TrimmedP4[i]     = candidate -> TrimmedP4[i];
-      entry->PrunedP4[i]      = candidate -> PrunedP4[i];
+      entry->FracPt[i] = candidate -> FracPt[i];
+      entry->Tau[i] = candidate -> Tau[i];
+      entry->TrimmedP4[i] = candidate -> TrimmedP4[i];
+      entry->PrunedP4[i] = candidate -> PrunedP4[i];
       entry->SoftDroppedP4[i] = candidate -> SoftDroppedP4[i];
     }
-   
+
     FillParticles(candidate, &entry->Particles);
   }
 }

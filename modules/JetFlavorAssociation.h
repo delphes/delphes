@@ -16,12 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JetFlavourAssociation_h
-#define JetFlavourAssociation_h
+#ifndef JetFlavorAssociation_h
+#define JetFlavorAssociation_h
 
-/** \class JetFlavourAssociation
+/** \class JetFlavorAssociation
  *
- *  Find origin of jet and evaluate jet flavour
+ *  Find origin of jet and evaluate jet flavor
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -38,19 +38,19 @@ class ExRootFilter;
 class PartonClassifier;
 class PartonClassifierLHEF;
 
-class JetFlavourAssociation: public DelphesModule
+class JetFlavorAssociation: public DelphesModule
 {
 public:
 
-  JetFlavourAssociation();
-  ~JetFlavourAssociation();
+  JetFlavorAssociation();
+  ~JetFlavorAssociation();
 
   void Init();
   void Process();
   void Finish();
 
-  void GetAlgoFlavour(Candidate *jet, TIter &itPartonArray, TIter &itPartonArrayLHEF);
-  void GetPhysicsFlavour(Candidate *jet, TIter &itPartonArray, TIter &itPartonArrayLHEF);
+  void GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonArrayLHEF);
+  void GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonArrayLHEF);
 
 private:
 
@@ -72,7 +72,7 @@ private:
   const TObjArray *fJetInputArray; //!
   const TObjArray *fParticleInputArray; //!
 
-  ClassDef(JetFlavourAssociation, 1)
+  ClassDef(JetFlavorAssociation, 1)
 };
 
 #endif

@@ -41,6 +41,7 @@
 #include "modules/EnergyScale.h"
 #include "modules/UniqueObjectFinder.h"
 #include "modules/TrackCountingBTagging.h"
+#include "modules/BTaggingCMS.h"
 #include "modules/BTagging.h"
 #include "modules/TauTagging.h"
 #include "modules/TreeWriter.h"
@@ -58,7 +59,7 @@
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
 #include "modules/RunPUPPI.h"
-#include "modules/JetFlavourAssociation.h"
+#include "modules/JetFlavorAssociation.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -83,6 +84,7 @@
 #pragma link C++ class EnergyScale+;
 #pragma link C++ class UniqueObjectFinder+;
 #pragma link C++ class TrackCountingBTagging+;
+#pragma link C++ class BTaggingCMS+;
 #pragma link C++ class BTagging+;
 #pragma link C++ class TauTagging+;
 #pragma link C++ class TreeWriter+;
@@ -100,7 +102,7 @@
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
 #pragma link C++ class RunPUPPI+;
-#pragma link C++ class JetFlavourAssociation+;
+#pragma link C++ class JetFlavorAssociation+;
 #pragma link C++ class ExampleModule+;
 
 #endif

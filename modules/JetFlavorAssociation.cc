@@ -17,7 +17,7 @@
  */
 
 
-/** \class JetFlavourAssociation
+/** \class JetFlavorAssociation
  *
  *  Find origin of jet && evaluate jet flavor
  *
@@ -25,7 +25,7 @@
  *
  */
 
-#include "modules/JetFlavourAssociation.h"
+#include "modules/JetFlavorAssociation.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -116,18 +116,18 @@ Int_t PartonClassifierLHEF::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-JetFlavourAssociation::JetFlavourAssociation() :
+JetFlavorAssociation::JetFlavorAssociation() :
   fClassifier(0), fFilter(0),
   fItPartonInputArray(0), fItPartonInputArrayLHEF(0),
   fItJetInputArray(0), fItParticleInputArray(0)
 {
-  fClassifier    = new PartonClassifier;
+  fClassifier = new PartonClassifier;
   fClassifierLHEF = new PartonClassifierLHEF;
 }
 
 //------------------------------------------------------------------------------
 
-JetFlavourAssociation::~JetFlavourAssociation()
+JetFlavorAssociation::~JetFlavorAssociation()
 {
   if(fClassifier) delete fClassifier;
   if(fClassifierLHEF) delete fClassifierLHEF;
@@ -135,7 +135,7 @@ JetFlavourAssociation::~JetFlavourAssociation()
 
 //------------------------------------------------------------------------------
 
-void JetFlavourAssociation::Init()
+void JetFlavorAssociation::Init()
 {
   ExRootConfParam param;
 
@@ -167,7 +167,7 @@ void JetFlavourAssociation::Init()
 
 //------------------------------------------------------------------------------
 
-void JetFlavourAssociation::Finish()
+void JetFlavorAssociation::Finish()
 {
   if(fFilter) delete fFilter;
   if(fFilterLHEF) delete fFilterLHEF;
@@ -180,7 +180,7 @@ void JetFlavourAssociation::Finish()
 
 //------------------------------------------------------------------------------
 
-void JetFlavourAssociation::Process(){
+void JetFlavorAssociation::Process(){
 
   Candidate *jet;
   TObjArray *partonArray;
@@ -204,8 +204,8 @@ void JetFlavourAssociation::Process(){
   while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
   {
     // get standard flavor
-    GetAlgoFlavour(jet, itPartonArray, itPartonLHEFArray);
-    GetPhysicsFlavour(jet, itPartonArray, itPartonLHEFArray);
+    GetAlgoFlavor(jet, itPartonArray, itPartonLHEFArray);
+    GetPhysicsFlavor(jet, itPartonArray, itPartonLHEFArray);
   }
 }
 
@@ -213,7 +213,7 @@ void JetFlavourAssociation::Process(){
 // Standard definition of jet flavor in
 // https://cmssdt.cern.ch/SDT/lxr/source/PhysicsTools/JetMCAlgos/plugins/JetPartonMatcher.cc?v=CMSSW_7_3_0_pre1
 
-void JetFlavourAssociation::GetAlgoFlavour(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray)
+void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray)
 {
   float maxPt = 0;
   float minDr = 1000;
@@ -253,12 +253,12 @@ void JetFlavourAssociation::GetAlgoFlavour(Candidate *jet, TIter &itPartonArray,
       if(parton->D1 != -1 || parton->D2 != -1)
       {
         // partons are only quarks || gluons
-        int daughterFlavour1 = -1;
-        int daughterFlavour2 = -1;
-        if(parton->D1 != -1) daughterFlavour1 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->At(parton->D1))->PID);
-        if(parton->D2 != -1) daughterFlavour2 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->At(parton->D2))->PID);
-        if((daughterFlavour1 == 1 || daughterFlavour1 == 2 || daughterFlavour1 == 3 || daughterFlavour1 == 4 || daughterFlavour1 == 5 || daughterFlavour1 == 21)) daughterCounter++;
-        if((daughterFlavour2 == 1 || daughterFlavour2 == 2 || daughterFlavour2 == 3 || daughterFlavour2 == 4 || daughterFlavour1 == 5 || daughterFlavour2 == 21)) daughterCounter++;
+        int daughterFlavor1 = -1;
+        int daughterFlavor2 = -1;
+        if(parton->D1 != -1) daughterFlavor1 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->At(parton->D1))->PID);
+        if(parton->D2 != -1) daughterFlavor2 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->At(parton->D2))->PID);
+        if((daughterFlavor1 == 1 || daughterFlavor1 == 2 || daughterFlavor1 == 3 || daughterFlavor1 == 4 || daughterFlavor1 == 5 || daughterFlavor1 == 21)) daughterCounter++;
+        if((daughterFlavor2 == 1 || daughterFlavor2 == 2 || daughterFlavor2 == 3 || daughterFlavor2 == 4 || daughterFlavor1 == 5 || daughterFlavor2 == 21)) daughterCounter++;
       }
       if(daughterCounter > 0) continue;
       if(jet->Momentum.DeltaR(parton->Momentum) <= fDeltaR)
@@ -295,14 +295,14 @@ void JetFlavourAssociation::GetAlgoFlavour(Candidate *jet, TIter &itPartonArray,
 
 //------------------------------------------------------------------------------
 
-void JetFlavourAssociation::GetPhysicsFlavour(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray)
+void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray)
 {
   float minDr = 1000;
   int partonCounter = 0;
   float biggerConeSize = 0.7;
   float dist;
   bool isGoodCandidate;
-  int contaminatingFlavour = 0;
+  int contaminatingFlavor = 0;
   int motherCounter = 0;
   Candidate *parton, *partonLHEF, *mother1, *mother2;
   Candidate *tempParton = 0, *tempPartonNearest = 0;
@@ -371,7 +371,7 @@ void JetFlavourAssociation::GetPhysicsFlavour(Candidate *jet, TIter &itPartonArr
     for(itContaminations = contaminations.begin(); itContaminations != contaminations.end(); ++itContaminations)
     {
       parton = *itContaminations;
-      contaminatingFlavour = TMath::Abs(parton->PID);
+      contaminatingFlavor = TMath::Abs(parton->PID);
       motherCounter = 0;
       if(parton->M1 != -1) motherCounter++;
       if(parton->M2 != -1) motherCounter++;
@@ -390,7 +390,7 @@ void JetFlavourAssociation::GetPhysicsFlavour(Candidate *jet, TIter &itPartonArr
       if(TMath::Abs(tempParton->PID) == 4)
       {
         // keep association --> the initialParton is a c --> the contaminated parton is a c
-        if(contaminatingFlavour == 4) continue;
+        if(contaminatingFlavor == 4) continue;
         jet->FlavorPhysics = 0; // all the other cases reject!
         break;
       }
