@@ -1,23 +1,20 @@
 /*
-
 This macro shows how to compute jet energy scale.
 root -l examples/Example4.C'("delphes_output.root", "plots.root")'
 
-The output ROOT file contains the pT(MC)/pT(Reco) distributions for various pT(Reco) and |eta| bins.
-The peak value of such distribution is interpreted as the jet energy correction to be applied for that given pT(Reco), |eta| bin.
+The output ROOT file contains the pT(MC)/pT(Reco) distributions for
+various pT(Reco) and |eta| bins. The peak value of such distribution is
+interpreted as the jet energy correction to be applied for that
+given pT(Reco), |eta| bin.
 
-This can be done by modifying the "ScaleFormula" input parameter to the JetEnergyScale module in the delphes_card_XXX.tcl
-
-
+This can be done by modifying the "ScaleFormula" input parameter to
+the JetEnergyScale module in the delphes_card_XXX.tcl
 
 e.g  a smooth function:
 
-
-  set ScaleFormula { sqrt(3.0 - 0.1*(abs(eta)))^2 / pt + 1.0 ) }
-
+  set ScaleFormula { sqrt(3.0 - 0.1*(abs(eta)))^2 / pt + 1.0) }
 
 or a binned function:
-
 
   set ScaleFormula {(abs(eta) > 0.0 && abs(eta) <= 2.5) * (pt > 20.0 && pt <= 50.0)  * (1.10) +
                     (abs(eta) > 0.0 && abs(eta) <= 2.5) * (pt > 50.0 && pt <= 100.0) * (1.05) +
@@ -26,12 +23,19 @@ or a binned function:
                     (abs(eta) > 2.5 && abs(eta) <= 5.0) * (pt > 50.0 && pt <= 100.0) * (1.05) +
                     (abs(eta) > 2.5 && abs(eta) <= 5.0) * (pt > 100.0)               * (1.00)}
 
-
-Be aware that a binned jet energy scale can produce "steps" in the corrected jet pt distribution ...
-
-
-
+Be aware that a binned jet energy scale can produce "steps" in the corrected
+jet pt distribution ...
 */
+
+#ifdef __CLING__
+R__LOAD_LIBRARY(libDelphes)
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
+#include "external/ExRootAnalysis/ExRootResult.h"
+#else
+class ExRootTreeReader;
+class ExRootResult;
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -160,12 +164,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
   cout << "** Chain contains " << allEntries << " events" << endl;
 
   Jet *jet, *genjet;
-  GenParticle *part;
+  GenParticle *particle;
   TObject *object;
 
-  TLorentzVector JetMom, GenJetMom, BestGenJetMom;
+  TLorentzVector jetMomentum, genJetMomentum, bestGenJetMomentum;
 
-  Float_t Dr;
+  Float_t deltaR;
   Float_t pt, eta;
   Long64_t entry;
 
@@ -176,7 +180,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
-    //  cout<<"--  New event -- "<<endl;
 
     if(entry%500 == 0) cout << "Event number: "<< entry <<endl;
 
@@ -185,61 +188,56 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
     {
 
       jet = (Jet*) branchJet->At(i);
-      JetMom = jet-> P4();
+      jetMomentum = jet->P4();
 
-      plots->fJetPT->Fill(JetMom.Pt());
+      plots->fJetPT->Fill(jetMomentum.Pt());
 
-      Dr = 999;
+      deltaR = 999;
 
      // Loop over all hard partons in event
      for(j = 0; j < branchParticle->GetEntriesFast(); ++j)
      {
+        particle = (GenParticle*) branchParticle->At(j);
 
-        part = (GenParticle*) branchParticle->At(j);
+        genJetMomentum = particle->P4();
 
-        GenJetMom = part -> P4();
+	// this is simply to avoid warnings from initial state particle
+        // having infite rapidity ...
+	if(genJetMomentum.Px() == 0 && genJetMomentum.Py() == 0) continue;
 
-	//this is simply to avoid warnings from initial state particle having infite rapidity ...
-	if(GenJetMom.Px() == 0 && GenJetMom.Py() == 0) continue;
-
-        //take the closest parton candidate
-        if( GenJetMom.DeltaR(JetMom) < Dr )
+        // take the closest parton candidate
+        if(genJetMomentum.DeltaR(jetMomentum) < deltaR)
         {
-           Dr = GenJetMom.DeltaR(JetMom);
-           BestGenJetMom = GenJetMom;
+           deltaR = genJetMomentum.DeltaR(jetMomentum);
+           bestGenJetMomentum = genJetMomentum;
         }
-
       }
 
-     if(Dr < 0.3)
-     {
-       pt  = JetMom.Pt();
-       eta = TMath::Abs(JetMom.Eta());
+      if(deltaR < 0.3)
+      {
+        pt  = jetMomentum.Pt();
+        eta = TMath::Abs(jetMomentum.Eta());
 
 
-       if( pt > 20.0 && pt < 50.0 && eta > 0.0 && eta < 2.5 ) plots -> fJetRes_Pt_20_50_Eta_0_25->Fill(BestGenJetMom.Pt()/JetMom.Pt());
-       if( pt > 20.0 && pt < 50.0 && eta > 2.5 && eta < 5.0 ) plots -> fJetRes_Pt_20_50_Eta_25_5->Fill(BestGenJetMom.Pt()/JetMom.Pt());
+        if(pt > 20.0 && pt < 50.0 && eta > 0.0 && eta < 2.5) plots -> fJetRes_Pt_20_50_Eta_0_25->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
+        if(pt > 20.0 && pt < 50.0 && eta > 2.5 && eta < 5.0) plots -> fJetRes_Pt_20_50_Eta_25_5->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
 
-       if( pt > 50.0 && pt < 100.0 && eta > 0.0 && eta < 2.5 ) plots -> fJetRes_Pt_50_100_Eta_0_25->Fill(BestGenJetMom.Pt()/JetMom.Pt());
-       if( pt > 50.0 && pt < 100.0 && eta > 2.5 && eta < 5.0 ) plots -> fJetRes_Pt_50_100_Eta_25_5->Fill(BestGenJetMom.Pt()/JetMom.Pt());
+        if(pt > 50.0 && pt < 100.0 && eta > 0.0 && eta < 2.5) plots -> fJetRes_Pt_50_100_Eta_0_25->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
+        if(pt > 50.0 && pt < 100.0 && eta > 2.5 && eta < 5.0) plots -> fJetRes_Pt_50_100_Eta_25_5->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
 
-       if( pt > 100.0 && pt < 200.0 && eta > 0.0 && eta < 2.5 ) plots -> fJetRes_Pt_100_200_Eta_0_25->Fill(BestGenJetMom.Pt()/JetMom.Pt());
-       if( pt > 100.0 && pt < 200.0 && eta > 2.5 && eta < 5.0 ) plots -> fJetRes_Pt_100_200_Eta_25_5->Fill(BestGenJetMom.Pt()/JetMom.Pt());
+        if(pt > 100.0 && pt < 200.0 && eta > 0.0 && eta < 2.5) plots -> fJetRes_Pt_100_200_Eta_0_25->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
+        if(pt > 100.0 && pt < 200.0 && eta > 2.5 && eta < 5.0) plots -> fJetRes_Pt_100_200_Eta_25_5->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
 
-       if( pt > 200.0 && pt < 500.0 && eta > 0.0 && eta < 2.5 ) plots -> fJetRes_Pt_200_500_Eta_0_25->Fill(BestGenJetMom.Pt()/JetMom.Pt());
-       if( pt > 200.0 && pt < 500.0 && eta > 2.5 && eta < 5.0 ) plots -> fJetRes_Pt_200_500_Eta_25_5->Fill(BestGenJetMom.Pt()/JetMom.Pt());
+        if(pt > 200.0 && pt < 500.0 && eta > 0.0 && eta < 2.5) plots -> fJetRes_Pt_200_500_Eta_0_25->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
+        if(pt > 200.0 && pt < 500.0 && eta > 2.5 && eta < 5.0) plots -> fJetRes_Pt_200_500_Eta_25_5->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
 
-       if( pt > 500.0               && eta > 0.0 && eta < 2.5 ) plots -> fJetRes_Pt_500_inf_Eta_0_25->Fill(BestGenJetMom.Pt()/JetMom.Pt());
-       if( pt > 500.0               && eta > 2.5 && eta < 5.0 ) plots -> fJetRes_Pt_500_inf_Eta_25_5->Fill(BestGenJetMom.Pt()/JetMom.Pt());
+        if(pt > 500.0               && eta > 0.0 && eta < 2.5) plots -> fJetRes_Pt_500_inf_Eta_0_25->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
+        if(pt > 500.0               && eta > 2.5 && eta < 5.0) plots -> fJetRes_Pt_500_inf_Eta_25_5->Fill(bestGenJetMomentum.Pt()/jetMomentum.Pt());
 
-
-     }
-
-
+      }
     }
   }
 }
-
 
 //------------------------------------------------------------------------------
 
