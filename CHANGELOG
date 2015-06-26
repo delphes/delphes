@@ -1,17 +1,21 @@
 3.3.0:
 - updated FastJet library to 3.1.2
-- added PhotonConversions module
+- adapted examples, EventDisplay, DelphesFormula and DelphesTF2 to ROOT 6.04
+- fixed tau-tagging for events without tau (thanks to Sho Iwamoto)
+- added PhotonConversion module
+- added TaggingParticlesSkimmer module
+- added phi and energy dependence to AngularSmearing, BTagging, Efficiency, EnergyScale, EnergySmearing, IdentificationMapi, ImpactParameterSmearing and MomentumSmearing
 - added IsRecoPU flag and PTMin parameter to TrackPileUpSubtractor
 - added Invert and Status options to PdgCodeFilter (thanks to Chase Shimmin)
-- added new isolation variables to Candidate and Electrons, Muons, Photons classes (thanks to Raffaele Gerosa)
+- added new isolation variables to Candidate, Electron, Muon and Photon classes (thanks to Raffaele Gerosa)
 - added code from CMS to PileUpMerger and PileUpMergerPythia8
-- included timing information in Calorimeter
-- included last PileUpJetID version (thanks to Seth Senz)
+- added timing information to Calorimeter
+- added new PileUpJetID version (thanks to Seth Senz)
 - added Area 4-vector to jet class
 - added PUPPI algorithm and RunPUPPI module
 - added RecursiveTools package from fastjet contribs
 - replaced N-subjettiness with an array in Jet class (same as in Candidate class)
-- added Trimming, Pruning and SoftDrop in FastJetFinder
+- added Trimming, Pruning and SoftDrop to FastJetFinder
 - added possibility to use DelphesPythia8 with LHE files
 - added Pythia8 examples
 - added JetFlavourAssociation module with Physics and Algorithmic definitions of the jet flavor
