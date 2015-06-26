@@ -8,6 +8,13 @@ root -l examples/Example2.C'("delphes_output.root")'
 #include "TH1.h"
 #include "TSystem.h"
 
+#ifdef __CLING__
+R__LOAD_LIBRARY(libDelphes)
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
+#include "external/ExRootAnalysis/ExRootResult.h"
+#endif
+
 //------------------------------------------------------------------------------
 
 struct MyPlots

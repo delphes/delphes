@@ -3,6 +3,13 @@
  * root -l examples/EventDisplay.C'("cards/delphes_card_FCC_basic.tcl","delphes_output.root","ParticlePropagator","ChargedHadronTrackingEfficiency","MuonTrackingEfficiency","Ecal,Hcal")'
  */
 
+#ifdef __CLING__
+R__LOAD_LIBRARY(libEve)
+R__LOAD_LIBRARY(libDelphesDisplay)
+#include "display/DelphesEventDisplay.h"
+#include "display/Delphes3DGeometry.h"
+#endif
+
 void EventDisplay(const char *configfile = "delphes_card_CMS.tcl",
                   const char *datafile = "delphes_output.root",
                   const char *ParticlePropagator = "ParticlePropagator",
@@ -32,7 +39,7 @@ void EventDisplay(const char *configfile = "delphes_card_CMS.tcl",
     det3D.readFile(configfile, ParticlePropagator, TrackingEfficiency, MuonEfficiency, Calorimeters);
 
     // create the application
-    DelphesEventDisplay* display = new DelphesEventDisplay(configfile, datafile, det3D);
+    DelphesEventDisplay *display = new DelphesEventDisplay(configfile, datafile, det3D);
   }
 }
 

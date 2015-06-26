@@ -17,9 +17,11 @@
  */
 
 #include "classes/DelphesTF2.h"
+
+#include "RVersion.h"
 #include "TString.h"
+
 #include <stdexcept>
-#include <string>
 
 using namespace std;
 
@@ -33,7 +35,7 @@ DelphesTF2::DelphesTF2() :
 //------------------------------------------------------------------------------
 
 DelphesTF2::DelphesTF2(const char *name, const char *expression) :
-  TF2(name,expression)
+  TF2(name, expression)
 {
 }
 
@@ -45,20 +47,26 @@ DelphesTF2::~DelphesTF2()
 
 //------------------------------------------------------------------------------
 
-Int_t DelphesTF2::DefinedVariable(TString &chaine, Int_t &action)
+Int_t DelphesTF2::Compile(const char *expression)
 {
-  action = kVariable;
-  if(chaine == "z")
+  TString buffer;
+  const char *it;
+  for(it = expression; *it; ++it)
   {
-    if(fNdim < 1) fNdim = 1;
-    return 0;
+    if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+    buffer.Append(*it);
   }
-  else if(chaine == "t")
+  buffer.ReplaceAll("z", "x");
+  buffer.ReplaceAll("t", "y");
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,04,00)
+  if(TF2::Compile(buffer) != 0)
+#else
+  if(TF2::GetFormula()->Compile(buffer) != 0)
+#endif
   {
-    if(fNdim < 2) fNdim = 2;
-    return 1;
+    throw runtime_error("Invalid formula.");
   }
-  return -1;
+  return 0;
 }
 
 //------------------------------------------------------------------------------
