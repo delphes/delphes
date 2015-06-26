@@ -1,7 +1,8 @@
 3.3.0:
 - updated FastJet library to 3.1.2
 - added PhotonConversions module
-- added isRecoPU flag and fPTMin parameter in TrackPileUpSubtractor
+- added IsRecoPU flag and PTMin parameter to TrackPileUpSubtractor
+- added Invert and Status options to PdgCodeFilter (thanks to Chase Shimmin)
 - added new isolation variables to Candidate and Electrons, Muons, Photons classes (thanks to Raffaele Gerosa)
 - added code from CMS to PileUpMerger and PileUpMergerPythia8
 - included timing information in Calorimeter
