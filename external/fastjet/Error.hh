@@ -2,7 +2,7 @@
 #define __FASTJET_ERROR_HH__
 
 //FJSTARTHEADER
-// $Id: Error.hh 3694 2014-09-18 13:21:54Z soyez $
+// $Id: Error.hh 3809 2015-02-20 13:05:13Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -92,6 +92,25 @@ private:
 #if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
   static LimitedWarning _execinfo_undefined;
 #endif
+};
+
+
+/// @ingroup error_handling
+/// \class InternalError
+/// class corresponding to critical internal errors
+/// 
+/// This is an error class (derived from Error) meant for serious,
+/// critical, internal errors that we still want to be catchable by an
+/// end-user [e.g. a serious issue in clustering where the end-user
+/// can catch it and retry with a different strategy]
+///
+/// Please directly contact the FastJet authors if you see such an
+/// error.
+class InternalError : public Error{
+public:
+  /// ctor with error message:
+  /// just add a bit of info to the message and pass it to the base class
+  InternalError(const std::string & message_in) : Error(std::string("*** CRITICAL INTERNAL FASTJET ERROR *** CONTACT THE AUTHORS *** ") + message_in){ }
 };
 
 

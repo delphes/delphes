@@ -2,7 +2,7 @@
 #define __FASTJET_LAZYTILING9ALT_HH__
 
 //FJSTARTHEADER
-// $Id: LazyTiling9Alt.hh 3477 2014-07-29 14:34:39Z salam $
+// $Id: LazyTiling9Alt.hh 3808 2015-02-20 11:24:53Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -36,6 +36,39 @@
 #include "fastjet/ClusterSequence.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
+
+/// Rounding errors in the Lazy strategies may cause the following
+/// problem: when browsing tiles in the vicinity of the particles
+/// being clustered in order to decide which of these tiles may
+/// contain particles that need to be updated (because theit NN is one
+/// of the particles that are currently clustered), we discard tiles
+/// that are deemed "too far from the cell" by the "max_NN_dist"
+/// criterion. Because of rounding error, this condition can sometimes
+/// miss cases where an update is needed.
+///
+/// An example of this happens if a particle '1' is, say, at the lower
+/// edge of the rapidity of a given tile, with a particle '2' in the
+/// tile directly on its left at the same rapidity. Assume also that
+/// max_NN_dist in 2's tile corresponds to the distance between 2 and
+/// teh tile of 1. If 2 is 1's NN then in case 2 gets clustered, 1's
+/// NN needs to be updated. However, rounding errors in the
+/// calculation of the distance between 1 and 2 may result is
+/// something slightly larger than the max_NN_dist in 2's tile.
+///
+/// This situation corresponds to the bug reported by Jochen Olt on
+/// February 12 2015 [see issue-tracker/2015-02-infinite-loop],
+/// causing an infinite loop.
+///
+/// To prevent this, the simplest solution is, when looking at tiles
+/// to browse for updateds, to add a margin of security close to the
+/// edges of the cell, i.e. instead of updating only tiles for which
+/// distance<=max_NN_dist, we will update tiles for which
+/// distance<=max_NN_dist+tile_edge_security_margin.
+///
+/// Note that this does not need to be done when computing nearest
+/// neighbours [rounding errors are tolerated there] but it is
+/// critical when tracking points that have to be updated.
+const double tile_edge_security_margin=1.0e-7;
 
 /// structure analogous to BriefJet, but with the extra information
 /// needed for dealing with tiles

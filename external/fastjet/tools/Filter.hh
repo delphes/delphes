@@ -2,7 +2,7 @@
 #define __FASTJET_TOOLS_FILTER_HH__
 
 //FJSTARTHEADER
-// $Id: Filter.hh 3494 2014-07-30 20:38:48Z soyez $
+// $Id: Filter.hh 3845 2015-03-08 08:35:36Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -141,7 +141,7 @@ public:
 
   /// Set a subtractor that is applied to all individual subjets before
   /// deciding which ones to keep. It takes precedence over a non-zero rho.
-  void set_subtractor(const FunctionOfPseudoJet<PseudoJet> * subtractor) {_subtractor = subtractor;}
+  void set_subtractor(const FunctionOfPseudoJet<PseudoJet> * subtractor_in) {_subtractor = subtractor_in;}
 
   /// runs the filtering and sets kept and rejected to be the jets of interest
   /// (with non-zero rho, they will have been subtracted).

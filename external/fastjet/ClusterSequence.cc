@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence.cc 3685 2014-09-11 20:15:00Z salam $
+// $Id: ClusterSequence.cc 3809 2015-02-20 13:05:13Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -371,8 +371,8 @@ void ClusterSequence::_initialise_and_run_no_decant () {
     tiling.run();
     _plugin_activated = false;
 
-#ifndef __FJCORE__
   } else if (_strategy == N2MHTLazy9AntiKtSeparateGhosts) {
+#ifndef __FJCORE__
     // attempt to use an external tiling routine -- it manipulates
     // the CS history via the plugin mechanism
     _plugin_activated = true;
@@ -1470,9 +1470,24 @@ void ClusterSequence::_add_step_to_history (
   int local_step = _history.size()-1;
   assert(local_step == step_number);
 
+  // sanity check: make sure the particles have not already been recombined
+  //
+  // Note that good practice would make this an assert (since this is
+  // a serious internal issue). However, we decided to throw an
+  // InternalError so that the end user can decide to catch it and
+  // retry the clustering with a different strategy.
+
   assert(parent1 >= 0);
+  if (_history[parent1].child != Invalid){
+    throw InternalError("trying to recomine an object that has previsously been recombined");
+  }
   _history[parent1].child = local_step;
-  if (parent2 >= 0) {_history[parent2].child = local_step;}
+  if (parent2 >= 0) {
+    if (_history[parent2].child != Invalid){
+      throw InternalError("trying to recomine an object that has previsously been recombined");
+    }
+    _history[parent2].child = local_step;
+  }
 
   // get cross-referencing right from PseudoJets
   if (jetp_index != Invalid) {
