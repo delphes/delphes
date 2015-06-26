@@ -193,7 +193,7 @@ void BTagging::Process()
     pt = jetMomentum.Pt();
     e = jetMomentum.E();
 
-    // find an efficency formula
+    // find an efficiency formula
     itEfficiencyMap = fEfficiencyMap.find(jet->Flavor);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
@@ -201,10 +201,10 @@ void BTagging::Process()
     }
     formula = itEfficiencyMap->second;
 
-    // apply an efficency formula
+    // apply an efficiency formula
     jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
 
-    // find an efficency formula for algo flavor definition
+    // find an efficiency formula for algo flavor definition
     itEfficiencyMap = fEfficiencyMap.find(jet->FlavorAlgo);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
@@ -212,10 +212,10 @@ void BTagging::Process()
     }
     formula = itEfficiencyMap->second;
 
-    // apply an efficency formula
+    // apply an efficiency formula
     jet->BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
 
-    // find an efficency formula for phys flavor definition
+    // find an efficiency formula for phys flavor definition
     itEfficiencyMap = fEfficiencyMap.find(jet->FlavorPhys);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
@@ -223,7 +223,7 @@ void BTagging::Process()
     }
     formula = itEfficiencyMap->second;
 
-    // apply an efficency formula
+    // apply an efficiency formula
     jet->BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
   }
 }
