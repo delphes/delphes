@@ -73,6 +73,11 @@ void PdgCodeFilter::Init()
   // PT threshold
   fPTMin = GetDouble("PTMin", 0.0);
 
+  fInvertPdg = GetBool("InvertPdg", false);
+
+  fRequireStatus = GetBool("RequireStatus", false);
+  fStatus = GetInt("Status", 1);
+
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
@@ -108,6 +113,10 @@ void PdgCodeFilter::Process()
   Bool_t pass;
   Double_t pt;
 
+  const Bool_t requireStatus = fRequireStatus;
+  const Bool_t invertPdg = fInvertPdg;
+  const int reqStatus = fStatus;
+
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
@@ -115,11 +124,13 @@ void PdgCodeFilter::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     pt = candidateMomentum.Pt();
 
-    pass = kTRUE;
+    if(pt < fPTMin) continue;
+    if(requireStatus && (candidate->Status != reqStatus)) continue;
 
-    if(pt < fPTMin) pass = kFALSE;
+    pass = kTRUE;
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
 
+    if (invertPdg) pass = !pass;
     if(pass) fOutputArray->Add(candidate);
   }
 }
