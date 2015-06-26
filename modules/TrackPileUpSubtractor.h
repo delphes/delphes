@@ -49,6 +49,8 @@ private:
 
   Double_t fZVertexResolution;
 
+  Double_t fPTMin; 
+
   std::map< TIterator *, TObjArray * > fInputMap; //!
 
   ClassDef(TrackPileUpSubtractor, 1)

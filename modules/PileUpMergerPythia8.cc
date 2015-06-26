@@ -28,7 +28,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesTF2.h"
 #include "classes/DelphesPileUpReader.h"
 
 #include "ExRootAnalysis/ExRootResult.h"
@@ -55,14 +55,16 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpMergerPythia8::PileUpMergerPythia8() :
-  fPythia(0), fItInputArray(0)
+  fFunction(0), fPythia(0), fItInputArray(0)
 {
+  fFunction = new DelphesTF2;
 }
 
 //------------------------------------------------------------------------------
 
 PileUpMergerPythia8::~PileUpMergerPythia8()
 {
+  delete fFunction;
 }
 
 //------------------------------------------------------------------------------
@@ -71,10 +73,22 @@ void PileUpMergerPythia8::Init()
 {
   const char *fileName;
 
+  fPileUpDistribution = GetInt("PileUpDistribution", 0);
+
   fMeanPileUp  = GetDouble("MeanPileUp", 10);
-  fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
+
+  fZVertexSpread = GetDouble("ZVertexSpread", 0.15);
+  fTVertexSpread = GetDouble("TVertexSpread", 1.5E-09);
+
+  fInputBeamSpotX = GetDouble("InputBeamSpotX", 0.0);
+  fInputBeamSpotY = GetDouble("InputBeamSpotY", 0.0);
+  fOutputBeamSpotX = GetDouble("OutputBeamSpotX", 0.0);
+  fOutputBeamSpotY = GetDouble("OutputBeamSpotY", 0.0);
 
   fPTMin = GetDouble("PTMin", 0.0);
+
+  fFunction->Compile(GetString("VertexDistributionFormula", "0.0"));
+  fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
 
   fileName = GetString("ConfigFile", "MinBias.cmnd");
   fPythia = new Pythia8::Pythia();
@@ -85,7 +99,8 @@ void PileUpMergerPythia8::Init()
   fItInputArray = fInputArray->MakeIterator();
 
   // create output arrays
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
+  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -102,31 +117,81 @@ void PileUpMergerPythia8::Process()
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid, status;
-  Float_t x, y, z, t;
+  Float_t x, y, z, t, vx, vy;
   Float_t px, py, pz, e;
-  Double_t dz, dphi;
-  Int_t poisson, event, i;
-  Candidate *candidate;
+  Double_t dz, dphi, dt;
+  Int_t numberOfEvents, event, numberOfParticles, i;
+  Candidate *candidate, *vertex;
   DelphesFactory *factory;
 
+  const Double_t c_light = 2.99792458E8;
+
   fItInputArray->Reset();
+
+  // --- Deal with primary vertex first  ------
+
+  fFunction->GetRandom2(dz, dt);
+
+  dt *= c_light*1.0E3; // necessary in order to make t in mm/c
+  dz *= 1.0E3; // necessary in order to make z in mm
+  vx = 0.0;
+  vy = 0.0;
+  numberOfParticles = fInputArray->GetEntriesFast();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    fOutputArray->Add(candidate);
+    vx += candidate->Position.X();
+    vy += candidate->Position.Y();
+    z = candidate->Position.Z();
+    t = candidate->Position.T();
+    candidate->Position.SetZ(z + dz);
+    candidate->Position.SetT(t + dt);
+    fParticleOutputArray->Add(candidate);
+  }
+
+  if(numberOfParticles > 0)
+  {
+    vx /= numberOfParticles;
+    vy /= numberOfParticles;
   }
 
   factory = GetFactory();
 
-  poisson = gRandom->Poisson(fMeanPileUp);
+  vertex = factory->NewCandidate();
+  vertex->Position.SetXYZT(vx, vy, dz, dt);
+  fVertexOutputArray->Add(vertex);
 
-  for(event = 0; event < poisson; ++event)
+  // --- Then with pile-up vertices  ------
+
+  switch(fPileUpDistribution)
+  {
+    case 0:
+      numberOfEvents = gRandom->Poisson(fMeanPileUp);
+      break;
+    case 1:
+      numberOfEvents = gRandom->Integer(2*fMeanPileUp + 1);
+      break;
+    default:
+      numberOfEvents = gRandom->Poisson(fMeanPileUp);
+      break;
+  }
+
+  for(event = 0; event < numberOfEvents; ++event)
   {
     while(!fPythia->next());
 
-    dz = gRandom->Gaus(0.0, fZVertexSpread);
+   // --- Pile-up vertex smearing
+
+    fFunction->GetRandom2(dz, dt);
+
+    dt *= c_light*1.0E3; // necessary in order to make t in mm/c
+    dz *= 1.0E3; // necessary in order to make z in mm
+
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 
-    for(i = 1; i < fPythia->event.size(); ++i)
+    vx = 0.0;
+    vy = 0.0;
+    numberOfParticles = fPythia->event.size();
+    for(i = 1; i < numberOfParticles; ++i)
     {
       Pythia8::Particle &particle = fPythia->event[i];
 
@@ -142,7 +207,7 @@ void PileUpMergerPythia8::Process()
 
       candidate->PID = pid;
 
-      candidate->Status = status;
+      candidate->Status = 1;
 
       pdgParticle = pdg->GetParticle(pid);
       candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
@@ -153,13 +218,30 @@ void PileUpMergerPythia8::Process()
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
 
-      candidate->Position.SetXYZT(x, y, z + dz, t);
+      x -= fInputBeamSpotX;
+      y -= fInputBeamSpotY;
+      candidate->Position.SetXYZT(x, y, z + dz, t + dt);
       candidate->Position.RotateZ(dphi);
+      candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
-      fOutputArray->Add(candidate);
+      vx += candidate->Position.X();
+      vy += candidate->Position.Y();
+
+      fParticleOutputArray->Add(candidate);
     }
+
+    if(numberOfParticles > 0)
+    {
+      vx /= numberOfParticles;
+      vy /= numberOfParticles;
+    }
+
+    vertex = factory->NewCandidate();
+    vertex->Position.SetXYZT(vx, vy, dz, dt);
+    vertex->IsPU = 1;
+
+    fVertexOutputArray->Add(vertex);
   }
 }
 
 //------------------------------------------------------------------------------
-

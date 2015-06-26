@@ -83,6 +83,17 @@ public:
 
 //---------------------------------------------------------------------------
 
+class LHEFWeight: public TObject
+{
+public:
+  Int_t ID; // weight ID
+  Float_t Weight; // weight value
+
+  ClassDef(LHEFWeight, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class HepMCEvent: public Event
 {
 public:
@@ -230,6 +241,15 @@ public:
 
   TRefArray Particles; // references to generated particles
 
+  // Isolation variables
+
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -256,6 +276,15 @@ public:
 
   TRef Particle; // reference to generated particle
 
+  // Isolation variables
+
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -279,6 +308,15 @@ public:
   Int_t Charge; // muon charge
 
   TRef Particle; // reference to generated particle
+
+   // Isolation variables
+
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -305,26 +343,37 @@ public:
   Float_t DeltaEta;  // jet radius in pseudorapidity
   Float_t DeltaPhi;  // jet radius in azimuthal angle
 
+  UInt_t Flavor;
+  UInt_t FlavorAlgo;
+  UInt_t FlavorPhys;
+
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagAlgo;
+  UInt_t BTagPhys;
+
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
   Int_t Charge; // tau charge
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
-  Int_t    NCharged; // number of charged constituents 
-  Int_t    NNeutrals; // number of neutral constituents 
-  Float_t  Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents) 
-  Float_t  BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents) 
-  Float_t  MeanSqDeltaR; // average distance (squared) between constituent and jet weighted by pt (squared) of constituent
-  Float_t  PTD; // average pt between constituent and jet weighted by pt of constituent
-  Float_t  FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents) 
+  Int_t NCharged; // number of charged constituents
+  Int_t NNeutrals; // number of neutral constituents
+  Float_t Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents)
+  Float_t BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)
+  Float_t MeanSqDeltaR; // average distance (squared) between constituent and jet weighted by pt (squared) of constituent
+  Float_t PTD; // average pt between constituent and jet weighted by pt of constituent
+  Float_t FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents)
 
-  Float_t Tau1; // 1-subjettiness
-  Float_t Tau2; // 2-subjettiness
-  Float_t Tau3; // 3-subjettiness
-  Float_t Tau4; // 4-subjettiness
-  Float_t Tau5; // 5-subjettiness
+  Float_t Tau[5]; // N-subjettiness
+
+  TLorentzVector TrimmedP4[5]; // first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
+  TLorentzVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  TLorentzVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+
+  Int_t NSubJetsTrimmed; // number of subjets trimmed
+  Int_t NSubJetsPruned; // number of subjets pruned
+  Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
 
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
@@ -333,8 +382,9 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4() const;
+  TLorentzVector Area;
 
-  ClassDef(Jet, 2)
+  ClassDef(Jet, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -391,7 +441,8 @@ public:
 
   Float_t E; // calorimeter tower energy
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
+  Int_t   Ntimes; // number of hits contributing to time measurement
 
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
@@ -451,9 +502,18 @@ public:
   Float_t Mass;
 
   Int_t IsPU;
+  Int_t IsRecoPU;
+
   Int_t IsConstituent;
 
+  UInt_t Flavor;
+  UInt_t FlavorAlgo;
+  UInt_t FlavorPhys;
+
   UInt_t BTag;
+  UInt_t BTagAlgo;
+  UInt_t BTagPhys;
+
   UInt_t TauTag;
 
   Float_t Eem;
@@ -481,9 +541,34 @@ public:
   Float_t  PTD;
   Float_t  FracPt[5];
 
+  //Timing information
+
+  Int_t    Ntimes;
+  std::vector<std::pair<Float_t,Float_t> > Ecal_E_t;
+
+  // Isolation variables
+
+  Float_t IsolationVar;
+  Float_t IsolationVarRhoCorr;
+  Float_t SumPtCharged;
+  Float_t SumPtNeutral;
+  Float_t SumPtChargedPU;
+  Float_t SumPt;
+
   // N-subjettiness variables
 
   Float_t Tau[5];
+
+  // Other Substructure variables
+
+  TLorentzVector TrimmedP4[5]; // first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
+  TLorentzVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  TLorentzVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+
+  Int_t NSubJetsTrimmed; // number of subjets trimmed
+  Int_t NSubJetsPruned; // number of subjets pruned
+  Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
+
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -503,7 +588,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 2)
+  ClassDef(Candidate, 3)
 };
 
 #endif // DelphesClasses_h

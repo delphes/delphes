@@ -1,0 +1,280 @@
+2014-07-09  Gregory Soyez  <soyez@fastjet.fr> + Jesse
+
+	* NEWS:
+	release of RecursiveTools v1.0.0
+
+	* VERSION:
+	switched version number to 1.0.0
+
+2014-07-08  Gavin Salam  <gavin.salam@cern.ch>
+
+	* README (RecursionChoice): 
+	added ref to .hh for constness specs of virtual functions (to
+	reduce risk of failed overloading due to wrong constness).
+
+2014-07-08  Gregory Soyez  <soyez@fastjet.fr> + Jesse
+
+	* README:
+	partially rewrote the description of set_subtractor
+
+2014-07-07  Gregory Soyez  <soyez@fastjet.fr> + Jesse
+
+	* example_advanced_usage.cc:
+	* example_softdrop.cc:
+	a few small fixed in the header of the files
+
+	* VERSION:
+	switched over to 1.0.0-alpha2-devel
+
+	* README:
+	Reordered a few things and added a few details.
+
+	* Makefile (check):
+	Be quiter during "make check"
+
+	* Recluster.cc (contrib):
+	Documented the "single" ctor argument
+
+	* RecursiveSymmetryCutBase.cc (contrib):
+	If the user sets himself the reclustering, disable the "non-CA"
+	warning (we assume that he knows what he is doing). Mentioned in
+	the comments that non-CA reclustering has to be used at the user's
+	risk. Also throw when th input jet has no constituents or when
+	there is no cluster sequence after reclustering.
+
+	* Recluster.cc (contrib):
+	replaced a remaining mention to "filtering" by reclustering
+
+2014-07-04  Jesse Thaler  <jthaler@jthaler.net>
+	* VERSION
+	  . Ready for alpha release
+
+2014-06-17  Jesse Thaler  <jthaler@jthaler.net>
+	* example_advanced_usage.{cc,ref}  ** ADDED **
+	* Makefile
+	  . New example file to test a bunch of soft drop options
+	  . Put in makefile as well
+	  . Fixed nasty memory bug with pointers to Recluster
+
+	* RecursiveSymmetryCutBase.cc
+	* example_softdrop.ref 
+	  . description() now says Groomer vs. Tagger
+
+	* RecursiveSymmetryCutBase.{cc,hh}
+	  . Added optional verbose logging information about
+	    kinematics of dropped branches
+	
+	* example_softdrop.cc
+	* example_advanced_usage.cc
+	  . Fixed 
+
+
+2014-06-16  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Makefile:
+	also install the RecursiveSymmetryuCutBase.hh header
+
+2014-06-13  Jesse Thaler  <jthaler@jthaler.net>
+	* AUTHORS
+	  . Added myself to author list
+          . Put complete bibliographic details on papers
+
+	* COPYING
+	  . Added boilerplate MC/GPLv2 statement 
+
+        * example.cc:  ** REMOVED **  renamed to...
+        * example_mmdt.cc   ** ADDED **
+        * Makefile
+          . Made name change for consistency
+	  . Made corresponding changes in Makefile
+
+	* example_mmdt_sub.cc:
+	* example_mmdt.cc:
+	* example_recluster.cc:
+	  . light editing of comments
+
+	* example_softdrop.cc:
+	  . light editing of comments
+          . added assert for sdjet != 0, since SoftDrop is a groomer
+
+	* ModifiedMassDropTagger.hh
+	* Recluster.{cc,hh}
+	* RecursiveSymmetryCutBase.{cc,hh}
+	* SoftDrop.hh
+	  . Updated some comments
+
+	* README
+	  . Updated to include basic usage description and some 
+	    technical details
+
+	* TODO:
+	  . Added some discussion points.
+          
+2014-06-13  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example_softdrop.{cc,ref}:
+	added an example for SoftDrop
+
+	* SoftDrop.{hh,cc}:
+	* ModifiedMassDropTagger.{hh,cc}:
+	* RecursiveSymmetryCutBase.{hh,cc}:        *** ADDED ***
+	  . added a base class for both the mMDT and SoftDrop
+	  . made mMDT and SoftDrop inherit from RecursiveSymmetryCutBase
+	  . moved the reclustering to the base class. By default, both
+	    mMDT and SoftDrop now recluster the jet with C/A
+	  . added set_grooming_mode and set_tagging_mode methods to the
+	    base class
+
+	* Merging the development branch 1.0-beta1-softdrop-addition back
+	into the trunk (will correspond to revision 682)
+
+	* VERSION:
+	switched back to 1.0.0-devel
+
+	* SoftDrop.{hh,cc}:
+	added support for re-clustering through set_reclustering(bool,
+	Recluster*). By default, reclustering is done with
+	Cambridge/Aachen.
+
+	* example_recluster.{cc,ref}:              *** ADDED ***
+	added an example of reclustering
+
+	* Recluster.{hh,cc}:
+	added a 'single' ctor argument [true by default]. When true, the
+	hardest jet after reclustering is returned, otherwise, the result
+	is a composite jet with all the subjets as its pieces.
+
+2014-05-15  Gregory Soyez  <soyez@fastjet.fr>
+
+	* VERSION:
+	set version number to 1.0-alpha-PUWS14.1 in preparation for a
+	fastjet-contrib release for the pileup-workshop at CERN on May
+	2014.
+
+2014-04-25  Gregory Soyez  <soyez@fastjet.fr>
+
+	* ModifiedMassDropTagger.hh:
+	* ModifiedMassDropTagger.cc:
+	  Added comments at various places
+
+	* AUTHORS:
+	* README:
+	Updated info about what is now included in this contrib
+
+	* SoftDrop.hh:                *** ADDED ***
+	* SoftDrop.cc:	              *** ADDED ***
+	* Recluster.hh:	              *** ADDED ***
+	* Recluster.cc;               *** ADDED ***
+	Added tools for reclustering and softDrop
+
+2014-04-25  Gregory Soyez  <soyez@fastjet.fr>
+
+	branch started at revision 611 to start including SoftDrop in the
+	Recursivetols contrib
+
+2014-04-24  Gregory Soyez  <soyez@fastjet.fr>
+
+	* ModifiedMassDropTagger.hh:
+	added a mention of the fact that when result is called in the
+	presence of a subtractor, then the output is a subtracted
+	PseudoJet.
+
+	* ModifiedMassDropTagger.hh:
+	declared _symmetry_cut as protected (rather than provate) so it
+	can be accessed if symmetry_cut_description() is overloaded.
+
+	* example.cc:
+	trivial typo fixed in a comment
+
+2014-02-04  Gavin Salam  <gavin.salam@cern.ch>
+
+	* VERSION: 
+	upped it to 1.0-beta1
+
+	* example_mmdt_sub.cc (main): 
+	added an #if to make sure FJ3.1 features are only used if FJ3.1
+	is available. (Currently FJ3.1 is only available to FJ developers).
+
+2014-01-26  Gavin Salam  <gavin.salam@cern.ch>
+
+	* VERSION:
+	renamed to 1.0-beta0
+
+	* ModifiedMassDropTagger.hh:
+	* README:
+	added info on author names
+
+	* example_mmdt_sub.ref: *** ADDED ***
+	added reference output for the pileup test.
+
+2014-01-25  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example_mmdt_sub.cc:
+	* Makefile:
+	added an extra example illustrating functionality with pileup
+	subtraction.
+
+2014-01-24  Gavin Salam  <gavin.salam@cern.ch>
+
+	* ModifiedMassDropTagger.cc:
+
+	Reorganised code so that (sub)jet.m2()>0 check is only used when
+	absolutely necessary: so if using a scalar_z symmetry measure,
+	whenever scalar_z < zcut, then there is no point checking the mu
+	condition. This means that there's no issue if the (sub)jet mass
+	is negative, and one simply recurses down into the jet. (Whereas
+	before it would bail out, reducing the tagging efficiency).
+
+	Also removed the verbose code.
+
+2014-01-23  Gavin Salam  <gavin.salam@cern.ch>
+
+	* ModifiedMassDropTagger.cc|hh:
+	* example.cc
+	replaced "asymmetry" with "symmetry" in a number of places;
+	implemented the structural information and added it to the example;
+	added a new simplified constructor;
+	improved doxygen documentation;
+	started renaming -> RecursiveTools
+
+	* README
+	some tidying
+
+	* VERSION
+	1.0-b0
+
+2014-01-22  Gavin Salam <gavin.salam@cern.ch>
+
+	* ModifiedMassDropTagger.cc (contrib):
+	-ve mass now bails out also when using the "y" asymmetry measure.
+	Also, default my is now infinite.
+
+2014-01-20  Gavin Salam <gavin.salam@cern.ch> + Gregory
+
+
+	* ModifiedMassDropTagger.cc|hh:
+	introduced a virtual asymmetry_cut_fn (essentially a
+	dummy function returning a constant), to allow for derived classes
+	to do fancier things.
+
+	added warning about non-C/A clustering.
+	explicitly labelled some (inherited) virtual functions as
+	virtual. 
+
+2014-01-20  Gavin Salam  <gavin.salam@cern.ch>
+
+	* example.ref:
+	* example.cc (main):
+	got a first working example and make check setup.
+
+	* ModifiedMassDropTagger.cc|hh:
+	improved doxygen comments;
+	added option whereby input jet is assumed already subtracted
+
+2014-01-19  Gavin Salam  <gavin.salam@cern.ch>
+
+	* ModifiedMassDropTagger.cc|hh:
+	* many other files
+
+        Initial creation, with basic code for MMDT
+
