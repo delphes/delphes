@@ -1,34 +1,28 @@
 /*
- *  Delphes: a framework for fast simulation of a generic collider experiment
- *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
+  * Delphes: a framework for fast simulation of a generic collider experiment
+  * Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  * You should have received a copy of the GNU General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <cassert>
 #include <iostream>
 #include <utility>
 #include <algorithm>
+
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
-#include "external/ExRootAnalysis/ExRootConfReader.h"
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
-#include "display/DelphesCaloData.h"
-#include "display/DelphesBranchElement.h"
-#include "display/Delphes3DGeometry.h"
-#include "display/DelphesEventDisplay.h"
-#include "classes/DelphesClasses.h"
 #include "TEveElement.h"
 #include "TEveJetCone.h"
 #include "TEveTrack.h"
@@ -52,6 +46,23 @@
 #include "TEveEventManager.h"
 #include "TCanvas.h"
 #include "TH1F.h"
+#include "TAxis.h"
+#include "TChain.h"
+#include "TGHtml.h"
+#include "TGStatusBar.h"
+
+#include "display/DelphesCaloData.h"
+#include "display/DelphesBranchElement.h"
+#include "display/Delphes3DGeometry.h"
+#include "display/DelphesEventDisplay.h"
+#include "display/DelphesDisplay.h"
+#include "display/Delphes3DGeometry.h"
+#include "display/DelphesHtmlSummary.h"
+#include "display/DelphesPlotSummary.h"
+
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootConfReader.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
 
 DelphesEventDisplay::DelphesEventDisplay()
 {
@@ -97,7 +108,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    // initialize the application
    TEveManager::Create(kTRUE, "IV");
    fStatusBar_ = gEve->GetBrowser()->GetStatusBar();
-   TGeoManager* geom = gGeoManager;
+   TGeoManager *geom = gGeoManager;
 
    // build the detector
    tkRadius_ = det3D.getTrackerRadius();
@@ -107,13 +118,13 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    bz_ = det3D.getBField();
    etaAxis_ = det3D.getCaloAxes().first;
    phiAxis_ = det3D.getCaloAxes().second;
-   TGeoVolume* top = det3D.getDetector(false);
+   TGeoVolume *top = det3D.getDetector(false);
    geom->SetTopVolume(top);
    TEveElementList *geometry = new TEveElementList("Geometry");
-   TObjArray* nodes = top->GetNodes();
+   TObjArray *nodes = top->GetNodes();
    TIter itNodes(nodes);
-   TGeoNode* nodeobj;
-   TEveGeoTopNode* node;
+   TGeoNode *nodeobj;
+   TEveGeoTopNode *node;
    while((nodeobj = (TGeoNode*)itNodes.Next())) {
      node = new TEveGeoTopNode(gGeoManager,nodeobj);
      node->UseNodeTrans();
@@ -130,9 +141,9 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 
    // prepare data collections
    readConfig(configFile, elements_);
-   for(std::vector<DelphesBranchBase*>::iterator element = elements_.begin(); element<elements_.end(); ++element) {
-     DelphesBranchElement<TEveTrackList>*   item_v1 = dynamic_cast<DelphesBranchElement<TEveTrackList>*>(*element);
-     DelphesBranchElement<TEveElementList>* item_v2 = dynamic_cast<DelphesBranchElement<TEveElementList>*>(*element);
+   for(std::vector<DelphesBranchBase *>::iterator element = elements_.begin(); element<elements_.end(); ++element) {
+     DelphesBranchElement<TEveTrackList> *item_v1 = dynamic_cast<DelphesBranchElement<TEveTrackList>*>(*element);
+     DelphesBranchElement<TEveElementList> *item_v2 = dynamic_cast<DelphesBranchElement<TEveElementList>*>(*element);
      if(item_v1) gEve->AddElement(item_v1->GetContainer());
      if(item_v2) gEve->AddElement(item_v2->GetContainer());
    }
@@ -143,9 +154,9 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
    delphesDisplay_->ImportGeomRPhi(geometry);
    delphesDisplay_->ImportGeomRhoZ(geometry);
    // find the first calo data and use that to initialize the calo display
-   for(std::vector<DelphesBranchBase*>::iterator data=elements_.begin();data<elements_.end();++data) {
+   for(std::vector<DelphesBranchBase *>::iterator data=elements_.begin();data<elements_.end();++data) {
      if(TString((*data)->GetType())=="Tower") { // we could also use GetClassName()=="DelphesCaloData"
-       DelphesCaloData* container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>((*data))->GetContainer();
+       DelphesCaloData *container = dynamic_cast<DelphesBranchElement<DelphesCaloData>*>((*data))->GetContainer();
        assert(container);
        TEveCalo3D *calo3d = new TEveCalo3D(container);
        calo3d->SetBarrelRadius(tkRadius_);
@@ -181,9 +192,9 @@ void DelphesEventDisplay::readConfig(const char *configFile, std::vector<Delphes
    confReader->ReadFile(configFile);
    ExRootConfParam branches = confReader->GetParam("TreeWriter::Branch");
    Int_t nBranches = branches.GetSize()/3;
-   DelphesBranchElement<TEveTrackList>* tlist;
-   DelphesBranchElement<DelphesCaloData>* clist;
-   DelphesBranchElement<TEveElementList>* elist;
+   DelphesBranchElement<TEveTrackList> *tlist;
+   DelphesBranchElement<DelphesCaloData> *clist;
+   DelphesBranchElement<TEveElementList> *elist;
    // first loop with all but tracks
    for(Int_t b = 0; b<nBranches; ++b) {
      TString input = branches[b*3].GetString();
@@ -272,7 +283,7 @@ void DelphesEventDisplay::load_event()
    }
 
    // update display
-   TEveElement* top = (TEveElement*)gEve->GetCurrentEvent();
+   TEveElement *top = (TEveElement*)gEve->GetCurrentEvent();
    delphesDisplay_->DestroyEventRPhi();
    delphesDisplay_->ImportEventRPhi(top);
    delphesDisplay_->DestroyEventRhoZ();
@@ -355,12 +366,12 @@ void DelphesEventDisplay::make_gui()
    // Create minimal GUI for event navigation.
 
    // add a tab on the left
-   TEveBrowser* browser = gEve->GetBrowser();
+   TEveBrowser *browser = gEve->GetBrowser();
    browser->SetWindowName("Delphes Event Display");
    browser->StartEmbedding(TRootBrowser::kLeft);
 
    // set the main title
-   TGMainFrame* frmMain = new TGMainFrame(gClient->GetRoot(), 1000, 600);
+   TGMainFrame *frmMain = new TGMainFrame(gClient->GetRoot(), 1000, 600);
    frmMain->SetWindowName("Delphes Event Display");
    frmMain->SetCleanup(kDeepCleanup);
 
@@ -370,17 +381,17 @@ void DelphesEventDisplay::make_gui()
      icondir = Form("%s/icons/", gSystem->Getenv("ROOTSYS"));
    if(!gSystem->OpenDirectory(icondir)) 
      icondir = Form("%s/icons/", (const char*)gSystem->GetFromPipe("root-config --etcdir") );
-   TGGroupFrame* vf = new TGGroupFrame(frmMain,"Event navigation",kVerticalFrame | kFitWidth );
+   TGGroupFrame *vf = new TGGroupFrame(frmMain,"Event navigation",kVerticalFrame | kFitWidth );
    {
-     TGHorizontalFrame* hf = new TGHorizontalFrame(frmMain);
+     TGHorizontalFrame *hf = new TGHorizontalFrame(frmMain);
      {
-        TGPictureButton* b = 0;
+        TGPictureButton *b = 0;
 
         b = new TGPictureButton(hf, gClient->GetPicture(icondir+"GoBack.gif"));
         hf->AddFrame(b, new TGLayoutHints(kLHintsLeft | kLHintsCenterY , 10, 2, 10, 10));
         b->Connect("Clicked()", "DelphesEventDisplay", this, "Bck()");
 
-        TGNumberEntry* numberEntry = new TGNumberEntry(hf,0,9,-1,TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, treeReader_->GetEntries());
+        TGNumberEntry *numberEntry = new TGNumberEntry(hf,0,9,-1,TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, treeReader_->GetEntries());
         hf->AddFrame(numberEntry, new TGLayoutHints(kLHintsCenterX | kLHintsCenterY , 2, 0, 10, 10));
         this->Connect("EventChanged(Int_t)","TGNumberEntry",numberEntry,"SetIntNumber(Long_t)");
         numberEntry->GetNumberEntry()->Connect("TextChanged(char*)", "DelphesEventDisplay", this, "PreSetEv(char*)");
@@ -393,7 +404,7 @@ void DelphesEventDisplay::make_gui()
      }
      vf->AddFrame(hf, new TGLayoutHints(kLHintsExpandX , 2, 2, 2, 2));
 
-     TGHProgressBar* progress = new TGHProgressBar(frmMain, TGProgressBar::kFancy, 100);
+     TGHProgressBar *progress = new TGHProgressBar(frmMain, TGProgressBar::kFancy, 100);
      progress->SetMax( treeReader_->GetEntries());
      progress->ShowPosition(kTRUE, kFALSE, "Event %.0f");
      progress->SetBarColor("green");
@@ -417,7 +428,7 @@ void DelphesEventDisplay::make_gui()
 
    // the summary tab
    htmlSummary_ = new DelphesHtmlSummary("Delphes Event Display Summary Table");
-   TEveWindowSlot* slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
+   TEveWindowSlot *slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
    gHtml_ = new TGHtml(0, 100, 100);
    TEveWindowFrame *wf = slot->MakeFrame(gHtml_);
    gHtml_->MapSubwindows();
@@ -425,7 +436,7 @@ void DelphesEventDisplay::make_gui()
 
    // plot tab
    slot = TEveWindow::CreateWindowInTab(gEve->GetBrowser()->GetTabRight());
-   TEveWindowTab* tab = slot->MakeTab();
+   TEveWindowTab *tab = slot->MakeTab();
    tab->SetElementName("Summary plots");
    tab->SetShowTitleBar(kFALSE);
    plotSummary_ = new DelphesPlotSummary(tab);
@@ -434,4 +445,41 @@ void DelphesEventDisplay::make_gui()
 
 }
 
+void DelphesEventDisplay::Fwd() {  
+  if (event_id_ < treeReader_->GetEntries() - 2) {
+     EventChanged(event_id_+1);
+  } else {
+     printf("Already at last event.\n");
+  }
+}
 
+void DelphesEventDisplay::Bck() {
+  if (event_id_ > 0) {
+     EventChanged(event_id_-1);
+  } else {
+     printf("Already at first event.\n");
+  }
+}
+
+void DelphesEventDisplay::PreSetEv(char *ev) {
+  event_id_tmp_ = Int_t(atoi(ev));
+}
+
+void DelphesEventDisplay::GoTo() {
+  if (event_id_tmp_>=0 && event_id_tmp_ < treeReader_->GetEntries()-1) {
+    EventChanged(event_id_tmp_);
+  } else {
+    printf("Error: no such event.\n");
+  }
+}
+
+void DelphesEventDisplay::InitSummaryPlots() {
+  plotSummary_->FillSample(treeReader_, event_id_);
+  plotSummary_->FillEvent();
+  plotSummary_->Draw();
+}
+
+void DelphesEventDisplay::DisplayProgress(Int_t p) { 
+  fStatusBar_->SetText(Form("Processing... %d %%",p), 1);
+  gSystem->ProcessEvents();
+}
