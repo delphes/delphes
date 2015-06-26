@@ -41,7 +41,6 @@
 #include "modules/EnergyScale.h"
 #include "modules/UniqueObjectFinder.h"
 #include "modules/TrackCountingBTagging.h"
-#include "modules/BTaggingCMS.h"
 #include "modules/BTagging.h"
 #include "modules/TauTagging.h"
 #include "modules/TreeWriter.h"
@@ -84,7 +83,6 @@
 #pragma link C++ class EnergyScale+;
 #pragma link C++ class UniqueObjectFinder+;
 #pragma link C++ class TrackCountingBTagging+;
-#pragma link C++ class BTaggingCMS+;
 #pragma link C++ class BTagging+;
 #pragma link C++ class TauTagging+;
 #pragma link C++ class TreeWriter+;

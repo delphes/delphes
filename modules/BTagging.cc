@@ -21,7 +21,7 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -45,7 +45,7 @@
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -61,7 +61,7 @@ public:
   BTaggingPartonClassifier() {}
 
   Int_t GetCategory(TObject *object);
-  
+
   Double_t fEtaMax, fPTMin;
 };
 
@@ -74,7 +74,7 @@ Int_t BTaggingPartonClassifier::GetCategory(TObject *object)
   Int_t pdgCode;
 
   if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
-  
+
   pdgCode = TMath::Abs(parton->PID);
   if(pdgCode != 21 && pdgCode > 5) return -1;
 
@@ -116,7 +116,7 @@ void BTagging::Init()
   // read efficiency formulas
   param = GetParam("EfficiencyFormula");
   size = param.GetSize();
-  
+
   fEfficiencyMap.clear();
   for(i = 0; i < size/2; ++i)
   {
@@ -142,7 +142,7 @@ void BTagging::Init()
   fItPartonInputArray = fPartonInputArray->MakeIterator();
 
   fFilter = new ExRootFilter(fPartonInputArray);
-  
+
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
 }
@@ -169,48 +169,32 @@ void BTagging::Finish()
 
 void BTagging::Process()
 {
-  Candidate *jet, *parton;
+  Candidate *jet;
   Double_t pt, eta, phi, e;
   TObjArray *partonArray;
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
-  Int_t pdgCode, pdgCodeMax;
 
   // select quark and gluons
   fFilter->Reset();
   partonArray = fFilter->GetSubArray(fClassifier, 0);
-  
+
   if(partonArray == 0) return;
 
   TIter itPartonArray(partonArray);
-  
+
   // loop over all input jets
   fItJetInputArray->Reset();
   while((jet = static_cast<Candidate*>(fItJetInputArray->Next())))
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
-    pdgCodeMax = -1;
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
     pt = jetMomentum.Pt();
     e = jetMomentum.E();
-    
-    // loop over all input partons
-    itPartonArray.Reset();
-    while((parton = static_cast<Candidate*>(itPartonArray.Next())))
-    {
-      pdgCode = TMath::Abs(parton->PID);
-      if(pdgCode == 21) pdgCode = 0;
-      if(jetMomentum.DeltaR(parton->Momentum) <= fDeltaR)
-      {
-        if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
-      }
-    }
-    if(pdgCodeMax == 0) pdgCodeMax = 21;
-    if(pdgCodeMax == -1) pdgCodeMax = 0;
 
     // find an efficency formula
-    itEfficiencyMap = fEfficiencyMap.find(pdgCodeMax);
+    itEfficiencyMap = fEfficiencyMap.find(jet->Flavor);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
@@ -219,6 +203,28 @@ void BTagging::Process()
 
     // apply an efficency formula
     jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+
+    // find an efficency formula for algo flavor definition
+    itEfficiencyMap = fEfficiencyMap.find(jet->FlavorAlgo);
+    if(itEfficiencyMap == fEfficiencyMap.end())
+    {
+      itEfficiencyMap = fEfficiencyMap.find(0);
+    }
+    formula = itEfficiencyMap->second;
+
+    // apply an efficency formula
+    jet->BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+
+    // find an efficency formula for phys flavor definition
+    itEfficiencyMap = fEfficiencyMap.find(jet->FlavorPhys);
+    if(itEfficiencyMap == fEfficiencyMap.end())
+    {
+      itEfficiencyMap = fEfficiencyMap.find(0);
+    }
+    formula = itEfficiencyMap->second;
+
+    // apply an efficency formula
+    jet->BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
   }
 }
 

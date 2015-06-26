@@ -120,8 +120,8 @@ Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsConstituent(0),
-  BTag(0), BTagAlgo(0), BTagDefault(0), BTagPhysics(0), BTagNearest2(0), BTagNearest3(0), BTagHeaviest(0), BTagHighestPt(0),
-  FlavorAlgo(0), FlavorDefault(0), FlavorPhysics(0), FlavorNearest2(0), FlavorNearest3(0), FlavorHeaviest(0), FlavorHighestPt(0),
+  Flavor(0), FlavorAlgo(0), FlavorPhys(0),
+  BTag(0), BTagAlgo(0), BTagPhys(0),
   TauTag(0), Eem(0.0), Ehad(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
@@ -242,21 +242,12 @@ void Candidate::Copy(TObject &obj) const
   object.Mass = Mass;
   object.IsPU = IsPU;
   object.IsConstituent = IsConstituent;
+  object.Flavor = Flavor;
+  object.FlavorAlgo = FlavorAlgo;
+  object.FlavorPhys = FlavorPhys;
   object.BTag = BTag;
   object.BTagAlgo = BTagAlgo;
-  object.BTagDefault = BTagDefault;
-  object.BTagPhysics = BTagPhysics;
-  object.BTagNearest2 = BTagNearest2;
-  object.BTagNearest3 = BTagNearest3;
-  object.BTagHeaviest = BTagHeaviest;
-  object.BTagHighestPt = BTagHighestPt;
-  object.FlavorAlgo = FlavorAlgo;
-  object.FlavorDefault = FlavorDefault;
-  object.FlavorPhysics = FlavorPhysics;
-  object.FlavorNearest2 = FlavorNearest2;
-  object.FlavorNearest3 = FlavorNearest3;
-  object.FlavorHeaviest = FlavorHeaviest;
-  object.FlavorHighestPt = FlavorHighestPt;
+  object.BTagPhys = BTagPhys;
   object.TauTag = TauTag;
   object.Eem = Eem;
   object.Ehad = Ehad;
@@ -351,21 +342,12 @@ void Candidate::Clear(Option_t* option)
   Mass = 0.0;
   IsPU = 0;
   IsConstituent = 0;
+  Flavor = 0;
+  FlavorAlgo = 0;
+  FlavorPhys = 0;
   BTag = 0;
   BTagAlgo = 0;
-  BTagDefault = 0;
-  BTagPhysics = 0;
-  BTagNearest2 = 0;
-  BTagNearest3 = 0;
-  BTagHeaviest = 0;
-  BTagHighestPt = 0;
-  FlavorAlgo = 0;
-  FlavorDefault = 0;
-  FlavorPhysics = 0;
-  FlavorNearest2 = 0;
-  FlavorNearest3 = 0;
-  FlavorHeaviest = 0;
-  FlavorHighestPt = 0;
+  BTagPhys = 0;
   TauTag = 0;
   Eem = 0.0;
   Ehad = 0.0;

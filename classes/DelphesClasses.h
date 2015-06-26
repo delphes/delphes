@@ -343,23 +343,13 @@ public:
   Float_t DeltaEta;  // jet radius in pseudorapidity
   Float_t DeltaPhi;  // jet radius in azimuthal angle
 
-  UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
-
-  UInt_t BTagAlgo;
-  UInt_t BTagDefault;
-  UInt_t BTagPhysics;
-  UInt_t BTagNearest2;
-  UInt_t BTagNearest3;
-  UInt_t BTagHeaviest;
-  UInt_t BTagHighestPt;
-
+  UInt_t Flavor;
   UInt_t FlavorAlgo;
-  UInt_t FlavorDefault;
-  UInt_t FlavorPhysics;
-  UInt_t FlavorNearest2;
-  UInt_t FlavorNearest3;
-  UInt_t FlavorHeaviest;
-  UInt_t FlavorHighestPt;
+  UInt_t FlavorPhys;
+
+  UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagAlgo;
+  UInt_t BTagPhys;
 
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
@@ -516,23 +506,13 @@ public:
 
   Int_t IsConstituent;
 
-  UInt_t BTag;
-
-  UInt_t BTagAlgo;
-  UInt_t BTagDefault;
-  UInt_t BTagPhysics;
-  UInt_t BTagNearest2;
-  UInt_t BTagNearest3;
-  UInt_t BTagHeaviest;
-  UInt_t BTagHighestPt;
-
+  UInt_t Flavor;
   UInt_t FlavorAlgo;
-  UInt_t FlavorDefault;
-  UInt_t FlavorPhysics;
-  UInt_t FlavorNearest2;
-  UInt_t FlavorNearest3;
-  UInt_t FlavorHeaviest;
-  UInt_t FlavorHighestPt;
+  UInt_t FlavorPhys;
+
+  UInt_t BTag;
+  UInt_t BTagAlgo;
+  UInt_t BTagPhys;
 
   UInt_t TauTag;
 

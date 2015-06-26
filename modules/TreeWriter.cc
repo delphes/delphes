@@ -489,7 +489,6 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
 
-
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -566,23 +565,14 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->DeltaEta = candidate->DeltaEta;
     entry->DeltaPhi = candidate->DeltaPhi;
 
+    entry->Flavor = candidate->Flavor;
+    entry->FlavorAlgo = candidate->FlavorAlgo;
+    entry->FlavorPhys = candidate->FlavorPhys;
+
     entry->BTag = candidate->BTag;
 
     entry->BTagAlgo = candidate->BTagAlgo;
-    entry->BTagDefault = candidate->BTagDefault;
-    entry->BTagPhysics = candidate->BTagPhysics;
-    entry->BTagNearest2 = candidate->BTagNearest2;
-    entry->BTagNearest3 = candidate->BTagNearest3;
-    entry->BTagHeaviest = candidate->BTagHeaviest;
-    entry->BTagHighestPt = candidate->BTagHighestPt;
-
-    entry->FlavorAlgo = candidate->FlavorAlgo;
-    entry->FlavorDefault = candidate->FlavorDefault;
-    entry->FlavorPhysics = candidate->FlavorPhysics;
-    entry->FlavorNearest2 = candidate->FlavorNearest2;
-    entry->FlavorNearest3 = candidate->FlavorNearest3;
-    entry->FlavorHeaviest = candidate->FlavorHeaviest;
-    entry->FlavorHighestPt = candidate->FlavorHighestPt;
+    entry->BTagPhys = candidate->BTagPhys;
 
     entry->TauTag = candidate->TauTag;
 

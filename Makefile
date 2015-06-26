@@ -321,7 +321,6 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/EnergyScale.h \
 	modules/UniqueObjectFinder.h \
 	modules/TrackCountingBTagging.h \
-	modules/BTaggingCMS.h \
 	modules/BTagging.h \
 	modules/TauTagging.h \
 	modules/TreeWriter.h \
@@ -539,15 +538,6 @@ tmp/modules/AngularSmearing.$(ObjSuf): \
 tmp/modules/BTagging.$(ObjSuf): \
 	modules/BTagging.$(SrcSuf) \
 	modules/BTagging.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesFormula.h \
-	external/ExRootAnalysis/ExRootResult.h \
-	external/ExRootAnalysis/ExRootFilter.h \
-	external/ExRootAnalysis/ExRootClassifier.h
-tmp/modules/BTaggingCMS.$(ObjSuf): \
-	modules/BTaggingCMS.$(SrcSuf) \
-	modules/BTaggingCMS.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -906,7 +896,6 @@ DELPHES_OBJ +=  \
 	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
-	tmp/modules/BTaggingCMS.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
@@ -1395,8 +1384,8 @@ endif
 tmp/display/Delphes3DGeometry.$(ObjSuf): \
 	display/Delphes3DGeometry.$(SrcSuf) \
 	display/Delphes3DGeometry.h \
-	external/ExRootAnalysis/ExRootConfReader.h \
-	classes/DelphesClasses.h
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootConfReader.h
 tmp/display/DelphesBranchElement.$(ObjSuf): \
 	display/DelphesBranchElement.$(SrcSuf) \
 	display/DelphesBranchElement.h \
@@ -1409,13 +1398,17 @@ tmp/display/DelphesDisplay.$(ObjSuf): \
 	display/DelphesDisplay.h
 tmp/display/DelphesEventDisplay.$(ObjSuf): \
 	display/DelphesEventDisplay.$(SrcSuf) \
-	external/ExRootAnalysis/ExRootConfReader.h \
-	external/ExRootAnalysis/ExRootTreeReader.h \
 	display/DelphesCaloData.h \
 	display/DelphesBranchElement.h \
 	display/Delphes3DGeometry.h \
 	display/DelphesEventDisplay.h \
-	classes/DelphesClasses.h
+	display/DelphesDisplay.h \
+	display/Delphes3DGeometry.h \
+	display/DelphesHtmlSummary.h \
+	display/DelphesPlotSummary.h \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootConfReader.h \
+	external/ExRootAnalysis/ExRootTreeReader.h
 tmp/display/DelphesHtmlSummary.$(ObjSuf): \
 	display/DelphesHtmlSummary.$(SrcSuf) \
 	display/DelphesHtmlSummary.h
@@ -1736,14 +1729,6 @@ modules/MomentumSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-display/DelphesEventDisplay.h: \
-	external/ExRootAnalysis/ExRootTreeReader.h \
-	display/DelphesDisplay.h \
-	display/Delphes3DGeometry.h \
-	display/DelphesHtmlSummary.h \
-	display/DelphesPlotSummary.h
-	@touch $@
-
 modules/TauTagging.h: \
 	classes/DelphesModule.h \
 	external/ExRootAnalysis/ExRootResult.h \
@@ -1770,11 +1755,6 @@ modules/Delphes.h: \
 
 modules/UniqueObjectFinder.h: \
 	classes/DelphesModule.h
-	@touch $@
-
-modules/BTaggingCMS.h: \
-	classes/DelphesModule.h \
-	classes/DelphesClasses.h
 	@touch $@
 
 modules/TrackCountingBTagging.h: \
