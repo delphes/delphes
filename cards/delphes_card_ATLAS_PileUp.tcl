@@ -477,7 +477,7 @@ module EnergyScale JetEnergyScale {
 ###################
 
 module Efficiency PhotonEfficiency {
-  set InputArray Calorimeter/photons
+  set InputArray Calorimeter/eflowPhotons
   set OutputArray photons
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
