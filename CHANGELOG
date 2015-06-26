@@ -1,3 +1,21 @@
+3.3.0:
+- updated FastJet library to 3.1.2
+- added PhotonConversions module
+- added isRecoPU flag and fPTMin parameter in TrackPileUpSubtractor
+- added new isolation variables to Candidate and Electrons, Muons, Photons classes (thanks to Raffaele Gerosa)
+- added code from CMS to PileUpMerger and PileUpMergerPythia8
+- included timing information in Calorimeter
+- included last PileUpJetID version (thanks to Seth Senz)
+- added Area 4-vector to jet class
+- added PUPPI algorithm and RunPUPPI module
+- added RecursiveTools package from fastjet contribs
+- replaced N-subjettiness with an array in Jet class (same as in Candidate class)
+- added Trimming, Pruning and SoftDrop in FastJetFinder
+- added possibility to use DelphesPythia8 with LHE files
+- added Pythia8 examples
+- added JetFlavourAssociation module with Physics and Algorithmic definitions of the jet flavor
+- added new jet flavor definitions to the BTagging module
+
 3.2.0:
 - moved code repository to GitHub (http://github.com/delphes/delphes)
 - moved configuration files from examples to cards directory
