@@ -22,7 +22,6 @@
 #include "TString.h"
 
 #include <stdexcept>
-#include <string>
 
 using namespace std;
 
@@ -50,14 +49,17 @@ DelphesCylindricalFormula::~DelphesCylindricalFormula()
 
 Int_t DelphesCylindricalFormula::Compile(const char *expression)
 {
-  string buffer;
+  TString buffer;
   const char *it;
   for(it = expression; *it; ++it)
   {
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
-    buffer.push_back(*it);
+    buffer.Append(*it);
   }
-  if(TFormula::Compile(buffer.c_str()) != 0)
+  buffer.ReplaceAll("r", "x");
+  buffer.ReplaceAll("phi", "y");
+  buffer.ReplaceAll("z", "z");
+  if(TFormula::Compile(buffer) != 0)
   {
     throw runtime_error("Invalid formula.");
   }
@@ -68,31 +70,8 @@ Int_t DelphesCylindricalFormula::Compile(const char *expression)
 
 Double_t DelphesCylindricalFormula::Eval(Double_t r, Double_t phi, Double_t z)
 {
-   Double_t x[3] = {r, phi, z};
-   return EvalPar(x);
-}
-
-//------------------------------------------------------------------------------
-
-Int_t DelphesCylindricalFormula::DefinedVariable(TString &chaine, Int_t &action)
-{
-  action = kVariable;
-  if(chaine == "r")
-  {
-    if(fNdim < 1) fNdim = 1;
-    return 0;
-  }
-  else if(chaine == "phi")
-  {
-    if(fNdim < 2) fNdim = 2;
-    return 1;
-  }
-  else if(chaine == "z")
-  {
-    if(fNdim < 3) fNdim = 3;
-    return 2;
-  }
-  return -1;
+  Double_t x[3] = {r, phi, z};
+  return EvalPar(x);
 }
 
 //------------------------------------------------------------------------------

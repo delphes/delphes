@@ -34,8 +34,6 @@ public:
   Int_t Compile(const char *expression);
 
   Double_t Eval(Double_t r, Double_t phi = 0, Double_t z = 0);
-
-  Int_t DefinedVariable(TString &variable, Int_t &action);
 };
 
 #endif /* DelphesCylindricalFormula_h */

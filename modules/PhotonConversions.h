@@ -55,12 +55,12 @@ private:
   const TObjArray *fInputArray; //!
 
   TObjArray *fOutputArray; //!
-  
+
   DelphesCylindricalFormula *fConversionMap; //!
-  
+
   TF1 *fDecayXsec; //!
-  
-  Double_t fStep; 
+
+  Double_t fStep;
 
   ClassDef(PhotonConversions, 1)
 };

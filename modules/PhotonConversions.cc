@@ -56,7 +56,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PhotonConversions::PhotonConversions() :
-  fDecayXsec(0), fConversionMap(0), fItInputArray(0)
+  fItInputArray(0), fConversionMap(0), fDecayXsec(0)
 {
   fDecayXsec = new TF1;
   fConversionMap = new DelphesCylindricalFormula;
@@ -73,20 +73,24 @@ PhotonConversions::~PhotonConversions()
 void PhotonConversions::Init()
 {
   fRadius = GetDouble("Radius", 1.0);
-  fRadius2 =  fRadius*fRadius;
-  
+  fRadius2 = fRadius*fRadius;
+
   fHalfLength = GetDouble("HalfLength", 3.0);
-  
+
   fEtaMax = GetDouble("EtaMax", 5.0);
   fEtaMin = GetDouble("EtaMin", 2.0);
-  
-  fStep = GetDouble("Step", 0.1); // in meters 
- 
-  fConversionMap->Compile(GetString("ConversionMap", "0."));
-  
-  fDecayXsec->Compile("1 - 4/3*x*(1-x)");
-  fDecayXsec->SetRange(0.0,1.0);
- 
+
+  fStep = GetDouble("Step", 0.1); // in meters
+
+  fConversionMap->Compile(GetString("ConversionMap", "0.0"));
+
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,04,00)
+  fDecayXsec->Compile("1.0 - 4.0/3.0 * x * (1.0 - x)");
+#else
+  fDecayXsec->GetFormula()->Compile("1.0 - 4.0/3.0 * x * (1.0 - x)");
+#endif
+  fDecayXsec->SetRange(0.0, 1.0);
+
   // import array with output from filter/classifier module
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
@@ -110,10 +114,10 @@ void PhotonConversions::Finish()
 
 void PhotonConversions::Process()
 {
-  Candidate *candidate, *mother, *ep, *em;
+  Candidate *candidate, *ep, *em;
   TLorentzVector candidatePosition, candidateMomentum;
   TVector3 pos_i;
-  Double_t px, py, pz, pt, pt2, e, eta, phi, q;
+  Double_t px, py, pz, pt, pt2, e, eta, phi;
   Double_t x, y, z, t;
   Double_t x_t, y_t, z_t, r_t;
   Double_t x_i, y_i, z_i, r_i, phi_i;
@@ -122,14 +126,15 @@ void PhotonConversions::Process()
   Int_t nsteps, i;
   Double_t rate, p_conv, x1, x2;
   Bool_t converted;
- 
-  const Double_t c_light = 2.99792458E8;
- 
+
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    
-    if(candidate->PID != 22) fOutputArray->Add(candidate); 
+
+    if(candidate->PID != 22)
+    {
+      fOutputArray->Add(candidate);
+    }
     else
     {
       candidatePosition = candidate->Position;
@@ -137,13 +142,9 @@ void PhotonConversions::Process()
       x = candidatePosition.X()*1.0E-3;
       y = candidatePosition.Y()*1.0E-3;
       z = candidatePosition.Z()*1.0E-3;
-      q = candidate->Charge;
 
       // check that particle position is inside the cylinder
-      if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
-      {
-        continue;
-      }
+      if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength) continue;
 
       px = candidateMomentum.Px();
       py = candidateMomentum.Py();
@@ -153,10 +154,10 @@ void PhotonConversions::Process()
       eta = candidateMomentum.Eta();
       phi = candidateMomentum.Phi();
       e = candidateMomentum.E();
-   
+
       if(eta < fEtaMin || eta > fEtaMax) continue;
-   
-       // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
+
+      // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
       tmp = px*y - py*x;
       discr2 = pt2*fRadius2 - tmp*tmp;
 
@@ -181,84 +182,76 @@ void PhotonConversions::Process()
       }
 
       // final position
-
       x_t = x + px*t;
       y_t = y + py*t;
       z_t = z + pz*t;
-      
+
       r_t = TMath::Sqrt(x_t*x_t + y_t*y_t + z_t*z_t);
-       
-       
-      // here starts conversion code   
+
+
+      // here starts conversion code
       nsteps = Int_t(r_t/fStep);
-       
+
       x_i = x;
       y_i = y;
       z_i = z;
-      
+
       dt = t/nsteps;
-      
+
       converted = false;
-      
-      for(i=0; i<nsteps; ++i)
+
+      for(i = 0; i < nsteps; ++i)
       {
-   	
-	x_i += px*dt;
-	y_i += py*dt;
-	z_i += pz*dt;
+        x_i += px*dt;
+        y_i += py*dt;
+        z_i += pz*dt;
         pos_i.SetXYZ(x_i,y_i,z_i);
-	
-	//convert photon position into cylindrical coordinates, cylindrical r,phi,z !!
-	
-	r_i = TMath::Sqrt(x_i*x_i + y_i*y_i);
+
+        // convert photon position into cylindrical coordinates, cylindrical r,phi,z !!
+
+        r_i = TMath::Sqrt(x_i*x_i + y_i*y_i);
         phi_i = pos_i.Phi();
-       
+
         // read conversion rate/meter from card
-	rate = fConversionMap->Eval(r_i, phi_i, z_i);
-	
-	// convert into conversion probability
-	p_conv = 1 - TMath::Exp(-7.0/9.0*fStep*rate);
-	
-	   
-	//case conversion occurs
-	if(gRandom->Uniform() < p_conv)
-	{
-	  converted = true;
-	  
-	  // generate x1 and x2, the fraction of the photon energy taken resp. by e+ and e-
-	  x1 = fDecayXsec->GetRandom();
-	  x2 = 1 - x1;
-	
-	  mother = candidate; 
-	  ep = static_cast<Candidate*>(candidate->Clone());
-	  em = static_cast<Candidate*>(candidate->Clone());
-	
-	  ep->Position.SetXYZT(x_i*1.0E3, y_i*1.0E3, z_i*1.0E3, candidatePosition.T() + nsteps*dt*e*1.0E3);
-	  em->Position.SetXYZT(x_i*1.0E3, y_i*1.0E3, z_i*1.0E3, candidatePosition.T() + nsteps*dt*e*1.0E3);
-	  
-	  ep->Momentum.SetPtEtaPhiE(x1*pt, eta, phi, x1*e);
-	  em->Momentum.SetPtEtaPhiE(x2*pt, eta, phi, x2*e);
-	
-	  ep->PID = -11;
-	  em->PID = 11;
-	 
-	  ep->Charge = 1.0;
-	  em->Charge = -1.0;
-	
-	  ep->IsFromConversion = 1;
-	  em->IsFromConversion = 1;
-	 
-	  fOutputArray->Add(em);
-	  fOutputArray->Add(ep);
-	
-	  break;
-	
-	}
-     
+        rate = fConversionMap->Eval(r_i, phi_i, z_i);
+
+        // convert into conversion probability
+        p_conv = 1 - TMath::Exp(-7.0/9.0*fStep*rate);
+
+        // case conversion occurs
+        if(gRandom->Uniform() < p_conv)
+        {
+          converted = true;
+
+          // generate x1 and x2, the fraction of the photon energy taken resp. by e+ and e-
+          x1 = fDecayXsec->GetRandom();
+          x2 = 1 - x1;
+
+          ep = static_cast<Candidate*>(candidate->Clone());
+          em = static_cast<Candidate*>(candidate->Clone());
+
+          ep->Position.SetXYZT(x_i*1.0E3, y_i*1.0E3, z_i*1.0E3, candidatePosition.T() + nsteps*dt*e*1.0E3);
+          em->Position.SetXYZT(x_i*1.0E3, y_i*1.0E3, z_i*1.0E3, candidatePosition.T() + nsteps*dt*e*1.0E3);
+
+          ep->Momentum.SetPtEtaPhiE(x1*pt, eta, phi, x1*e);
+          em->Momentum.SetPtEtaPhiE(x2*pt, eta, phi, x2*e);
+
+          ep->PID = -11;
+          em->PID = 11;
+
+          ep->Charge = 1.0;
+          em->Charge = -1.0;
+
+          ep->IsFromConversion = 1;
+          em->IsFromConversion = 1;
+
+          fOutputArray->Add(em);
+          fOutputArray->Add(ep);
+
+          break;
+        }
       }
-     
-     if(!converted) fOutputArray->Add(candidate); 
-  
+      if(!converted) fOutputArray->Add(candidate);
     }
   }
 }
