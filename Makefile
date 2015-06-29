@@ -308,6 +308,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ModulesLinkDef.h \
 	modules/Delphes.h \
 	modules/AngularSmearing.h \
+	modules/PhotonConversions.h \
 	modules/ParticlePropagator.h \
 	modules/Efficiency.h \
 	modules/IdentificationMap.h \
@@ -389,6 +390,9 @@ tmp/classes/DelphesClasses.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/SortableObject.h
+tmp/classes/DelphesCylindricalFormula.$(ObjSuf): \
+	classes/DelphesCylindricalFormula.$(SrcSuf) \
+	classes/DelphesCylindricalFormula.h
 tmp/classes/DelphesFactory.$(ObjSuf): \
 	classes/DelphesFactory.$(SrcSuf) \
 	classes/DelphesFactory.h \
@@ -720,6 +724,15 @@ tmp/modules/PdgCodeFilter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/PhotonConversions.$(ObjSuf): \
+	modules/PhotonConversions.$(SrcSuf) \
+	modules/PhotonConversions.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesCylindricalFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/PileUpJetID.$(ObjSuf): \
 	modules/PileUpJetID.$(SrcSuf) \
 	modules/PileUpJetID.h \
@@ -847,6 +860,7 @@ tmp/modules/Weighter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h
 DELPHES_OBJ +=  \
 	tmp/classes/DelphesClasses.$(ObjSuf) \
+	tmp/classes/DelphesCylindricalFormula.$(ObjSuf) \
 	tmp/classes/DelphesFactory.$(ObjSuf) \
 	tmp/classes/DelphesFormula.$(ObjSuf) \
 	tmp/classes/DelphesHepMCReader.$(ObjSuf) \
@@ -915,6 +929,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/MomentumSmearing.$(ObjSuf) \
 	tmp/modules/ParticlePropagator.$(ObjSuf) \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
+	tmp/modules/PhotonConversions.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
 	tmp/modules/RunPUPPI.$(ObjSuf) \
@@ -1802,6 +1817,10 @@ external/fastjet/ClusterSequenceAreaBase.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/LimitedWarning.hh \
 	external/fastjet/Selector.hh
+	@touch $@
+
+modules/PhotonConversions.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/ClusterSequenceVoronoiArea.hh: \

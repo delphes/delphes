@@ -505,7 +505,9 @@ public:
   Int_t IsRecoPU;
 
   Int_t IsConstituent;
-
+  
+  Int_t IsFromConversion;
+  
   UInt_t Flavor;
   UInt_t FlavorAlgo;
   UInt_t FlavorPhys;
