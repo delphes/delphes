@@ -59,9 +59,9 @@ private:
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
 
-  Double_t fTimingEMin;
-  Bool_t fElectronsFromTrack; // for timing
-  
+  Double_t fTimingEnergyMin;
+  Bool_t fElectronsFromTrack;
+
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
   Double_t fECalEnergyMin;

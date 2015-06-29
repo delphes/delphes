@@ -130,20 +130,20 @@ Candidate::Candidate() :
   Dxy(0), SDxy(0), Xd(0), Yd(0), Zd(0),
   NCharged(0),
   NNeutrals(0),
-  NSubJetsTrimmed(0),
-  NSubJetsPruned(0), 
-  NSubJetsSoftDropped(0), 
   Beta(0),
   BetaStar(0),
   MeanSqDeltaR(0),
   PTD(0),
-  Ntimes(-1),
+  NTimeHits(-1),
   IsolationVar(-999),
   IsolationVarRhoCorr(-999),
   SumPtCharged(-999),
   SumPtNeutral(-999),
   SumPtChargedPU(-999),
   SumPt(-999),
+  NSubJetsTrimmed(0),
+  NSubJetsPruned(0),
+  NSubJetsSoftDropped(0),
   fFactory(0),
   fArray(0)
 {
@@ -273,7 +273,7 @@ void Candidate::Copy(TObject &obj) const
   object.BetaStar = BetaStar;
   object.MeanSqDeltaR = MeanSqDeltaR;
   object.PTD = PTD;
-  object.Ntimes = Ntimes; 
+  object.NTimeHits = NTimeHits;
   object.IsolationVar = IsolationVar;
   object.IsolationVarRhoCorr = IsolationVarRhoCorr;
   object.SumPtCharged = SumPtCharged;
@@ -291,7 +291,7 @@ void Candidate::Copy(TObject &obj) const
   object.Tau[2] = Tau[2];
   object.Tau[3] = Tau[3];
   object.Tau[4] = Tau[4];
-  
+
   object.TrimmedP4[0] = TrimmedP4[0];
   object.TrimmedP4[1] = TrimmedP4[1];
   object.TrimmedP4[2] = TrimmedP4[2];
@@ -315,8 +315,8 @@ void Candidate::Copy(TObject &obj) const
   object.fFactory = fFactory;
   object.fArray = 0;
 
-  // Copy cluster timing info
-  copy(Ecal_E_t.begin(),Ecal_E_t.end(),back_inserter(object.Ecal_E_t));
+  // copy cluster timing info
+  copy(ECalEnergyTimePairs.begin(), ECalEnergyTimePairs.end(), back_inserter(object.ECalEnergyTimePairs));
 
   if(fArray && fArray->GetEntriesFast() > 0)
   {
@@ -373,17 +373,17 @@ void Candidate::Clear(Option_t* option)
   BetaStar = 0.0;
   MeanSqDeltaR = 0.0;
   PTD = 0.0;
-  
-  Ntimes = 0;
-  Ecal_E_t.clear();
-  
+
+  NTimeHits = 0;
+  ECalEnergyTimePairs.clear();
+
   IsolationVar = -999;
   IsolationVarRhoCorr = -999;
   SumPtCharged = -999;
   SumPtNeutral = -999;
   SumPtChargedPU = -999;
   SumPt = -999;
-  
+
   FracPt[0] = 0.0;
   FracPt[1] = 0.0;
   FracPt[2] = 0.0;
@@ -394,17 +394,17 @@ void Candidate::Clear(Option_t* option)
   Tau[2] = 0.0;
   Tau[3] = 0.0;
   Tau[4] = 0.0;
-  
+
   for(i = 0; i < 5; ++i)
   {
     TrimmedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-    PrunedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0); 
+    PrunedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
     SoftDroppedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
   }
 
   NSubJetsTrimmed = 0;
   NSubJetsPruned = 0;
   NSubJetsSoftDropped = 0;
-  
+
   fArray = 0;
 }

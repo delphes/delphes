@@ -442,7 +442,7 @@ public:
   Float_t E; // calorimeter tower energy
 
   Float_t T; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
-  Int_t   Ntimes; // number of hits contributing to time measurement
+  Int_t NTimeHits; // number of hits contributing to time measurement
 
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
@@ -505,9 +505,9 @@ public:
   Int_t IsRecoPU;
 
   Int_t IsConstituent;
-  
+
   Int_t IsFromConversion;
-  
+
   UInt_t Flavor;
   UInt_t FlavorAlgo;
   UInt_t FlavorPhys;
@@ -527,26 +527,26 @@ public:
 
   TLorentzVector Momentum, Position, Area;
 
-  Float_t  Dxy;
-  Float_t  SDxy;
-  Float_t  Xd;
-  Float_t  Yd;
-  Float_t  Zd;
+  Float_t Dxy;
+  Float_t SDxy;
+  Float_t Xd;
+  Float_t Yd;
+  Float_t Zd;
 
   // PileUpJetID variables
 
-  Int_t    NCharged;
-  Int_t    NNeutrals;
-  Float_t  Beta;
-  Float_t  BetaStar;
-  Float_t  MeanSqDeltaR;
-  Float_t  PTD;
-  Float_t  FracPt[5];
+  Int_t NCharged;
+  Int_t NNeutrals;
+  Float_t Beta;
+  Float_t BetaStar;
+  Float_t MeanSqDeltaR;
+  Float_t PTD;
+  Float_t FracPt[5];
 
-  //Timing information
+  // Timing information
 
-  Int_t    Ntimes;
-  std::vector<std::pair<Float_t,Float_t> > Ecal_E_t;
+  Int_t NTimeHits;
+  std::vector< std::pair< Float_t, Float_t > > ECalEnergyTimePairs;
 
   // Isolation variables
 

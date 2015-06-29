@@ -153,7 +153,7 @@ void PileUpJetID::Process()
     float sumT30 = 0.;
     float sumT40 = 0.;
     float sumWeightsForT = 0.;
-    candidate->Ntimes = 0;
+    candidate->NTimeHits = 0;
 
     float sumpt = 0.;
     float sumptch = 0.;
@@ -196,20 +196,20 @@ void PileUpJetID::Process()
 	}
 	float tow_sumT = 0;
 	float tow_sumW = 0;
-	for (int i = 0 ; i < constituent->Ecal_E_t.size() ; i++) {
-	  float w = TMath::Sqrt(constituent->Ecal_E_t[i].first);
+	for (int i = 0 ; i < constituent->ECalEnergyTimePairs.size() ; i++) {
+	  float w = TMath::Sqrt(constituent->ECalEnergyTimePairs[i].first);
 	  if (fAverageEachTower) {
-            tow_sumT += w*constituent->Ecal_E_t[i].second;
+            tow_sumT += w*constituent->ECalEnergyTimePairs[i].second;
             tow_sumW += w;
 	  } else {
-	    sumT0 += w*constituent->Ecal_E_t[i].second;
-	    sumT1 += w*gRandom->Gaus(constituent->Ecal_E_t[i].second,0.001);
-	    sumT10 += w*gRandom->Gaus(constituent->Ecal_E_t[i].second,0.010);
-	    sumT20 += w*gRandom->Gaus(constituent->Ecal_E_t[i].second,0.020);
-	    sumT30 += w*gRandom->Gaus(constituent->Ecal_E_t[i].second,0.030);
-	    sumT40 += w*gRandom->Gaus(constituent->Ecal_E_t[i].second,0.040);
+	    sumT0 += w*constituent->ECalEnergyTimePairs[i].second;
+	    sumT1 += w*gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second,0.001);
+	    sumT10 += w*gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second,0.010);
+	    sumT20 += w*gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second,0.020);
+	    sumT30 += w*gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second,0.030);
+	    sumT40 += w*gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second,0.040);
 	    sumWeightsForT += w;
-	    candidate->Ntimes++;
+	    candidate->NTimeHits++;
 	  }
 	}
 	if (fAverageEachTower && tow_sumW > 0.) {
@@ -220,7 +220,7 @@ void PileUpJetID::Process()
           sumT30 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0030);
           sumT40 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0040);
 	  sumWeightsForT += tow_sumW;
-	  candidate->Ntimes++;
+	  candidate->NTimeHits++;
 	}
       }
     } else {
