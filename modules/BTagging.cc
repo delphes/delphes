@@ -33,10 +33,6 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootClassifier.h"
-
 #include "TMath.h"
 #include "TString.h"
 #include "TFormula.h"
@@ -54,47 +50,15 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-class BTaggingPartonClassifier : public ExRootClassifier
-{
-public:
-
-  BTaggingPartonClassifier() {}
-
-  Int_t GetCategory(TObject *object);
-
-  Double_t fEtaMax, fPTMin;
-};
-
-//------------------------------------------------------------------------------
-
-Int_t BTaggingPartonClassifier::GetCategory(TObject *object)
-{
-  Candidate *parton = static_cast<Candidate*>(object);
-  const TLorentzVector &momentum = parton->Momentum;
-  Int_t pdgCode;
-
-  if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
-
-  pdgCode = TMath::Abs(parton->PID);
-  if(pdgCode != 21 && pdgCode > 5) return -1;
-
-  return 0;
-}
-
-//------------------------------------------------------------------------------
-
 BTagging::BTagging() :
-  fClassifier(0), fFilter(0),
-  fItPartonInputArray(0), fItJetInputArray(0)
+  fItJetInputArray(0)
 {
-  fClassifier = new BTaggingPartonClassifier;
 }
 
 //------------------------------------------------------------------------------
 
 BTagging::~BTagging()
 {
-  if(fClassifier) delete fClassifier;
 }
 
 //------------------------------------------------------------------------------
@@ -107,11 +71,6 @@ void BTagging::Init()
   Int_t i, size;
 
   fBitNumber = GetInt("BitNumber", 0);
-
-  fDeltaR = GetDouble("DeltaR", 0.5);
-
-  fClassifier->fPTMin = GetDouble("PartonPTMin", 1.0);
-  fClassifier->fEtaMax = GetDouble("PartonEtaMax", 2.5);
 
   // read efficiency formulas
   param = GetParam("EfficiencyFormula");
@@ -138,11 +97,6 @@ void BTagging::Init()
 
   // import input array(s)
 
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
-
-  fFilter = new ExRootFilter(fPartonInputArray);
-
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
 }
@@ -154,9 +108,7 @@ void BTagging::Finish()
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
-  if(fFilter) delete fFilter;
   if(fItJetInputArray) delete fItJetInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
 
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
   {
@@ -171,17 +123,8 @@ void BTagging::Process()
 {
   Candidate *jet;
   Double_t pt, eta, phi, e;
-  TObjArray *partonArray;
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
-
-  // select quark and gluons
-  fFilter->Reset();
-  partonArray = fFilter->GetSubArray(fClassifier, 0);
-
-  if(partonArray == 0) return;
-
-  TIter itPartonArray(partonArray);
 
   // loop over all input jets
   fItJetInputArray->Reset();

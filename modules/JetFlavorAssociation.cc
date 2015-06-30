@@ -150,15 +150,25 @@ void JetFlavorAssociation::Init()
   // import input array(s)
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
   fItPartonInputArray = fPartonInputArray->MakeIterator();
+  fPartonFilter = new ExRootFilter(fPartonInputArray);
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
   fItParticleInputArray = fParticleInputArray->MakeIterator();
 
-  fParticleLHEFInputArray = ImportArray(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"));
-  fItParticleLHEFInputArray = fParticleLHEFInputArray->MakeIterator();
+  try
+  {
+    fParticleLHEFInputArray = ImportArray(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"));
+  }
+  catch(runtime_error &e)
+  {
+    fParticleLHEFInputArray = 0;
+  }
 
-  fPartonFilter = new ExRootFilter(fPartonInputArray);
-  fParticleLHEFFilter = new ExRootFilter(fParticleLHEFInputArray);
+  if(fParticleLHEFInputArray)
+  {
+    fItParticleLHEFInputArray = fParticleLHEFInputArray->MakeIterator();
+    fParticleLHEFFilter = new ExRootFilter(fParticleLHEFInputArray);
+  }
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
@@ -182,29 +192,26 @@ void JetFlavorAssociation::Finish()
 void JetFlavorAssociation::Process(){
 
   Candidate *jet;
-  TObjArray *partonArray;
-  TObjArray *partonLHEFArray;
+  TObjArray *partonArray = 0;
+  TObjArray *partonLHEFArray = 0;
 
-  // select quark && gluons
+  // select quark and gluons
   fPartonFilter->Reset();
   partonArray = fPartonFilter->GetSubArray(fPartonClassifier, 0); // get the filtered parton array
-
   if(partonArray == 0) return;
-  TIter itPartonArray(partonArray);
 
-  fParticleLHEFFilter->Reset();
-  partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier, 0); // get the filtered parton array
-
-  if(partonLHEFArray == 0) return;
-  TIter itPartonLHEFArray(partonLHEFArray);
-
+  if(fParticleLHEFInputArray) 
+  {
+    fParticleLHEFFilter->Reset();
+    partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier, 0); // get the filtered parton array
+  }
   // loop over all input jets
   fItJetInputArray->Reset();
   while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
   {
     // get standard flavor
-    GetAlgoFlavor(jet, itPartonArray, itPartonLHEFArray);
-    GetPhysicsFlavor(jet, itPartonArray, itPartonLHEFArray);
+    GetAlgoFlavor(jet, partonArray, partonLHEFArray);
+    if(fParticleLHEFInputArray) GetPhysicsFlavor(jet, partonArray, partonLHEFArray);
   }
 }
 
@@ -212,14 +219,16 @@ void JetFlavorAssociation::Process(){
 // Standard definition of jet flavor in
 // https://cmssdt.cern.ch/SDT/lxr/source/PhysicsTools/JetMCAlgos/plugins/JetPartonMatcher.cc?v=CMSSW_7_3_0_pre1
 
-void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray)
+void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray)
 {
   float maxPt = 0;
-  bool isGoodParton = true;
   int daughterCounter = 0;
   Candidate *parton, *partonLHEF;
   Candidate *tempParton = 0, *tempPartonHighestPt = 0;
   int pdgCode, pdgCodeMax = -1;
+  
+  TIter itPartonArray(partonArray);
+  TIter itPartonLHEFArray(partonLHEFArray);
 
   itPartonArray.Reset();
   while((parton = static_cast<Candidate *>(itPartonArray.Next())))
@@ -231,20 +240,18 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, T
     {
       if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
     }
-
-    isGoodParton = true;
+ 
+    if(!fParticleLHEFInputArray) continue;
+ 
     itPartonLHEFArray.Reset();
     while((partonLHEF = static_cast<Candidate *>(itPartonLHEFArray.Next())))
     {
       if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 &&
          parton->PID == partonLHEF->PID &&
          partonLHEF->Charge == parton->Charge)
-      {
-         isGoodParton = false;
+      {      
          break;
       }
-
-      if(!isGoodParton) continue;
 
       // check the daugheter
       daughterCounter = 0;
@@ -284,7 +291,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, T
 
 //------------------------------------------------------------------------------
 
-void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray)
+void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray)
 {
   int partonCounter = 0;
   float biggerConeSize = 0.7;
@@ -296,6 +303,9 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray
   Candidate *tempParton = 0;
   vector<Candidate *> contaminations;
   vector<Candidate *>::iterator itContaminations;
+
+  TIter itPartonArray(partonArray);
+  TIter itPartonLHEFArray(partonLHEFArray);
 
   contaminations.clear();
 

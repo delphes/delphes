@@ -49,8 +49,8 @@ public:
   void Process();
   void Finish();
 
-  void GetAlgoFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray);
-  void GetPhysicsFlavor(Candidate *jet, TIter &itPartonArray, TIter &itPartonLHEFArray);
+  void GetAlgoFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
+  void GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
 
 private:
 
