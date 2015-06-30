@@ -42,6 +42,8 @@ set ExecutionPath {
   MuonIsolation
 
   MissingET
+  
+  JetFlavorAssociation
 
   BTagging
   TauTagging
@@ -641,21 +643,31 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
+########################
+# Jet Flavor Association
+########################
+
+module JetFlavorAssociation JetFlavorAssociation {
+  
+  set PartonInputArray Delphes/partons
+  set ParticleInputArray Delphes/allParticles
+  set ParticleLHEFInputArray Delphes/allParticlesLHEF
+  set JetInputArray JetEnergyScale/jets
+  
+  set DeltaR 0.5
+  set PartonPTMin 1.0
+  set PartonEtaMax 2.5
+
+}
+
 ###########
 # b-tagging
 ###########
 
 module BTagging BTagging {
-  set PartonInputArray Delphes/partons
   set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
-
-  set DeltaR 0.5
-
-  set PartonPTMin 1.0
-
-  set PartonEtaMax 2.5
 
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
   # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
@@ -677,6 +689,10 @@ module BTagging BTagging {
                               (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.4*tanh(pt*0.03 - 0.4)) +
                               (abs(eta) > 2.5)                                  * (0.000)}
 }
+
+#############
+# tau-tagging
+#############
 
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
