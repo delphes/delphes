@@ -7,7 +7,8 @@
 #######################################
 
 set ExecutionPath {
-
+  
+  PhotonConversions
   ParticlePropagator
 
   ChargedHadronMomentumSmearing
@@ -27,12 +28,49 @@ set ExecutionPath {
 
 
 
+#####################
+# Photon Conversions
+#####################
+
+module PhotonConversions PhotonConversions {
+  set InputArray Delphes/stableParticles
+
+  set OutputArray stableParticles
+  
+  # radius of the magnetic field coverage, in m
+ 
+  set Radius 3.31
+   
+  set HalfLength 12.0
+ 
+  set EtaMin 2.0
+  set EtaMax 5.0
+ 
+  
+  # material budget map: (uniform for now)
+  # distribution of the detector mass ( density / X0), can be thought as 
+  # conversion rate per meter function of r,phi,z 
+ 
+ 
+  # unit: m-1
+  
+  set Step 0.05
+  
+  set ConversionMap {          (abs(z) > 0.0 && abs(z) < 12.0 ) * (0.07) +
+                               (abs(z) > 0.0) * (0.00) +
+			       (abs(z) < 0.0) * (0.00)
+		    }
+
+}
+
+
+
 #################################
 # Propagate particles in cylinder
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray Delphes/stableParticles
+  set InputArray PhotonConversions/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -198,6 +236,16 @@ module IdentificationMap IdentificationMap {
                                            (eta > 2.0  && eta <= 5.0) *      (pt < 0.8)* (0.00) +
                                            (eta > 2.0  && eta <= 5.0) *     (pt >= 0.8)* (0.97) +
                                            (eta > 5.0)                                 * (0.00)}
+
+# --- electrons ---
+
+
+
+  add EfficiencyFormula {-11} {-11} {      (eta <= 2.0)                                * (0.00) +
+                                           (eta > 2.0  && eta <= 5.0) *      (pt < 0.6)* (0.97) +
+                                           (eta > 2.0  && eta <= 5.0) *     (pt >= 0.6)* (0.97) +
+                                           (eta > 5.0)                                 * (0.00)}
+
 
 
  # efficiency for other charged particles (should be always {0} {0} {formula})
