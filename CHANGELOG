@@ -2,7 +2,7 @@
 - updated FastJet library to 3.1.2
 - adapted examples, EventDisplay, DelphesFormula and DelphesTF2 to ROOT 6.04
 - fixed tau-tagging for events without tau (thanks to Sho Iwamoto)
-- added PhotonConversion module
+- added PhotonConversions module
 - added TaggingParticlesSkimmer module
 - added phi and energy dependence to AngularSmearing, BTagging, Efficiency, EnergyScale, EnergySmearing, IdentificationMapi, ImpactParameterSmearing and MomentumSmearing
 - added IsRecoPU flag and PTMin parameter to TrackPileUpSubtractor
