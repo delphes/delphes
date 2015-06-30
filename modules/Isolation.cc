@@ -108,10 +108,7 @@ void Isolation::Init()
 
   fUsePTSum = GetBool("UsePTSum", false);
 
-  fVetoLeptons = GetBool("VetoLeptons", true);  
-  
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
-
 
   // import input array(s)
 
@@ -196,19 +193,18 @@ void Isolation::Process()
       const TLorentzVector &isolationMomentum = isolation->Momentum;
 
       if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax &&
-         candidate->GetUniqueID() != isolation->GetUniqueID() &&
-	 ( !fVetoLeptons || (TMath::Abs(candidate->PID) != 11 && (TMath::Abs(candidate->PID) != 13)) ) )
+         candidate->GetUniqueID() != isolation->GetUniqueID())
       {
-     
         sumAllParticles += isolationMomentum.Pt();
         if(isolation->Charge !=0) 
 	{ 
 	  sumCharged += isolationMomentum.Pt();
           if(isolation->IsRecoPU != 0) sumChargedPU += isolationMomentum.Pt();
 	} 
-  
-        else sumNeutral += isolationMomentum.Pt();
-  
+        else
+	{
+	  sumNeutral += isolationMomentum.Pt();
+        }
         ++counter;
       }
     }
@@ -227,7 +223,6 @@ void Isolation::Process()
       }
     }
 
-        
      // correct sum for pile-up contamination
     sumDBeta = sumCharged + TMath::Max(sumNeutral-0.5*sumChargedPU,0.0);
     sumRhoCorr = sumCharged + TMath::Max(sumNeutral-TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
@@ -241,7 +236,7 @@ void Isolation::Process()
     candidate->SumPtChargedPU = sumChargedPU;
     candidate->SumPt = sumAllParticles;
 
-    if((fUsePTSum && sumDBeta > fPTSumMax) || ratioDBeta > fPTRatioMax) continue;
+    if((fUsePTSum && sumDBeta > fPTSumMax) || (!fUsePTSum && ratioDBeta > fPTRatioMax)) continue;
     fOutputArray->Add(candidate);
   }
 }
