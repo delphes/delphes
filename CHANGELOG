@@ -1,5 +1,6 @@
 3.3.0:
 - updated FastJet library to 3.1.2
+- added a detector card for the ILD detector (for ILC)  based on http://arxiv.org/abs/1306.6329
 - adapted examples, EventDisplay, DelphesFormula and DelphesTF2 to ROOT 6.04
 - fixed tau-tagging for events without tau (thanks to Sho Iwamoto)
 - added PhotonConversions module
