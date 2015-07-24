@@ -27,6 +27,7 @@
 
 #include "modules/FastJetFinder.h"
 #include "modules/FastJetGridMedianEstimator.h"
+#include "modules/RunPUPPI.h"
 
 #ifdef __CINT__
 
@@ -36,5 +37,6 @@
 
 #pragma link C++ class FastJetFinder+;
 #pragma link C++ class FastJetGridMedianEstimator+;
+#pragma link C++ class RunPUPPI+;
 
 #endif

@@ -58,7 +58,6 @@
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
-#include "modules/RunPUPPI.h"
 #include "modules/JetFlavorAssociation.h"
 #include "modules/ExampleModule.h"
 
@@ -101,7 +100,6 @@
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
-#pragma link C++ class RunPUPPI+;
 #pragma link C++ class JetFlavorAssociation+;
 #pragma link C++ class ExampleModule+;
 
