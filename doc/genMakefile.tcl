@@ -102,7 +102,7 @@ proc sourceDeps {srcPrefix args} {
 
     if {$fileName == "modules/PileUpMergerPythia8.cc"} {
       lappend srcObjFilesPythia8 $srcObjName$objSuf
-    } elseif {[string match {modules/FastJet*.cc} $fileName] || [string match {modules/RunPUPPI.cc} $fileName] && $srcPrefix != {FASTJET}} {
+    } elseif {([string match {modules/FastJet*.cc} $fileName] || [string match {modules/RunPUPPI.cc} $fileName]) && $srcPrefix != {FASTJET}} {
       continue
     } else {
       lappend srcObjFiles $srcObjName$objSuf

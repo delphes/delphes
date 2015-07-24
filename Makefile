@@ -338,7 +338,6 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Cloner.h \
 	modules/Weighter.h \
 	modules/Hector.h \
-	modules/RunPUPPI.h \
 	modules/JetFlavorAssociation.h \
 	modules/ExampleModule.h
 ModulesDict$(PcmSuf): \
@@ -357,7 +356,8 @@ DELPHES_DICT_PCM +=  \
 tmp/modules/FastJetDict.$(SrcSuf): \
 	modules/FastJetLinkDef.h \
 	modules/FastJetFinder.h \
-	modules/FastJetGridMedianEstimator.h
+	modules/FastJetGridMedianEstimator.h \
+	modules/RunPUPPI.h
 FastJetDict$(PcmSuf): \
 	tmp/modules/FastJetDict$(PcmSuf) \
 	tmp/modules/FastJetDict.$(SrcSuf)
@@ -527,9 +527,6 @@ tmp/external/Hector/H_VerticalKicker.$(ObjSuf): \
 	external/Hector/H_VerticalKicker.$(SrcSuf)
 tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf): \
 	external/Hector/H_VerticalQuadrupole.$(SrcSuf)
-tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf): \
-	external/PUPPI/puppiCleanContainer.$(SrcSuf) \
-	external/fastjet/Selector.hh
 tmp/modules/AngularSmearing.$(ObjSuf): \
 	modules/AngularSmearing.$(SrcSuf) \
 	modules/AngularSmearing.h \
@@ -544,10 +541,7 @@ tmp/modules/BTagging.$(ObjSuf): \
 	modules/BTagging.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
-	classes/DelphesFormula.h \
-	external/ExRootAnalysis/ExRootResult.h \
-	external/ExRootAnalysis/ExRootFilter.h \
-	external/ExRootAnalysis/ExRootClassifier.h
+	classes/DelphesFormula.h
 tmp/modules/Calorimeter.$(ObjSuf): \
 	modules/Calorimeter.$(SrcSuf) \
 	modules/Calorimeter.h \
@@ -762,16 +756,6 @@ tmp/modules/PileUpMergerPythia8.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
-tmp/modules/RunPUPPI.$(ObjSuf): \
-	modules/RunPUPPI.$(SrcSuf) \
-	modules/RunPUPPI.h \
-	external/PUPPI/puppiCleanContainer.hh \
-	external/PUPPI/RecoObj.hh \
-	external/PUPPI/puppiParticle.hh \
-	external/PUPPI/puppiAlgoBin.hh \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesFormula.h
 tmp/modules/SimpleCalorimeter.$(ObjSuf): \
 	modules/SimpleCalorimeter.$(SrcSuf) \
 	modules/SimpleCalorimeter.h \
@@ -907,7 +891,6 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_TransportMatrices.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalKicker.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
-	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
@@ -932,7 +915,6 @@ DELPHES_OBJ +=  \
 	tmp/modules/PhotonConversions.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
-	tmp/modules/RunPUPPI.$(ObjSuf) \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
 	tmp/modules/TaggingParticlesSkimmer.$(ObjSuf) \
@@ -949,6 +931,9 @@ DELPHES_OBJ +=  \
 	tmp/modules/PileUpMergerPythia8.$(ObjSuf)
 endif
 
+tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf): \
+	external/PUPPI/puppiCleanContainer.$(SrcSuf) \
+	external/fastjet/Selector.hh
 tmp/external/fastjet/AreaDefinition.$(ObjSuf): \
 	external/fastjet/AreaDefinition.$(SrcSuf) \
 	external/fastjet/AreaDefinition.hh
@@ -1295,7 +1280,18 @@ tmp/modules/FastJetGridMedianEstimator.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/Njettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh \
 	external/fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh
+tmp/modules/RunPUPPI.$(ObjSuf): \
+	modules/RunPUPPI.$(SrcSuf) \
+	modules/RunPUPPI.h \
+	external/PUPPI/puppiCleanContainer.hh \
+	external/PUPPI/RecoObj.hh \
+	external/PUPPI/puppiParticle.hh \
+	external/PUPPI/puppiAlgoBin.hh \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h
 FASTJET_OBJ +=  \
+	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/external/fastjet/AreaDefinition.$(ObjSuf) \
 	tmp/external/fastjet/BasicRandom.$(ObjSuf) \
 	tmp/external/fastjet/ClosestPair2D.$(ObjSuf) \
@@ -1389,7 +1385,8 @@ FASTJET_OBJ +=  \
 	tmp/external/fastjet/tools/Subtractor.$(ObjSuf) \
 	tmp/external/fastjet/tools/TopTaggerBase.$(ObjSuf) \
 	tmp/modules/FastJetFinder.$(ObjSuf) \
-	tmp/modules/FastJetGridMedianEstimator.$(ObjSuf)
+	tmp/modules/FastJetGridMedianEstimator.$(ObjSuf) \
+	tmp/modules/RunPUPPI.$(ObjSuf)
 
 ifeq ($(HAS_PYTHIA8),true)
 FASTJET_OBJ +=  \
