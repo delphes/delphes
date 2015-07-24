@@ -358,6 +358,7 @@ void FastJetFinder::Process()
 
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
+      if(itInputList->user_index() < 0) continue;
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
 
       deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
