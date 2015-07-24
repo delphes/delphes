@@ -130,7 +130,7 @@ void RunPUPPI::Process(){
   fItNeutralInputArray->Reset();
   fPVItInputArray->Reset();
 
-  std::vector<Candidate> InputParticles;
+  std::vector<Candidate *> InputParticles;
   InputParticles.clear();
 
   // take the leading vertex 
@@ -140,6 +140,7 @@ void RunPUPPI::Process(){
 
   // Fill input particles for puppi
   std::vector<RecoObj> puppiInputVector;
+  puppiInputVector.clear();
 
   // Loop on charge track candidate
   while((candidate = static_cast<Candidate*>(fItTrackInputArray->Next()))){   
@@ -176,7 +177,7 @@ void RunPUPPI::Process(){
       }
 
       puppiInputVector.push_back(curRecoObj);
-      InputParticles.push_back(*candidate);
+      InputParticles.push_back(candidate);
   }
 
   // Loop on neutral calo cells 
@@ -206,7 +207,7 @@ void RunPUPPI::Process(){
         continue;
       }
       puppiInputVector.push_back(curRecoObj);
-      InputParticles.push_back(*candidate);
+      InputParticles.push_back(candidate);
   }
 
   // Create algorithm list for puppi
@@ -246,9 +247,8 @@ void RunPUPPI::Process(){
   // Loop on final particles
   for (std::vector<fastjet::PseudoJet>::iterator it = puppiParticles.begin() ; it != puppiParticles.end() ; it++) {
     if(it->user_index() <= int(InputParticles.size())){      
-      candidate = factory->NewCandidate();
-      candidate = dynamic_cast<Candidate*>(InputParticles.at(it->user_index()).Clone());
-      candidate->Momentum.SetXYZT(it->px(),it->py(),it->pz(),it->e());
+      candidate = static_cast<Candidate *>(InputParticles.at(it->user_index())->Clone());
+      candidate->Momentum.SetPxPyPzE(it->px(),it->py(),it->pz(),it->e());
       fOutputArray->Add(candidate);
       if( puppiInputVector.at(it->user_index()).id == 1 or puppiInputVector.at(it->user_index()).id == 2) fOutputTrackArray->Add(candidate);
       else if (puppiInputVector.at(it->user_index()).id == 0) fOutputNeutralArray->Add(candidate);
