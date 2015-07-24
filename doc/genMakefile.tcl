@@ -102,7 +102,7 @@ proc sourceDeps {srcPrefix args} {
 
     if {$fileName == "modules/PileUpMergerPythia8.cc"} {
       lappend srcObjFilesPythia8 $srcObjName$objSuf
-    } elseif {[string match {modules/FastJet*.cc} $fileName] && $srcPrefix != {FASTJET}} {
+    } elseif {[string match {modules/FastJet*.cc} $fileName] || [string match {modules/RunPUPPI.cc} $fileName] && $srcPrefix != {FASTJET}} {
       continue
     } else {
       lappend srcObjFiles $srcObjName$objSuf
@@ -282,9 +282,9 @@ dictDeps {FASTJET_DICT} {modules/FastJetLinkDef.h}
 
 dictDeps {DISPLAY_DICT} {display/DisplayLinkDef.h}
 
-sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/Hector/*.cc} {external/PUPPI/*.cc}
+sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/Hector/*.cc}
 
-sourceDeps {FASTJET} {modules/FastJet*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc} {external/fastjet/contribs/*/*.cc} 
+sourceDeps {FASTJET} {modules/FastJet*.cc} {modules/RunPUPPI.cc} {external/PUPPI/*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc} {external/fastjet/contribs/*/*.cc} 
 
 sourceDeps {DISPLAY} {display/*.cc}
 
