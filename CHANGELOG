@@ -5,7 +5,7 @@
 - fixed tau-tagging for events without tau (thanks to Sho Iwamoto)
 - added PhotonConversions module
 - added TaggingParticlesSkimmer module
-- added phi and energy dependence to AngularSmearing, BTagging, Efficiency, EnergyScale, EnergySmearing, IdentificationMapi, ImpactParameterSmearing and MomentumSmearing
+- added phi and energy dependence to AngularSmearing, BTagging, Efficiency, EnergyScale, EnergySmearing, IdentificationMap, ImpactParameterSmearing and MomentumSmearing
 - added IsRecoPU flag and PTMin parameter to TrackPileUpSubtractor
 - added Invert and Status options to PdgCodeFilter (thanks to Chase Shimmin)
 - added new isolation variables to Candidate, Electron, Muon and Photon classes (thanks to Raffaele Gerosa)
@@ -20,7 +20,7 @@
 - added possibility to use DelphesPythia8 with LHE files
 - added Pythia8 examples
 - added JetFlavourAssociation module with Physics and Algorithmic definitions of the jet flavor
-- added new jet flavor definitions to the BTagging module
+- added new jet flavor definitions to the BTagging module (available only when running DelphesPythia8 with LHE files)
 
 3.2.0:
 - moved code repository to GitHub (http://github.com/delphes/delphes)
