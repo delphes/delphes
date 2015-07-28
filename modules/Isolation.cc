@@ -120,7 +120,7 @@ void Isolation::Init()
   fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "Calorimeter/electrons"));
   fItCandidateInputArray = fCandidateInputArray->MakeIterator();
 
-  rhoInputArrayName = GetString("RhoInputArray", "");
+  rhoInputArrayName = GetString("RhoInputArray", "Rho/rho");
   if(rhoInputArrayName[0] != '\0')
   {
     fRhoInputArray = ImportArray(rhoInputArrayName);
@@ -157,12 +157,6 @@ void Isolation::Process()
   Double_t eta = 0.0;
   Double_t rho = 0.0;
 
-  if(fRhoInputArray && fRhoInputArray->GetEntriesFast() > 0)
-  {
-    candidate = static_cast<Candidate*>(fRhoInputArray->At(0));
-    rho = candidate->Momentum.Pt();
-  }
-
   // select isolation objects
   fFilter->Reset();
   isolationArray = fFilter->GetSubArray(fClassifier, 0);
@@ -177,6 +171,20 @@ void Isolation::Process()
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = TMath::Abs(candidateMomentum.Eta());
+
+    // find rho
+    rho = 0.0;
+    if(fRhoInputArray)
+    {
+      fItRhoInputArray->Reset();
+      while((object = static_cast<Candidate*>(fItRhoInputArray->Next())))
+      {
+        if(eta >= object->Edges[0] && eta < object->Edges[1])
+        {
+          rho = object->Momentum.Pt();
+        }
+      }
+    }
 
     // loop over all input tracks
     
