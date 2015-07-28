@@ -120,7 +120,7 @@ void Isolation::Init()
   fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "Calorimeter/electrons"));
   fItCandidateInputArray = fCandidateInputArray->MakeIterator();
 
-  rhoInputArrayName = GetString("RhoInputArray", "Rho/rho");
+  rhoInputArrayName = GetString("RhoInputArray", "");
   if(rhoInputArrayName[0] != '\0')
   {
     fRhoInputArray = ImportArray(rhoInputArrayName);
