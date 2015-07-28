@@ -253,7 +253,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray,
          break;
       }
 
-      // check the daugheter
+      // check the daughter
       daughterCounter = 0;
       if(parton->D1 != -1 || parton->D2 != -1)
       {
