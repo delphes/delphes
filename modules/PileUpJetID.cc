@@ -56,15 +56,6 @@ void PileUpJetID::Init()
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
 
-
-  /*
-  Double_t fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
-  Double_t fBetaMinBarrel; // |eta| < 2.5
-  Double_t fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
-  Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
-  Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
-  */
-
   fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel",0.1);
   fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
   fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap",0.1);
@@ -73,16 +64,6 @@ void PileUpJetID::Init()
   fJetPTMinForNeutrals = GetDouble("JetPTMinForNeutrals", 20.0);
   fNeutralPTMin = GetDouble("NeutralPTMin", 2.0);
 
-
-
-  cout << "  set MeanSqDeltaRMaxBarrel " << fMeanSqDeltaRMaxBarrel << endl;
-  cout << "  set BetaMinBarrel " << fBetaMinBarrel << endl;
-  cout << "  set MeanSqDeltaRMaxEndcap " << fMeanSqDeltaRMaxEndcap << endl;
-  cout << "  set BetaMinEndcap " << fBetaMinEndcap << endl;
-  cout << "  set MeanSqDeltaRMaxForward " << fMeanSqDeltaRMaxForward << endl;
-
-
-
   fAverageEachTower = false; // for timing
 
   // import input array(s)
@@ -90,26 +71,17 @@ void PileUpJetID::Init()
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
 
-
-  //  cout << "BeforE SCZ additions in init" << endl;
-  //  cout << GetString("TrackInputArray", "ParticlePropagator/tracks") << endl;
-  //  cout << GetString("EFlowTrackInputArray", "ParticlePropagator/tracks") << endl;
-
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
   fItTrackInputArray = fTrackInputArray->MakeIterator();
 
   fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "ParticlePropagator/tracks"));
   fItNeutralInputArray = fNeutralInputArray->MakeIterator();
 
-
   // create output array(s)
 
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
 
   fNeutralsInPassingJets = ExportArray(GetString("NeutralsInPassingJets","eflowtowers"));
-
-
-  //  cout << " end of INIT " << endl;
 
 }
 
@@ -129,14 +101,9 @@ void PileUpJetID::Finish()
 
 void PileUpJetID::Process()
 {
-  //  cout << "start of process" << endl;
-
   Candidate *candidate, *constituent;
   TLorentzVector momentum, area;
 
-  //  cout << "BeforE SCZ additions in process" << endl;
-
-  // SCZ
   Candidate *trk;
 
   // loop over all input candidates
