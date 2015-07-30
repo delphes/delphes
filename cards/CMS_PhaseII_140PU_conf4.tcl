@@ -1,4 +1,4 @@
-set MaxEvents 20
+set MaxEvents 100
 
 #######################################
 # Order of execution of various modules
