@@ -255,7 +255,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Photon, 2)
+  ClassDef(Photon, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -290,7 +290,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Electron, 2)
+  ClassDef(Electron, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -323,7 +323,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Muon, 2)
+  ClassDef(Muon, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -456,7 +456,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Tower, 1)
+  ClassDef(Tower, 2)
 };
 
 //---------------------------------------------------------------------------
