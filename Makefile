@@ -339,6 +339,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Weighter.h \
 	modules/Hector.h \
 	modules/JetFlavorAssociation.h \
+	modules/JetFakeParticle.h \
 	modules/ExampleModule.h
 ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict$(PcmSuf) \
@@ -655,6 +656,15 @@ tmp/modules/Isolation.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/JetFakeParticle.$(ObjSuf): \
+	modules/JetFakeParticle.$(SrcSuf) \
+	modules/JetFakeParticle.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/JetFlavorAssociation.$(ObjSuf): \
 	modules/JetFlavorAssociation.$(SrcSuf) \
 	modules/JetFlavorAssociation.h \
@@ -905,6 +915,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/IdentificationMap.$(ObjSuf) \
 	tmp/modules/ImpactParameterSmearing.$(ObjSuf) \
 	tmp/modules/Isolation.$(ObjSuf) \
+	tmp/modules/JetFakeParticle.$(ObjSuf) \
 	tmp/modules/JetFlavorAssociation.$(ObjSuf) \
 	tmp/modules/JetPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
@@ -1665,6 +1676,10 @@ external/fastjet/ClusterSequenceArea.hh: \
 	external/fastjet/ClusterSequencePassiveArea.hh \
 	external/fastjet/ClusterSequenceVoronoiArea.hh \
 	external/fastjet/AreaDefinition.hh
+	@touch $@
+
+modules/JetFakeParticle.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/ClusterSequence1GhostPassiveArea.hh: \
