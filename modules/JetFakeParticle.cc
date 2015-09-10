@@ -72,25 +72,25 @@ void JetFakeParticle::Init()
   TFakeMap::iterator itEfficiencyMap;
   ExRootConfParam param;
   DelphesFormula *formula;
-  Int_t i, size, pdg;
+  Int_t i, size, pdgCode;
 
   // read efficiency formulas
   param = GetParam("EfficiencyFormula");
   size = param.GetSize();
 
   fEfficiencyMap.clear();
- 
+
   for(i = 0; i < size/2; ++i)
   {
     formula = new DelphesFormula;
     formula->Compile(param[i*2 + 1].GetString());
-    pdg = param[i*2].GetInt();
-    
-    if(TMath::Abs(pdg) != 11 && TMath::Abs(pdg) != 13 && TMath::Abs(pdg) != 22)
+    pdgCode = param[i*2].GetInt();
+
+    if(TMath::Abs(pdgCode) != 11 && TMath::Abs(pdgCode) != 13 && TMath::Abs(pdgCode) != 22)
     {
       throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
     }
-    
+
     fEfficiencyMap[param[i*2].GetInt()] = formula;
   }
 
@@ -103,8 +103,7 @@ void JetFakeParticle::Init()
 
     fEfficiencyMap[0] = formula;
   }
- 
- 
+
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
@@ -112,9 +111,9 @@ void JetFakeParticle::Init()
 
   // create output array
 
-  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons_fake"));
-  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons_fake"));
-  fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "photons_fake"));
+  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "fakeElectrons"));
+  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "fakeMuons"));
+  fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "fakePhotons"));
   fJetOutputArray = ExportArray(GetString("JetOutputArray", "jets"));
 
 }
@@ -138,13 +137,12 @@ void JetFakeParticle::Finish()
 
 void JetFakeParticle::Process()
 {
-  Candidate *candidate, *fake;
+  Candidate *candidate, *fake = 0;
   Double_t pt, eta, phi, e;
   TFakeMap::iterator itEfficiencyMap;
   DelphesFormula *formula;
-  Int_t pdgCodeIn, pdgCodeOut, charge;
-  Bool_t faked;
-  
+  Int_t pdgCodeOut;
+
   Double_t p, r, rs, total;
 
   fItInputArray->Reset();
@@ -156,17 +154,14 @@ void JetFakeParticle::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-   
+
     r = gRandom->Uniform();
     total = 0.0;
-    faked = 0;
-    
+    fake = 0;
+
     // loop over map for this jet
     for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
     {
-    
-  
-    
       formula = itEfficiencyMap->second;
       pdgCodeOut = itEfficiencyMap->first;
 
@@ -174,42 +169,39 @@ void JetFakeParticle::Process()
 
       if(total <= r && r < total + p)
       {
-        
         fake = static_cast<Candidate*>(candidate->Clone());
-        faked = 1;
-        
+
         // convert jet
-        
+
         if(TMath::Abs(pdgCodeOut) == 11 || TMath::Abs(pdgCodeOut) == 13)
         {
-          
-        // for electrons and muons fake use the jet charge (if non-zero, otherwise randomly assign sign) 
-          
-          if(candidate->Charge != 0)fake->PID = -(candidate->Charge)*TMath::Abs(pdgCodeOut);
+          // for electrons and muons fake use the jet charge (if non-zero, otherwise randomly assign sign)
+
+          if(candidate->Charge != 0)
+          {
+            fake->PID = -(candidate->Charge)*TMath::Abs(pdgCodeOut);
+          }
           else
           {
             rs = gRandom->Uniform();
             fake->PID = (rs < 0.5) ? -TMath::Abs(pdgCodeOut) : TMath::Abs(pdgCodeOut);
-          } 
-        
+          }
         }
-        
+
         if(TMath::Abs(pdgCodeOut) == 22) fake->PID = 22;
-        
+
         if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->Add(fake);
         if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->Add(fake);
         if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->Add(fake);
 
         break;
-
       }
 
       total += p;
     }
- 
-  if(!faked) fJetOutputArray->Add(candidate);
- 
- }
+
+    if(!fake) fJetOutputArray->Add(candidate);
+  }
 }
 
 //------------------------------------------------------------------------------
