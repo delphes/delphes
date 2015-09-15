@@ -175,16 +175,15 @@ void JetFakeParticle::Process()
 
         if(TMath::Abs(pdgCodeOut) == 11 || TMath::Abs(pdgCodeOut) == 13)
         {
-          // for electrons and muons fake use the jet charge (if non-zero, otherwise randomly assign sign)
-
           if(candidate->Charge != 0)
           {
-            fake->PID = -(candidate->Charge)*TMath::Abs(pdgCodeOut);
+            fake->Charge = candidate->Charge/TMath::Abs(candidate->Charge);
           }
           else
           {
             rs = gRandom->Uniform();
-            fake->PID = (rs < 0.5) ? -TMath::Abs(pdgCodeOut) : TMath::Abs(pdgCodeOut);
+            fake->Charge = (rs < 0.5) ? -1 : 1;
+            
           }
         }
 
