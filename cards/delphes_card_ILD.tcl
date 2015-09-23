@@ -217,8 +217,8 @@ module SimpleCalorimeter ECal {
 
   set IsEcal true 
  
-  set EnergyMin 0.1
-  set EnergySignificanceMin 0.0
+  set EnergyMin 0.5
+  set EnergySignificanceMin 1.0
 
   set SmearTowerCenter true
 
@@ -263,7 +263,7 @@ module SimpleCalorimeter ECal {
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
 
-  set ResolutionFormula { (abs(eta) <= 2.5)                   * sqrt(energy^2*0.01^2 + energy*0.15^2) }
+  set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.01^2 + energy*0.15^2) }
 
 }
 
@@ -280,8 +280,8 @@ module SimpleCalorimeter HCal {
 
   set IsEcal false 
  
-  set EnergyMin 0.1
-  set EnergySignificanceMin 0.0
+  set EnergyMin 1.0
+  set EnergySignificanceMin 1.0
 
   set SmearTowerCenter true
 
@@ -327,8 +327,7 @@ module SimpleCalorimeter HCal {
 
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}
 
-  # This is the ATLAS HCAL resolution, extended up eta = 3.0
-  set HCalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.015^2 + energy*0.50^2)}
+  set ResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.015^2 + energy*0.50^2)}
 
 }
 
