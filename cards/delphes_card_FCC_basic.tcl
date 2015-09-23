@@ -341,7 +341,7 @@ module SimpleCalorimeter HCal {
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}
 
   # This is the ATLAS HCAL resolution, extended up eta = 6.0
-  set HCalResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) +
+  set ResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) +
                              (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.0500^2 + energy*0.706^2) +
                              (abs(eta) > 3.2 && abs(eta) <= 6.0) * sqrt(energy^2*0.09420^2 + energy*1.00^2)}
 
