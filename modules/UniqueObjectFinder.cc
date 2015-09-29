@@ -73,13 +73,15 @@ void UniqueObjectFinder::Init()
   const TObjArray *array;
   TIterator *iterator;
 
+  fInputMap.clear();
+
   size = param.GetSize();
   for(i = 0; i < size/2; ++i)
   {
     array = ImportArray(param[i*2].GetString());
     iterator = array->MakeIterator();
 
-    fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());
+    fInputMap.push_back(make_pair(iterator, ExportArray(param[i*2 + 1].GetString())));
   }
 }
 
@@ -87,7 +89,7 @@ void UniqueObjectFinder::Init()
 
 void UniqueObjectFinder::Finish()
 {
-  map< TIterator *, TObjArray * >::iterator itInputMap;
+  vector< pair< TIterator *, TObjArray * > >::iterator itInputMap;
   TIterator *iterator;
 
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
@@ -103,7 +105,7 @@ void UniqueObjectFinder::Finish()
 void UniqueObjectFinder::Process()
 {
   Candidate *candidate;
-  map< TIterator *, TObjArray * >::iterator itInputMap;
+  vector< pair< TIterator *, TObjArray * > >::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
 
@@ -127,10 +129,10 @@ void UniqueObjectFinder::Process()
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, map< TIterator *, TObjArray * >::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector< pair< TIterator *, TObjArray * > >::iterator itInputMap)
 {
   Candidate *previousCandidate;
-  map< TIterator *, TObjArray * >::iterator previousItInputMap;
+  vector< pair< TIterator *, TObjArray * > >::iterator previousItInputMap;
   TObjArray *array;
 
   // loop over previous arrays

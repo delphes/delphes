@@ -141,13 +141,12 @@ void Calorimeter::Init()
     fFractionMap[param[i*2].GetInt()] = make_pair(ecalFraction, hcalFraction);
   }
 
-/*
-  TFractionMap::iterator itFractionMap;
-  for(itFractionMap = fFractionMap.begin(); itFractionMap != fFractionMap.end(); ++itFractionMap)
-  {
-    cout << itFractionMap->first << "   " << itFractionMap->second.first  << "   " << itFractionMap->second.second << endl;
-  }
-*/
+  // read min E value for timing measurement in ECAL
+  fTimingEnergyMin = GetDouble("TimingEnergyMin",4.);
+  // For timing
+  // So far this flag needs to be false
+  // Curved extrapolation not supported
+  fElectronsFromTrack = false;
 
   // read min E value for towers to be saved
   fECalEnergyMin = GetDouble("ECalEnergyMin", 0.0);
@@ -157,7 +156,7 @@ void Calorimeter::Init()
   fHCalEnergySignificanceMin = GetDouble("HCalEnergySignificanceMin", 0.0);
 
   // switch on or off the dithering of the center of calorimeter towers
-  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
+  fSmearTowerCenter = GetBool("SmearTowerCenter", true);
 
   // read resolution formulas
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
@@ -355,15 +354,6 @@ void Calorimeter::Process()
       fTrackECalEnergy = 0.0;
       fTrackHCalEnergy = 0.0;
 
-      fTowerECalTime = 0.0;
-      fTowerHCalTime = 0.0;
-
-      fTrackECalTime = 0.0;
-      fTrackHCalTime = 0.0;
-
-      fTowerECalTimeWeight = 0.0;
-      fTowerHCalTimeWeight = 0.0;
-
       fTowerTrackHits = 0;
       fTowerPhotonHits = 0;
 
@@ -379,18 +369,19 @@ void Calorimeter::Process()
       momentum = track->Momentum;
       position = track->Position;
 
-
       ecalEnergy = momentum.E() * fTrackECalFractions[number];
       hcalEnergy = momentum.E() * fTrackHCalFractions[number];
 
       fTrackECalEnergy += ecalEnergy;
       fTrackHCalEnergy += hcalEnergy;
 
-      fTrackECalTime += TMath::Sqrt(ecalEnergy)*position.T();
-      fTrackHCalTime += TMath::Sqrt(hcalEnergy)*position.T();
-
-      fTrackECalTimeWeight += TMath::Sqrt(ecalEnergy);
-      fTrackHCalTimeWeight += TMath::Sqrt(hcalEnergy);
+      if(ecalEnergy > fTimingEnergyMin && fTower)
+      {
+        if(fElectronsFromTrack)
+        {
+          fTower->ECalEnergyTimePairs.push_back(make_pair<Float_t, Float_t>(ecalEnergy, track->Position.T()));
+        }
+      }
 
       fTowerTrackArray->Add(track);
 
@@ -411,12 +402,13 @@ void Calorimeter::Process()
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
 
-    fTowerECalTime += TMath::Sqrt(ecalEnergy)*position.T();
-    fTowerHCalTime += TMath::Sqrt(hcalEnergy)*position.T();
-
-    fTowerECalTimeWeight += TMath::Sqrt(ecalEnergy);
-    fTowerHCalTimeWeight += TMath::Sqrt(hcalEnergy);
-
+    if(ecalEnergy > fTimingEnergyMin && fTower)
+    {
+      if (abs(particle->PID) != 11 || !fElectronsFromTrack)
+      {
+        fTower->ECalEnergyTimePairs.push_back(make_pair<Float_t, Float_t>(ecalEnergy, particle->Position.T()));
+      }
+    }
 
     fTower->AddCandidate(particle);
   }
@@ -433,7 +425,7 @@ void Calorimeter::FinalizeTower()
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalSigma, hcalSigma;
-  Double_t ecalTime, hcalTime, time;
+  Float_t weight, sumWeightedTime, sumWeight;
 
   if(!fTower) return;
 
@@ -443,9 +435,6 @@ void Calorimeter::FinalizeTower()
   ecalEnergy = LogNormal(fTowerECalEnergy, ecalSigma);
   hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
 
-  ecalTime = (fTowerECalTimeWeight < 1.0E-09 ) ? 0.0 : fTowerECalTime/fTowerECalTimeWeight;
-  hcalTime = (fTowerHCalTimeWeight < 1.0E-09 ) ? 0.0 : fTowerHCalTime/fTowerHCalTimeWeight;
-
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
 
@@ -453,9 +442,8 @@ void Calorimeter::FinalizeTower()
   if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalEnergySignificanceMin*hcalSigma) hcalEnergy = 0.0;
 
   energy = ecalEnergy + hcalEnergy;
-  time = (TMath::Sqrt(ecalEnergy)*ecalTime + TMath::Sqrt(hcalEnergy)*hcalTime)/(TMath::Sqrt(ecalEnergy) + TMath::Sqrt(hcalEnergy));
 
-  if(fDitherTowerCenter)
+  if(fSmearTowerCenter)
   {
     eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
     phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
@@ -468,7 +456,29 @@ void Calorimeter::FinalizeTower()
 
   pt = energy / TMath::CosH(eta);
 
-  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, time);
+  // Time calculation for tower
+  fTower->NTimeHits = 0;
+  sumWeightedTime = 0.0;
+  sumWeight = 0.0;
+
+  for(size_t i = 0; i < fTower->ECalEnergyTimePairs.size(); ++i)
+  {
+    weight = TMath::Sqrt(fTower->ECalEnergyTimePairs[i].first);
+    sumWeightedTime += weight * fTower->ECalEnergyTimePairs[i].second;
+    sumWeight += weight;
+    fTower->NTimeHits++;
+  }
+
+  if(sumWeight > 0.0)
+  {
+    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, sumWeightedTime/sumWeight);
+  }
+  else
+  {
+    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 999999.9);
+  }
+
+
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;

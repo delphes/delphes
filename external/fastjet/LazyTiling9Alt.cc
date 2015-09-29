@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: LazyTiling9Alt.cc 3477 2014-07-29 14:34:39Z salam $
+// $Id: LazyTiling9Alt.cc 3808 2015-02-20 11:24:53Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -318,7 +318,9 @@ inline void LazyTiling9Alt::_add_untagged_neighbours_to_tile_union_using_max_inf
   
   for (Tile::TileFnPair * near_tile = tile.begin_tiles; near_tile != tile.end_tiles; near_tile++){
     if ((near_tile->first)->tagged) continue;
-    double dist = (tile.*(near_tile->second))(jet);
+    // here we are not allowed to miss a tile due to some rounding
+    // error. We therefore allow for a margin of security
+    double dist = (tile.*(near_tile->second))(jet) - tile_edge_security_margin;
     // cout << "      max info looked at tile " << *near_tile - &_tiles[0] 
     // 	 << ", dist = " << dist << " " << (*near_tile)->max_NN_dist
     // 	 << endl;

@@ -1,0 +1,12 @@
+This example shows how to run Delphes as a library with external FastJet
+
+First, you need to modify Makefile by setting ROOT_DIR, DELPHES_DIR, FASTJET_DIR
+
+Then you can build the examples with the following command:
+
+  make
+
+For more details, please visit:
+
+  https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/ExternalFastJet
+

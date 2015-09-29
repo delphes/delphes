@@ -55,17 +55,21 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/WeightsInfo.h"
 
 using namespace std;
 
 //---------------------------------------------------------------------------
 
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
-  ExRootTreeBranch *branchEvent, DelphesFactory *factory,
-  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
+  DelphesFactory *factory, TObjArray *allParticleOutputArray,
+  TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
 {
   fwlite::Handle< GenEventInfoProduct > handleGenEventInfo;
+
+  fwlite::Handle< LHEEventProduct > handleLHEEvent;
 
   fwlite::Handle< vector< reco::GenParticle > > handleParticle;
   vector< reco::GenParticle >::const_iterator itParticle;
@@ -74,9 +78,11 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   vector< const reco::Candidate * >::iterator itCandidate;
 
   handleGenEventInfo.getByLabel(event, "generator");
+  handleLHEEvent.getByLabel(event, "source");
   handleParticle.getByLabel(event, "genParticles");
 
   HepMCEvent *element;
+  Weight *weight;
   Candidate *candidate;
   TDatabasePDG *pdg;
   TParticlePDG *pdgParticle;
@@ -85,6 +91,9 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   Int_t pid, status;
   Double_t px, py, pz, e, mass;
   Double_t x, y, z;
+
+  const vector< gen::WeightsInfo > &vectorWeightsInfo = handleLHEEvent->weights();
+  vector< gen::WeightsInfo >::const_iterator itWeightsInfo;
 
   element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
 
@@ -107,6 +116,12 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   element->ReadTime = 0.0;
   element->ProcTime = 0.0;
+
+  for(itWeightsInfo = vectorWeightsInfo.begin(); itWeightsInfo != vectorWeightsInfo.end(); ++itWeightsInfo)
+  {
+    weight = static_cast<Weight *>(branchRwgt->NewEntry());
+    weight->Weight = itWeightsInfo->wgt;
+  }
 
   pdg = TDatabasePDG::Instance();
 
@@ -185,7 +200,7 @@ int main(int argc, char *argv[])
   TFile *outputFile = 0;
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0;
+  ExRootTreeBranch *branchEvent = 0, *branchRwgt = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
@@ -225,6 +240,7 @@ int main(int argc, char *argv[])
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
+    branchRwgt = treeWriter->NewBranch("Rwgt", Weight::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -267,7 +283,7 @@ int main(int argc, char *argv[])
       treeWriter->Clear();
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
-        ConvertInput(event, eventCounter, branchEvent, factory,
+        ConvertInput(event, eventCounter, branchEvent, branchRwgt, factory,
           allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
         modularDelphes->ProcessTask();
 

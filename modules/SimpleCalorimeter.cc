@@ -149,8 +149,11 @@ void SimpleCalorimeter::Init()
 
   fEnergySignificanceMin = GetDouble("EnergySignificanceMin", 0.0);
 
+  // flag that says if current calo is Ecal of Hcal (will then fill correct values of Eem and Ehad)
+  fIsEcal = GetBool("IsEcal", false);
+
   // switch on or off the dithering of the center of calorimeter towers
-  fDitherTowerCenter = GetBool("DitherTowerCenter", true);
+  fSmearTowerCenter = GetBool("SmearTowerCenter", true);
 
   // read resolution formulas
   fResolutionFormula->Compile(GetString("ResolutionFormula", "0"));
@@ -408,7 +411,7 @@ void SimpleCalorimeter::FinalizeTower()
 
   if(energy < fEnergyMin || energy < fEnergySignificanceMin*sigma) energy = 0.0;
 
-  if(fDitherTowerCenter)
+  if(fSmearTowerCenter)
   {
     eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
     phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
@@ -423,6 +426,9 @@ void SimpleCalorimeter::FinalizeTower()
 
   fTower->Position.SetPtEtaPhiE(1.0, eta, phi, time);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+
+  fTower->Eem = (!fIsEcal) ? 0 : energy;
+  fTower->Ehad = (fIsEcal) ? 0 : energy; 
 
   fTower->Edges[0] = fTowerEdges[0];
   fTower->Edges[1] = fTowerEdges[1];
@@ -445,6 +451,9 @@ void SimpleCalorimeter::FinalizeTower()
     // create new photon tower
     tower = static_cast<Candidate*>(fTower->Clone());
     pt = energy / TMath::CosH(eta);
+
+    tower->Eem = (!fIsEcal) ? 0 : energy;
+    tower->Ehad = (fIsEcal) ? 0 : energy; 
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
     fEFlowTowerOutputArray->Add(tower);

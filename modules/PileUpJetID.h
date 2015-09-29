@@ -1,29 +1,11 @@
-/*
- *  Delphes: a framework for fast simulation of a generic collider experiment
- *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #ifndef PileUpJetID_h
 #define PileUpJetID_h
 
 /** \class PileUpJetID
  *
- *  CMS PileUp Jet ID Variables, based on http://cds.cern.ch/record/1581583
+ *  CMS PileUp Jet ID Variables
  *
- *  \author S. Zenz, December 2013
+ *  \author S. Zenz
  *
  */
 
@@ -33,6 +15,7 @@
 #include <deque>
 
 class TObjArray;
+class DelphesFormula;
 
 class PileUpJetID: public DelphesModule
 {
@@ -50,10 +33,61 @@ private:
   Double_t fJetPTMin;
   Double_t fParameterR;
 
+  Double_t fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
+  Double_t fBetaMinBarrel; // |eta| < 2.5
+  Double_t fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
+  Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
+  Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
+
+  Double_t fNeutralPTMin;
+  Double_t fJetPTMinForNeutrals;
+
+  /*
+JAY
+---
+
+|Eta|<1.5
+
+meanSqDeltaR betaStar SigEff BgdEff
+0.13 0.92 96% 8%
+0.13 0.95 97% 16%
+0.13 0.97 98% 27%
+
+|Eta|>1.5
+
+meanSqDeltaR betaStar SigEff BgdEff
+0.14 0.91 95% 15%
+0.14 0.94 97% 19%
+0.14 0.97 98% 29%
+
+BRYAN
+-----
+
+Barrel (MeanSqDR, Beta, sig eff, bg eff): 
+0.10, 0.08, 90%, 8%
+0.11, 0.12, 90%, 6%
+0.13, 0.16, 89%, 5%
+
+Endcap (MeanSqDR, Beta, sig eff, bg eff):
+0.07, 0.06, 89%, 4%
+0.08, 0.08, 92%, 6%
+0.09, 0.08, 95%, 10%
+0.10, 0.08, 97%, 13%
+
+SETH GUESSES FOR |eta| > 4.0
+----------------------------
+
+MeanSqDeltaR 
+0.07 
+0.10 
+0.14 
+0.2
+  */
+
   // If set to true, may have weird results for PFCHS
   // If set to false, uses everything within dR < fParameterR even if in other jets &c.
   // Results should be very similar for PF
-  Int_t fUseConstituents;
+  Int_t fUseConstituents; 
 
   Bool_t fAverageEachTower;
 
@@ -61,21 +95,17 @@ private:
 
   const TObjArray *fJetInputArray; //!
 
-  const TObjArray *fTrackInputArray; //!
-  const TObjArray *fNeutralInputArray; //!
+  const TObjArray *fTrackInputArray; // SCZ
+  const TObjArray *fNeutralInputArray; 
 
-  TIterator *fItTrackInputArray; //!
-  TIterator *fItNeutralInputArray; //!
+  TIterator *fItTrackInputArray; // SCZ
+  TIterator *fItNeutralInputArray; // SCZ
 
   TObjArray *fOutputArray; //!
+  TObjArray *fNeutralsInPassingJets; // SCZ
 
-  TIterator *fItVertexInputArray; //!
-  const TObjArray *fVertexInputArray; //!
 
-  Double_t fZVertexResolution;
-
-  ClassDef(PileUpJetID, 1)
+  ClassDef(PileUpJetID, 2)
 };
 
 #endif
-

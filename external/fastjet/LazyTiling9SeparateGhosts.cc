@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: LazyTiling9SeparateGhosts.cc 3596 2014-08-12 15:27:19Z soyez $
+// $Id: LazyTiling9SeparateGhosts.cc 3808 2015-02-20 11:24:53Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -297,7 +297,9 @@ inline void LazyTiling9SeparateGhosts::_add_untagged_neighbours_to_tile_union_us
   
   for (Tile3 ** near_tile = tile.begin_tiles; near_tile != tile.end_tiles; near_tile++){
     if ((*near_tile)->tagged) continue;
-    double dist = _distance_to_tile(jet, *near_tile);
+    // here we are not allowed to miss a tile due to some rounding
+    // error. We therefore allow for a margin of security
+    double dist = _distance_to_tile(jet, *near_tile) - tile_edge_security_margin;
     // cout << "      max info looked at tile " << *near_tile - &_tiles[0] 
     // 	 << ", dist = " << dist << " " << (*near_tile)->max_NN_dist
     // 	 << endl;

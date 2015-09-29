@@ -49,6 +49,9 @@ public:
 private:
 
   Double_t fPTMin; //!
+  Bool_t fInvertPdg; //!
+  Bool_t fRequireStatus; //!
+  Int_t fStatus; //!
 
   std::vector<Int_t> fPdgCodes;
 

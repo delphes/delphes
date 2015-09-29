@@ -68,9 +68,6 @@ IdentificationMap::~IdentificationMap()
 
 void IdentificationMap::Init()
 {
-  // read efficiency formula
-
-
   TMisIDMap::iterator itEfficiencyMap;
   ExRootConfParam param;
   DelphesFormula *formula;
@@ -86,10 +83,7 @@ void IdentificationMap::Init()
     formula = new DelphesFormula;
     formula->Compile(param[i*3 + 2].GetString());
     pdg = param[i*3].GetInt();
-    fEfficiencyMap.insert(make_pair(pdg,make_pair(param[i*3 + 1].GetInt(),formula)));
-
-   // cout<<param[i*3].GetInt()<<","<<param[i*3+1].GetInt()<<","<<param[i*3 + 2].GetString()<<endl;
-
+    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i*3 + 1].GetInt(), formula)));
   }
 
   // set default efficiency formula
@@ -99,7 +93,7 @@ void IdentificationMap::Init()
     formula = new DelphesFormula;
     formula->Compile("1.0");
 
-    fEfficiencyMap.insert(make_pair(0,make_pair(0,formula)));
+    fEfficiencyMap.insert(make_pair(0, make_pair(0, formula)));
   }
 
   // import input array
@@ -125,7 +119,6 @@ void IdentificationMap::Finish()
     formula = (itEfficiencyMap->second).second;
     if(formula) delete formula;
   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -133,15 +126,13 @@ void IdentificationMap::Finish()
 void IdentificationMap::Process()
 {
   Candidate *candidate;
-  Double_t pt, eta, phi;
+  Double_t pt, eta, phi, e;
   TMisIDMap::iterator itEfficiencyMap;
   pair <TMisIDMap::iterator, TMisIDMap::iterator> range;
   DelphesFormula *formula;
-  Int_t pdgIn, pdgOut, charge;
+  Int_t pdgCodeIn, pdgCodeOut, charge;
 
-  Double_t P, Pi;
-
- // cout<<"------------ New Event ------------"<<endl;
+  Double_t p, r, total;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -151,54 +142,42 @@ void IdentificationMap::Process()
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
-    pdgIn = candidate->PID;
+    e = candidateMomentum.E();
+   
+    pdgCodeIn = candidate->PID;
     charge = candidate->Charge;
 
-   // cout<<"------------ New Candidate ------------"<<endl;
-   // cout<<candidate->PID<<"   "<<pt<<","<<eta<<","<<phi<<endl;
+    // first check that PID of this particle is specified in the map
+    // otherwise, look for PID = 0
 
-    P = 1.0;
+    itEfficiencyMap = fEfficiencyMap.find(pdgCodeIn);
 
-    //first check that PID of this particle is specified in cfg, if not set look for PID=0
-
-    itEfficiencyMap = fEfficiencyMap.find(pdgIn);
-
-    range = fEfficiencyMap.equal_range(pdgIn);
-    if(range.first == range.second) range = fEfficiencyMap.equal_range(-pdgIn);
+    range = fEfficiencyMap.equal_range(pdgCodeIn);
+    if(range.first == range.second) range = fEfficiencyMap.equal_range(-pdgCodeIn);
     if(range.first == range.second) range = fEfficiencyMap.equal_range(0);
 
-    //loop over submap for this pid
-    for (TMisIDMap::iterator it=range.first; it!=range.second; ++it)
+    r = gRandom->Uniform();
+    total = 0.0;
+
+    // loop over sub-map for this PID
+    for(TMisIDMap::iterator it = range.first; it != range.second; ++it)
     {
-
       formula = (it->second).second;
-      pdgOut = (it->second).first;
+      pdgCodeOut = (it->second).first;
 
-      Pi = formula->Eval(pt, eta);
+      p = formula->Eval(pt, eta, phi, e);
 
-      // check that sum of probabilities does not exceed 1.
-      P = (P - Pi)/P;
-
-      if( P < 0.0 ) continue;
-      else
+      if(total <= r && r < total + p)
       {
-
-       //randomly assign a PID to particle according to map
-       Double_t rndm = gRandom->Uniform();
-
-       if(rndm > P)
-       {
-         //change PID of particle
-         if(pdgOut != 0) candidate->PID = charge*pdgOut;
-         fOutputArray->Add(candidate);
-         break;
-       }
+        // change PID of particle
+        if(pdgCodeOut != 0) candidate->PID = charge*pdgCodeOut;
+        fOutputArray->Add(candidate);
+        break;
       }
 
+      total += p;
     }
-
-   }
-
+  }
 }
 
 //------------------------------------------------------------------------------

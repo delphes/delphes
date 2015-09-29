@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: Filter.cc 3633 2014-08-15 13:23:52Z soyez $
+// $Id: Filter.cc 3760 2014-12-19 10:05:10Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -163,8 +163,8 @@ PseudoJet Filter::_finalise(const PseudoJet & /*jet*/,
   // information about empty areas)
   if ((ca_optimisation_used) && (kept.size()+rejected.size()>0)){
     bool has_non_explicit_ghost_area = (kept.size()>0)
-      ? (kept[0].has_area()     && kept[0].validated_csab()->has_explicit_ghosts())
-      : (rejected[0].has_area() && rejected[0].validated_csab()->has_explicit_ghosts());
+      ? (kept[0].has_area()     && (!(kept[0].validated_csab()->has_explicit_ghosts())))
+      : (rejected[0].has_area() && (!(rejected[0].validated_csab()->has_explicit_ghosts())));
     if (has_non_explicit_ghost_area)
       fs->discard_area();
   }

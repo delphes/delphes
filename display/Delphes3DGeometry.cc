@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "display/Delphes3DGeometry.h"
 #include <set>
 #include <map>
 #include <utility>
@@ -24,6 +23,8 @@
 #include <algorithm>
 #include <sstream>
 #include <cassert>
+
+#include "TAxis.h"
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
@@ -33,11 +34,16 @@
 #include "TGeoTube.h"
 #include "TGeoCone.h"
 #include "TGeoArb8.h"
-#include "external/ExRootAnalysis/ExRootConfReader.h"
-#include "classes/DelphesClasses.h"
 #include "TF2.h"
+#include "TFormula.h"
 #include "TH1F.h"
 #include "TMath.h"
+#include "TString.h"
+
+#include "display/Delphes3DGeometry.h"
+
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootConfReader.h"
 
 using namespace std;
 
@@ -89,13 +95,25 @@ void Delphes3DGeometry::readFile(const char *configFile,
    tk_radius_ = confReader->GetDouble(Form("%s::Radius",ParticlePropagator), 1.0)*100.;		// tk_radius
    tk_length_ = confReader->GetDouble(Form("%s::HalfLength",ParticlePropagator), 3.0)*100.; 	// tk_length
    tk_Bz_     = confReader->GetDouble("ParticlePropagator::Bz", 0.0);                           // tk_Bz
-
+   
+   TString buffer;
+   const char *it;
+ 
+   
    {
    TString tkEffFormula = confReader->GetString(Form("%s::EfficiencyFormula",TrackingEfficiency),"abs(eta)<3.0");
    tkEffFormula.ReplaceAll("pt","x");
    tkEffFormula.ReplaceAll("eta","y");
    tkEffFormula.ReplaceAll("phi","0.");
-   TF2* tkEffFunction = new TF2("tkEff",tkEffFormula,0,1000,-10,10);
+ 
+   buffer.Clear();
+   for(it = tkEffFormula.Data(); *it; ++it)
+   {
+     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+     buffer.Append(*it);
+   }
+
+   TF2* tkEffFunction = new TF2("tkEff",buffer,0,1000,-10,10);
    TH1F etaHisto("eta","eta",100,5.,-5.);
    Double_t pt,eta;
    for(int i=0;i<1000;++i) {
@@ -117,7 +135,15 @@ void Delphes3DGeometry::readFile(const char *configFile,
    muonEffFormula.ReplaceAll("pt","x");
    muonEffFormula.ReplaceAll("eta","y");
    muonEffFormula.ReplaceAll("phi","0.");
-   TF2* muEffFunction = new TF2("muEff",muonEffFormula,0,1000,-10,10);
+   
+   buffer.Clear();
+   for(it = muonEffFormula.Data(); *it; ++it)
+   {
+     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+     buffer.Append(*it);
+   }
+
+   TF2* muEffFunction = new TF2("muEff",buffer,0,1000,-10,10);
    TH1F etaHisto("eta2","eta2",100,5.,-5.);
    Double_t pt,eta;
    for(int i=0;i<1000;++i) {

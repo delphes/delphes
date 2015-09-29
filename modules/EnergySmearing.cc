@@ -95,19 +95,21 @@ void EnergySmearing::Finish()
 void EnergySmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t energy, eta, phi;
+  Double_t pt, energy, eta, phi;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
+    
+    pt = candidatePosition.Pt();
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     energy = candidateMomentum.E();
  
     // apply smearing formula
-    energy = gRandom->Gaus(energy, fFormula->Eval(0.0, eta, 0.0, energy));
+    energy = gRandom->Gaus(energy, fFormula->Eval(pt, eta, phi, energy));
      
     if(energy <= 0.0) continue;
  

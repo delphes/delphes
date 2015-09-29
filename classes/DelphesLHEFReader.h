@@ -30,6 +30,7 @@
 #include <stdio.h>
 
 #include <vector>
+#include <utility>
 
 class TObjArray;
 class TStopwatch;
@@ -57,7 +58,7 @@ public:
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
-  void AnalyzeRwgt(ExRootTreeBranch *branch);
+  void AnalyzeWeight(ExRootTreeBranch *branch);
 
 private:
 
@@ -82,7 +83,7 @@ private:
   int fPID, fStatus, fM1, fM2, fC1, fC2;
   double fPx, fPy, fPz, fE, fMass;
   
-  std::vector<double> fRwgtList;
+  std::vector< std::pair< int, double > > fWeightList;
 };
 
 #endif // DelphesLHEFReader_h

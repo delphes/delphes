@@ -108,7 +108,7 @@ void JetPileUpSubtractor::Process()
   {
     momentum = candidate->Momentum;
     area = candidate->Area;
-    eta = TMath::Abs(momentum.Eta());
+    eta = momentum.Eta();
 
     // find rho
     rho = 0.0;

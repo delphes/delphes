@@ -73,8 +73,9 @@ void TrackPileUpSubtractor::Init()
   
   fZVertexResolution  = GetDouble("ZVertexResolution", 0.005)*1.0E3;
 
+  fPTMin = GetDouble("PTMin", 0.);
   // import arrays with output from other modules
-
+   
   ExRootConfParam param = GetParam("InputArray");
   Long_t i, size;
   const TObjArray *array;
@@ -146,9 +147,12 @@ void TrackPileUpSubtractor::Process()
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
       
-      if(candidate->IsPU && TMath::Abs(z-zvtx) > fZVertexResolution) continue;
-
-      array->Add(candidate);
+      if(candidate->IsPU && TMath::Abs(z-zvtx) > fZVertexResolution) candidate->IsRecoPU = 1;
+      else 
+      {
+         candidate->IsRecoPU = 0;
+         if( candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
+      }
     }
   }
 }

@@ -1,19 +1,19 @@
 /*
- *  Delphes: a framework for fast simulation of a generic collider experiment
- *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
+  * Delphes: a framework for fast simulation of a generic collider experiment
+  * Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  * You should have received a copy of the GNU General Public License
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef Delphes3DGeometry_h
@@ -21,14 +21,14 @@
 
 #include <set>
 #include <map>
-#include <utility>
 #include <vector>
-#include <algorithm>
-#include <sstream>
-#include "TAxis.h"
-#include "TGeoManager.h"
-#include "TGeoVolume.h"
-#include "TGeoMedium.h"
+
+#include "Rtypes.h"
+
+class TAxis;
+class TGeoManager;
+class TGeoVolume;
+class TGeoMedium;
 
 // TODO: asymmetric detector
 
@@ -37,20 +37,17 @@ class Delphes3DGeometry {
      Delphes3DGeometry(TGeoManager *geom = NULL, bool transp = false);
      ~Delphes3DGeometry() {}
 
-     void readFile(const char* filename, const char* ParticlePropagator="ParticlePropagator",
-                                         const char* TrackingEfficiency="ChargedHadronTrackingEfficiency",
-                                         const char* MuonEfficiency="MuonEfficiency",
-                                         const char* Calorimeters="Calorimeter");
-
-     void loadFromFile(const char* filename, const char* name="DelphesGeometry");
-     void save(const char* filename, const char* name="DelphesGeometry");
+     void readFile(const char *filename, const char *ParticlePropagator="ParticlePropagator",
+                                         const char *TrackingEfficiency="ChargedHadronTrackingEfficiency",
+                                         const char *MuonEfficiency="MuonEfficiency",
+                                         const char *Calorimeters="Calorimeter");
 
      void setContingency(Double_t contingency) { contingency_ = contingency; }
      void setCaloBarrelThickness(Double_t thickness) { calo_barrel_thickness_ = thickness; }
      void setCaloEndcapThickness(Double_t thickness) { calo_endcap_thickness_ = thickness; }
      void setMuonSystemThickness(Double_t thickness) { muonSystem_thickn_ = thickness; }
 
-     TGeoVolume* getDetector(bool withTowers = true);
+     TGeoVolume *getDetector(bool withTowers = true);
 
      Double_t getTrackerRadius() const { return tk_radius_; }
      Double_t getDetectorRadius() const { return muonSystem_radius_; }
@@ -61,9 +58,9 @@ class Delphes3DGeometry {
 
    private:
      std::pair<Double_t, Double_t> addTracker(TGeoVolume *top);
-     std::pair<Double_t, Double_t> addCalorimeter(TGeoVolume *top, const char* name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set< std::pair<Double_t, Int_t> >& caloBinning);
-     std::pair<Double_t, Double_t> addMuonDets(TGeoVolume *top, const char* name, Double_t innerBarrelRadius, Double_t innerBarrelLength);
-     void addCaloTowers(TGeoVolume *top, const char* name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set< std::pair<Double_t, Int_t> >& caloBinning);
+     std::pair<Double_t, Double_t> addCalorimeter(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set< std::pair<Double_t, Int_t> >& caloBinning);
+     std::pair<Double_t, Double_t> addMuonDets(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength);
+     void addCaloTowers(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set< std::pair<Double_t, Int_t> >& caloBinning);
 
    private:
 
@@ -74,8 +71,8 @@ class Delphes3DGeometry {
      TGeoMedium *calomed_;
      TGeoMedium *mudetmed_;
 
-     TAxis* etaAxis_;
-     TAxis* phiAxis_;
+     TAxis *etaAxis_;
+     TAxis *phiAxis_;
 
      Double_t contingency_;
      Double_t calo_barrel_thickness_;
@@ -93,7 +90,7 @@ class Delphes3DGeometry {
 
      std::map<std::string, Double_t> muonSystem_etamax_;
      std::map<std::string, std::set< std::pair<Double_t, Int_t> > > caloBinning_;
-     
+
 };
 
 #endif

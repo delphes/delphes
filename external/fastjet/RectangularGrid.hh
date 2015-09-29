@@ -2,7 +2,7 @@
 #define __FASTJET_RECTANGULARGRID_HH__
 
 //FJSTARTHEADER
-// $Id$
+// $Id: RectangularGrid.hh 3771 2014-12-22 21:13:22Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -41,8 +41,6 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 /// Class to indicate generic structure of tilings
 class TilingBase {
 public:
-  virtual ~TilingBase() {}
-
   /// returns the index of the tile in which p is located, or -1 if p
   /// is outside the tiling region
   virtual int tile_index(const PseudoJet & p) const = 0;
@@ -80,6 +78,9 @@ public:
   /// returns true if the Tiling structure is in a suitably initialised state
   virtual bool is_initialised() const = 0;
   bool is_initialized() const {return is_initialised();}
+
+  /// virtual destructor
+  virtual ~TilingBase() {}
 };
 
 //----------------------------------------------------------------------
@@ -164,7 +165,9 @@ private:
 
   // a tile selector
   Selector _tile_selector;
-  // a cached 
+  // if there's a tile selector, then for each tile, this caches the
+  // information about whether it is "good" i.e. it passes the tile
+  // selector
   std::vector<bool> _is_good;
   
 };

@@ -59,11 +59,8 @@ private:
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
 
-  Double_t fTowerECalTime, fTowerHCalTime;
-  Double_t fTrackECalTime, fTrackHCalTime;
-
-  Double_t fTowerECalTimeWeight, fTowerHCalTimeWeight;
-  Double_t fTrackECalTimeWeight, fTrackHCalTimeWeight;
+  Double_t fTimingEnergyMin;
+  Bool_t fElectronsFromTrack;
 
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
@@ -73,7 +70,7 @@ private:
   Double_t fECalEnergySignificanceMin;
   Double_t fHCalEnergySignificanceMin;
 
-  Bool_t fDitherTowerCenter;
+  Bool_t fSmearTowerCenter;
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!

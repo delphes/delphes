@@ -28,6 +28,7 @@
 #include "modules/Delphes.h"
 
 #include "modules/AngularSmearing.h"
+#include "modules/PhotonConversions.h"
 #include "modules/ParticlePropagator.h"
 #include "modules/Efficiency.h"
 #include "modules/IdentificationMap.h"
@@ -49,6 +50,7 @@
 #include "modules/PileUpMerger.h"
 #include "modules/JetPileUpSubtractor.h"
 #include "modules/TrackPileUpSubtractor.h"
+#include "modules/TaggingParticlesSkimmer.h"
 #include "modules/PileUpJetID.h"
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
@@ -56,6 +58,8 @@
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
+#include "modules/JetFlavorAssociation.h"
+#include "modules/JetFakeParticle.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -67,6 +71,7 @@
 #pragma link C++ class Delphes+;
 
 #pragma link C++ class AngularSmearing+;
+#pragma link C++ class PhotonConversions+;
 #pragma link C++ class ParticlePropagator+;
 #pragma link C++ class Efficiency+;
 #pragma link C++ class IdentificationMap+;
@@ -88,6 +93,7 @@
 #pragma link C++ class PileUpMerger+;
 #pragma link C++ class JetPileUpSubtractor+;
 #pragma link C++ class TrackPileUpSubtractor+;
+#pragma link C++ class TaggingParticlesSkimmer+;
 #pragma link C++ class PileUpJetID+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
@@ -95,6 +101,8 @@
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
+#pragma link C++ class JetFlavorAssociation+;
+#pragma link C++ class JetFakeParticle+;
 #pragma link C++ class ExampleModule+;
 
 #endif

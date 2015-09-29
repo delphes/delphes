@@ -21,10 +21,10 @@
 ########################################################################
 
 
-This simple example shows how to use Delphes with an external fastjet installation.
-Events in hepmc format are read via the DelphesHepMC reader. 
+This simple example shows how to use Delphes with an external FastJet installation.
+Events in HepMC format are read via the DelphesHepMC reader. 
 
-In order to run this example you first, you need to set the paths to your Delphes, FastJet
+In order to run this example you first need to set the paths to your Delphes, FastJet
 and ROOT installations (DELPHES_DIR, FASTJET_DIR and ROOT_DIR):
 
 DELPHES_DIR=<path to Delphes installation>
@@ -33,7 +33,7 @@ ROOT_DIR=<path to ROOT installation>
 
 Then run the following commands to build the executable:
 
-DELPHES_LIB="-Wl,-rpath $DELPHES_DIR -L$DELPHES_DIR -lDelphesNoFastJet"
+DELPHES_LIB="-Wl,-rpath,$DELPHES_DIR -L$DELPHES_DIR -lDelphesNoFastJet"
 
 FASTJET_INC=`$FASTJET_DIR/bin/fastjet-config --cxxflags`
 FASTJET_LIB=`$FASTJET_DIR/bin/fastjet-config --libs`
@@ -42,13 +42,13 @@ ROOT_INC=`$ROOT_DIR/bin/root-config --incdir`
 ROOT_LIB=`$ROOT_DIR/bin/root-config --libs`
 
 CXXFLAGS="$FASTJET_INC -I$ROOT_INC -I$DELPHES_DIR -I$DELPHES_DIR/external"
-LDFLAGS="$FASTJET_LIB $ROOT_LIB $DELPHES_LIB"
+LDFLAGS="$FASTJET_LIB $ROOT_LIB -lEG $DELPHES_LIB"
 
-g++ $CXXFLAGS $LDFLAGS examples/ExternalFastJetHepMC.cpp -o examples/ExternalFastJetHepMC
+g++ $CXXFLAGS examples/ExternalFastJet/ExternalFastJetHepMC.cpp $LDFLAGS -o ExternalFastJetHepMC
 
-Then run (you need an event file in hepmc format):
+Then run (you need an event file in HepMC format):
 
-./examples/ExternalFastJetHepMC cards/delphes_card_CMS_NoFastJet.tcl file.hepmc
+./ExternalFastJetHepMC cards/delphes_card_CMS_NoFastJet.tcl file.hepmc
 
 
 ########################################################################

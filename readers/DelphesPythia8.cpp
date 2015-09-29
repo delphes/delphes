@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include <signal.h>
 
@@ -37,6 +38,7 @@
 #include "modules/Delphes.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesLHEFReader.h"
 
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
@@ -148,14 +150,18 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesPythia8";
   stringstream message;
+  FILE *inputFile = 0;
   TFile *outputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0;
+  ExRootTreeBranch *branchEventLHEF = 0, *branchWeightLHEF = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
+  TObjArray *stableParticleOutputArrayLHEF = 0, *allParticleOutputArrayLHEF = 0, *partonOutputArrayLHEF = 0;
+  DelphesLHEFReader *reader = 0;
   Long64_t eventCounter, errorCounter;
   Long64_t numberOfEvents, timesAllowErrors;
 
@@ -204,9 +210,7 @@ int main(int argc, char *argv[])
     stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
     partonOutputArray = modularDelphes->ExportArray("partons");
 
-    modularDelphes->InitTask();
-
-    // Initialize pythia
+    // Initialize Pythia
     pythia = new Pythia8::Pythia;
 
     if(pythia == NULL)
@@ -221,6 +225,22 @@ int main(int argc, char *argv[])
     numberOfEvents = pythia->mode("Main:numberOfEvents");
     timesAllowErrors = pythia->mode("Main:timesAllowErrors");
 
+    inputFile = fopen(pythia->word("Beams:LHEF").c_str(), "r");
+    if(inputFile)
+    {
+      reader = new DelphesLHEFReader;
+      reader->SetInputFile(inputFile);
+
+      branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
+      branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
+
+      allParticleOutputArrayLHEF = modularDelphes->ExportArray("allParticlesLHEF");
+      stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
+      partonOutputArrayLHEF = modularDelphes->ExportArray("partonsLHEF");
+    }
+
+    modularDelphes->InitTask();
+
     pythia->init();
 
     // ExRootProgressBar progressBar(numberOfEvents - 1);
@@ -233,19 +253,28 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
+      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF,
+        stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
+
       if(!pythia->next())
       {
         // If failure because reached end of file then exit event loop
-        if (pythia->info.atEndOfFile())
+        if(pythia->info.atEndOfFile())
         {
           cerr << "Aborted since reached end of Les Houches Event File" << endl;
           break;
         }
 
         // First few failures write off as "acceptable" errors, then quit
-        if (++errorCounter < timesAllowErrors) continue;
-        cerr << "Event generation aborted prematurely, owing to error!" << endl;
-        break;
+        if(++errorCounter > timesAllowErrors)
+        {
+          cerr << "Event generation aborted prematurely, owing to error!" << endl;
+          break;
+        }
+
+        modularDelphes->Clear();
+        reader->Clear();
+        continue;
       }
 
       readStopWatch.Stop();
@@ -257,10 +286,17 @@ int main(int argc, char *argv[])
       modularDelphes->ProcessTask();
       procStopWatch.Stop();
 
+      if(reader)
+      {
+        reader->AnalyzeEvent(branchEventLHEF, eventCounter, &readStopWatch, &procStopWatch);
+        reader->AnalyzeWeight(branchWeightLHEF);
+      }
+
       treeWriter->Fill();
 
       treeWriter->Clear();
       modularDelphes->Clear();
+      if(reader) reader->Clear();
 
       readStopWatch.Start();
       progressBar.Update(eventCounter, eventCounter);
@@ -276,6 +312,7 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
+    delete reader;
     delete pythia;
     delete modularDelphes;
     delete confReader;

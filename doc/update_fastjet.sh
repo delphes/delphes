@@ -1,6 +1,6 @@
-version=3.1.0
+version=3.1.2
 
-#wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
+wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
 
 tar -zxf fastjet-${version}.tar.gz
 mkdir -p fastjet/plugins
@@ -82,15 +82,14 @@ cp -a ../../fastjet-${version}/plugins/SISCone/siscone/COPYING SISCone
 cp -a ../../fastjet-${version}/plugins/SISCone/siscone/siscone/*.h SISCone
 cp -a ../../fastjet-${version}/plugins/SISCone/siscone/siscone/*.cpp SISCone
 cp -a ../../fastjet-${version}/plugins/SISCone/fastjet/*.hh SISCone/fastjet
-rename .cpp .cc SISCone/*.cpp
-
+rename 's/\.cpp$/.cc/' SISCone/*.cpp
 
 mkdir -p TrackJet/fastjet
 cp -a ../../fastjet-${version}/plugins/TrackJet/*.cc TrackJet
 cp -a ../../fastjet-${version}/plugins/TrackJet/fastjet/*.hh TrackJet/fastjet
 
-sed -i 's/#include "fastjet\//#include "/' D0RunICone/fastjet/D0RunIpre96ConePlugin.hh
-sed -i 's/#include "fastjet\//#include "/' D0RunICone/fastjet/D0RunIConePlugin.hh
+sed -i 's/#include "fastjet\/D0RunIBaseConePlugin.hh"/#include "D0RunIBaseConePlugin.hh"/' D0RunICone/fastjet/D0RunIpre96ConePlugin.hh
+sed -i 's/#include "fastjet\/D0RunIBaseConePlugin.hh"/#include "D0RunIBaseConePlugin.hh"/' D0RunICone/fastjet/D0RunIConePlugin.hh
 
 sed -i 's/#include "siscone\//#include "/' SISCone/SISConePlugin.cc
 

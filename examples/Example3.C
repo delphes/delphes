@@ -5,6 +5,16 @@ It is also shown how to loop over the jet constituents.
 root -l examples/Example3.C'("delphes_output.root")'
 */
 
+#ifdef __CLING__
+R__LOAD_LIBRARY(libDelphes)
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
+#include "external/ExRootAnalysis/ExRootResult.h"
+#else
+class ExRootTreeReader;
+class ExRootResult;
+#endif
+
 //------------------------------------------------------------------------------
 
 struct TestPlots
@@ -24,11 +34,6 @@ struct TestPlots
 
   TH1 *fJetDeltaPT;
 };
-
-//------------------------------------------------------------------------------
-
-class ExRootResult;
-class ExRootTreeReader;
 
 //------------------------------------------------------------------------------
 

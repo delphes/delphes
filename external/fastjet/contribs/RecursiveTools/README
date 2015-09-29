@@ -1,0 +1,186 @@
+------------------------------------------------------------------------
+RecursiveTools FastJet contrib
+------------------------------------------------------------------------
+
+The RecursiveTools FastJet contrib aims to provide a common contrib
+for a number of tools that involve recursive reclustering/declustering
+of a jet for tagging or grooming purposes.
+
+Currently it contains:
+
+- ModifiedMassDropTagger
+  This corresponds to arXiv:1307.0007 by Mrinal Dasgupta, Alessandro
+  Fregoso, Simone Marzani and Gavin P. Salam
+
+- SoftDrop
+  This corresponds to arXiv:1402.2657 by Andrew J. Larkoski, Simone
+  Marzani, Gregory Soyez, Jesse Thaler
+
+- Recluster
+  A generic tool to recluster a given jet into subjets
+  Note: this is largely based on the Filter code in FastJet v3.0 and
+  ultimately, this tool will probably be moved into FastJet
+
+The interface for these tools is described in more detail below, with
+all of the available options documented in the header files.
+
+One note about nomenclature.  A groomer is a procedure that takes a
+PseudoJet and always returns another (non-zero) PseudoJet.  A tagger is
+a procedure that takes a PseudoJet, and either returns another PseudoJet
+(i.e. tags it) or returns an empty PseudoJet (i.e. doesn't tag it).
+
+------------------------------------------------------------------------
+ModifiedMassDropTagger
+------------------------------------------------------------------------
+
+The Modified Mass Drop Tagger (mMDT) recursively declusters a jet,
+following the largest pT subjet until a pair of subjets is found that
+satisfy the symmetry condition on the energy sharing
+
+   z > z_cut
+
+where z_cut is a predetermined value.  By default, z is calculated as
+the scalar pT fraction of the softest subjet.  Note that larger values
+of z_cut correspond to a more restrictive tagging criteria.
+
+By default, mMDT will first recluster the jet using the CA clustering
+algorithm, which means that mMDT can be called on any jet, regardless
+of the original jet finding measure.
+
+A default mMDT can be created via
+
+   double z_cut = 0.10;
+   ModifiedMassDropTagger mMDT(z_cut);
+
+More options are available in the full constructor.  To apply mMDT,
+one simply calls it on the jet of interest.
+
+   PseudoJet tagged_jet = mMDT(original_jet);
+
+Note that mMDT is a tagger, such that tagged_jet will only be non-zero
+if the symmetry cut z > z_cut is satisfied by some branching of the
+clustering tree.  
+
+To gain additional information about the mMDT procedure, one can use
+
+   tagged_jet.structure_of<ModifiedMassDropTagger>()
+
+which gives access to information about the delta_R between the tagged
+subjets, their z value, etc.
+
+------------------------------------------------------------------------
+SoftDrop
+------------------------------------------------------------------------
+
+The SoftDrop procedure is very similar to mMDT, albeit with a 
+generalized symmetry condition:
+ 
+   z > z_cut * (R / R0)^beta
+
+Note that larger z_cut and smaller beta correspond to more aggressive
+grooming of the jet.
+
+SoftDrop is intended to be used as a groomer (instead of as a tagger),
+such that if the symmetry condition fails throughout the whole
+clustering tree, SoftDrop will still return a single particle in the
+end.  Apart from the tagger/groomer distinction, SoftDrop with beta=0 is
+the same as mMDT.
+
+A default SoftDrop groomer can be created via:
+
+   double z_cut = 0.10;
+   double beta  = 2.0;
+   double R0    = 1.0; // this is the default value
+   SoftDrop sd(z_cut,beta,R0);
+
+and acts on a desired jet as
+
+   PseudoJet groomed_jet = sd(original_jet);
+
+and additional information can be obtained via
+
+   groomed_jet.structure_of<SoftDrop>()
+
+SoftDrop is typically called with beta > 0, though beta < 0 is still a
+viable option.  Because beta < 0 is infrared-collinear unsafe in
+grooming mode, one probably wants to switch to tagging mode for negative
+beta, via set_tagging_mode().
+
+------------------------------------------------------------------------
+Recluster
+------------------------------------------------------------------------
+
+The Recluster class allows the constituents of a jet to be reclustered
+with a different recursive clustering algorithm.  This is used
+internally in the mMDT/SoftDrop code in order to recluster the jet using
+the CA algorithm.  This is achieved via
+
+  Recluster ca_reclusterer(cambridge_algorithm,
+                        JetDefinition::max_allowable_R);
+  PseudoJet reclustered_jet = ca_reclusterer(original_jet);
+
+Note that reclustered_jet creates a new ClusterSequence that knows to
+delete_self_when_unused.
+
+
+------------------------------------------------------------------------
+Changing behaviour
+------------------------------------------------------------------------
+
+The behaviour of the ModifiedMassDropTagger and SoftDrop classes can
+be tweaked using the following options:
+
+SymmetryMeasure = {scalar_z,vector_z,y}  [constructor argument]
+  : The definition of the energy sharing between subjets, with 0
+    corresponding to the most asymmetric
+
+RecursionChoice = {larger_pt,larger_mt,larger_m}  [constructor argument]
+  : The path to recurse through the tree after the symmetry condition
+    fails
+
+mu_cut   [constructor argument]
+  : An optional mass drop condition
+
+set_subtractor(subtractor*) [or subtracter as a constructor argument]
+  : provide a subtractor. When a subtractor is supplied, the
+    kinematic constraints are applied on subtracted 4-vectors. In
+    this case, the result of the ModifiedMassDropTagger/SoftDrop is a
+    subtracted PseudoJet, and it is assumed that
+    ModifiedMassDropTagger/SoftDrop is applied to an unsubtracted jet.
+    The latter default can be changed by calling
+    set_input_jet_is_subtracted().
+
+set_reclustering(bool, Recluster*)
+  : An optional setting to recluster a jet with a different jet
+    recursive jet algorithm.  The code is only designed to give sensible
+    results with the CA algorithm, but other reclustering algorithm
+    (especially kT) may be appropriate in certain contexts. 
+    Use at your own risk.
+
+set_grooming_mode()/set_tagging_mode()
+  : In grooming mode, the algorithm will return a single particle if the
+    symmetry condition fails for the whole tree.  In tagging mode, the
+    algorithm will return an zero PseudoJet if no symmetry conditions
+    passes.  Note that ModifiedMassDropTagger defaults to tagging mode
+    and SoftDrop defaults to grooming mode.
+
+------------------------------------------------------------------------
+Technical Details
+------------------------------------------------------------------------
+
+Both ModifiedMassDropTagger and SoftDrop inherit from
+RecursiveSymmetryCutBase, which provides a common codebase for recursive
+declustering of a jet with a symmetry cut condition.  A generic 
+RecursiveSymmetryCutBase depends on the following (virtual) functions
+(see header file for exact full specs, including constness):
+
+double symmetry_cut_fn(PseudoJet &, PseudoJet &)
+  : The function that defines the symmetry cut. This is what actually 
+    defines different recursive declustering schemes, and all classes
+    that inherit from RecursiveSymmetryCutBase must define this
+    function.
+
+string symmetry_cut_description() 
+  : the string description of the symmetry cut.
+
+------------------------------------------------------------------------
