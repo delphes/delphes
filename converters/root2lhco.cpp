@@ -347,13 +347,15 @@ void LHCOWriter::AnalyseTauJets()
 
     Reset();
 
-    counter = 0;
+    counter = 1;
+   
+   /*
     fItTrack->Reset();
     while((track = static_cast<Track*>(fItTrack->Next())))
     {
       if(element->P4().DeltaR(track->P4()) < 0.5) ++counter;
     }
-
+   */
     fIntParam[1] = 3;
 
     fDblParam[0] = element->Eta;
