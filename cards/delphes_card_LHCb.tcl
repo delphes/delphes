@@ -269,6 +269,7 @@ module SimpleCalorimeter ECal {
   set TrackInputArray IdentificationMap/tracks
 
   set TowerOutputArray ecalTowers
+  set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowPhotons
 
   set IsEcal true
@@ -348,9 +349,10 @@ module SimpleCalorimeter ECal {
 
 module SimpleCalorimeter HCal {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray IdentificationMap/tracks
+  set TrackInputArray ECal/eflowTracks
 
   set TowerOutputArray hcalTowers
+  set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowNeutralHadrons
 
   set IsEcal false 

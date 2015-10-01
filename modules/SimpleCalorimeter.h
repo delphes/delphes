@@ -98,8 +98,9 @@ private:
 
   TObjArray *fTowerOutputArray; //!
 
+  TObjArray *fEFlowTrackOutputArray; //!
   TObjArray *fEFlowTowerOutputArray; //!
-
+  
   TObjArray *fTowerTrackArray; //!
   TIterator *fItTowerTrackArray; //!
 

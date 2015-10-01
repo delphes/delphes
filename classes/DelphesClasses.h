@@ -533,6 +533,10 @@ public:
   Float_t Yd;
   Float_t Zd;
 
+  // tracking resolution
+  
+  Float_t TrackResolution;
+
   // PileUpJetID variables
 
   Int_t NCharged;
@@ -590,7 +594,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 3)
+  ClassDef(Candidate, 4)
 };
 
 #endif // DelphesClasses_h

@@ -167,6 +167,8 @@ void SimpleCalorimeter::Init()
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
+ 
+  fEFlowTrackOutputArray = ExportArray(GetString("EFlowTrackOutputArray", "eflowTracks"));
   fEFlowTowerOutputArray = ExportArray(GetString("EFlowTowerOutputArray", "eflowTowers"));
 }
 
@@ -394,11 +396,17 @@ void SimpleCalorimeter::Process()
 
 void SimpleCalorimeter::FinalizeTower()
 {
-  Candidate *tower;
+  Candidate *tower, *track;
   Double_t energy, pt, eta, phi;
   Double_t sigma;
   Double_t time;
 
+  Double_t trkSigma, fraction;
+  
+  Int_t pdgCode;
+  TLorentzVector momentum;
+  TFractionMap::iterator itFractionMap;
+ 
   if(!fTower) return;
 
   sigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerEnergy);
@@ -438,11 +446,39 @@ void SimpleCalorimeter::FinalizeTower()
   // fill SimpleCalorimeter towers
   if(energy > 0.0) fTowerOutputArray->Add(fTower);
 
-  // fill energy flow candidates
-  energy -= fTrackEnergy;
+
+
+  // fill e-flow candidates 
+  fItTowerTrackArray->Reset();
+  while((track = static_cast<Candidate*>(fItTowerTrackArray->Next())))
+  {
+     momentum = track->Momentum;
+   
+     pdgCode = TMath::Abs(track->PID);
+
+     itFractionMap = fFractionMap.find(pdgCode);
+     if(itFractionMap == fFractionMap.end())
+     {
+       itFractionMap = fFractionMap.find(0);
+     }
+
+     fraction = itFractionMap->second;
+   
+     // charged particle has to deposit either in ECAL or HCAL
+     if(fraction < 1.0E-9) continue;  
+    
+     trkSigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());       
+  
+     if(track->TrackResolution < trkSigma/momentum.E()) 
+     {
+        energy -= momentum.E();
+        fEFlowTrackOutputArray->Add(track);
+     }
+
+  }
+
 
   sigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
-
   if(energy < fEnergyMin || energy < fEnergySignificanceMin*sigma) energy = 0.0;
 
   // save energy excess as an energy flow tower

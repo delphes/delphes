@@ -425,10 +425,18 @@ void Calorimeter::FinalizeTower()
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalSigma, hcalSigma;
+  Double_t ecalTrkSigma, hcalTrkSigma;
+  Double_t ecalFraction, hcalFraction;
+  
+  Int_t pdgCode;
+  TLorentzVector momentum;
+  TFractionMap::iterator itFractionMap;
+  
   Float_t weight, sumWeightedTime, sumWeight;
 
   if(!fTower) return;
 
+  
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
 
@@ -500,15 +508,50 @@ void Calorimeter::FinalizeTower()
 
   // fill energy flow candidates
 
-  // save all the tracks as energy flow tracks
-  fItTowerTrackArray->Reset();
-  while((track = static_cast<Candidate*>(fItTowerTrackArray->Next())))
-  {
-    fEFlowTrackOutputArray->Add(track);
-  }
+  // save as eflowtracks only tracks that have better resolution than calo 
+ 
+   fItTowerTrackArray->Reset();
+   while((track = static_cast<Candidate*>(fItTowerTrackArray->Next())))
+   {
+     momentum = track->Momentum;
+   
+     pdgCode = TMath::Abs(track->PID);
 
-  ecalEnergy -= fTrackECalEnergy;
-  hcalEnergy -= fTrackHCalEnergy;
+     itFractionMap = fFractionMap.find(pdgCode);
+     if(itFractionMap == fFractionMap.end())
+     {
+       itFractionMap = fFractionMap.find(0);
+     }
+
+     ecalFraction = itFractionMap->second.first;
+     hcalFraction = itFractionMap->second.second;
+
+     // charged particle has to deposit either in ECAL or HCAL
+ 
+     if(ecalFraction < 1.0E-9 && hcalFraction < 1.0E-9) continue;  
+     if(ecalFraction > 1.0E-9 && hcalFraction > 1.0E-9) continue;  
+ 
+     if(ecalFraction > 1.0E-9)
+     {
+       if(track->TrackResolution < ecalTrkSigma/momentum.E()) 
+       {
+         ecalTrkSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());  
+         ecalEnergy -= momentum.E();
+         fEFlowTrackOutputArray->Add(track);        
+       }
+    
+     }
+    
+     if(hcalFraction > 1.0E-9)
+     {
+       if(track->TrackResolution < hcalTrkSigma/momentum.E())
+       {
+         hcalTrkSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());  
+         hcalEnergy -= momentum.E();
+         fEFlowTrackOutputArray->Add(track);        
+       }
+     }
+  }
 
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);

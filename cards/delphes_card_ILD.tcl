@@ -213,6 +213,7 @@ module SimpleCalorimeter ECal {
   set TrackInputArray ImpactParameterSmearing/tracks
 
   set TowerOutputArray ecalTowers
+  set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowPhotons
 
   set IsEcal true 
@@ -273,9 +274,10 @@ module SimpleCalorimeter ECal {
 
 module SimpleCalorimeter HCal {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray ImpactParameterSmearing/tracks
+  set TrackInputArray ECal/eflowTracks
 
   set TowerOutputArray hcalTowers
+  set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowNeutralHadrons
 
   set IsEcal false 
@@ -348,7 +350,7 @@ module Merger TowerMerger {
 
 module Merger EFlowMerger {
 # add InputArray InputArray
-  add InputArray ImpactParameterSmearing/tracks
+  add InputArray HCal/eflowTracks
   add InputArray ECal/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
