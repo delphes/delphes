@@ -118,6 +118,7 @@ void EnergySmearing::Process()
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     candidate->Momentum.SetPtEtaPhiE(energy/TMath::CosH(eta), eta, phi, energy);
+    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy)/energy;
     candidate->AddCandidate(mother);
  
     fOutputArray->Add(candidate);
