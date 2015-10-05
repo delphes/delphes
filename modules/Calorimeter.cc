@@ -527,29 +527,28 @@ void Calorimeter::FinalizeTower()
      hcalFraction = itFractionMap->second.second;
 
      // charged particle has to deposit either in ECAL or HCAL
- 
-     if(ecalFraction < 1.0E-9 && hcalFraction < 1.0E-9) continue;  
-     if(ecalFraction > 1.0E-9 && hcalFraction > 1.0E-9) continue;  
- 
-     if(ecalFraction > 1.0E-9)
+     
+     if(ecalFraction > 1.0E-9 && hcalFraction < 1.0E-9 )
      {
+       ecalTrkSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());     
        if(track->TrackResolution < ecalTrkSigma/momentum.E()) 
        {
-         ecalTrkSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());  
          ecalEnergy -= momentum.E();
          fEFlowTrackOutputArray->Add(track);        
-       }
-    
+       }   
      }
-    
-     if(hcalFraction > 1.0E-9)
+     else if(ecalFraction < 1.0E-9 && hcalFraction > 1.0E-9 )
      {
+       hcalTrkSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());   
        if(track->TrackResolution < hcalTrkSigma/momentum.E())
        {
-         hcalTrkSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());  
          hcalEnergy -= momentum.E();
          fEFlowTrackOutputArray->Add(track);        
        }
+     }
+     else if(pdgCode == 13) 
+     {
+       fEFlowTrackOutputArray->Add(track); 
      }
   }
 

@@ -465,16 +465,25 @@ void SimpleCalorimeter::FinalizeTower()
      fraction = itFractionMap->second;
    
      // charged particle has to deposit either in ECAL or HCAL
-     if(fraction < 1.0E-9) continue;  
-    
-     trkSigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());       
-  
-     if(track->TrackResolution < trkSigma/momentum.E()) 
+     if(fraction > 1.0E-9)
      {
-        energy -= momentum.E();
-        fEFlowTrackOutputArray->Add(track);
+       trkSigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());       
+       if(track->TrackResolution < trkSigma/momentum.E()) 
+       {
+         energy -= momentum.E();
+         fEFlowTrackOutputArray->Add(track);
+       }
      }
-
+     //forward all tracks from ECAL to HCAL
+     else if(fIsEcal)
+     {
+       fEFlowTrackOutputArray->Add(track);
+     }
+     //store muons from HCAL 
+     else if(pdgCode == 13)
+     {
+       fEFlowTrackOutputArray->Add(track);
+     }
   }
 
 
