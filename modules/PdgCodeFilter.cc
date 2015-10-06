@@ -73,7 +73,7 @@ void PdgCodeFilter::Init()
   // PT threshold
   fPTMin = GetDouble("PTMin", 0.0);
 
-  fInvertPdg = GetBool("InvertPdg", false);
+  fInvert = GetBool("Invert", false);
 
   fRequireStatus = GetBool("RequireStatus", false);
   fStatus = GetInt("Status", 1);
@@ -113,10 +113,6 @@ void PdgCodeFilter::Process()
   Bool_t pass;
   Double_t pt;
 
-  const Bool_t requireStatus = fRequireStatus;
-  const Bool_t invertPdg = fInvertPdg;
-  const int reqStatus = fStatus;
-
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
@@ -125,12 +121,12 @@ void PdgCodeFilter::Process()
     pt = candidateMomentum.Pt();
 
     if(pt < fPTMin) continue;
-    if(requireStatus && (candidate->Status != reqStatus)) continue;
+    if(fRequireStatus && (candidate->Status != fStatus)) continue;
 
     pass = kTRUE;
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
 
-    if (invertPdg) pass = !pass;
+    if(fInvert) pass = !pass;
     if(pass) fOutputArray->Add(candidate);
   }
 }

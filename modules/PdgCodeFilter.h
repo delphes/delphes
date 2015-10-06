@@ -18,13 +18,13 @@
 
 //------------------------------------------------------------------------------
 
-#ifndef PidFilter_h
-#define PidFilter_h
+#ifndef PdgCodeFilter_h
+#define PdgCodeFilter_h
 
-/** \class Efficiency
+/** \class PdgCodeFilter
  *
- *  Removes particles with specific pdg codes
-  *
+ *  Removes particles with specific PDG codes
+ *
  *  \author M. Selvaggi
  *
  */
@@ -49,7 +49,7 @@ public:
 private:
 
   Double_t fPTMin; //!
-  Bool_t fInvertPdg; //!
+  Bool_t fInvert; //!
   Bool_t fRequireStatus; //!
   Int_t fStatus; //!
 
