@@ -12,7 +12,7 @@ set ExecutionPath {
   ParticlePropagator
 
   ChargedHadronMomentumSmearing
-  ElectronEnergySmearing
+  ElectronMomentumSmearing
   MuonMomentumSmearing
 
   TrackMerger
@@ -110,20 +110,19 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   set ResolutionFormula {(eta > 2.0  && eta <= 5.0)      * (pt > 0.5) * (0.005)}
 }
 
-#################################
-# Energy resolution for electrons
-#################################
+###################################
+# Momentum resolution for electrons
+###################################
 
-module EnergySmearing ElectronEnergySmearing {
+module MomentumSmearing ElectronMomentumSmearing {
   set InputArray ParticlePropagator/electrons
   set OutputArray electrons
 
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
   # resolution formula for electrons
-  set ResolutionFormula { (eta > 2.0  && eta <= 5.0) * (energy > 0.1   && energy <= 8.0) * (energy*0.05) +
-                          (eta > 2.0  && eta <= 5.0) * (energy > 8.0)                    *  sqrt(energy^2*0.015^2 + energy*0.10^2)}
-  }
+  set ResolutionFormula {(eta > 2.0  && eta <= 5.0)      * (pt > 0.5)* (0.005)}
+}
 
 ###############################
 # Momentum resolution for muons
@@ -145,7 +144,7 @@ module MomentumSmearing MuonMomentumSmearing {
 module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronEnergySmearing/electrons
+  add InputArray ElectronMomentumSmearing/electrons
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }

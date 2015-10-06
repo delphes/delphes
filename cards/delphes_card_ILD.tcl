@@ -12,7 +12,7 @@ set ExecutionPath {
   MuonTrackingEfficiency
 
   ChargedHadronMomentumSmearing
-  ElectronEnergySmearing
+  ElectronMomentumSmearing
   MuonMomentumSmearing
 
   TrackMerger
@@ -21,6 +21,8 @@ set ExecutionPath {
 
   ECal
   HCal
+
+  ElectronFilter
 
   TowerMerger
   EFlowMerger
@@ -127,11 +129,11 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
 
 }
 
-#################################
-# Energy resolution for electrons
-#################################
+###################################
+# Momentum resolution for electrons
+###################################
 
-module EnergySmearing ElectronEnergySmearing {
+module MomentumSmearing ElectronMomentumSmearing {
   set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
 
@@ -166,15 +168,15 @@ module MomentumSmearing MuonMomentumSmearing {
 module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronEnergySmearing/electrons
+  add InputArray ElectronMomentumSmearing/electrons
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
 
 
-################################
+########################
 # Track angular smearing
-################################
+########################
 
 module AngularSmearing AngularSmearing {
   set InputArray TrackMerger/tracks
@@ -189,9 +191,9 @@ module AngularSmearing AngularSmearing {
 
 }
 
-################################
+#################################
 # Track impact parameter smearing
-################################
+#################################
 
 module ImpactParameterSmearing ImpactParameterSmearing {
   set InputArray AngularSmearing/tracks
@@ -333,9 +335,21 @@ module SimpleCalorimeter HCal {
 
 }
 
-####################
+#################
+# Electron filter
+#################
+
+module PdgCodeFilter ElectronFilter {
+  set InputArray Calorimeter/eflowTracks
+  set OutputArray electrons
+  set Invert true
+  add PdgCode {11}
+  add PdgCode {-11}
+}
+
+###################################################
 # Tower Merger (in case not using e-flow algorithm)
-####################
+###################################################
 
 module Merger TowerMerger {
 # add InputArray InputArray
@@ -378,9 +392,9 @@ module Merger ScalarHT {
   set EnergyOutputArray energy
 }
 
-#####################
+#################
 # Neutrino Filter
-#####################
+#################
 
 module PdgCodeFilter NeutrinoFilter {
 
@@ -471,9 +485,9 @@ module TrackCountingBTagging TrackCountingBTagging {
 }
 
 
-##########################
+#############
 # tau-tagging
-##########################
+#############
 
 
 module TauTagging TauTagging {
@@ -508,7 +522,7 @@ module TreeWriter TreeWriter {
   add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
   add Branch ECal/eflowPhotons Photon Photon
 
-  add Branch ElectronEnergySmearing/electrons Electron Electron
+  add Branch ElectronFilter/electrons Electron Electron
   add Branch MuonMomentumSmearing/muons Muon Muon
   add Branch JetEnergyScale/jets Jet Jet
   add Branch MissingET/momentum MissingET MissingET
