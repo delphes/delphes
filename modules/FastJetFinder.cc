@@ -281,7 +281,7 @@ void FastJetFinder::Process()
 
   Double_t deta, dphi, detaMax, dphiMax;
   Double_t time, timeWeight;
-  Int_t number;
+  Int_t number, ncharged, nneutrals;
   Int_t charge; 
   Double_t rho = 0.0;
   PseudoJet jet, area;
@@ -339,6 +339,7 @@ void FastJetFinder::Process()
   // loop over all jets and export them
   detaMax = 0.0;
   dphiMax = 0.0;
+  
   for(itOutputList = outputList.begin(); itOutputList != outputList.end(); ++itOutputList)
   {
     jet = *itOutputList;
@@ -356,6 +357,9 @@ void FastJetFinder::Process()
 
     charge = 0;
 
+    ncharged = 0;
+    nneutrals = 0;
+
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
 
@@ -368,6 +372,9 @@ void FastJetFinder::Process()
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
       if(deta > detaMax) detaMax = deta;
       if(dphi > dphiMax) dphiMax = dphi;
+
+      if(constituent->Charge == 0) nneutrals++;
+      else ncharged++;
 
       time += TMath::Sqrt(constituent->Momentum.E())*(constituent->Position.T());
       timeWeight += TMath::Sqrt(constituent->Momentum.E());
@@ -384,6 +391,9 @@ void FastJetFinder::Process()
     candidate->DeltaEta = detaMax;
     candidate->DeltaPhi = dphiMax;
     candidate->Charge = charge; 
+    candidate->NNeutrals = nneutrals;
+    candidate->NCharged = ncharged;
+    
     //------------------------------------
     // Trimming
     //------------------------------------
