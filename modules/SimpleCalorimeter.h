@@ -58,7 +58,7 @@ private:
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerEnergy;
-  Double_t fTrackEnergy;
+  Double_t fTrackEnergy[2];
 
   Double_t fTowerTime;
   Double_t fTrackTime;
@@ -74,7 +74,7 @@ private:
 
   Bool_t fSmearTowerCenter;
 
-  Bool_t fIsEcal; //! 
+  Bool_t fIsEcal; //!
 
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
@@ -100,9 +100,9 @@ private:
 
   TObjArray *fEFlowTrackOutputArray; //!
   TObjArray *fEFlowTowerOutputArray; //!
-  
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
+
+  TObjArray *fTowerTrackArray[2]; //!
+  TIterator *fItTowerTrackArray[2]; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
