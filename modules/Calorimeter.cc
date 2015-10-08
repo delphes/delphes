@@ -563,6 +563,7 @@ void Calorimeter::FinalizeTower()
     track->AddCandidate(mother);
 
     track->Momentum *= ecalEnergy/fECalTrackEnergy[0];
+    ecalEnergy = 0.0;
 
     fEFlowTrackOutputArray->Add(track);
   }
@@ -584,7 +585,8 @@ void Calorimeter::FinalizeTower()
     track = static_cast<Candidate*>(track->Clone());
     track->AddCandidate(mother);
 
-    track->Momentum *= ecalEnergy/fECalTrackEnergy[0];
+    track->Momentum *= hcalEnergy/fHCalTrackEnergy[0];
+    hcalEnergy = 0.0;
 
     fEFlowTrackOutputArray->Add(track);
   }
