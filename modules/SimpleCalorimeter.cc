@@ -382,7 +382,7 @@ void SimpleCalorimeter::Process()
           fTowerTrackArray[1]->Add(track);
         }
       }
-      else if(fTrackFractions[number] < 1.0E-9)
+      else
       {
         fEFlowTrackOutputArray->Add(track);
       }
