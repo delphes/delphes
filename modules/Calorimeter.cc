@@ -403,7 +403,7 @@ void Calorimeter::Process()
         }
       }
 
-      if(fECalTrackFractions[number] > 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9 )
+      if(fECalTrackFractions[number] > 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9)
       {
         ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
         if(ecalSigma/momentum.E() < track->TrackResolution)
@@ -417,7 +417,7 @@ void Calorimeter::Process()
           fECalTowerTrackArray[1]->Add(track);
         }
       }
-      else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] > 1.0E-9 )
+      else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] > 1.0E-9)
       {
         hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
         if(hcalSigma/momentum.E() < track->TrackResolution)
@@ -430,6 +430,10 @@ void Calorimeter::Process()
           fHCalTrackEnergy[1] += hcalEnergy;
           fHCalTowerTrackArray[1]->Add(track);
         }
+      }
+      else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9)
+      {
+        fEFlowTrackOutputArray->Add(track);
       }
 
       continue;
@@ -563,7 +567,6 @@ void Calorimeter::FinalizeTower()
     track->AddCandidate(mother);
 
     track->Momentum *= ecalEnergy/fECalTrackEnergy[0];
-    ecalEnergy = 0.0;
 
     fEFlowTrackOutputArray->Add(track);
   }
@@ -586,7 +589,6 @@ void Calorimeter::FinalizeTower()
     track->AddCandidate(mother);
 
     track->Momentum *= hcalEnergy/fHCalTrackEnergy[0];
-    hcalEnergy = 0.0;
 
     fEFlowTrackOutputArray->Add(track);
   }
@@ -600,6 +602,9 @@ void Calorimeter::FinalizeTower()
 
     fEFlowTrackOutputArray->Add(track);
   }
+
+  if(fECalTowerTrackArray[0]->GetEntriesFast() > 0) ecalEnergy = 0.0;
+  if(fHCalTowerTrackArray[0]->GetEntriesFast() > 0) hcalEnergy = 0.0;
 
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
