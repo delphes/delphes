@@ -1,5 +1,3 @@
-set MaxEvents 100
-
 #######################################
 # Order of execution of various modules
 #######################################
@@ -1936,9 +1934,8 @@ module Isolation PhotonIsolation {
   # particle for which calculate the isolation
   set CandidateInputArray        PhotonEfficiency/photons 
   
-  # neutral and charged particles for the whole event (no CHS applied)
-  set NeutralIsolationInputArray NeutralTowerMerger/eflowTowers
-  set ChargedIsolationInputArray TrackMerger/tracks
+  # isolation collection
+  set IsolationInputArray EFlowMergerAllTracks/eflow
  
   # select a rho for the isolation
   set RhoInputArray RhoGridFastJet/rho
@@ -2007,10 +2004,10 @@ module Efficiency ElectronEfficiency {
 
 module Isolation ElectronIsolation {
   
-  set CandidateInputArray        ElectronEfficiency/electrons
+  set CandidateInputArray ElectronEfficiency/electrons
   
-  set NeutralIsolationInputArray NeutralTowerMerger/eflowTowers
-  set ChargedIsolationInputArray TrackMerger/tracks
+  # isolation collection
+  set IsolationInputArray EFlowMergerAllTracks/eflow
  
   set RhoInputArray RhoGridFastJet/rho
   
@@ -2052,9 +2049,9 @@ module Efficiency MuonEfficiency {
 module Isolation MuonIsolation {
   set CandidateInputArray MuonEfficiency/muons
  
-  set NeutralIsolationInputArray NeutralTowerMerger/eflowTowers
-  set ChargedIsolationInputArray TrackMerger/tracks
-
+  # isolation collection
+  set IsolationInputArray EFlowMergerAllTracks/eflow
+ 
   set RhoInputArray RhoGridFastJet/rho
   
   set OutputArray muons
