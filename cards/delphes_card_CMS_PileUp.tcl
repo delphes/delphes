@@ -672,7 +672,8 @@ module BTagging BTagging {
   # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
   # gluon's PDG code has the lowest priority
 
-  # https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsBTV
+  # based on arXiv:1211.4462
+  
   # default efficiency formula (misidentification rate)
   add EfficiencyFormula {0} {0.01+0.00038*pt}
 
@@ -701,9 +702,9 @@ module TauTagging TauTagging {
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
 
   # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.001}
+  add EfficiencyFormula {0} {0.01}
   # efficiency formula for tau-jets
-  add EfficiencyFormula {15} {0.4}
+  add EfficiencyFormula {15} {0.6}
 }
 
 #####################################################
