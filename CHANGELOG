@@ -24,7 +24,7 @@
 - added Trimming, Pruning and SoftDrop to FastJetFinder
 - added possibility to use DelphesPythia8 with LHE files
 - added Pythia8 examples
-- added JetFlavourAssociation module with Physics and Algorithmic definitions of the jet flavor
+- added JetFlavorAssociation module with Physics and Algorithmic definitions of the jet flavor
 - added new jet flavor definitions to the BTagging module (available only when running DelphesPythia8 with LHE files)
 
 3.2.0:
