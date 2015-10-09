@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: Njettiness.cc 677 2014-06-12 18:56:46Z jthaler $
+//  $Id: Njettiness.cc 821 2015-06-15 18:50:53Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -35,20 +35,79 @@ namespace contrib {
 //
 ///////
 
-Njettiness::Njettiness(const AxesDefinition & axes_def, const MeasureDefinition & measure_def)
-: _axes_def(axes_def.create()), _measure_def(measure_def.create()) {
-   setMeasureFunctionAndAxesFinder();  // call helper function to do the hard work
-}
+LimitedWarning Njettiness::_old_measure_warning;
+LimitedWarning Njettiness::_old_axes_warning;
 
-Njettiness::Njettiness(AxesMode axes_mode, const MeasureDefinition & measure_def)
-: _axes_def(createAxesDef(axes_mode)), _measure_def(measure_def.create()) {
-   setMeasureFunctionAndAxesFinder();  // call helper function to do the hard work
+   
+// Constructor
+Njettiness::Njettiness(const AxesDefinition & axes_def, const MeasureDefinition & measure_def)
+: _axes_def(axes_def.create()), _measure_def(measure_def.create()) {}
+   
+// setAxes for Manual mode
+void Njettiness::setAxes(const std::vector<fastjet::PseudoJet> & myAxes) {
+   if (_axes_def()->needsManualAxes()) {
+      _currentAxes = myAxes;
+   } else {
+      throw Error("You can only use setAxes for manual AxesDefinitions");
+   }
 }
    
+// Calculates and returns all TauComponents that user would want.
+// This information is stored in _current_tau_components for later access as well.
+TauComponents Njettiness::getTauComponents(unsigned n_jets, const std::vector<fastjet::PseudoJet> & inputJets) const {
+   if (inputJets.size() <= n_jets) {  //if not enough particles, return zero
+      _currentAxes = inputJets;
+      _currentAxes.resize(n_jets,fastjet::PseudoJet(0.0,0.0,0.0,0.0));
+      _current_tau_components = TauComponents();
+      _seedAxes = _currentAxes;
+      _currentPartition = TauPartition(n_jets); // empty partition
+   } else {
+      assert(_axes_def()); // this should never fail.
+      
+      if (_axes_def()->needsManualAxes()) { // if manual mode
+         // take current axes as seeds
+         _seedAxes = _currentAxes;
+         
+         // refine axes if requested
+         _currentAxes = _axes_def->get_refined_axes(n_jets,inputJets,_seedAxes, _measure_def());
+      } else { // non-manual axes
+         
+          //set starting point for minimization
+         _seedAxes = _axes_def->get_starting_axes(n_jets,inputJets,_measure_def());
+         
+         // refine axes as needed
+         _currentAxes = _axes_def->get_refined_axes(n_jets,inputJets,_seedAxes, _measure_def());
+         
+         // NOTE:  The above two function calls are combined in "AxesDefinition::get_axes"
+         // but are separated here to allow seed axes to be stored.
+      }
+      
+      // Find and store partition
+      _currentPartition = _measure_def->get_partition(inputJets,_currentAxes);
+      
+      // Find and store tau value
+      _current_tau_components = _measure_def->component_result_from_partition(_currentPartition, _currentAxes);  // sets current Tau Values
+   }
+   return _current_tau_components;
+}
+   
+
+///////
+//
+// Below is code for backward compatibility to use the old interface.
+// May be deleted in a future version
+//
+///////
+   
+Njettiness::Njettiness(AxesMode axes_mode, const MeasureDefinition & measure_def)
+: _axes_def(createAxesDef(axes_mode)), _measure_def(measure_def.create()) {}
+
 // Convert from MeasureMode enum to MeasureDefinition
 // This returns a pointer that will be claimed by a SharedPtr
 MeasureDefinition* Njettiness::createMeasureDef(MeasureMode measure_mode, int num_para, double para1, double para2, double para3) const {
-
+   
+   _old_measure_warning.warn("Njettiness::createMeasureDef:  You are using the old MeasureMode way of specifying N-subjettiness measures.  This is deprecated as of v2.1 and will be removed in v3.0.  Please use MeasureDefinition instead.");
+   
    // definition of maximum Rcutoff for non-cutoff measures, changed later by other measures
    double Rcutoff = std::numeric_limits<double>::max();  //large number
    // Most (but not all) measures have some kind of beta value
@@ -76,12 +135,7 @@ MeasureDefinition* Njettiness::createMeasureDef(MeasureMode measure_mode, int nu
          }
          break;
       case geometric_measure:
-         beta = para1;
-         if (num_para == 1) {
-            return new GeometricMeasure(beta);
-         } else {
-            throw Error("geometric_measure needs 1 parameter (beta)");
-         }
+         throw Error("This class has been removed. Please use OriginalGeometricMeasure, ModifiedGeometricMeasure, or ConicalGeometricMeasure with the new Njettiness constructor.");
          break;
       case normalized_cutoff_measure:
          beta = para1;
@@ -103,14 +157,7 @@ MeasureDefinition* Njettiness::createMeasureDef(MeasureMode measure_mode, int nu
          }
          break;
       case geometric_cutoff_measure:
-         beta = para1;
-         Rcutoff = para2; //Rcutoff parameter is 2nd parameter in geometric_cutoff_measure
-         if(num_para == 2) {
-           return new GeometricCutoffMeasure(beta,Rcutoff);
-         } else {
-            throw Error("geometric_cutoff_measure has 2 parameters (beta, Rcutoff)");
-         }
-         break;
+         throw Error("This class has been removed. Please use OriginalGeometricMeasure, ModifiedGeometricMeasure, or ConicalGeometricMeasure with the new Njettiness constructor.");
       default:
          assert(false);
          break;
@@ -121,6 +168,9 @@ MeasureDefinition* Njettiness::createMeasureDef(MeasureMode measure_mode, int nu
 // Convert from AxesMode enum to AxesDefinition
 // This returns a pointer that will be claimed by a SharedPtr
 AxesDefinition* Njettiness::createAxesDef(Njettiness::AxesMode axes_mode) const {
+   
+   _old_axes_warning.warn("Njettiness::createAxesDef:  You are using the old AxesMode way of specifying N-subjettiness axes.  This is deprecated as of v2.1 and will be removed in v3.0.  Please use AxesDefinition instead.");
+   
    
    switch (axes_mode) {
       case wta_kt_axes:
@@ -155,64 +205,9 @@ AxesDefinition* Njettiness::createAxesDef(Njettiness::AxesMode axes_mode) const 
    }
 }
 
-   
-// Parsing needed for constructor to set AxesFinder and MeasureFunction
-// All of the parameter handling is here, and checking that number of parameters is correct.
-void Njettiness::setMeasureFunctionAndAxesFinder() {
-   // Get the correct MeasureFunction and AxesFinders
-   _measureFunction.reset(_measure_def->createMeasureFunction());
-   _startingAxesFinder.reset(_axes_def->createStartingAxesFinder(*_measure_def));
-   _finishingAxesFinder.reset(_axes_def->createFinishingAxesFinder(*_measure_def));
-}
 
-// setAxes for Manual mode
-void Njettiness::setAxes(const std::vector<fastjet::PseudoJet> & myAxes) {
-   if (_axes_def->supportsManualAxes()) {
-      _currentAxes = myAxes;
-   } else {
-      throw Error("You can only use setAxes for manual AxesDefinitions");
-   }
-}
-   
-// Calculates and returns all TauComponents that user would want.
-// This information is stored in _current_tau_components for later access as well.
-TauComponents Njettiness::getTauComponents(unsigned n_jets, const std::vector<fastjet::PseudoJet> & inputJets) const {
-   if (inputJets.size() <= n_jets) {  //if not enough particles, return zero
-      _currentAxes = inputJets;
-      _currentAxes.resize(n_jets,fastjet::PseudoJet(0.0,0.0,0.0,0.0));
-      _current_tau_components = TauComponents();
-      _seedAxes = _currentAxes;
-      _currentJets = _currentAxes;
-      _currentBeam = PseudoJet(0.0,0.0,0.0,0.0);
-   } else {
-
-      _seedAxes = _startingAxesFinder->getAxes(n_jets,inputJets,_currentAxes); //sets starting point for minimization
-      if (_finishingAxesFinder) {
-         _currentAxes = _finishingAxesFinder->getAxes(n_jets,inputJets,_seedAxes);
-      } else {
-         _currentAxes = _seedAxes;
-      }
-      
-      // Find partition and store information
-      // (jet information in _currentJets, beam in _currentBeam)
-      _currentJets = _measureFunction->get_partition(inputJets,_currentAxes,&_currentBeam);
-      
-      // Find tau value and store information
-      _current_tau_components = _measureFunction->result_from_partition(_currentJets, _currentAxes,&_currentBeam);  // sets current Tau Values
-   }
-   return _current_tau_components;
-}
    
    
-// Partition a list of particles according to which N-jettiness axis they are closest to.
-// Return a vector of length _currentAxes.size() (which should be N).
-// Each vector element is a list of ints corresponding to the indices in
-// particles of the particles belonging to that jet.
-std::vector<std::list<int> > Njettiness::getPartitionList(const std::vector<fastjet::PseudoJet> & particles) const {
-   // core code is in MeasureFunction
-   return _measureFunction->get_partition_list(particles,_currentAxes);
-}
-
    
 } // namespace contrib
 

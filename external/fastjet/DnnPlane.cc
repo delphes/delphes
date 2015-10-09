@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: DnnPlane.cc 3442 2014-07-24 07:20:49Z salam $
+// $Id: DnnPlane.cc 3918 2015-07-03 14:19:13Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -259,7 +259,9 @@ void DnnPlane::RemoveAndAddPoints(
     // triangulation and the supervertex structure should be updated
     // to reflect the fact that the points are no longer valid.
     _TR.remove(_supervertex[index].vertex);
+    if (_verbose) cout << "DnnPlane about to set _supervertex["<< index<<"].vertex to NULL" << endl;
     _supervertex[index].vertex = NULL;
+    if (_verbose) cout << "                 value is " << (_is_not_null(_supervertex[index].vertex)) << endl;
   }
 
   // add new point: give a "hint" to the inserter that
@@ -296,7 +298,8 @@ void DnnPlane::RemoveAndAddPoints(
     _supervertex.push_back(sv);
     int index = _supervertex.size()-1;
     indices_added.push_back(index);
-    if (_verbose) cout << "  adding " << index << endl;
+    if (_verbose) cout << "  adding " << index << " at "
+                       << points_to_add[ia].first<< " " << points_to_add[ia].second << endl;
 
     //if (indices_to_remove.size() > 0) {
     if (NeighbourUnion.size() > 0) {

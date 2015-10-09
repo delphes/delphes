@@ -9,27 +9,38 @@ Njettiness has changed, we have called this v2 (http://semver.org).
 
 Note that we have maintain backwards compatibility for the typical ways that
 Nsubjettiness was used.  In particular, all of the Nsubjettiness class code in
-the example file v1.0.3 from still compiles, as does the NjettinessPlugin class
+the example file from v1.0.3 still compiles, as does the NjettinessPlugin class
 code that uses the default measure.
 
 The key new features are:
 
   * NsubjettinessRatio:  Direct access to tau_N / tau_M (the most requested
     feature)
-  * MeasureDefinition to allow access to both normalized and unnormalized measures
+  * MeasureDefinition to allow access to normalized and unnormalized measures
   * AxesDefinition to allow for access to more general axes modes
-  * Winner-Take-All recombination axes:  a faster way to find axes than beta = 1
+  * Winner-Take-All recombination axes:  a faster way to find axes than beta=1
     minimization, but with comparable performance.
   * TauComponents to get access to the pieces of the N-(sub)jettiness
     calculation.
+  * TauExtras to get complete access to get partitioning and axes information.
   * For clarity, split the example file into an example_basic_usage and
-    example_advanced_usage
+    example_advanced_usage (and example_advanced_usage_ee for e+e- collisions).
   * In Nsubjettiness, access to seedAxes() and currentAxes() to figure out the
     axes used before and after minimization.
   * In Nsubjettiness, access to currentSubjets() to get the subjet fourvectors.
+  * (v2.2)  XConePlugin, which improves on the previous NjettinessPlugin to use
+    N-jettiness as a jet finder using the new ConicalGeometric measure.
 
+-- 2.2.1:  (Sept 28, 2015)  Fix of small Makefile bug
+-- 2.2.0:  (Sept 7, 2015)  Inclusion of the XCone jet algorithm, as well as a
+           few new measures, including the "conical geometric" measure and
+           options for e+e- colliders.  Improvement of the
+           Measure/AxesDefinition interface to allow for direct
+           use in calculations.
+           * Fixed bug where MultiPass_Axes did not actually minimize
+           * Fixed floating point error with infinity^2 in various measures
 
--- 2.1.0:  (July 9, 2014) Inclusion of MeasureDefinition/AxesDefinition interface.
+-- 2.1.0:  (July 9, 2014) Inclusion of Measure/AxesDefinition interface.
            This was the first publicly available version of Nsubjettiness v2.
 -- 2.0.0:  Initial release of v2.0.  This was never officially made public.
 

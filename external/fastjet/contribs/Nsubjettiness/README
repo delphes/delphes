@@ -14,11 +14,26 @@ The Nsubjettiness package is based on the physics described in:
 
 New in v2.0 is the winner-take-all axis, which is described in:
 
+   Jet Observables Without Jet Algorithms. 
+   Daniele Bertolini, Tucker Chan, and Jesse Thaler. 
+   JHEP 1404:013 (2014), arXiv:1310.7584.
+
    Jet Shapes with the Broadening Axis. 
    Andrew J. Larkoski, Duff Neill, and Jesse Thaler. 
    JHEP 1404:017 (2014), arXiv:1401.2158.
 
-as well as in unpublished work by Gavin Salam.
+   Unpublished work by Gavin Salam
+
+New in v2.2 are new measures used in the XCone jet algorithm, described in:
+
+   XCone: N-jettiness as an Exclusive Cone Jet Algorithm.
+   Iain W. Stewart, Frank J. Tackmann, Jesse Thaler,
+   Christopher K. Vermilion, and Thomas F. Wilkason.
+   arXiv:1508.01516.
+
+   Resolving Boosted Jets with XCone.
+   Jesse Thaler and Thomas F. Wilkason.
+   arXiv:1508.01518.
 
 --------------------------------------------------------------------------------
 Core Classes
@@ -28,19 +43,29 @@ There are various ways to access N-(sub)jettiness variables, described
 in more detail below:
 
 Nsubjettiness       [Nsubjettiness.hh]:
-   A FunctionOfPseudoJet<double> interface to measure N-subjettiness
+   A FunctionOfPseudoJet<double> interface to measure the
+   N-subjettiness jet shape
    (Recommended for most users)
+
 NsubjettinessRatio  [Nsubjettiness.hh]:
    A FunctionOfPseudoJet<double> interface to measure ratios of
    two different N-subjettiness (i.e. tau3/tau2)
+   (Recommended for most users)
+
+XConePlugin         [XConePlugin.hh]:
+   A FastJet plugin for using the XCone jet algorithm.
+   (Recommended for most users)
+
 NjettinessPlugin    [NjettinessPlugin.hh]:
-   A FastJet plugin for finding jets by minimizing N-jettiness
-   (Recommended for advanced users)
+   A FastJet plugin for finding jets by minimizing N-jettiness.
+   Same basic philosophy as XCone, but many more options.
+   (Recommended for advanced users only.)
+
 Njettiness          [Njettiness.hh]:
    Access to the core Njettiness code.
    (Not recommended for users, since the interface might change)
 
-The code assumes that you have FastJet 3.
+The code assumes that you have FastJet 3, but does not (yet) require FastJet 3.1
 
 --------------------------------------------------------------------------------
 Basic Usage: Nsubjettiness and NsubjettinessRatio  [Nsubjettiness.hh]
@@ -63,6 +88,16 @@ Also available are ratios of N-subjettiness values
                                  MeasureDefinition)
     // N and M give tau_N / tau_M, all other options the same
 
+For example, if you just want the tau_2/tau_1 value of a jet, using recommended
+parameter choices, do this:
+
+    PseudoJet this_jet = /*from your favorite jet algorithm*/;
+    double beta = 1.0;
+    NsubjettinessRatio nSub21(2,1,
+                              OnePass_WTA_KT_Axes(),
+                              UnnormalizedMeasure(beta));
+    double tau21 = nSub21(this_jet);
+
 --------------------------------------------------------------------------------
 AxesDefinition  [NjettinessDefinition.hh]
 --------------------------------------------------------------------------------
@@ -71,44 +106,81 @@ N-(sub)jettiness requires choosing axes as well as a measure (see below). There
 are a number of axes choices available to the user, though modes with a (*) are
 recommended. Arguments in parentheses are parameters that the user must set.
 
-Axes can be found using standard recursive clustering procedures.  New is the
-option to use the "winner-take-all" recombination scheme:
-(*) KT_Axes           // exclusive kt axes
-    CA_Axes           // exclusive ca axes
-    AntiKT_Axes(R0)   // inclusive hardest axes with antikt, R0 = radius
-(*) WTA_KT_Axes       // exclusive kt with winner-take-all recombination
-    WTA_CA_Axes       // exclusive ca with winner-take-all recombination
+Axes can be found using standard recursive clustering procedures.  New in v2 is
+the option to use the "winner-take-all" recombination scheme:
+(*) KT_Axes          // exclusive kt axes
+    CA_Axes          // exclusive ca axes
+    AntiKT_Axes(R0)  // inclusive hardest axes with antikt, R0 = radius
+(*) WTA_KT_Axes      // exclusive kt with winner-take-all recombination
+    WTA_CA_Axes      // exclusive ca with winner-take-all recombination
 
-One can also run a minimization routine to find a (local) minimum of
-N-(sub)jettiness:
+New in v2.2 are generalized recombination/clustering schemes:
+    GenET_GenKT_Axes(delta, p, R0 = inf)
+    WTA_GenKT_Axes(p, R0 = inf)
+    GenKT_Axes(p, R0 = inf)
+Here, delta > 0 labels the generalized ET recombination scheme (delta = 1 for
+standard ET scheme, delta = 2 for ET^2 scheme, delta = infinity for WTA scheme)
+p >= 0 labels the generalized KT clustering metric (p = 0 for ca, p = 1 for kt),
+R0 is the radius parameter, and the clustering is run in exclusive mode.  The
+GenKT_Axes mode uses standard E-scheme recombination.  By default the value of
+R0 is set to "infinity", namely fastjet::JetDefinition::max_allowable_R.
+
+Also new in v2.2 is option of identifying nExtra axes through exclusive
+clustering and then looking at all (N + nExtra) choose N axes and finding the 
+one that gives the smallest N-(sub)jettiness value:
+    Comb_GenET_GenKT_Axes(nExtra, delta, p, R0 = inf)
+    Comb_WTA_GenKT_Axes(nExtra, p, R0 = inf)
+    Comb_GenKT_Axes(nExtra, p, R0 = inf)
+These modes are not recommended for reasons of speed.
+
+Starting from any set of seed axes, one can run a minimization routine to find
+a (local) minimum of N-(sub)jettiness.  Note that the one-pass minimization
+routine is tied to the choice of MeasureDefinition.
 (*) OnePass_KT_Axes          // one-pass minimization from kt starting point
     OnePass_CA_Axes          // one-pass min. from ca starting point
     OnePass_AntiKT(R0)       // one-pass min. from antikt starting point,R0=rad
 (*) OnePass_WTA_KT_Axes      // one-pass min. from wta_kt starting point
     OnePass_WTA_CA_Axes      // one-pass min. from wta_ca starting point
+    OnePass_GenET_GenKT_Axes(delta, p, R0 = inf) // one-pass min. from GenET/KT
+    OnePass_WTA_GenKT_Axes(p, R0 = inf)          // one-pass min from WTA/GenKT
+    OnePass_GenKT_Axes(p, R0 = inf)              // one-pass min from GenKT
 
-In general, it is difficult to finding the global minimum, but this mode
-attempts to do so
-    MultiPass_Axes(Npass)    // axes that (attempt to) minimize N-subjettiness
-                             // (NPass = 100 is typical)
+For one-pass minimization, OnePass_CA_Axes and OnePass_WTA_CA_Axes are not
+recommended as they provide a poor choice of seed axes.
+
+In general, it is difficult to find the global minimum, but this mode attempts
+to do so:
+    MultiPass_Axes(NPass) // axes that (attempt to) minimize N-subjettiness
+                          // (NPass = 100 is typical)
+This does multi-pass minimization from KT_Axes starting points.
 
 Finally, one can set manual axes:
-    Manual_Axes          // set your own axes with setAxes()
-    OnePass_Manual_Axes  // one-pass minimization from manual starting point
+    Manual_Axes              // set your own axes with setAxes()
+    OnePass_Manual_Axes      // one-pass minimization from manual starting point
+    MultiPass_Manual_Axes(Npass) // multi-pass min. from manual
+
+If one wants to change the number of passes used by any of the axes finders, one
+can call the function
+    setNPass(NPass,nAttempts,accuracy,noise_range)
+where NPass = 0 only uses the seed axes, NPass = 1 is one-pass minimization, and
+NPass = 100 is the default multi-pass.  nAttempts is the number of iterations to
+use in each pass, accuracy is how close to the minimum one tries to get, and
+noise_range is how much in rapidity/azimuth the random axes are jiggled.
 
 For most cases, running with OnePass_KT_Axes or OnePass_WTA_KT_Axes gives
 reasonable results (and the results are IRC safe).  Because it uses random
-number seeds, MultiPass_Axes is not IRC safe (and the code is rather slow).  Note
-that for the minimization routines, beta = 1.1 is faster than beta = 1, with
-comparable performance.
+number seeds, MultiPass_Axes is not IRC safe (and the code is rather slow).
+Note that for the minimization routines, beta = 1.1 is faster than beta = 1,
+with comparable performance.
 
 --------------------------------------------------------------------------------
 MeasureDefinition  [NjettinessDefinition.hh]
 --------------------------------------------------------------------------------
 
-At the moment, there are only a few measures.  Note that each one has a
-different number of parameters.  The one indicated by (*)
-is the one recommended for use by users new to Nsubjettiness.
+The value of N-(sub)jettiness depends crucially on the choice of measure.  Each
+measure has a different number of parameters, so one has to be careful when
+switching between measures  The one indicated by (*) is the one recommended for
+use by users new to Nsubjettiness.
 
 The original N-subjettiness measures are:
     NormalizedMeasure(beta,R0)  //default normalized measure with
@@ -121,12 +193,43 @@ There are also measures that incorporate a radial cutoff:
                                              //additional Rcutoff
     UnnormalizedCutoffMeasure(beta,Rcutoff)  //unnormalized measure with
                                              //additional Rcutoff
+                                             
+For all of the above measures, there is an optional argument to change from the
+ordinary pt_R distance measure recommended for pp collisions to an 
+E_theta distance measure recommended for ee collisions.  There are also
+lorentz_dot and perp_lorentz_dot distance measures recommended only for
+advanced users.
 
-In beta testing are "geometric" measures where distances are measured using the
-Lorentz dot product (N.B. the formula for the geometric measure is likely to
-change since there should be separate beam and jet beta factors.)
-    GeometricMeasure(beta)               //geometric measure with exponent beta
-    GeometricCutoffMeasure(beta,Rcutoff) //geometric measure with Rcutoff
+New for v2.2 is a set of measures defined in arXiv:1508.01516.  First, there is
+the "conical measure":
+
+    ConicalMeasure(beta,R0) // same jets as UnnormalizedCutoffMeasure
+                            // but differs in normalization and specifics
+                            // of one-pass minimization
+
+Next, there is the geometric measure (as well as a modified version to yield
+more conical jet regions):
+
+    OriginalGeometricMeasure(R) // not recommended for analysis
+    ModifiedGeometricMeasure(R)
+
+(Prior to v2.2, there was a "GeometricMeasure" which unfortunately had the wrong
+definition.  These have been commented out in the code as
+"DeprecatedGeometricMeasure" and "DeprecatedGeometricCutoffMeasure", but they
+should not be used.)
+
+Next, there is a "conical geometric" measure:
+
+    ConicalGeometricMeasure(beta, gamma, Rcutoff)
+
+This is a hybrid between the conical and geometric measures and is the basis for
+the XCone jet algorithm.  Finally, setting to the gamma = 1 default gives the
+XCone default measure, which is used in the XConePlugin jet finder
+
+(*)  XConeMeasure(beta,Rcutoff)
+    
+where beta = 2 is the recommended default value and beta = 1 is the recoil-free
+default.
 
 --------------------------------------------------------------------------------
 A note on beta dependence
@@ -137,9 +240,11 @@ N-subjettiness paper advocated beta = 1, but it is now understood that different
 beta values can be useful in different contexts.  The two main choices are:
 
 beta = 1:  aka broadening/girth/width measure
+   the axes behave like the "median" in that they point to the hardest cluster
    wta_kt_axes are approximately the same as minimizing beta = 1 measure
 
 beta = 2:  aka thrust/mass measure
+   the axes behave like the "mean" in that they point along the jet momentum
    kt_axes are approximately the same as minimizing beta = 2 measure
 
 N.B. The minimization routines are only valid for 1 < beta < 3.
@@ -148,7 +253,58 @@ For quark/gluon discrimination with N = 1, beta~0.2 with wta_kt_axes appears
 to be a good choice. 
 
 --------------------------------------------------------------------------------
-TauComponents  [MeasureFunction.hh]
+XConePlugin  [XConePlugin.hh]
+--------------------------------------------------------------------------------
+
+The XCone FastJet plugin is an exclusive cone jet finder which yields a
+fixed N number of jets which approximately conical boundaries. The algorithm
+finds N axes, and jets are simply the sum of particles closest to a given axis
+(or unclustered if they are closest to the beam).  Unlike the NjettinessPlugin
+below, the user is restricted to using the XConeMeasure. 
+
+   XConePlugin plugin(N,R,beta=2);
+   JetDefinition def(&plugin);
+   ClusterSequence cs(vector<PseudoJet>,def);
+   vector<PseudoJet> jets = cs.inclusive_jets();
+
+Note that despite being an exclusive jet algorithm, one finds the jets using the
+inclusive_jets() call.
+
+The AxesDefinition and MeasureDefinition are defaulted in this measure to 
+OnePass_GenET_GenKT_Axes and XConeMeasure, respectively. The parameters chosen 
+for the OnePass_GenET_GenKT_Axes are defined according to the chosen value of
+beta as delta = 1/(beta - 1) and p = 1/beta. These have been shown to give the
+optimal choice of seed axes. The R value for finding the axes is chosen to be
+the same as the R for the jet algorithm, although in principle, these two radii
+could be different. 
+
+N.B.:  The order of the R, beta arguments is *reversed* from the XConeMeasure
+itself, since this ordering is the more natural one to use for Plugins.  We
+apologize in advance for any confusion this might cause.
+
+--------------------------------------------------------------------------------
+Advanced Usage:  NjettinessPlugin  [NjettinessPlugin.hh]
+--------------------------------------------------------------------------------
+
+Same as the XConePlugin, but the axes finding methods and measures are the same
+as for Nsubjettiness, allowing more flexibility.
+
+   NjettinessPlugin plugin(N, AxesDefinition, MeasureDefinition);
+   JetDefinition def(&plugin);
+   ClusterSequence cs(vector<PseudoJet>,def);
+   vector<PseudoJet> jets = cs.inclusive_jets();
+
+--------------------------------------------------------------------------------
+Very Advanced Usage:  Njettiness  [Njettiness.hh]
+--------------------------------------------------------------------------------
+
+Most users will want to use the Nsubjettiness or NjettinessPlugin classes to
+access N-(sub)jettiness information.  For direct access to the Njettiness class,
+one can use Njettiness.hh directly. This class is in constant evolution, so
+users who wish to extend its functionality should contact the authors first.
+
+--------------------------------------------------------------------------------
+TauComponents  [MeasureDefinition.hh]
 --------------------------------------------------------------------------------
 
 For most users, they will only need the value of N-subjettiness (i.e. tau)
@@ -160,49 +316,33 @@ the individual numerator pieces, the denominator, etc.)
    double denom = tauComp.denominator();  //normalization factor
 
 --------------------------------------------------------------------------------
-WinnerTakeAllRecombiner  [WinnerTakeAllRecombiner.hh]
+Extra Recombiners  [ExtraRecombiners.hh]
 --------------------------------------------------------------------------------
 
-New for version 2.0 of Nsubjettiness are winner-take-all axes.  They are found
-with the help of the WinnerTakeAllRecombiner. This class defines a new
-recombination scheme for clustering particles. This scheme recombines two
-PseudoJets into a PseudoJet with pT of the sum of the two input PseudoJet pTs
-and direction of the harder PseudoJet.  This is a "recoil-free" recombination
-scheme that guarantees that the axes is aligned with one of the input particles.
-It is IRC safe.  Axes found with the standard E-scheme recombiner at similar to
-the beta = 2 minimization, while winner-take-all is similar to the beta = 1
-measure.
+New in v2.0 are winner-take-all axes.  (These have now been included in 
+FastJet 3.1, but we have left the code here to allow the plugin to work under
+FJ 3.0).  These axes are found with the help of the WinnerTakeAllRecombiner.
+This class defines a new recombination scheme for clustering particles. This
+scheme recombines two PseudoJets into a PseudoJet with pT of the sum of the two
+input PseudoJet pTs and direction of the harder PseudoJet.  This is a
+"recoil-free" recombination scheme that guarantees that the axes is aligned with
+one of the input particles. It is IRC safe.  Axes found with the standard
+E-scheme recombiner at similar to the beta = 2 minimization, while
+winner-take-all is similar to the beta = 1 measure.
+
+New in v2.2 is the GeneralEtSchemeRecombiner, as defined in arxiv:1506.XXXX.
+This functions similarly to the Et-scheme defined in Fastjet, but the reweighting
+of the sum of rap and phi is parameterized by an exponent delta. Thus, delta = 1
+is the normal Et-scheme recombination, delta = 2 is Et^2 recombination, and
+delta = infinity is the winner-take-all recombination. This recombination scheme
+is used in GenET_GenKT_Axes, and we find that optimal seed axes for minimization
+can be found by using delta = 1/(beta - 1). 
 
 Note that the WinnerTakeAllRecombiner can be used outside of Nsubjettiness
 itself for jet finding.  For example, the direction of anti-kT jets found
 with the WinnerTakeAllRecombiner is particularly robust against soft jet
-contamination.
-
---------------------------------------------------------------------------------
-Advanced Usage:  NjettinessPlugin  [NjettinessPlugin.hh]
---------------------------------------------------------------------------------
-
-The Njettiness FastJet plugin represents an exclusive jet finder (yielding a
-fixed N number of jets). The algorithm finds N axes, and jets are simply the sum
-of particles closest to a given axis (or unclustered if they are closest to the
-beam).  The axes finding methods and measures are the same as for Nsubjettiness.
-
-   NjettinessPlugin plugin(N, AxesDefinition, MeasureDefinition);
-   JetDefinition def(&plugin);
-   ClusterSequence cs(vector<PseudoJet>,def);
-   vector<PseudoJet> jets = cs.inclusive_jets();
-
-Note that despite being an exclusive jet algorithm, one finds the jets using the
-inclusive_jets() call.
-
---------------------------------------------------------------------------------
-Very Advanced Usage:  Njettiness  [Njettiness.hh]
---------------------------------------------------------------------------------
-
-Most users will want to use the Nsubjettiness or NjettinessPlugin classes to
-access N-(sub)jettiness information.  For direct access to the Njettiness class,
-one can use Njettiness.hh directly. This class is still evolving, so users who
-wish to extend its functionality should contact the authors first.
+contamination.  That said, this functionality is now included in FJ 3.1, so this
+code is likely to be deprecated in a future version.
 
 --------------------------------------------------------------------------------
 Technical Details
@@ -212,9 +352,9 @@ In general, the user will never need access to these header files.  Here is a
 brief description about how they are used to help the calculation of
 N-(sub)jettiness:
 
-AxesFinder.hh:
+AxesDefinition.hh:
 
-The AxesFinder class (and derived classes) defines the axes used in the
+The AxesDefinition class (and derived classes) defines the axes used in the
 calculation of N-(sub)jettiness.  These axes can be defined from the exclusive
 jets from a kT or CA algorithm, the hardest jets from an anti-kT algorithm,
 manually, or from minimization of N-jettiness.  In the future, the user will be
@@ -222,16 +362,18 @@ able to write their own axes finder, though currently the interface is still
 evolving.  At the moment, the user should stick to the options allowed by
 AxesDefinition.
 
-MeasureFunction.hh:
+MeasureDefinition.hh:
 
-The MeasureFunction class (and derived classes) defines the measure by which
+The MeasureDefinition class (and derived classes) defines the measure by which
 N-(sub)jettiness is calculated. This measure is calculated between each
 particle and its corresponding axis, and then summed and normalized to
 produce N-(sub)jettiness. The default measure for this calculation is
 pT*dR^beta, where dR is the rapidity-azimuth distance between the particle
 and its axis, and beta is the angular exponent.  Again, in the future the user
 will be able to write their own measures, but for the time being, only the
-predefined MeasureDefinition values should be used.
+predefined MeasureDefinition values should be used.  Note that the one-pass
+minimization algorithms are defined within MeasureDefinition, since they are
+measure specific.
 
 --------------------------------------------------------------------------------
 Known Issues
@@ -239,6 +381,14 @@ Known Issues
 
 -- The MultiPass_Axes mode gives different answers on different runs, since
    random numbers are used.
--- In rare cases, one pass minimization can give a larger value of Njettiness
-   than without minimization.
+-- For the default measures, in rare cases, one pass minimization can give a 
+   larger value of Njettiness than without minimization. The reason is due 
+   to the fact that axes in default measure are not defined as light-like
 -- Nsubjettiness is not thread safe, since there are mutables in Njettiness.
+-- If the AxesDefinition does not find N axes, then it adds zero vectors to the
+   list of axes to get the total up to N.  This can lead to unpredictable
+   results (including divide by zero issues), and a warning is thrown to alert
+   the user.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------

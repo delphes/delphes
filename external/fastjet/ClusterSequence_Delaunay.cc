@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence_Delaunay.cc 3475 2014-07-29 11:57:23Z salam $
+// $Id: ClusterSequence_Delaunay.cc 3918 2015-07-03 14:19:13Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -69,8 +69,8 @@ void ClusterSequence::_delaunay_cluster () {
 
   // initialise our DNN structure with the set of points
   auto_ptr<DynamicNearestNeighbours> DNN;
-#ifndef DROP_CGAL // strategy = NlnN* are not supported if we drop CGAL...
   bool verbose = false;
+#ifndef DROP_CGAL // strategy = NlnN* are not supported if we drop CGAL...
   bool ignore_nearest_is_mirror = (_Rparam < twopi);
   if (_strategy == NlnN4pi) {
     DNN.reset(new Dnn4piCylinder(points,verbose));
@@ -125,6 +125,7 @@ void ClusterSequence::_delaunay_cluster () {
       SmallestDijPair = DijMap.begin()->second;
       jet_i = SmallestDijPair.first;
       jet_j = SmallestDijPair.second;
+      if (verbose) cout << "CS_Delaunay found recombination candidate: " << jet_i << " " << jet_j << " " << SmallestDij << endl; // GPS debugging
       // distance is immediately removed regardless of whether or not
       // it is used.
       // Some temporary testing code relating to problems with the gcc-3.2 compiler
@@ -138,7 +139,7 @@ void ClusterSequence::_delaunay_cluster () {
       recombine_with_beam = (jet_j == BeamJet);
       if (!recombine_with_beam) {Valid2 = DNN->Valid(jet_j);} 
       else {Valid2 = true;}
-
+      if (verbose) cout << "CS_Delaunay validities i & j: " << DNN->Valid(jet_i) << " " << Valid2 << endl;
     } while ( !DNN->Valid(jet_i) || !Valid2);
 
 
@@ -147,6 +148,7 @@ void ClusterSequence::_delaunay_cluster () {
     // later (only if at least 2 jets are around).
     if (! recombine_with_beam) {
       int nn; // will be index of new jet
+      if (verbose) cout << "CS_Delaunay call _do_ij_recomb: " << jet_i << " " << jet_j << " " << SmallestDij << endl; // GPS debug
       _do_ij_recombination_step(jet_i, jet_j, SmallestDij, nn);
       //OBS // merge the two jets, add new jet, remove old ones
       //OBS _jets.push_back(_jets[jet_i] + _jets[jet_j]);
@@ -168,6 +170,7 @@ void ClusterSequence::_delaunay_cluster () {
       points.push_back(newpoint);
     } else {
       // recombine the jet with the beam
+      if (verbose) cout << "CS_Delaunay call _do_iB_recomb: " << jet_i << " " << SmallestDij << endl; // GPS debug
       _do_iB_recombination_step(jet_i, SmallestDij);
       //OBS _add_step_to_history(n+i,_jets[jet_i].cluster_hist_index(),BeamJet,
       //OBS 			   Invalid, SmallestDij);

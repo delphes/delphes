@@ -63,7 +63,7 @@
 #include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
-#include "fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh"
+#include "fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh"
 
 #include "fastjet/tools/Filter.hh"
 #include "fastjet/tools/Pruner.hh"

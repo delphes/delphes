@@ -63,6 +63,9 @@
 #define FASTJET_ENABLE_PLUGIN_TRACKJET  /**/ 
 #endif
 
+/* defined if C++11 features have been enabled */
+/* #undef HAVE_CXX11_FEATURES */
+
 /* defined if demangling is enabled at configure time and is supported through
    the GNU C++ ABI */
 /* #undef HAVE_DEMANGLING_SUPPORT */
@@ -150,7 +153,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef FASTJET_PACKAGE_STRING 
-#define FASTJET_PACKAGE_STRING  "FastJet 3.1.2" 
+#define FASTJET_PACKAGE_STRING  "FastJet 3.1.3" 
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -160,7 +163,7 @@
 
 /* Define to the version of this package. */
 #ifndef FASTJET_PACKAGE_VERSION 
-#define FASTJET_PACKAGE_VERSION  "3.1.2" 
+#define FASTJET_PACKAGE_VERSION  "3.1.3" 
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
@@ -170,7 +173,7 @@
 
 /* Version number of package */
 #ifndef FASTJET_VERSION 
-#define FASTJET_VERSION  "3.1.2" 
+#define FASTJET_VERSION  "3.1.3" 
 #endif
 
 /* Major version of this package */
@@ -185,12 +188,12 @@
 
 /* Version of the package under the form XYYZZ (instead of X.Y.Z) */
 #ifndef FASTJET_VERSION_NUMBER 
-#define FASTJET_VERSION_NUMBER  30102 
+#define FASTJET_VERSION_NUMBER  30103 
 #endif
 
 /* Patch version of this package */
 #ifndef FASTJET_VERSION_PATCHLEVEL 
-#define FASTJET_VERSION_PATCHLEVEL  2 
+#define FASTJET_VERSION_PATCHLEVEL  3 
 #endif
 
 /* Pre-release version of this package */

@@ -1,4 +1,4 @@
-version=3.1.2
+version=3.1.3
 
 wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
 

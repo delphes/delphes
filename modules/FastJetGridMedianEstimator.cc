@@ -67,7 +67,7 @@
 #include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
-#include "fastjet/contribs/Nsubjettiness/WinnerTakeAllRecombiner.hh"
+#include "fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh"
 
 using namespace std;
 using namespace fastjet;

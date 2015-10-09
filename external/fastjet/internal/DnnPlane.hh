@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: DnnPlane.hh 3442 2014-07-24 07:20:49Z salam $
+// $Id: DnnPlane.hh 3918 2015-07-03 14:19:13Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -189,7 +189,7 @@ private:
     // of RemoveAndAddPoints so here we should just make sure there is
     // no crash... that's done by checking (near != NULL)
     if ((std::abs(dist-mindist)<DISTANCE_FOR_CGAL_CHECKS) &&
-	(near != NULL) &&
+	_is_not_null(near) && // GPS cf. note below about != NULL with clang/CGAL
 	(_euclid_distance(candidate, near->point())<DISTANCE_FOR_CGAL_CHECKS)){
       // we're in a situation where there might be a rounding issue,
       // use CGAL's distance computation to get it right
@@ -221,6 +221,23 @@ private:
   /// and the distance between the two points is also smaller than this
   /// then use CGAL to compare the distances. 
   static const double DISTANCE_FOR_CGAL_CHECKS;  
+
+
+  /// small routine to check if if a vertex handle is not null.
+  ///
+  /// This is centralised here because of the need for a not-very
+  /// readable workaround for certain CGAL/clang++ compiler
+  /// combinations.
+  inline static bool _is_not_null(const Vertex_handle & vh) {
+    // as found in issue 2015-07-clang61+CGAL, the form
+    //   vh != NULL
+    // appears to be broken with CGAL-3.6 and clang-3.6.0/.1
+    //
+    // The not very "readable"
+    //   vh.operator->()
+    // does the job instead
+    return vh.operator->();
+  }
   
 };
 
@@ -236,7 +253,13 @@ inline double DnnPlane::NearestNeighbourDistance(const int ii) const {
 
 inline bool DnnPlane::Valid(const int index) const {
   if (index >= 0 && index < static_cast<int>(_supervertex.size())) {
-    return (_supervertex[index].vertex != NULL);} else {return false;} }
+    return _is_not_null(_supervertex[index].vertex);
+  }
+  else {
+    return false;
+  }
+}
+
 
 inline EtaPhi DnnPlane::etaphi(const int i) const {
   Point * p = & (_supervertex[i].vertex->point());

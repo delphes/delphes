@@ -1,13 +1,17 @@
-The Nsubjettiness FastJet contrib was written and is maintained and developed by:
+-------------------------------------------------------------------------------
 
-   Jesse Thaler <jthaler@jthaler.net>
+The Nsubjettiness FastJet contrib was written, maintained, and developed by:
+
+   Jesse Thaler <jthaler@mit.edu>
    Ken Van Tilburg <kenvt@stanford.edu>
    Christopher K. Vermilion <christopher.vermilion@gmail.com>
    TJ Wilkason <tjwilk@mit.edu>
 
-Questions and comments should be directed to:  jthaler@jthaler.net.
+Questions and comments should be directed to:  jthaler@mit.edu.
 
-For physics details, see:
+-------------------------------------------------------------------------------
+
+For physics details on N-subjettiness, see:
 
    Identifying Boosted Objects with N-subjettiness.
    Jesse Thaler and Ken Van Tilburg.
@@ -19,10 +23,25 @@ For physics details, see:
 
 New in v2.0 is the winner-take-all axis, described in:
 
+   Jet Observables Without Jet Algorithms. 
+   Daniele Bertolini, Tucker Chan, and Jesse Thaler. 
+   JHEP 1404:013 (2014), arXiv:1310.7584.
+
    Jet Shapes with the Broadening Axis. 
    Andrew J. Larkoski, Duff Neill, and Jesse Thaler. 
    JHEP 1404:017 (2014), arXiv:1401.2158.
 
-as well as in unpublished work by Gavin Salam.
+   Unpublished work by Gavin Salam.
 
-----------------------------------------------------------------------
+New in v2.2 is the XCone jet algorithm, described in:
+
+   XCone: N-jettiness as an Exclusive Cone Jet Algorithm.
+   Iain W. Stewart, Frank J. Tackmann, Jesse Thaler,
+   Christopher K. Vermilion, and Thomas F. Wilkason.
+   arXiv:1508.01516.
+
+   Resolving Boosted Jets with XCone.
+   Jesse Thaler and Thomas F. Wilkason.
+   arXiv:1508.01518.
+
+-------------------------------------------------------------------------------

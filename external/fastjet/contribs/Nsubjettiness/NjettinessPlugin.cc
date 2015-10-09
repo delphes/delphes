@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: NjettinessPlugin.cc 663 2014-06-03 21:26:41Z jthaler $
+//  $Id: NjettinessPlugin.cc 821 2015-06-15 18:50:53Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -28,7 +28,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 namespace contrib{
 
-
+LimitedWarning NjettinessPlugin::_old_constructor_warning;
 
 std::string NjettinessPlugin::description() const {return "N-jettiness jet finder";}
 
@@ -47,11 +47,11 @@ void NjettinessPlugin::run_clustering(ClusterSequence& cs) const
    }
    
    
-   _njettinessFinder.getTau(_N, particles);
-
-   std::vector<std::list<int> > partition = _njettinessFinder.getPartitionList(particles);
-
-   std::vector<fastjet::PseudoJet> jet_indices_for_extras;
+   TauComponents tau_components = _njettinessFinder.getTauComponents(_N, particles);
+   TauPartition tau_partition = _njettinessFinder.currentPartition();
+   std::vector<std::list<int> > partition = tau_partition.jets_list();
+   
+   std::vector<int> jet_indices_for_extras;
 
    // output clusterings for each jet
    for (size_t i0 = 0; i0 < partition.size(); ++i0) {
@@ -72,15 +72,22 @@ void NjettinessPlugin::run_clustering(ClusterSequence& cs) const
       
       int finalJet = indices.back();
       cs.plugin_record_iB_recombination(finalJet, fakeDib);
-      jet_indices_for_extras.push_back(cs.jets()[finalJet]);  // Get the four vector for the final jets to compare later.
+      jet_indices_for_extras.push_back(cs.jets()[finalJet].cluster_hist_index());  // Get the four vector for the final jets to compare later.
    }
 
    //HACK:  Re-reverse order of reading to match CS order
    reverse(jet_indices_for_extras.begin(),jet_indices_for_extras.end());
 
-   NjettinessExtras * extras = new NjettinessExtras(_njettinessFinder.currentTauComponents(),jet_indices_for_extras,_njettinessFinder.currentAxes());
+   // Store extra information about jets 
+   NjettinessExtras * extras = new NjettinessExtras(tau_components,jet_indices_for_extras);
+
+#if FASTJET_VERSION_NUMBER>=30100
+   cs.plugin_associate_extras(extras);
+#else
+   // auto_ptr no longer supported, apparently
    cs.plugin_associate_extras(std::auto_ptr<ClusterSequence::Extras>(extras));
-   
+#endif
+  
 }
 
 
