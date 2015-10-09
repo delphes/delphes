@@ -339,7 +339,7 @@ module SimpleCalorimeter HCal {
 #################
 
 module PdgCodeFilter ElectronFilter {
-  set InputArray Calorimeter/eflowTracks
+  set InputArray HCal/eflowTracks
   set OutputArray electrons
   set Invert true
   add PdgCode {11}

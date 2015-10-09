@@ -430,7 +430,7 @@ module TreeWriter TreeWriter {
 
   add Branch Delphes/allParticles Particle GenParticle
 
-  add Branch IdentificationMap/tracks Track Track
+  add Branch HCal/eflowTracks Track Track
   add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
   add Branch ECal/eflowPhotons Photon Photon
 
