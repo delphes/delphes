@@ -3,6 +3,17 @@ Prints complete input particle arborescence for the first 100 events. Useful for
 root -l examples/Example5.C'("delphes_output.root")'
 */
 
+#ifdef __CLING__
+R__LOAD_LIBRARY(libDelphes)
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
+#include "external/ExRootAnalysis/ExRootResult.h"
+#else
+class ExRootTreeReader;
+class ExRootResult;
+#endif
+
+
 //------------------------------------------------------------------------------
 
 void Example5(const char *inputFile)
