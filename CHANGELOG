@@ -1,9 +1,13 @@
 3.3.0:
+- improved energy-flow algorithm for high momentum
+- updated b-tagging parameterisations to recent ATLAS and CMS publications
 - updated FastJet library to 3.1.3
 - updated Nsubjettiness library to 2.2.1
 - added a detector card for the ILD detector (for ILC)  based on http://arxiv.org/abs/1306.6329
 - adapted examples, EventDisplay, DelphesFormula and DelphesTF2 to ROOT 6.04
 - fixed tau-tagging for events without tau (thanks to Sho Iwamoto)
+- fixed UniqueObjectFinder (#728)
+- added JetFakeParticle module
 - added PhotonConversions module
 - added TaggingParticlesSkimmer module
 - added phi and energy dependence to AngularSmearing, BTagging, Efficiency, EnergyScale, EnergySmearing, IdentificationMap, ImpactParameterSmearing and MomentumSmearing
