@@ -123,8 +123,8 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
   # resolution formula for charged hadrons
-  set ResolutionFormula {    (abs(eta) <= 1.0)                   * (0.001 + pt*1.e-5) +
-                             (abs(eta) > 1.0 && abs(eta) <= 2.4) * (0.01 + pt*1.e-4)}
+  set ResolutionFormula {    (abs(eta) <= 1.0)                   * sqrt(0.001^2 + pt^2*1.e-5^2) +
+                             (abs(eta) > 1.0 && abs(eta) <= 2.4) * sqrt(0.01^2 + pt^2*1.e-4^2)}
 
 
 }
@@ -139,9 +139,9 @@ module MomentumSmearing ElectronMomentumSmearing {
 
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
-  # resolution formula for electrons (we keep nominal tracking reso since ECAL can't beat this, even at high E)
-  set ResolutionFormula {    (abs(eta) <= 1.0)                   * (0.001 + pt*1.e-5) +
-                             (abs(eta) > 1.0 && abs(eta) <= 2.4) * (0.01 + pt*1.e-4)}
+   # resolution formula for charged hadrons
+  set ResolutionFormula {    (abs(eta) <= 1.0)                   * sqrt(0.001^2 + pt^2*1.e-5^2) +
+                             (abs(eta) > 1.0 && abs(eta) <= 2.4) * sqrt(0.01^2 + pt^2*1.e-4^2)}
 }
 
 ###############################
@@ -154,10 +154,9 @@ module MomentumSmearing MuonMomentumSmearing {
 
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
-  # resolution formula for muons
-  set ResolutionFormula {    (abs(eta) <= 1.0)                   * (0.001 + pt*1.e-5) +
-                             (abs(eta) > 1.0 && abs(eta) <= 2.4) * (0.01 + pt*1.e-4)}
-
+   # resolution formula for charged hadrons
+  set ResolutionFormula {    (abs(eta) <= 1.0)                   * sqrt(0.001^2 + pt^2*1.e-5^2) +
+                             (abs(eta) > 1.0 && abs(eta) <= 2.4) * sqrt(0.01^2 + pt^2*1.e-4^2)}
 
 }
 
