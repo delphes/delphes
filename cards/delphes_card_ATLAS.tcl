@@ -515,19 +515,13 @@ module BTagging BTagging {
   # gluon's PDG code has the lowest priority
 
   # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.001}
+  add EfficiencyFormula {0} {0.002+7.2984e-06*pt}
 
   # efficiency formula for c-jets (misidentification rate)
-  add EfficiencyFormula {4} {                                      (pt <= 15.0) * (0.000) +
-                                                (abs(eta) <= 1.2) * (pt > 15.0) * (0.2*tanh(pt*0.03 - 0.4)) +
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.1*tanh(pt*0.03 - 0.4)) +
-                              (abs(eta) > 2.5)                                  * (0.000)}
+  add EfficiencyFormula {4} {0.20*tanh(0.02*pt)*(1/(1+0.0034*pt))}
 
   # efficiency formula for b-jets
-  add EfficiencyFormula {5} {                                      (pt <= 15.0) * (0.000) +
-                                                (abs(eta) <= 1.2) * (pt > 15.0) * (0.5*tanh(pt*0.03 - 0.4)) +
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.4*tanh(pt*0.03 - 0.4)) +
-                              (abs(eta) > 2.5)                                  * (0.000)}
+  add EfficiencyFormula {5} {0.80*tanh(0.003*pt)*(30/(1+0.086*pt))}
 }
 
 #############
