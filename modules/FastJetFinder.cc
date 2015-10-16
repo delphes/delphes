@@ -77,7 +77,8 @@ using namespace fastjet::contrib;
 //------------------------------------------------------------------------------
 
 FastJetFinder::FastJetFinder() :
-  fPlugin(0), fRecomb(0), fNjettinessPlugin(0), fDefinition(0), fAreaDefinition(0), fItInputArray(0)
+  fPlugin(0), fRecomb(0), fAxesDef(0), fMeasureDef(0), fNjettinessPlugin(0), 
+  fDefinition(0), fAreaDefinition(0), fItInputArray(0)
 {
 
 }
@@ -123,6 +124,24 @@ void FastJetFinder::Init()
   fAxisMode = GetInt("AxisMode", 1);
   fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
   fN = GetInt("N", 2);                  // used only if Njettiness is used as jet clustering algo (case 8)
+     
+  fMeasureDef = new UnnormalizedMeasure(fBeta);
+   
+  switch(fAxisMode)
+  {
+    default:
+      case 1:
+        fAxesDef = new WTA_KT_Axes();
+        break;
+      case 2:
+        fAxesDef = new OnePass_WTA_KT_Axes();
+        break;
+      case 3:
+        fAxesDef = new KT_Axes();
+        break;
+      case 4:
+        fAxesDef = new OnePass_KT_Axes();
+   }
 
   //-- Trimming parameters --
   
@@ -218,6 +237,8 @@ void FastJetFinder::Init()
       break;
   }
 
+   
+
   fPlugin = plugin;
   fRecomb = recomb;
 
@@ -270,6 +291,8 @@ void FastJetFinder::Finish()
   if(fPlugin) delete static_cast<JetDefinition::Plugin*>(fPlugin);
   if(fRecomb) delete static_cast<JetDefinition::Recombiner*>(fRecomb);
   if(fNjettinessPlugin) delete static_cast<JetDefinition::Plugin*>(fNjettinessPlugin);
+  if(fAxesDef) delete fAxesDef;
+  if(fMeasureDef) delete fMeasureDef;
 }
 
 //------------------------------------------------------------------------------
@@ -398,7 +421,7 @@ void FastJetFinder::Process()
     // Trimming
     //------------------------------------
 
-     if(fComputeTrimming)
+    if(fComputeTrimming)
     {
 
       fastjet::Filter    trimmer(fastjet::JetDefinition(fastjet::kt_algorithm,fRTrim),fastjet::SelectorPtFractionMin(fPtFracTrim));
@@ -415,9 +438,10 @@ void FastJetFinder::Process()
       
       candidate->NSubJetsTrimmed = subjets.size();
 
-      for (size_t i = 0; i < subjets.size() and i < 4; i++){
-	if(subjets.at(i).pt() < 0) continue ; 
- 	candidate->TrimmedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+      for (size_t i = 0; i < subjets.size() and i < 4; i++)
+      {
+	    if(subjets.at(i).pt() < 0) continue ; 
+ 	    candidate->TrimmedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
       }
     }
     
@@ -442,9 +466,10 @@ void FastJetFinder::Process()
       
       candidate->NSubJetsPruned = subjets.size();
 
-      for (size_t i = 0; i < subjets.size() and i < 4; i++){
-	if(subjets.at(i).pt() < 0) continue ; 
-  	candidate->PrunedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+      for (size_t i = 0; i < subjets.size() and i < 4; i++)
+      {
+	    if(subjets.at(i).pt() < 0) continue ; 
+  	    candidate->PrunedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
       }
 
     } 
@@ -456,7 +481,7 @@ void FastJetFinder::Process()
     if(fComputeSoftDrop)
     {
     
-      contrib::SoftDrop  softDrop(fBetaSoftDrop,fSymmetryCutSoftDrop,fR0SoftDrop);
+      contrib::SoftDrop softDrop(fBetaSoftDrop,fSymmetryCutSoftDrop,fR0SoftDrop);
       fastjet::PseudoJet softdrop_jet = softDrop(*itOutputList);
       
       candidate->SoftDroppedP4[0].SetPtEtaPhiM(softdrop_jet.pt(), softdrop_jet.eta(), softdrop_jet.phi(), softdrop_jet.m());
@@ -468,9 +493,10 @@ void FastJetFinder::Process()
       subjets    = sorted_by_pt(subjets);
       candidate->NSubJetsSoftDropped = softdrop_jet.pieces().size();
 
-      for (size_t i = 0; i < subjets.size()  and i < 4; i++){
-	if(subjets.at(i).pt() < 0) continue ; 
-  	candidate->SoftDroppedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+      for (size_t i = 0; i < subjets.size()  and i < 4; i++)
+      {
+	    if(subjets.at(i).pt() < 0) continue ; 
+  	    candidate->SoftDroppedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
       }
     }
   
@@ -478,38 +504,19 @@ void FastJetFinder::Process()
 
     if(fComputeNsubjettiness)
     {
-      Njettiness::AxesMode axisMode;
-
-      switch(fAxisMode)
-      {
-        default:
-        case 1:
-          axisMode = Njettiness::wta_kt_axes;
-          break;
-        case 2:
-          axisMode = Njettiness::onepass_wta_kt_axes;
-          break;
-        case 3:
-          axisMode = Njettiness::kt_axes;
-          break;
-        case 4:
-          axisMode = Njettiness::onepass_kt_axes;
-          break;
-      }
-
-      Njettiness::MeasureMode measureMode = Njettiness::unnormalized_measure;
-
-      Nsubjettiness nSub1(1, axisMode, measureMode, fBeta);
-      Nsubjettiness nSub2(2, axisMode, measureMode, fBeta);
-      Nsubjettiness nSub3(3, axisMode, measureMode, fBeta);
-      Nsubjettiness nSub4(4, axisMode, measureMode, fBeta);
-      Nsubjettiness nSub5(5, axisMode, measureMode, fBeta);
-
+     
+      Nsubjettiness nSub1(1, *fAxesDef, *fMeasureDef);
+      Nsubjettiness nSub2(2, *fAxesDef, *fMeasureDef);
+      Nsubjettiness nSub3(3, *fAxesDef, *fMeasureDef);
+      Nsubjettiness nSub4(4, *fAxesDef, *fMeasureDef);
+      Nsubjettiness nSub5(5, *fAxesDef, *fMeasureDef);
+     
       candidate->Tau[0] = nSub1(*itOutputList);
       candidate->Tau[1] = nSub2(*itOutputList);
       candidate->Tau[2] = nSub3(*itOutputList);
       candidate->Tau[3] = nSub4(*itOutputList);
       candidate->Tau[4] = nSub5(*itOutputList);
+         
     }
 
     fOutputArray->Add(candidate);
