@@ -47,7 +47,7 @@ void Example5(const char *inputFile)
     for(Int_t i=0; i < branchParticle->GetEntriesFast(); i++)
     {    
      GenParticle *gen = (GenParticle*) branchParticle->At(i);     
-     cout<<"N: "<<i<<", St: "<<gen->Status<<", PID: "<<gen->PID<<", E: "<<gen->E<<", Px: "<<gen->Px<<", Py: "<<gen->Py<<", Pz: "<<gen->Pz<<", M1: "<<gen->M1<<", M2: "<<gen->M2<<", D1: "<<gen->D1<<", D2: "<<gen->D2<<endl;
+     cout<<"N: "<<i<<", St: "<<gen->Status<<", PID: "<<gen->PID<<", E: "<<gen->E<<", Px: "<<gen->Px<<", Py: "<<gen->Py<<", Pz: "<<gen->Pz<<", M: "<<gen->Mass<<", M1: "<<gen->M1<<", M2: "<<gen->M2<<", D1: "<<gen->D1<<", D2: "<<gen->D2<<endl;
     }
   }
 }
