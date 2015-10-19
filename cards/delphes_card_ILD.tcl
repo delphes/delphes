@@ -200,9 +200,7 @@ module ImpactParameterSmearing ImpactParameterSmearing {
 
 
   # absolute impact parameter smearing formula (in mm) as a function of pt and eta
-  set ResolutionFormula {(pt > 0.1  && pt <= 5.0)   * (0.010) +
-                         (pt > 5.0)                 * (0.005)}
-
+  set ResolutionFormula {0.010/sqrt(pt)}
 }
 
 #############
