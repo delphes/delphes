@@ -219,7 +219,11 @@ int main(int argc, char *argv[])
     }
 
     // Read in commands from configuration file
-    pythia->readFile(argv[2]);
+    if(!pythia->readFile(argv[2]))
+    {
+      message << "can't read Pythia8 configuration file " << argv[2] << endl;
+      throw runtime_error(message.str());
+    }
 
     // Extract settings to be used in the main program
     numberOfEvents = pythia->mode("Main:numberOfEvents");
