@@ -256,7 +256,7 @@ void FastJetFinder::Init()
     {
       etaMin = param[i*2].GetDouble();
       etaMax = param[i*2 + 1].GetDouble();
-      estimatorStruct.estimator = new JetMedianBackgroundEstimator(SelectorEtaRange(etaMin, etaMax), *fDefinition, *fAreaDefinition);
+      estimatorStruct.estimator = new JetMedianBackgroundEstimator(SelectorAbsRapRange(etaMin, etaMax), *fDefinition, *fAreaDefinition);
       estimatorStruct.etaMin = etaMin;
       estimatorStruct.etaMax = etaMax;
       fEstimators.push_back(estimatorStruct);
