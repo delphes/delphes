@@ -16,16 +16,22 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
-  AngularSmearing
-  ImpactParameterSmearing
-
+  
   ECal
   HCal
 
-  ElectronFilter
-
   TowerMerger
   EFlowMerger
+
+  PhotonEfficiency
+  PhotonIsolation
+
+  ElectronFilter
+  ElectronEfficiency
+  ElectronIsolation
+
+  MuonEfficiency
+  MuonIsolation
 
   MissingET
 
@@ -42,6 +48,8 @@ set ExecutionPath {
   TauTagging
 
   ScalarHT
+
+  UniqueObjectFinder
 
   TreeWriter
 }
@@ -175,44 +183,13 @@ module Merger TrackMerger {
   set OutputArray tracks
 }
 
-
-########################
-# Track angular smearing
-########################
-
-module AngularSmearing AngularSmearing {
-  set InputArray TrackMerger/tracks
-  set OutputArray tracks
-
-
-  # angular smearing  in eta formula as a function of pt and eta
-  set EtaResolutionFormula { 0.001 }
-
-  # angular smearing  in phi formula as a function of pt and eta
-  set PhiResolutionFormula { 0.001 }
-
-}
-
-#################################
-# Track impact parameter smearing
-#################################
-
-module ImpactParameterSmearing ImpactParameterSmearing {
-  set InputArray AngularSmearing/tracks
-  set OutputArray tracks
-
-
-  # absolute impact parameter smearing formula (in mm) as a function of pt and eta
-  set ResolutionFormula {0.010/sqrt(pt)}
-}
-
 #############
 #   ECAL
 #############
 
 module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray ImpactParameterSmearing/tracks
+  set TrackInputArray TrackMerger/tracks
 
   set TowerOutputArray ecalTowers
   set EFlowTrackOutputArray eflowTracks
@@ -476,6 +453,111 @@ module JetFlavorAssociation JetFlavorAssociation {
 
 }
 
+###################
+# Photon efficiency
+###################
+
+module Efficiency PhotonEfficiency {
+  set InputArray ECal/eflowPhotons
+  set OutputArray photons
+
+  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+
+  # efficiency formula for photons
+  set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
+                                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
+                         (abs(eta) > 2.5)                                   * (0.00)}
+}
+
+##################
+# Photon isolation
+##################
+
+module Isolation PhotonIsolation {
+  set CandidateInputArray PhotonEfficiency/photons
+  set IsolationInputArray EFlowMerger/eflow
+
+  set OutputArray photons
+
+  set DeltaRMax 0.5
+
+  set PTMin 0.5
+
+  set PTRatioMax 0.1
+}
+
+#####################
+# Electron efficiency
+#####################
+
+module Efficiency ElectronEfficiency {
+  set InputArray ElectronFilter/electrons
+  set OutputArray electrons
+
+  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+
+  # efficiency formula for electrons
+  set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
+                                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
+                         (abs(eta) > 2.5)                                   * (0.00)}
+}
+
+####################
+# Electron isolation
+####################
+
+module Isolation ElectronIsolation {
+  set CandidateInputArray ElectronEfficiency/electrons
+  set IsolationInputArray EFlowMerger/eflow
+
+  set OutputArray electrons
+
+  set DeltaRMax 0.5
+
+  set PTMin 0.5
+
+  set PTRatioMax 0.1
+}
+
+#################
+# Muon efficiency
+#################
+
+module Efficiency MuonEfficiency {
+  set InputArray MuonMomentumSmearing/muons
+  set OutputArray muons
+
+  # set EfficiencyFormula {efficiency as a function of eta and pt}
+
+  # efficiency formula for muons
+  set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
+                                           (abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
+                                           (abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+                         (abs(eta) > 2.4)                                                 * (0.00)}
+}
+
+################
+# Muon isolation
+################
+
+module Isolation MuonIsolation {
+  set CandidateInputArray MuonEfficiency/muons
+  set IsolationInputArray EFlowMerger/eflow
+
+  set OutputArray muons
+
+  set DeltaRMax 0.5
+
+  set PTMin 0.5
+
+  set PTRatioMax 0.1
+}
+
+
 ###########
 # b-tagging
 ###########
@@ -525,6 +607,20 @@ module TauTagging TauTagging {
   add EfficiencyFormula {15} {0.4}
 }
 
+#####################################################
+# Find uniquely identified photons/electrons/tau/jets
+#####################################################
+
+module UniqueObjectFinder UniqueObjectFinder {
+# earlier arrays take precedence over later ones
+# add InputArray InputArray OutputArray
+  add InputArray PhotonIsolation/photons photons
+  add InputArray ElectronIsolation/electrons electrons
+  add InputArray MuonIsolation/muons muons
+  add InputArray JetEnergyScale/jets jets
+}
+
+
 ##################
 # ROOT tree writer
 ##################
@@ -534,16 +630,16 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
   add Branch GenJetFinder/jets GenJet Jet
 
-  add Branch AngularSmearing/tracks Track Track
   add Branch TowerMerger/towers Tower Tower
 
   add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
   add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
-  add Branch ECal/eflowPhotons Photon Photon
-
-  add Branch ElectronFilter/electrons Electron Electron
-  add Branch MuonMomentumSmearing/muons Muon Muon
-  add Branch JetEnergyScale/jets Jet Jet
+  
+  add Branch UniqueObjectFinder/photons Photon Photon
+  add Branch UniqueObjectFinder/electrons Electron Electron
+  add Branch UniqueObjectFinder/muons Muon Muon
+  add Branch UniqueObjectFinder/jets Jet Jet
+  
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 }
