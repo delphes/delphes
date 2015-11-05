@@ -35,7 +35,10 @@ set ExecutionPath {
 
   JetEnergyScale
 
-  TrackCountingBTagging
+  JetFlavorAssociation
+
+  BTagging
+  
   TauTagging
 
   ScalarHT
@@ -455,32 +458,48 @@ module EnergyScale JetEnergyScale {
   set ScaleFormula {1.00}
 }
 
-##########################
-# Track Counting b-tagging
-##########################
 
-module TrackCountingBTagging TrackCountingBTagging {
-  set TrackInputArray ImpactParameterSmearing/tracks
+########################
+# Jet Flavor Association
+########################
+
+module JetFlavorAssociation JetFlavorAssociation {
+
+  set PartonInputArray Delphes/partons
+  set ParticleInputArray Delphes/allParticles
+  set ParticleLHEFInputArray Delphes/allParticlesLHEF
+  set JetInputArray JetEnergyScale/jets
+
+  set DeltaR 0.5
+  set PartonPTMin 1.0
+  set PartonEtaMax 2.5
+
+}
+
+###########
+# b-tagging
+###########
+
+module BTagging BTagging {
   set JetInputArray JetEnergyScale/jets
 
   set BitNumber 0
 
-  # maximum distance between jet and track
-  set DeltaR 0.3
+  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+  # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
+  # gluon's PDG code has the lowest priority
 
-  # minimum pt of tracks
-  set TrackPTMin 1.0
+  # based on arXiv:1211.4462
+  
+  # default efficiency formula (misidentification rate)
+  add EfficiencyFormula {0} {0.01+0.00038*pt}
 
-  # minimum transverse impact parameter (in mm)
-  set TrackIPMax 2.0
+  # efficiency formula for c-jets (misidentification rate)
+  add EfficiencyFormula {4} {0.25*tanh(0.018*pt)*(1/(1+ 0.0013*pt))}
 
-  # minimum ip significance for the track to be counted
-  set SigMin 6.5
-
-  # minimum number of tracks (high efficiency n=2, high purity n=3)
-  set Ntracks 3
+  # efficiency formula for b-jets
+  add EfficiencyFormula {5} {0.85*tanh(0.0025*pt)*(25.0/(1+0.063*pt))}
 }
-
 
 #############
 # tau-tagging
@@ -514,6 +533,9 @@ module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
   add Branch GenJetFinder/jets GenJet Jet
+
+  add Branch AngularSmearing/tracks Track Track
+  add Branch TowerMerger/towers Tower Tower
 
   add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
   add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
