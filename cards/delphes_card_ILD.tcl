@@ -630,6 +630,7 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
   add Branch GenJetFinder/jets GenJet Jet
 
+  add Branch TrackMerger/tracks Track Track
   add Branch TowerMerger/towers Tower Tower
 
   add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
