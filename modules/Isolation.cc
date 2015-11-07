@@ -108,6 +108,8 @@ void Isolation::Init()
 
   fUsePTSum = GetBool("UsePTSum", false);
 
+  fUseRhoCorr = GetBool("UseRhoCorrection", false);
+
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
 
   // import input array(s)
@@ -152,7 +154,7 @@ void Isolation::Process()
 {
   Candidate *candidate, *isolation, *object;
   TObjArray *isolationArray;
-  Double_t sumCharged, sumNeutral, sumAllParticles, sumChargedPU, sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr;
+  Double_t sumCharged, sumNeutral, sumAllParticles, sumChargedPU, sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
   Int_t counter;
   Double_t eta = 0.0;
   Double_t rho = 0.0;
@@ -244,7 +246,12 @@ void Isolation::Process()
     candidate->SumPtChargedPU = sumChargedPU;
     candidate->SumPt = sumAllParticles;
 
-    if((fUsePTSum && sumDBeta > fPTSumMax) || (!fUsePTSum && ratioDBeta > fPTRatioMax)) continue;
+    sum = (fUseRhoCorr) ? sumRhoCorr : sumDBeta;
+    if(fUsePTSum && sum > fPTSumMax) continue;
+
+    ratio = (fUseRhoCorr) ? ratioRhoCorr : ratioDBeta;
+    if(!fUsePTSum && ratio > fPTRatioMax) continue;
+
     fOutputArray->Add(candidate);
   }
 }
