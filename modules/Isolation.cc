@@ -244,7 +244,7 @@ void Isolation::Process()
     candidate->SumPtChargedPU = sumChargedPU;
     candidate->SumPt = sumAllParticles;
 
-    if((fUsePTSum && sumDBeta > fPTSumMax) || (!fUsePTSum && ratioDBeta > fPTRatioMax)) continue;
+    if((fUsePTSum && sumRhoCorr > fPTSumMax) || (!fUsePTSum && ratioRhoCorr > fPTRatioMax)) continue;
     fOutputArray->Add(candidate);
   }
 }
