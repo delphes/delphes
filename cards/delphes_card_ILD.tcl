@@ -574,7 +574,7 @@ module BTagging BTagging {
   # based on arXiv:1211.4462
   
   # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.01+0.00038*pt}
+  add EfficiencyFormula {0} {0.01+0.000038*pt}
 
   # efficiency formula for c-jets (misidentification rate)
   add EfficiencyFormula {4} {0.25*tanh(0.018*pt)*(1/(1+ 0.0013*pt))}
