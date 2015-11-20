@@ -205,10 +205,16 @@ void Isolation::Process()
          candidate->GetUniqueID() != isolation->GetUniqueID())
       {
         sumAllParticles += isolationMomentum.Pt();
-        if(isolation->Charge !=0)
+        if(isolation->Charge != 0)
         {
-          sumCharged += isolationMomentum.Pt();
-          if(isolation->IsRecoPU != 0) sumChargedPU += isolationMomentum.Pt();
+          if(isolation->IsRecoPU)
+          {
+            sumChargedPU += isolationMomentum.Pt();
+          }
+          else
+          {
+            sumCharged += isolationMomentum.Pt();
+          }
         }
         else
         {
@@ -233,8 +239,8 @@ void Isolation::Process()
     }
 
     // correct sum for pile-up contamination
-    sumDBeta = sumCharged + TMath::Max(sumNeutral-0.5*sumChargedPU, 0.0);
-    sumRhoCorr = sumCharged + TMath::Max(sumNeutral-TMath::Max(rho, 0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(), 0.0);
+    sumDBeta = sumCharged + TMath::Max(sumNeutral - 0.5*sumChargedPU, 0.0);
+    sumRhoCorr = sumCharged + TMath::Max(sumNeutral - TMath::Max(rho, 0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(), 0.0);
     ratioDBeta = sumDBeta/candidateMomentum.Pt();
     ratioRhoCorr = sumRhoCorr/candidateMomentum.Pt();
 
