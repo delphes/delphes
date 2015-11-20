@@ -533,7 +533,7 @@ module Efficiency PhotonEfficiency {
 
 module Isolation PhotonIsolation {
   set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowMergerAllTracks/eflow
   set RhoInputArray Rho/rho
 
   set OutputArray photons
