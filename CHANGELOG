@@ -4,7 +4,7 @@
 - fixed muon collection in ILD card
 - added example for pileup generation with Pythia8
 - moved to loose isolation working points for ATLAS and CMS cards
-- moved to pile-up density (rho) corrected isolation variable as default
+- added UseRhoCorrection switch to decide which isolation variable use for selection (true by default)
 - switch to Rapidity selector (SelectorRapRange) for pile-up density computation in FastJet to ensure backward compatibility
 - addressed N-subjettiness warnings in 2.2.1 version
 
