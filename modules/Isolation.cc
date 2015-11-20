@@ -152,7 +152,7 @@ void Isolation::Process()
 {
   Candidate *candidate, *isolation, *object;
   TObjArray *isolationArray;
-  Double_t sumCharged, sumNeutral, sumAllParticles, sumChargedPU;
+  Double_t sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
   Double_t sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
   Int_t counter;
   Double_t eta = 0.0;
@@ -190,7 +190,7 @@ void Isolation::Process()
     // loop over all input tracks
 
     sumNeutral = 0.0;
-    sumCharged = 0.0;
+    sumChargedNoPU = 0.0;
     sumChargedPU = 0.0;
     sumAllParticles = 0.0;
 
@@ -213,7 +213,7 @@ void Isolation::Process()
           }
           else
           {
-            sumCharged += isolationMomentum.Pt();
+            sumChargedNoPU += isolationMomentum.Pt();
           }
         }
         else
@@ -239,14 +239,14 @@ void Isolation::Process()
     }
 
     // correct sum for pile-up contamination
-    sumDBeta = sumCharged + TMath::Max(sumNeutral - 0.5*sumChargedPU, 0.0);
-    sumRhoCorr = sumCharged + TMath::Max(sumNeutral - TMath::Max(rho, 0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(), 0.0);
+    sumDBeta = sumChargedNoPU + TMath::Max(sumNeutral - 0.5*sumChargedPU, 0.0);
+    sumRhoCorr = sumChargedNoPU + TMath::Max(sumNeutral - TMath::Max(rho, 0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(), 0.0);
     ratioDBeta = sumDBeta/candidateMomentum.Pt();
     ratioRhoCorr = sumRhoCorr/candidateMomentum.Pt();
 
     candidate->IsolationVar = ratioDBeta;
     candidate->IsolationVarRhoCorr = ratioRhoCorr;
-    candidate->SumPtCharged = sumCharged;
+    candidate->SumPtCharged = sumChargedNoPU;
     candidate->SumPtNeutral = sumNeutral;
     candidate->SumPtChargedPU = sumChargedPU;
     candidate->SumPt = sumAllParticles;
