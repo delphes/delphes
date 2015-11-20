@@ -1,3 +1,13 @@
+3.3.1:
+- corrected light parton mistag rate in b-tagging formula for CMS and ILD cards
+- added tracks to output in ILD card to enable root2lhco conversion
+- fixed muon collection in ILD card
+- added example for pileup generation with Pythia8
+- moved to loose isolation working points for ATLAS and CMS cards
+- moved to pile-up density (rho) corrected isolation variable as default
+- switch to Rapidity selector (SelectorRapRange) for pile-up density computation in FastJet to ensure backward compatibility
+- addressed N-subjettiness warnings in 2.2.1 version
+
 3.3.0:
 - improved energy-flow algorithm for high momentum
 - updated b-tagging parameterisations to recent ATLAS and CMS publications
