@@ -499,7 +499,7 @@ module Efficiency PhotonEfficiency {
 
 module Isolation PhotonIsolation {
   set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowMergerAllTracks/eflow
   set RhoInputArray Rho/rho
 
   set OutputArray photons
@@ -534,7 +534,7 @@ module Efficiency ElectronEfficiency {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowMergerAllTracks/eflow
   set RhoInputArray Rho/rho
 
   set OutputArray electrons
@@ -569,7 +569,7 @@ module Efficiency MuonEfficiency {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowMergerAllTracks/eflow
   set RhoInputArray Rho/rho
 
   set OutputArray muons
