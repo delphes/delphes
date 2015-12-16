@@ -651,23 +651,35 @@ module BTagging BTagging {
 # tau-tagging
 #############
 
-module TauTagging TauTagging {
+module TrackCountingTauTagging TauTagging {
+ 
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
+  set TrackInputArray TrackMerger/tracks
   set JetInputArray JetEnergyScale/jets
 
-  set DeltaR 0.5
+  set DeltaR 0.2
+  set DeltaRTrack 0.2
 
+  set TrackPTMin 1.0
+ 
   set TauPTMin 1.0
-
   set TauEtaMax 2.5
 
-  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+  # instructions: {n-prongs} {eff} 
+  
+  # 1 - one prong efficiency
+  # 2 - two or more efficiency
+  # -1 - one prong mistag rate
+  # -2 - two or more mistag rate
+ 
+  # taken from ATL-PHYS-PUB-2015-045 (medium working point)
+     
+  add EfficiencyFormula {1} {0.70}
+  add EfficiencyFormula {2} {0.60}
+  add EfficiencyFormula {-1} {0.02}
+  add EfficiencyFormula {-2} {0.01}
 
-  # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.01}
-  # efficiency formula for tau-jets
-  add EfficiencyFormula {15} {0.6}
 }
 
 #####################################################
