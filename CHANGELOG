@@ -1,3 +1,8 @@
+3.3.2:
+- added pre-validated card for CMS upgrade Phase II studies
+- added TrackCountingTauTagging module (a la CheckMate)
+- updated tau-tagging efficiency according to ATL-PHYS-PUB-2015-045
+
 3.3.1:
 - corrected light parton mistag rate in b-tagging formula for CMS and ILD cards
 - added tracks to output in ILD card to enable root2lhco conversion
