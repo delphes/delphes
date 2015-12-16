@@ -44,6 +44,7 @@
 #include "modules/TrackCountingBTagging.h"
 #include "modules/BTagging.h"
 #include "modules/TauTagging.h"
+#include "modules/TrackCountingTauTagging.h"
 #include "modules/TreeWriter.h"
 #include "modules/Merger.h"
 #include "modules/LeptonDressing.h"
@@ -87,6 +88,7 @@
 #pragma link C++ class TrackCountingBTagging+;
 #pragma link C++ class BTagging+;
 #pragma link C++ class TauTagging+;
+#pragma link C++ class TrackCountingTauTagging+;
 #pragma link C++ class TreeWriter+;
 #pragma link C++ class Merger+;
 #pragma link C++ class LeptonDressing+;
