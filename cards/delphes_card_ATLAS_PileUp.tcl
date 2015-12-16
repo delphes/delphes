@@ -673,8 +673,9 @@ module TrackCountingTauTagging TauTagging {
   # -1 - one prong mistag rate
   # -2 - two or more mistag rate
  
+  set BitNumber 0
+ 
   # taken from ATL-PHYS-PUB-2015-045 (medium working point)
-     
   add EfficiencyFormula {1} {0.70}
   add EfficiencyFormula {2} {0.60}
   add EfficiencyFormula {-1} {0.02}

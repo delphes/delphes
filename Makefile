@@ -324,6 +324,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TrackCountingBTagging.h \
 	modules/BTagging.h \
 	modules/TauTagging.h \
+	modules/TrackCountingTauTagging.h \
 	modules/TreeWriter.h \
 	modules/Merger.h \
 	modules/LeptonDressing.h \
@@ -815,6 +816,15 @@ tmp/modules/TrackCountingBTagging.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
+tmp/modules/TrackCountingTauTagging.$(ObjSuf): \
+	modules/TrackCountingTauTagging.$(SrcSuf) \
+	modules/TrackCountingTauTagging.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \
@@ -932,6 +942,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/TauTagging.$(ObjSuf) \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
+	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
@@ -1291,7 +1302,8 @@ tmp/modules/FastJetGridMedianEstimator.$(ObjSuf): \
 	external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh \
 	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/Njettiness.hh \
-	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh
+	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh \
+	external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh
 tmp/modules/RunPUPPI.$(ObjSuf): \
 	modules/RunPUPPI.$(SrcSuf) \
 	modules/RunPUPPI.h \
@@ -1693,6 +1705,10 @@ external/fastjet/ClusterSequence1GhostPassiveArea.hh: \
 external/fastjet/internal/LazyTiling9Alt.hh: \
 	external/fastjet/internal/MinHeap.hh \
 	external/fastjet/ClusterSequence.hh
+	@touch $@
+
+modules/TrackCountingTauTagging.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/RectangularGrid.hh: \

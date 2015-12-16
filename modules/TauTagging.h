@@ -54,7 +54,9 @@ public:
   void Finish();
 
 private:
-
+  
+  Int_t fBitNumber;
+  
   Double_t fDeltaR;
 
 #if !defined(__CINT__) && !defined(__CLING__)

@@ -38,6 +38,8 @@ public:
 
 private:
 
+  Int_t fBitNumber;
+
   Double_t fDeltaR;
   Double_t fDeltaRTrack;
   Double_t fTrackPTMin;

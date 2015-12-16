@@ -125,6 +125,8 @@ void TauTagging::Init()
   DelphesFormula *formula;
   Int_t i, size;
 
+  fBitNumber = GetInt("BitNumber", 0);
+
   fDeltaR = GetDouble("DeltaR", 0.5);
 
   // read efficiency formulas
@@ -192,7 +194,7 @@ void TauTagging::Process()
 {
   Candidate *jet, *tau, *daughter;
   TLorentzVector tauMomentum;
-  Double_t pt, eta, phi;
+  Double_t pt, eta, phi, e;
   TObjArray *tauArray;
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
@@ -212,6 +214,7 @@ void TauTagging::Process()
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
     pt = jetMomentum.Pt();
+    e = jetMomentum.E();
 
     // loop over all input taus
     if(tauArray){
@@ -251,7 +254,8 @@ void TauTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficency formula
-    jet->TauTag = gRandom->Uniform() <= formula->Eval(pt, eta);
+    jet->TauTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    
     // set tau charge
     jet->Charge = charge;
   }
