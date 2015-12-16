@@ -633,8 +633,9 @@ module TreeWriter TreeWriter {
   add Branch TrackMerger/tracks Track Track
   add Branch TowerMerger/towers Tower Tower
 
-  add Branch ChargedHadronMomentumSmearing/chargedHadrons ChargedHadron Track
-  add Branch HCal/eflowNeutralHadrons NeutralHadron Tower
+  add Branch HCal/eflowTracks EFlowTrack Track
+  add Branch ECal/eflowPhotons EFlowPhoton Tower
+  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
   
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/electrons Electron Electron
