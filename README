@@ -3,13 +3,13 @@ Quick start with Delphes
 
 Commands to get the code:
 
-   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.2.0.tar.gz
+   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.2.tar.gz
 
-   tar -zxf Delphes-3.2.0.tar.gz
+   tar -zxf Delphes-3.3.2.tar.gz
 
 Commands to compile the code:
 
-   cd Delphes-3.2.0
+   cd Delphes-3.3.2
 
    make
 
