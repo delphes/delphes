@@ -31,6 +31,8 @@ set ExecutionPath {
 
   NeutrinoFilter
   GenJetFinder
+  GenMissingET
+  
   FastJetFinder
 
   JetEnergyScale
@@ -456,6 +458,18 @@ module FastJetFinder GenJetFinder {
 }
 
 
+#########################
+# Gen Missing ET merger
+########################
+
+module Merger GenMissingET {
+# add InputArray InputArray
+  add InputArray NeutrinoFilter/filteredParticles
+  set MomentumOutputArray momentum
+}
+
+
+
 ############
 # Jet finder
 ############
@@ -595,6 +609,8 @@ module TreeWriter TreeWriter {
   add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   add Branch GenJetFinder/jets GenJet Jet
+  add Branch GenMissingET/momentum GenMissingET MissingET
+
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/photons Photon Photon

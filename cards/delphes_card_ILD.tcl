@@ -406,6 +406,18 @@ module FastJetFinder GenJetFinder {
   set JetPTMin 20.0
 }
 
+#########################
+# Gen Missing ET merger
+########################
+
+module Merger GenMissingET {
+# add InputArray InputArray
+  add InputArray NeutrinoFilter/filteredParticles
+  set MomentumOutputArray momentum
+}
+
+
+
 ############
 # Jet finder
 ############
@@ -628,7 +640,9 @@ module UniqueObjectFinder UniqueObjectFinder {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
+  
   add Branch GenJetFinder/jets GenJet Jet
+  add Branch GenMissingET/momentum GenMissingET MissingET
 
   add Branch TrackMerger/tracks Track Track
   add Branch TowerMerger/towers Tower Tower
