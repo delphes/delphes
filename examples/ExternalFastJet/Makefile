@@ -15,7 +15,7 @@ DELPHES_DIR = ../..
 #
 
 CXXFLAGS += $(shell $(FASTJET_DIR)/bin/fastjet-config --cxxflags)
-CXXFLAGS += -I$(shell $(ROOT_DIR)/bin/root-config --incdir)
+CXXFLAGS += $(shell $(ROOT_DIR)/bin/root-config --cflags)
 CXXFLAGS += -I$(DELPHES_DIR) -I$(DELPHES_DIR)/external
 
 LDFLAGS += $(shell $(FASTJET_DIR)/bin/fastjet-config --libs)
