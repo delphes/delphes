@@ -37,11 +37,12 @@ CXXFLAGS += -I$(PROMC)/include -I$(PROMC)/src
 OPT_LIBS += -L$(PROMC)/lib -lpromc -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
 endif
 
+ifeq ($(HAS_PYTHIA8),true)
 ifneq ($(PYTHIA8),)
-#HAS_PYTHIA8 = true
 CXXFLAGS += -I$(PYTHIA8)/include
 CXXFLAGS += -I$(PYTHIA8)/include/Pythia8
 OPT_LIBS += -L$(PYTHIA8)/lib -lpythia8 -ldl
+endif
 endif
 
 DELPHES_LIBS += $(OPT_LIBS)
