@@ -79,7 +79,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile /home/fynu/mvidal/scratch/Delphes_CMS/MinBias100K_14TeV.pileup
+  set PileUpFile MinBias.pileup
 
   # Get rid of beam spot from http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup ...
   set InputBSX 2.44
