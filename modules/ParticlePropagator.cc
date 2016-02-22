@@ -238,6 +238,15 @@ void ParticlePropagator::Process()
       yd = (rc2 > 0.0) ? yd / rc2 : -999;
       zd = z + (TMath::Sqrt(xd*xd + yd*yd) - TMath::Sqrt(x*x + y*y))*pz/pt;
 
+      // use perigee momentum rather than original particle
+      // momentum, since the orignal particle momentum isn't known
+      double r_sign = std::signbit(r) ? 1 : -1;
+      px = r_sign * pt * (y_c / r_c);
+      py = r_sign * pt * (-x_c / r_c);
+      double eta_p = candidateMomentum.Eta();
+      double phi_p = std::atan2(py, px);
+      candidateMomentum.SetPtEtaPhiE(pt, eta_p, phi_p, candidateMomentum.E());
+
       // calculate impact paramater
       dxy = (xd*py - yd*px)/pt;
 
