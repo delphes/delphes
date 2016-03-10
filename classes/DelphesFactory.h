@@ -45,7 +45,7 @@ public:
   DelphesFactory(const char *name = "ObjectFactory");
   ~DelphesFactory();
 
-  void Clear();
+  virtual void Clear(Option_t* option = "");
  
   TObjArray *NewPermanentArray();
 
