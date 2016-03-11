@@ -264,7 +264,7 @@ void DelphesLHEFReader::AnalyzeParticle(DelphesFactory *factory,
 
   if(!pdgParticle) return;
 
-  if(fStatus == 1 && pdgParticle->Stable())
+  if(fStatus == 1)
   {
     stableParticleOutputArray->Add(candidate);
   }
