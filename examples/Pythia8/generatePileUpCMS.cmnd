@@ -1,0 +1,53 @@
+! Lines not beginning with a letter or digit are comments.
+! Names are case-insensitive  -  but spellings-sensitive!
+! The changes here are illustrative, not always physics-motivated.
+
+! 1) Settings that will be used in a main program.
+Main:numberOfEvents = 100000          ! number of events to generate
+Main:timesAllowErrors = 3          ! abort run after this many flawed events
+
+! 2) Settings related to output in init(), next() and stat().
+Init:showChangedSettings = on      ! list changed settings
+Init:showAllSettings = off         ! list all settings
+Init:showChangedParticleData = on  ! list changed particle data
+Init:showAllParticleData = off     ! list all particle data
+Next:numberCount = 5            ! print message every n events
+Next:numberShowLHA = 1             ! print LHA information n times
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 1         ! print process record n times
+Next:numberShowEvent = 1           ! print event record n times
+Stat:showPartonLevel = on          ! additional statistics on MPI
+Random:setSeed = on
+Random:setSeed = 10
+
+! 3) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 14000.                 ! CM energy of collision
+
+! Common Settings
+
+Tune:preferLHAPDF = 2
+Main:timesAllowErrors = 10000
+Check:epTolErr = 0.01
+Beams:setProductionScalesFromLHEF = off
+SLHA:keepSM = on
+SLHA:minMassSM = 1000.
+ParticleDecays:limitTau0 = on
+ParticleDecays:tau0Max = 10
+ParticleDecays:allowPhotonRadiation = on
+
+! CUEP8M1 Settings
+
+Tune:pp 14
+Tune:ee 7
+MultipartonInteractions:pT0Ref=2.4024
+MultipartonInteractions:ecmPow=0.25208
+MultipartonInteractions:expPow=1.6
+
+! Process parameters
+
+SoftQCD:nonDiffractive = on
+SoftQCD:singleDiffractive = on
+SoftQCD:doubleDiffractive = on
+
