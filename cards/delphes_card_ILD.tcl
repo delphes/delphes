@@ -33,11 +33,12 @@ set ExecutionPath {
   MuonEfficiency
   MuonIsolation
 
-  MissingET
-
   NeutrinoFilter
   GenJetFinder
   FastJetFinder
+
+  MissingET
+  GenMissingET
 
   JetEnergyScale
 
