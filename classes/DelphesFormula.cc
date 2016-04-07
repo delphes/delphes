@@ -60,6 +60,9 @@ Int_t DelphesFormula::Compile(const char *expression)
   buffer.ReplaceAll("eta", "y");
   buffer.ReplaceAll("phi", "z");
   buffer.ReplaceAll("energy", "t");
+  
+  TFormula::SetMaxima(100000,1000,1000000);
+  
   if(TFormula::Compile(buffer) != 0)
   {
     throw runtime_error("Invalid formula.");
