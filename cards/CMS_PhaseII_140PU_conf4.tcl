@@ -653,7 +653,7 @@ module JetFlavorAssociation JetFlavorAssociation {
   
   set DeltaR 0.5
   set PartonPTMin 1.0
-  set PartonEtaMax 2.5
+  set PartonEtaMax 4.0
 
 }
 
@@ -1291,7 +1291,7 @@ module Efficiency PhotonEfficiency {
 module Isolation PhotonIsolation {
   
   # particle for which calculate the isolation
-  set CandidateInputArray        PhotonEfficiency/photons 
+  set CandidateInputArray PhotonEfficiency/photons 
   
   # isolation collection
   set IsolationInputArray EFlowMergerAllTracks/eflow
