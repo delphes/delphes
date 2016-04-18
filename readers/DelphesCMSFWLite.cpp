@@ -78,7 +78,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   vector< const reco::Candidate * >::iterator itCandidate;
 
   handleGenEventInfo.getByLabel(event, "generator");
-  handleLHEEvent.getByLabel(event, "source");
+  handleLHEEvent.getByLabel(event, "externalLHEProducer");
   handleParticle.getByLabel(event, "genParticles");
 
   HepMCEvent *element;
