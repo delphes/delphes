@@ -65,7 +65,7 @@ Int_t DelphesFormula::Compile(const char *expression)
 
   #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
     TFormula::SetMaxima(100000,1000,1000000);
-   #endif
+  #endif
   
   if(TFormula::Compile(buffer) != 0)
   {
