@@ -340,31 +340,31 @@ module SimpleCalorimeter ECal {
   # assume 0.02 x 0.02 resolution in eta,phi in the barrel |eta| < 1.5
   
   set PhiBins {}
-  for {set i -157} {$i <= 157} {incr i} {
-    add PhiBins [expr {$i * $pi/157.0}]
+  for {set i -180} {$i <= 180} {incr i} {
+    add PhiBins [expr {$i * $pi/180.0}]
   }
 
   # 0.02 unit in eta up to eta = 1.5 (barrel)
-  for {set i -74} {$i <= 75} {incr i} {
-    set eta [expr {$i * 0.02}]
+  for {set i -85} {$i <= 86} {incr i} {
+    set eta [expr {$i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  # assume 0.05 x 0.05 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL)
+  # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- ECAL)
   
   set PhiBins {}
-  for {set i -65} {$i <= 65} {incr i} {
-    add PhiBins [expr {$i * $pi/65.0}]
+  for {set i -180} {$i <= 180} {incr i} {
+    add PhiBins [expr {$i * $pi/180.0}]
   }
 
-  # 0.05 unit in eta up to eta = 3
-  for {set i 1} {$i <= 30} {incr i} {
-    set eta [expr { -3.00 + $i * 0.05}]
+  # 0.02 unit in eta up to eta = 3
+  for {set i 1} {$i <= 84} {incr i} {
+    set eta [expr { -2.958 + $i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  for {set i 1} {$i <= 30} {incr i} {
-    set eta [expr { 1.5 + $i * 0.05}]
+  for {set i 1} {$i <= 84} {incr i} {
+    set eta [expr { 1.4964 + $i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
   }
 
@@ -376,7 +376,7 @@ module SimpleCalorimeter ECal {
     add PhiBins [expr {$i * $pi/18.0}]
   }
   
-  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -3 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
+  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }
 
@@ -405,11 +405,11 @@ module SimpleCalorimeter ECal {
   # for the ECAL barrel (|eta| < 1.5), see hep-ex/1306.2016.
   # for the endcaps (1.5 < |eta| < 3.0), we take HGCAL  see LHCC-P-008, Fig. 3.39, p.117
 
-  set ResolutionFormula {                     (abs(eta) <= 1.50) * sqrt(energy^2*0.003^2 + energy*0.028^2 + 0.12^2) + \
+  set ResolutionFormula {                     (abs(eta) <= 1.50) * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
                            (abs(eta) > 1.50 && abs(eta) <= 1.75) * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
                            (abs(eta) > 1.75 && abs(eta) <= 2.15) * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
                            (abs(eta) > 2.15 && abs(eta) <= 3.00) * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
-                           (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.97^2)}
+                           (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.98^2)}
 
 }
 
@@ -499,9 +499,9 @@ module SimpleCalorimeter HCal {
   add EnergyFraction {3122} {0.7}
 
 # set ResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.03^2 + energy*0.52^2 + 1.59^2) + \
-						   (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.05^2 + energy*0.706^2) + \
-						   (abs(eta) > 3.0 && abs(eta) <= 4.9) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
+  set ResolutionFormula {                    (abs(eta) <= 1.5) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
+						   (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
+						   (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*2.80^2)}
 
 }
 
