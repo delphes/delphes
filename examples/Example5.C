@@ -1,5 +1,5 @@
 /*
-Prints complete input particle arborescence for the first 100 events. Useful for debugging purposes.
+Prints complete input particle arborescence for the first 10 events. Useful for debugging purposes.
 root -l examples/Example5.C'("delphes_output.root")'
 */
 
@@ -37,7 +37,7 @@ void Example5(const char *inputFile)
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
     
-    if(entry>100) break;
+    if(entry>10) break;
     
     cout<<"" <<endl;
     cout<<"--------- New Event ---------" <<endl;
