@@ -29,9 +29,6 @@ struct TestPlots
   TH1 *fMuonDeltaPT;
   TH1 *fMuonDeltaEta;
 
-  TH1 *fTrackDeltaPT;
-  TH1 *fTrackDeltaEta;
-
   TH1 *fJetDeltaPT;
 };
 
@@ -77,16 +74,6 @@ void BookHistograms(ExRootResult *result, TestPlots *plots)
     "(#eta^{particle} - #eta^{muon})/#eta^{particle}", "number of muons",
     100, -0.1, 0.1);
 
-  plots->fTrackDeltaPT = result->AddHist1D(
-    "track_delta_pt", "(p_{T}^{particle} - p_{T}^{track})/p_{T}^{particle}",
-    "(p_{T}^{particle} - p_{T}^{track})/p_{T}^{particle}", "number of tracks",
-    100, -0.1, 0.1);
-
-  plots->fTrackDeltaEta = result->AddHist1D(
-    "track_delta_eta", "(#eta^{particle} - #eta^{track})/#eta^{particle}",
-    "(#eta^{particle} - #eta^{track})/#eta^{particle}", "number of tracks",
-    100, -0.1, 0.1);
-
   plots->fJetDeltaPT = result->AddHist1D(
     "jet_delta_pt", "(p_{T}^{jet} - p_{T}^{constituents})/p_{T}^{jet}",
     "(p_{T}^{jet} - p_{T}^{constituents})/p_{T}^{jet}", "number of jets",
@@ -102,10 +89,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
   TClonesArray *branchElectron = treeReader->UseBranch("Electron");
   TClonesArray *branchPhoton = treeReader->UseBranch("Photon");
   TClonesArray *branchMuon = treeReader->UseBranch("Muon");
-
-  TClonesArray *branchTrack = treeReader->UseBranch("Track");
-  TClonesArray *branchTower = treeReader->UseBranch("Tower");
-
   TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
   TClonesArray *branchEFlowPhoton = treeReader->UseBranch("EFlowPhoton");
   TClonesArray *branchEFlowNeutralHadron = treeReader->UseBranch("EFlowNeutralHadron");
@@ -174,16 +157,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
 
       plots->fMuonDeltaPT->Fill((particle->PT - muon->PT)/particle->PT);
       plots->fMuonDeltaEta->Fill((particle->Eta - muon->Eta)/particle->Eta);
-    }
-
-    // Loop over all tracks in event
-    for(i = 0; i < branchTrack->GetEntriesFast(); ++i)
-    {
-      track = (Track*) branchTrack->At(i);
-      particle = (GenParticle*) track->Particle.GetObject();
-
-      plots->fTrackDeltaPT->Fill((particle->PT - track->PT)/particle->PT);
-      plots->fTrackDeltaEta->Fill((particle->Eta - track->Eta)/particle->Eta);
     }
 
     // cout << "--  New event -- " << endl;
