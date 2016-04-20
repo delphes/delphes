@@ -61,8 +61,6 @@ set ExecutionPath {
 
   TauTagging
   
-  GenParticleFilter
-  
   TreeWriter
 }
 
@@ -1248,7 +1246,7 @@ module BTagging BTaggingTight {
 				       (abs(eta) > 2.4 && abs(eta) <= 3.0) * (pt > 350.0 && pt <= 3000) * (0.0016) + \
 				       (abs(eta) > 2.4 && abs(eta) <= 3.0) * (pt > 3000.0)              * (0.000) + \
 				 
-				   (abs(eta) > 3.0 && abs(eta) <= 3.4) * (pt <= 20.0)               * (0.000) + \
+			       	       (abs(eta) > 3.0 && abs(eta) <= 3.4) * (pt <= 20.0)               * (0.000) + \
 				       (abs(eta) > 3.0 && abs(eta) <= 3.4) * (pt > 20.0 && pt <= 30)    * (0.005) + \
 				       (abs(eta) > 3.0 && abs(eta) <= 3.4) * (pt > 30.0 && pt <= 40)    * (0.005) + \
 				       (abs(eta) > 3.0 && abs(eta) <= 3.4) * (pt > 40.0 && pt <= 50)    * (0.005) + \
@@ -1391,33 +1389,20 @@ module TauTagging TauTagging {
 }
 
 
-###############################################################################################################
-# StatusPidFilter: this module removes all generated particles except electrons, muons, taus, and status == 3 #
-###############################################################################################################
-
-module StatusPidFilter GenParticleFilter {
-  
-    set InputArray  Delphes/allParticles
-    set OutputArray filteredParticles
-    set PTMin 5.0
-    
-}
-
-
 ##################
 # ROOT tree writer
 ##################
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-  add Branch GenParticleFilter/filteredParticles Particle GenParticle
+  add Branch Delphes/allParticles Particle GenParticle
   
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
-#  add Branch HCal/eflowTracks EFlowTrack Track
-#  add Branch ECal/eflowPhotons EFlowPhoton Tower
-#  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+  add Branch HCal/eflowTracks EFlowTrack Track
+  add Branch ECal/eflowPhotons EFlowPhoton Tower
+  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
   
   add Branch PhotonIsolation/photons Photon Photon
   add Branch ElectronIsolation/electrons Electron Electron
