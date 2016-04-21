@@ -448,23 +448,23 @@ module SimpleCalorimeter HCal {
     add EtaPhiBins $eta $PhiBins
   }
 
-  # assume 0.05 x 0.05 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL)
-
+  # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- HCAL)
+  
   set PhiBins {}
-  for {set i -65} {$i <= 65} {incr i} {
-    add PhiBins [expr {$i * $pi/65.0}]
+  for {set i -180} {$i <= 180} {incr i} {
+    add PhiBins [expr {$i * $pi/180.0}]
   }
 
-  # 0.05 unit in eta up to eta = 3
-  for {set i 1} {$i <= 27} {incr i} {
-    set eta [expr { -3.00 + $i * 0.05}]
+  # 0.02 unit in eta up to eta = 3
+  for {set i 1} {$i <= 84} {incr i} {
+    set eta [expr { -2.958 + $i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  for {set i 4} {$i <= 30} {incr i} {
-    set eta [expr { 1.5 + $i * 0.05}]
+  for {set i 1} {$i <= 84} {incr i} {
+    set eta [expr { 1.4964 + $i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
-  }  
+  }
 
   # take present CMS granularity for HF  
  
@@ -474,9 +474,10 @@ module SimpleCalorimeter HCal {
     add PhiBins [expr {$i * $pi/18.0}]
   }
   
-  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -3 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
+  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }
+
 
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
   add EnergyFraction {0} {1.0}
