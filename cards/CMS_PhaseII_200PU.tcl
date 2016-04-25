@@ -41,15 +41,15 @@ set ExecutionPath {
 
   RunPUPPI
 
-  PhotonEfficiency
   PhotonIsolation
-
-  ElectronEfficiency
+  PhotonEfficiency
+  
   ElectronIsolation
-
-  MuonEfficiency
+  ElectronEfficiency
+ 
   MuonIsolation
-
+  MuonEfficiency
+  
   NeutrinoFilter
 
   MissingET
@@ -803,25 +803,6 @@ module EnergyScale JetEnergyScale {
 }
 
 
-#####################
-# Photon efficiency #
-#####################
-
-module Efficiency PhotonEfficiency {
-  
-  ## input particles
-  set InputArray ECal/eflowPhotons
-  ## output particles
-  set OutputArray photons
-  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
-  # efficiency formula for photons
-  set EfficiencyFormula {                      (pt <= 10.0) * (0.00) + \
-	                   (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
-	 (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
-	 (abs(eta) > 4.0)                                   * (0.00)}
-
-}
-
 ####################
 # Photon isolation #
 ####################
@@ -829,10 +810,10 @@ module Efficiency PhotonEfficiency {
 module Isolation PhotonIsolation {
   
   # particle for which calculate the isolation
-  set CandidateInputArray PhotonEfficiency/photons 
+  set CandidateInputArray ECal/eflowPhotons
   
   # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
+  set IsolationInputArray EFlowMerger/eflow
  
   # output array
   set OutputArray photons
@@ -848,13 +829,55 @@ module Isolation PhotonIsolation {
 }
 
 
+
+#####################
+# Photon efficiency #
+#####################
+
+module Efficiency PhotonEfficiency {
+  
+  ## input particles
+  set InputArray PhotonIsolation/photons 
+  ## output particles
+  set OutputArray photons
+  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+  # efficiency formula for photons
+  set EfficiencyFormula {                      (pt <= 10.0) * (0.00) + \
+	                   (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
+	 (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
+	 (abs(eta) > 4.0)                                   * (0.00)}
+
+}
+
+
+######################
+# Electron isolation #
+######################
+
+module Isolation ElectronIsolation {
+  
+  set CandidateInputArray ElectronFilter/electrons
+  
+  # isolation collection
+  set IsolationInputArray EFlowMerger/eflow
+  
+  set OutputArray electrons
+  
+  set DeltaRMax 0.3
+  set PTMin 1.0
+  set PTRatioMax 9999.
+
+}
+
+
+
 #######################
 # Electron efficiency #
 #######################
 
 module Efficiency ElectronEfficiency {
   
-  set InputArray ElectronFilter/electrons
+  set InputArray ElectronIsolation/electrons
   set OutputArray electrons
   
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
@@ -892,18 +915,17 @@ module Efficiency ElectronEfficiency {
   }
 }
 
-######################
-# Electron isolation #
-######################
+##################
+# Muon isolation #
+##################
 
-module Isolation ElectronIsolation {
-  
-  set CandidateInputArray ElectronEfficiency/electrons
-  
+module Isolation MuonIsolation {
+  set CandidateInputArray MuonMomentumSmearing/muons
+ 
   # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
-  
-  set OutputArray electrons
+  set IsolationInputArray EFlowMerger/eflow
+ 
+  set OutputArray muons
   
   set DeltaRMax 0.3
   set PTMin 1.0
@@ -912,14 +934,13 @@ module Isolation ElectronIsolation {
 }
 
 
-
 ###################
 # Muon efficiency #
 ###################
 
 module Efficiency MuonEfficiency {
   
-  set InputArray MuonMomentumSmearing/muons
+  set InputArray MuonIsolation/muons
  
   set OutputArray muons
   # set EfficiencyFormula {efficiency as a function of eta and pt}
@@ -936,25 +957,6 @@ module Efficiency MuonEfficiency {
 
 }
 
-
-
-##################
-# Muon isolation #
-##################
-
-module Isolation MuonIsolation {
-  set CandidateInputArray MuonEfficiency/muons
- 
-  # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
- 
-  set OutputArray muons
-  
-  set DeltaRMax 0.3
-  set PTMin 1.0
-  set PTRatioMax 9999.
-
-}
 
 
 
