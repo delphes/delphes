@@ -225,28 +225,104 @@ module MomentumSmearing MuonMomentumSmearing {
   set InputArray MuonTrackingEfficiency/muons
   set OutputArray muons
   # resolution formula for muons
+  
+  # up to |eta| < 2.8 take measurement from tracking + muon chambers 
+  # for |eta| > 2.8 and pT < 5.0 take measurement from tracking alone 
+  
   set ResolutionFormula {
-    (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.012) + \
-      (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.01) + \
-      (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.012) + \
-      (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.030) + \
-      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.011) + \
-      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.011) + \
-      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.022) + \
-      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.030) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1   && pt <= 1.0)   * (0.017) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0   && pt <= 10.0)  * (0.03) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 10.0  && pt <= 100.0) * (0.05) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 100.0)                * (0.30) + \
-	  (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
-	  (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0   && pt <= 10.0)  * (0.04) + \
-	  (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0  && pt <= 100.0) * (0.07) + \
-	  (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0)                * (0.30) + \
-	  (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.025) + \
-	  (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 10.0)  * (0.05) + \
-	  (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0  && pt <= 100.0) * (0.20) + \
-	  (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0)                * (0.80)
-      
+    
+        (pt > 5 && pt < 10) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.00519 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.00575 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.00629 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.00626 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.00722 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.00968 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.00983 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.0102 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.0126 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.0178 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.0248 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.0347 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.0359 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.0412 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.0422 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.0496 + \
+
+        (pt > 10 && pt < 20) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.00533 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.00592 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.00602 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.00614 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.00736 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.0104 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.00968 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.00991 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.0106 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.0158 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.0207 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.0327 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.0369 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.039 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.0488 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.0543 + \
+
+        (pt > 20 && pt < 40) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.00559 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.00586 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.00614 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.00654 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.00759 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.0103 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.00963 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.0102 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.011 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.0142 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.0197 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.0315 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.0409 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.0471 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.0579 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.0679 + \
+
+        (pt > 40) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.00656 + \
+		(pt > 40) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.007 + \
+		(pt > 40) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.00733 + \
+		(pt > 40) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.00752 + \
+		(pt > 40) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.00851 + \
+		(pt > 40) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.0105 + \
+		(pt > 40) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.0105 + \
+		(pt > 40) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.0111 + \
+		(pt > 40) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.0119 + \
+		(pt > 40) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.0165 + \
+		(pt > 40) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.0242 + \
+		(pt > 40) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.0359 + \
+		(pt > 40) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.0474 + \
+		(pt > 40) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.052 + \
+		(pt > 40) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.0639 + \
+		(pt > 40) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.0763 + \
+
+        (abs(eta) > 2.8 && abs(eta) <= 3.0) * (pt > 0.1   && pt <= 1.0)   * (0.017) + \
+	    (abs(eta) > 2.8 && abs(eta) <= 3.0) * (pt > 1.0   && pt <= 10.0)  * (0.03) + \
+	    (abs(eta) > 2.8 && abs(eta) <= 3.0) * (pt > 10.0  && pt <= 100.0) * (0.05) + \
+	    (abs(eta) > 2.8 && abs(eta) <= 3.0) * (pt > 100.0)                * (0.30) + \
+	    (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
+	    (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0   && pt <= 10.0)  * (0.04) + \
+	    (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0  && pt <= 100.0) * (0.07) + \
+	    (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0)                * (0.30) + \
+	    (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.025) + \
+	    (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 10.0)  * (0.05) + \
+	    (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0  && pt <= 100.0) * (0.20) + \
+	    (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0)                * (0.80) + \
+        
+        (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+        (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 5.0) * (0.013) + \
+        (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+        (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 5.0)   * (0.015) + \
+        (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1   && pt <= 1.0)   * (0.017) + \
+        (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0   && pt <= 5.0)   * (0.03) + \
+        (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
+        (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0   && pt <= 5.0)   * (0.04) + \
+        (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.025) + \
+        (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 5.0)   * (0.05) 
+                 
   }
 }
 
