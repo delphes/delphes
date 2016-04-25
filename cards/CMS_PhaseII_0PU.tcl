@@ -39,7 +39,8 @@ set ExecutionPath {
   ElectronEfficiency
  
   MuonIsolation
-  MuonEfficiency
+  MuonLooseIdEfficiency
+  MuonTightIdEfficiency
   
   NeutrinoFilter
 
@@ -141,12 +142,12 @@ module Efficiency MuonTrackingEfficiency {
   # tracking efficiency formula for muons
   set EfficiencyFormula {
       (pt <= 0.2) * (0.00) + \
-	  (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.998) + \
-	  (abs(eta) <= 1.2) * (pt > 1.0) * (0.998) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.99) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.99) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
+	  (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 1.00) + \
+	  (abs(eta) <= 1.2) * (pt > 1.0) * (1.00) + \
+	  (abs(eta) > 1.2 && abs(eta) <= 2.8) * (pt > 0.2 && pt <= 1.0) * (pt*1.00) + \
+	  (abs(eta) > 1.2 && abs(eta) <= 2.8) * (pt > 1.0) * (1.00) + \
+	  (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
+	  (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
 	  (abs(eta) > 4.0) * (0.00)
 	  
   }
@@ -799,33 +800,174 @@ module Isolation MuonIsolation {
 
 }
 
+##################
+# Muon Loose Id  #
+##################
 
-###################
-# Muon efficiency #
-###################
+module Efficiency MuonLooseIdEfficiency {
+    set InputArray MuonIsolation/muons
+    set OutputArray muons
+    # tracking + LooseID efficiency formula for muons
+    set EfficiencyFormula {
+        
+        (pt <= 5.0) * (0.00) + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.967 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.968 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.986 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.982 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.972 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.974 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.969 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.988 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.989 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.992 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.979 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.976 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.882 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.883 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.851 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.828 + \
 
-module Efficiency MuonEfficiency {
-  
-  set InputArray MuonIsolation/muons
- 
-  set OutputArray muons
-  # set EfficiencyFormula {efficiency as a function of eta and pt}
-  # efficiency formula for muons
-  set EfficiencyFormula { (pt <= 2.0)  * (0.00) + \
-  			  (abs(eta) <= 4.00) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
-                          (abs(eta) <= 4.00) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \
-                          (abs(eta) <= 4.00) * (pt >  4.0 && pt <= 11.0) * (0.93) + \
-                          (abs(eta) <= 4.00) * (pt >  11. && pt <= 50.)  * (0.96) + \
-                          (abs(eta) <= 4.00) * (pt >  50. && pt <= 70.)  * (0.98) + \
-                          (abs(eta) <= 4.00) * (pt > 70.0 )  * (1.00) + \
-			  (abs(eta) > 4.00)  * (0.00)
- }
+		(pt > 10 && pt < 20) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.989 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.989 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.995 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.995 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.987 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.989 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.981 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.99 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.997 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.997 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.989 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.995 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.888 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.894 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.886 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.883 + \
 
+        (pt > 20 && pt < 40) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.981 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.994 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.995 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.997 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.986 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.991 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.987 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.992 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.993 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.999 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.994 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.997 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.894 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.879 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.871 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.864 + \
+
+        (pt > 40) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.986 + \
+		(pt > 40) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.989 + \
+		(pt > 40) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.996 + \
+		(pt > 40) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.994 + \
+		(pt > 40) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.991 + \
+		(pt > 40) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.989 + \
+		(pt > 40) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.985 + \
+		(pt > 40) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.993 + \
+		(pt > 40) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.996 + \
+		(pt > 40) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.997 + \
+		(pt > 40) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.99 + \
+		(pt > 40) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.993 + \
+		(pt > 40) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.905 + \
+		(pt > 40) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.86 + \
+		(pt > 40) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.845 + \
+		(pt > 40) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.855 + \
+
+        (abs(eta) > 2.8) * (0.00)
+
+    }
 }
 
 
+##################
+# Muon Tight Id  #
+##################
 
+module Efficiency MuonTightIdEfficiency {
+    set InputArray MuonIsolation/muons
+    set OutputArray muons
+    # tracking + TightID efficiency formula for muons
+    set EfficiencyFormula {
 
+        (pt <= 5.0) * (0.00) + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.949 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.894 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.966 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.964 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.923 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.94 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.959 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.972 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.962 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.972 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.947 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.911 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.825 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.821 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.783 + \
+		(pt > 5 && pt < 10) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.746 + \
+
+		(pt > 10 && pt < 20) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.975 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.935 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.986 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.976 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.954 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.978 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.975 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.98 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.982 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.985 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.962 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.946 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.839 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.844 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.803 + \
+		(pt > 10 && pt < 20) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.791 + \
+
+        (pt > 20 && pt < 40) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.965 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.938 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.99 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.977 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.959 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.976 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.984 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.981 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.978 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.985 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.969 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.964 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.863 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.828 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.807 + \
+		(pt > 20 && pt < 40) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.764 + \
+
+        (pt > 40) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.975 + \
+		(pt > 40) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.935 + \
+		(pt > 40) * (abs(eta) > 0.4 && abs(eta) < 0.6) * 0.991 + \
+		(pt > 40) * (abs(eta) > 0.6 && abs(eta) < 0.8) * 0.983 + \
+		(pt > 40) * (abs(eta) > 0.8 && abs(eta) < 1) * 0.957 + \
+		(pt > 40) * (abs(eta) > 1 && abs(eta) < 1.2) * 0.979 + \
+		(pt > 40) * (abs(eta) > 1.2 && abs(eta) < 1.4) * 0.981 + \
+		(pt > 40) * (abs(eta) > 1.4 && abs(eta) < 1.6) * 0.983 + \
+		(pt > 40) * (abs(eta) > 1.6 && abs(eta) < 1.8) * 0.981 + \
+		(pt > 40) * (abs(eta) > 1.8 && abs(eta) < 2) * 0.984 + \
+		(pt > 40) * (abs(eta) > 2 && abs(eta) < 2.2) * 0.964 + \
+		(pt > 40) * (abs(eta) > 2.2 && abs(eta) < 2.4) * 0.956 + \
+		(pt > 40) * (abs(eta) > 2.4 && abs(eta) < 2.5) * 0.855 + \
+		(pt > 40) * (abs(eta) > 2.5 && abs(eta) < 2.6) * 0.817 + \
+		(pt > 40) * (abs(eta) > 2.6 && abs(eta) < 2.7) * 0.764 + \
+		(pt > 40) * (abs(eta) > 2.7 && abs(eta) < 2.8) * 0.752 + \
+
+        (abs(eta) > 2.8) * (0.00)
+
+    }
+}
 
 ########################
 # Jet Flavor Association
@@ -1482,9 +1624,10 @@ module TreeWriter TreeWriter {
   add Branch ECal/eflowPhotons EFlowPhoton Tower
   add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
   
-  add Branch PhotonIsolation/photons Photon Photon
-  add Branch ElectronIsolation/electrons Electron Electron
-  add Branch MuonIsolation/muons Muon Muon
+  add Branch PhotonEfficiency/photons Photon Photon
+  add Branch ElectronEfficiency/electrons Electron Electron
+  add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
+  add Branch MuonTightIdEfficiency/muons MuonTight Muon
   
   add Branch JetEnergyScale/jets Jet Jet
   
