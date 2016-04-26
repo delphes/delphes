@@ -235,6 +235,7 @@ int SourceObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Ob
   strcat(fullName, "/");
   strcat(fullName, fileName);
   reader->ReadFile(fullName, false);
+  free(fullName);
 
   return TCL_OK;
 }
