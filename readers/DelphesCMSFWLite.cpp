@@ -48,8 +48,7 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
 
-#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
-
+#include "FWCore/FWLite/interface/FWLiteEnabler.h"
 #include "DataFormats/FWLite/interface/Event.h"
 #include "DataFormats/FWLite/interface/Handle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -225,8 +224,8 @@ int main(int argc, char *argv[])
   char *appargv[] = {appName};
   TApplication app(appName, &appargc, appargv);
 
-  AutoLibraryLoader::enable();
-
+  FWLiteEnabler::enable();
+  
   try
   {
     outputFile = TFile::Open(argv[2], "CREATE");
