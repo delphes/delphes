@@ -185,15 +185,13 @@ void ExRootConfReader::AddModule(const char *className, const char *moduleName)
 
 int ModuleObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-  ExRootConfReader *reader;
+  ExRootConfReader *reader = static_cast<ExRootConfReader*>(clientData);
 
   if(objc < 3)
   {
     Tcl_WrongNumArgs(interp, 1, objv, "className moduleName ?arg...?");
     return TCL_ERROR;
   }
-
-  reader = (ExRootConfReader*) clientData;
 
   // add module to a list of modules to be created
 
@@ -216,10 +214,8 @@ int ModuleObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Ob
 
 int SourceObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-  const char *fileName;
-  char *fullName;
-  ExRootConfReader *reader;
-  size_t size;
+  ExRootConfReader *reader = static_cast<ExRootConfReader*>(clientData);
+  stringstream fileName;
 
   if(objc != 2)
   {
@@ -227,15 +223,8 @@ int SourceObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Ob
     return TCL_ERROR;
   }
 
-  reader = (ExRootConfReader*) clientData;
-  fileName = Tcl_GetStringFromObj(objv[1], 0);
-  size = strlen(reader->GetTopDir()) + strlen(fileName) + 2;
-  fullName = static_cast<char *>(malloc(size));
-  strcpy(fullName, reader->GetTopDir());
-  strcat(fullName, "/");
-  strcat(fullName, fileName);
-  reader->ReadFile(fullName, false);
-  free(fullName);
+  fileName << reader->GetTopDir() << "/" << Tcl_GetStringFromObj(objv[1], 0);
+  reader->ReadFile(fileName.str().c_str(), false);
 
   return TCL_OK;
 }
