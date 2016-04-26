@@ -204,7 +204,7 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
       
       //Basic Weight Checks
       if( std::isinf(pWeight) || std::isnan(pWeight)){
-	std::cerr << "====> Weight is nan : pt " << fPFParticles_[iPart].pt() << " -- eta : " << fPFParticles_[iPart].eta() << " -- id : " << fPFParticles_[iPart].user_index() << std::endl;
+	//std::cerr << "====> Weight is nan : pt " << fPFParticles_[iPart].pt() << " -- eta : " << fPFParticles_[iPart].eta() << " -- id : " << fPFParticles_[iPart].user_index() << std::endl;
 	pWeight = 1; // set the default to avoid problems
       }
 
