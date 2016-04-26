@@ -30,6 +30,12 @@ using namespace std;
 DelphesTF2::DelphesTF2() :
   TF2()
 {
+
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,04,00)
+  fFormula = new TFormula();
+#endif
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -58,10 +64,10 @@ Int_t DelphesTF2::Compile(const char *expression)
   }
   buffer.ReplaceAll("z", "x");
   buffer.ReplaceAll("t", "y");
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,04,00)
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,04,00)
   if(TF2::Compile(buffer) != 0)
 #else
-  if(TF2::GetFormula()->Compile(buffer) != 0)
+  if(fFormula->Compile(buffer) != 0)
 #endif
   {
     throw runtime_error("Invalid formula.");
