@@ -49,7 +49,7 @@ public:
   ExRootConfReader();
   ~ExRootConfReader();
 
-  void ReadFile(const char *fileName);
+  void ReadFile(const char *fileName, bool isTop = true);
 
   int GetInt(const char *name, int defaultValue, int index = -1);
   long GetLong(const char *name, long defaultValue, int index = -1);
@@ -62,7 +62,11 @@ public:
 
   void AddModule(const char *className, const char *moduleName);
 
+  const char *GetTopDir() const { return fTopDir; }
+
 private:
+
+  const char *fTopDir; //!
 
   Tcl_Interp *fTclInterp; //!
 
