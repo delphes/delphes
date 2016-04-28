@@ -66,6 +66,28 @@ ParticlePropagator::~ParticlePropagator()
 {
 }
 
+
+//------------------------------------------------------------------------------
+
+TLorentzVector ParticlePropagator::BeamSpotPosition(const TObjArray *array)
+{
+  Candidate *candidate;
+  Bool_t passed = false;
+  TLorentzVector bs;
+ 
+  fItInputArray->Reset();
+  while((candidate = static_cast<Candidate*>(fItInputArray->Next())) && !passed)
+  {
+    if(candidate->IsPU == 0) passed = true;
+    bs = candidate->Position;
+  }
+  
+  return bs;
+  
+}
+
+
+
 //------------------------------------------------------------------------------
 
 void ParticlePropagator::Init()
@@ -122,6 +144,8 @@ void ParticlePropagator::Process()
   Double_t rcu, rc2, dxy, xd, yd, zd;
 
   const Double_t c_light = 2.99792458E8;
+
+  const TLorentzVector &bs = BeamSpotPosition(fInputArray);
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))

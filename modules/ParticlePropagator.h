@@ -34,6 +34,7 @@
 
 class TClonesArray;
 class TIterator;
+class TLorentzVector;
 
 class ParticlePropagator: public DelphesModule
 {
@@ -59,6 +60,8 @@ private:
   TObjArray *fChargedHadronOutputArray; //!
   TObjArray *fElectronOutputArray; //!
   TObjArray *fMuonOutputArray; //!
+
+  TLorentzVector BeamSpotPosition(const TObjArray *array);
 
   ClassDef(ParticlePropagator, 1)
 };
