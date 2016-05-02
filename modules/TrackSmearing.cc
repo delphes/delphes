@@ -337,7 +337,7 @@ void TrackSmearing::Process()
     pz = candidate->Momentum.Pz ();
     pt = candidate->Momentum.Pt ();
     
-    // -- to be checked, not sure yet about formulae
+    // -- solve for delta: d0' = ( (x+delta)*py' - (y+delta)*px' )/pt'
     
     candidate->InitialPosition.SetX (x + ((px * y - py * x + d0 * pt) / (py - px)));
     candidate->InitialPosition.SetY (y + ((px * y - py * x + d0 * pt) / (py - px)));
