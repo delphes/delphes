@@ -291,8 +291,8 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
 
-    entry->Dxy = candidate->Dxy;
-    entry->SDxy = candidate->SDxy ;
+    entry->D0 = candidate->D0;
+    entry->ErrorD0 = candidate->ErrorD0 ;
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;

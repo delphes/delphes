@@ -96,7 +96,7 @@ void TrackCountingBTagging::Process()
 
   Double_t jpx, jpy;
   Double_t dr, tpx, tpy, tpt;
-  Double_t xd, yd, dxy, ddxy, ip, sip;
+  Double_t xd, yd, d0, dd0, ip, sip;
 
   Int_t sign;
 
@@ -119,23 +119,19 @@ void TrackCountingBTagging::Process()
 
       dr = jetMomentum.DeltaR(trkMomentum);
 
-      tpt = trkMomentum.Pt();
-      tpx = trkMomentum.Px();
-      tpy = trkMomentum.Py();
-
       xd = track->Xd;
       yd = track->Yd;
-      dxy = TMath::Hypot(xd, yd);
-      ddxy = track->SDxy;
+      d0 = TMath::Hypot(xd, yd);
+      dd0 = track->ErrorD0;
 
       if(tpt < fPtMin) continue;
       if(dr > fDeltaR) continue;
-      if(dxy > fIPmax) continue;
+      if(d0 > fIPmax) continue;
 
       sign = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
 
-      ip = sign*dxy;
-      sip = ip / TMath::Abs(ddxy);
+      ip = sign*d0;
+      sip = ip / TMath::Abs(dd0);
 
       if(sip > fSigMin) count++;
     }
