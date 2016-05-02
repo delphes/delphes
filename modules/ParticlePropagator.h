@@ -55,13 +55,12 @@ private:
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
+  const TObjArray *fBeamSpotInputArray; //!
 
   TObjArray *fOutputArray; //!
   TObjArray *fChargedHadronOutputArray; //!
   TObjArray *fElectronOutputArray; //!
   TObjArray *fMuonOutputArray; //!
-
-  TLorentzVector BeamSpotPosition(const TObjArray *array);
 
   ClassDef(ParticlePropagator, 1)
 };

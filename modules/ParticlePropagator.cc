@@ -69,27 +69,6 @@ ParticlePropagator::~ParticlePropagator()
 
 //------------------------------------------------------------------------------
 
-TLorentzVector ParticlePropagator::BeamSpotPosition(const TObjArray *array)
-{
-  Candidate *candidate;
-  Bool_t passed = false;
-  TLorentzVector bs;
- 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())) && !passed)
-  {
-    if(candidate->IsPU == 0) passed = true;
-    bs = candidate->Position;
-  }
-  
-  return bs;
-  
-}
-
-
-
-//------------------------------------------------------------------------------
-
 void ParticlePropagator::Init()
 {
   fRadius = GetDouble("Radius", 1.0);
@@ -112,6 +91,10 @@ void ParticlePropagator::Init()
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
+  // import beamspot
+ 
+  fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+
   // create output arrays
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -132,7 +115,7 @@ void ParticlePropagator::Finish()
 void ParticlePropagator::Process()
 {
   Candidate *candidate, *mother;
-  TLorentzVector candidatePosition, candidateMomentum;
+  TLorentzVector candidatePosition, candidateMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, pt2, e, q;
   Double_t x, y, z, t, r, phi;
   Double_t x_c, y_c, r_c, phi_c, phi_0;
@@ -141,12 +124,20 @@ void ParticlePropagator::Process()
   Double_t t_z, t_r, t_ra, t_rb;
   Double_t tmp, discr, discr2;
   Double_t delta, gammam, omega, asinrho;
-  Double_t rcu, rc2, dxy, xd, yd, zd;
-
+  Double_t rcu, rc2, xd, yd, zd;
+  Double_t l, d0, dz, p, ctgTheta, phip, etap, alpha;
+  Double_t bsx, bsy, bsz;
+  	 
   const Double_t c_light = 2.99792458E8;
-
-  const TLorentzVector &bs = BeamSpotPosition(fInputArray);
-
+ 
+  if (!fBeamSpotInputArray->GetSize () || !fBeamSpotInputArray->At(0)) 
+    beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  else
+  {
+    Candidate &beamSpotCandidate = *((Candidate *) fBeamSpotInputArray->At(0));
+    beamSpotPosition = beamSpotCandidate.Position;
+  }
+ 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
@@ -155,6 +146,11 @@ void ParticlePropagator::Process()
     x = candidatePosition.X()*1.0E-3;
     y = candidatePosition.Y()*1.0E-3;
     z = candidatePosition.Z()*1.0E-3;
+    
+    bsx = beamSpotPosition.X()*1.0E-3;
+    bsy = beamSpotPosition.Y()*1.0E-3;
+    bsz = beamSpotPosition.Z()*1.0E-3;
+   
     q = candidate->Charge;
 
     // check that particle position is inside the cylinder
@@ -204,12 +200,15 @@ void ParticlePropagator::Process()
       x_t = x + px*t;
       y_t = y + py*t;
       z_t = z + pz*t;
+      
+      l = TMath::Sqrt( (x_t - x)*(x_t - x) + (y_t - y)*(y_t - y) + (z_t - z)*(z_t - z));
 
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
       candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*e*1.0E3);
-
+      candidate->L = l*1.0E3;
+   
       candidate->Momentum = candidateMomentum;
       candidate->AddCandidate(mother);
 
@@ -261,10 +260,24 @@ void ParticlePropagator::Process()
       yd = y_c*(-rcu*r_c + rc2);
       yd = (rc2 > 0.0) ? yd / rc2 : -999;
       zd = z + (TMath::Sqrt(xd*xd + yd*yd) - TMath::Sqrt(x*x + y*y))*pz/pt;
-
-      // calculate impact paramater
-      dxy = (xd*py - yd*px)/pt;
-
+      
+      // use perigee momentum rather than original particle
+      // momentum, since the orignal particle momentum isn't known 
+      
+      px = TMath::Sign(1.0,r) * pt * (-y_c / r_c);
+      py = TMath::Sign(1.0,r) * pt * (x_c / r_c);
+      etap = candidateMomentum.Eta();
+      phip = TMath::ATan2(py, px);
+       
+      candidateMomentum.SetPtEtaPhiE(pt, etap, phip, candidateMomentum.E());
+      
+      // calculate additional track parameters (correct for beamspot position)
+       
+      d0        = (  (x - bsx) * py - (y - bsy) * px) / pt;
+      dz        = z - ((x - bsx) * px + (py - bsy) * py) / pt * (pz / pt);
+      p         = candidateMomentum.P();
+      ctgTheta  = 1.0 / TMath::Tan (candidateMomentum.Theta ());
+         
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
@@ -310,6 +323,12 @@ void ParticlePropagator::Process()
       z_t = z + pz*1.0E9 / c_light / gammam * t;
       r_t = TMath::Hypot(x_t, y_t);
 
+      
+      // compute path length for an helix
+      
+      alpha = pz*1.0E9 / c_light / gammam;
+      l = t * TMath::Sqrt(alpha*alpha + r*r*omega*omega);
+          
       if(r_t > 0.0)
       {
         mother = candidate;
@@ -318,8 +337,16 @@ void ParticlePropagator::Process()
         candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*c_light*1.0E3);
 
         candidate->Momentum = candidateMomentum;
-        candidate->Dxy = dxy*1.0E3;
-        candidate->Xd = xd*1.0E3;
+        
+	candidate->L =  l*1.0E3;
+        candidate->D0 = d0*1.0E3;
+        candidate->DZ = dz*1.0E3;
+        candidate->P = p;
+        candidate->PT = pt;
+        candidate->CtgTheta = ctgTheta;
+        candidate->Phi = phi;
+
+	candidate->Xd = xd*1.0E3;
         candidate->Yd = yd*1.0E3;
         candidate->Zd = zd*1.0E3;
 
