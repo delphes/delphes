@@ -315,6 +315,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
 	modules/MomentumSmearing.h \
+	modules/TrackSmearing.h \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
 	modules/SimpleCalorimeter.h \
@@ -337,6 +338,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
 	modules/PdgCodeFilter.h \
+	modules/BeamSpotFilter.h \
 	modules/Cloner.h \
 	modules/Weighter.h \
 	modules/Hector.h \
@@ -545,6 +547,15 @@ tmp/modules/BTagging.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
+tmp/modules/BeamSpotFilter.$(ObjSuf): \
+	modules/BeamSpotFilter.$(SrcSuf) \
+	modules/BeamSpotFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/Calorimeter.$(ObjSuf): \
 	modules/Calorimeter.$(SrcSuf) \
 	modules/Calorimeter.h \
@@ -835,6 +846,15 @@ tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/TrackSmearing.$(ObjSuf): \
+	modules/TrackSmearing.$(SrcSuf) \
+	modules/TrackSmearing.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/TreeWriter.$(ObjSuf): \
 	modules/TreeWriter.$(SrcSuf) \
 	modules/TreeWriter.h \
@@ -914,6 +934,7 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
+	tmp/modules/BeamSpotFilter.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
@@ -945,6 +966,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
 	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
+	tmp/modules/TrackSmearing.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
 	tmp/modules/Weighter.$(ObjSuf)
@@ -1544,6 +1566,10 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
 
+modules/TrackSmearing.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 external/fastjet/ClusterSequence.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
@@ -1976,6 +2002,10 @@ external/fastjet/ClusterSequencePassiveArea.hh: \
 	@touch $@
 
 modules/FastJetFinder.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/BeamSpotFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
