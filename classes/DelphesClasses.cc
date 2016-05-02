@@ -126,8 +126,16 @@ Candidate::Candidate() :
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
+  InitialPosition(0.0, 0.0, 0.0, 0.0), 
   Area(0.0, 0.0, 0.0, 0.0),
-  Dxy(0), SDxy(0), Xd(0), Yd(0), Zd(0),
+  L(0),
+  D0(0), ErrorD0(0), 
+  DZ(0), ErrorDZ(0), 
+  P(0),  ErrorP(0), 
+  PT(0), ErrorPT(0), 
+  CtgTheta(0), ErrorCtgTheta(0), 
+  Phi(0), ErrorPhi(0),  
+  Xd(0), Yd(0), Zd(0), 
   TrackResolution(0),
   NCharged(0),
   NNeutrals(0),
@@ -261,9 +269,21 @@ void Candidate::Copy(TObject &obj) const
   object.DeltaPhi = DeltaPhi;
   object.Momentum = Momentum;
   object.Position = Position;
+  object.InitialPosition = Position;
   object.Area = Area;
-  object.Dxy = Dxy;
-  object.SDxy = SDxy;
+  object.L = L;
+  object.D0 = D0;
+  object.ErrorD0 = ErrorD0;
+  object.DZ = DZ;
+  object.ErrorDZ = ErrorDZ;
+  object.P = P;
+  object.ErrorP = ErrorP;
+  object.PT = PT;
+  object.ErrorPT = ErrorPT;
+  object.CtgTheta = CtgTheta ;
+  object.ErrorCtgTheta = ErrorCtgTheta;
+  object.Phi = Phi;
+  object.ErrorPhi = ErrorPhi;  
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
@@ -362,9 +382,21 @@ void Candidate::Clear(Option_t* option)
   DeltaPhi = 0.0;
   Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  Dxy = 0.0;
-  SDxy = 0.0;
+  L = 0.0;
+  D0 = 0.0;  
+  ErrorD0 = 0.0;
+  DZ = 0.0;
+  ErrorDZ = 0.0;
+  P =0.0;
+  ErrorP =0.0;
+  PT = 0.0;
+  ErrorPT = 0.0;
+  CtgTheta = 0.0;
+  ErrorCtgTheta = 0.0;
+  Phi = 0.0;
+  ErrorPhi = 0.0;
   Xd = 0.0;
   Yd = 0.0;
   Zd = 0.0;

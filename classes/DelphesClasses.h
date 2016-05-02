@@ -414,8 +414,8 @@ public:
   Float_t ZOuter; // track position (z component) at the tracker edge
   Float_t TOuter; // track position (z component) at the tracker edge
 
-  Float_t Dxy;     // track signed transverse impact parameter
-  Float_t SDxy;    // signed error on the track signed transverse impact parameter
+  Float_t D0;     // track signed transverse impact parameter
+  Float_t ErrorD0;    // signed error on the track signed transverse impact parameter
   Float_t Xd;      // X coordinate of point of closest approach to vertex
   Float_t Yd;      // Y coordinate of point of closest approach to vertex
   Float_t Zd;      // Z coordinate of point of closest approach to vertex
@@ -525,10 +525,22 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, Area;
+  TLorentzVector Momentum, Position, InitialPosition, Area;
 
-  Float_t Dxy;
-  Float_t SDxy;
+  Float_t L; // path length
+  Float_t D0;
+  Float_t ErrorD0;
+  Float_t DZ;
+  Float_t ErrorDZ;
+  Float_t P;
+  Float_t ErrorP;
+  Float_t PT;
+  Float_t ErrorPT;
+  Float_t CtgTheta;
+  Float_t ErrorCtgTheta;
+  Float_t Phi;
+  Float_t ErrorPhi;
+
   Float_t Xd;
   Float_t Yd;
   Float_t Zd;
