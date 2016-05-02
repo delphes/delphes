@@ -95,7 +95,7 @@ void TrackCountingBTagging::Process()
   Candidate *jet, *track;
 
   Double_t jpx, jpy;
-  Double_t dr, tpx, tpy, tpt;
+  Double_t dr, tpt;
   Double_t xd, yd, d0, dd0, ip, sip;
 
   Int_t sign;
@@ -116,9 +116,9 @@ void TrackCountingBTagging::Process()
     while((track = static_cast<Candidate*>(fItTrackInputArray->Next())))
     {
       const TLorentzVector &trkMomentum = track->Momentum;
-
+      
       dr = jetMomentum.DeltaR(trkMomentum);
-
+      tpt = trkMomentum.Pt();
       xd = track->Xd;
       yd = track->Yd;
       d0 = TMath::Hypot(xd, yd);
