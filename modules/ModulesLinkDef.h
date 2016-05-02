@@ -34,6 +34,7 @@
 #include "modules/IdentificationMap.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
+#include "modules/TrackSmearing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
@@ -56,6 +57,7 @@
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
+#include "modules/BeamSpotFilter.h"
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
@@ -78,6 +80,7 @@
 #pragma link C++ class IdentificationMap+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
+#pragma link C++ class TrackSmearing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
@@ -100,6 +103,7 @@
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
+#pragma link C++ class BeamSpotFilter+;
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
