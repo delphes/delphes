@@ -40,7 +40,6 @@ using namespace std;
 TrackSmearing::TrackSmearing() :
   fD0Formula(0), fDZFormula(0), fPFormula(0), fCtgThetaFormula(0), fPhiFormula(0), fItInputArray(0)
 {
-  TFormula::SetMaxima (10000, 10000, 10000);
   fD0Formula = new DelphesFormula;
   fDZFormula = new DelphesFormula;
   fPFormula = new DelphesFormula;
