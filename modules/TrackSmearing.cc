@@ -128,8 +128,16 @@ void TrackSmearing::Init()
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray = fInputArray->MakeIterator();
  
-  fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-
+  // import beamspot
+  try
+  {
+    fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+  }
+  catch(runtime_error &e)
+  {
+    fBeamSpotInputArray = 0;
+  }  
+ 
   // create output array
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -157,8 +165,8 @@ void TrackSmearing::Process()
              *ctgThetaErrorHist = NULL,
              *phiErrorHist = NULL;
 
- 
-  if (!fBeamSpotInputArray->GetSize () || !fBeamSpotInputArray->At(0)) 
+  //cout<<fBeamSpotInputArray->GetSize ()<<endl;
+  if (!fBeamSpotInputArray || fBeamSpotInputArray->GetSize () == 0) 
     beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   else
   {

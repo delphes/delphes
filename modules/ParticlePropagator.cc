@@ -92,9 +92,14 @@ void ParticlePropagator::Init()
   fItInputArray = fInputArray->MakeIterator();
 
   // import beamspot
- 
-  fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-
+  try
+  {
+    fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+  }
+  catch(runtime_error &e)
+  {
+    fBeamSpotInputArray = 0;
+  }  
   // create output arrays
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -130,7 +135,7 @@ void ParticlePropagator::Process()
   	 
   const Double_t c_light = 2.99792458E8;
  
-  if (!fBeamSpotInputArray->GetSize () || !fBeamSpotInputArray->At(0)) 
+  if (!fBeamSpotInputArray || fBeamSpotInputArray->GetSize () == 0) 
     beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   else
   {
