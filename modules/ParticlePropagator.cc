@@ -282,7 +282,7 @@ void ParticlePropagator::Process()
       dz        = z - ((x - bsx) * px + (py - bsy) * py) / pt * (pz / pt);
       p         = candidateMomentum.P();
       ctgTheta  = 1.0 / TMath::Tan (candidateMomentum.Theta ());
-         
+          
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
@@ -336,6 +336,16 @@ void ParticlePropagator::Process()
           
       if(r_t > 0.0)
       {
+        
+        // store these variables before cloning
+           
+        candidate->D0 = d0*1.0E3;
+        candidate->DZ = dz*1.0E3;
+        candidate->P  = p;
+        candidate->PT = pt;
+        candidate->CtgTheta = ctgTheta;
+        candidate->Phi = phip;
+      
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
@@ -343,15 +353,9 @@ void ParticlePropagator::Process()
 
         candidate->Momentum = candidateMomentum;
         
-	candidate->L =  l*1.0E3;
-        candidate->D0 = d0*1.0E3;
-        candidate->DZ = dz*1.0E3;
-        candidate->P = p;
-        candidate->PT = pt;
-        candidate->CtgTheta = ctgTheta;
-        candidate->Phi = phi;
-
-	candidate->Xd = xd*1.0E3;
+	    candidate->L  =  l*1.0E3;
+        
+	    candidate->Xd = xd*1.0E3;
         candidate->Yd = yd*1.0E3;
         candidate->Zd = zd*1.0E3;
 

@@ -146,10 +146,13 @@ public:
   Float_t Py; // particle momentum vector (y component) | hepevt.phep[number][1]
   Float_t Pz; // particle momentum vector (z component) | hepevt.phep[number][2]
 
-  Float_t PT; // particle transverse momentum
+  Float_t D0;
+  Float_t DZ;
+  Float_t P;
+  Float_t PT;
+  Float_t CtgTheta;
+  Float_t Phi;
   Float_t Eta; // particle pseudorapidity
-  Float_t Phi; // particle azimuthal angle
-
   Float_t Rapidity; // particle rapidity
 
   Float_t T; // particle vertex position (t component) | hepevt.vhep[number][3]
@@ -396,11 +399,8 @@ public:
 
   Int_t Charge; // track charge
 
-  Float_t PT; // track transverse momentum
-
   Float_t Eta; // track pseudorapidity
-  Float_t Phi; // track azimuthal angle
-
+  
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
 
@@ -414,8 +414,26 @@ public:
   Float_t ZOuter; // track position (z component) at the tracker edge
   Float_t TOuter; // track position (z component) at the tracker edge
 
+  Float_t L; // track path length
+    
   Float_t D0;     // track signed transverse impact parameter
   Float_t ErrorD0;    // signed error on the track signed transverse impact parameter
+ 
+  Float_t DZ; // track transverse momentum
+  Float_t ErrorDZ; // track transverse momentum error
+ 
+  Float_t P; // track transverse momentum
+  Float_t ErrorP; // track transverse momentum error
+ 
+  Float_t PT; // track transverse momentum
+  Float_t ErrorPT; // track transverse momentum error
+ 
+  Float_t CtgTheta; // track transverse momentum
+  Float_t ErrorCtgTheta; // track transverse momentum error
+ 
+  Float_t Phi; // track azimuthal angle
+  Float_t ErrorPhi; // track azimuthal angle
+  
   Float_t Xd;      // X coordinate of point of closest approach to vertex
   Float_t Yd;      // Y coordinate of point of closest approach to vertex
   Float_t Zd;      // Z coordinate of point of closest approach to vertex

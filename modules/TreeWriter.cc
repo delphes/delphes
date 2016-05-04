@@ -214,6 +214,13 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Py = momentum.Py();
     entry->Pz = momentum.Pz();
 
+    entry->D0            = candidate->D0;
+    entry->DZ            = candidate->DZ;
+    entry->P             = candidate->P;
+    entry->PT            = candidate->PT;
+    entry->CtgTheta      = candidate->CtgTheta;
+    entry->Phi           = candidate->Phi;
+
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
     entry->PT = pt;
@@ -290,9 +297,22 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
     entry->TOuter = position.T()*1.0E-3/c_light;
-
-    entry->D0 = candidate->D0;
-    entry->ErrorD0 = candidate->ErrorD0 ;
+ 
+    entry->L = candidate->L;
+  
+    entry->D0            = candidate->D0;
+    entry->ErrorD0       = candidate->ErrorD0;
+    entry->DZ            = candidate->DZ;
+    entry->ErrorDZ       = candidate->ErrorDZ;
+    entry->P             = candidate->P;
+    entry->ErrorP        = candidate->ErrorP;
+    entry->PT            = candidate->PT;
+    entry->ErrorPT       = candidate->ErrorPT;
+    entry->CtgTheta      = candidate->CtgTheta;
+    entry->ErrorCtgTheta = candidate->ErrorCtgTheta;
+    entry->Phi           = candidate->Phi;
+    entry->ErrorPhi      = candidate->ErrorPhi; 
+    
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;
@@ -306,9 +326,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     rapidity = (cosTheta == 1.0 ? signz*999.9 : momentum.Rapidity());
 
     entry->Eta = eta;
-    entry->Phi = momentum.Phi();
-    entry->PT = pt;
-
+    
     particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
     const TLorentzVector &initialPosition = particle->Position;
 
