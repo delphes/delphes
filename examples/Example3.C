@@ -143,12 +143,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
       if(photon->Particles.GetEntriesFast() != 1) continue;
 
       particle = (GenParticle*) photon->Particles.At(0);
-      if(object->IsA() == GenParticle::Class())
-      {
-        plots->fPhotonDeltaPT->Fill((particle->PT - photon->PT)/particle->PT);
-        plots->fPhotonDeltaEta->Fill((particle->Eta - photon->Eta)/particle->Eta);
-        plots->fPhotonDeltaE->Fill((particle->E - photon->E)/particle->E);
-      }    
+      plots->fPhotonDeltaPT->Fill((particle->PT - photon->PT)/particle->PT);
+      plots->fPhotonDeltaEta->Fill((particle->Eta - photon->Eta)/particle->Eta);
+      plots->fPhotonDeltaE->Fill((particle->E - photon->E)/particle->E);
+          
     }
 
     // Loop over all muons in event
