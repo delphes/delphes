@@ -169,6 +169,9 @@ void PileUpMerger::Process()
     case 1:
       numberOfEvents = gRandom->Integer(2*fMeanPileUp + 1);
       break;
+    case 2:
+      numberOfEvents = fMeanPileUp;
+      break;   
     default:
       numberOfEvents = gRandom->Poisson(fMeanPileUp);
       break;
