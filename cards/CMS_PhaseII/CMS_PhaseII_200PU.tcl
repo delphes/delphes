@@ -23,7 +23,7 @@ set ExecutionPath {
   MuonTrackingEfficiency
 
   ChargedHadronMomentumSmearing
-  ElectronMomentumSmearing
+  ElectronEnergySmearing
   MuonMomentumSmearing
 
   TrackMerger
@@ -217,20 +217,29 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   source trackMomentumResolution.tcl
 }
 
-########################################
-# Momentum resolution for electrons
-########################################
+#################################
+# Energy resolution for electrons
+#################################
 
-module MomentumSmearing ElectronMomentumSmearing {
-  ## hadrons after having applied the tracking efficiency
-  set InputArray  ElectronTrackingEfficiency/electrons
+module EnergySmearing ElectronEnergySmearing {
+  set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
+
+  # set ResolutionFormula {resolution formula as a function of eta and energy}
+
   # resolution formula for electrons
-  # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source trackMomentumResolution.tcl  
+  
+  # taking something flat in energy for now, ECAL will take over at high energy anyway.
+  # inferred from hep-ex/1306.2016 and 1502.02701
+  set ResolutionFormula {  
+  
+                        (abs(eta) <= 1.5)  * (1+0.64*abs(eta)^2)*(energy*0.028) +
+    (abs(eta) > 1.5  && abs(eta) <= 1.75)  * (energy*0.037) +
+    (abs(eta) > 1.75  && abs(eta) <= 2.15) * (energy*0.038) +
+    (abs(eta) > 2.15  && abs(eta) <= 3.00) * (energy*0.044) +
+    (abs(eta) > 3.00  && abs(eta) <= 4.00) * (energy*0.10)}   
 
 }
-
 
 ###############################
 # Momentum resolution for muons
@@ -257,7 +266,7 @@ module MomentumSmearing MuonMomentumSmearing {
 module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronMomentumSmearing/electrons
+  add InputArray ElectronEnergySmearing/electrons
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
@@ -352,14 +361,14 @@ module SimpleCalorimeter ECal {
 
   # set ResolutionFormula {resolution formula as a function of eta and energy}
   
-  # for the ECAL barrel (|eta| < 1.5), see hep-ex/1306.2016.
+  # for the ECAL barrel (|eta| < 1.5), see hep-ex/1306.2016 and 1502.02701
   # for the endcaps (1.5 < |eta| < 3.0), we take HGCAL  see LHCC-P-008, Fig. 3.39, p.117
 
-  set ResolutionFormula {                     (abs(eta) <= 1.50) * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
-                           (abs(eta) > 1.50 && abs(eta) <= 1.75) * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
-                           (abs(eta) > 1.75 && abs(eta) <= 2.15) * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
-                           (abs(eta) > 2.15 && abs(eta) <= 3.00) * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
-                           (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.98^2)}
+  set ResolutionFormula {  (abs(eta) <= 1.50)                    * 1.00 * (1+0.64*abs(eta)^2)*sqrt(energy^2*0.008^2 + energy*0.11^2 + 0.50^2) + 
+                           (abs(eta) > 1.50 && abs(eta) <= 1.75) * 1.00 * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
+                           (abs(eta) > 1.75 && abs(eta) <= 2.15) * 1.00 * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
+                           (abs(eta) > 2.15 && abs(eta) <= 3.00) * 1.00 * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
+                           (abs(eta) >= 3.0 && abs(eta) <= 5.0)  * 1.00 * sqrt(energy^2*0.08^2 + energy*1.98^2)}
 
 }
 
