@@ -364,11 +364,11 @@ module SimpleCalorimeter ECal {
   # for the ECAL barrel (|eta| < 1.5), see hep-ex/1306.2016 and 1502.02701
   # for the endcaps (1.5 < |eta| < 3.0), we take HGCAL  see LHCC-P-008, Fig. 3.39, p.117
 
-  set ResolutionFormula {  (abs(eta) <= 1.50)                    * 1.00 * (1+0.64*abs(eta)^2)*sqrt(energy^2*0.008^2 + energy*0.11^2 + 0.50^2) + 
-                           (abs(eta) > 1.50 && abs(eta) <= 1.75) * 1.00 * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
-                           (abs(eta) > 1.75 && abs(eta) <= 2.15) * 1.00 * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
-                           (abs(eta) > 2.15 && abs(eta) <= 3.00) * 1.00 * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
-                           (abs(eta) >= 3.0 && abs(eta) <= 5.0)  * 1.00 * sqrt(energy^2*0.08^2 + energy*1.98^2)}
+  set ResolutionFormula {  (abs(eta) <= 1.50)                    * (1+0.64*abs(eta)^2)*sqrt(energy^2*0.009^2 + energy*0.12^2 + 0.45^2) + 
+                           (abs(eta) > 1.50 && abs(eta) <= 1.75) * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
+                           (abs(eta) > 1.75 && abs(eta) <= 2.15) * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
+                           (abs(eta) > 2.15 && abs(eta) <= 3.00) * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
+                           (abs(eta) >= 3.0 && abs(eta) <= 5.0)  * sqrt(energy^2*0.08^2 + energy*1.98^2)}
 
 }
 
