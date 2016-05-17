@@ -452,6 +452,8 @@ public:
 
   TRef Particle; // reference to generated particle
 
+  Int_t VertexIndex; // reference to vertex
+  
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 

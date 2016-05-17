@@ -1,15 +1,11 @@
 /** \class VertexFinder
  *
- *  Merges particles from pile-up sample into event
- *
- *
- *  $Date: 2013-02-12 15:13:59 +0100 (Tue, 12 Feb 2013) $
- *  $Revision: 907 $
- *
+ *  Cluster vertices from tracks
  *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */
+
 
 #include "modules/VertexFinder.h"
 
@@ -69,7 +65,7 @@ void VertexFinder::Init()
   fItInputArray = fInputArray->MakeIterator();
 
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-  fClusterOutputArray = ExportArray(GetString("ClusterOutputArray", "clusters"));
+  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -182,7 +178,7 @@ void VertexFinder::Process()
     candidate->Position.SetXYZT(0.0, 0.0, clusterIDToDouble.at (cluster->first).at ("z"), 0.0);
     candidate->PositionError.SetXYZT(0.0, 0.0, clusterIDToDouble.at (cluster->first).at ("ez"), 0.0);
 
-    fClusterOutputArray->Add(candidate);
+    fVertexOutputArray->Add(candidate);
   }
 ////////////////////////////////////////////////////////////////////////////////
 }

@@ -243,21 +243,53 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
   Vertex *entry = 0;
 
   const Double_t c_light = 2.99792458E8;
-
+ 
+  Double_t x, y, z, t, xError, yError, zError, sigma, sumPT2, btvSumPT2, genDeltaZ, genSumPT2;
+  UInt_t index, ndf;
+ 
   // loop over all vertices
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))
   {
-    const TLorentzVector &position = candidate->Position;
+   
+    index = candidate->ClusterIndex;
+    ndf = candidate->ClusterNDF;
+    sigma = candidate->ClusterSigma;
+    sumPT2 = candidate->SumPT2;
+    btvSumPT2 = candidate->BTVSumPT2;
+    genDeltaZ = candidate->GenDeltaZ;
+    genSumPT2 = candidate->GenSumPT2;
+
+    x = candidate->Position.X ();
+    y = candidate->Position.Y ();
+    z = candidate->Position.Z ();
+    t = candidate->Position.T()*1.0E-3/c_light;
+  
+    xError = candidate->PositionError.X ();
+    yError = candidate->PositionError.Y ();
+    zError = candidate->PositionError.Z ();
 
     entry = static_cast<Vertex*>(branch->NewEntry());
 
-    entry->X = position.X();
-    entry->Y = position.Y();
-    entry->Z = position.Z();
-    entry->T = position.T()*1.0E-3/c_light;
+    entry->Index = index;
+    entry->NDF = ndf;
+    entry->Sigma = sigma;
+    entry->SumPT2 = sumPT2;
+    entry->BTVSumPT2 = btvSumPT2;
+    entry->GenDeltaZ = genDeltaZ;
+    entry->GenSumPT2 = genSumPT2;
+  
+    entry->X = x;
+    entry->Y = y;
+    entry->Z = z;
+    entry->T = t;
+    
+    entry->ErrorX = xError;
+    entry->ErrorY = yError;
+    entry->ErrorZ = zError;
   }
 }
+
 
 //------------------------------------------------------------------------------
 
@@ -336,6 +368,9 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->T = initialPosition.T()*1.0E-3/c_light;
 
     entry->Particle = particle;
+
+    entry->VertexIndex = candidate->ClusterIndex;
+
   }
 }
 

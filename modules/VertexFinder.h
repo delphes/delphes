@@ -3,12 +3,7 @@
 
 /** \class VertexFinder
  *
- *  Merges particles from pile-up sample into event
- *
- *
- *  $Date: 2013-02-12 15:13:59 +0100 (Tue, 12 Feb 2013) $
- *  $Revision: 907 $
- *
+ *  Cluster vertices from tracks
  *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
@@ -62,7 +57,7 @@ private:
   TIterator *fItInputArray;
 
   TObjArray *fOutputArray;
-  TObjArray *fClusterOutputArray;
+  TObjArray *fVertexOutputArray;
 
   map<unsigned, map<string, double> > trackIDToDouble;
   map<unsigned, map<string, int> > trackIDToInt;
