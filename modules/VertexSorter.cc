@@ -70,12 +70,16 @@ void VertexSorter::Init()
       fItJetInputArray = fJetInputArray->MakeIterator();
     }
 
-  if (string (GetString("BeamSpotInputArray", "")) != "")
-    {
-      fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", ""));
-      fItBeamSpotInputArray = fBeamSpotInputArray->MakeIterator();
-    }
-
+  // import beamspot
+  try
+  {
+    fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+  }
+  catch(runtime_error &e)
+  {
+    fBeamSpotInputArray = 0;
+  }  
+ 
   fOutputArray = ExportArray(GetString("OutputArray", "clusters"));
 
   fMethod = GetString ("Method", "BTV");
