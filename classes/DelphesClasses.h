@@ -177,8 +177,20 @@ public:
   Float_t X; // vertex position (x component)
   Float_t Y; // vertex position (y component)
   Float_t Z; // vertex position (z component)
+ 
+  Double_t ErrorX;
+  Double_t ErrorY;
+  Double_t ErrorZ;
 
-  ClassDef(Vertex, 1)
+  Int_t Index;
+  Int_t NDF;
+  Double_t Sigma;
+  Double_t SumPT2;
+  Double_t BTVSumPT2;
+  Double_t GenDeltaZ;
+  Double_t GenSumPT2;
+
+  ClassDef(Vertex, 2)
 };
 
 //---------------------------------------------------------------------------
@@ -543,7 +555,7 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, InitialPosition, Area;
+  TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
 
   Float_t L; // path length
   Float_t D0;
@@ -590,6 +602,16 @@ public:
   Float_t SumPtNeutral;
   Float_t SumPtChargedPU;
   Float_t SumPt;
+
+  // vertex variables
+  
+  Int_t ClusterIndex;
+  Int_t ClusterNDF;
+  Double_t ClusterSigma;
+  Double_t SumPT2;
+  Double_t BTVSumPT2;
+  Double_t GenDeltaZ;
+  Double_t GenSumPT2;
 
   // N-subjettiness variables
 
