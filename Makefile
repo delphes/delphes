@@ -344,6 +344,8 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/Hector.h \
 	modules/JetFlavorAssociation.h \
 	modules/JetFakeParticle.h \
+	modules/VertexSorter.h \
+	modules/VertexFinder.h \
 	modules/ExampleModule.h
 ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict$(PcmSuf) \
@@ -874,6 +876,26 @@ tmp/modules/UniqueObjectFinder.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/VertexFinder.$(ObjSuf): \
+	modules/VertexFinder.$(SrcSuf) \
+	modules/VertexFinder.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/VertexSorter.$(ObjSuf): \
+	modules/VertexSorter.$(SrcSuf) \
+	modules/VertexSorter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/Weighter.$(ObjSuf): \
 	modules/Weighter.$(SrcSuf) \
 	modules/Weighter.h \
@@ -969,6 +991,8 @@ DELPHES_OBJ +=  \
 	tmp/modules/TrackSmearing.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
+	tmp/modules/VertexFinder.$(ObjSuf) \
+	tmp/modules/VertexSorter.$(ObjSuf) \
 	tmp/modules/Weighter.$(ObjSuf)
 
 ifeq ($(HAS_PYTHIA8),true)
@@ -1826,8 +1850,18 @@ external/fastjet/internal/Dnn4piCylinder.hh: \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
 
+modules/VertexSorter.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
+	@touch $@
+
 modules/Delphes.h: \
 	classes/DelphesModule.h
+	@touch $@
+
+modules/VertexFinder.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
 	@touch $@
 
 modules/UniqueObjectFinder.h: \
