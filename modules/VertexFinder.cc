@@ -277,9 +277,6 @@ VertexFinder::growCluster (const UInt_t clusterIndex)
               if (trackIDToBool.at (track->first).at ("claimed") || trackIDToInt.at (track->first).at ("clusterIndex") == (Int_t) clusterIndex)
                 continue;
                 
-              Double_t sz_tr =  track->second.at ("ez") *  track->second.at ("z");
-              Double_t sz_vt =  clusterIDToDouble.at (clusterIndex).at ("ez") *  clusterIDToDouble.at (clusterIndex).at ("z");
-                
               Double_t distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - track->second.at ("z")) / hypot (clusterIDToDouble.at (clusterIndex).at ("ez"), track->second.at ("ez"));
               if (nearestDistance < 0.0 || distance < nearestDistance)
                 {

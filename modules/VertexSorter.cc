@@ -52,7 +52,7 @@ VertexSorter::~VertexSorter()
 
 void VertexSorter::Init()
 {
-  fInputArray = ImportArray(GetString("InputArray", "VertexFinder/clusters"));
+  fInputArray = ImportArray(GetString("InputArray", "VertexFinder/vertices"));
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "VertexFinder/tracks"));
   fItTrackInputArray = fTrackInputArray->MakeIterator();

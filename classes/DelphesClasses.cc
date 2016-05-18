@@ -120,13 +120,15 @@ Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
+  ClusterIndex(-1), ClusterNDF(0), ClusterSigma(0), SumPT2(0), BTVSumPT2(0), GenDeltaZ(0), GenSumPT2(0),
   Flavor(0), FlavorAlgo(0), FlavorPhys(0),
   BTag(0), BTagAlgo(0), BTagPhys(0),
   TauTag(0), Eem(0.0), Ehad(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
-  InitialPosition(0.0, 0.0, 0.0, 0.0), 
+  PositionError(0.0, 0.0, 0.0, 0.0),
+  InitialPosition(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
   L(0),
   D0(0), ErrorD0(0), 
@@ -252,6 +254,13 @@ void Candidate::Copy(TObject &obj) const
   object.IsPU = IsPU;
   object.IsConstituent = IsConstituent;
   object.IsFromConversion = IsFromConversion;
+  object.ClusterIndex = ClusterIndex;
+  object.ClusterNDF = ClusterNDF;
+  object.ClusterSigma = ClusterSigma;
+  object.SumPT2 = SumPT2;
+  object.BTVSumPT2 = BTVSumPT2;
+  object.GenDeltaZ = GenDeltaZ;
+  object.GenSumPT2 = GenSumPT2;
   object.Flavor = Flavor;
   object.FlavorAlgo = FlavorAlgo;
   object.FlavorPhys = FlavorPhys;
@@ -269,7 +278,8 @@ void Candidate::Copy(TObject &obj) const
   object.DeltaPhi = DeltaPhi;
   object.Momentum = Momentum;
   object.Position = Position;
-  object.InitialPosition = Position;
+  object.InitialPosition = InitialPosition;
+  object.PositionError = PositionError;
   object.Area = Area;
   object.L = L;
   object.D0 = D0;
