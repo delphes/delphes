@@ -8,10 +8,6 @@
 
 
 #include "modules/VertexFinder.h"
-
-//#include "CLHEP/Units/GlobalSystemOfUnits.h"
-//#include "CLHEP/Units/GlobalPhysicalConstants.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"

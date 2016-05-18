@@ -8,7 +8,6 @@
  *
 */
 
-#include <unordered_map>
 #include "modules/VertexSorter.h"
 
 #include "classes/DelphesClasses.h"
