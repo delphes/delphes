@@ -165,7 +165,6 @@ void TrackSmearing::Process()
              *ctgThetaErrorHist = NULL,
              *phiErrorHist = NULL;
 
-  //cout<<fBeamSpotInputArray->GetSize ()<<endl;
   if (!fBeamSpotInputArray || fBeamSpotInputArray->GetSize () == 0) 
     beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   else
@@ -174,7 +173,6 @@ void TrackSmearing::Process()
     beamSpotPosition = beamSpotCandidate.Position;
   }
 
- 
   if (!fUseD0Formula)
   {
      TFile *fin = TFile::Open (fD0ResolutionFile.c_str ());
@@ -223,6 +221,7 @@ void TrackSmearing::Process()
 
     d0 = trueD0 = candidate->D0;
     dz = trueDZ = candidate->DZ;
+     
     p = trueP = candidate->P;
     ctgTheta = trueCtgTheta = candidate->CtgTheta;
     phi = truePhi = candidate->Phi;
@@ -351,8 +350,10 @@ void TrackSmearing::Process()
     x = candidate->InitialPosition.X ();
     y = candidate->InitialPosition.Y ();
     candidate->InitialPosition.SetZ (z + ((pz * (px * (x - beamSpotPosition.X ()) + py * (y - beamSpotPosition.Y ())) + pt * pt * (dz - z)) / (pt * pt)));
+    
+    
     candidate->InitialPosition.SetT (t);
-
+    
     if (fApplyToPileUp || !candidate->IsPU)
     {
        candidate->ErrorD0 = d0Error;
@@ -361,7 +362,7 @@ void TrackSmearing::Process()
        candidate->ErrorCtgTheta = ctgThetaError;
        candidate->ErrorPhi = phiError;
        candidate->ErrorPT = ptError (p, ctgTheta, pError, ctgThetaError);
-       candidate->TrackResolution = pError;
+       candidate->TrackResolution = pError/p;
     }
     
     candidate->AddCandidate(mother);
