@@ -120,12 +120,14 @@ void VertexFinder::Process()
       // Skip the cluster if it no longer has any tracks
       if (!clusterIDToInt.at (cluster->first).at ("ndf"))
         continue;
+        
       // Grow the cluster if GrowSeeds is true
       if (fGrowSeeds)
         growCluster (cluster->first);
 
       // If the cluster still has fewer than MinNDF tracks, release the tracks;
       // otherwise, mark the seed track as claimed
+      
       if ((int) clusterIDToInt.at (cluster->first).at ("ndf") < fMinNDF)
         {
           for (map<unsigned, map<string, int> >::iterator track = trackIDToInt.begin (); track != trackIDToInt.end (); track++)
@@ -161,11 +163,13 @@ void VertexFinder::Process()
   clusterSumPT2.clear ();
   for (map<unsigned, map<string, int> >::const_iterator cluster = clusterIDToInt.begin (); cluster != clusterIDToInt.end (); cluster++)
   {
+    
     if (cluster->second.at ("ndf") < fMinNDF)
       continue;
     clusterSumPT2.push_back (make_pair (cluster->first, clusterIDToDouble.at (cluster->first).at ("sumPT2")));
   }
   sort (clusterSumPT2.begin (), clusterSumPT2.end (), secondDescending);
+  
   for (vector<pair<unsigned, double> >::const_iterator cluster = clusterSumPT2.begin (); cluster != clusterSumPT2.end (); cluster++)
   {
     DelphesFactory *factory = GetFactory();
@@ -271,11 +275,17 @@ VertexFinder::growCluster (const unsigned clusterIndex)
       // tracks in this vector are checked.
       if (!nearTracks.size ())
         {
-          for (map<unsigned, map<string, double> >::const_iterator track = trackIDToDouble.begin (); track != trackIDToDouble.end (); track++)
+        
+            for (map<unsigned, map<string, double> >::const_iterator track = trackIDToDouble.begin (); track != trackIDToDouble.end (); track++)
             {
               if (trackIDToBool.at (track->first).at ("claimed") || trackIDToInt.at (track->first).at ("clusterIndex") == (int) clusterIndex)
                 continue;
+                
+              Double_t sz_tr =  track->second.at ("ez") *  track->second.at ("z");
+              Double_t sz_vt =  clusterIDToDouble.at (clusterIndex).at ("ez") *  clusterIDToDouble.at (clusterIndex).at ("z");
+                
               double distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - track->second.at ("z")) / hypot (clusterIDToDouble.at (clusterIndex).at ("ez"), track->second.at ("ez"));
+              //double distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - track->second.at ("z")) / hypot (sz_vt, sz_tr);
               if (nearestDistance < 0.0 || distance < nearestDistance)
                 {
                   nearestID = track->first;
@@ -285,6 +295,7 @@ VertexFinder::growCluster (const unsigned clusterIndex)
                 nearTracks.push_back (track->first);
             }
         }
+      
       else
         {
           for (vector<unsigned>::const_iterator track = nearTracks.begin (); track != nearTracks.end (); track++)
@@ -299,7 +310,7 @@ VertexFinder::growCluster (const unsigned clusterIndex)
                 }
             }
         }
-
+      
       // If no tracks within Sigma of the cluster were found, stop growing.
       done = nearestDistance > fSigma || nearestDistance < 0.0;
       if (done)
