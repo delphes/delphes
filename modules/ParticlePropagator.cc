@@ -211,6 +211,7 @@ void ParticlePropagator::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
+      candidate->InitialPosition = candidatePosition;
       candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*e*1.0E3);
       candidate->L = l*1.0E3;
    
@@ -279,7 +280,7 @@ void ParticlePropagator::Process()
       // calculate additional track parameters (correct for beamspot position)
        
       d0        = (  (x - bsx) * py - (y - bsy) * px) / pt;
-      dz        = z - ((x - bsx) * px + (py - bsy) * py) / pt * (pz / pt);
+      dz        = z - ((x - bsx) * px + (y - bsy) * py) / pt * (pz / pt);
       p         = candidateMomentum.P();
       ctgTheta  = 1.0 / TMath::Tan (candidateMomentum.Theta ());
           
@@ -349,6 +350,7 @@ void ParticlePropagator::Process()
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
+        candidate->InitialPosition = candidatePosition;
         candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*c_light*1.0E3);
 
         candidate->Momentum = candidateMomentum;
