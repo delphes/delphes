@@ -5,9 +5,10 @@
  *
  *  Cluster vertices from tracks
  *
- *  \author M. Selvaggi - UCL, Louvain-la-Neuve
+ *  \authors A. Hart, M. Selvaggi
  *
  */
+
 
 #include "classes/DelphesModule.h"
 #include "classes/DelphesClasses.h"
@@ -35,16 +36,16 @@ public:
   void Process();
   void Finish();
 
-  static bool secondDescending (pair<unsigned, double>, pair<unsigned, double>);
-  static bool secondAscending (pair<unsigned, double>, pair<unsigned, double>);
+  static Bool_t secondDescending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
+  static Bool_t secondAscending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
 
 private:
 
   void createSeeds ();
-  void growCluster (const unsigned);
-  double weight (const unsigned);
-  void addTrackToCluster (const unsigned, const unsigned);
-  void removeTrackFromCluster (const unsigned, const unsigned);
+  void growCluster (const UInt_t);
+  Double_t weight (const UInt_t);
+  void addTrackToCluster (const UInt_t, const UInt_t);
+  void removeTrackFromCluster (const UInt_t, const UInt_t);
 
   Double_t fSigma;
   Double_t fMinPT;
@@ -59,15 +60,15 @@ private:
   TObjArray *fOutputArray;
   TObjArray *fVertexOutputArray;
 
-  map<unsigned, map<string, double> > trackIDToDouble;
-  map<unsigned, map<string, int> > trackIDToInt;
-  map<unsigned, map<string, bool> > trackIDToBool;
+  map<UInt_t, map<string, Double_t> > trackIDToDouble;
+  map<UInt_t, map<string, Int_t> > trackIDToInt;
+  map<UInt_t, map<string, Bool_t> > trackIDToBool;
 
-  map<unsigned, map<string, double> > clusterIDToDouble;
-  map<unsigned, map<string, int> > clusterIDToInt;
-  map<unsigned, map<string, bool> > clusterIDToBool;
-  vector<pair<unsigned, double> > trackPT;
-  vector<pair<unsigned, double> > clusterSumPT2;
+  map<UInt_t, map<string, Double_t> > clusterIDToDouble;
+  map<UInt_t, map<string, Int_t> > clusterIDToInt;
+  map<UInt_t, map<string, Bool_t> > clusterIDToBool;
+  vector<pair<UInt_t, Double_t> > trackPT;
+  vector<pair<UInt_t, Double_t> > clusterSumPT2;
 
   ClassDef(VertexFinder, 1)
 };

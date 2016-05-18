@@ -2,7 +2,7 @@
  *
  *  Cluster vertices from tracks
  *
- *  \author M. Selvaggi - UCL, Louvain-la-Neuve
+ *  \authors A. Hart, M. Selvaggi
  *
  */
 
@@ -31,11 +31,11 @@
 #include "TMatrixT.h"
 #include "TVector3.h"
 
-static const double mm  = 1.;
-static const double m = 1000.*mm;
-static const double ns  = 1.;
-static const double s = 1.e+9 *ns;
-static const double c_light   = 2.99792458e+8 * m/s;
+static const Double_t mm  = 1.;
+static const Double_t m = 1000.*mm;
+static const Double_t ns  = 1.;
+static const Double_t s = 1.e+9 *ns;
+static const Double_t c_light   = 2.99792458e+8 * m/s;
 
 //------------------------------------------------------------------------------
 
@@ -77,12 +77,12 @@ void VertexFinder::Finish()
 
 //------------------------------------------------------------------------------
 //
-bool VertexFinder::secondAscending (pair<unsigned, double> pair0, pair<unsigned, double> pair1)
+Bool_t VertexFinder::secondAscending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second < pair1.second);
 }
 
-bool VertexFinder::secondDescending (pair<unsigned, double> pair0, pair<unsigned, double> pair1)
+Bool_t VertexFinder::secondDescending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second > pair1.second);
 }
@@ -115,7 +115,7 @@ void VertexFinder::Process()
 // fewer than MinNDF tracks, release the tracks for other clusters to claim.
 ////////////////////////////////////////////////////////////////////////////////
   sort (clusterSumPT2.begin (), clusterSumPT2.end (), secondDescending);
-  for (vector<pair<unsigned, double> >::const_iterator cluster = clusterSumPT2.begin (); cluster != clusterSumPT2.end (); cluster++)
+  for (vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin (); cluster != clusterSumPT2.end (); cluster++)
     {
       // Skip the cluster if it no longer has any tracks
       if (!clusterIDToInt.at (cluster->first).at ("ndf"))
@@ -128,11 +128,11 @@ void VertexFinder::Process()
       // If the cluster still has fewer than MinNDF tracks, release the tracks;
       // otherwise, mark the seed track as claimed
       
-      if ((int) clusterIDToInt.at (cluster->first).at ("ndf") < fMinNDF)
+      if ((Int_t) clusterIDToInt.at (cluster->first).at ("ndf") < fMinNDF)
         {
-          for (map<unsigned, map<string, int> >::iterator track = trackIDToInt.begin (); track != trackIDToInt.end (); track++)
+          for (map<UInt_t, map<string, Int_t> >::iterator track = trackIDToInt.begin (); track != trackIDToInt.end (); track++)
             {
-              if (track->second.at ("clusterIndex") != (int) cluster->first)
+              if (track->second.at ("clusterIndex") != (Int_t) cluster->first)
                 continue;
               track->second["clusterIndex"] = -1;
               trackIDToBool[track->first]["claimed"] = false;
@@ -161,7 +161,7 @@ void VertexFinder::Process()
 // descending sum(pt**2).
 ////////////////////////////////////////////////////////////////////////////////
   clusterSumPT2.clear ();
-  for (map<unsigned, map<string, int> >::const_iterator cluster = clusterIDToInt.begin (); cluster != clusterIDToInt.end (); cluster++)
+  for (map<UInt_t, map<string, Int_t> >::const_iterator cluster = clusterIDToInt.begin (); cluster != clusterIDToInt.end (); cluster++)
   {
     
     if (cluster->second.at ("ndf") < fMinNDF)
@@ -170,7 +170,7 @@ void VertexFinder::Process()
   }
   sort (clusterSumPT2.begin (), clusterSumPT2.end (), secondDescending);
   
-  for (vector<pair<unsigned, double> >::const_iterator cluster = clusterSumPT2.begin (); cluster != clusterSumPT2.end (); cluster++)
+  for (vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin (); cluster != clusterSumPT2.end (); cluster++)
   {
     DelphesFactory *factory = GetFactory();
     candidate = factory->NewCandidate();
@@ -191,7 +191,7 @@ void
 VertexFinder::createSeeds ()
 {
   Candidate *candidate;
-  unsigned clusterIndex = 0, maxSeeds = 0;
+  UInt_t clusterIndex = 0, maxSeeds = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Loop over all tracks, initializing some variables.
@@ -223,7 +223,7 @@ VertexFinder::createSeeds ()
 // trackPT vector.
 ////////////////////////////////////////////////////////////////////////////////
   sort (trackPT.begin (), trackPT.end (), secondDescending);
-  for (vector<pair<unsigned, double> >::const_iterator track = trackPT.begin (); track != trackPT.end (); track++, maxSeeds++)
+  for (vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin (); track != trackPT.end (); track++, maxSeeds++)
     {
       if (track->second < fSeedMinPT)
         break;
@@ -241,7 +241,7 @@ VertexFinder::createSeeds ()
 ////////////////////////////////////////////////////////////////////////////////
 // Create the seeds from the SeedMinPT highest pt tracks.
 ////////////////////////////////////////////////////////////////////////////////
-  for (vector<pair<unsigned, double> >::const_iterator track = trackPT.begin (); track != trackPT.end (); track++, clusterIndex++)
+  for (vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin (); track != trackPT.end (); track++, clusterIndex++)
     {
       addTrackToCluster (track->first, clusterIndex);
       clusterSumPT2.push_back (make_pair (clusterIndex, track->second * track->second));
@@ -250,13 +250,13 @@ VertexFinder::createSeeds ()
 }
 
 void
-VertexFinder::growCluster (const unsigned clusterIndex)
+VertexFinder::growCluster (const UInt_t clusterIndex)
 {
-  bool done = false;
-  unsigned nearestID;
-  int oldClusterIndex;
-  double nearestDistance;
-  vector<unsigned> nearTracks;
+  Bool_t done = false;
+  UInt_t nearestID;
+  Int_t oldClusterIndex;
+  Double_t nearestDistance;
+  vector<UInt_t> nearTracks;
   nearTracks.clear ();
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,16 +276,15 @@ VertexFinder::growCluster (const unsigned clusterIndex)
       if (!nearTracks.size ())
         {
         
-            for (map<unsigned, map<string, double> >::const_iterator track = trackIDToDouble.begin (); track != trackIDToDouble.end (); track++)
+            for (map<UInt_t, map<string, Double_t> >::const_iterator track = trackIDToDouble.begin (); track != trackIDToDouble.end (); track++)
             {
-              if (trackIDToBool.at (track->first).at ("claimed") || trackIDToInt.at (track->first).at ("clusterIndex") == (int) clusterIndex)
+              if (trackIDToBool.at (track->first).at ("claimed") || trackIDToInt.at (track->first).at ("clusterIndex") == (Int_t) clusterIndex)
                 continue;
                 
               Double_t sz_tr =  track->second.at ("ez") *  track->second.at ("z");
               Double_t sz_vt =  clusterIDToDouble.at (clusterIndex).at ("ez") *  clusterIDToDouble.at (clusterIndex).at ("z");
                 
-              double distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - track->second.at ("z")) / hypot (clusterIDToDouble.at (clusterIndex).at ("ez"), track->second.at ("ez"));
-              //double distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - track->second.at ("z")) / hypot (sz_vt, sz_tr);
+              Double_t distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - track->second.at ("z")) / hypot (clusterIDToDouble.at (clusterIndex).at ("ez"), track->second.at ("ez"));
               if (nearestDistance < 0.0 || distance < nearestDistance)
                 {
                   nearestID = track->first;
@@ -298,11 +297,11 @@ VertexFinder::growCluster (const unsigned clusterIndex)
       
       else
         {
-          for (vector<unsigned>::const_iterator track = nearTracks.begin (); track != nearTracks.end (); track++)
+          for (vector<UInt_t>::const_iterator track = nearTracks.begin (); track != nearTracks.end (); track++)
             {
-              if (trackIDToBool.at (*track).at ("claimed") || trackIDToInt.at (*track).at ("clusterIndex") == (int) clusterIndex)
+              if (trackIDToBool.at (*track).at ("claimed") || trackIDToInt.at (*track).at ("clusterIndex") == (Int_t) clusterIndex)
                 continue;
-              double distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - trackIDToDouble.at (*track).at ("z")) / hypot (clusterIDToDouble.at (clusterIndex).at ("ez"), trackIDToDouble.at (*track).at ("ez"));
+              Double_t distance = fabs (clusterIDToDouble.at (clusterIndex).at ("z") - trackIDToDouble.at (*track).at ("z")) / hypot (clusterIDToDouble.at (clusterIndex).at ("ez"), trackIDToDouble.at (*track).at ("ez"));
               if (nearestDistance < 0.0 || distance < nearestDistance)
                 {
                   nearestID = *track;
@@ -333,16 +332,16 @@ VertexFinder::growCluster (const unsigned clusterIndex)
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-double
-VertexFinder::weight (const unsigned trackID)
+Double_t
+VertexFinder::weight (const UInt_t trackID)
 {
   return ((trackIDToDouble.at (trackID).at ("pt") / (trackIDToDouble.at (trackID).at ("ept") * trackIDToDouble.at (trackID).at ("ez"))) * (trackIDToDouble.at (trackID).at ("pt") / (trackIDToDouble.at (trackID).at ("ept") * trackIDToDouble.at (trackID).at ("ez"))));
 }
 
 void
-VertexFinder::removeTrackFromCluster (const unsigned trackID, const unsigned clusterID)
+VertexFinder::removeTrackFromCluster (const UInt_t trackID, const UInt_t clusterID)
 {
-  double wz = weight (trackID);
+  Double_t wz = weight (trackID);
 
   trackIDToInt[trackID]["clusterIndex"] = -1;
   clusterIDToInt[clusterID]["ndf"]--;
@@ -356,9 +355,9 @@ VertexFinder::removeTrackFromCluster (const unsigned trackID, const unsigned clu
 }
 
 void
-VertexFinder::addTrackToCluster (const unsigned trackID, const unsigned clusterID)
+VertexFinder::addTrackToCluster (const UInt_t trackID, const UInt_t clusterID)
 {
-  double wz = weight (trackID);
+  Double_t wz = weight (trackID);
 
   if (!clusterIDToInt.count (clusterID))
     {

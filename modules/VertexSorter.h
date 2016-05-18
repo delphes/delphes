@@ -3,16 +3,13 @@
 
 /** \class VertexSorter
  *
- *  Merges particles from pile-up sample into event
+ *
+ *  Sorts vertices according to different criteria
+ *
+ *  \authors A. Hart, M. Selvaggi
  *
  *
- *  $Date: 2013-02-12 15:13:59 +0100 (Tue, 12 Feb 2013) $
- *  $Revision: 907 $
- *
- *
- *  \author M. Selvaggi - UCL, Louvain-la-Neuve
- *
- */
+*/
 
 #include "classes/DelphesModule.h"
 #include "classes/DelphesClasses.h"
@@ -41,8 +38,8 @@ public:
   void Process();
   void Finish();
 
-  static bool secondDescending (pair<unsigned, double>, pair<unsigned, double>);
-  static bool secondAscending (pair<unsigned, double>, pair<unsigned, double>);
+  static Bool_t secondDescending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
+  static Bool_t secondAscending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
 
 private:
 

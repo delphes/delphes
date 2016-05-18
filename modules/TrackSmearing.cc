@@ -2,9 +2,7 @@
  *
  *  Performs d0, dZ, p, Theta, Phi smearing of tracks.
  *
- *
- *
- *  \author A. Hart, M. Selvaggi
+ *  \authors A. Hart, M. Selvaggi
  *
 */
 

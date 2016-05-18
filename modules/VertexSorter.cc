@@ -1,21 +1,15 @@
 /** \class VertexSorter
  *
- *  Merges particles from pile-up sample into event
+ *
+ *  Sorts vertices according to different criteria
+ *
+ *  \authors A. Hart, M. Selvaggi
  *
  *
- *  $Date: 2013-02-12 15:13:59 +0100 (Tue, 12 Feb 2013) $
- *  $Revision: 907 $
- *
- *
- *  \author M. Selvaggi - UCL, Louvain-la-Neuve
- *
- */
+*/
 
 #include <unordered_map>
 #include "modules/VertexSorter.h"
-
-//#include "CLHEP/Units/GlobalSystemOfUnits.h"
-//#include "CLHEP/Units/GlobalPhysicalConstants.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -36,11 +30,11 @@
 #include "TMatrixT.h"
 #include "TVector3.h"
 
-static const double mm  = 1.;
-static const double m = 1000.*mm;
-static const double ns  = 1.;
-static const double s = 1.e+9 *ns;
-static const double c_light   = 2.99792458e+8 * m/s;
+static const Double_t mm  = 1.;
+static const Double_t m = 1000.*mm;
+static const Double_t ns  = 1.;
+static const Double_t s = 1.e+9 *ns;
+static const Double_t c_light   = 2.99792458e+8 * m/s;
 
 //------------------------------------------------------------------------------
 
@@ -95,11 +89,11 @@ void VertexSorter::Finish()
 
 //------------------------------------------------------------------------------
 //
-bool VertexSorter::secondDescending (pair<unsigned, double> pair0, pair<unsigned, double> pair1)
+Bool_t VertexSorter::secondDescending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second > pair1.second);
 }
-bool VertexSorter::secondAscending (pair<unsigned, double> pair0, pair<unsigned, double> pair1)
+Bool_t VertexSorter::secondAscending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second < pair1.second);
 }
@@ -107,11 +101,11 @@ bool VertexSorter::secondAscending (pair<unsigned, double> pair0, pair<unsigned,
 void VertexSorter::Process()
 {
   Candidate *candidate, *jetCandidate, *beamSpotCandidate;
-  unordered_map<int, unsigned> clusterIDToIndex;
-  unordered_map<int, double> clusterIDToSumPT2;
-  vector<pair<int, double> > sortedClusterIDs;
+  unordered_map<Int_t, UInt_t> clusterIDToIndex;
+  unordered_map<Int_t, Double_t> clusterIDToSumPT2;
+  vector<pair<Int_t, Double_t> > sortedClusterIDs;
 
-  for (int iCluster = 0; iCluster < fInputArray->GetEntries (); iCluster++)
+  for (Int_t iCluster = 0; iCluster < fInputArray->GetEntries (); iCluster++)
     {
       const Candidate &cluster = *((Candidate *) fInputArray->At (iCluster));
       clusterIDToIndex[cluster.ClusterIndex] = iCluster;
@@ -134,7 +128,7 @@ void VertexSorter::Process()
           if (candidate->ClusterIndex < 0)
             continue;
           TLorentzVector p (candidate->Momentum.Px (), candidate->Momentum.Py (), candidate->Momentum.Pz (), candidate->Momentum.E ());
-          bool isInJet = false;
+          Bool_t isInJet = false;
 
           fItJetInputArray->Reset();
           while((jetCandidate = static_cast<Candidate*>(fItJetInputArray->Next())))
@@ -172,7 +166,7 @@ void VertexSorter::Process()
         }
 
       beamSpotCandidate = (Candidate *) fBeamSpotInputArray->At (0);
-      for (int iCluster = 0; iCluster < fInputArray->GetEntries (); iCluster++)
+      for (Int_t iCluster = 0; iCluster < fInputArray->GetEntries (); iCluster++)
         {
           const Candidate &cluster = *((Candidate *) fInputArray->At (iCluster));
           sortedClusterIDs.push_back (make_pair (cluster.ClusterIndex, fabs (cluster.Position.Z () - beamSpotCandidate->Position.Z ())));
