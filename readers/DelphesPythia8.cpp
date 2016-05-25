@@ -144,6 +144,48 @@ void SignalHandler(int sig)
   interrupted = true;
 }
 
+
+// Single-particle gun. The particle must be a colour singlet.
+// Input: flavour, energy, direction (theta, phi).
+// If theta < 0 then random choice over solid angle.
+// Optional final argument to put particle at rest => E = m.
+// from pythia8 example 21
+
+void fillParticle(int id, double ee, double thetaIn, double phiIn,
+  Pythia8::Event& event, Pythia8::ParticleData& pdt, Pythia8::Rndm& rndm, bool atRest = false) {
+
+  // Reset event record to allow for new event.
+  event.reset();
+
+  // Select particle mass; where relevant according to Breit-Wigner.
+  double mm = pdt.mSel(id);
+  double pp = Pythia8::sqrtpos(ee*ee - mm*mm);
+
+  // Special case when particle is supposed to be at rest.
+  if (atRest) {
+    ee = mm;
+    pp = 0.;
+  }
+
+  // Angles as input or uniform in solid angle.
+  double cThe, sThe, phi;
+  if (thetaIn >= 0.) {
+    cThe = cos(thetaIn);
+    sThe = sin(thetaIn);
+    phi  = phiIn;
+  } else {
+    cThe = 2. * rndm.flat() - 1.;
+    sThe = Pythia8::sqrtpos(1. - cThe * cThe);
+    phi = 2. * M_PI * rndm.flat();
+  }
+
+  // Store the particle in the event record.
+  event.append( id, 1, 0, 0, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee, mm);
+
+}
+
+
+
 //---------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
@@ -212,6 +254,8 @@ int main(int argc, char *argv[])
 
     // Initialize Pythia
     pythia = new Pythia8::Pythia;
+    //Pythia8::Event& event = pythia->event;
+    //Pythia8::ParticleData& pdt = pythia->particleData;
 
     if(pythia == NULL)
     {
@@ -229,18 +273,22 @@ int main(int argc, char *argv[])
     numberOfEvents = pythia->mode("Main:numberOfEvents");
     timesAllowErrors = pythia->mode("Main:timesAllowErrors");
 
-    inputFile = fopen(pythia->word("Beams:LHEF").c_str(), "r");
-    if(inputFile)
+    // Check if particle gun
+    if (!pythia->flag("Main:spareFlag1"))
     {
-      reader = new DelphesLHEFReader;
-      reader->SetInputFile(inputFile);
+      inputFile = fopen(pythia->word("Beams:LHEF").c_str(), "r");
+      if(inputFile)
+      {
+        reader = new DelphesLHEFReader;
+        reader->SetInputFile(inputFile);
 
-      branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
-      branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
+        branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
+        branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
 
-      allParticleOutputArrayLHEF = modularDelphes->ExportArray("allParticlesLHEF");
-      stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
-      partonOutputArrayLHEF = modularDelphes->ExportArray("partonsLHEF");
+        allParticleOutputArrayLHEF = modularDelphes->ExportArray("allParticlesLHEF");
+        stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
+        partonOutputArrayLHEF = modularDelphes->ExportArray("partonsLHEF");
+      }
     }
 
     modularDelphes->InitTask();
@@ -259,6 +307,11 @@ int main(int argc, char *argv[])
     {
       while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF,
         stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
+
+      if (pythia->flag("Main:spareFlag1"))
+      {
+        fillParticle( pythia->mode("Main:spareMode1"), 30, -1., 0.,pythia->event, pythia->particleData, pythia->rndm, 0);
+      }
 
       if(!pythia->next())
       {
