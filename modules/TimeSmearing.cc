@@ -103,10 +103,11 @@ void TimeSmearing::Process()
 
     // apply smearing formula
     t = gRandom->Gaus(t, fTimeResolution);
-
+    
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
     candidate->Position.SetT(t*1.0E3*c_light);
+    candidate->ErrorT = fTimeResolution*1.0E3*c_light;
 
     candidate->AddCandidate(mother);
 
