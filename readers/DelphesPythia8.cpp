@@ -151,39 +151,54 @@ void SignalHandler(int sig)
 // Optional final argument to put particle at rest => E = m.
 // from pythia8 example 21
 
-void fillParticle(int id, double ee, double thetaIn, double phiIn,
+void fillParticle(int id, double ee_max, double thetaIn, double phiIn,
   Pythia8::Event& event, Pythia8::ParticleData& pdt, Pythia8::Rndm& rndm, bool atRest = false) {
 
   // Reset event record to allow for new event.
   event.reset();
 
-  // Select particle mass; where relevant according to Breit-Wigner.
+  // Angles uniform in solid angle.
+  double cThe, sThe, phi, ee;
+  cThe = 2. * rndm.flat() - 1.;
+  sThe = Pythia8::sqrtpos(1. - cThe * cThe);
+  phi = 2. * M_PI * rndm.flat();
+  ee = pow(10,1+(log10(ee_max)-1)*rndm.flat());
   double mm = pdt.mSel(id);
   double pp = Pythia8::sqrtpos(ee*ee - mm*mm);
-
-  // Special case when particle is supposed to be at rest.
-  if (atRest) {
-    ee = mm;
-    pp = 0.;
-  }
-
-  // Angles as input or uniform in solid angle.
-  double cThe, sThe, phi;
-  if (thetaIn >= 0.) {
-    cThe = cos(thetaIn);
-    sThe = sin(thetaIn);
-    phi  = phiIn;
-  } else {
-    cThe = 2. * rndm.flat() - 1.;
-    sThe = Pythia8::sqrtpos(1. - cThe * cThe);
-    phi = 2. * M_PI * rndm.flat();
-  }
 
   // Store the particle in the event record.
   event.append( id, 1, 0, 0, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee, mm);
 
 }
 
+void fillPartons(int type, double ee_max, Pythia8::Event& event, Pythia8::ParticleData& pdt,
+  Pythia8::Rndm& rndm) {
+
+  // Reset event record to allow for new event.
+  event.reset();
+
+  // Angles uniform in solid angle.
+  double cThe, sThe, phi, ee;
+
+  // Information on a q qbar system, to be hadronized.
+
+  cThe = 2. * rndm.flat() - 1.;
+  sThe = Pythia8::sqrtpos(1. - cThe * cThe);
+  phi = 2. * M_PI * rndm.flat();
+  ee = pow(10,1+(log10(ee_max)-1)*rndm.flat());
+  double mm = pdt.m0(type);
+  double pp = Pythia8::sqrtpos(ee*ee - mm*mm);
+  if (type == 21)
+  {
+    event.append( 21, 23, 101, 102, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee);
+    event.append( 21, 23, 102, 101, -pp * sThe * cos(phi), -pp * sThe * sin(phi), -pp * cThe, ee);
+  }
+  else
+  {
+    event.append(  type, 23, 101,   0, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee, mm);
+    event.append( -type, 23,   0, 101, -pp * sThe * cos(phi), -pp * sThe * sin(phi), -pp * cThe, ee, mm);
+  }
+}
 
 
 //---------------------------------------------------------------------------
@@ -310,7 +325,11 @@ int main(int argc, char *argv[])
 
       if (pythia->flag("Main:spareFlag1"))
       {
-        fillParticle( pythia->mode("Main:spareMode1"), 30, -1., 0.,pythia->event, pythia->particleData, pythia->rndm, 0);
+        if (pythia->mode("Main:spareMode1") == 11 || pythia->mode("Main:spareMode1") == 13 || pythia->mode("Main:spareMode1") == 22) 
+        { 
+          fillParticle( pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), -1., 0.,pythia->event, pythia->particleData, pythia->rndm, 0);
+        }
+        else fillPartons( pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), pythia->event, pythia->particleData, pythia->rndm);
       }
 
       if(!pythia->next())
