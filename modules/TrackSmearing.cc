@@ -348,9 +348,8 @@ void TrackSmearing::Process()
     x = candidate->InitialPosition.X ();
     y = candidate->InitialPosition.Y ();
     candidate->InitialPosition.SetZ (z + ((pz * (px * (x - beamSpotPosition.X ()) + py * (y - beamSpotPosition.Y ())) + pt * pt * (dz - z)) / (pt * pt)));
-    
-    
-    candidate->InitialPosition.SetT (t);
+  
+    candidate->InitialPosition.SetT(t);
     
     if (fApplyToPileUp || !candidate->IsPU)
     {
