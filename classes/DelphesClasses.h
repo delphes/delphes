@@ -427,7 +427,8 @@ public:
   Float_t TOuter; // track position (z component) at the tracker edge
 
   Float_t L; // track path length
-    
+  Float_t ErrorT; // error on the time measurement 
+     
   Float_t D0;     // track signed transverse impact parameter
   Float_t ErrorD0;    // signed error on the track signed transverse impact parameter
  
@@ -560,6 +561,7 @@ public:
   TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
 
   Float_t L; // path length
+  Float_t ErrorT; // path length
   Float_t D0;
   Float_t ErrorD0;
   Float_t DZ;
