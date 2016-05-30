@@ -163,7 +163,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 
-    candidate->Position.SetXYZT(x, y, z, 0.0);
+    candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
 
     allParticleOutputArray->Add(candidate);
 
