@@ -2,6 +2,7 @@
 #define RunPUPPI_h
 
 #include "classes/DelphesModule.h"
+#include "PUPPI/PuppiContainer.hh"
 #include <vector>
 
 class TObjArray;
@@ -28,9 +29,10 @@ class RunPUPPI: public DelphesModule {
   const TObjArray *fTrackInputArray;
   const TObjArray *fNeutralInputArray; //!
   const TObjArray *fPVInputArray; //!                                                                                                                                                     
- 
+  PuppiContainer* fPuppi;
   // puppi parameters
-  float fMinPuppiWeight;
+  bool fApplyNoLep;
+  double fMinPuppiWeight;
   bool fUseExp;
   
   std::vector<float> fEtaMinBin ;
@@ -45,6 +47,7 @@ class RunPUPPI: public DelphesModule {
   std::vector<bool>  fUseCharged;
   std::vector<bool>  fApplyLowPUCorr;
   std::vector<int>   fMetricId;
+  std::vector<int>   fCombId;
 
   TObjArray *fOutputArray;
   TObjArray *fOutputTrackArray;

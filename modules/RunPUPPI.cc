@@ -1,9 +1,9 @@
 #include "modules/RunPUPPI.h"
 
-#include "PUPPI/puppiCleanContainer.hh"
-#include "PUPPI/RecoObj.hh"
-#include "PUPPI/puppiParticle.hh"
-#include "PUPPI/puppiAlgoBin.hh"
+#include "PUPPI/RecoObj2.hh"
+#include "PUPPI/AlgoObj.hh"
+//#include "PUPPI/puppiParticle.hh"
+//#include "PUPPI/puppiAlgoBin.hh"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -29,7 +29,6 @@ RunPUPPI::~RunPUPPI(){}
 //------------------------------------------------------------------------------
 
 void RunPUPPI::Init(){
-
   // input collection
   fTrackInputArray     = ImportArray(GetString("TrackInputArray", "Calorimeter/towers"));
   fItTrackInputArray   = fTrackInputArray->MakeIterator();
@@ -37,76 +36,103 @@ void RunPUPPI::Init(){
   fItNeutralInputArray = fNeutralInputArray->MakeIterator();
   fPVInputArray        = ImportArray(GetString("PVInputArray", "PV"));
   fPVItInputArray      = fPVInputArray->MakeIterator();
-
-
-  // puppi parameters                                     
+  // puppi parameters                                 
+  fApplyNoLep     = GetBool("UseNoLep", true);    
   fMinPuppiWeight = GetDouble("MinPuppiWeight", 0.01);
   fUseExp         = GetBool("UseExp", false);
-
-  // read eta min ranges                                                                                                                                                           
+  // read eta min ranges
   ExRootConfParam param = GetParam("EtaMinBin");
   fEtaMinBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fEtaMinBin.push_back(param[iMap].GetDouble());
-
-  // read eta max ranges                                                                                                                                                           
+  // read eta max ranges
   param = GetParam("EtaMaxBin");
   fEtaMaxBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fEtaMaxBin.push_back(param[iMap].GetDouble());
-
-  // read pt min value                                                                                                                                                           
+  // read pt min value
   param = GetParam("PtMinBin");
   fPtMinBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fPtMinBin.push_back(param[iMap].GetDouble());
-
   // read cone size                                                                                                                                                           
   param = GetParam("ConeSizeBin");
   fConeSizeBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fConeSizeBin.push_back(param[iMap].GetDouble());
-
   // read RMS min pt                                                                                                                                             
   param = GetParam("RMSPtMinBin");
   fRMSPtMinBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fRMSPtMinBin.push_back(param[iMap].GetDouble());
-
-  // read RMS scale factor                                                                                                                                                           
+  // read RMS scale factor
   param = GetParam("RMSScaleFactorBin");
   fRMSScaleFactorBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fRMSScaleFactorBin.push_back(param[iMap].GetDouble());
-
-  // read neutral pt min cut                                                                                                                                                           
+  // read neutral pt min cut
   param = GetParam("NeutralMinEBin");
   fNeutralMinEBin.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fNeutralMinEBin.push_back(param[iMap].GetDouble());
-
-  // read neutral pt min slope                                                                                                                                                           
+  // read neutral pt min slope
   param = GetParam("NeutralPtSlope");
   fNeutralPtSlope.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fNeutralPtSlope.push_back(param[iMap].GetDouble());
-
   // read apply chs                                                                                                                                                           
-  param = GetParam("ApplyCHS");
-  fApplyCHS.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fApplyCHS.push_back(param[iMap].GetBool());
-
-  // read use charged                                                                                                                                                           
+  //param = GetParam("ApplyCHS");
+  //fApplyCHS.clear();
+  //for(int iMap = 0; iMap < param.GetSize(); ++iMap) fApplyCHS.push_back(param[iMap].GetBool());
+  // read use charged
   param = GetParam("UseCharged");
   fUseCharged.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fUseCharged.push_back(param[iMap].GetBool());
-
-  // read apply chs correction                                                                                                                                                           
+  // read apply chs correction
   param = GetParam("ApplyLowPUCorr");
   fApplyLowPUCorr.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fApplyLowPUCorr.push_back(param[iMap].GetBool());
-  
   // read metric id                                                                                                                                                          
   param = GetParam("MetricId");
   fMetricId.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fMetricId.push_back(param[iMap].GetInt());
-
+  // scheme for combining
+  param = GetParam("CombId");
+  fCombId.clear();
+  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fCombId.push_back(param[iMap].GetInt());
   // create output array
   fOutputArray        = ExportArray(GetString("OutputArray", "puppiParticles"));
   fOutputTrackArray   = ExportArray(GetString("OutputArrayTracks", "puppiTracks"));
   fOutputNeutralArray = ExportArray(GetString("OutputArrayNeutrals", "puppiNeutrals"));
+  // Create algorithm list for puppi
+  std::vector<AlgoObj> puppiAlgo;
+  if(puppiAlgo.empty()){
+    if(!(fEtaMinBin.size() == fEtaMaxBin.size() and fEtaMinBin.size() == fPtMinBin.size() and fEtaMinBin.size() == fConeSizeBin.size() and fEtaMinBin.size() == fRMSPtMinBin.size()
+	 and fEtaMinBin.size() == fRMSScaleFactorBin.size() and fEtaMinBin.size() == fNeutralMinEBin.size() and  fEtaMinBin.size() == fNeutralPtSlope.size() 
+	 and fEtaMinBin.size() == fUseCharged.size()
+	 and fEtaMinBin.size() == fApplyLowPUCorr.size() and fEtaMinBin.size() == fMetricId.size())) {
+      std::cerr<<" Error in PUPPI configuration, algo info should have the same size --> exit from the code"<<std::endl;
+      std::exit(EXIT_FAILURE);
+    }
+  }
+  for( size_t iAlgo =  0 ; iAlgo < fEtaMinBin.size() ; iAlgo++){
+    AlgoObj algoTmp ;
+    algoTmp.etaMin            = fEtaMinBin.at(iAlgo);
+    algoTmp.etaMax            = fEtaMaxBin.at(iAlgo);
+    algoTmp.ptMin             = fPtMinBin.at(iAlgo);
+    algoTmp.minNeutralPt      = fNeutralMinEBin.at(iAlgo);
+    algoTmp.minNeutralPtSlope = fNeutralPtSlope.at(iAlgo);
+    //Eta Extrapolation stuff is missing
+    //Loop through file requiring algos for same bins to be adjacent
+    while(iAlgo < fEtaMinBin.size() and algoTmp.etaMin == fEtaMinBin.at(iAlgo) and algoTmp.etaMax == fEtaMaxBin.at(iAlgo)) { 
+      AlgoSubObj algoSubTmp;
+      algoSubTmp.metricId          = fMetricId.at(iAlgo);
+      algoSubTmp.useCharged        = fUseCharged.at(iAlgo);
+      algoSubTmp.applyLowPUCorr    = fApplyLowPUCorr.at(iAlgo);
+      algoSubTmp.combId            = fCombId.at(iAlgo);
+      algoSubTmp.coneSize          = fConeSizeBin.at(iAlgo);
+      algoSubTmp.rmsPtMin          = fRMSPtMinBin.at(iAlgo);
+      algoSubTmp.rmsScaleFactor    = fRMSScaleFactorBin.at(iAlgo);
+      algoTmp.subAlgos.push_back(algoSubTmp);
+      iAlgo++;
+    }
+    iAlgo--;
+    //if(std::find(puppiAlgo.begin(),puppiAlgo.end(),algoTmp) != puppiAlgo.end()) continue;    
+    puppiAlgo.push_back(algoTmp);     
+  }
+  fPuppi  = new PuppiContainer(true,fUseExp,fMinPuppiWeight,puppiAlgo);
 }
 
 //------------------------------------------------------------------------------
@@ -123,12 +149,12 @@ void RunPUPPI::Process(){
   Candidate *candidate, *particle;
   TLorentzVector momentum;
 
-  DelphesFactory *factory = GetFactory();
+  //DelphesFactory *factory = GetFactory();
 
   // loop over input objects
-  fItTrackInputArray->Reset();
-  fItNeutralInputArray->Reset();
-  fPVItInputArray->Reset();
+  fItTrackInputArray   ->Reset();
+  fItNeutralInputArray ->Reset();
+  fPVItInputArray      ->Reset();
 
   std::vector<Candidate *> InputParticles;
   InputParticles.clear();
@@ -141,21 +167,22 @@ void RunPUPPI::Process(){
   // Fill input particles for puppi
   std::vector<RecoObj> puppiInputVector;
   puppiInputVector.clear();
-
+  int lNBad  = 0; 
   // Loop on charge track candidate
   while((candidate = static_cast<Candidate*>(fItTrackInputArray->Next()))){   
-
       momentum = candidate->Momentum;
-      
       RecoObj curRecoObj;
       curRecoObj.pt  = momentum.Pt();
       curRecoObj.eta = momentum.Eta();
       curRecoObj.phi = momentum.Phi();
       curRecoObj.m   = momentum.M();  
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
+      //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
+      //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
       if (candidate->IsRecoPU and candidate->Charge !=0) { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
+	lNBad++;
 	curRecoObj.id    = 2;
-	curRecoObj.vtxId = candidate->IsPU;
+	curRecoObj.vtxId = 0.7*(fPVInputArray->GetEntries()); //Hack apply reco vtx efficiency of 70% for calibration
 	if(TMath::Abs(candidate->PID) == 11)      curRecoObj.pfType = 2;
 	else if(TMath::Abs(candidate->PID) == 13) curRecoObj.pfType = 3;
 	else if(TMath::Abs(candidate->PID) == 22) curRecoObj.pfType = 4;
@@ -182,16 +209,14 @@ void RunPUPPI::Process(){
 
   // Loop on neutral calo cells 
   while((candidate = static_cast<Candidate*>(fItNeutralInputArray->Next()))){
-
       momentum = candidate->Momentum;
-
       RecoObj curRecoObj;
       curRecoObj.pt  = momentum.Pt();
       curRecoObj.eta = momentum.Eta();
       curRecoObj.phi = momentum.Phi();
       curRecoObj.m   = momentum.M();
+      curRecoObj.charge = 0;
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
-
 
       if(candidate->Charge == 0){
 	curRecoObj.id    = 0; // neutrals have id==0
@@ -209,40 +234,10 @@ void RunPUPPI::Process(){
       puppiInputVector.push_back(curRecoObj);
       InputParticles.push_back(candidate);
   }
-
-  // Create algorithm list for puppi
-  std::vector<puppiAlgoBin> puppiAlgo;
-  if(puppiAlgo.empty()){
-   if(!(fEtaMinBin.size() == fEtaMaxBin.size() and fEtaMinBin.size() == fPtMinBin.size() and fEtaMinBin.size() == fConeSizeBin.size() and fEtaMinBin.size() == fRMSPtMinBin.size()
-       and fEtaMinBin.size() == fRMSScaleFactorBin.size() and fEtaMinBin.size() == fNeutralMinEBin.size() and  fEtaMinBin.size() == fNeutralPtSlope.size() 
-       and fEtaMinBin.size() == fApplyCHS.size()  and fEtaMinBin.size() == fUseCharged.size()
-       and fEtaMinBin.size() == fApplyLowPUCorr.size() and fEtaMinBin.size() == fMetricId.size())) {
-    std::cerr<<" Error in PUPPI configuration, algo info should have the same size --> exit from the code"<<std::endl;
-    std::exit(EXIT_FAILURE);
-   } 
-
-   for( size_t iAlgo =  0 ; iAlgo < fEtaMinBin.size() ; iAlgo++){
-    puppiAlgoBin algoTmp ;
-    algoTmp.fEtaMin_ = fEtaMinBin.at(iAlgo);
-    algoTmp.fEtaMax_ = fEtaMaxBin.at(iAlgo);
-    algoTmp.fPtMin_  = fPtMinBin.at(iAlgo);
-    algoTmp.fConeSize_        = fConeSizeBin.at(iAlgo);
-    algoTmp.fRMSPtMin_        = fRMSPtMinBin.at(iAlgo);
-    algoTmp.fRMSScaleFactor_  = fRMSScaleFactorBin.at(iAlgo);
-    algoTmp.fNeutralMinE_     = fNeutralMinEBin.at(iAlgo);
-    algoTmp.fNeutralPtSlope_  = fNeutralPtSlope.at(iAlgo);
-    algoTmp.fApplyCHS_        = fApplyCHS.at(iAlgo);
-    algoTmp.fUseCharged_      = fUseCharged.at(iAlgo);
-    algoTmp.fApplyLowPUCorr_  = fApplyLowPUCorr.at(iAlgo);
-    algoTmp.fMetricId_        = fMetricId.at(iAlgo);
-    if(std::find(puppiAlgo.begin(),puppiAlgo.end(),algoTmp) != puppiAlgo.end()) continue;    
-    puppiAlgo.push_back(algoTmp);     
-   }
-  }  
-
   // Create PUPPI container
-  puppiCleanContainer curEvent(puppiInputVector,puppiAlgo,fMinPuppiWeight,fUseExp);
-  std::vector<fastjet::PseudoJet> puppiParticles = curEvent.puppiEvent();
+  fPuppi->initialize(puppiInputVector);
+  fPuppi->puppiWeights();
+  std::vector<fastjet::PseudoJet> puppiParticles = fPuppi->puppiParticles();
 
   // Loop on final particles
   for (std::vector<fastjet::PseudoJet>::iterator it = puppiParticles.begin() ; it != puppiParticles.end() ; it++) {
