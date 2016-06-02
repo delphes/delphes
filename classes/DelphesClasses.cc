@@ -312,7 +312,11 @@ void Candidate::Copy(TObject &obj) const
   object.SumPtNeutral = SumPtNeutral;
   object.SumPtChargedPU = SumPtChargedPU;
   object.SumPt = SumPt;
-
+  object.ClusterIndex = ClusterIndex;
+  object.ClusterNDF = ClusterNDF;
+  object.ClusterSigma = ClusterSigma; 
+  object.SumPT2 = SumPT2;
+  
   object.FracPt[0] = FracPt[0];
   object.FracPt[1] = FracPt[1];
   object.FracPt[2] = FracPt[2];
@@ -430,6 +434,14 @@ void Candidate::Clear(Option_t* option)
   SumPtChargedPU = -999;
   SumPt = -999;
 
+  ClusterIndex = -1;
+  ClusterNDF = -99;
+  ClusterSigma = 0.0; 
+  SumPT2 = 0.0;
+  BTVSumPT2 = 0.0;
+  GenDeltaZ = 0.0;
+  GenSumPT2 = 0.0; 
+  
   FracPt[0] = 0.0;
   FracPt[1] = 0.0;
   FracPt[2] = 0.0;
