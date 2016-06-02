@@ -259,10 +259,10 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
     btvSumPT2 = candidate->BTVSumPT2;
     genDeltaZ = candidate->GenDeltaZ;
     genSumPT2 = candidate->GenSumPT2;
-
-    x = candidate->Position.X ();
-    y = candidate->Position.Y ();
-    z = candidate->Position.Z ();
+   
+    x = candidate->Position.X();
+    y = candidate->Position.Y();
+    z = candidate->Position.Z();
     t = candidate->Position.T()*1.0E-3/c_light;
   
     xError = candidate->PositionError.X ();
@@ -278,7 +278,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
     entry->BTVSumPT2 = btvSumPT2;
     entry->GenDeltaZ = genDeltaZ;
     entry->GenSumPT2 = genSumPT2;
-  
+    
     entry->X = x;
     entry->Y = y;
     entry->Z = z;
