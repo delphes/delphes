@@ -98,7 +98,7 @@ void TimeSmearing::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
+    const TLorentzVector &candidatePosition = candidate->InitialPosition;
     t = candidatePosition.T()*1.0E-3/c_light;
 
     // apply smearing formula
@@ -106,7 +106,7 @@ void TimeSmearing::Process()
     
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->Position.SetT(t*1.0E3*c_light);
+    candidate->InitialPosition.SetT(t*1.0E3*c_light);
     candidate->ErrorT = fTimeResolution*1.0E3*c_light;
 
     candidate->AddCandidate(mother);
