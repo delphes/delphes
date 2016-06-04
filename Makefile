@@ -954,12 +954,8 @@ DELPHES_OBJ +=  \
 	tmp/modules/PileUpMergerPythia8.$(ObjSuf)
 endif
 
-tmp/external/PUPPI/PuppiAlgo.$(ObjSuf): \
-	external/PUPPI/PuppiAlgo.$(SrcSuf) \
-	external/fastjet/internal/base.hh
-tmp/external/PUPPI/PuppiContainer.$(ObjSuf): \
-	external/PUPPI/PuppiContainer.$(SrcSuf) \
-	external/fastjet/internal/base.hh \
+tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf): \
+	external/PUPPI/puppiCleanContainer.$(SrcSuf) \
 	external/fastjet/Selector.hh
 tmp/external/fastjet/AreaDefinition.$(ObjSuf): \
 	external/fastjet/AreaDefinition.$(SrcSuf) \
@@ -1312,14 +1308,15 @@ tmp/modules/FastJetGridMedianEstimator.$(ObjSuf): \
 tmp/modules/RunPUPPI.$(ObjSuf): \
 	modules/RunPUPPI.$(SrcSuf) \
 	modules/RunPUPPI.h \
-	external/PUPPI/RecoObj2.hh \
-	external/PUPPI/AlgoObj.hh \
+	external/PUPPI/puppiCleanContainer.hh \
+	external/PUPPI/RecoObj.hh \
+	external/PUPPI/puppiParticle.hh \
+	external/PUPPI/puppiAlgoBin.hh \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
 FASTJET_OBJ +=  \
-	tmp/external/PUPPI/PuppiAlgo.$(ObjSuf) \
-	tmp/external/PUPPI/PuppiContainer.$(ObjSuf) \
+	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/external/fastjet/AreaDefinition.$(ObjSuf) \
 	tmp/external/fastjet/BasicRandom.$(ObjSuf) \
 	tmp/external/fastjet/ClosestPair2D.$(ObjSuf) \
@@ -1744,8 +1741,7 @@ external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	@touch $@
 
 modules/RunPUPPI.h: \
-	classes/DelphesModule.h \
-	external/PUPPI/PuppiContainer.hh
+	classes/DelphesModule.h
 	@touch $@
 
 modules/Cloner.h: \
@@ -1867,6 +1863,14 @@ external/fastjet/ClusterSequenceVoronoiArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/AreaDefinition.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh
+	@touch $@
+
+external/PUPPI/puppiCleanContainer.hh: \
+	external/PUPPI/RecoObj.hh \
+	external/PUPPI/puppiParticle.hh \
+	external/PUPPI/puppiAlgoBin.hh \
+	external/fastjet/internal/base.hh \
+	external/fastjet/PseudoJet.hh
 	@touch $@
 
 modules/BTagging.h: \
