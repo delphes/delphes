@@ -117,7 +117,7 @@ void PileUpMerger::Process()
   Int_t pid, nch, nvtx = -1;
   Float_t x, y, z, t, vx, vy, vz, vt;
   Float_t px, py, pz, e, pt;
-  Double_t dz, dphi, dt, sumpt2;
+  Double_t dz, dphi, dt, sumpt2, dz0, dt0;
   Int_t numberOfEvents, event, numberOfParticles;
   Long64_t allEntries, entry;
   Candidate *candidate, *vertex;
@@ -131,8 +131,12 @@ void PileUpMerger::Process()
 
   fFunction->GetRandom2(dz, dt);
 
+  dz0 = -1.0e6;
+  dt0 = -1.0e6;
+
   dt *= c_light*1.0E3; // necessary in order to make t in mm/c
   dz *= 1.0E3; // necessary in order to make z in mm
+  
   vx = 0.0;
   vy = 0.0;
   vz = 0.0;
@@ -150,11 +154,19 @@ void PileUpMerger::Process()
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
     
-    vz += z+dz;
-    vt += t+dt;
+    // take postion and time from first stable particle
+    if (dz0 < -999999.0)
+      dz0 = z;
+    if (dt0 < -999999.0)
+      dt0 = t;
+
+    // cancel any possible offset in position and time the input file
+    candidate->Position.SetZ(z - dz0 + dz);
+    candidate->Position.SetT(t - dt0 + dt);
     
-    candidate->Position.SetZ(z + dz);
-    candidate->Position.SetT(t + dt);
+    vz += z - dz0 + dz;
+    vt += t - dt0 + dt;
+    
     fParticleOutputArray->Add(candidate);
  
     if(TMath::Abs(candidate->Charge) >  1.0E-9)
@@ -169,8 +181,7 @@ void PileUpMerger::Process()
     vx /= numberOfParticles;
     vy /= numberOfParticles;
     vz /= numberOfParticles;
-    vt /= numberOfParticles;
-  
+    vt /= numberOfParticles; 
   }
 
   nvtx++;
@@ -255,6 +266,8 @@ void PileUpMerger::Process()
 
       vx += candidate->Position.X();
       vy += candidate->Position.Y();
+      vz += z+dz;
+      vt += t+dt;
       
       ++numberOfParticles;
       if(TMath::Abs(candidate->Charge) >  1.0E-9)
