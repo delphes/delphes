@@ -39,11 +39,7 @@ set ExecutionPath {
   EFlowMergerAllTracks
   EFlowMerger
 
-  LeptonFilterNoLep
-  LeptonFilterLep
-  RunPUPPIBase
   RunPUPPI
-
 
   PhotonIsolation
   PhotonEfficiency
@@ -58,7 +54,6 @@ set ExecutionPath {
   NeutrinoFilter
 
   MissingET
-  PuppiMissingET
   GenMissingET
   GenPileUpMissingET
 
@@ -95,7 +90,7 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile MinBias.pileup 
+  set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup 
 
   # average expected pile up
   set MeanPileUp 200
@@ -109,10 +104,12 @@ module PileUpMerger PileUpMerger {
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
  
   #set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
-  set VertexDistributionFormula { (abs(t) <= 1.6e-10) * (abs(z) <= 0.053) * (1.00) +
-      (abs(t) >  1.6e-10) * (abs(z) <= 0.053) * (0.00) +
-      (abs(t) <= 1.6e-10) * (abs(z) > 0.053)  * (0.00) +
-      (abs(t) >  1.6e-10) * (abs(z) > 0.053)  * (0.00)}
+  
+  
+  set VertexDistributionFormula { (abs(t) <= 1.0e-09) * (abs(z) <= 0.15) * (1.00) +
+                                  (abs(t) >  1.0e-09) * (abs(z) <= 0.15) * (0.00) +
+   				  (abs(t) <= 1.0e-09) * (abs(z) > 0.15)  * (0.00) +
+   				  (abs(t) >  1.0e-09) * (abs(z) > 0.15)  * (0.00)}
 
 }
 
@@ -549,49 +546,27 @@ module Merger EFlowMergerAllTracks {
 ### Run the puppi code (to be tuned) ###
 #########################################
 
-module PdgCodeFilter LeptonFilterNoLep {
-  set InputArray HCal/eflowTracks
-  set OutputArray eflowTracksNoLeptons
-  set Invert false
-  add PdgCode {13}
-  add PdgCode {-13}
-  add PdgCode {11}
-  add PdgCode {-11}
-}
-
-module PdgCodeFilter LeptonFilterLep {
-  set InputArray HCal/eflowTracks
-  set OutputArray eflowTracksLeptons
-  set Invert true
-  add PdgCode {11}
-  add PdgCode {-11}
-  add PdgCode {13}
-  add PdgCode {-13}
-}
-
-module RunPUPPI RunPUPPIBase {
+module RunPUPPI RunPUPPI {
   ## input information
-  set TrackInputArray   LeptonFilterNoLep/eflowTracksNoLeptons
+  set TrackInputArray   TrackMerger/tracks
   set NeutralInputArray NeutralEFlowMerger/eflowTowers
   set PVInputArray      PileUpMerger/vertices
   set MinPuppiWeight    0.05
   set UseExp            false
-  set UseNoLep          false
  
   ## define puppi algorithm parameters (more than one for the same eta region is possible)                                                                                      
-  add EtaMinBin           0.0   1.5   4.0
-  add EtaMaxBin           1.5   4.0   10.0
-  add PtMinBin            0.0   0.0   0.0
-  add ConeSizeBin         0.2   0.2   0.2
-  add RMSPtMinBin         0.1   0.5   0.5
-  add RMSScaleFactorBin   1.0   1.0   1.0
-  add NeutralMinEBin      0.2   0.2   0.5
-  add NeutralPtSlope      0.006 0.013 0.067
-  add ApplyCHS            true  true  true
-  add UseCharged          true  true  false
-  add ApplyLowPUCorr      true  true  true 
-  add MetricId            5     5     5
-  add CombId              0     0     0
+  add EtaMinBin           0.    2.5    2.5    3.0   3.0
+  add EtaMaxBin           2.5   3.0    3.0    10.0  10.0
+  add PtMinBin            0.    0.5    0.5    0.5   0.5
+  add ConeSizeBin         0.25  0.25   0.25   0.25  0.25
+  add RMSPtMinBin         0.1   0.5    0.5    0.5   0.5
+  add RMSScaleFactorBin   1.0   1.0    1.0    1.0   1.0
+  add NeutralMinEBin      0.2   1.0    1.0    1.5   1.5
+  add NeutralPtSlope      0.02  0.02   0.02   0.02  0.02
+  add ApplyCHS            true  true   true   true  true
+  add UseCharged          true  false  false  false false
+  add ApplyLowPUCorr      true  true   true   true  true
+  add MetricId            5     5      1      5     1
 
   ## output name
   set OutputArray         PuppiParticles
@@ -599,11 +574,7 @@ module RunPUPPI RunPUPPIBase {
   set OutputArrayNeutrals puppiNeutrals
 } 
 
-module Merger RunPUPPI {
-  add InputArray RunPUPPIBase/PuppiParticles
-  add InputArray LeptonFilterLep/eflowTracksLeptons
-  set OutputArray PuppiParticles
-}
+
 
 ###################
 # Missing ET merger
@@ -613,13 +584,6 @@ module Merger MissingET {
 # add InputArray InputArray
 #  add InputArray RunPUPPI/PuppiParticles
   add InputArray EFlowMerger/eflow
-  set MomentumOutputArray momentum
-}
-
-module Merger PuppiMissingET {
-  #add InputArray InputArray
-  add InputArray RunPUPPI/PuppiParticles
-  #add InputArray EFlowMerger/eflow
   set MomentumOutputArray momentum
 }
 
@@ -1006,7 +970,6 @@ module TreeWriter TreeWriter {
   add Branch JetEnergyScale/jets Jet Jet
   
   add Branch MissingET/momentum MissingET MissingET
-  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
   add Branch GenPileUpMissingET/momentum GenPileUpMissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 }
