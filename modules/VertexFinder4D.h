@@ -5,7 +5,7 @@
  *
  *  Cluster vertices from tracks using deterministic annealing and timing information
  *
- *  \authors M. Selvaggi
+ *  \authors M. Selvaggi, L. Gray
  *
  */
 
@@ -47,6 +47,10 @@ public:
   Candidate* tt;  // a pointer to the Candidate Track
   double Z;              // Z[i]   for DA clustering
   double pi;             // track weight
+  double pt;
+  double eta;
+  double phi;
+
 };
 
 
@@ -69,15 +73,13 @@ struct vertex_t{
 
   void clusterize(const TObjArray & tracks, TObjArray & clusters);
 
-  std::vector< Candidate >
-    vertices(const TObjArray & tracks, const int verbosity=0);
+  std::vector< Candidate* > vertices();
 
-  std::vector<track_t> fill(const TObjArray & tracks)const;
+  std::vector<track_t> fill() const;
 
   bool split( double beta,
              std::vector<track_t> & tks,
-             std::vector<vertex_t> & y,
-             double threshold ) const;
+             std::vector<vertex_t> & y) const;
 
   double update( double beta,
                 std::vector<track_t> & tks,
@@ -88,8 +90,8 @@ struct vertex_t{
                std::vector<vertex_t> & y,
                double & )const;
 
-  void dump(const double beta, const std::vector<vertex_t> & y, const std::vector<track_t> & tks, const int verbosity=0) const;
-  bool merge(std::vector<vertex_t> &,int ) const;
+  void dump(const double beta, const std::vector<vertex_t> & y, const std::vector<track_t> & tks) const;
+  bool merge(std::vector<vertex_t> &) const;
   bool merge(std::vector<vertex_t> &,double & ) const;
   bool purge(std::vector<vertex_t> &, std::vector<track_t> & , double &, const double ) const;
 
@@ -104,23 +106,19 @@ struct vertex_t{
 
 private:
 
-  Double_t fSigma;
-  Double_t fMinPT;
-  Double_t fMaxEta;
-  Double_t fSeedMinPT;
-  Int_t fMinNDF;
-  Int_t fGrowSeeds;
   Bool_t fVerbose;
-
-  bool useTc_;
-  float vertexSize_;
-  int maxIterations_;
-  double coolingFactor_;
-  float betamax_;
-  float betastop_;
-  double dzCutOff_;
-  double d0CutOff_;
-  double dtCutOff_; // for when the beamspot has time
+  Double_t fMinPT;
+  
+  Float_t fVertexSpaceSize;
+  Float_t fVertexTimeSize;
+  Bool_t fUseTc;
+  Float_t fBetaMax;
+  Float_t fBetaStop;
+  Double_t fCoolingFactor;
+  Int_t fMaxIterations;
+  Double_t fDzCutOff;
+  Double_t fD0CutOff;
+  Double_t fDtCutOff; // for when the beamspot has time
 
   TObjArray *fInputArray;
   TIterator *fItInputArray;

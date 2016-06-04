@@ -2,7 +2,7 @@
  *
  *  Cluster vertices from tracks using deterministic annealing and timing information
  *
- *  \authors M. Selvaggi, L. Grey
+ *  \authors M. Selvaggi, L. Gray
  *
  */
 
@@ -35,8 +35,6 @@ static const Double_t c_light   = 2.99792458e+8 * m/s;
 
 
 namespace {
-  constexpr double dtCutOff = 4.0;
-
   bool recTrackLessZ1(const VertexFinder4D::track_t & tk1,
                       const VertexFinder4D::track_t & tk2)
   {
@@ -48,7 +46,9 @@ namespace {
 //------------------------------------------------------------------------------
 
 VertexFinder4D::VertexFinder4D() :
-  fSigma(0), fMinPT(0), fMaxEta(0), fSeedMinPT(0), fMinNDF(0), fGrowSeeds(0)
+  fVerbose(0), fMinPT(0), fVertexSpaceSize(0), fVertexTimeSize(0),
+  fUseTc(0), fBetaMax(0), fBetaStop(0), fCoolingFactor(0),
+  fMaxIterations(0), fDzCutOff(0), fD0CutOff(0), fDtCutOff(0)
 {
 }
 
@@ -64,23 +64,24 @@ void VertexFinder4D::Init()
 {
   
   fVerbose = GetBool("Verbose", 1);
-  fSigma = GetDouble("Sigma", 3.0);
   fMinPT = GetDouble("MinPT", 0.1);
-  fMaxEta = GetDouble("MaxEta", 10.0);
-  fSeedMinPT = GetDouble("SeedMinPT", 5.0);
-  fMinNDF = GetInt("MinNDF", 4);
-  fGrowSeeds = GetInt("GrowSeeds", 1);
-
-  // setting everything in cm to be able to compare easily with Lindsey code
-  useTc_=true;
-  betamax_=0.1;
-  betastop_  =1.0;
-  coolingFactor_=0.8;
-  maxIterations_=100;
-  vertexSize_=0.05;  // 0.5 mm
-  dzCutOff_=4.0;   // Adaptive Fitter uses 3.0 but that appears to be a bit tight here sometimes
-  d0CutOff_=3.0; 
- 
+  fVertexSpaceSize = GetDouble("VertexSpaceSize", 0.5); //in mm
+  fVertexTimeSize = GetDouble("VertexTimeSize", 10E-12); //in s
+  fUseTc         = GetBool("UseTc", 1);
+  fBetaMax       = GetDouble("BetaMax ", 0.1);
+  fBetaStop      = GetDouble("BetaStop", 1.0);
+  fCoolingFactor = GetDouble("CoolingFactor", 0.8);
+  fMaxIterations = GetInt("MaxIterations", 100);
+  fDzCutOff      = GetDouble("DzCutOff", 40);  // Adaptive Fitter uses 30 mm but that appears to be a bit tight here sometimes
+  fD0CutOff      = GetDouble("D0CutOff", 30);
+  fDtCutOff      = GetDouble("DtCutOff", 100E-12);  // dummy
+  
+  // convert stuff in cm, ns
+  fVertexSpaceSize /= 10.0;  
+  fVertexTimeSize *= 1E9;  
+  fDzCutOff       /= 10.0;   // Adaptive Fitter uses 3.0 but that appears to be a bit tight here sometimes
+  fD0CutOff       /= 10.0; 
+  
   fInputArray = ImportArray(GetString("InputArray", "TrackSmearing/tracks"));
   fItInputArray = fInputArray->MakeIterator();
 
@@ -104,18 +105,36 @@ void VertexFinder4D::Process()
   ClusterArray = new TObjArray;
   TIterator *ItClusterArray;
   Int_t ivtx = 0;
-
+  
+  fInputArray->Sort();
+  
+  TLorentzVector pos, mom;
+  if (fVerbose)
+  {
+     cout<<" start processing vertices ..."<<endl;
+     cout<<" Found "<<fInputArray->GetEntriesFast()<<" input tracks"<<endl;
+     //loop over input tracks
+     fItInputArray->Reset();
+     while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+     {  
+        pos = candidate->InitialPosition;
+        mom = candidate->Momentum;
+       
+        cout<<"pt: "<<mom.Pt()<<", eta: "<<mom.Eta()<<", phi: "<<mom.Phi()<<", z: "<<candidate->DZ/10<<endl;
+     }
+  }   
+     
   // clusterize tracks in Z
   clusterize(*fInputArray, *ClusterArray);
  
   if (fVerbose){std::cout <<  " clustering returned  "<< ClusterArray->GetEntriesFast() << " clusters  from " << fInputArray->GetEntriesFast() << " selected tracks" <<std::endl;}
-
-  
+ 
   //loop over vertex candidates
   ItClusterArray = ClusterArray->MakeIterator();
   ItClusterArray->Reset();
   while((candidate = static_cast<Candidate*>(ItClusterArray->Next())))
   {
+  
      double meantime = 0.;
      double expv_x2 = 0.;
      double normw = 0.;      
@@ -130,19 +149,20 @@ void VertexFinder4D::Process()
     
      int itr = 0;
      
+     if(fVerbose)cout<<"this vertex has: "<<candidate->GetCandidates()->GetEntriesFast()<<" tracks"<<endl;
+     
      // loop over tracks belonging to this vertex
      TIter it1(candidate->GetCandidates());
      it1.Reset();
+     
      while((track = static_cast<Candidate*>(it1.Next())))
      {
         
         itr++;
         // TBC: the time is in ns for now TBC 
-        double t = track->Position.T()/c_light;
-        double l = track->L/c_light;
+        double t = track->InitialPosition.T()/c_light;
         double dt = track->ErrorT/c_light;
-        
-        const double time = t-l;
+        const double time = t;
         const double inverr = 1.0/dt;
         meantime += time*inverr;
         expv_x2  += time*time*inverr;
@@ -150,7 +170,7 @@ void VertexFinder4D::Process()
      
         // compute error position TBC
         const double pt = track->Momentum.Pt();
-        const double z = track->DZ;
+        const double z = track->DZ/10.0;
         const double err_pt = track->ErrorPT;
         const double err_z = track->ErrorDZ;
         
@@ -162,10 +182,8 @@ void VertexFinder4D::Process()
         sumpt2 += pt*pt;
       
         // while we are here store cluster index in tracks
-        track->ClusterIndex = ivtx; 
-      
+        track->ClusterIndex = ivtx;  
      }
-     
      
      meantime = meantime/normw;
      expv_x2 = expv_x2/normw;
@@ -181,6 +199,8 @@ void VertexFinder4D::Process()
      candidate->ClusterNDF = itr;
      candidate->ClusterIndex = ivtx;
 
+     fVertexOutputArray->Add(candidate);
+     
      ivtx++;
  
      if (fVerbose){
@@ -188,13 +208,15 @@ void VertexFinder4D::Process()
        std::cout << ",t";
        std::cout << "=" << candidate->Position.X()/10.0 <<" " << candidate->Position.Y()/10.0 << " " <<  candidate->Position.Z()/10.0;
        std::cout << " " << candidate->Position.T()/c_light;
+       
        std::cout << std::endl;
+       std::cout << "sumpt2 " << candidate->SumPT2<<endl;
      }
    }// end of cluster loop
 
     
     if(fVerbose){
-      std::cout << "PrimaryVertexProducerAlgorithm::vertices  candidates =" << ClusterArray->GetEntriesFast() << std::endl;
+      std::cout << "PrimaryVertexProducerAlgorithm::vertices candidates =" << ClusterArray->GetEntriesFast() << std::endl;
     }
 
     //TBC maybe this can be done later  
@@ -218,44 +240,41 @@ void VertexFinder4D::clusterize(const TObjArray & tracks, TObjArray & clusters)
     cout << "# VertexFinder4D::clusterize   nt="<<tracks.GetEntriesFast() << endl;
     cout << "###################################################" << endl;
   }
+ 
+  vector< Candidate* > pv = vertices();
 
-  Candidate *candidate;
-  
-  vector< Candidate > pv=vertices(tracks);
-
-  cout<<"test"<<endl;
   if(fVerbose){ cout << "# VertexFinder4D::clusterize   pv.size="<<pv.size() << endl;  }
   if (pv.size()==0){ return;  }
 
   // convert into vector of candidates
   //TObjArray *ClusterArray = pv.begin()->GetCandidates();
   //Candidate *aCluster = static_cast<Candidate*>(&(pv.at(0)));
-   Candidate *aCluster = &(pv.at(0));
+   Candidate *aCluster = pv.at(0);
    
   // fill into clusters and merge
    
   
   if( fVerbose ) { 
       std::cout << '\t' << 0;
-      std::cout << ' ' << pv.begin()->Position.Z()/10.0 << ' ' << pv.begin()->Position.T()/c_light << std::endl; 
+      std::cout << ' ' << (*pv.begin())->Position.Z()/10.0 << ' ' << (*pv.begin())->Position.T()/c_light << std::endl; 
     }
 
-  for(vector<Candidate>::iterator k=pv.begin()+1; k!=pv.end(); k++){
+  for(vector<Candidate*>::iterator k=pv.begin()+1; k!=pv.end(); k++){
     if( fVerbose ) { 
       std::cout << '\t' << std::distance(pv.begin(),k);
-      std::cout << ' ' << k->Position.Z() << ' ' << k->Position.T() << std::endl; 
+      std::cout << ' ' << (*k)->Position.Z() << ' ' << (*k)->Position.T() << std::endl; 
     }
     
     
     // TBC - check units here
-    if ( std::abs(k->Position.Z() - (k-1)->Position.Z())/10.0 > (2*vertexSize_) ||
-         std::abs(k->Position.T() - (k-1)->Position.Z())/c_light > 2*0.010 ) {
+    if ( std::abs((*k)->Position.Z() - (*(k-1))->Position.Z())/10.0 > (2*fVertexSpaceSize) ||
+         std::abs((*k)->Position.T() - (*(k-1))->Position.Z())/c_light > 2*0.010 ) {
       // close a cluster
       clusters.Add(aCluster);
       //aCluster.clear();
     }
     //for(unsigned int i=0; i<k->GetCandidates().GetEntriesFast(); i++){ 
-      aCluster = &*k; 
+      aCluster = *k; 
     //}
     
   }
@@ -268,14 +287,33 @@ void VertexFinder4D::clusterize(const TObjArray & tracks, TObjArray & clusters)
 
 //------------------------------------------------------------------------------
 
-vector< Candidate >
-VertexFinder4D::vertices(const TObjArray & tracks, const int verbosity) 
+vector< Candidate* > VertexFinder4D::vertices() 
 {
   Candidate *candidate;
   UInt_t clusterIndex = 0;
-  vector< Candidate > clusters;
+  vector< Candidate* > clusters;
  
-  vector<track_t> tks=fill(tracks);
+  vector<track_t> tks = fill();
+   
+  //print out input tracks
+   
+  if(fVerbose)
+  { 
+    std::cout<<" start processing vertices ..."<<std::endl;
+    std::cout<<" Found "<<tks.size()<<" input tracks"<<std::endl;
+    //loop over input tracks
+ 
+   
+   for(std::vector<track_t>::const_iterator it=tks.begin(); it!=tks.end(); it++){
+     double z = it->z;
+     double pt=it->pt;
+     double eta=it->eta;
+     double phi=it->phi;
+     double t = it->t;
+
+     std::cout<<"pt: "<<pt<<", eta: "<<eta<<", phi: "<<phi<<", z: "<<z<<", t: "<<t<<std::endl;
+   } 
+  }
    
   unsigned int nt=tks.size();
   double rho0=0.0;  // start with no outlier rejection
@@ -293,75 +331,74 @@ VertexFinder4D::vertices(const TObjArray & tracks, const int verbosity)
   int niter=0;      // number of iterations
  
   // estimate first critical temperature
-  double beta=beta0(betamax_, tks, y);
-  niter=0; while((update(beta, tks,y)>1.e-6)  && (niter++ < maxIterations_)){ }
+  double beta=beta0(fBetaMax, tks, y);
+  niter=0; while((update(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){ }
 
   // annealing loop, stop when T<Tmin  (i.e. beta>1/Tmin)
-  while(beta<betamax_){ 
+  while(beta<fBetaMax){ 
 
-    if(useTc_){
+    if(fUseTc){
       update(beta, tks,y);
       while(merge(y,beta)){update(beta, tks,y);}
-      split(beta, tks,y, 1.);
-      beta=beta/coolingFactor_;
+      split(beta, tks,y);
+      beta=beta/fCoolingFactor;
     }else{
-      beta=beta/coolingFactor_;
+      beta=beta/fCoolingFactor;
       splitAll(y);
     }
 
-
    // make sure we are not too far from equilibrium before cooling further
-   niter=0; while((update(beta, tks,y)>1.e-6)  && (niter++ < maxIterations_)){ }
+   niter=0; while((update(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){ }
 
   }
 
-  if(useTc_){
+  if(fUseTc){
     // last round of splitting, make sure no critical clusters are left
     update(beta, tks,y);
     while(merge(y,beta)){update(beta, tks,y);}
     unsigned int ntry=0;
-    while( split(beta, tks,y,1.) && (ntry++<10) ){
+    while( split(beta, tks,y) && (ntry++<10) ){
       niter=0; 
-      while((update(beta, tks,y)>1.e-6)  && (niter++ < maxIterations_)){}
+      while((update(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){}
       merge(y,beta);
       update(beta, tks,y);
     }
   }else{
     // merge collapsed clusters 
     while(merge(y,beta)){update(beta, tks,y);}  
-    if(fVerbose ){ cout << "dump after 1st merging " << endl;  dump(beta,y,tks,2);}
+    if(fVerbose ){ cout << "dump after 1st merging " << endl;  dump(beta,y,tks);}
   }
  
   // switch on outlier rejection
   rho0=1./nt; for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){ k->pk =1.; }  // democratic
-  niter=0; while((update(beta, tks,y,rho0) > 1.e-8)  && (niter++ < maxIterations_)){  }
-  if(fVerbose  ){ cout << "rho0=" << rho0 <<   " niter=" << niter <<  endl; dump(beta,y,tks,2);}
+  niter=0; while((update(beta, tks,y,rho0) > 1.e-8)  && (niter++ < fMaxIterations)){  }
+  if(fVerbose  ){ cout << "rho0=" << rho0 <<   " niter=" << niter <<  endl; dump(beta,y,tks);}
 
   
   // merge again  (some cluster split by outliers collapse here)
-  while(merge(y,tks.size())){}  
-  if(fVerbose  ){ cout << "dump after 2nd merging " << endl;  dump(beta,y,tks,2);}
+  while(merge(y)){}  
+  if(fVerbose  ){ cout << "dump after 2nd merging " << endl;  dump(beta,y,tks);}
 
 
   // continue from freeze-out to Tstop (=1) without splitting, eliminate insignificant vertices
-  while(beta<=betastop_){
+  while(beta<=fBetaStop){
     while(purge(y,tks,rho0, beta)){
-      niter=0; while((update(beta, tks, y, rho0) > 1.e-6)  && (niter++ < maxIterations_)){  }
+      niter=0; while((update(beta, tks, y, rho0) > 1.e-6)  && (niter++ < fMaxIterations)){  }
     } 
-    beta/=coolingFactor_;
-    niter=0; while((update(beta, tks, y, rho0) > 1.e-6)  && (niter++ < maxIterations_)){  }
+    beta/=fCoolingFactor;
+    niter=0; while((update(beta, tks, y, rho0) > 1.e-6)  && (niter++ < fMaxIterations)){  }
   }
 
 
 //   // new, one last round of cleaning at T=Tstop
 //   while(purge(y,tks,rho0, beta)){
-//     niter=0; while((update(beta, tks,y,rho0) > 1.e-6)  && (niter++ < maxIterations_)){  }
+//     niter=0; while((update(beta, tks,y,rho0) > 1.e-6)  && (niter++ < fMaxIterations)){  }
 //   } 
 
 
   if(fVerbose){
    cout << "Final result, rho0=" << rho0 << endl;
-   dump(beta,y,tks,2);
+   dump(beta,y,tks);
   }
 
 
@@ -370,7 +407,7 @@ VertexFinder4D::vertices(const TObjArray & tracks, const int verbosity)
   
   // ensure correct normalization of probabilities, should make double assginment reasonably impossible
   for(unsigned int i=0; i<nt; i++){  
-    tks[i].Z=rho0*exp(-beta*( dzCutOff_*dzCutOff_));
+    tks[i].Z=rho0*exp(-beta*( fDzCutOff*fDzCutOff));
     for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){ 
       tks[i].Z += k->pk * exp(-beta*Eik(tks[i],*k));
     }
@@ -419,23 +456,13 @@ VertexFinder4D::vertices(const TObjArray & tracks, const int verbosity)
    
     
     candidate->ClusterIndex = clusterIndex++;;
-    //candidate->ClusterNDF = 5;
-    //candidate->ClusterSigma = fSigma;
-    //candidate->SumPT2 = cluster->second;
-    
-    // TBC units - set everything back in mm 
-    
-    //cout<<z<<","<<time<<endl;
-    
     candidate->Position.SetXYZT(0.0, 0.0, z*10.0 , time*c_light);
     
     // TBC - fill error later ... 
     candidate->PositionError.SetXYZT(0.0, 0.0, 0.0 , crappy_error_guess*c_light);
 
-    //fVertexOutputArray->Add(candidate);
-
     clusterIndex++;   
-    clusters.push_back(*candidate);
+    clusters.push_back(candidate);
   }
   
 
@@ -446,22 +473,19 @@ VertexFinder4D::vertices(const TObjArray & tracks, const int verbosity)
 //------------------------------------------------------------------------------
 
 vector<VertexFinder4D::track_t> 
-VertexFinder4D::fill( const TObjArray & tracks )const{
+VertexFinder4D::fill()const{
   
   Candidate *candidate;
   track_t tr;
   Double_t z, dz, t, l, dt, d0, d0error;
-  
   
   // prepare track data for clustering
   vector< track_t > tks;
   
   // loop over input tracks
   fItInputArray->Reset();
-  cout<<"new fill"<<endl;
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-     cout<<"new track"<<endl;
      //TBC everything in cm 
      z = candidate->DZ/10;
      tr.z = z;
@@ -469,42 +493,42 @@ VertexFinder4D::fill( const TObjArray & tracks )const{
      tr.dz2 = dz*dz          // track error
    // TBC: beamspot size induced error, take 0 for now.        
    //   + (std::pow(beamspot.BeamWidthX()*cos(phi),2.)+std::pow(beamspot.BeamWidthY()*sin(phi),2.))/std::pow(tantheta,2.) // beam-width induced
-      + vertexSize_*vertexSize_;                     // intrinsic vertex size, safer for outliers and short lived decays
+      + fVertexSpaceSize*fVertexSpaceSize;                     // intrinsic vertex size, safer for outliers and short lived decays
     
-    // TBC: the time is in ns for now TBC 
-     t = candidate->Position.T()/c_light;
+     // TBC: the time is in ns for now TBC 
+     //t = candidate->Position.T()/c_light;
+     t = candidate->InitialPosition.T()/c_light;
      l = candidate->L/c_light;
      
-     tr.t = (t-l); // 
+     double pt = candidate->Momentum.Pt();
+     double eta = candidate->Momentum.Eta();
+     double phi = candidate->Momentum.Phi();
+
+     tr.pt = pt;
+     tr.eta = eta;
+     tr.phi = phi;
+     tr.t = t; // 
      tr.dtz = 0.;
      dt = candidate->ErrorT/c_light;
-     tr.dt2 = dt*dt + 0.010*0.010;   // the ~injected~ timing error, need to add a small minimum vertex size in time
-     //cout<<"t error: "<<dt<<endl;
-    if (d0CutOff_>0){
+     tr.dt2 = dt*dt + fVertexTimeSize*fVertexTimeSize;   // the ~injected~ timing error plus a small minimum vertex size in time
+     if (fD0CutOff>0){
     
-      d0 = TMath::Abs(candidate->D0)/10.0;
-      d0error = candidate->ErrorD0/10.0;
+     d0 = TMath::Abs(candidate->D0)/10.0;
+     d0error = candidate->ErrorD0/10.0;
       
-      tr.pi=1./(1.+exp((d0*d0)/(d0error*d0error) - d0CutOff_*d0CutOff_));  // reduce weight for high ip tracks  
-     // cout<<"IP: "<<d0<<endl;
-     // cout<<"IP error: "<<d0error<<endl;
-    
-    }else{
+     tr.pi=1./(1.+exp((d0*d0)/(d0error*d0error) - fD0CutOff*fD0CutOff));  // reduce weight for high ip tracks  
+     
+    }
+    else{
       tr.pi=1.;
     }
     tr.tt=&(*candidate);    
     tr.Z=1.;
-    if( tr.pi > 1e-3 ) {
+ 
+    // TBC now putting track selection here (> fPTMin)
+    if( tr.pi > 1e-3 && tr.pt > fMinPT) {
       tks.push_back(tr);
     }
- 
-   cout<<"dz2: "<<tr.dz2<<endl;
-   cout<<"t: "<<tr.t<<endl;
-   cout<<"z: "<<tr.z<<endl;
-   cout<<"dt2: "<<tr.dt2<<endl;
-   cout<<"pi: "<<tr.pi<<endl;
-
- 
  
   }
   
@@ -522,7 +546,7 @@ double VertexFinder4D::Eik(const track_t & t, const vertex_t &k ) const {
   
 //--------------------------------------------------------------------------------  
 
-void VertexFinder4D::dump(const double beta, const vector<vertex_t> & y, const vector<track_t> & tks0, int verbosity)const{
+void VertexFinder4D::dump(const double beta, const vector<vertex_t> & y, const vector<track_t> & tks0)const{
 
   // copy and sort for nicer printout
   vector<track_t> tks; 
@@ -530,7 +554,7 @@ void VertexFinder4D::dump(const double beta, const vector<vertex_t> & y, const v
   std::stable_sort(tks.begin(), tks.end(), recTrackLessZ1);
 
   cout << "-----DAClusterizerInZT::dump ----" << endl;
-  cout << " beta=" << beta << "   betamax= " << betamax_ << endl;
+  cout << " beta=" << beta << "   betamax= " << fBetaMax << endl;
   cout << "                                                               z= ";
   cout.precision(4);
   for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
@@ -553,7 +577,7 @@ void VertexFinder4D::dump(const double beta, const vector<vertex_t> & y, const v
   }
   cout  << endl;
 
-  if(verbosity>0){
+  if(fVerbose){
     double E=0, F=0;
     cout << endl;
     cout << "----       z +/- dz        t +/- dt        ip +/-dip       pt    phi  eta    weights  ----" << endl;
@@ -565,23 +589,6 @@ void VertexFinder4D::dump(const double beta, const vector<vertex_t> & y, const v
       cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2) 
            << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
       
-      
-      // TBC - see later if we want to keep these print outs 
-      /*
-      if(tks[i].tt->track().quality(reco::TrackBase::highPurity)){ cout << " *";}else{cout <<"  ";}
-      if(tks[i].tt->track().hitPattern().hasValidHitInFirstPixelBarrel()){cout <<"+";}else{cout << "-";}
-      
-      cout << setw(1) << tks[i].tt->track().hitPattern().pixelBarrelLayersWithMeasurement(); // see DataFormats/TrackReco/interface/HitPattern.h
-      cout << setw(1) << tks[i].tt->track().hitPattern().pixelEndcapLayersWithMeasurement(); 
-      cout << setw(1) << hex << tks[i].tt->track().hitPattern().trackerLayersWithMeasurement()-tks[i].tt->track().hitPattern().pixelLayersWithMeasurement() <<dec; 
-      cout << "=" << setw(1)<<hex <<tks[i].tt->track().trackerExpectedHitsOuter().numberOfHits() << dec;
-
-      Measurement1D IP=tks[i].tt->stateAtBeamLine().transverseImpactParameter();
-      cout << setw (8) << IP.value() << "+/-" << setw (6) << IP.error();
-      cout << " " << setw(6) << setprecision(2)  << tks[i].tt->track().pt()*tks[i].tt->track().charge();
-      cout << " " << setw(5) << setprecision(2) << tks[i].tt->track().phi() 
-	   << " "  << setw(5)  << setprecision(2)   << tks[i].tt->track().eta() ;
-      */
       double sump=0.;
       for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
 	if((tks[i].pi>0)&&(tks[i].Z>0)){
@@ -703,8 +710,8 @@ double VertexFinder4D::update( double beta,
   for(unsigned int i=0; i<nt; i++){
 
     // update pik and Zi and Ti
-    double Zi = rho0*std::exp(-beta*(dzCutOff_*dzCutOff_));// cut-off (eventually add finite size in time)
-    //double Ti = 0.; // dt0*std::exp(-beta*dtCutOff_);
+    double Zi = rho0*std::exp(-beta*(fDzCutOff*fDzCutOff));// cut-off (eventually add finite size in time)
+    //double Ti = 0.; // dt0*std::exp(-beta*fDtCutOff);
     for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){
       k->ei = std::exp(-beta*Eik(tks[i],*k));// cache exponential for one track at a time
       Zi   += k->pk * k->ei;
@@ -724,9 +731,7 @@ double VertexFinder4D::update( double beta,
       }
     }
 
-
   } // end of track loop
-
 
   // now update z
   double delta=0;
@@ -751,7 +756,7 @@ double VertexFinder4D::update( double beta,
 
 //------------------------------------------------------------------------------
 
-bool VertexFinder4D::merge(vector<vertex_t> & y, int nt)const{
+bool VertexFinder4D::merge(vector<vertex_t> & y)const{
   // merge clusters that collapsed or never separated, return true if vertices were merged, false otherwise
   
   if(y.size()<2)  return false;
@@ -826,7 +831,7 @@ bool VertexFinder4D::purge(vector<vertex_t> & y, vector<track_t> & tks, double &
   for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){ 
     int nUnique=0;
     double sump=0;
-    double pmax=k->pk/(k->pk+rho0*exp(-beta*dzCutOff_*dzCutOff_));
+    double pmax=k->pk/(k->pk+rho0*exp(-beta*fDzCutOff*fDzCutOff));
     for(unsigned int i=0; i<nt; i++){
       if(tks[i].Z > 0){
 	double p = k->pk * std::exp(-beta*Eik(tks[i],*k)) / tks[i].Z ;
@@ -891,10 +896,10 @@ double VertexFinder4D::beta0( double betamax,
   }// vertex loop (normally there should be only one vertex at beta=0)
   
   if (T0>1./betamax){
-    return betamax/pow(coolingFactor_, int(std::log(T0*betamax)/std::log(coolingFactor_))-1 );
+    return betamax/pow(fCoolingFactor, int(std::log(T0*betamax)/std::log(fCoolingFactor))-1 );
   }else{
     // ensure at least one annealing step
-    return betamax/coolingFactor_;
+    return betamax/fCoolingFactor;
   }
 }
 
@@ -902,8 +907,7 @@ double VertexFinder4D::beta0( double betamax,
 
 bool VertexFinder4D::split( double beta,
                                vector<track_t> & tks,
-                               vector<vertex_t> & y,
-                               double threshold ) const {
+                               vector<vertex_t> & y) const {
   // split only critical vertices (Tc >~ T=1/beta   <==>   beta*Tc>~1)
   // an update must have been made just before doing this (same beta, no merging)
   // returns true if at least one cluster was split
