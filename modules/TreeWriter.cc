@@ -247,6 +247,8 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
   Double_t x, y, z, t, xError, yError, zError, sigma, sumPT2, btvSumPT2, genDeltaZ, genSumPT2;
   UInt_t index, ndf;
  
+  array->Sort();
+ 
   // loop over all vertices
   iterator.Reset();
   while((candidate = static_cast<Candidate*>(iterator.Next())))

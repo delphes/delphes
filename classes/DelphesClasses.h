@@ -190,7 +190,10 @@ public:
   Double_t GenDeltaZ;
   Double_t GenSumPT2;
 
-  ClassDef(Vertex, 2)
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  ClassDef(Vertex, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -650,7 +653,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 4)
+  ClassDef(Candidate, 5)
 };
 
 #endif // DelphesClasses_h
