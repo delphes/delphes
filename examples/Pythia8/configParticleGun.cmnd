@@ -1,0 +1,22 @@
+ProcessLevel:all = off
+
+! 1) Settings used in the main program.
+
+Main:numberOfEvents = 10000         ! number of events to generate
+Main:timesAllowErrors = 3          ! how many aborts before run stops
+Main:spareFlag1 = on                ! true means particle gun
+Main:spareMode1 = 11               ! 1-5 - di-quark, 21 - di-gluon, 11 - single electron, 13 - single muon, 22 - single photon
+Main:spareParm1 = 10000           ! max pt
+
+! 2) Settings related to output in init(), next() and stat().
+
+Init:showChangedSettings = on      ! list changed settings
+Init:showChangedParticleData = off ! list changed particle data
+Next:numberCount = 100             ! print message every n events
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 1         ! print process record n times
+Next:numberShowEvent = 0           ! print event record n times
+
+! 3) Set the input LHE file
+
+! Beams:frameType = 4
