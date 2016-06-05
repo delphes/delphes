@@ -169,7 +169,6 @@ int main(int argc, char *argv[])
       for(Int_t entry = 0; entry < numberOfEvents; ++entry)
       {
         
-        eventCounter++;
         treeReader->ReadEntry(entry);
        
         // -- TBC need also to include event weights --  
