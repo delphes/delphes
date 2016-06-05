@@ -954,6 +954,13 @@ DELPHES_OBJ +=  \
 	tmp/modules/PileUpMergerPythia8.$(ObjSuf)
 endif
 
+tmp/external/PUPPI/PuppiAlgo.$(ObjSuf): \
+	external/PUPPI/PuppiAlgo.$(SrcSuf) \
+	external/fastjet/internal/base.hh
+tmp/external/PUPPI/PuppiContainer.$(ObjSuf): \
+	external/PUPPI/PuppiContainer.$(SrcSuf) \
+	external/fastjet/internal/base.hh \
+	external/fastjet/Selector.hh
 tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf): \
 	external/PUPPI/puppiCleanContainer.$(SrcSuf) \
 	external/fastjet/Selector.hh
@@ -1316,6 +1323,8 @@ tmp/modules/RunPUPPI.$(ObjSuf): \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
 FASTJET_OBJ +=  \
+	tmp/external/PUPPI/PuppiAlgo.$(ObjSuf) \
+	tmp/external/PUPPI/PuppiContainer.$(ObjSuf) \
 	tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf) \
 	tmp/external/fastjet/AreaDefinition.$(ObjSuf) \
 	tmp/external/fastjet/BasicRandom.$(ObjSuf) \
