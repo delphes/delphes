@@ -1,9 +1,11 @@
+set MaxEvents 10
+
 #
 #  Phase II - Pile-Up
 #
 #  Main authors: Michele Selvaggi (UCL)
-#                                
-#  Released on: 
+#
+#  Released on:
 #
 #  Version: v01
 #
@@ -13,9 +15,8 @@
 #######################################
 
 set ExecutionPath {
- 
-  PileUpMerger 
-  
+
+  PileUpMerger
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -27,33 +28,39 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
-  
+
   ECal
   HCal
 
   ElectronFilter
   TrackPileUpSubtractor
-  
+
   TowerMerger
   NeutralEFlowMerger
   EFlowMergerAllTracks
   EFlowMerger
 
+  LeptonFilterNoLep
+  LeptonFilterLep
+  RunPUPPIBase
   RunPUPPI
+
+  PhotonFilter
 
   PhotonIsolation
   PhotonEfficiency
-  
+
   ElectronIsolation
   ElectronEfficiency
- 
+
   MuonIsolation
   MuonLooseIdEfficiency
   MuonTightIdEfficiency
- 
+
   NeutrinoFilter
 
   MissingET
+  PuppiMissingET
   GenMissingET
   GenPileUpMissingET
 
@@ -61,7 +68,7 @@ set ExecutionPath {
   FastJetFinder
 
   ScalarHT
- 
+
   JetEnergyScale
 
   JetFlavorAssociation
@@ -71,9 +78,9 @@ set ExecutionPath {
   BTaggingTight
 
   TauTagging
-  
+
   GenParticleFilter
-  
+
   TreeWriter
 }
 
@@ -90,26 +97,19 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup 
+  set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
 
   # average expected pile up
   set MeanPileUp 200
-  
+
   # maximum spread in the beam direction in m
-  set ZVertexSpread 0.15
+  set ZVertexSpread 0.25
 
   # maximum spread in time in s
-  set TVertexSpread 1.5E-09
+  set TVertexSpread 800E-12
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
- 
-  #set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
-  
-  
-  set VertexDistributionFormula { (abs(t) <= 1.0e-09) * (abs(z) <= 0.15) * (1.00) +
-                                  (abs(t) >  1.0e-09) * (abs(z) <= 0.15) * (0.00) +
-   				  (abs(t) <= 1.0e-09) * (abs(z) > 0.15)  * (0.00) +
-   				  (abs(t) >  1.0e-09) * (abs(z) > 0.15)  * (0.00)}
+  set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
 
 }
 
@@ -166,7 +166,7 @@ module Efficiency ElectronTrackingEfficiency {
   set InputArray  ParticlePropagator/electrons
   set OutputArray electrons
   # tracking efficiency formula for electrons
-  set EfficiencyFormula { 
+  set EfficiencyFormula {
       (pt <= 0.2) * (0.00) + \
 	  (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
 	  (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
@@ -198,7 +198,7 @@ module Efficiency MuonTrackingEfficiency {
 	  (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
 	  (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
 	  (abs(eta) > 4.0) * (0.00)
-	  
+
   }
 }
 
@@ -211,8 +211,8 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   ## hadrons after having applied the tracking efficiency
   set InputArray  ChargedHadronTrackingEfficiency/chargedHadrons
   set OutputArray chargedHadrons
-  # resolution formula for charged hadrons , 
- 
+  # resolution formula for charged hadrons ,
+
   # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
   source trackMomentumResolution.tcl
 }
@@ -228,16 +228,16 @@ module EnergySmearing ElectronEnergySmearing {
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
   # resolution formula for electrons
-  
+
   # taking something flat in energy for now, ECAL will take over at high energy anyway.
   # inferred from hep-ex/1306.2016 and 1502.02701
-  set ResolutionFormula {  
-  
+  set ResolutionFormula {
+
                         (abs(eta) <= 1.5)  * (1+0.64*abs(eta)^2)*(energy*0.028) +
     (abs(eta) > 1.5  && abs(eta) <= 1.75)  * (energy*0.037) +
     (abs(eta) > 1.75  && abs(eta) <= 2.15) * (energy*0.038) +
     (abs(eta) > 2.15  && abs(eta) <= 3.00) * (energy*0.044) +
-    (abs(eta) > 3.00  && abs(eta) <= 4.00) * (energy*0.10)}   
+    (abs(eta) > 3.00  && abs(eta) <= 4.00) * (energy*0.10)}
 
 }
 
@@ -249,11 +249,11 @@ module MomentumSmearing MuonMomentumSmearing {
   set InputArray MuonTrackingEfficiency/muons
   set OutputArray muons
   # resolution formula for muons
-  
-  # up to |eta| < 2.8 take measurement from tracking + muon chambers 
-  # for |eta| > 2.8 and pT < 5.0 take measurement from tracking alone taken from 
+
+  # up to |eta| < 2.8 take measurement from tracking + muon chambers
+  # for |eta| > 2.8 and pT < 5.0 take measurement from tracking alone taken from
   # http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source muonMomentumResolution.tcl  
+  source muonMomentumResolution.tcl
 }
 
 
@@ -283,8 +283,8 @@ module SimpleCalorimeter ECal {
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowPhotons
 
-  set IsEcal true 
- 
+  set IsEcal true
+
   set EnergyMin 0.5
   set EnergySignificanceMin 1.0
 
@@ -297,7 +297,7 @@ module SimpleCalorimeter ECal {
   # the list ends with the higher edged of the last tower
 
   # assume 0.02 x 0.02 resolution in eta,phi in the barrel |eta| < 1.5
-  
+
   set PhiBins {}
   for {set i -180} {$i <= 180} {incr i} {
     add PhiBins [expr {$i * $pi/180.0}]
@@ -310,7 +310,7 @@ module SimpleCalorimeter ECal {
   }
 
   # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- ECAL)
-  
+
   set PhiBins {}
   for {set i -180} {$i <= 180} {incr i} {
     add PhiBins [expr {$i * $pi/180.0}]
@@ -327,14 +327,14 @@ module SimpleCalorimeter ECal {
     add EtaPhiBins $eta $PhiBins
   }
 
-  # take present CMS granularity for HF  
- 
+  # take present CMS granularity for HF
+
   # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
   set PhiBins {}
   for {set i -18} {$i <= 18} {incr i} {
     add PhiBins [expr {$i * $pi/18.0}]
   }
-  
+
   foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }
@@ -360,11 +360,11 @@ module SimpleCalorimeter ECal {
   add EnergyFraction {3122} {0.3}
 
   # set ResolutionFormula {resolution formula as a function of eta and energy}
-  
+
   # for the ECAL barrel (|eta| < 1.5), see hep-ex/1306.2016 and 1502.02701
   # for the endcaps (1.5 < |eta| < 3.0), we take HGCAL  see LHCC-P-008, Fig. 3.39, p.117
 
-  set ResolutionFormula {  (abs(eta) <= 1.50)                    * (1+0.64*abs(eta)^2)*sqrt(energy^2*0.009^2 + energy*0.12^2 + 0.45^2) + 
+  set ResolutionFormula {  (abs(eta) <= 1.50)                    * (1+0.64*abs(eta)^2)*sqrt(energy^2*0.009^2 + energy*0.12^2 + 0.45^2) +
                            (abs(eta) > 1.50 && abs(eta) <= 1.75) * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
                            (abs(eta) > 1.75 && abs(eta) <= 2.15) * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
                            (abs(eta) > 2.15 && abs(eta) <= 3.00) * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
@@ -384,8 +384,8 @@ module SimpleCalorimeter HCal {
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowNeutralHadrons
 
-  set IsEcal false 
- 
+  set IsEcal false
+
   set EnergyMin 1.0
   set EnergySignificanceMin 1.0
 
@@ -396,7 +396,7 @@ module SimpleCalorimeter HCal {
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
- 
+
   # assume 0.087 x 0.087 resolution in eta,phi in the barrel |eta| < 1.5
 
   set PhiBins {}
@@ -408,7 +408,7 @@ module SimpleCalorimeter HCal {
   }
 
   # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- HCAL)
-  
+
   set PhiBins {}
   for {set i -180} {$i <= 180} {incr i} {
     add PhiBins [expr {$i * $pi/180.0}]
@@ -425,14 +425,14 @@ module SimpleCalorimeter HCal {
     add EtaPhiBins $eta $PhiBins
   }
 
-  # take present CMS granularity for HF  
- 
+  # take present CMS granularity for HF
+
   # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
   set PhiBins {}
   for {set i -18} {$i <= 18} {incr i} {
     add PhiBins [expr {$i * $pi/18.0}]
   }
-  
+
   foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }
@@ -476,6 +476,7 @@ module PdgCodeFilter ElectronFilter {
   add PdgCode {11}
   add PdgCode {-11}
 }
+
 
 ##########################
 # Track pile-up subtractor
@@ -546,35 +547,61 @@ module Merger EFlowMergerAllTracks {
 ### Run the puppi code (to be tuned) ###
 #########################################
 
-module RunPUPPI RunPUPPI {
+module PdgCodeFilter LeptonFilterNoLep {
+  set InputArray HCal/eflowTracks
+  set OutputArray eflowTracksNoLeptons
+  set Invert false
+  add PdgCode {13}
+  add PdgCode {-13}
+  add PdgCode {11}
+  add PdgCode {-11}
+}
+
+module PdgCodeFilter LeptonFilterLep {
+  set InputArray HCal/eflowTracks
+  set OutputArray eflowTracksLeptons
+  set Invert true
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+module RunPUPPI RunPUPPIBase {
   ## input information
-  set TrackInputArray   TrackMerger/tracks
+  set TrackInputArray   LeptonFilterNoLep/eflowTracksNoLeptons
   set NeutralInputArray NeutralEFlowMerger/eflowTowers
   set PVInputArray      PileUpMerger/vertices
   set MinPuppiWeight    0.05
   set UseExp            false
- 
-  ## define puppi algorithm parameters (more than one for the same eta region is possible)                                                                                      
-  add EtaMinBin           0.    2.5    2.5    3.0   3.0
-  add EtaMaxBin           2.5   3.0    3.0    10.0  10.0
-  add PtMinBin            0.    0.5    0.5    0.5   0.5
-  add ConeSizeBin         0.25  0.25   0.25   0.25  0.25
-  add RMSPtMinBin         0.1   0.5    0.5    0.5   0.5
-  add RMSScaleFactorBin   1.0   1.0    1.0    1.0   1.0
-  add NeutralMinEBin      0.2   1.0    1.0    1.5   1.5
-  add NeutralPtSlope      0.02  0.02   0.02   0.02  0.02
-  add ApplyCHS            true  true   true   true  true
-  add UseCharged          true  false  false  false false
-  add ApplyLowPUCorr      true  true   true   true  true
-  add MetricId            5     5      1      5     1
+  set UseNoLep          false
+
+  ## define puppi algorithm parameters (more than one for the same eta region is possible)
+  add EtaMinBin           0.0   1.5   4.0
+  add EtaMaxBin           1.5   4.0   10.0
+  add PtMinBin            0.0   0.0   0.0
+  add ConeSizeBin         0.2   0.2   0.2
+  add RMSPtMinBin         0.1   0.5   0.5
+  add RMSScaleFactorBin   1.0   1.0   1.0
+  add NeutralMinEBin      0.2   0.2   0.5
+  add NeutralPtSlope      0.006 0.013 0.067
+  add ApplyCHS            true  true  true
+  add UseCharged          true  true  false
+  add ApplyLowPUCorr      true  true  true
+  add MetricId            5     5     5
+  add CombId              0     0     0
 
   ## output name
   set OutputArray         PuppiParticles
   set OutputArrayTracks   puppiTracks
   set OutputArrayNeutrals puppiNeutrals
-} 
+}
 
-
+module Merger RunPUPPI {
+  add InputArray RunPUPPIBase/PuppiParticles
+  add InputArray LeptonFilterLep/eflowTracksLeptons
+  set OutputArray PuppiParticles
+}
 
 ###################
 # Missing ET merger
@@ -587,8 +614,15 @@ module Merger MissingET {
   set MomentumOutputArray momentum
 }
 
+module Merger PuppiMissingET {
+  #add InputArray InputArray
+  add InputArray RunPUPPI/PuppiParticles
+  #add InputArray EFlowMerger/eflow
+  set MomentumOutputArray momentum
+}
+
 ###################
-# Ger PileUp Missing ET 
+# Ger PileUp Missing ET
 ###################
 
 module Merger GenPileUpMissingET {
@@ -635,7 +669,7 @@ module PdgCodeFilter NeutrinoFilter {
 
 module FastJetFinder GenJetFinder {
   set InputArray NeutrinoFilter/filteredParticles
- 
+
   set OutputArray jets
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
@@ -688,29 +722,47 @@ module EnergyScale JetEnergyScale {
 }
 
 
+#################
+# Photon filter
+#################
+
+module PdgCodeFilter PhotonFilter {
+  set InputArray ECal/eflowPhotons
+  set OutputArray photons
+  set Invert true
+  set PTMin 5.0
+  add PdgCode {22}
+}
+
+
 ####################
 # Photon isolation #
 ####################
 
 module Isolation PhotonIsolation {
-  
+
   # particle for which calculate the isolation
-  set CandidateInputArray ECal/eflowPhotons
-  
+  set CandidateInputArray PhotonFilter/photons
+
   # isolation collection
-  set IsolationInputArray EFlowMerger/eflow
- 
+  set IsolationInputArray RunPUPPI/PuppiParticles
+
   # output array
   set OutputArray photons
-  
+
+  # veto isolation cand. based on proximity to input cand.
+  set DeltaRMin 0.01
+  set UseMiniCone true
+
   # isolation cone
   set DeltaRMax 0.3
-  
-  # minimum pT  
+
+  # minimum pT
   set PTMin     1.0
-  
+
   # iso ratio to cut
   set PTRatioMax 9999.
+
 }
 
 
@@ -720,9 +772,9 @@ module Isolation PhotonIsolation {
 #####################
 
 module Efficiency PhotonEfficiency {
-  
+
   ## input particles
-  set InputArray PhotonIsolation/photons 
+  set InputArray PhotonIsolation/photons
   ## output particles
   set OutputArray photons
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
@@ -740,14 +792,15 @@ module Efficiency PhotonEfficiency {
 ######################
 
 module Isolation ElectronIsolation {
-  
+
   set CandidateInputArray ElectronFilter/electrons
-  
+
   # isolation collection
-  set IsolationInputArray EFlowMerger/eflow
-  
+  set IsolationInputArray RunPUPPI/PuppiParticles
+  #set IsolationInputArray EFlowMerger/eflow
+
   set OutputArray electrons
-  
+
   set DeltaRMax 0.3
   set PTMin 1.0
   set PTRatioMax 9999.
@@ -761,10 +814,10 @@ module Isolation ElectronIsolation {
 #######################
 
 module Efficiency ElectronEfficiency {
-  
+
   set InputArray ElectronIsolation/electrons
   set OutputArray electrons
-  
+
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for electrons
   set EfficiencyFormula {
@@ -772,31 +825,31 @@ module Efficiency ElectronEfficiency {
                          (abs(eta) <= 1.45 ) * (pt >  4.0 && pt <= 6.0)   * (0.50) + \
                          (abs(eta) <= 1.45 ) * (pt >  6.0 && pt <= 8.0)   * (0.70) + \
                          (abs(eta) <= 1.45 ) * (pt >  8.0 && pt <= 10.0)  * (0.85) + \
-                         (abs(eta) <= 1.45 ) * (pt > 10.0 && pt <= 30.0)  * (0.94) + \                                                      
-                         (abs(eta) <= 1.45 ) * (pt > 30.0 && pt <= 50.0)  * (0.97) + \                          
-                         (abs(eta) <= 1.45 ) * (pt > 50.0 && pt <= 70.0)  * (0.98) + \          
-                         (abs(eta) <= 1.45 ) * (pt > 70.0 )  * (1.0) + \                                                                                                 
+                         (abs(eta) <= 1.45 ) * (pt > 10.0 && pt <= 30.0)  * (0.94) + \
+                         (abs(eta) <= 1.45 ) * (pt > 30.0 && pt <= 50.0)  * (0.97) + \
+                         (abs(eta) <= 1.45 ) * (pt > 50.0 && pt <= 70.0)  * (0.98) + \
+                         (abs(eta) <= 1.45 ) * (pt > 70.0 )  * (1.0) + \
                          (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt >  4.0 && pt <= 10.0)   * (0.35) + \
-                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 10.0 && pt <= 30.0)   * (0.40) + \   
-                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 30.0 && pt <= 70.0)   * (0.45) + \                                 
-                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 70.0 )  * (0.55) + \    
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 10.0 && pt <= 30.0)   * (0.40) + \
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 30.0 && pt <= 70.0)   * (0.45) + \
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 70.0 )  * (0.55) + \
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt >  4.0 && pt <= 10.0)  * (0.75) + \
-                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 10.0 && pt <= 30.0)  * (0.85) + \                                                      
-                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.95) + \                          
-                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.95) + \          
-                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 70.0 )  * (1.0) + \   
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 10.0 && pt <= 30.0)  * (0.85) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.95) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.95) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 70.0 )  * (1.0) + \
                          (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt >  4.0 && pt <= 10.0)  * (0.65) + \
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \                                                      
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 30.0 && pt <= 50.0)  * (0.90) + \                          
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \          
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.90) + \                                                                            
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 30.0 && pt <= 50.0)  * (0.90) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.90) + \
                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 4.0 && pt <= 10.0) * (0.65) + \
 					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0) * (0.75) + \
 					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0) * (0.90) + \
 					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0) * (0.90) + \
 					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 70.0 ) * (0.90) + \
 					  (abs(eta) > 4.0) * (0.00)
- 
+
   }
 }
 
@@ -806,12 +859,12 @@ module Efficiency ElectronEfficiency {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonMomentumSmearing/muons
- 
+
   # isolation collection
-  set IsolationInputArray EFlowMerger/eflow
- 
+  set IsolationInputArray RunPUPPI/PuppiParticles
+
   set OutputArray muons
-  
+
   set DeltaRMax 0.3
   set PTMin 1.0
   set PTRatioMax 9999.
@@ -884,11 +937,10 @@ module BTagging BTaggingMedium {
   set JetInputArray JetEnergyScale/jets
 
   set BitNumber 1
- 
+
   source btagMedium.tcl
 }
 
-  
 
 #############
 # b-tagging #
@@ -899,11 +951,8 @@ module BTagging BTaggingTight {
 
   set BitNumber 2
 
-  source btagTight.tcl 
+  source btagTight.tcl
 }
-
-
-
 
 
 #############
@@ -929,7 +978,7 @@ module TauTagging TauTagging {
                              }
   add EfficiencyFormula {15} { (abs(eta) < 2.3) * 0.97*0.77*( (0.32 + 0.01*pt - 0.000054*pt*pt )*(pt<100)+0.78*(pt>100) ) + \
                                (abs(eta) > 2.3) * (0.000)
-                             } 
+                             }
 }
 
 
@@ -938,11 +987,11 @@ module TauTagging TauTagging {
 ###############################################################################################################
 
 module StatusPidFilter GenParticleFilter {
-  
+
     set InputArray  Delphes/allParticles
     set OutputArray filteredParticles
     set PTMin 5.0
-    
+
 }
 
 
@@ -954,22 +1003,23 @@ module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch GenParticleFilter/filteredParticles Particle GenParticle
   add Branch PileUpMerger/vertices Vertex Vertex
- 
+
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
 #  add Branch HCal/eflowTracks EFlowTrack Track
 #  add Branch ECal/eflowPhotons EFlowPhoton Tower
 #  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
-  
+
   add Branch PhotonEfficiency/photons Photon Photon
   add Branch ElectronEfficiency/electrons Electron Electron
   add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
   add Branch MuonTightIdEfficiency/muons MuonTight Muon
-   
+
   add Branch JetEnergyScale/jets Jet Jet
-  
+
   add Branch MissingET/momentum MissingET MissingET
+  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
   add Branch GenPileUpMissingET/momentum GenPileUpMissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 }

@@ -1361,10 +1361,8 @@ tmp/modules/FastJetGridMedianEstimator.$(ObjSuf): \
 tmp/modules/RunPUPPI.$(ObjSuf): \
 	modules/RunPUPPI.$(SrcSuf) \
 	modules/RunPUPPI.h \
-	external/PUPPI/puppiCleanContainer.hh \
-	external/PUPPI/RecoObj.hh \
-	external/PUPPI/puppiParticle.hh \
-	external/PUPPI/puppiAlgoBin.hh \
+	external/PUPPI/RecoObj2.hh \
+	external/PUPPI/AlgoObj.hh \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
@@ -1800,7 +1798,8 @@ external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	@touch $@
 
 modules/RunPUPPI.h: \
-	classes/DelphesModule.h
+	classes/DelphesModule.h \
+	external/PUPPI/PuppiContainer.hh
 	@touch $@
 
 modules/Cloner.h: \
@@ -1932,14 +1931,6 @@ external/fastjet/ClusterSequenceVoronoiArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/AreaDefinition.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh
-	@touch $@
-
-external/PUPPI/puppiCleanContainer.hh: \
-	external/PUPPI/RecoObj.hh \
-	external/PUPPI/puppiParticle.hh \
-	external/PUPPI/puppiAlgoBin.hh \
-	external/fastjet/internal/base.hh \
-	external/fastjet/PseudoJet.hh
 	@touch $@
 
 modules/BTagging.h: \

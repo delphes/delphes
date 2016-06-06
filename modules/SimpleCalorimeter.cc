@@ -503,8 +503,11 @@ void SimpleCalorimeter::FinalizeTower()
 
     tower->Eem = (!fIsEcal) ? 0 : energy;
     tower->Ehad = (fIsEcal) ? 0 : energy;
-
+    
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+    
+    tower->PID = (fIsEcal) ? 22 : 0;
+    
     fEFlowTowerOutputArray->Add(tower);
   }
 }

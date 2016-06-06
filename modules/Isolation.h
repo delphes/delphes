@@ -56,9 +56,13 @@ private:
 
   Double_t fPTSumMax;
 
+  Double_t fDeltaRMin;
+
   Bool_t fUsePTSum;
 
   Bool_t fUseRhoCorrection;
+
+  Bool_t fUseMiniCone;
 
   IsolationClassifier *fClassifier; //!
 
