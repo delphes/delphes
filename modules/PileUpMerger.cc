@@ -146,7 +146,6 @@ void PileUpMerger::Process()
   nch = 0;
   sumpt2 = 0.0; 
    
-  cout<<"candidate loop"<<endl;  
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     vx += candidate->Position.X();
