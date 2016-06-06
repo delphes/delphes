@@ -110,6 +110,9 @@ void Isolation::Init()
 
   fUseRhoCorrection = GetBool("UseRhoCorrection", true);
 
+  fDeltaRMin = GetDouble("DeltaRMin", 0.01);
+  fUseMiniCone = GetBool("UseMiniCone", false);
+
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
 
   // import input array(s)
@@ -156,7 +159,7 @@ void Isolation::Process()
   TObjArray *isolationArray;
   Double_t sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
   Double_t sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
-  Int_t counter;
+  Bool_t pass = kFALSE;
   Double_t eta = 0.0;
   Double_t rho = 0.0;
 
@@ -196,16 +199,25 @@ void Isolation::Process()
     sumChargedPU = 0.0;
     sumAllParticles = 0.0;
 
-    counter = 0;
     itIsolationArray.Reset();
-
     while((isolation = static_cast<Candidate*>(itIsolationArray.Next())))
     {
       const TLorentzVector &isolationMomentum = isolation->Momentum;
 
-      if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax &&
-         candidate->GetUniqueID() != isolation->GetUniqueID())
+      if(fUseMiniCone)
       {
+         pass = candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax &&
+         candidateMomentum.DeltaR(isolationMomentum) > fDeltaRMin;
+      }
+      else
+      {
+         pass = candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax &&
+         candidate->GetUniqueID() != isolation->GetUniqueID();
+      }
+
+      if(pass)
+      {
+
         sumAllParticles += isolationMomentum.Pt();
         if(isolation->Charge != 0)
         {
@@ -222,11 +234,11 @@ void Isolation::Process()
         {
           sumNeutral += isolationMomentum.Pt();
         }
-        ++counter;
       }
+
     }
 
-    // find rho
+   // find rho
     rho = 0.0;
     if(fRhoInputArray)
     {
@@ -239,6 +251,8 @@ void Isolation::Process()
         }
       }
     }
+
+
 
     // correct sum for pile-up contamination
     sumDBeta = sumChargedNoPU + TMath::Max(sumNeutral - 0.5*sumChargedPU, 0.0);
