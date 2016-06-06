@@ -624,6 +624,7 @@ void Calorimeter::FinalizeTower()
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
     tower->Eem = ecalEnergy;
     tower->Ehad = 0.0;
+    tower->PID = 22;
 
     fEFlowPhotonOutputArray->Add(tower);
   }
