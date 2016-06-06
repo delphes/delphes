@@ -183,8 +183,6 @@ void PileUpMerger::Process()
   nvtx++;
   factory = GetFactory();
 
-  cout<<"vertex position"<<endl;
-  //cout<<vz<<","<<vt<<endl;
   vertex = factory->NewCandidate();
   vertex->Position.SetXYZT(vx, vy, dz, dt);
   vertex->ClusterIndex = nvtx;
@@ -264,8 +262,6 @@ void PileUpMerger::Process()
 
       vx += candidate->Position.X();
       vy += candidate->Position.Y();
-      vz += z+dz;
-      vt += t+dt;
       
       ++numberOfParticles;
       if(TMath::Abs(candidate->Charge) >  1.0E-9)
