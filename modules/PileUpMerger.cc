@@ -115,7 +115,7 @@ void PileUpMerger::Process()
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid, nch, nvtx = -1;
-  Float_t x, y, z, t, vx, vy, vz, vt;
+  Float_t x, y, z, t, vx, vy;
   Float_t px, py, pz, e, pt;
   Double_t dz, dphi, dt, sumpt2, dz0, dt0;
   Int_t numberOfEvents, event, numberOfParticles;
@@ -133,19 +133,20 @@ void PileUpMerger::Process()
 
   dz0 = -1.0e6;
   dt0 = -1.0e6;
-
+  
   dt *= c_light*1.0E3; // necessary in order to make t in mm/c
   dz *= 1.0E3; // necessary in order to make z in mm
   
+  //cout<<dz<<","<<dt<<endl;
+ 
   vx = 0.0;
   vy = 0.0;
-  vz = 0.0;
-  vt = 0.0;
   
   numberOfParticles = fInputArray->GetEntriesFast();
   nch = 0;
   sumpt2 = 0.0; 
-    
+   
+  cout<<"candidate loop"<<endl;  
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     vx += candidate->Position.X();
@@ -153,7 +154,7 @@ void PileUpMerger::Process()
     z = candidate->Position.Z();
     t = candidate->Position.T();
     pt = candidate->Momentum.Pt();
-    
+       
     // take postion and time from first stable particle
     if (dz0 < -999999.0)
       dz0 = z;
@@ -164,9 +165,6 @@ void PileUpMerger::Process()
     candidate->Position.SetZ(z - dz0 + dz);
     candidate->Position.SetT(t - dt0 + dt);
     
-    vz += z - dz0 + dz;
-    vt += t - dt0 + dt;
-    
     fParticleOutputArray->Add(candidate);
  
     if(TMath::Abs(candidate->Charge) >  1.0E-9)
@@ -175,20 +173,20 @@ void PileUpMerger::Process()
       sumpt2 += pt*pt;
     }  
   }
-
+ 
   if(numberOfParticles > 0)
   {
-    vx /= numberOfParticles;
-    vy /= numberOfParticles;
-    vz /= numberOfParticles;
-    vt /= numberOfParticles; 
+    vx /= sumpt2;
+    vy /= sumpt2;
   }
-
+  
   nvtx++;
   factory = GetFactory();
 
+  cout<<"vertex position"<<endl;
+  //cout<<vz<<","<<vt<<endl;
   vertex = factory->NewCandidate();
-  vertex->Position.SetXYZT(vx, vy, vz, vt);
+  vertex->Position.SetXYZT(vx, vy, dz, dt);
   vertex->ClusterIndex = nvtx;
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
