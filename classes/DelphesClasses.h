@@ -170,7 +170,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Vertex: public TObject
+class Vertex: public SortableObject
 {
 public:
   Float_t T; // vertex position (t component)
