@@ -71,9 +71,12 @@ proc dictDeps {dictPrefix args} {
 
     dependencies $fileName "$dictName$srcSuf:$suffix$fileName"
 
-    puts -nonewline [file tail $dictName$pcmSuf]:$suffix
-    puts -nonewline $dictName$pcmSuf$suffix
+    puts -nonewline $dictName$pcmSuf:$suffix
     puts -nonewline $dictName$srcSuf
+    puts {}
+
+    puts -nonewline [file tail $dictName$pcmSuf]:$suffix
+    puts -nonewline $dictName$pcmSuf
     puts {}
   }
 

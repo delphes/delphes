@@ -270,9 +270,10 @@ EXECUTABLE_OBJ +=  \
 tmp/modules/Pythia8Dict.$(SrcSuf): \
 	modules/Pythia8LinkDef.h \
 	modules/PileUpMergerPythia8.h
-Pythia8Dict$(PcmSuf): \
-	tmp/modules/Pythia8Dict$(PcmSuf) \
+tmp/modules/Pythia8Dict$(PcmSuf): \
 	tmp/modules/Pythia8Dict.$(SrcSuf)
+Pythia8Dict$(PcmSuf): \
+	tmp/modules/Pythia8Dict$(PcmSuf)
 DELPHES_DICT_OBJ +=  \
 	tmp/modules/Pythia8Dict.$(ObjSuf)
 
@@ -287,9 +288,10 @@ tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/DelphesFactory.h \
 	classes/SortableObject.h \
 	classes/DelphesClasses.h
-ClassesDict$(PcmSuf): \
-	tmp/classes/ClassesDict$(PcmSuf) \
+tmp/classes/ClassesDict$(PcmSuf): \
 	tmp/classes/ClassesDict.$(SrcSuf)
+ClassesDict$(PcmSuf): \
+	tmp/classes/ClassesDict$(PcmSuf)
 tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootAnalysisLinkDef.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
@@ -302,9 +304,10 @@ tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf): \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootConfReader.h \
 	external/ExRootAnalysis/ExRootTask.h
-ExRootAnalysisDict$(PcmSuf): \
-	tmp/external/ExRootAnalysis/ExRootAnalysisDict$(PcmSuf) \
+tmp/external/ExRootAnalysis/ExRootAnalysisDict$(PcmSuf): \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(SrcSuf)
+ExRootAnalysisDict$(PcmSuf): \
+	tmp/external/ExRootAnalysis/ExRootAnalysisDict$(PcmSuf)
 tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ModulesLinkDef.h \
 	modules/Delphes.h \
@@ -343,9 +346,10 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/JetFlavorAssociation.h \
 	modules/JetFakeParticle.h \
 	modules/ExampleModule.h
-ModulesDict$(PcmSuf): \
-	tmp/modules/ModulesDict$(PcmSuf) \
+tmp/modules/ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict.$(SrcSuf)
+ModulesDict$(PcmSuf): \
+	tmp/modules/ModulesDict$(PcmSuf)
 DELPHES_DICT_OBJ +=  \
 	tmp/classes/ClassesDict.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(ObjSuf) \
@@ -361,9 +365,10 @@ tmp/modules/FastJetDict.$(SrcSuf): \
 	modules/FastJetFinder.h \
 	modules/FastJetGridMedianEstimator.h \
 	modules/RunPUPPI.h
-FastJetDict$(PcmSuf): \
-	tmp/modules/FastJetDict$(PcmSuf) \
+tmp/modules/FastJetDict$(PcmSuf): \
 	tmp/modules/FastJetDict.$(SrcSuf)
+FastJetDict$(PcmSuf): \
+	tmp/modules/FastJetDict$(PcmSuf)
 FASTJET_DICT_OBJ +=  \
 	tmp/modules/FastJetDict.$(ObjSuf)
 
@@ -379,9 +384,10 @@ tmp/display/DisplayDict.$(SrcSuf): \
 	display/DelphesEventDisplay.h \
 	display/DelphesHtmlSummary.h \
 	display/DelphesPlotSummary.h
-DisplayDict$(PcmSuf): \
-	tmp/display/DisplayDict$(PcmSuf) \
+tmp/display/DisplayDict$(PcmSuf): \
 	tmp/display/DisplayDict.$(SrcSuf)
+DisplayDict$(PcmSuf): \
+	tmp/display/DisplayDict$(PcmSuf)
 DISPLAY_DICT_OBJ +=  \
 	tmp/display/DisplayDict.$(ObjSuf)
 
