@@ -418,7 +418,15 @@ dist:
 	@cat $@.arch $< $@.base > $@
 	@rm $@.arch $@.base
 
-%Dict$(PcmSuf):
+$(DELPHES_DICT_PCM): %Dict$(PcmSuf):
+	@echo ">> Copying $@"
+	@cp $< $@
+
+$(FASTJET_DICT_PCM): %Dict$(PcmSuf):
+	@echo ">> Copying $@"
+	@cp $< $@
+
+$(DISPLAY_DICT_PCM): %Dict$(PcmSuf):
 	@echo ">> Copying $@"
 	@cp $< $@
 
