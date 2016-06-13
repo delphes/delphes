@@ -71,9 +71,12 @@ proc dictDeps {dictPrefix args} {
 
     dependencies $fileName "$dictName$srcSuf:$suffix$fileName"
 
-    puts -nonewline [file tail $dictName$pcmSuf]:$suffix
-    puts -nonewline $dictName$pcmSuf$suffix
+    puts -nonewline $dictName$pcmSuf:$suffix
     puts -nonewline $dictName$srcSuf
+    puts {}
+
+    puts -nonewline [file tail $dictName$pcmSuf]:$suffix
+    puts -nonewline $dictName$pcmSuf
     puts {}
   }
 
@@ -415,7 +418,15 @@ dist:
 	@cat $@.arch $< $@.base > $@
 	@rm $@.arch $@.base
 
-%Dict$(PcmSuf):
+$(DELPHES_DICT_PCM): %Dict$(PcmSuf):
+	@echo ">> Copying $@"
+	@cp $< $@
+
+$(FASTJET_DICT_PCM): %Dict$(PcmSuf):
+	@echo ">> Copying $@"
+	@cp $< $@
+
+$(DISPLAY_DICT_PCM): %Dict$(PcmSuf):
 	@echo ">> Copying $@"
 	@cp $< $@
 

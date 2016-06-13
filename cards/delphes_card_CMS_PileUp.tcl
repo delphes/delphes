@@ -73,21 +73,15 @@ module PileUpMerger PileUpMerger {
   # average expected pile up
   set MeanPileUp 50
 
-  # maximum spread in the beam direction in m
-  set ZVertexSpread 0.10
+   # maximum spread in the beam direction in m
+  set ZVertexSpread 0.25
 
   # maximum spread in time in s
-  set TVertexSpread 1.5E-09
+  set TVertexSpread 800E-12
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
-
-  set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
-
-  #set VertexDistributionFormula { (abs(t) <= 1.0e-09) * (abs(z) <= 0.15) * (1.00) +
-  #                                (abs(t) >  1.0e-09) * (abs(z) <= 0.15) * (0.00) +
-  #				  (abs(t) <= 1.0e-09) * (abs(z) > 0.15)  * (0.00) +
-  #				  (abs(t) >  1.0e-09) * (abs(z) > 0.15)  * (0.00)}
-
+  set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
+ 
 
 }
 
@@ -312,7 +306,7 @@ module Calorimeter Calorimeter {
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
   # Eta shape from arXiv:1306.2016, Energy shape from arXiv:1502.02701
   set ECalResolutionFormula {                  (abs(eta) <= 1.5) * (1+0.64*eta^2) * sqrt(energy^2*0.008^2 + energy*0.11^2 + 0.40^2) +
-                             (abs(eta) > 1.5 && abs(eta) <= 2.5) * (2.16 + 5.6*(eta-2)^2) * sqrt(energy^2*0.008^2 + energy*0.11^2 + 0.40^2) +
+                             (abs(eta) > 1.5 && abs(eta) <= 2.5) * (2.16 + 5.6*(abs(eta)-2)^2) * sqrt(energy^2*0.008^2 + energy*0.11^2 + 0.40^2) +
                              (abs(eta) > 2.5 && abs(eta) <= 5.0) * sqrt(energy^2*0.107^2 + energy*2.08^2)}
 
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}

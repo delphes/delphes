@@ -72,20 +72,14 @@ module PileUpMerger PileUpMerger {
   # average expected pile up
   set MeanPileUp 50
 
-  # maximum spread in the beam direction in m
-  set ZVertexSpread 0.10
+   # maximum spread in the beam direction in m
+  set ZVertexSpread 0.25
 
   # maximum spread in time in s
-  set TVertexSpread 1.5E-09
+  set TVertexSpread 800E-12
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
-
-  set VertexDistributionFormula {exp(-(t^2/(2*(0.05/2.99792458E8*exp(-(z^2/(2*(0.05)^2))))^2)))}
-
-  #set VertexDistributionFormula { (abs(t) <= 1.0e-09) * (abs(z) <= 0.15) * (1.00) +
-  #                                (abs(t) >  1.0e-09) * (abs(z) <= 0.15) * (0.00) +
-  #				  (abs(t) <= 1.0e-09) * (abs(z) > 0.15)  * (0.00) +
-  #				  (abs(t) >  1.0e-09) * (abs(z) > 0.15)  * (0.00)}
+  set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
 
 
 }
