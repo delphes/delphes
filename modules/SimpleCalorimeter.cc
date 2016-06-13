@@ -365,8 +365,8 @@ void SimpleCalorimeter::Process()
 
       energy = momentum.E() * fTrackFractions[number];
 
-      fTrackTime += TMath::Sqrt(energy)*position.T();
-      fTrackTimeWeight += TMath::Sqrt(energy);
+      fTrackTime += energy*position.T();
+      fTrackTimeWeight += energy;
 
       if(fTrackFractions[number] > 1.0E-9)
       {
@@ -402,8 +402,8 @@ void SimpleCalorimeter::Process()
 
     fTowerEnergy += energy;
 
-    fTowerTime += TMath::Sqrt(energy)*position.T();
-    fTowerTimeWeight += TMath::Sqrt(energy);
+    fTowerTime += energy*position.T();
+    fTowerTimeWeight += energy;
 
     fTower->AddCandidate(particle);
   }
