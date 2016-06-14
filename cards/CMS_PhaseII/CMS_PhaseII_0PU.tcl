@@ -49,6 +49,7 @@ set ExecutionPath {
 
   GenJetFinder
   FastJetFinder
+  FatJetFinder
 
   ScalarHT
  
@@ -536,6 +537,45 @@ module FastJetFinder FastJetFinder {
   set JetPTMin 15.0
 }
 
+
+
+
+############
+# Jet finder
+############
+
+module FastJetFinder FatJetFinder {
+#  set InputArray TowerMerger/towers
+  set InputArray EFlowMerger/eflow
+
+  set OutputArray jets
+
+  set JetAlgorithm 5
+  set ParameterR 0.8
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+ 
+  set ComputeTrimming 1
+  set RTrim 0.2
+  set PtFracTrim 0.05
+
+  set ComputePruning 1 
+  set ZcutPrun 0.1
+  set RcutPrun 0.5
+  set RPrun 0.8
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 0.8
+
+  set JetPTMin 200.0
+}
+
+
+
 ##################
 # Jet Energy Scale
 ##################
@@ -809,6 +849,7 @@ module TreeWriter TreeWriter {
   add Branch MuonTightIdEfficiency/muons MuonTight Muon
   
   add Branch JetEnergyScale/jets Jet Jet
+  add Branch FatJetFinder/jets FatJet Jet
   
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
