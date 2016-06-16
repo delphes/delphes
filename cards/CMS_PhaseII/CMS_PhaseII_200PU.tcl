@@ -29,7 +29,8 @@ set ExecutionPath {
 
   ECal
   HCal
-
+  
+  PhotonEnergySmearing
   ElectronFilter
   TrackPileUpSubtractor
 
@@ -96,7 +97,8 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  #set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 200
@@ -464,6 +466,21 @@ module SimpleCalorimeter HCal {
 
 }
 
+#################################
+# Energy resolution for electrons
+#################################
+
+module EnergySmearing PhotonEnergySmearing {
+  set InputArray ECal/eflowPhotons
+  set OutputArray eflowPhotons
+
+  # adding 1% extra photon smearing
+  set ResolutionFormula {energy*0.01}
+
+}
+
+
+
 #################
 # Electron filter
 #################
@@ -512,7 +529,7 @@ module Merger TowerMerger {
 
 module Merger NeutralEFlowMerger {
 # add InputArray InputArray
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflowTowers
 }
@@ -525,7 +542,7 @@ module Merger NeutralEFlowMerger {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray HCal/eflowTracks
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
@@ -537,7 +554,7 @@ module Merger EFlowMerger {
 module Merger EFlowMergerAllTracks {
 # add InputArray InputArray
   add InputArray TrackMerger/tracks
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
@@ -763,7 +780,7 @@ module EnergyScale JetEnergyScale {
 #################
 
 module PdgCodeFilter PhotonFilter {
-  set InputArray ECal/eflowPhotons
+  set InputArray PhotonEnergySmearing/eflowPhotons
   set OutputArray photons
   set Invert true
   set PTMin 5.0

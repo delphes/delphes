@@ -28,6 +28,8 @@ set ExecutionPath {
   ECal
   HCal
 
+  PhotonEnergySmearing
+
   TowerMerger
   EFlowMerger
 
@@ -435,6 +437,20 @@ module Merger TowerMerger {
   set OutputArray towers
 }
 
+#################################
+# Energy resolution for electrons
+#################################
+
+module EnergySmearing PhotonEnergySmearing {
+  set InputArray ECal/eflowPhotons
+  set OutputArray eflowPhotons
+
+  # adding 1% extra photon smearing
+  set ResolutionFormula {energy*0.01}
+
+}
+
+
 ####################
 # Energy flow merger
 ####################
@@ -442,7 +458,7 @@ module Merger TowerMerger {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray HCal/eflowTracks
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
@@ -595,7 +611,7 @@ module EnergyScale JetEnergyScale {
 module Isolation PhotonIsolation {
   
   # particle for which calculate the isolation
-  set CandidateInputArray ECal/eflowPhotons
+  set CandidateInputArray PhotonEnergySmearing/eflowPhotons
   
   # isolation collection
   set IsolationInputArray EFlowMerger/eflow
@@ -840,7 +856,7 @@ module TreeWriter TreeWriter {
   add Branch GenMissingET/momentum GenMissingET MissingET
 
   add Branch HCal/eflowTracks EFlowTrack Track
-  add Branch ECal/eflowPhotons EFlowPhoton Tower
+  add Branch PhotonEnergySmearing/eflowPhotons EFlowPhoton Tower
   add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
   
   add Branch PhotonEfficiency/photons Photon Photon
