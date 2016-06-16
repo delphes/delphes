@@ -29,7 +29,8 @@ set ExecutionPath {
 
   ECal
   HCal
-
+  
+  PhotonEnergySmearing
   ElectronFilter
   TrackPileUpSubtractor
 
@@ -64,6 +65,7 @@ set ExecutionPath {
 
   GenJetFinder
   FastJetFinder
+  FatJetFinder
 
   ScalarHT
 
@@ -95,7 +97,8 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  #set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 200
@@ -463,6 +466,21 @@ module SimpleCalorimeter HCal {
 
 }
 
+#################################
+# Energy resolution for electrons
+#################################
+
+module EnergySmearing PhotonEnergySmearing {
+  set InputArray ECal/eflowPhotons
+  set OutputArray eflowPhotons
+
+  # adding 1% extra photon smearing
+  set ResolutionFormula {energy*0.01}
+
+}
+
+
+
 #################
 # Electron filter
 #################
@@ -511,7 +529,7 @@ module Merger TowerMerger {
 
 module Merger NeutralEFlowMerger {
 # add InputArray InputArray
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflowTowers
 }
@@ -524,7 +542,7 @@ module Merger NeutralEFlowMerger {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray HCal/eflowTracks
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
@@ -536,7 +554,7 @@ module Merger EFlowMerger {
 module Merger EFlowMergerAllTracks {
 # add InputArray InputArray
   add InputArray TrackMerger/tracks
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
@@ -707,6 +725,43 @@ module FastJetFinder FastJetFinder {
   set JetPTMin 15.0
 }
 
+
+
+############
+# Jet finder
+############
+
+module FastJetFinder FatJetFinder {
+#  set InputArray TowerMerger/towers
+  set InputArray RunPUPPI/PuppiParticles
+
+  set OutputArray jets
+
+  set JetAlgorithm 5
+  set ParameterR 0.8
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeTrimming 1
+  set RTrim 0.2
+  set PtFracTrim 0.05
+
+  set ComputePruning 1
+  set ZcutPrun 0.1
+  set RcutPrun 0.5
+  set RPrun 0.8
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 0.8
+
+  set JetPTMin 200.0
+}
+
+
 ##################
 # Jet Energy Scale
 ##################
@@ -725,7 +780,7 @@ module EnergyScale JetEnergyScale {
 #################
 
 module PdgCodeFilter PhotonFilter {
-  set InputArray ECal/eflowPhotons
+  set InputArray PhotonEnergySmearing/eflowPhotons
   set OutputArray photons
   set Invert true
   set PTMin 5.0
@@ -1015,6 +1070,7 @@ module TreeWriter TreeWriter {
   add Branch MuonTightIdEfficiency/muons MuonTight Muon
 
   add Branch JetEnergyScale/jets Jet Jet
+  add Branch FatJetFinder/jets FatJet Jet
 
   add Branch MissingET/momentum MissingET MissingET
   add Branch PuppiMissingET/momentum PuppiMissingET MissingET

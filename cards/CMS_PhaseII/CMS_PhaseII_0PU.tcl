@@ -28,6 +28,8 @@ set ExecutionPath {
   ECal
   HCal
 
+  PhotonEnergySmearing
+
   TowerMerger
   EFlowMerger
 
@@ -49,6 +51,7 @@ set ExecutionPath {
 
   GenJetFinder
   FastJetFinder
+  FatJetFinder
 
   ScalarHT
  
@@ -434,6 +437,20 @@ module Merger TowerMerger {
   set OutputArray towers
 }
 
+#################################
+# Energy resolution for electrons
+#################################
+
+module EnergySmearing PhotonEnergySmearing {
+  set InputArray ECal/eflowPhotons
+  set OutputArray eflowPhotons
+
+  # adding 1% extra photon smearing
+  set ResolutionFormula {energy*0.01}
+
+}
+
+
 ####################
 # Energy flow merger
 ####################
@@ -441,7 +458,7 @@ module Merger TowerMerger {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray HCal/eflowTracks
-  add InputArray ECal/eflowPhotons
+  add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
 }
@@ -536,6 +553,45 @@ module FastJetFinder FastJetFinder {
   set JetPTMin 15.0
 }
 
+
+
+
+############
+# Jet finder
+############
+
+module FastJetFinder FatJetFinder {
+#  set InputArray TowerMerger/towers
+  set InputArray EFlowMerger/eflow
+
+  set OutputArray jets
+
+  set JetAlgorithm 5
+  set ParameterR 0.8
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+ 
+  set ComputeTrimming 1
+  set RTrim 0.2
+  set PtFracTrim 0.05
+
+  set ComputePruning 1 
+  set ZcutPrun 0.1
+  set RcutPrun 0.5
+  set RPrun 0.8
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 0.8
+
+  set JetPTMin 200.0
+}
+
+
+
 ##################
 # Jet Energy Scale
 ##################
@@ -555,7 +611,7 @@ module EnergyScale JetEnergyScale {
 module Isolation PhotonIsolation {
   
   # particle for which calculate the isolation
-  set CandidateInputArray ECal/eflowPhotons
+  set CandidateInputArray PhotonEnergySmearing/eflowPhotons
   
   # isolation collection
   set IsolationInputArray EFlowMerger/eflow
@@ -800,7 +856,7 @@ module TreeWriter TreeWriter {
   add Branch GenMissingET/momentum GenMissingET MissingET
 
   add Branch HCal/eflowTracks EFlowTrack Track
-  add Branch ECal/eflowPhotons EFlowPhoton Tower
+  add Branch PhotonEnergySmearing/eflowPhotons EFlowPhoton Tower
   add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
   
   add Branch PhotonEfficiency/photons Photon Photon
@@ -809,6 +865,7 @@ module TreeWriter TreeWriter {
   add Branch MuonTightIdEfficiency/muons MuonTight Muon
   
   add Branch JetEnergyScale/jets Jet Jet
+  add Branch FatJetFinder/jets FatJet Jet
   
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
