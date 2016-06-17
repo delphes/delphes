@@ -177,7 +177,7 @@ public:
   Float_t X; // vertex position (x component)
   Float_t Y; // vertex position (y component)
   Float_t Z; // vertex position (z component)
- 
+
   Double_t ErrorX;
   Double_t ErrorY;
   Double_t ErrorZ;
@@ -189,6 +189,8 @@ public:
   Double_t BTVSumPT2;
   Double_t GenDeltaZ;
   Double_t GenSumPT2;
+
+  TRefArray Constituents; // references to constituents
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -415,7 +417,7 @@ public:
   Int_t Charge; // track charge
 
   Float_t Eta; // track pseudorapidity
-  
+
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
 
@@ -430,26 +432,26 @@ public:
   Float_t TOuter; // track position (z component) at the tracker edge
 
   Float_t L; // track path length
-  Float_t ErrorT; // error on the time measurement 
-     
+  Float_t ErrorT; // error on the time measurement
+
   Float_t D0;     // track signed transverse impact parameter
   Float_t ErrorD0;    // signed error on the track signed transverse impact parameter
- 
+
   Float_t DZ; // track transverse momentum
   Float_t ErrorDZ; // track transverse momentum error
- 
+
   Float_t P; // track transverse momentum
   Float_t ErrorP; // track transverse momentum error
- 
+
   Float_t PT; // track transverse momentum
   Float_t ErrorPT; // track transverse momentum error
- 
+
   Float_t CtgTheta; // track transverse momentum
   Float_t ErrorCtgTheta; // track transverse momentum error
- 
+
   Float_t Phi; // track azimuthal angle
   Float_t ErrorPhi; // track azimuthal angle
-  
+
   Float_t Xd;      // X coordinate of point of closest approach to vertex
   Float_t Yd;      // Y coordinate of point of closest approach to vertex
   Float_t Zd;      // Z coordinate of point of closest approach to vertex
@@ -457,7 +459,7 @@ public:
   TRef Particle; // reference to generated particle
 
   Int_t VertexIndex; // reference to vertex
-  
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -583,7 +585,7 @@ public:
   Float_t Zd;
 
   // tracking resolution
-  
+
   Float_t TrackResolution;
 
   // PileUpJetID variables
@@ -611,7 +613,7 @@ public:
   Float_t SumPt;
 
   // vertex variables
-  
+
   Int_t ClusterIndex;
   Int_t ClusterNDF;
   Double_t ClusterSigma;
