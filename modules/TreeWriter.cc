@@ -244,7 +244,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
 
   const Double_t c_light = 2.99792458E8;
 
-  Double_t x, y, z, t, xError, yError, zError, sigma, sumPT2, btvSumPT2, genDeltaZ, genSumPT2;
+  Double_t x, y, z, t, xError, yError, zError, tError, sigma, sumPT2, btvSumPT2, genDeltaZ, genSumPT2;
   UInt_t index, ndf;
 
   CompBase *compare = Candidate::fgCompare;
@@ -273,6 +273,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
     xError = candidate->PositionError.X ();
     yError = candidate->PositionError.Y ();
     zError = candidate->PositionError.Z ();
+    tError = candidate->PositionError.T ()*1.0E-3/c_light;
 
     entry = static_cast<Vertex*>(branch->NewEntry());
 
@@ -292,6 +293,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, TObjArray *array)
     entry->ErrorX = xError;
     entry->ErrorY = yError;
     entry->ErrorZ = zError;
+    entry->ErrorT = tError;
 
 
     TIter itConstituents(candidate->GetCandidates());

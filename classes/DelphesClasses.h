@@ -181,6 +181,7 @@ public:
   Double_t ErrorX;
   Double_t ErrorY;
   Double_t ErrorZ;
+  Double_t ErrorT;
 
   Int_t Index;
   Int_t NDF;
