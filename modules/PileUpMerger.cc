@@ -146,6 +146,9 @@ void PileUpMerger::Process()
   nch = 0;
   sumpt2 = 0.0;
 
+  factory = GetFactory();
+  vertex = factory->NewCandidate();
+
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     vx += candidate->Position.X();
@@ -170,6 +173,7 @@ void PileUpMerger::Process()
     {
       nch++;
       sumpt2 += pt*pt;
+      vertex->AddCandidate(candidate);
     }
   }
 
@@ -180,9 +184,6 @@ void PileUpMerger::Process()
   }
 
   nvtx++;
-  factory = GetFactory();
-
-  vertex = factory->NewCandidate();
   vertex->Position.SetXYZT(vx, vy, dz, dt);
   vertex->ClusterIndex = nvtx;
   vertex->ClusterNDF = nch;
@@ -270,7 +271,6 @@ void PileUpMerger::Process()
         nch++;
         sumpt2 += pt*pt;
         vertex->AddCandidate(candidate);
-
       }
 
       fParticleOutputArray->Add(candidate);
