@@ -167,6 +167,8 @@ void PileUpMerger::Process()
     candidate->Position.SetZ(z - dz0 + dz);
     candidate->Position.SetT(t - dt0 + dt);
 
+    candidate->IsPU = 0;
+
     fParticleOutputArray->Add(candidate);
 
     if(TMath::Abs(candidate->Charge) >  1.0E-9)
@@ -189,7 +191,6 @@ void PileUpMerger::Process()
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
   vertex->GenSumPT2 = sumpt2;
-
   fVertexOutputArray->Add(vertex);
 
   // --- Then with pile-up vertices  ------
@@ -211,6 +212,7 @@ void PileUpMerger::Process()
   }
 
   allEntries = fReader->GetEntries();
+
 
   for(event = 0; event < numberOfEvents; ++event)
   {
@@ -237,6 +239,7 @@ void PileUpMerger::Process()
     numberOfParticles = 0;
     sumpt2 = 0.0;
 
+    //factory = GetFactory();
     vertex = factory->NewCandidate();
 
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
@@ -255,6 +258,7 @@ void PileUpMerger::Process()
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
       candidate->Momentum.RotateZ(dphi);
+      pt = candidate->Momentum.Pt();
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
