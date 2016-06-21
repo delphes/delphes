@@ -1,5 +1,4 @@
-#include "external/fastjet/internal/base.hh"
-#include "external/fastjet/PseudoJet.hh"
+#include "fastjet/PseudoJet.hh"
 #include "AlgoObj.hh"
 #include <vector>
 

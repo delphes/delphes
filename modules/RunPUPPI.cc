@@ -2,8 +2,9 @@
 
 #include "PUPPI/RecoObj2.hh"
 #include "PUPPI/AlgoObj.hh"
-//#include "PUPPI/puppiParticle.hh"
-//#include "PUPPI/puppiAlgoBin.hh"
+#include "PUPPI/PuppiContainer.hh"
+
+#include "fastjet/PseudoJet.hh"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -16,6 +17,7 @@
 #include <vector>
 
 using namespace std;
+using namespace fastjet;
 
 //------------------------------------------------------------------------------
 RunPUPPI::RunPUPPI() :
@@ -237,10 +239,10 @@ void RunPUPPI::Process(){
   // Create PUPPI container
   fPuppi->initialize(puppiInputVector);
   fPuppi->puppiWeights();
-  std::vector<fastjet::PseudoJet> puppiParticles = fPuppi->puppiParticles();
+  std::vector<PseudoJet> puppiParticles = fPuppi->puppiParticles();
 
   // Loop on final particles
-  for (std::vector<fastjet::PseudoJet>::iterator it = puppiParticles.begin() ; it != puppiParticles.end() ; it++) {
+  for (std::vector<PseudoJet>::iterator it = puppiParticles.begin() ; it != puppiParticles.end() ; it++) {
     if(it->user_index() <= int(InputParticles.size())){      
       candidate = static_cast<Candidate *>(InputParticles.at(it->user_index())->Clone());
       candidate->Momentum.SetPxPyPzE(it->px(),it->py(),it->pz(),it->e());

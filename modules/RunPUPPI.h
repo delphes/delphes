@@ -2,12 +2,11 @@
 #define RunPUPPI_h
 
 #include "classes/DelphesModule.h"
-#include "PUPPI/PuppiContainer.hh"
 #include <vector>
 
 class TObjArray;
 class TIterator;
-
+class PuppiContainer;
 
 class RunPUPPI: public DelphesModule {
 

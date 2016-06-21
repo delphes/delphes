@@ -1,7 +1,5 @@
 #include "PuppiContainer.hh"
-#include "external/fastjet/internal/base.hh"
-#include "external/fastjet/Selector.hh"
-//#include "external/fastjet/FunctionOfPseudoJet.hh"
+#include "fastjet/Selector.hh"
 #include "Math/ProbFunc.h"
 #include "TMath.h"
 #include <iostream>
