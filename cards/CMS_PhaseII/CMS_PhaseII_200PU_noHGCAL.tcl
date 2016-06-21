@@ -29,7 +29,7 @@ set ExecutionPath {
 
   ECal
   HCal
-  
+
   PhotonEnergySmearing
   ElectronFilter
   TrackPileUpSubtractor
@@ -98,7 +98,7 @@ module PileUpMerger PileUpMerger {
 
   # pre-generated minbias input file
   set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
-  
+
   # average expected pile up
   set MeanPileUp 200
 
@@ -362,13 +362,9 @@ module SimpleCalorimeter ECal {
   # set ResolutionFormula {resolution formula as a function of eta and energy}
 
   # for the ECAL barrel (|eta| < 1.5), see hep-ex/1306.2016 and 1502.02701
-  # for the endcaps (1.5 < |eta| < 3.0), we take HGCAL  see LHCC-P-008, Fig. 3.39, p.117
 
-  set ResolutionFormula {  (abs(eta) <= 1.50)                    * sqrt(energy^2*0.009^2 + energy*0.12^2 + 0.45^2) +
-                           (abs(eta) > 1.50 && abs(eta) <= 1.75) * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
-                           (abs(eta) > 1.75 && abs(eta) <= 2.15) * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
-                           (abs(eta) > 2.15 && abs(eta) <= 3.00) * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
-                           (abs(eta) >= 3.0 && abs(eta) <= 5.0)  * sqrt(energy^2*0.08^2 + energy*1.98^2)}
+  set ResolutionFormula {  (abs(eta) <= 2.5)                    * sqrt(energy^2*0.009^2 + energy*0.12^2 + 0.45^2) +
+                           (abs(eta) >= 2.5 && abs(eta) <= 5.0)  * sqrt(energy^2*0.08^2 + energy*1.98^2)}
 
 }
 
@@ -397,46 +393,32 @@ module SimpleCalorimeter HCal {
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
 
-  # assume 0.087 x 0.087 resolution in eta,phi in the barrel |eta| < 1.5
-
+  # 5 degrees towers
   set PhiBins {}
   for {set i -36} {$i <= 36} {incr i} {
     add PhiBins [expr {$i * $pi/36.0}]
   }
-  foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.65} {
+  foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.653} {
     add EtaPhiBins $eta $PhiBins
   }
 
-  # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- HCAL)
-
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
-
-  # 0.02 unit in eta up to eta = 3
-  for {set i 1} {$i <= 84} {incr i} {
-    set eta [expr { -2.958 + $i * 0.0174}]
-    add EtaPhiBins $eta $PhiBins
-  }
-
-  for {set i 1} {$i <= 84} {incr i} {
-    set eta [expr { 1.4964 + $i * 0.0174}]
-    add EtaPhiBins $eta $PhiBins
-  }
-
-  # take present CMS granularity for HF
-
-  # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
+  # 10 degrees towers
   set PhiBins {}
   for {set i -18} {$i <= 18} {incr i} {
     add PhiBins [expr {$i * $pi/18.0}]
   }
-
-  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
+  foreach eta {-4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.95 -2.868 -2.65 -2.5 -2.322 -2.172 -2.043 -1.93 -1.83 -1.74 -1.653 1.74 1.83 1.93 2.043 2.172 2.322 2.5 2.65 2.868 2.95 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525} {
     add EtaPhiBins $eta $PhiBins
   }
 
+  # 20 degrees towers
+  set PhiBins {}
+  for {set i -9} {$i <= 9} {incr i} {
+    add PhiBins [expr {$i * $pi/9.0}]
+  }
+  foreach eta {-5 -4.7 -4.525 4.7 5} {
+    add EtaPhiBins $eta $PhiBins
+  }
 
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
   add EnergyFraction {0} {1.0}
@@ -459,9 +441,8 @@ module SimpleCalorimeter HCal {
   add EnergyFraction {3122} {0.7}
 
 # set ResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula {                    (abs(eta) <= 1.5) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
-						   (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
-						   (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*2.80^2)}
+  set ResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.050^2 + energy*1.50^2) +
+                         (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.130^2 + energy*2.70^2)}
 
 }
 
