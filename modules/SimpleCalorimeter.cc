@@ -389,8 +389,8 @@ void SimpleCalorimeter::Process()
 
     fTowerEnergy += energy;
 
-    fTowerTime += TMath::Sqrt(energy)*position.T();
-    fTowerTimeWeight += TMath::Sqrt(energy);
+    fTowerTime += energy*position.T();
+    fTowerTimeWeight += energy;
 
     fTower->AddCandidate(particle);
   }
