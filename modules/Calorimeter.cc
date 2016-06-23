@@ -545,7 +545,7 @@ void Calorimeter::FinalizeTower()
   
   ecalNeutralSigma = ecalNeutralEnergy / TMath::Sqrt(fECalTrackSigma*fECalTrackSigma + ecalSigma*ecalSigma);
   hcalNeutralSigma = hcalNeutralEnergy / TMath::Sqrt(fHCalTrackSigma*fHCalTrackSigma + hcalSigma*hcalSigma);
- 
+  
    // if ecal neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack
   if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
@@ -633,8 +633,8 @@ void Calorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fHCalTrackEnergy;
 
     //rescale tracks
-    fItECalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate*>(fItECalTowerTrackArray->Next())))
+    fItHCalTowerTrackArray->Reset();
+    while((track = static_cast<Candidate*>(fItHCalTowerTrackArray->Next())))
     {  
       mother = track;
       track = static_cast<Candidate*>(track->Clone());
