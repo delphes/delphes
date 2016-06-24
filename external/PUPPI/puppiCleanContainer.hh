@@ -6,7 +6,6 @@
 #include "PUPPI/puppiParticle.hh"
 #include "PUPPI/puppiAlgoBin.hh"
 
-#include "fastjet/internal/base.hh"
 #include "fastjet/PseudoJet.hh"
 #include <algorithm>
 

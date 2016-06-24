@@ -1,7 +1,4 @@
-//#include "FWCore/ParameterSet/interface/ParameterSet.h"
-//#include "FWCore/PythonParameterSet/interface/MakeParameterSets.h"
 #include "PuppiAlgo.hh"
-#include "external/fastjet/internal/base.hh"
 #include "Math/QuantFuncMathCore.h"
 #include "Math/SpecFuncMathCore.h"
 #include "Math/ProbFunc.h"
@@ -18,7 +15,7 @@ PuppiAlgo::PuppiAlgo(AlgoObj &iAlgo) {
   fEtaMaxExtrap       = iAlgo.etaMaxExtrap;
   std::vector<AlgoSubObj> lAlgos = iAlgo.subAlgos;
   fNAlgos = lAlgos.size();
-  std::cout << "==> "  << fEtaMin << " - " << fEtaMax << " - " << fPtMin  << " - " << fNeutralPtMin  << " - " << fNeutralPtSlope  << " - " << fRMSEtaSF  << " - " << std::endl;
+  //std::cout << "==> "  << fEtaMin << " - " << fEtaMax << " - " << fPtMin  << " - " << fNeutralPtMin  << " - " << fNeutralPtSlope  << " - " << fRMSEtaSF  << " - " << std::endl;
   for(unsigned int i0 = 0; i0 < lAlgos.size(); i0++)  { 
     int    pAlgoId      = lAlgos[i0].metricId;
     bool   pCharged     = lAlgos[i0].useCharged;
@@ -27,7 +24,7 @@ PuppiAlgo::PuppiAlgo(AlgoObj &iAlgo) {
     double pConeSize    = lAlgos[i0].coneSize;
     double pRMSPtMin    = lAlgos[i0].rmsPtMin;
     double pRMSSF       = lAlgos[i0].rmsScaleFactor;
-    std::cout << "Algo==> " << i0 << " - " << pAlgoId << " - " << pCharged << " - " << pWeight0 << " - " << pComb << " - " << pConeSize << " - " << pRMSPtMin << " - " << std::endl;
+    //std::cout << "Algo==> " << i0 << " - " << pAlgoId << " - " << pCharged << " - " << pWeight0 << " - " << pComb << " - " << pConeSize << " - " << pRMSPtMin << " - " << std::endl;
     fAlgoId        .push_back(pAlgoId);
     fCharged       .push_back(pCharged);
     fAdjust        .push_back(pWeight0);

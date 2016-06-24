@@ -24,6 +24,7 @@
 #include <signal.h>
 
 #include "Pythia.h"
+#include "Pythia8Plugins/CombineMatchingInput.h"
 
 #include "TROOT.h"
 #include "TApplication.h"
@@ -223,6 +224,10 @@ int main(int argc, char *argv[])
   Long64_t numberOfEvents, timesAllowErrors;
 
   Pythia8::Pythia *pythia = 0;
+ 
+  // for matching
+  Pythia8::CombineMatchingInput *combined = 0;
+  Pythia8::UserHooks* matching = 0;
 
   if(argc != 4)
   {
@@ -269,8 +274,15 @@ int main(int argc, char *argv[])
 
     // Initialize Pythia
     pythia = new Pythia8::Pythia;
-    //Pythia8::Event& event = pythia->event;
-    //Pythia8::ParticleData& pdt = pythia->particleData;
+  
+    // jet matching
+    matching = combined->getHook(*pythia);
+    if (!matching)
+    {
+      throw runtime_error("can't do matching");
+    }
+    pythia->setUserHooksPtr(matching);
+ 
 
     if(pythia == NULL)
     {

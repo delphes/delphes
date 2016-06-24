@@ -559,21 +559,21 @@ void VertexFinderDA4D::dump(const double beta, const vector<vertex_t> & y, const
   cout << "                                                               z= ";
   cout.precision(4);
   for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
-    cout  <<  setw(8) << fixed << k->z;
+    //cout  <<  setw(8) << fixed << k->z;
   }
   cout << endl << "                                                               t= ";
   for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
-    cout  <<  setw(8) << fixed << k->t;
+    //cout  <<  setw(8) << fixed << k->t;
   }
-  cout << endl << "T=" << setw(15) << 1./beta <<"                                             Tc= ";
+  //cout << endl << "T=" << setw(15) << 1./beta <<"                                             Tc= ";
   for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
-    cout  <<  setw(8) << fixed << k->Tc ;
+    //cout  <<  setw(8) << fixed << k->Tc ;
   }
 
   cout << endl << "                                                              pk=";
   double sumpk=0;
   for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
-    cout <<  setw(8) <<  setprecision(3) <<  fixed << k->pk;
+    //cout <<  setw(8) <<  setprecision(3) <<  fixed << k->pk;
     sumpk+=k->pk;
   }
   cout  << endl;
@@ -587,8 +587,8 @@ void VertexFinderDA4D::dump(const double beta, const vector<vertex_t> & y, const
       if (tks[i].Z>0){	F-=log(tks[i].Z)/beta;}
       double tz= tks[i].z;
       double tt= tks[i].t;
-      cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2)
-           << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
+      //cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2)
+      //     << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
 
       double sump=0.;
       for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
@@ -596,7 +596,7 @@ void VertexFinderDA4D::dump(const double beta, const vector<vertex_t> & y, const
 	  //double p=pik(beta,tks[i],*k);
 	  double p=k->pk * std::exp(-beta*Eik(tks[i],*k)) / tks[i].Z;
 	  if( p > 0.0001){
-	    cout <<  setw (8) <<  setprecision(3) << p;
+	    //cout <<  setw (8) <<  setprecision(3) << p;
 	  }else{
 	    cout << "    .   ";
 	  }

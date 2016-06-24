@@ -1,7 +1,6 @@
 #include "PuppiAlgo.hh"
 #include "RecoObj2.hh"
-//#include "external/fastjet/internal/base.hh"
-#include "external/fastjet/PseudoJet.hh"
+#include "fastjet/PseudoJet.hh"
 #include <vector>
 
 using namespace std;
