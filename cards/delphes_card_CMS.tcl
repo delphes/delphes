@@ -34,6 +34,7 @@ set ExecutionPath {
   GenMissingET
   
   FastJetFinder
+  FastCaloJetFinder
 
   JetEnergyScale
 
@@ -209,8 +210,8 @@ module Calorimeter Calorimeter {
   set ECalEnergyMin 0.5
   set HCalEnergyMin 1.0
 
-  set ECalEnergySignificanceMin 1.0
-  set HCalEnergySignificanceMin 1.0
+  set ECalEnergySignificanceMin 2.0
+  set HCalEnergySignificanceMin 2.0
 
   set SmearTowerCenter true
 
@@ -496,6 +497,22 @@ module FastJetFinder FastJetFinder {
   set JetPTMin 20.0
 }
 
+################
+# caloJet finder
+################
+
+module FastJetFinder FastCaloJetFinder {
+  set InputArray Calorimeter/towers
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 0.5
+
+  set JetPTMin 20.0
+}
+
 ##################
 # Jet Energy Scale
 ##################
@@ -609,6 +626,7 @@ module TreeWriter TreeWriter {
   add Branch GenMissingET/momentum GenMissingET MissingET
 
   add Branch UniqueObjectFinder/jets Jet Jet
+  add Branch FastCaloJetFinder/jets CaloJet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/muons Muon Muon

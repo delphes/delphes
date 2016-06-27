@@ -56,7 +56,7 @@ class ExRootResult;
 
 double ptrangemin = 10;
 double ptrangemax = 10000;
-static const int Nbins = 10;
+static const int Nbins = 20;
 
 int objStyle = 1;
 int trackStyle = 7;
@@ -100,7 +100,7 @@ void resolPlot::set(double ptdown, double ptup, TString object){
     ptmax = ptup;
     obj = object;
 
-    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500, -0.4, 0.4);
+    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500, -1, 1);
     fwdResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", 500, 0.4, 0.4);
 
 }
@@ -316,7 +316,7 @@ void GetJetsEres(std::vector<resolPlot> *histos, TClonesArray *branchJet, TClone
 
   Long64_t allEntries = treeReader->GetEntries();
 
-cout << "** Computing resolution of " << branchJet->GetName() << " induced by " << branchGenJet->GetName() << endl;
+  cout << "** Computing resolution of " << branchJet->GetName() << " induced by " << branchGenJet->GetName() << endl;
 
   Jet *jet, *genjet;
 
@@ -337,7 +337,7 @@ cout << "** Computing resolution of " << branchJet->GetName() << " induced by " 
     if(entry%10000 == 0) cout << "Event number: "<< entry <<endl;
 
     // Loop over all reconstructed jets in event
-    for(i = 0; i < branchJet->GetEntriesFast(); ++i)
+    for(i = 0; i < TMath::Min(2,branchJet->GetEntriesFast()); ++i) //branchJet->GetEntriesFast(); ++i)
     {
 
       jet = (Jet*) branchJet->At(i);
@@ -346,7 +346,7 @@ cout << "** Computing resolution of " << branchJet->GetName() << " induced by " 
       deltaR = 999;
 
      // Loop over all hard partons in event
-     for(j = 0; j < branchGenJet->GetEntriesFast(); ++j)
+     for(j = 0; j < TMath::Min(2,branchGenJet->GetEntriesFast()); ++j)
      {
         genjet = (Jet*) branchGenJet->At(j);
 
@@ -364,14 +364,14 @@ cout << "** Computing resolution of " << branchJet->GetName() << " induced by " 
         }
       }
 
-      if(deltaR < 0.1)
+      if(deltaR < 0.3)
       {
         pt  = genJetMomentum.Pt();
         eta = TMath::Abs(genJetMomentum.Eta());
 
         for (bin = 0; bin < Nbins; bin++)
         {
-            if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 0.5) 
+            if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 2.5) 
             {
                 histos->at(bin).cenResolHist->Fill((bestGenJetMomentum.E()-jetMomentum.E())/bestGenJetMomentum.E());
             }
@@ -388,13 +388,15 @@ std::pair<Double_t, Double_t> GausFit(TH1* hist)
     Double_t sigErr = f1->GetParError(2);
     delete f1;
     return make_pair (sig, sigErr);
+    //return make_pair (hist->GetRMS(), hist->GetRMSError());
 }
 
 
 TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central)
 {
     Int_t bin;
-    TGraphErrors gr = TGraphErrors(Nbins);
+    Int_t count = 0;
+    TGraphErrors gr = TGraphErrors(Nbins/2);
     Double_t sig = 0;
     Double_t sigErr = 0;
     for (bin = 0; bin < Nbins; bin++)
@@ -405,8 +407,9 @@ TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central)
             std::cout << " mean : " << histos->at(bin).cenResolHist->GetMean() << " RMS : " << histos->at(bin).cenResolHist->GetRMS(); 
             std::cout << " entries : " << histos->at(bin).cenResolHist->GetEntries() << std::endl;
             std::pair<Double_t, Double_t> sigvalues = GausFit(histos->at(bin).cenResolHist);
-            gr.SetPoint(bin,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.first);
-            gr.SetPointError(bin,0, sigvalues.second);
+            gr.SetPoint(count,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.first);
+            gr.SetPointError(count,0, sigvalues.second);
+            count++;
         }
         /*
         else if (histos->at(bin).cenResolHist->GetEntries() > 10) 
@@ -515,6 +518,8 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double max)
   gPad->SetLogx();
   gPad->SetBottomMargin(0.2);
   gPad->SetLeftMargin(0.2);
+  gPad->Modified();
+  gPad->Update();
   
 }
 
@@ -652,6 +657,7 @@ void Validation(const char *inputFile, const char *outputFile)
   C_el1->SaveAs(elEff+".eps");
   C_el2->SaveAs(elRes+".eps");
 
+  gDirectory->cd(0);
 
 /*
   ///////////
@@ -802,6 +808,30 @@ void Validation(const char *inputFile, const char *outputFile)
   TGraphErrors gr_pfjets = EresGraph(&plots_pfjets, true);
   gr_pfjets.SetName("pfJet");
 
+
+  // PFJets Energy Resolution
+  std::vector<resolPlot> plots_calojets;
+  HistogramsCollection(&plots_calojets, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "CaloJet");
+  GetJetsEres( &plots_calojets, branchCaloJet, branchGenJet, treeReader);
+  TGraphErrors gr_calojets = EresGraph(&plots_calojets, true);
+  gr_calojets.SetName("caloJet");
+
+
+  TString jetRes = "jetERes";
+  TCanvas *C_jet = new TCanvas(jetRes,jetRes, 1000, 500);
+  TMultiGraph *mg_jet = new TMultiGraph(jetRes,jetRes);
+  TLegend *leg_jet = new TLegend(0.52,0.7,0.9,0.9);
+
+  addGraph(mg_jet, &gr_calojets, leg_jet, 3);
+  addGraph(mg_jet, &gr_pfjets, leg_jet, 1);
+
+  mg_jet->Draw("ACX");
+  leg_jet->Draw();
+
+  DrawAxis(mg_jet, leg_jet, 0.25);
+
+  C_jet->SaveAs(jetRes+".eps");
+
   
   /*
   // CaloJets Energy Resolution
@@ -819,6 +849,7 @@ void Validation(const char *inputFile, const char *outputFile)
   for (int bin = 0; bin < Nbins; bin++)
   {  
       plots_pfjets.at(bin).cenResolHist->Write();
+      plots_calojets.at(bin).cenResolHist->Write();
       plots_el.at(bin).cenResolHist->Write();
       plots_eltrack.at(bin).cenResolHist->Write();
       plots_eltower.at(bin).cenResolHist->Write();
@@ -847,12 +878,13 @@ void Validation(const char *inputFile, const char *outputFile)
 
   C_el1->Write();
   C_el2->Write();
+  C_jet->Write();
 /*
   C_mu->Write();
   C_ph->Write();
 */
   gr_pfjets.Write();
-  //gr_calojets.Write();
+  gr_calojets.Write();
 
   fout->Write();
   
