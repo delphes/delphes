@@ -100,7 +100,7 @@ void resolPlot::set(double ptdown, double ptup, TString object){
     ptmax = ptup;
     obj = object;
 
-    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500, -1, 1);
+    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500,  0, 2);
     fwdResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", 500, 0.4, 0.4);
 
 }
@@ -364,16 +364,16 @@ void GetJetsEres(std::vector<resolPlot> *histos, TClonesArray *branchJet, TClone
         }
       }
 
-      if(deltaR < 0.3)
+      if(deltaR < 0.25)
       {
         pt  = genJetMomentum.Pt();
         eta = TMath::Abs(genJetMomentum.Eta());
 
         for (bin = 0; bin < Nbins; bin++)
         {
-            if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 2.5) 
+            if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 1.5) 
             {
-                histos->at(bin).cenResolHist->Fill((bestGenJetMomentum.E()-jetMomentum.E())/bestGenJetMomentum.E());
+                histos->at(bin).cenResolHist->Fill(jetMomentum.Pt()/bestGenJetMomentum.Pt());
             }
         }
       }
