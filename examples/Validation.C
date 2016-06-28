@@ -1,32 +1,3 @@
-/*
-This macro shows how to compute jet energy scale.
-root -l examples/Example4.C'("delphes_output.root", "plots.root")'
-
-The output ROOT file contains the pT(MC)/pT(Reco) distributions for
-various pT(Reco) and |eta| bins. The peak value of such distribution is
-interpreted as the jet energy correction to be applied for that
-given pT(Reco), |eta| bin.
-
-This can be done by modifying the "ScaleFormula" input parameter to
-the JetEnergyScale module in the delphes_card_XXX.tcl
-
-e.g  a smooth function:
-
-  set ScaleFormula { sqrt(3.0 - 0.1*(abs(eta)))^2 / pt + 1.0) }
-
-or a binned function:
-
-  set ScaleFormula {(abs(eta) > 0.0 && abs(eta) <= 2.5) * (pt > 20.0 && pt <= 50.0)  * (1.10) +
-                    (abs(eta) > 0.0 && abs(eta) <= 2.5) * (pt > 50.0 && pt <= 100.0) * (1.05) +
-                    (abs(eta) > 0.0 && abs(eta) <= 2.5) * (pt > 100.0)               * (1.00) +
-                    (abs(eta) > 2.5 && abs(eta) <= 5.0) * (pt > 20.0 && pt <= 50.0)  * (1.10) +
-                    (abs(eta) > 2.5 && abs(eta) <= 5.0) * (pt > 50.0 && pt <= 100.0) * (1.05) +
-                    (abs(eta) > 2.5 && abs(eta) <= 5.0) * (pt > 100.0)               * (1.00)}
-
-Be aware that a binned jet energy scale can produce "steps" in the corrected
-jet pt distribution ...
-*/
-
 #ifdef __CLING__
 R__LOAD_LIBRARY(libDelphes)
 #include "classes/DelphesClasses.h"
@@ -303,8 +274,8 @@ void GetEres(std::vector<resolPlot> *histos, TClonesArray *branchReco, TClonesAr
         {
             if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 2.5) 
             {
-                if (eta < 1.5) {histos->at(bin).cenResolHist->Fill((bestGenMomentum.E()-recoMomentum.E())/bestGenMomentum.E());}
-                else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill((bestGenMomentum.E()-recoMomentum.E())/bestGenMomentum.E());}
+                if (eta < 1.5) {histos->at(bin).cenResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
+                else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
             }
         }
       }
@@ -659,7 +630,6 @@ void Validation(const char *inputFile, const char *outputFile)
 
   gDirectory->cd(0);
 
-/*
   ///////////
   // Muons //
   ///////////
@@ -795,12 +765,10 @@ void Validation(const char *inputFile, const char *outputFile)
 
   C_ph->SaveAs(phRes+".eps");
 
-*/
   //////////
   // Jets //
   //////////
 
-  
   // PFJets Energy Resolution
   std::vector<resolPlot> plots_pfjets;
   HistogramsCollection(&plots_pfjets, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "PFJet");
@@ -855,7 +823,7 @@ void Validation(const char *inputFile, const char *outputFile)
       plots_eltower.at(bin).cenResolHist->Write();
   }
 
-/*
+
   //  gr.Write();
   histos_el.first->Write();
   //histos_el.second->Write();
@@ -874,15 +842,15 @@ void Validation(const char *inputFile, const char *outputFile)
   //gr_el.Write();
   //gr_eltrack.Write();
   //gr_eltower.Write();
-*/
+
 
   C_el1->Write();
   C_el2->Write();
   C_jet->Write();
-/*
+
   C_mu->Write();
   C_ph->Write();
-*/
+
   gr_pfjets.Write();
   gr_calojets.Write();
 
