@@ -38,6 +38,7 @@
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
 #include "modules/Calorimeter.h"
+#include "modules/OldCalorimeter.h"
 #include "modules/Isolation.h"
 #include "modules/EnergyScale.h"
 #include "modules/UniqueObjectFinder.h"
@@ -82,6 +83,7 @@
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class Calorimeter+;
+#pragma link C++ class OldCalorimeter+;
 #pragma link C++ class Isolation+;
 #pragma link C++ class EnergyScale+;
 #pragma link C++ class UniqueObjectFinder+;
