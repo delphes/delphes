@@ -322,6 +322,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TimeSmearing.h \
 	modules/SimpleCalorimeter.h \
 	modules/Calorimeter.h \
+	modules/OldCalorimeter.h \
 	modules/Isolation.h \
 	modules/EnergyScale.h \
 	modules/UniqueObjectFinder.h \
@@ -718,6 +719,15 @@ tmp/modules/MomentumSmearing.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/OldCalorimeter.$(ObjSuf): \
+	modules/OldCalorimeter.$(SrcSuf) \
+	modules/OldCalorimeter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/ParticlePropagator.$(ObjSuf): \
 	modules/ParticlePropagator.$(SrcSuf) \
 	modules/ParticlePropagator.h \
@@ -938,6 +948,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/MomentumSmearing.$(ObjSuf) \
+	tmp/modules/OldCalorimeter.$(ObjSuf) \
 	tmp/modules/ParticlePropagator.$(ObjSuf) \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
 	tmp/modules/PhotonConversions.$(ObjSuf) \
@@ -961,11 +972,9 @@ DELPHES_OBJ +=  \
 endif
 
 tmp/external/PUPPI/PuppiAlgo.$(ObjSuf): \
-	external/PUPPI/PuppiAlgo.$(SrcSuf) \
-	external/fastjet/internal/base.hh
+	external/PUPPI/PuppiAlgo.$(SrcSuf)
 tmp/external/PUPPI/PuppiContainer.$(ObjSuf): \
 	external/PUPPI/PuppiContainer.$(SrcSuf) \
-	external/fastjet/internal/base.hh \
 	external/fastjet/Selector.hh
 tmp/external/PUPPI/puppiCleanContainer.$(ObjSuf): \
 	external/PUPPI/puppiCleanContainer.$(SrcSuf) \
@@ -1323,6 +1332,8 @@ tmp/modules/RunPUPPI.$(ObjSuf): \
 	modules/RunPUPPI.h \
 	external/PUPPI/RecoObj2.hh \
 	external/PUPPI/AlgoObj.hh \
+	external/PUPPI/PuppiContainer.hh \
+	external/fastjet/PseudoJet.hh \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
@@ -1710,6 +1721,10 @@ modules/JetFakeParticle.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/OldCalorimeter.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 external/fastjet/ClusterSequence1GhostPassiveArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh \
@@ -1754,8 +1769,7 @@ external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	@touch $@
 
 modules/RunPUPPI.h: \
-	classes/DelphesModule.h \
-	external/PUPPI/PuppiContainer.hh
+	classes/DelphesModule.h
 	@touch $@
 
 modules/Cloner.h: \
@@ -1851,6 +1865,10 @@ modules/PdgCodeFilter.h: \
 
 external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh: \
 	external/fastjet/JetDefinition.hh
+	@touch $@
+
+external/PUPPI/PuppiContainer.hh: \
+	external/fastjet/PseudoJet.hh
 	@touch $@
 
 external/fastjet/RangeDefinition.hh: \
