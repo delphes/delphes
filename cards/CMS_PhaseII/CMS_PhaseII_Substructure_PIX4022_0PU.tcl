@@ -231,8 +231,7 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   set OutputArray chargedHadrons
   # resolution formula for charged hadrons ,
 
-  # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source trackMomentumResolution_PIX4022.tcl
+  source trackMomentumResolution_vs_p_PIX4022.tcl
 }
 
 #################################
@@ -734,21 +733,6 @@ module Merger GenMissingET {
   add InputArray NeutrinoFilter/filteredParticles
   set MomentumOutputArray momentum
 }
-
-
-
-#########################
-# Gen Missing ET merger
-########################
-
-module Merger GenMissingET {
-
-# add InputArray InputArray
-  add InputArray NeutrinoFilter/filteredParticles
-  set MomentumOutputArray momentum
-}
-
-
 
 ############
 # Jet finder
