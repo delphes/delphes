@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 
       if (pythia->flag("Main:spareFlag1"))
       {
-        if (pythia->mode("Main:spareMode1") == 11 || pythia->mode("Main:spareMode1") == 13 || pythia->mode("Main:spareMode1") == 22) 
+        if (pythia->mode("Main:spareMode1") == 11 || pythia->mode("Main:spareMode1") == 13 || pythia->mode("Main:spareMode1") == 15 || pythia->mode("Main:spareMode1") == 22) 
         { 
           fillParticle( pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), -1., 0.,pythia->event, pythia->particleData, pythia->rndm, 0);
         }
