@@ -1,5 +1,3 @@
-set MaxEvents 100
-
 #
 #  Phase II - No Pile-Up
 #
