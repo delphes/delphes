@@ -1,3 +1,5 @@
+set MaxEvents 100
+
 #
 #  Phase II - No Pile-Up
 #
@@ -32,12 +34,16 @@ set ExecutionPath {
 
   PhotonEnergySmearing
   ElectronFilter
+
   TrackPileUpSubtractor
+  RecoPuFilter
 
   TowerMerger
   NeutralEFlowMerger
-  EFlowMergerAllTracks
+
   EFlowMerger
+  EFlowMergerCHS
+  Rho
 
   LeptonFilterNoLep
   LeptonFilterLep
@@ -47,14 +53,24 @@ set ExecutionPath {
   PhotonFilter
 
   PhotonIsolation
+  PhotonIsolationCHS
   PhotonEfficiency
+  PhotonEfficiencyCHS
 
   ElectronIsolation
+  ElectronIsolationCHS
+
   ElectronEfficiency
+  ElectronEfficiencyCHS
 
   MuonIsolation
+  MuonIsolationCHS
+
   MuonLooseIdEfficiency
   MuonTightIdEfficiency
+
+  MuonLooseIdEfficiencyCHS
+  MuonTightIdEfficiencyCHS
 
   NeutrinoFilter
 
@@ -67,6 +83,8 @@ set ExecutionPath {
   GenJetFinderAK8
   FastJetFinder
   FastJetFinderAK8
+  JetPileUpSubtractor
+  JetPileUpSubtractorAK8
   FastJetFinderPUPPI
   FastJetFinderPUPPIAK8
 
@@ -113,8 +131,8 @@ module PileUpMerger PileUpMerger {
   set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
-  #set PileUpFile MinBias.pileup
+  #set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 200
@@ -125,7 +143,7 @@ module PileUpMerger PileUpMerger {
   # maximum spread in time in s
   set TVertexSpread 800E-12
 
-  # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
+  # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s) - {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
   set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
 
 }
@@ -137,6 +155,7 @@ module PileUpMerger PileUpMerger {
 
 module ParticlePropagator ParticlePropagator {
   set InputArray PileUpMerger/stableParticles
+  #set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -271,9 +290,6 @@ module MomentumSmearing MuonMomentumSmearing {
   # http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
   source muonMomentumResolution.tcl
 }
-
-
-
 
 ##############
 # Track merger
@@ -525,6 +541,14 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   set ZVertexResolution 0.0001
 }
 
+########################
+# Reco PU filter
+########################
+
+module RecoPuFilter RecoPuFilter {
+  set InputArray HCal/eflowTracks
+  set OutputArray eflowTracks
+}
 
 ###################################################
 # Tower Merger (in case not using e-flow algorithm)
@@ -537,7 +561,6 @@ module Merger TowerMerger {
   set OutputArray towers
 }
 
-
 ####################
 # Neutral eflow erger
 ####################
@@ -549,10 +572,9 @@ module Merger NeutralEFlowMerger {
   set OutputArray eflowTowers
 }
 
-
-####################
+#####################
 # Energy flow merger
-####################
+#####################
 
 module Merger EFlowMerger {
 # add InputArray InputArray
@@ -562,13 +584,13 @@ module Merger EFlowMerger {
   set OutputArray eflow
 }
 
-##################################
-# Energy flow merger (all tracks)
-##################################
+############################
+# Energy flow merger no PU
+############################
 
-module Merger EFlowMergerAllTracks {
+module Merger EFlowMergerCHS {
 # add InputArray InputArray
-  add InputArray TrackMerger/tracks
+  add InputArray RecoPuFilter/eflowTracks
   add InputArray PhotonEnergySmearing/eflowPhotons
   add InputArray HCal/eflowNeutralHadrons
   set OutputArray eflow
@@ -693,7 +715,6 @@ module PdgCodeFilter NeutrinoFilter {
 
 }
 
-
 #####################
 # MC truth jet finder
 #####################
@@ -734,16 +755,46 @@ module Merger GenMissingET {
 }
 
 
+#############
+# Rho pile-up
+#############
 
-############
+module FastJetFinder Rho {
+#  set InputArray Calorimeter/towers
+  set InputArray EFlowMergerCHS/eflow
+
+  set ComputeRho true
+  set RhoOutputArray rho
+
+  # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
+  set AreaAlgorithm 5
+
+  # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 4
+  set ParameterR 0.4
+  set GhostEtaMax 5.0
+
+  add RhoEtaRange -5.0 -4.0
+  add RhoEtaRange -4.0 -1.5
+  add RhoEtaRange -1.5 1.5
+  add RhoEtaRange 1.5 4.0
+  add RhoEtaRange 4.0 5.0
+
+  set JetPTMin 0.0
+}
+
+
+##############
 # Jet finder
-############
+##############
 
 module FastJetFinder FastJetFinder {
 #  set InputArray TowerMerger/towers
-  set InputArray EFlowMerger/eflow
+  set InputArray EFlowMergerCHS/eflow
 
   set OutputArray jets
+
+  set AreaAlgorithm 5
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
@@ -755,9 +806,11 @@ module FastJetFinder FastJetFinder {
 #module Class Name
 module FastJetFinder FastJetFinderAK8 {
 #  set InputArray TowerMerger/towers
-  set InputArray EFlowMerger/eflow
+  set InputArray EFlowMergerCHS/eflow
 
   set OutputArray jets
+
+  set AreaAlgorithm 5
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
@@ -782,6 +835,32 @@ module FastJetFinder FastJetFinderAK8 {
   set R0SoftDrop 0.8
 
   set JetPTMin 200.0
+}
+
+###########################
+# Jet Pile-Up Subtraction
+###########################
+
+module JetPileUpSubtractor JetPileUpSubtractor {
+  set JetInputArray FastJetFinder/jets
+  set RhoInputArray Rho/rho
+
+  set OutputArray jets
+
+  set JetPTMin 15.0
+}
+
+##############################
+# Jet Pile-Up Subtraction AK8
+##############################
+
+module JetPileUpSubtractor JetPileUpSubtractorAK8 {
+  set JetInputArray FastJetFinderAK8/jets
+  set RhoInputArray Rho/rho
+
+  set OutputArray jets
+
+  set JetPTMin 15.0
 }
 
 module FastJetFinder FastJetFinderPUPPI {
@@ -833,7 +912,7 @@ module FastJetFinder FastJetFinderPUPPIAK8 {
 ##################
 
 module EnergyScale JetEnergyScale {
-  set InputArray FastJetFinder/jets
+  set InputArray JetPileUpSubtractor/jets
   set OutputArray jets
 
  # scale formula for jets
@@ -841,7 +920,7 @@ module EnergyScale JetEnergyScale {
 }
 
 module EnergyScale JetEnergyScaleAK8 {
-  set InputArray FastJetFinderAK8/jets
+  set InputArray JetPileUpSubtractorAK8/jets
   set OutputArray jets
 
  # scale formula for jets
@@ -908,6 +987,32 @@ module Isolation PhotonIsolation {
 }
 
 
+########################
+# Photon isolation CHS #
+########################
+
+module Isolation PhotonIsolationCHS {
+
+  # particle for which calculate the isolation
+  set CandidateInputArray PhotonFilter/photons
+
+  # isolation collection
+  set IsolationInputArray EFlowMerger/eflow
+
+  # output array
+  set OutputArray photons
+
+  # isolation cone
+  set DeltaRMax 0.3
+
+  # minimum pT
+  set PTMin     1.0
+
+  # iso ratio to cut
+  set PTRatioMax 9999.
+
+}
+
 
 #####################
 # Photon efficiency #
@@ -929,6 +1034,25 @@ module Efficiency PhotonEfficiency {
 }
 
 
+#####################
+# Photon efficiency #
+#####################
+
+module Efficiency PhotonEfficiencyCHS {
+
+  ## input particles
+  set InputArray PhotonIsolationCHS/photons
+  ## output particles
+  set OutputArray photons
+  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+  # efficiency formula for photons
+  set EfficiencyFormula {                      (pt <= 10.0) * (0.00) + \
+	                   (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
+	 (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
+	 (abs(eta) > 4.0)                                   * (0.00)}
+
+}
+
 ######################
 # Electron isolation #
 ######################
@@ -949,6 +1073,25 @@ module Isolation ElectronIsolation {
 
 }
 
+
+##########################
+# Electron isolation CHS #
+##########################
+
+module Isolation ElectronIsolationCHS {
+
+  set CandidateInputArray ElectronFilter/electrons
+
+  # isolation collection
+  set IsolationInputArray EFlowMerger/eflow
+
+  set OutputArray electrons
+
+  set DeltaRMax 0.3
+  set PTMin 1.0
+  set PTRatioMax 9999.
+
+}
 
 
 #######################
@@ -995,6 +1138,51 @@ module Efficiency ElectronEfficiency {
   }
 }
 
+###########################
+# Electron efficiency CHS #
+###########################
+
+module Efficiency ElectronEfficiencyCHS {
+
+  set InputArray ElectronIsolationCHS/electrons
+  set OutputArray electrons
+
+  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+  # efficiency formula for electrons
+  set EfficiencyFormula {
+                                      (pt <= 4.0)  * (0.00) + \
+                         (abs(eta) <= 1.45 ) * (pt >  4.0 && pt <= 6.0)   * (0.50) + \
+                         (abs(eta) <= 1.45 ) * (pt >  6.0 && pt <= 8.0)   * (0.70) + \
+                         (abs(eta) <= 1.45 ) * (pt >  8.0 && pt <= 10.0)  * (0.85) + \
+                         (abs(eta) <= 1.45 ) * (pt > 10.0 && pt <= 30.0)  * (0.94) + \
+                         (abs(eta) <= 1.45 ) * (pt > 30.0 && pt <= 50.0)  * (0.97) + \
+                         (abs(eta) <= 1.45 ) * (pt > 50.0 && pt <= 70.0)  * (0.98) + \
+                         (abs(eta) <= 1.45 ) * (pt > 70.0 )  * (1.0) + \
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt >  4.0 && pt <= 10.0)   * (0.35) + \
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 10.0 && pt <= 30.0)   * (0.40) + \
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 30.0 && pt <= 70.0)   * (0.45) + \
+                         (abs(eta) > 1.45  && abs(eta) <= 1.55) * (pt > 70.0 )  * (0.55) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt >  4.0 && pt <= 10.0)  * (0.75) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 10.0 && pt <= 30.0)  * (0.85) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.95) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.95) + \
+                         (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 70.0 )  * (1.0) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt >  4.0 && pt <= 10.0)  * (0.65) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 30.0 && pt <= 50.0)  * (0.90) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.90) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 4.0 && pt <= 10.0) * (0.65) + \
+					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0) * (0.75) + \
+					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0) * (0.90) + \
+					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0) * (0.90) + \
+					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 70.0 ) * (0.90) + \
+					  (abs(eta) > 4.0) * (0.00)
+
+  }
+}
+
+
 ##################
 # Muon isolation #
 ##################
@@ -1013,10 +1201,28 @@ module Isolation MuonIsolation {
 
 }
 
+######################
+# Muon isolation CHS #
+######################
 
-##################
-# Muon Loose Id  #
-##################
+module Isolation MuonIsolationCHS {
+  set CandidateInputArray MuonMomentumSmearing/muons
+
+  # isolation collection
+  set IsolationInputArray EFlowMerger/eflow
+
+  set OutputArray muons
+
+  set DeltaRMax 0.3
+  set PTMin 1.0
+  set PTRatioMax 9999.
+
+}
+
+
+#####################
+# Muon Loose Id     #
+#####################
 
 module Efficiency MuonLooseIdEfficiency {
     set InputArray MuonIsolation/muons
@@ -1038,6 +1244,30 @@ module Efficiency MuonTightIdEfficiency {
     source muonTightId.tcl
 }
 
+
+#####################
+# Muon Loose Id CHS #
+#####################
+
+module Efficiency MuonLooseIdEfficiencyCHS {
+    set InputArray MuonIsolationCHS/muons
+    set OutputArray muons
+    # tracking + LooseID efficiency formula for muons
+    source muonLooseId.tcl
+
+}
+
+
+######################
+# Muon Tight Id  CHS #
+######################
+
+module Efficiency MuonTightIdEfficiencyCHS {
+    set InputArray MuonIsolationCHS/muons
+    set OutputArray muons
+    # tracking + TightID efficiency formula for muons
+    source muonTightId.tcl
+}
 
 
 ########################
@@ -1250,7 +1480,7 @@ module TauTagging TauTagging {
 
 module StatusPidFilter GenParticleFilter {
 
-    set InputArray  Delphes/allParticles
+    set InputArray Delphes/allParticles
     set OutputArray filteredParticles
     set PTMin 5.0
 
@@ -1279,6 +1509,11 @@ module TreeWriter TreeWriter {
   add Branch MuonLooseIdEfficiency/muons MuonLoose Muon
   add Branch MuonTightIdEfficiency/muons MuonTight Muon
 
+  add Branch PhotonEfficiencyCHS/photons PhotonCHS Photon
+  add Branch ElectronEfficiencyCHS/electrons ElectronCHS Electron
+  add Branch MuonLooseIdEfficiencyCHS/muons MuonLooseCHS Muon
+  add Branch MuonTightIdEfficiencyCHS/muons MuonTightCHS Muon
+
   add Branch JetEnergyScale/jets Jet Jet
 #  add Branch FatJetFinder/jets FatJet Jet
   add Branch JetEnergyScalePUPPI/jets JetPUPPI Jet
@@ -1289,4 +1524,5 @@ module TreeWriter TreeWriter {
   add Branch PuppiMissingET/momentum PuppiMissingET MissingET
   add Branch GenPileUpMissingET/momentum GenPileUpMissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
+
 }
