@@ -57,6 +57,7 @@
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
+#include "modules/RecoPuFilter.h"
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
@@ -102,6 +103,7 @@
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
+#pragma link C++ class RecoPuFilter+;
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
