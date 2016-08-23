@@ -142,6 +142,61 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootUtilities.h
+Validation$(ExeSuf): \
+	tmp/examples/Validation.$(ObjSuf)
+
+tmp/examples/Validation.$(ObjSuf): \
+	examples/Validation.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
+Validation_electron$(ExeSuf): \
+	tmp/examples/Validation_electron.$(ObjSuf)
+
+tmp/examples/Validation_electron.$(ObjSuf): \
+	examples/Validation_electron.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
+Validation_jet$(ExeSuf): \
+	tmp/examples/Validation_jet.$(ObjSuf)
+
+tmp/examples/Validation_jet.$(ObjSuf): \
+	examples/Validation_jet.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
+Validation_muon$(ExeSuf): \
+	tmp/examples/Validation_muon.$(ObjSuf)
+
+tmp/examples/Validation_muon.$(ObjSuf): \
+	examples/Validation_muon.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
+Validation_photon$(ExeSuf): \
+	tmp/examples/Validation_photon.$(ObjSuf)
+
+tmp/examples/Validation_photon.$(ObjSuf): \
+	examples/Validation_photon.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
 EXECUTABLE +=  \
 	hepmc2pileup$(ExeSuf) \
 	lhco2root$(ExeSuf) \
@@ -149,7 +204,12 @@ EXECUTABLE +=  \
 	root2lhco$(ExeSuf) \
 	root2pileup$(ExeSuf) \
 	stdhep2pileup$(ExeSuf) \
-	Example1$(ExeSuf)
+	Example1$(ExeSuf) \
+	Validation$(ExeSuf) \
+	Validation_electron$(ExeSuf) \
+	Validation_jet$(ExeSuf) \
+	Validation_muon$(ExeSuf) \
+	Validation_photon$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
@@ -158,7 +218,12 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/root2lhco.$(ObjSuf) \
 	tmp/converters/root2pileup.$(ObjSuf) \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
-	tmp/examples/Example1.$(ObjSuf)
+	tmp/examples/Example1.$(ObjSuf) \
+	tmp/examples/Validation.$(ObjSuf) \
+	tmp/examples/Validation_electron.$(ObjSuf) \
+	tmp/examples/Validation_jet.$(ObjSuf) \
+	tmp/examples/Validation_muon.$(ObjSuf) \
+	tmp/examples/Validation_photon.$(ObjSuf)
 
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
