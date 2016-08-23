@@ -143,14 +143,16 @@ std::pair<TH1D*, TH1D*> GetEff(TClonesArray *branchReco, TClonesArray *branchPar
 
   Int_t i, j;
 
-  TH1D *histGenPt = new TH1D(name+" gen spectra Pt",name+" gen spectra Pt", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
-  TH1D *histRecoPt = new TH1D(name+" reco spectra Pt",name+" reco spectra Pt", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
-  TH1D *histGenEta  = new TH1D(name+" gen spectra Eta",name+" gen spectra Eta", 12, -3, 3);
-  TH1D *histRecoEta = new TH1D(name+" reco spectra Eta",name+" reco spectra Eta", 12, -3, 3);
+  TH1D *histGenPtcen = new TH1D(name+" gen spectra Pt",name+" gen spectra cen", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
+  TH1D *histRecoPtcen = new TH1D(name+" reco spectra Pt",name+" reco spectra cen", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
+  TH1D *histGenPtfwd  = new TH1D(name+" gen spectra Eta",name+" gen spectra fwd", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
+  TH1D *histRecoPtfwd = new TH1D(name+" reco spectra Eta",name+" reco spectra fwd", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
 
 
-  BinLogX(histGenPt);
-  BinLogX(histRecoPt);
+  BinLogX(histGenPtcen);
+  BinLogX(histRecoPtcen);
+  BinLogX(histGenPtfwd);
+  BinLogX(histRecoPtfwd);
 
   // Loop over all events
   for(entry = 0; entry < allEntries; ++entry)
@@ -200,13 +202,16 @@ std::pair<TH1D*, TH1D*> GetEff(TClonesArray *branchReco, TClonesArray *branchPar
         pt  = genMomentum.Pt();
         eta = genMomentum.Eta();
 
-        histGenPt->Fill(pt);
-        histGenEta->Fill(eta);
-
-        if(deltaR < 0.3)
+        if (TMath::Abs(eta) < 1.5) 
         {
-          histRecoPt->Fill(pt);
-          histRecoEta->Fill(eta); 
+          histGenPtcen->Fill(pt);
+          if(deltaR < 0.3) { histRecoPtcen->Fill(pt); }
+        }
+        else if (TMath::Abs(eta) < 2.5)
+        {
+          histGenPtfwd->Fill(pt);
+          if(deltaR < 0.3) { histRecoPtfwd->Fill(pt); } 
+          
         }
       }
     }
@@ -215,11 +220,11 @@ std::pair<TH1D*, TH1D*> GetEff(TClonesArray *branchReco, TClonesArray *branchPar
 
   std::pair<TH1D*,TH1D*> histos; 
 
-  histRecoPt->Divide(histGenPt);
-  histRecoEta->Divide(histGenEta);
+  histRecoPtcen->Divide(histGenPtcen);
+  histRecoPtfwd->Divide(histGenPtfwd);
 
-  histos.first = histRecoPt;
-  histos.second = histRecoEta;
+  histos.first = histRecoPtcen;
+  histos.second = histRecoPtfwd;
 
   return histos;
 }
@@ -354,10 +359,15 @@ void GetJetsEres(std::vector<resolPlot> *histos, TClonesArray *branchJet, TClone
 
         for (bin = 0; bin < Nbins; bin++)
         {
-            if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 1.5) 
+            if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 1.5) 
             {
                 histos->at(bin).cenResolHist->Fill(jetMomentum.Pt()/bestGenJetMomentum.Pt());
             }
+            else if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 2.5)
+            {
+                histos->at(bin).fwdResolHist->Fill(jetMomentum.Pt()/bestGenJetMomentum.Pt());
+            }
+
         }
       }
     }
@@ -429,9 +439,6 @@ TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central, bool rms = 
     {
         if (central == true && histos->at(bin).cenResolHist->GetEntries() > 100) 
         {
-            std::cout << " pt : " << (histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0;
-            std::cout << " mean : " << histos->at(bin).cenResolHist->GetMean() << " RMS : " << histos->at(bin).cenResolHist->GetRMS(); 
-            std::cout << " entries : " << histos->at(bin).cenResolHist->GetEntries() << std::endl;
             std::pair<Double_t, Double_t> sigvalues = GausFit(histos->at(bin).cenResolHist);
             if (rms == true) 
             {
@@ -445,17 +452,23 @@ TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central, bool rms = 
             }
             count++;
         }
-        /*
-        else if (histos->at(bin).cenResolHist->GetEntries() > 10) 
+        
+        else if (central == false && histos->at(bin).fwdResolHist->GetEntries() > 10) 
         {
-            histos->at(bin).fwdResolHist->Fit("gaus","","", -2*histos->at(bin).fwdResolHist->GetRMS(), 2*histos->at(bin).fwdResolHist->GetRMS());
-            TF1 *f = histos->at(bin).fwdResolHist->GetFunction("gaus");
-            Double_t sig = f->GetParameter(2);
-            Double_t sigErr = f->GetParError(2);
-            gr.SetPoint(bin,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sig);
-            gr.SetPointError(bin,0, sigErr);
+            std::pair<Double_t, Double_t> sigvalues = GausFit(histos->at(bin).fwdResolHist);
+            if (rms == true)
+            {
+              gr.SetPoint(count,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.second);
+              gr.SetPointError(count,0, sigvalues.second); // to correct
+            }
+            else
+            {
+              gr.SetPoint(count,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.first);
+              gr.SetPointError(count,0, sigvalues.second);
+            }
+            count++;
         }
-        */
+        
     }
     return gr;
 }
@@ -628,21 +641,27 @@ void Validation(const char *inputFile, const char *outputFile)
   HistogramsCollection(&plots_el, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "electrons");
   GetEres<Electron>( &plots_el, branchElectron, branchParticle, elID, treeReader);
   TGraphErrors gr_el = EresGraph(&plots_el, true);
+  TGraphErrors gr_elFwd = EresGraph(&plots_el, false);
   gr_el.SetName("Electron");
+  gr_elFwd.SetName("ElectronFwd");
 
   // Electron Track Energy Resolution
   std::vector<resolPlot> plots_eltrack;
   HistogramsCollection(&plots_eltrack, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "electronsTracks");
   GetEres<Track>( &plots_eltrack, branchTrack, branchParticle, elID, treeReader);
   TGraphErrors gr_eltrack = EresGraph(&plots_eltrack, true);
+  TGraphErrors gr_eltrackFwd = EresGraph(&plots_eltrack, false);
   gr_eltrack.SetName("ElectronTracks");
+  gr_eltrackFwd.SetName("ElectronTracksFwd");
 
   // Electron Tower Energy Resolution
   std::vector<resolPlot> plots_eltower;
   HistogramsCollection(&plots_eltower, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "electronsTower");
   GetEres<Tower>( &plots_eltower, branchTower, branchParticle, elID, treeReader);
   TGraphErrors gr_eltower = EresGraph(&plots_eltower, true);
+  TGraphErrors gr_eltowerFwd = EresGraph(&plots_eltower, false);
   gr_eltower.SetName("ElectronTower");
+  gr_eltrackFwd.SetName("ElectronTracksFwd");
 
   // Canvases
   TString elEff = "electronEff";
@@ -665,6 +684,7 @@ void Validation(const char *inputFile, const char *outputFile)
   C_el1->cd(2);
   TLegend *leg_el2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
 
+  gPad->SetLogx();
   histos_eltrack.second->Draw();
   addHist(histos_eltrack.second, leg_el2, 2);
   histos_eltower.second->Draw("same");
@@ -672,12 +692,15 @@ void Validation(const char *inputFile, const char *outputFile)
   histos_el.second->Draw("same");
   addHist(histos_el.second, leg_el2, 1);
 
-  DrawAxis(histos_eltrack.second, leg_el2, 1);
+  DrawAxis(histos_eltrack.second, leg_el2, 0);
   delete(leg_el2);
   C_el1->cd(0);
  
   TString elRes = "electronERes";
+  TString elResFwd = "electronEResForward";
   TCanvas *C_el2 = new TCanvas(elRes,elRes, 1000, 500);
+  C_el2->Divide(2);
+  C_el2->cd(1);
   TMultiGraph *mg_el = new TMultiGraph(elRes,elRes);
   TLegend *leg_el = new TLegend(0.52,0.7,0.9,0.9);
 
@@ -689,6 +712,19 @@ void Validation(const char *inputFile, const char *outputFile)
   leg_el->Draw();
 
   DrawAxis(mg_el, leg_el, 0.1);
+
+  C_el2->cd(2);
+  TMultiGraph *mg_elFwd = new TMultiGraph(elResFwd,elResFwd);
+  TLegend *leg_elFwd = new TLegend(0.52,0.7,0.9,0.9);
+
+  addGraph(mg_elFwd, &gr_eltowerFwd, leg_elFwd, 3);
+  addGraph(mg_elFwd, &gr_eltrackFwd, leg_elFwd, 2);
+  addGraph(mg_elFwd, &gr_elFwd, leg_elFwd, 1);
+
+  mg_elFwd->Draw("ACX");
+
+  DrawAxis(mg_elFwd, leg_elFwd, 0.1);
+
   
   C_el1->SaveAs(elEff+".eps");
   C_el2->SaveAs(elRes+".eps");
@@ -715,14 +751,17 @@ void Validation(const char *inputFile, const char *outputFile)
   HistogramsCollection(&plots_mu, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "muons");
   GetEres<Muon>( &plots_mu, branchMuon, branchParticle, muID, treeReader);
   TGraphErrors gr_mu = EresGraph(&plots_mu, true);
+  TGraphErrors gr_muFwd = EresGraph(&plots_mu, false);
   gr_mu.SetName("Muon");
+  gr_muFwd.SetName("MuonFwd");
 
   // Muon Track Energy Resolution
   std::vector<resolPlot> plots_mutrack;
   HistogramsCollection(&plots_mutrack, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "muonsTracks");
   GetEres<Track>( &plots_mutrack, branchTrack, branchParticle, muID, treeReader);
   TGraphErrors gr_mutrack = EresGraph(&plots_mutrack, true);
-  gr_mutrack.SetName("MuonTracks");
+  TGraphErrors gr_mutrackFwd = EresGraph(&plots_mutrack, false);
+  gr_mutrackFwd.SetName("MuonTracksFwd");
 
   // Canvas
 
@@ -744,6 +783,7 @@ void Validation(const char *inputFile, const char *outputFile)
   C_mu1->cd(2);
   TLegend *leg_mu2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
 
+  gPad->SetLogx();
   histos_mutrack.second->Draw();
   addHist(histos_mutrack.second, leg_mu2, 2);
   histos_mu.second->Draw("same");
@@ -752,7 +792,11 @@ void Validation(const char *inputFile, const char *outputFile)
   DrawAxis(histos_mutrack.second, leg_mu2, 1);
 
   TString muRes = "muonERes";
+  TString muResFwd = "muonEResFwd";
+
   TCanvas *C_mu = new TCanvas(muRes,muRes, 1000, 500);
+  C_mu->Divide(2);
+  C_mu->cd(1);
   TMultiGraph *mg_mu = new TMultiGraph(muRes,muRes);
   TLegend *leg_mu = new TLegend(0.52,0.7,0.9,0.9);
 
@@ -763,6 +807,17 @@ void Validation(const char *inputFile, const char *outputFile)
   leg_mu->Draw();
 
   DrawAxis(mg_mu, leg_mu, 0.3);
+
+  C_mu->cd(2);
+  TMultiGraph *mg_muFwd = new TMultiGraph(muResFwd,muResFwd);
+  TLegend *leg_muFwd = new TLegend(0.52,0.7,0.9,0.9);
+
+  addGraph(mg_muFwd, &gr_mutrackFwd, leg_muFwd, 2);
+  addGraph(mg_muFwd, &gr_muFwd, leg_muFwd, 1);
+
+  mg_muFwd->Draw("ACX");
+
+  DrawAxis(mg_muFwd, leg_muFwd, 0.3);
 
   C_mu1->SaveAs(muEff+".eps");
   C_mu->SaveAs(muRes+".eps");
@@ -787,14 +842,19 @@ void Validation(const char *inputFile, const char *outputFile)
   HistogramsCollection(&plots_ph, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "photons");
   GetEres<Photon>( &plots_ph, branchPhoton, branchParticle, phID, treeReader);
   TGraphErrors gr_ph = EresGraph(&plots_ph, true);
+  TGraphErrors gr_phFwd = EresGraph(&plots_ph, false);
   gr_ph.SetName("Photon");
+  gr_phFwd.SetName("PhotonFwd");
+
 
   // Photon Tower Energy Resolution
   std::vector<resolPlot> plots_phtower;
   HistogramsCollection(&plots_phtower, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "photonsTower");
   GetEres<Tower>( &plots_phtower, branchTower, branchParticle, phID, treeReader);
   TGraphErrors gr_phtower = EresGraph(&plots_phtower, true);
+  TGraphErrors gr_phtowerFwd = EresGraph(&plots_phtower, false);
   gr_phtower.SetName("PhotonTower");
+  gr_phtowerFwd.SetName("PhotonTowerFwd");
 
   // Canvas
 
@@ -816,6 +876,7 @@ void Validation(const char *inputFile, const char *outputFile)
   C_ph1->cd(2);
   TLegend *leg_ph2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
 
+  gPad->SetLogx();
   histos_phtower.second->Draw("same");
   addHist(histos_phtower.second, leg_ph2, 3);
   histos_ph.second->Draw("same");
@@ -826,7 +887,11 @@ void Validation(const char *inputFile, const char *outputFile)
   C_ph1->SaveAs(phEff+".eps");
 
   TString phRes = "phERes";
+  TString phResFwd = "phEResFwd";
+
   TCanvas *C_ph = new TCanvas(phRes,phRes, 1000, 500);
+  C_ph->Divide(2);
+  C_ph->cd(1);
   TMultiGraph *mg_ph = new TMultiGraph(phRes,phRes);
   TLegend *leg_ph = new TLegend(0.52,0.7,0.9,0.9);
 
@@ -837,6 +902,17 @@ void Validation(const char *inputFile, const char *outputFile)
   leg_ph->Draw();
 
   DrawAxis(mg_ph, leg_ph, 0.3);
+
+  C_ph->cd(2);
+  TMultiGraph *mg_phFwd = new TMultiGraph(phResFwd,phResFwd);
+  TLegend *leg_phFwd = new TLegend(0.52,0.7,0.9,0.9);
+
+  addGraph(mg_phFwd, &gr_phtowerFwd, leg_phFwd, 3);
+  addGraph(mg_phFwd, &gr_phFwd, leg_phFwd, 1);
+
+  mg_phFwd->Draw("ACX");
+
+  DrawAxis(mg_phFwd, leg_phFwd, 0.3);
 
   C_ph->SaveAs(phRes+".eps");
 
@@ -863,14 +939,18 @@ void Validation(const char *inputFile, const char *outputFile)
   HistogramsCollection(&plots_pfjets, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "PFJet");
   GetJetsEres( &plots_pfjets, branchPFJet, branchGenJet, treeReader);
   TGraphErrors gr_pfjets = EresGraph(&plots_pfjets, true);
+  TGraphErrors gr_pfjetsFwd = EresGraph(&plots_pfjets, false);
   gr_pfjets.SetName("pfJet");
+  gr_pfjetsFwd.SetName("pfJetFwd");
 
   // CaloJets Energy Resolution
   std::vector<resolPlot> plots_calojets;
   HistogramsCollection(&plots_calojets, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "CaloJet");
   GetJetsEres( &plots_calojets, branchCaloJet, branchGenJet, treeReader);
   TGraphErrors gr_calojets = EresGraph(&plots_calojets, true);
+  TGraphErrors gr_calojetsFwd = EresGraph(&plots_calojets, false);
   gr_calojets.SetName("caloJet");
+  gr_calojetsFwd.SetName("caloJetFwd");
 
   // MET Resolution vs HT
   std::vector<resolPlot> plots_met;
@@ -880,7 +960,6 @@ void Validation(const char *inputFile, const char *outputFile)
   gr_calojets.SetName("MET");
 
   // Canvas
-
   TString btagEff = "btagEff";
   TCanvas *C_btag1 = new TCanvas(btagEff,btagEff, 1000, 500);
   C_btag1->Divide(2);
@@ -928,7 +1007,11 @@ void Validation(const char *inputFile, const char *outputFile)
   C_tautag1->cd(0);
 
   TString jetRes = "jetERes";
+  TString jetResFwd = "jetEResFwd";
   TCanvas *C_jet = new TCanvas(jetRes,jetRes, 1000, 500);
+  C_jet->Divide(2);
+
+  C_jet->cd(1);
   TMultiGraph *mg_jet = new TMultiGraph(jetRes,jetRes);
   TLegend *leg_jet = new TLegend(0.52,0.7,0.9,0.9);
 
@@ -939,6 +1022,17 @@ void Validation(const char *inputFile, const char *outputFile)
   leg_jet->Draw();
 
   DrawAxis(mg_jet, leg_jet, 0.25);
+
+  C_jet->cd(2);
+  TMultiGraph *mg_jetFwd = new TMultiGraph(jetResFwd,jetResFwd);
+  TLegend *leg_jetFwd = new TLegend(0.52,0.7,0.9,0.9);
+
+  addGraph(mg_jetFwd, &gr_calojetsFwd, leg_jetFwd, 3);
+  addGraph(mg_jetFwd, &gr_pfjetsFwd, leg_jetFwd, 1);
+
+  mg_jetFwd->Draw("ACX");
+
+  DrawAxis(mg_jetFwd, leg_jetFwd, 0.25);
 
   C_btag1->SaveAs(btagEff+".eps");
   C_jet->SaveAs(jetRes+".eps");
@@ -978,6 +1072,9 @@ void Validation(const char *inputFile, const char *outputFile)
       plots_el.at(bin).cenResolHist->Write();
       plots_eltrack.at(bin).cenResolHist->Write();
       plots_eltower.at(bin).cenResolHist->Write();
+      plots_el.at(bin).fwdResolHist->Write();
+      plots_eltrack.at(bin).fwdResolHist->Write();
+      plots_eltower.at(bin).fwdResolHist->Write();
   }
   //  gr.Write();
   histos_el.first->Write();
@@ -1009,7 +1106,9 @@ void Validation(const char *inputFile, const char *outputFile)
   for (int bin = 0; bin < Nbins; bin++)
   {
       plots_pfjets.at(bin).cenResolHist->Write();
+      plots_pfjets.at(bin).fwdResolHist->Write();
       plots_calojets.at(bin).cenResolHist->Write();
+      plots_calojets.at(bin).fwdResolHist->Write();
       plots_met.at(bin).cenResolHist->Write();
   }
   histos_btag.first->Write();
