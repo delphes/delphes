@@ -152,52 +152,52 @@ void SignalHandler(int sig)
 // Optional final argument to put particle at rest => E = m.
 // from pythia8 example 21
 
-void fillParticle(int id, double ee_max, double thetaIn, double phiIn,
-  Pythia8::Event& event, Pythia8::ParticleData& pdt, Pythia8::Rndm& rndm, bool atRest = false) {
-
+void fillParticle(int id, double pt_max, double eta_max,
+  Pythia8::Event &event, Pythia8::ParticleData &pdt, Pythia8::Rndm &rndm)
+{
   // Reset event record to allow for new event.
   event.reset();
 
-  // Angles uniform in solid angle.
-  double cThe, sThe, phi, ee;
-  cThe = 2. * rndm.flat() - 1.;
-  sThe = Pythia8::sqrtpos(1. - cThe * cThe);
-  phi = 2. * M_PI * rndm.flat();
-  ee = pow(10,1+(log10(ee_max)-1)*rndm.flat());
-  double mm = pdt.mSel(id);
-  double pp = Pythia8::sqrtpos(ee*ee - mm*mm);
+  // Generate uniform pt and eta.
+  double pt, eta, phi, pp, ee, mm;
+  pt = pow(10, 1.0 + (log10(pt_max) - 1.0) * rndm.flat());
+  eta = (2.0 * rndm.flat() - 1.0) * eta_max;
+  phi = 2.0 * M_PI * rndm.flat();
+  pp = pt * cosh(eta);
+  mm = pdt.mSel(id);
+  ee = Pythia8::sqrtpos(pp*pp + mm*mm);
 
   // Store the particle in the event record.
-  event.append( id, 1, 0, 0, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee, mm);
-
+  event.append(id, 1, 0, 0, pt * cos(phi), pt * sin(phi), pt * sinh(eta), ee, mm);
 }
 
-void fillPartons(int type, double ee_max, Pythia8::Event& event, Pythia8::ParticleData& pdt,
-  Pythia8::Rndm& rndm) {
+void fillPartons(int id, double pt_max, double eta_max,
+  Pythia8::Event &event, Pythia8::ParticleData &pdt, Pythia8::Rndm &rndm)
+{
 
   // Reset event record to allow for new event.
   event.reset();
-
-  // Angles uniform in solid angle.
-  double cThe, sThe, phi, ee;
 
   // Information on a q qbar system, to be hadronized.
 
-  cThe = 2. * rndm.flat() - 1.;
-  sThe = Pythia8::sqrtpos(1. - cThe * cThe);
-  phi = 2. * M_PI * rndm.flat();
-  ee = pow(10,1+(log10(ee_max)-1)*rndm.flat());
-  double mm = pdt.m0(type);
-  double pp = Pythia8::sqrtpos(ee*ee - mm*mm);
-  if (type == 21)
+  // Generate uniform pt and eta.
+  double pt, eta, phi, pp, ee, mm;
+  pt = pow(10, 1.0 + (log10(pt_max) - 1.0) * rndm.flat());
+  eta = (2.0 * rndm.flat() - 1.0) * eta_max;
+  phi = 2.0 * M_PI * rndm.flat();
+  pp = pt * cosh(eta);
+  mm = pdt.m0(id);
+  ee = Pythia8::sqrtpos(pp*pp + mm*mm);
+
+  if(id == 21)
   {
-    event.append( 21, 23, 101, 102, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee);
-    event.append( 21, 23, 102, 101, -pp * sThe * cos(phi), -pp * sThe * sin(phi), -pp * cThe, ee);
+    event.append(21, 23, 101, 102, pt * cos(phi), pt * sin(phi), pt * sinh(eta), ee);
+    event.append(21, 23, 102, 101, -pt * cos(phi), -pt * sin(phi), -pt * sinh(eta), ee);
   }
   else
   {
-    event.append(  type, 23, 101,   0, pp * sThe * cos(phi), pp * sThe * sin(phi), pp * cThe, ee, mm);
-    event.append( -type, 23,   0, 101, -pp * sThe * cos(phi), -pp * sThe * sin(phi), -pp * cThe, ee, mm);
+    event.append(id, 23, 101, 0, pt * cos(phi), pt * sin(phi), pt * sinh(eta), ee, mm);
+    event.append(-id, 23, 0, 101, -pt * cos(phi), -pt * sin(phi), -pt * sinh(eta), ee, mm);
   }
 }
 
@@ -339,9 +339,12 @@ int main(int argc, char *argv[])
       {
         if (pythia->mode("Main:spareMode1") == 11 || pythia->mode("Main:spareMode1") == 13 || pythia->mode("Main:spareMode1") == 15 || pythia->mode("Main:spareMode1") == 22) 
         { 
-          fillParticle( pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), -1., 0.,pythia->event, pythia->particleData, pythia->rndm, 0);
+          fillParticle(pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), pythia->parm("Main:spareParm2"), pythia->event, pythia->particleData, pythia->rndm);
         }
-        else fillPartons( pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), pythia->event, pythia->particleData, pythia->rndm);
+        else
+        {
+          fillPartons(pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), pythia->parm("Main:spareParm2"), pythia->event, pythia->particleData, pythia->rndm);
+        }
       }
 
       if(!pythia->next())
