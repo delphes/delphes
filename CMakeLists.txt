@@ -40,6 +40,7 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:fastjet>
   $<TARGET_OBJECTS:tcl>
   $<TARGET_OBJECTS:Hector>
+  $<TARGET_OBJECTS:PUPPI>
 )
 
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})

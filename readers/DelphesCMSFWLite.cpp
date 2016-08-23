@@ -64,21 +64,48 @@ using namespace std;
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
   DelphesFactory *factory, TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray)
+  TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
 {
+
   fwlite::Handle< GenEventInfoProduct > handleGenEventInfo;
-
   fwlite::Handle< LHEEventProduct > handleLHEEvent;
-
   fwlite::Handle< vector< reco::GenParticle > > handleParticle;
+
   vector< reco::GenParticle >::const_iterator itParticle;
 
   vector< const reco::Candidate * > vectorCandidate;
   vector< const reco::Candidate * >::iterator itCandidate;
 
   handleGenEventInfo.getByLabel(event, "generator");
-  handleLHEEvent.getByLabel(event, "externalLHEProducer");
-  handleParticle.getByLabel(event, "genParticles");
+
+  if (!((handleLHEEvent.getBranchNameFor(event, "source")).empty()))
+  { 
+    handleLHEEvent.getByLabel(event, "source");
+  }
+  else if (!((handleLHEEvent.getBranchNameFor(event, "externalLHEProducer")).empty()))
+  {
+    handleLHEEvent.getByLabel(event, "externalLHEProducer");
+  }
+  else if (firstEvent)
+  {
+    std::cout<<"Wrong LHEEvent Label! Please, check the input file."<<std::endl;
+  }
+
+  if (!((handleParticle.getBranchNameFor(event, "genParticles")).empty()))
+  {
+    handleParticle.getByLabel(event, "genParticles");
+  }
+  else if (!((handleParticle.getBranchNameFor(event, "prunedGenParticles")).empty()))
+  {
+    handleParticle.getByLabel(event, "prunedGenParticles");
+  }
+  else
+  {
+    std::cout<<"Wrong GenParticle Label! Please, check the input file."<<std::endl;
+    exit(-1);
+  }
+
+  Bool_t foundLHE = !((handleLHEEvent.getBranchNameFor(event, "source")).empty()) || !((handleLHEEvent.getBranchNameFor(event, "externalLHEProducer")).empty());
 
   HepMCEvent *element;
   Weight *weight;
@@ -90,9 +117,6 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   Int_t pid, status;
   Double_t px, py, pz, e, mass;
   Double_t x, y, z;
-
-  const vector< gen::WeightsInfo > &vectorWeightsInfo = handleLHEEvent->weights();
-  vector< gen::WeightsInfo >::const_iterator itWeightsInfo;
 
   element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
 
@@ -116,10 +140,17 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   element->ReadTime = 0.0;
   element->ProcTime = 0.0;
 
-  for(itWeightsInfo = vectorWeightsInfo.begin(); itWeightsInfo != vectorWeightsInfo.end(); ++itWeightsInfo)
+
+  if(foundLHE)
   {
-    weight = static_cast<Weight *>(branchRwgt->NewEntry());
-    weight->Weight = itWeightsInfo->wgt;
+    const vector< gen::WeightsInfo > &vectorWeightsInfo = handleLHEEvent->weights();
+    vector< gen::WeightsInfo >::const_iterator itWeightsInfo;
+    
+    for(itWeightsInfo = vectorWeightsInfo.begin(); itWeightsInfo != vectorWeightsInfo.end(); ++itWeightsInfo)
+    {
+      weight = static_cast<Weight *>(branchRwgt->NewEntry());
+      weight->Weight = itWeightsInfo->wgt;
+    }  
   }
 
   pdg = TDatabasePDG::Instance();
@@ -206,6 +237,7 @@ int main(int argc, char *argv[])
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
+  Bool_t firstEvent = kTRUE;
 
   if(argc < 4)
   {
@@ -280,11 +312,14 @@ int main(int argc, char *argv[])
       eventCounter = 0;
       modularDelphes->Clear();
       treeWriter->Clear();
+
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
         ConvertInput(event, eventCounter, branchEvent, branchRwgt, factory,
-          allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+          allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
         modularDelphes->ProcessTask();
+          
+        firstEvent = kFALSE;
 
         treeWriter->Fill();
 

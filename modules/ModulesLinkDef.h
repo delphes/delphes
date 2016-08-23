@@ -39,6 +39,7 @@
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
 #include "modules/Calorimeter.h"
+#include "modules/OldCalorimeter.h"
 #include "modules/Isolation.h"
 #include "modules/EnergyScale.h"
 #include "modules/UniqueObjectFinder.h"
@@ -58,6 +59,7 @@
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
 #include "modules/BeamSpotFilter.h"
+#include "modules/RecoPuFilter.h"
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
@@ -88,6 +90,7 @@
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class Calorimeter+;
+#pragma link C++ class OldCalorimeter+;
 #pragma link C++ class Isolation+;
 #pragma link C++ class EnergyScale+;
 #pragma link C++ class UniqueObjectFinder+;
@@ -107,6 +110,7 @@
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
 #pragma link C++ class BeamSpotFilter+;
+#pragma link C++ class RecoPuFilter+;
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
