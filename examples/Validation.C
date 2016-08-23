@@ -48,11 +48,13 @@ struct resolPlot
     TH1 *fwdResolHist;
     double ptmin;
     double ptmax;
+    double xmin;
+    double xmax;
     TString obj;
 
     resolPlot();
     resolPlot(double ptdown, double ptup, TString object);
-    void set(double ptdown, double ptup, TString object);
+    void set(double ptdown, double ptup, TString object, double xmin = 0, double xmax = 2);
     void print(){std::cout << ptmin << std::endl;}
 };
 
@@ -66,17 +68,17 @@ resolPlot::resolPlot(double ptdown, double ptup, TString object)
     this->set(ptdown,ptup,object);
 }
 
-void resolPlot::set(double ptdown, double ptup, TString object){
+void resolPlot::set(double ptdown, double ptup, TString object, double xmin, double xmax){
     ptmin = ptdown;
     ptmax = ptup;
     obj = object;
 
-    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500,  0, 2);
-    fwdResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", 500, 0.4, 0.4);
+    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500,  xmin, xmax);
+    fwdResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", 500,  xmin, xmax);
 
 }
 
-void HistogramsCollection(std::vector<resolPlot> *histos, double ptmin, double ptmax, TString obj)
+void HistogramsCollection(std::vector<resolPlot> *histos, double ptmin, double ptmax, TString obj, double xmin = 0, double xmax = 2)
 {
     double width;
     double ptdown;
@@ -88,7 +90,7 @@ void HistogramsCollection(std::vector<resolPlot> *histos, double ptmin, double p
         width = (ptmax - ptmin) / Nbins;
         ptdown = TMath::Power(10,ptmin + i * width );
         ptup = TMath::Power(10,ptmin + (i+1) * width );
-        ptemp.set(ptdown, ptup, obj);
+        ptemp.set(ptdown, ptup, obj, xmin, xmax);
         histos->push_back(ptemp);
     }
 }
@@ -361,6 +363,49 @@ void GetJetsEres(std::vector<resolPlot> *histos, TClonesArray *branchJet, TClone
     }
   }
 }
+
+void GetMetres(std::vector<resolPlot> *histos, TClonesArray *branchScalarHT, TClonesArray *branchMet, TClonesArray *branchJet, ExRootTreeReader *treeReader)
+{
+
+  Long64_t allEntries = treeReader->GetEntries();
+
+  cout << "** Computing resolution of " << branchMet->GetName() << " vs " << branchScalarHT->GetName() << endl;
+
+  MissingET *met;
+  ScalarHT *scalarHT;
+
+  Long64_t entry;
+
+  Int_t bin;
+  Double_t ht;
+
+  // Loop over all events
+  for(entry = 0; entry < allEntries; ++entry)
+  {
+    // Load selected branches with data from specified event
+    treeReader->ReadEntry(entry);
+
+    if(entry%10000 == 0) cout << "Event number: "<< entry <<endl;
+
+    if (branchJet->GetEntriesFast() > 1)
+    {
+      met = (MissingET*) branchMet->At(0);
+      scalarHT = (ScalarHT*) branchScalarHT->At(0);
+      ht = scalarHT->HT;
+
+      for (bin = 0; bin < Nbins; bin++)
+      {
+        if(ht > histos->at(bin).ptmin && ht < histos->at(bin).ptmax ) 
+        {
+          histos->at(bin).cenResolHist->Fill(met->P4().Px());
+          histos->at(bin).fwdResolHist->Fill(met->P4().Py());
+        }
+      }
+    }
+  }
+}
+
+
 std::pair<Double_t, Double_t> GausFit(TH1* hist)
 {
     TF1 *f1 = new TF1("f1", "gaus", hist->GetMean()-2*hist->GetRMS(), hist->GetMean()+2*hist->GetRMS());
@@ -373,7 +418,7 @@ std::pair<Double_t, Double_t> GausFit(TH1* hist)
 }
 
 
-TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central)
+TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central, bool rms = false)
 {
     Int_t bin;
     Int_t count = 0;
@@ -388,8 +433,16 @@ TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central)
             std::cout << " mean : " << histos->at(bin).cenResolHist->GetMean() << " RMS : " << histos->at(bin).cenResolHist->GetRMS(); 
             std::cout << " entries : " << histos->at(bin).cenResolHist->GetEntries() << std::endl;
             std::pair<Double_t, Double_t> sigvalues = GausFit(histos->at(bin).cenResolHist);
-            gr.SetPoint(count,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.first);
-            gr.SetPointError(count,0, sigvalues.second);
+            if (rms == true) 
+            {
+              gr.SetPoint(count,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.second);
+              gr.SetPointError(count,0, sigvalues.second); // to correct
+            }
+            else 
+            {
+              gr.SetPoint(count,(histos->at(bin).ptmin+histos->at(bin).ptmax)/2.0, sigvalues.first);
+              gr.SetPointError(count,0, sigvalues.second);
+            }
             count++;
         }
         /*
@@ -550,6 +603,8 @@ void Validation(const char *inputFile, const char *outputFile)
   TClonesArray *branchGenJet = treeReader->UseBranch("GenJet");
   TClonesArray *branchPFJet = treeReader->UseBranch("Jet");
   TClonesArray *branchCaloJet = treeReader->UseBranch("CaloJet");
+  TClonesArray *branchScalarHT = treeReader->UseBranch("ScalarHT");
+  TClonesArray *branchMet = treeReader->UseBranch("MissingET");
 
 #ifdef ELECTRON
 
@@ -810,13 +865,19 @@ void Validation(const char *inputFile, const char *outputFile)
   TGraphErrors gr_pfjets = EresGraph(&plots_pfjets, true);
   gr_pfjets.SetName("pfJet");
 
-
-  // PFJets Energy Resolution
+  // CaloJets Energy Resolution
   std::vector<resolPlot> plots_calojets;
   HistogramsCollection(&plots_calojets, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "CaloJet");
   GetJetsEres( &plots_calojets, branchCaloJet, branchGenJet, treeReader);
   TGraphErrors gr_calojets = EresGraph(&plots_calojets, true);
   gr_calojets.SetName("caloJet");
+
+  // MET Resolution vs HT
+  std::vector<resolPlot> plots_met;
+  HistogramsCollection(&plots_met, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "MET", -200, 200);
+  GetMetres( &plots_met, branchScalarHT, branchMet, branchPFJet, treeReader);
+  TGraphErrors gr_met = EresGraph(&plots_met, true);
+  gr_calojets.SetName("MET");
 
   // Canvas
 
@@ -882,6 +943,22 @@ void Validation(const char *inputFile, const char *outputFile)
   C_btag1->SaveAs(btagEff+".eps");
   C_jet->SaveAs(jetRes+".eps");
 
+  TString metRes = "MetRes";
+  TCanvas *C_met = new TCanvas(metRes,metRes, 1000, 500);
+
+  TMultiGraph *mg_met = new TMultiGraph(metRes,metRes);
+  TLegend *leg_met = new TLegend(0.52,0.7,0.9,0.9);
+
+  addGraph(mg_met, &gr_met, leg_met, 3);
+
+  mg_met->Draw("ACX");
+  leg_met->Draw();
+
+  DrawAxis(mg_met, leg_met, 100);
+
+  C_met->SaveAs(metRes+".eps");
+
+
 #endif
   
   /*
@@ -933,6 +1010,7 @@ void Validation(const char *inputFile, const char *outputFile)
   {
       plots_pfjets.at(bin).cenResolHist->Write();
       plots_calojets.at(bin).cenResolHist->Write();
+      plots_met.at(bin).cenResolHist->Write();
   }
   histos_btag.first->Write();
   histos_btag.second->Write();
@@ -941,6 +1019,7 @@ void Validation(const char *inputFile, const char *outputFile)
   C_btag1->Write();
   C_tautag1->Write();
   C_jet->Write();
+  C_met->Write();
 #endif
 
   fout->Write();
