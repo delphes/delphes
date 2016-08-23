@@ -58,7 +58,7 @@ using namespace std;
 PhotonConversions::PhotonConversions() :
   fItInputArray(0), fConversionMap(0), fDecayXsec(0)
 {
-  fDecayXsec = new TF1;
+  fDecayXsec = new TF1("decayXsec","1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0);
   fConversionMap = new DelphesCylindricalFormula;
 }
 
@@ -83,13 +83,6 @@ void PhotonConversions::Init()
   fStep = GetDouble("Step", 0.1); // in meters
 
   fConversionMap->Compile(GetString("ConversionMap", "0.0"));
-
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,04,00)
-  fDecayXsec->Compile("1.0 - 4.0/3.0 * x * (1.0 - x)");
-#else
-  fDecayXsec->GetFormula()->Compile("1.0 - 4.0/3.0 * x * (1.0 - x)");
-#endif
-  fDecayXsec->SetRange(0.0, 1.0);
 
   // import array with output from filter/classifier module
 
