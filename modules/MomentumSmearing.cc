@@ -108,9 +108,10 @@ void MomentumSmearing::Process()
     e = candidateMomentum.E();
 
     // apply smearing formula
-    pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
+    //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
+    pt = LogNormal(pt, fFormula->Eval(pt, eta, phi, e) * pt );
     
-    if(pt <= 0.0) continue;
+    //if(pt <= 0.0) continue;
 
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
@@ -123,5 +124,24 @@ void MomentumSmearing::Process()
     fOutputArray->Add(candidate);
   }
 }
+//----------------------------------------------------------------
+
+Double_t MomentumSmearing::LogNormal(Double_t mean, Double_t sigma)
+{
+  Double_t a, b;
+
+  if(mean > 0.0)
+  {
+    b = TMath::Sqrt(TMath::Log((1.0 + (sigma*sigma)/(mean*mean))));
+    a = TMath::Log(mean) - 0.5*b*b;
+
+    return TMath::Exp(a + b*gRandom->Gaus(0.0, 1.0));
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
 
 //------------------------------------------------------------------------------
