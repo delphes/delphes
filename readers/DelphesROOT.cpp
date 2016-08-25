@@ -166,9 +166,9 @@ int main(int argc, char *argv[])
       eventCounter = 0;
       modularDelphes->Clear();
       treeWriter->Clear();
-      for(Int_t entry = 0; entry < numberOfEvents; ++entry)
+      for(Int_t entry = 0; entry < numberOfEvents && !interrupted; ++entry)
       {
-        
+    
         treeReader->ReadEntry(entry);
        
         // -- TBC need also to include event weights --  
