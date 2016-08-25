@@ -1,3 +1,17 @@
+3.3.3:
+- improved compatibility with ROOT >= 6.04
+- removed test of praticle stability based on ROOT pdgtable (#347, #753, #821, #855)
+- fixed bugs in DelphesCMSFWLite
+- fixed bugs in PUPPI
+- fixed compiler and linker flags for Pythia8
+- added CMS Phase II cards
+- added particle gun to DelphesPythia8
+- added jet merging to DelphesPythia8 based on Pythia8 main32.cc
+- added UseMiniCone option in Isolation module
+- added RecoPuFilter module
+- added back OldCalorimeter for CheckMate bwd compatibilty (#591)
+- updated tracking and calorimeter resolution in CMS cards
+
 3.3.2:
 - added pre-validated card for CMS upgrade Phase II studies
 - added TrackCountingTauTagging module (a la CheckMate)
