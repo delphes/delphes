@@ -31,16 +31,27 @@ static const int Nbins = 20;
 
 int objStyle = 1;
 int trackStyle = 7;
-int towerStyle = 5;
+int towerStyle = 3;
 
 Color_t objColor = kBlack;
 Color_t trackColor = kBlack;
 Color_t towerColor = kBlack;
 
 double effLegXmin = 0.22;
-double effLegXmax = 0.5;
+double effLegXmax = 0.7;
 double effLegYmin = 0.22;
-double effLegYmax = 0.4;
+double effLegYmax = 0.5;
+
+double resLegXmin = 0.62;
+double resLegXmax = 0.9;
+double resLegYmin = 0.52;
+double resLegYmax = 0.85;
+
+double topLeftLegXmin = 0.22;
+double topLeftLegXmax = 0.7;
+double topLeftLegYmin = 0.52;
+double topLeftLegYmax = 0.85;
+
 
 struct resolPlot
 {
@@ -73,8 +84,8 @@ void resolPlot::set(double ptdown, double ptup, TString object, double xmin, dou
     ptmax = ptup;
     obj = object;
 
-    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 500,  xmin, xmax);
-    fwdResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", 500,  xmin, xmax);
+    cenResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_cen", 200,  xmin, xmax);
+    fwdResolHist = new TH1D(obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", obj+"_delta_pt_"+Form("%4.2f",ptmin)+"_"+Form("%4.2f",ptmax)+"_fwd", 200,  xmin, xmax);
 
 }
 
@@ -389,6 +400,9 @@ void GetMetres(std::vector<resolPlot> *histos, TClonesArray *branchScalarHT, TCl
   Int_t bin;
   Double_t ht;
 
+  Jet *jet;
+  TLorentzVector p1, p2;
+
   // Loop over all events
   for(entry = 0; entry < allEntries; ++entry)
   {
@@ -399,9 +413,18 @@ void GetMetres(std::vector<resolPlot> *histos, TClonesArray *branchScalarHT, TCl
 
     if (branchJet->GetEntriesFast() > 1)
     {
+      
+      jet = (Jet*) branchJet->At(0);
+      p1 = jet->P4();
+      jet = (Jet*) branchJet->At(1);
+      p2 = jet->P4();
+        
       met = (MissingET*) branchMet->At(0);
       scalarHT = (ScalarHT*) branchScalarHT->At(0);
       ht = scalarHT->HT;
+
+      if(p1.Pt() < 0.75*ht/2) continue;
+      if(p2.Pt() < 0.75*ht/2) continue;
 
       for (bin = 0; bin < Nbins; bin++)
       {
@@ -418,13 +441,22 @@ void GetMetres(std::vector<resolPlot> *histos, TClonesArray *branchScalarHT, TCl
 
 std::pair<Double_t, Double_t> GausFit(TH1* hist)
 {
+    
     TF1 *f1 = new TF1("f1", "gaus", hist->GetMean()-2*hist->GetRMS(), hist->GetMean()+2*hist->GetRMS());
     hist->Fit("f1","RQ");
     Double_t sig = f1->GetParameter(2);
     Double_t sigErr = f1->GetParError(2);
     delete f1;
     return make_pair (sig, sigErr);
+    
+    /* 
+    int bin1 = hist->FindFirstBinAbove(hist->GetMaximum()/2);
+    int bin2 = hist->FindLastBinAbove(hist->GetMaximum()/2);
+    double fwhm = hist->GetBinCenter(bin2) - hist->GetBinCenter(bin1);
+
+    return make_pair (fwhm, fwhm);
     //return make_pair (hist->GetRMS(), hist->GetRMSError());
+    */
 }
 
 
@@ -482,7 +514,7 @@ TGraphErrors EresGraph(std::vector<resolPlot> *histos, bool central, bool rms = 
 void addGraph(TMultiGraph *mg, TGraphErrors *gr, TLegend *leg, int type)
 {
 
-  gr->SetLineWidth(3);
+  gr->SetLineWidth(2);
 
   switch ( type )
   {    
@@ -508,6 +540,12 @@ void addGraph(TMultiGraph *mg, TGraphErrors *gr, TLegend *leg, int type)
       leg->AddEntry(gr,"Tower","l");
       break;
 
+    case 0:
+      gr->SetLineColor(objColor);
+      gr->SetLineStyle(objStyle);
+      mg->Add(gr);
+      break;
+
     default:
       std::cout << "wrong type, possibles choices are Object, Track and Tower" << std::endl;
       break;
@@ -516,7 +554,7 @@ void addGraph(TMultiGraph *mg, TGraphErrors *gr, TLegend *leg, int type)
 
 void addHist(TH1D *h, TLegend *leg, int type)
 {
-  h->SetLineWidth(3);
+  h->SetLineWidth(2);
 
   switch ( type )
   {
@@ -538,6 +576,11 @@ void addHist(TH1D *h, TLegend *leg, int type)
       leg->AddEntry(h,"Tower","l");
       break;
 
+    case 0:
+      h->SetLineColor(objColor);
+      h->SetLineStyle(objStyle);
+      break;
+
     default:
       std::cout << "wrong type, possibles choices are Object, Track and Tower" << std::endl;
       break;
@@ -549,17 +592,22 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double max)
   mg->SetMinimum(0.);
   mg->SetMaximum(max);
   mg->GetXaxis()->SetLimits(ptrangemin,ptrangemax);
-  mg->GetYaxis()->SetTitle("#sigma (E) / E_{gen}");
-  mg->GetXaxis()->SetTitle("E_{gen}");
+  mg->GetYaxis()->SetTitle("resolution");
+  mg->GetXaxis()->SetTitle("p_{T} [GeV]");
   mg->GetYaxis()->SetTitleSize(0.07);
   mg->GetXaxis()->SetTitleSize(0.07);
-  mg->GetYaxis()->SetLabelSize(0.07);
-  mg->GetXaxis()->SetLabelSize(0.07);
-
-  leg->SetLineStyle(0);
+  mg->GetYaxis()->SetLabelSize(0.06);
+  mg->GetXaxis()->SetLabelSize(0.06);
+  mg->GetYaxis()->SetLabelOffset(0.03);
+  mg->GetYaxis()->SetTitleOffset(1.4);
+  mg->GetXaxis()->SetTitleOffset(1.4);
+  
+  mg->GetYaxis()->SetNdivisions(505);
+  
+  leg->SetBorderSize(0);
+  leg->SetShadowColor(0);
+  leg->SetFillColor(0);
   leg->SetFillStyle(0);
-  leg->SetLineWidth(0);
-  leg->SetLineColor(0);
 
   gStyle->SetOptTitle(0); 
   gPad->SetLogx();
@@ -573,18 +621,24 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double max)
 void DrawAxis(TH1D *h, TLegend *leg, int type)
 {
 
-  h->GetYaxis()->SetRangeUser(0,1.2);
-  if (type == 0) h->GetXaxis()->SetTitle("E_{gen}");
+  h->GetYaxis()->SetRangeUser(0,1.0);
+  if (type == 0) h->GetXaxis()->SetTitle("p_{T} [GeV]");
   else h->GetXaxis()->SetTitle("#eta");
-  h->GetYaxis()->SetTitle("#epsilon");
+  h->GetYaxis()->SetTitle("efficiency");
   h->GetYaxis()->SetTitleSize(0.07);
   h->GetXaxis()->SetTitleSize(0.07);
-  h->GetYaxis()->SetLabelSize(0.07);
-  h->GetXaxis()->SetLabelSize(0.07);
-  leg->SetLineStyle(0);
+  h->GetYaxis()->SetLabelSize(0.06);
+  h->GetXaxis()->SetLabelSize(0.06);
+  h->GetYaxis()->SetLabelOffset(0.03);
+  h->GetYaxis()->SetTitleOffset(1.3);
+  h->GetXaxis()->SetTitleOffset(1.4);
+ 
+  h->GetYaxis()->SetNdivisions(505);
+  
+  leg->SetBorderSize(0);
+  leg->SetShadowColor(0);
+  leg->SetFillColor(0);
   leg->SetFillStyle(0);
-  leg->SetLineWidth(0);
-  leg->SetLineColor(0);
 
   gStyle->SetOptTitle(0);
   gStyle->SetOptStat(0);
@@ -618,6 +672,7 @@ void Validation(const char *inputFile, const char *outputFile)
   TClonesArray *branchCaloJet = treeReader->UseBranch("CaloJet");
   TClonesArray *branchScalarHT = treeReader->UseBranch("ScalarHT");
   TClonesArray *branchMet = treeReader->UseBranch("MissingET");
+
 
 #ifdef ELECTRON
 
@@ -665,44 +720,63 @@ void Validation(const char *inputFile, const char *outputFile)
 
   // Canvases
   TString elEff = "electronEff";
-  TCanvas *C_el1 = new TCanvas(elEff,elEff, 1000, 500);
+  TCanvas *C_el1 = new TCanvas(elEff,elEff, 1600, 600);
   C_el1->Divide(2);
   C_el1->cd(1);
   TLegend *leg_el1 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  leg_el1->SetHeader("#splitline{electrons}{|#eta| < 1.5}");
+  leg_el1->AddEntry("","","");
 
   gPad->SetLogx();
-  histos_eltrack.first->Draw();
+  histos_eltrack.first->Draw("][");
   addHist(histos_eltrack.first, leg_el1, 2); 
-  histos_eltower.first->Draw("same");
-  addHist(histos_eltower.first, leg_el1, 3);
-  histos_el.first->Draw("same");
+  //histos_eltower.first->Draw("same");
+  //addHist(histos_eltower.first, leg_el1, 3);
+  histos_el.first->Draw("same ][");
   addHist(histos_el.first, leg_el1, 1);
-
   DrawAxis(histos_eltrack.first, leg_el1, 0);
+  
   leg_el1->Draw();
-
+ 
+/*
+  TPaveText* txt = new TPaveText(effLegXmin,effLegYmax+0.02,effLegXmax,effLegYmax+0.1,"brNDC") ; 
+  txt->AddText("electrons"); 
+  txt->SetBorderSize(0);
+  txt->SetShadowColor(0);
+  txt->SetFillColor(0);
+  txt->SetFillStyle(0);
+  txt->SetTextAlign(22);
+  txt->Draw();
+*/
   C_el1->cd(2);
   TLegend *leg_el2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  leg_el2->SetHeader("#splitline{electrons}{1.5 < |#eta| < 2.5}");
+  leg_el2->AddEntry("","","");
 
   gPad->SetLogx();
-  histos_eltrack.second->Draw();
+  histos_eltrack.second->Draw("][");
   addHist(histos_eltrack.second, leg_el2, 2);
-  histos_eltower.second->Draw("same");
-  addHist(histos_eltower.second, leg_el2, 3);
-  histos_el.second->Draw("same");
+  //histos_eltower.second->Draw("same");
+  //addHist(histos_eltower.second, leg_el2, 3);
+  histos_el.second->Draw("same ][");
   addHist(histos_el.second, leg_el2, 1);
 
   DrawAxis(histos_eltrack.second, leg_el2, 0);
-  delete(leg_el2);
+  leg_el2->Draw();
+
+  //txt->Draw("same");
+ 
   C_el1->cd(0);
  
   TString elRes = "electronERes";
   TString elResFwd = "electronEResForward";
-  TCanvas *C_el2 = new TCanvas(elRes,elRes, 1000, 500);
+  TCanvas *C_el2 = new TCanvas(elRes,elRes, 1600, 600);
   C_el2->Divide(2);
   C_el2->cd(1);
   TMultiGraph *mg_el = new TMultiGraph(elRes,elRes);
-  TLegend *leg_el = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_el = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_el->SetHeader("#splitline{electrons}{|#eta| < 1.5}");
+  leg_el->AddEntry("","","");
 
   addGraph(mg_el, &gr_eltower, leg_el, 3);
   addGraph(mg_el, &gr_eltrack, leg_el, 2);
@@ -710,24 +784,44 @@ void Validation(const char *inputFile, const char *outputFile)
 
   mg_el->Draw("ACX");
   leg_el->Draw();
+  
+/*
+  TPaveText* txt2 = new TPaveText(0.72,0.57,0.95,0.65,"brNDC") ;
+ 
+  txt2->AddText("electrons"); 
+  txt2->SetBorderSize(0);
+  txt2->SetShadowColor(0);
+  txt2->SetFillColor(0);
+  txt2->SetFillStyle(0);
+  //txt2->SetTextAlign(12);
+  txt2->Draw();
+*/
 
   DrawAxis(mg_el, leg_el, 0.1);
 
   C_el2->cd(2);
   TMultiGraph *mg_elFwd = new TMultiGraph(elResFwd,elResFwd);
-  TLegend *leg_elFwd = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_elFwd = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_elFwd->SetHeader("#splitline{electrons}{1.5 < |#eta| < 2.5}");
+  leg_elFwd->AddEntry("","","");
+
 
   addGraph(mg_elFwd, &gr_eltowerFwd, leg_elFwd, 3);
   addGraph(mg_elFwd, &gr_eltrackFwd, leg_elFwd, 2);
   addGraph(mg_elFwd, &gr_elFwd, leg_elFwd, 1);
 
   mg_elFwd->Draw("ACX");
-
-  DrawAxis(mg_elFwd, leg_elFwd, 0.1);
-
+  leg_elFwd->Draw();
   
-  C_el1->SaveAs(elEff+".eps");
-  C_el2->SaveAs(elRes+".eps");
+  //txt2->Draw();
+
+  DrawAxis(mg_elFwd, leg_elFwd, 0.2);
+
+  C_el1->Print("electron.pdf(","pdf");
+  C_el2->Print("electron.pdf)","pdf");
+ 
+  //C_el1->SaveAs(elEff+".eps");
+  //C_el2->SaveAs(elRes+".eps");
 
 #endif
 
@@ -766,39 +860,48 @@ void Validation(const char *inputFile, const char *outputFile)
   // Canvas
 
   TString muEff = "muonEff";
-  TCanvas *C_mu1 = new TCanvas(muEff,muEff, 1000, 500);
+  TCanvas *C_mu1 = new TCanvas(muEff,muEff, 1600, 600);
   C_mu1->Divide(2);
   C_mu1->cd(1);
   TLegend *leg_mu1 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  leg_mu1->SetHeader("#splitline{muons}{|#eta| < 1.5}");
+  leg_mu1->AddEntry("","","");
+
 
   gPad->SetLogx();
-  histos_mutrack.first->Draw();
+  histos_mutrack.first->Draw("][");
   addHist(histos_mutrack.first, leg_mu1, 2);
-  histos_mu.first->Draw("same");
+  histos_mu.first->Draw("same ][");
   addHist(histos_mu.first, leg_mu1, 1);
 
   DrawAxis(histos_mutrack.first, leg_mu1, 0);
+ 
   leg_mu1->Draw();
 
   C_mu1->cd(2);
   TLegend *leg_mu2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  leg_mu2->SetHeader("#splitline{muons}{1.5 < |#eta| < 2.5}");
+  leg_mu2->AddEntry("","","");
 
   gPad->SetLogx();
-  histos_mutrack.second->Draw();
+  histos_mutrack.second->Draw("][");
   addHist(histos_mutrack.second, leg_mu2, 2);
-  histos_mu.second->Draw("same");
+  histos_mu.second->Draw("same ][");
   addHist(histos_mu.second, leg_mu2, 1);
 
   DrawAxis(histos_mutrack.second, leg_mu2, 1);
+  leg_mu2->Draw();
 
   TString muRes = "muonERes";
   TString muResFwd = "muonEResFwd";
 
-  TCanvas *C_mu = new TCanvas(muRes,muRes, 1000, 500);
+  TCanvas *C_mu = new TCanvas(muRes,muRes, 1600, 600);
   C_mu->Divide(2);
   C_mu->cd(1);
   TMultiGraph *mg_mu = new TMultiGraph(muRes,muRes);
-  TLegend *leg_mu = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_mu = new TLegend(topLeftLegXmin,topLeftLegYmin,topLeftLegXmax,topLeftLegYmax);
+  leg_mu->SetHeader("#splitline{muons}{|#eta| < 1.5}");
+  leg_mu->AddEntry("","","");
 
   addGraph(mg_mu, &gr_mutrack, leg_mu, 2);
   addGraph(mg_mu, &gr_mu, leg_mu, 1);
@@ -810,17 +913,23 @@ void Validation(const char *inputFile, const char *outputFile)
 
   C_mu->cd(2);
   TMultiGraph *mg_muFwd = new TMultiGraph(muResFwd,muResFwd);
-  TLegend *leg_muFwd = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_muFwd = new TLegend(topLeftLegXmin,topLeftLegYmin,topLeftLegXmax,topLeftLegYmax);
+  leg_muFwd->SetHeader("#splitline{muons}{1.5 < |#eta| < 2.5}");
+  leg_muFwd->AddEntry("","","");
 
   addGraph(mg_muFwd, &gr_mutrackFwd, leg_muFwd, 2);
   addGraph(mg_muFwd, &gr_muFwd, leg_muFwd, 1);
 
   mg_muFwd->Draw("ACX");
+  leg_muFwd->Draw();
 
   DrawAxis(mg_muFwd, leg_muFwd, 0.3);
 
-  C_mu1->SaveAs(muEff+".eps");
-  C_mu->SaveAs(muRes+".eps");
+  //C_mu1->SaveAs(muEff+".eps");
+  //C_mu->SaveAs(muRes+".eps");
+  
+  C_mu1->Print("muon.pdf(","pdf");
+  C_mu->Print("muon.pdf)","pdf");
 
 #endif
 
@@ -859,15 +968,18 @@ void Validation(const char *inputFile, const char *outputFile)
   // Canvas
 
   TString phEff = "photonEff";
-  TCanvas *C_ph1 = new TCanvas(phEff,phEff, 1000, 500);
+  TCanvas *C_ph1 = new TCanvas(phEff,phEff, 1600, 600);
   C_ph1->Divide(2);
   C_ph1->cd(1);
   TLegend *leg_ph1 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  leg_ph1->SetHeader("#splitline{photons}{|#eta| < 1.5}");
+  leg_ph1->AddEntry("","","");
+
 
   gPad->SetLogx();
-  histos_phtower.first->Draw();
+  histos_phtower.first->Draw("][");
   addHist(histos_phtower.first, leg_ph1, 3);
-  histos_ph.first->Draw("same");
+  histos_ph.first->Draw("same ][");
   addHist(histos_ph.first, leg_ph1, 1);
 
   DrawAxis(histos_phtower.first, leg_ph1, 0);
@@ -875,25 +987,31 @@ void Validation(const char *inputFile, const char *outputFile)
 
   C_ph1->cd(2);
   TLegend *leg_ph2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  leg_ph2->SetHeader("#splitline{photons}{1.5 < |#eta| < 2.5}");
+  leg_ph2->AddEntry("","","");
+
 
   gPad->SetLogx();
-  histos_phtower.second->Draw("same");
+  histos_phtower.second->Draw("][");
   addHist(histos_phtower.second, leg_ph2, 3);
-  histos_ph.second->Draw("same");
+  histos_ph.second->Draw("same ][");
   addHist(histos_ph.second, leg_ph2, 1);
 
   DrawAxis(histos_phtower.second, leg_ph2, 1);
+  leg_ph2->Draw();
 
   C_ph1->SaveAs(phEff+".eps");
 
   TString phRes = "phERes";
   TString phResFwd = "phEResFwd";
 
-  TCanvas *C_ph = new TCanvas(phRes,phRes, 1000, 500);
+  TCanvas *C_ph = new TCanvas(phRes,phRes, 1600, 600);
   C_ph->Divide(2);
   C_ph->cd(1);
   TMultiGraph *mg_ph = new TMultiGraph(phRes,phRes);
-  TLegend *leg_ph = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_ph = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_ph->SetHeader("#splitline{photons}{|#eta| < 1.5}");
+  leg_ph->AddEntry("","","");
 
   addGraph(mg_ph, &gr_phtower, leg_ph, 3);
   addGraph(mg_ph, &gr_ph, leg_ph, 1);
@@ -905,16 +1023,23 @@ void Validation(const char *inputFile, const char *outputFile)
 
   C_ph->cd(2);
   TMultiGraph *mg_phFwd = new TMultiGraph(phResFwd,phResFwd);
-  TLegend *leg_phFwd = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_phFwd = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_phFwd->SetHeader("#splitline{photons}{1.5 < |#eta| < 2.5}");
+  leg_phFwd->AddEntry("","","");
 
   addGraph(mg_phFwd, &gr_phtowerFwd, leg_phFwd, 3);
   addGraph(mg_phFwd, &gr_phFwd, leg_phFwd, 1);
 
   mg_phFwd->Draw("ACX");
+  leg_phFwd->Draw();
 
   DrawAxis(mg_phFwd, leg_phFwd, 0.3);
 
   C_ph->SaveAs(phRes+".eps");
+
+  C_ph1->Print("photon.pdf(","pdf");
+  C_ph->Print("photon.pdf)","pdf");
+
 
 #endif
 
@@ -954,66 +1079,78 @@ void Validation(const char *inputFile, const char *outputFile)
 
   // MET Resolution vs HT
   std::vector<resolPlot> plots_met;
-  HistogramsCollection(&plots_met, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "MET", -200, 200);
+  HistogramsCollection(&plots_met, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "MET", -500, 500);
   GetMetres( &plots_met, branchScalarHT, branchMet, branchPFJet, treeReader);
   TGraphErrors gr_met = EresGraph(&plots_met, true);
   gr_calojets.SetName("MET");
 
   // Canvas
   TString btagEff = "btagEff";
-  TCanvas *C_btag1 = new TCanvas(btagEff,btagEff, 1000, 500);
+  TCanvas *C_btag1 = new TCanvas(btagEff,btagEff, 1600, 600);
   C_btag1->Divide(2);
   C_btag1->cd(1);
-  TLegend *leg_btag1 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  TLegend *leg_btag1 = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_btag1->SetHeader("#splitline{B-tagging}{|#eta| < 1.5}");
+  leg_btag1->AddEntry("","","");
 
   gPad->SetLogx();
   histos_btag.first->Draw();
-  addHist(histos_btag.first, leg_btag1, 1);
+  addHist(histos_btag.first, leg_btag1, 0);
 
   DrawAxis(histos_btag.first, leg_btag1, 0);
   leg_btag1->Draw();
 
   C_btag1->cd(2);
-  TLegend *leg_btag2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
-
+  TLegend *leg_btag2 = new TLegend(resLegXmin,resLegYmin,resLegXmax+0.05,resLegYmax);
+  leg_btag2->SetHeader("#splitline{B-tagging}{1.5 < |#eta| < 2.5}");
+  leg_btag2->AddEntry("","","");
+  
+  gPad->SetLogx();
   histos_btag.second->Draw();
-  addHist(histos_btag.second, leg_btag2, 1);
+  addHist(histos_btag.second, leg_btag2, 0);
 
-  DrawAxis(histos_btag.second, leg_btag2, 1);
-  delete(leg_btag2);
+  DrawAxis(histos_btag.second, leg_btag2, 0);
+  leg_btag2->Draw();
   C_btag1->cd(0);
 
   TString tautagEff = "tautagEff";
-  TCanvas *C_tautag1 = new TCanvas(tautagEff,tautagEff, 1000, 500);
+  TCanvas *C_tautag1 = new TCanvas(tautagEff,tautagEff, 1600, 600);
   C_tautag1->Divide(2);
   C_tautag1->cd(1);
-  TLegend *leg_tautag1 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  TLegend *leg_tautag1 = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_tautag1->SetHeader("#splitline{#tau-tagging}{|#eta| < 1.5}");
+  leg_tautag1->AddEntry("","","");
 
   gPad->SetLogx();
   histos_tautag.first->Draw();
-  addHist(histos_tautag.first, leg_tautag1, 1);
+  addHist(histos_tautag.first, leg_tautag1, 0);
 
   DrawAxis(histos_tautag.first, leg_tautag1, 0);
   leg_tautag1->Draw();
 
   C_tautag1->cd(2);
-  TLegend *leg_tautag2 = new TLegend(effLegXmin,effLegYmin,effLegXmax,effLegYmax);
+  TLegend *leg_tautag2 = new TLegend(resLegXmin,resLegYmin,resLegXmax+0.05,resLegYmax);
+  leg_tautag2->SetHeader("#splitline{#tau-tagging}{1.5 < |#eta| < 2.5}");
+  leg_tautag2->AddEntry("","","");
 
+  gPad->SetLogx();
   histos_tautag.second->Draw();
-  addHist(histos_tautag.second, leg_tautag2, 1);
+  addHist(histos_tautag.second, leg_tautag2, 0);
 
-  DrawAxis(histos_tautag.second, leg_tautag2, 1);
-  delete(leg_tautag2);
+  DrawAxis(histos_tautag.second, leg_tautag2, 0);
+  leg_tautag2->Draw();
   C_tautag1->cd(0);
 
   TString jetRes = "jetERes";
   TString jetResFwd = "jetEResFwd";
-  TCanvas *C_jet = new TCanvas(jetRes,jetRes, 1000, 500);
+  TCanvas *C_jet = new TCanvas(jetRes,jetRes, 1600, 600);
   C_jet->Divide(2);
 
   C_jet->cd(1);
   TMultiGraph *mg_jet = new TMultiGraph(jetRes,jetRes);
-  TLegend *leg_jet = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_jet = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_jet->SetHeader("#splitline{jets}{|#eta| < 1.5}");
+  leg_jet->AddEntry("","","");
 
   addGraph(mg_jet, &gr_calojets, leg_jet, 3);
   addGraph(mg_jet, &gr_pfjets, leg_jet, 1);
@@ -1025,12 +1162,15 @@ void Validation(const char *inputFile, const char *outputFile)
 
   C_jet->cd(2);
   TMultiGraph *mg_jetFwd = new TMultiGraph(jetResFwd,jetResFwd);
-  TLegend *leg_jetFwd = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_jetFwd = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
+  leg_jetFwd->SetHeader("#splitline{jets}{|#eta| < 1.5}");
+  leg_jetFwd->AddEntry("","","");
 
   addGraph(mg_jetFwd, &gr_calojetsFwd, leg_jetFwd, 3);
   addGraph(mg_jetFwd, &gr_pfjetsFwd, leg_jetFwd, 1);
 
   mg_jetFwd->Draw("ACX");
+  leg_jetFwd->Draw();
 
   DrawAxis(mg_jetFwd, leg_jetFwd, 0.25);
 
@@ -1038,19 +1178,30 @@ void Validation(const char *inputFile, const char *outputFile)
   C_jet->SaveAs(jetRes+".eps");
 
   TString metRes = "MetRes";
-  TCanvas *C_met = new TCanvas(metRes,metRes, 1000, 500);
+  TCanvas *C_met = new TCanvas(metRes,metRes, 800, 600);
 
   TMultiGraph *mg_met = new TMultiGraph(metRes,metRes);
-  TLegend *leg_met = new TLegend(0.52,0.7,0.9,0.9);
+  TLegend *leg_met = new TLegend(topLeftLegXmin,topLeftLegYmin+0.2,topLeftLegXmax-0.2,topLeftLegYmax);
+  leg_met->SetHeader("E_{T}^{miss}");
+  leg_met->AddEntry("","","");
+  
 
-  addGraph(mg_met, &gr_met, leg_met, 3);
+  addGraph(mg_met, &gr_met, leg_met, 0);
 
   mg_met->Draw("ACX");
   leg_met->Draw();
 
-  DrawAxis(mg_met, leg_met, 100);
+  DrawAxis(mg_met, leg_met, 300);
+
+  mg_met->GetXaxis()->SetTitle("H_{T} [GeV]");
+  mg_met->GetYaxis()->SetTitle("#sigma(ME_{x}) [GeV]");
 
   C_met->SaveAs(metRes+".eps");
+
+  C_jet->Print("jet.pdf(","pdf");
+  C_btag1->Print("jet.pdf","pdf");
+  C_tautag1->Print("jet.pdf","pdf");  
+  C_met->Print("jet.pdf)","pdf");
 
 
 #endif
