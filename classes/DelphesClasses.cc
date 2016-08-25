@@ -40,6 +40,7 @@ CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
 CompBase *Track::fgCompare = CompPT<Track>::Instance();
 CompBase *Tower::fgCompare = CompE<Tower>::Instance();
 CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
+CompBase *Vertex::fgCompare = CompSumPT2<Vertex>::Instance();
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
 
 //------------------------------------------------------------------------------
@@ -120,14 +121,24 @@ Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
+  ClusterIndex(-1), ClusterNDF(0), ClusterSigma(0), SumPT2(0), BTVSumPT2(0), GenDeltaZ(0), GenSumPT2(0),
   Flavor(0), FlavorAlgo(0), FlavorPhys(0),
   BTag(0), BTagAlgo(0), BTagPhys(0),
   TauTag(0), Eem(0.0), Ehad(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
+  PositionError(0.0, 0.0, 0.0, 0.0),
+  InitialPosition(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
-  Dxy(0), SDxy(0), Xd(0), Yd(0), Zd(0),
+  L(0),
+  D0(0), ErrorD0(0), 
+  DZ(0), ErrorDZ(0), 
+  P(0),  ErrorP(0), 
+  PT(0), ErrorPT(0), 
+  CtgTheta(0), ErrorCtgTheta(0), 
+  Phi(0), ErrorPhi(0),  
+  Xd(0), Yd(0), Zd(0), 
   TrackResolution(0),
   NCharged(0),
   NNeutrals(0),
@@ -244,6 +255,13 @@ void Candidate::Copy(TObject &obj) const
   object.IsPU = IsPU;
   object.IsConstituent = IsConstituent;
   object.IsFromConversion = IsFromConversion;
+  object.ClusterIndex = ClusterIndex;
+  object.ClusterNDF = ClusterNDF;
+  object.ClusterSigma = ClusterSigma;
+  object.SumPT2 = SumPT2;
+  object.BTVSumPT2 = BTVSumPT2;
+  object.GenDeltaZ = GenDeltaZ;
+  object.GenSumPT2 = GenSumPT2;
   object.Flavor = Flavor;
   object.FlavorAlgo = FlavorAlgo;
   object.FlavorPhys = FlavorPhys;
@@ -261,9 +279,23 @@ void Candidate::Copy(TObject &obj) const
   object.DeltaPhi = DeltaPhi;
   object.Momentum = Momentum;
   object.Position = Position;
+  object.InitialPosition = InitialPosition;
+  object.PositionError = PositionError;
   object.Area = Area;
-  object.Dxy = Dxy;
-  object.SDxy = SDxy;
+  object.L = L;
+  object.ErrorT = ErrorT;
+  object.D0 = D0;
+  object.ErrorD0 = ErrorD0;
+  object.DZ = DZ;
+  object.ErrorDZ = ErrorDZ;
+  object.P = P;
+  object.ErrorP = ErrorP;
+  object.PT = PT;
+  object.ErrorPT = ErrorPT;
+  object.CtgTheta = CtgTheta ;
+  object.ErrorCtgTheta = ErrorCtgTheta;
+  object.Phi = Phi;
+  object.ErrorPhi = ErrorPhi;  
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
@@ -281,7 +313,11 @@ void Candidate::Copy(TObject &obj) const
   object.SumPtNeutral = SumPtNeutral;
   object.SumPtChargedPU = SumPtChargedPU;
   object.SumPt = SumPt;
-
+  object.ClusterIndex = ClusterIndex;
+  object.ClusterNDF = ClusterNDF;
+  object.ClusterSigma = ClusterSigma; 
+  object.SumPT2 = SumPT2;
+  
   object.FracPt[0] = FracPt[0];
   object.FracPt[1] = FracPt[1];
   object.FracPt[2] = FracPt[2];
@@ -362,9 +398,22 @@ void Candidate::Clear(Option_t* option)
   DeltaPhi = 0.0;
   Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  Dxy = 0.0;
-  SDxy = 0.0;
+  L = 0.0;
+  ErrorT = 0.0;
+  D0 = 0.0;  
+  ErrorD0 = 0.0;
+  DZ = 0.0;
+  ErrorDZ = 0.0;
+  P =0.0;
+  ErrorP =0.0;
+  PT = 0.0;
+  ErrorPT = 0.0;
+  CtgTheta = 0.0;
+  ErrorCtgTheta = 0.0;
+  Phi = 0.0;
+  ErrorPhi = 0.0;
   Xd = 0.0;
   Yd = 0.0;
   Zd = 0.0;
@@ -386,6 +435,14 @@ void Candidate::Clear(Option_t* option)
   SumPtChargedPU = -999;
   SumPt = -999;
 
+  ClusterIndex = -1;
+  ClusterNDF = -99;
+  ClusterSigma = 0.0; 
+  SumPT2 = 0.0;
+  BTVSumPT2 = 0.0;
+  GenDeltaZ = 0.0;
+  GenSumPT2 = 0.0; 
+  
   FracPt[0] = 0.0;
   FracPt[1] = 0.0;
   FracPt[2] = 0.0;

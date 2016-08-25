@@ -146,10 +146,13 @@ public:
   Float_t Py; // particle momentum vector (y component) | hepevt.phep[number][1]
   Float_t Pz; // particle momentum vector (z component) | hepevt.phep[number][2]
 
-  Float_t PT; // particle transverse momentum
+  Float_t D0;
+  Float_t DZ;
+  Float_t P;
+  Float_t PT;
+  Float_t CtgTheta;
+  Float_t Phi;
   Float_t Eta; // particle pseudorapidity
-  Float_t Phi; // particle azimuthal angle
-
   Float_t Rapidity; // particle rapidity
 
   Float_t T; // particle vertex position (t component) | hepevt.vhep[number][3]
@@ -167,7 +170,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Vertex: public TObject
+class Vertex: public SortableObject
 {
 public:
   Float_t T; // vertex position (t component)
@@ -175,7 +178,25 @@ public:
   Float_t Y; // vertex position (y component)
   Float_t Z; // vertex position (z component)
 
-  ClassDef(Vertex, 1)
+  Double_t ErrorX;
+  Double_t ErrorY;
+  Double_t ErrorZ;
+  Double_t ErrorT;
+
+  Int_t Index;
+  Int_t NDF;
+  Double_t Sigma;
+  Double_t SumPT2;
+  Double_t BTVSumPT2;
+  Double_t GenDeltaZ;
+  Double_t GenSumPT2;
+
+  TRefArray Constituents; // references to constituents
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  ClassDef(Vertex, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -396,10 +417,7 @@ public:
 
   Int_t Charge; // track charge
 
-  Float_t PT; // track transverse momentum
-
   Float_t Eta; // track pseudorapidity
-  Float_t Phi; // track azimuthal angle
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
@@ -414,13 +432,34 @@ public:
   Float_t ZOuter; // track position (z component) at the tracker edge
   Float_t TOuter; // track position (z component) at the tracker edge
 
-  Float_t Dxy;     // track signed transverse impact parameter
-  Float_t SDxy;    // signed error on the track signed transverse impact parameter
+  Float_t L; // track path length
+  Float_t ErrorT; // error on the time measurement
+
+  Float_t D0;     // track signed transverse impact parameter
+  Float_t ErrorD0;    // signed error on the track signed transverse impact parameter
+
+  Float_t DZ; // track transverse momentum
+  Float_t ErrorDZ; // track transverse momentum error
+
+  Float_t P; // track transverse momentum
+  Float_t ErrorP; // track transverse momentum error
+
+  Float_t PT; // track transverse momentum
+  Float_t ErrorPT; // track transverse momentum error
+
+  Float_t CtgTheta; // track transverse momentum
+  Float_t ErrorCtgTheta; // track transverse momentum error
+
+  Float_t Phi; // track azimuthal angle
+  Float_t ErrorPhi; // track azimuthal angle
+
   Float_t Xd;      // X coordinate of point of closest approach to vertex
   Float_t Yd;      // Y coordinate of point of closest approach to vertex
   Float_t Zd;      // Z coordinate of point of closest approach to vertex
 
   TRef Particle; // reference to generated particle
+
+  Int_t VertexIndex; // reference to vertex
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -525,16 +564,29 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, Area;
+  TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
 
-  Float_t Dxy;
-  Float_t SDxy;
+  Float_t L; // path length
+  Float_t ErrorT; // path length
+  Float_t D0;
+  Float_t ErrorD0;
+  Float_t DZ;
+  Float_t ErrorDZ;
+  Float_t P;
+  Float_t ErrorP;
+  Float_t PT;
+  Float_t ErrorPT;
+  Float_t CtgTheta;
+  Float_t ErrorCtgTheta;
+  Float_t Phi;
+  Float_t ErrorPhi;
+
   Float_t Xd;
   Float_t Yd;
   Float_t Zd;
 
   // tracking resolution
-  
+
   Float_t TrackResolution;
 
   // PileUpJetID variables
@@ -560,6 +612,16 @@ public:
   Float_t SumPtNeutral;
   Float_t SumPtChargedPU;
   Float_t SumPt;
+
+  // vertex variables
+
+  Int_t ClusterIndex;
+  Int_t ClusterNDF;
+  Double_t ClusterSigma;
+  Double_t SumPT2;
+  Double_t BTVSumPT2;
+  Double_t GenDeltaZ;
+  Double_t GenSumPT2;
 
   // N-subjettiness variables
 
@@ -594,7 +656,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 4)
+  ClassDef(Candidate, 5)
 };
 
 #endif // DelphesClasses_h

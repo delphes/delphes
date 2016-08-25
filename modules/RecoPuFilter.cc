@@ -16,16 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-/** \class TimeSmearing
+/*  \class RecoPuFilter
  *
- *  Performs transverse momentum resolution smearing.
+ *  Removes particles with RecoPU flag = true.
+ *  Input collection needs to pass by TrackPileUpSubtractor first)
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi
  *
  */
 
-#include "modules/TimeSmearing.h"
+#include "modules/RecoPuFilter.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -52,73 +52,54 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TimeSmearing::TimeSmearing() :
-fItInputArray(0)
+RecoPuFilter::RecoPuFilter() :
+  fItInputArray(0)
 {
 }
 
 //------------------------------------------------------------------------------
 
-TimeSmearing::~TimeSmearing()
+RecoPuFilter::~RecoPuFilter()
 {
 }
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Init()
+void RecoPuFilter::Init()
 {
-  // read resolution formula
 
-  fTimeResolution = GetDouble("TimeResolution", 1.0E-10);
+  ExRootConfParam param;
+  Size_t i, size;
+
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
+  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "muons"));
+  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
 }
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Finish()
+void RecoPuFilter::Finish()
 {
   if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Process()
+void RecoPuFilter::Process()
 {
-  Candidate *candidate, *mother;
-  Double_t ti, tf_smeared, tf;
-  const Double_t c_light = 2.99792458E8;
+  Candidate *candidate;
+  Int_t pdgCode;
+  Bool_t pass;
+  Double_t pt;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidateInitialPosition = candidate->InitialPosition;
-    const TLorentzVector &candidateFinalPosition = candidate->Position;
-
-    ti = candidateInitialPosition.T()*1.0E-3/c_light;
-    tf = candidateFinalPosition.T()*1.0E-3/c_light;
-
-    // apply smearing formula
-    tf_smeared = gRandom->Gaus(tf, fTimeResolution);
-    ti = ti + tf_smeared - tf;
-
-    mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->InitialPosition.SetT(ti*1.0E3*c_light);
-    candidate->Position.SetT(tf*1.0E3*c_light);
-
-    candidate->ErrorT = fTimeResolution*1.0E3*c_light;
-
-    candidate->AddCandidate(mother);
-
+    if(candidate->IsRecoPU) continue;
     fOutputArray->Add(candidate);
   }
 }
 
-//------------------------------------------------------------------------------

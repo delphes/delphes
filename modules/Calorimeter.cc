@@ -57,38 +57,32 @@ Calorimeter::Calorimeter() :
   fECalResolutionFormula(0), fHCalResolutionFormula(0),
   fItParticleInputArray(0), fItTrackInputArray(0)
 {
-  Int_t i;
-
+  
   fECalResolutionFormula = new DelphesFormula;
   fHCalResolutionFormula = new DelphesFormula;
 
-  for(i = 0; i < 2; ++i)
-  {
-    fECalTowerTrackArray[i] = new TObjArray;
-    fItECalTowerTrackArray[i] = fECalTowerTrackArray[i]->MakeIterator();
+  fECalTowerTrackArray = new TObjArray;
+  fItECalTowerTrackArray = fECalTowerTrackArray->MakeIterator();
 
-    fHCalTowerTrackArray[i] = new TObjArray;
-    fItHCalTowerTrackArray[i] = fHCalTowerTrackArray[i]->MakeIterator();
-  }
+  fHCalTowerTrackArray = new TObjArray;
+  fItHCalTowerTrackArray = fHCalTowerTrackArray->MakeIterator();
+  
 }
 
 //------------------------------------------------------------------------------
 
 Calorimeter::~Calorimeter()
 {
-  Int_t i;
-
+  
   if(fECalResolutionFormula) delete fECalResolutionFormula;
   if(fHCalResolutionFormula) delete fHCalResolutionFormula;
 
-  for(i = 0; i < 2; ++i)
-  {
-    if(fECalTowerTrackArray[i]) delete fECalTowerTrackArray[i];
-    if(fItECalTowerTrackArray[i]) delete fItECalTowerTrackArray[i];
+  if(fECalTowerTrackArray) delete fECalTowerTrackArray;
+  if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
 
-    if(fHCalTowerTrackArray[i]) delete fHCalTowerTrackArray[i];
-    if(fItHCalTowerTrackArray[i]) delete fItHCalTowerTrackArray[i];
-  }
+  if(fHCalTowerTrackArray) delete fHCalTowerTrackArray;
+  if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
+ 
 }
 
 //------------------------------------------------------------------------------
@@ -217,7 +211,6 @@ void Calorimeter::Process()
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
   Double_t ecalFraction, hcalFraction;
   Double_t ecalEnergy, hcalEnergy;
-  Double_t ecalSigma, hcalSigma;
   Int_t pdgCode;
 
   TFractionMap::iterator itFractionMap;
@@ -367,20 +360,18 @@ void Calorimeter::Process()
       fECalTowerEnergy = 0.0;
       fHCalTowerEnergy = 0.0;
 
-      fECalTrackEnergy[0] = 0.0;
-      fECalTrackEnergy[1] = 0.0;
-
-      fHCalTrackEnergy[0] = 0.0;
-      fHCalTrackEnergy[1] = 0.0;
-
+      fECalTrackEnergy = 0.0;
+      fHCalTrackEnergy = 0.0;
+      
+      fECalTrackSigma = 0.0;
+      fHCalTrackSigma = 0.0;
+      
       fTowerTrackHits = 0;
       fTowerPhotonHits = 0;
 
-      fECalTowerTrackArray[0]->Clear();
-      fECalTowerTrackArray[1]->Clear();
-
-      fHCalTowerTrackArray[0]->Clear();
-      fHCalTowerTrackArray[1]->Clear();
+      fECalTowerTrackArray->Clear();
+      fHCalTowerTrackArray->Clear();
+    
     }
 
     // check for track hits
@@ -405,32 +396,18 @@ void Calorimeter::Process()
 
       if(fECalTrackFractions[number] > 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9)
       {
-        ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
-        if(ecalSigma/momentum.E() < track->TrackResolution)
-        {
-          fECalTrackEnergy[0] += ecalEnergy;
-          fECalTowerTrackArray[0]->Add(track);
-        }
-        else
-        {
-          fECalTrackEnergy[1] += ecalEnergy;
-          fECalTowerTrackArray[1]->Add(track);
-        }
+        fECalTrackEnergy += ecalEnergy;
+        fECalTrackSigma += (track->TrackResolution)*momentum.E()*(track->TrackResolution)*momentum.E();
+        fECalTowerTrackArray->Add(track);
       }
+     
       else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] > 1.0E-9)
       {
-        hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
-        if(hcalSigma/momentum.E() < track->TrackResolution)
-        {
-          fHCalTrackEnergy[0] += hcalEnergy;
-          fHCalTowerTrackArray[0]->Add(track);
-        }
-        else
-        {
-          fHCalTrackEnergy[1] += hcalEnergy;
-          fHCalTowerTrackArray[1]->Add(track);
-        }
+        fHCalTrackEnergy += hcalEnergy;
+        fHCalTrackSigma += (track->TrackResolution)*momentum.E()*(track->TrackResolution)*momentum.E();
+        fHCalTowerTrackArray->Add(track);
       }
+      
       else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9)
       {
         fEFlowTrackOutputArray->Add(track);
@@ -475,15 +452,19 @@ void Calorimeter::FinalizeTower()
   Candidate *track, *tower, *mother;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
+  Double_t ecalNeutralEnergy, hcalNeutralEnergy;
+  
   Double_t ecalSigma, hcalSigma;
+  Double_t ecalNeutralSigma, hcalNeutralSigma;
 
+  Double_t weightTrack, weightCalo, bestEnergyEstimate, rescaleFactor;
+  
   TLorentzVector momentum;
   TFractionMap::iterator itFractionMap;
 
   Float_t weight, sumWeightedTime, sumWeight;
 
   if(!fTower) return;
-
 
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fECalTowerEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fHCalTowerEnergy);
@@ -553,94 +534,119 @@ void Calorimeter::FinalizeTower()
 
     fTowerOutputArray->Add(fTower);
   }
-
+  
   // fill energy flow candidates
+  fECalTrackSigma = TMath::Sqrt(fECalTrackSigma);
+  fHCalTrackSigma = TMath::Sqrt(fHCalTrackSigma);
 
-  ecalEnergy -= fECalTrackEnergy[1];
-  hcalEnergy -= fHCalTrackEnergy[1];
-
-  fItECalTowerTrackArray[0]->Reset();
-  while((track = static_cast<Candidate*>(fItECalTowerTrackArray[0]->Next())))
-  {
-    mother = track;
-    track = static_cast<Candidate*>(track->Clone());
-    track->AddCandidate(mother);
-
-    track->Momentum *= ecalEnergy/fECalTrackEnergy[0];
-
-    fEFlowTrackOutputArray->Add(track);
-  }
-
-  fItECalTowerTrackArray[1]->Reset();
-  while((track = static_cast<Candidate*>(fItECalTowerTrackArray[1]->Next())))
-  {
-    mother = track;
-    track = static_cast<Candidate*>(track->Clone());
-    track->AddCandidate(mother);
-
-    fEFlowTrackOutputArray->Add(track);
-  }
-
-  fItHCalTowerTrackArray[0]->Reset();
-  while((track = static_cast<Candidate*>(fItHCalTowerTrackArray[0]->Next())))
-  {
-    mother = track;
-    track = static_cast<Candidate*>(track->Clone());
-    track->AddCandidate(mother);
-
-    track->Momentum *= hcalEnergy/fHCalTrackEnergy[0];
-
-    fEFlowTrackOutputArray->Add(track);
-  }
-
-  fItHCalTowerTrackArray[1]->Reset();
-  while((track = static_cast<Candidate*>(fItHCalTowerTrackArray[1]->Next())))
-  {
-    mother = track;
-    track = static_cast<Candidate*>(track->Clone());
-    track->AddCandidate(mother);
-
-    fEFlowTrackOutputArray->Add(track);
-  }
-
-  if(fECalTowerTrackArray[0]->GetEntriesFast() > 0) ecalEnergy = 0.0;
-  if(fHCalTowerTrackArray[0]->GetEntriesFast() > 0) hcalEnergy = 0.0;
-
-  ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
-  hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
-
-  if(ecalEnergy < fECalEnergyMin || ecalEnergy < fECalEnergySignificanceMin*ecalSigma) ecalEnergy = 0.0;
-  if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalEnergySignificanceMin*hcalSigma) hcalEnergy = 0.0;
-
-  energy = ecalEnergy + hcalEnergy;
-
-  if(ecalEnergy > 0.0)
+  //compute neutral excesses
+  ecalNeutralEnergy = max( (ecalEnergy - fECalTrackEnergy) , 0.0);
+  hcalNeutralEnergy = max( (hcalEnergy - fHCalTrackEnergy) , 0.0);
+  
+  ecalNeutralSigma = ecalNeutralEnergy / TMath::Sqrt(fECalTrackSigma*fECalTrackSigma + ecalSigma*ecalSigma);
+  hcalNeutralSigma = hcalNeutralEnergy / TMath::Sqrt(fHCalTrackSigma*fHCalTrackSigma + hcalSigma*hcalSigma);
+  
+   // if ecal neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack
+  if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
     // create new photon tower
     tower = static_cast<Candidate*>(fTower->Clone());
-
-    pt = ecalEnergy / TMath::CosH(eta);
-
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
-    tower->Eem = ecalEnergy;
+    pt =  ecalNeutralEnergy / TMath::CosH(eta);
+    
+    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalNeutralEnergy);
+    tower->Eem = ecalNeutralEnergy;
     tower->Ehad = 0.0;
     tower->PID = 22;
-
+    
     fEFlowPhotonOutputArray->Add(tower);
+   
+    //clone tracks
+    fItECalTowerTrackArray->Reset();
+    while((track = static_cast<Candidate*>(fItECalTowerTrackArray->Next())))
+    {
+      mother = track;
+      track = static_cast<Candidate*>(track->Clone());
+      track->AddCandidate(mother);
+
+      fEFlowTrackOutputArray->Add(track);
+    }
+  
   }
-  if(hcalEnergy > 0.0)
+ 
+  // if neutral excess is not significant, rescale eflow tracks, such that the total charged equals the best measurement given by the calorimeter and tracking
+  else if(fECalTrackEnergy > 0.0)
   {
-    // create new neutral hadron tower
-    tower = static_cast<Candidate*>(fTower->Clone());
+    weightTrack = (fECalTrackSigma > 0.0) ? 1 / (fECalTrackSigma*fECalTrackSigma) : 0.0;
+    weightCalo  = (ecalSigma > 0.0) ? 1 / (ecalSigma*ecalSigma) : 0.0;
+  
+    bestEnergyEstimate = (weightTrack*fECalTrackEnergy + weightCalo*ecalEnergy) / (weightTrack + weightCalo); 
+    rescaleFactor = bestEnergyEstimate/fECalTrackEnergy;
 
-    pt = hcalEnergy / TMath::CosH(eta);
+    //rescale tracks
+    fItECalTowerTrackArray->Reset();
+    while((track = static_cast<Candidate*>(fItECalTowerTrackArray->Next())))
+    {  
+      mother = track;
+      track = static_cast<Candidate*>(track->Clone());
+      track->AddCandidate(mother);
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
-    tower->Eem = 0.0;
-    tower->Ehad = hcalEnergy;
+      track->Momentum *= rescaleFactor;
 
-    fEFlowNeutralHadronOutputArray->Add(tower);
+      fEFlowTrackOutputArray->Add(track);
+    }
   }
+
+
+  // if hcal neutral excess is significant, simply create neutral EflowNeutralHadron tower and clone each track into eflowtrack
+  if(hcalNeutralEnergy > fHCalEnergyMin && hcalNeutralSigma > fHCalEnergySignificanceMin)
+  {
+    // create new photon tower
+    tower = static_cast<Candidate*>(fTower->Clone());
+    pt =  hcalNeutralEnergy / TMath::CosH(eta);
+    
+    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalNeutralEnergy);
+    tower->Ehad = hcalNeutralEnergy;
+    tower->Eem = 0.0;
+    
+    fEFlowNeutralHadronOutputArray->Add(tower);
+   
+    //clone tracks
+    fItHCalTowerTrackArray->Reset();
+    while((track = static_cast<Candidate*>(fItHCalTowerTrackArray->Next())))
+    {
+      mother = track;
+      track = static_cast<Candidate*>(track->Clone());
+      track->AddCandidate(mother);
+
+      fEFlowTrackOutputArray->Add(track);
+    }
+  
+  }
+ 
+  // if neutral excess is not significant, rescale eflow tracks, such that the total charged equals the best measurement given by the calorimeter and tracking
+  else if(fHCalTrackEnergy > 0.0)
+  {
+    weightTrack = (fHCalTrackSigma > 0.0) ? 1 / (fHCalTrackSigma*fHCalTrackSigma) : 0.0;
+    weightCalo  = (hcalSigma > 0.0) ? 1 / (hcalSigma*hcalSigma) : 0.0;
+  
+    bestEnergyEstimate = (weightTrack*fHCalTrackEnergy + weightCalo*hcalEnergy) / (weightTrack + weightCalo); 
+    rescaleFactor = bestEnergyEstimate / fHCalTrackEnergy;
+
+    //rescale tracks
+    fItHCalTowerTrackArray->Reset();
+    while((track = static_cast<Candidate*>(fItHCalTowerTrackArray->Next())))
+    {  
+      mother = track;
+      track = static_cast<Candidate*>(track->Clone());
+      track->AddCandidate(mother);
+
+      track->Momentum *= rescaleFactor;
+
+      fEFlowTrackOutputArray->Add(track);
+    }
+  }
+  
+  
 }
 
 //------------------------------------------------------------------------------

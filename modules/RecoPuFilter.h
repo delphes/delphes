@@ -16,32 +16,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ParticlePropagator_h
-#define ParticlePropagator_h
+//------------------------------------------------------------------------------
 
-/** \class ParticlePropagator
+#ifndef RecoPuFilter_h
+#define RecoPuFilter_h
+
+/** \class RecoPuFilter
  *
- *  Propagates charged and neutral particles
- *  from a given vertex to a cylinder defined by its radius, 
- *  its half-length, centered at (0,0,0) and with its axis
- *  oriented along the z-axis.
+ *  Removes particles with RecoPU flag = true.
+ *  Input collection needs to pass by TrackPileUpSubtractor first)
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi
  *
  */
 
 #include "classes/DelphesModule.h"
+#include <vector>
 
-class TClonesArray;
 class TIterator;
-class TLorentzVector;
+class TObjArray;
 
-class ParticlePropagator: public DelphesModule
+class RecoPuFilter: public DelphesModule
 {
 public:
 
-  ParticlePropagator();
-  ~ParticlePropagator();
+  RecoPuFilter();
+  ~RecoPuFilter();
 
   void Init();
   void Process();
@@ -49,20 +49,13 @@ public:
 
 private:
 
-  Double_t fRadius, fRadius2, fHalfLength;
-  Double_t fBz;
-
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
-  const TObjArray *fBeamSpotInputArray; //!
 
   TObjArray *fOutputArray; //!
-  TObjArray *fChargedHadronOutputArray; //!
-  TObjArray *fElectronOutputArray; //!
-  TObjArray *fMuonOutputArray; //!
 
-  ClassDef(ParticlePropagator, 1)
+  ClassDef(RecoPuFilter, 1)
 };
 
 #endif
