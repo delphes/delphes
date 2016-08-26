@@ -327,15 +327,15 @@ void GetEres(std::vector<resolPlot> *histos, TClonesArray *branchReco, TClonesAr
 
       if(deltaR < 0.3)
       {
-        pt  = bestGenMomentum.Pt();
+        pt  = bestGenMomentum.E();
         eta = TMath::Abs(bestGenMomentum.Eta());
 
         for (bin = 0; bin < Nbins; bin++)
         {
           if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 2.5)
           {
-            if (eta < 1.5) {histos->at(bin).cenResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
-            else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
+            if (eta < 1.5) {histos->at(bin).cenResolHist->Fill(recoMomentum.E()/bestGenMomentum.E());}
+            else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill(recoMomentum.E()/bestGenMomentum.E());}
           }
         }
       }
