@@ -342,6 +342,80 @@ void GetEres(std::vector<resolPlot> *histos, TClonesArray *branchReco, TClonesAr
     }
   }
 }
+
+
+template<typename T>
+void GetPtres(std::vector<resolPlot> *histos, TClonesArray *branchReco, TClonesArray *branchParticle, int pdgID, ExRootTreeReader *treeReader)
+{
+  Long64_t allEntries = treeReader->GetEntries();
+
+  cout << "** Computing pt resolution of " << branchReco->GetName() << " induced by " << branchParticle->GetName() << " with PID " << pdgID << endl;
+
+  GenParticle *particle;
+  T* recoObj;
+
+  TLorentzVector recoMomentum, genMomentum, bestGenMomentum;
+
+  Float_t deltaR;
+  Float_t pt, eta;
+  Long64_t entry;
+
+  Int_t i, j, bin;
+
+  // Loop over all events
+  for(entry = 0; entry < allEntries; ++entry)
+  {
+    // Load selected branches with data from specified event
+    treeReader->ReadEntry(entry);
+
+    // Loop over all reconstructed jets in event
+    for(i = 0; i < branchReco->GetEntriesFast(); ++i)
+    {
+      recoObj = (T*) branchReco->At(i);
+      recoMomentum = recoObj->P4();
+
+      deltaR = 999;
+
+     // Loop over all hard partons in event
+     for(j = 0; j < branchParticle->GetEntriesFast(); ++j)
+     {
+        particle = (GenParticle*) branchParticle->At(j);
+        if (particle->PID == pdgID && particle->Status == 1)
+        {
+          genMomentum = particle->P4();
+
+          // this is simply to avoid warnings from initial state particle
+          // having infite rapidity ...
+          if(genMomentum.Px() == 0 && genMomentum.Py() == 0) continue;
+
+          // take the closest parton candidate
+          if(genMomentum.DeltaR(recoMomentum) < deltaR)
+          {
+             deltaR = genMomentum.DeltaR(recoMomentum);
+             bestGenMomentum = genMomentum;
+          }
+        }
+      }
+
+      if(deltaR < 0.3)
+      {
+        pt  = bestGenMomentum.Pt();
+        eta = TMath::Abs(bestGenMomentum.Eta());
+
+        for (bin = 0; bin < Nbins; bin++)
+        {
+          if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 2.5)
+          {
+            if (eta < 1.5) {histos->at(bin).cenResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
+            else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
+          }
+        }
+      }
+    }
+  }
+}
+
+
 void GetJetsEres(std::vector<resolPlot> *histos, TClonesArray *branchJet, TClonesArray *branchGenJet, ExRootTreeReader *treeReader)
 {
 
@@ -397,20 +471,19 @@ void GetJetsEres(std::vector<resolPlot> *histos, TClonesArray *branchJet, TClone
 
       if(deltaR < 0.25)
       {
-        pt  = genJetMomentum.Pt();
+        pt  = genJetMomentum.E();
         eta = TMath::Abs(genJetMomentum.Eta());
 
         for (bin = 0; bin < Nbins; bin++)
         {
             if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 1.5)
             {
-                histos->at(bin).cenResolHist->Fill(jetMomentum.Pt()/bestGenJetMomentum.Pt());
+                histos->at(bin).cenResolHist->Fill(jetMomentum.E()/bestGenJetMomentum.E());
             }
             else if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 2.5)
             {
-                histos->at(bin).fwdResolHist->Fill(jetMomentum.Pt()/bestGenJetMomentum.Pt());
+                histos->at(bin).fwdResolHist->Fill(jetMomentum.E()/bestGenJetMomentum.E());
             }
-
         }
       }
     }
@@ -475,9 +548,15 @@ std::pair<Double_t, Double_t> GausFit(TH1* hist)
 {
   TF1 *f1 = new TF1("f1", "gaus", hist->GetMean()-2*hist->GetRMS(), hist->GetMean()+2*hist->GetRMS());
   hist->Fit("f1","RQ");
-  Double_t sig = f1->GetParameter(2);
-  Double_t sigErr = f1->GetParError(2);
+
+  TF1 *f2 = new TF1("f2", "gaus", f1->GetParameter(1) - 2*f1->GetParameter(2), f1->GetParameter(1) + 2*f1->GetParameter(2));
+  hist->Fit("f2","RQ");  
+
+  Double_t sig = f2->GetParameter(2);
+  Double_t sigErr = f2->GetParError(2);
+
   delete f1;
+  delete f2;
   return make_pair (sig, sigErr);
 }
 
@@ -609,13 +688,14 @@ void addHist(TH1D *h, TLegend *leg, int type)
   }
 }
 
-void DrawAxis(TMultiGraph *mg, TLegend *leg, double max)
+void DrawAxis(TMultiGraph *mg, TLegend *leg, double max, int type = 0)
 {
   mg->SetMinimum(0.);
   mg->SetMaximum(max);
   mg->GetXaxis()->SetLimits(ptrangemin,ptrangemax);
   mg->GetYaxis()->SetTitle("resolution");
-  mg->GetXaxis()->SetTitle("p_{T} [GeV]");
+  if (type == 0) mg->GetXaxis()->SetTitle("E [GeV]");
+  else mg->GetXaxis()->SetTitle("p_{T} [GeV]");
   mg->GetYaxis()->SetTitleSize(0.07);
   mg->GetXaxis()->SetTitleSize(0.07);
   mg->GetYaxis()->SetLabelSize(0.06);
@@ -640,12 +720,12 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double max)
 
 }
 
-void DrawAxis(TH1D *h, TLegend *leg, int type)
+void DrawAxis(TH1D *h, TLegend *leg, int type = 0)
 {
 
   h->GetYaxis()->SetRangeUser(0,1.0);
-  if (type == 0) h->GetXaxis()->SetTitle("p_{T} [GeV]");
-  else h->GetXaxis()->SetTitle("#eta");
+  if (type == 0) h->GetXaxis()->SetTitle("E [GeV]");
+  else h->GetXaxis()->SetTitle("p_{T} [GeV]");
   h->GetYaxis()->SetTitle("efficiency");
   h->GetYaxis()->SetTitleSize(0.07);
   h->GetXaxis()->SetTitleSize(0.07);
@@ -781,7 +861,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   addHist(histos_eltrack.first, leg_el1, 2);
   histos_el.first->Draw("same ][");
   addHist(histos_el.first, leg_el1, 1);
-  DrawAxis(histos_eltrack.first, leg_el1, 0);
+  DrawAxis(histos_eltrack.first, leg_el1,1);
 
   leg_el1->Draw();
 
@@ -796,7 +876,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_el.second->Draw("same ][");
   addHist(histos_el.second, leg_el2, 1);
 
-  DrawAxis(histos_eltrack.second, leg_el2, 0);
+  DrawAxis(histos_eltrack.second, leg_el2, 1);
   leg_el2->Draw();
 
   TString elRes = "electronERes";
@@ -849,10 +929,10 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   // muon tracking reconstruction efficiency
   std::pair <TH1D*,TH1D*> histos_mutrack = GetEff<Track>(branchTrackMuon, branchParticleMuon, "muonTrack", muID, treeReaderMuon);
 
-  // Muon Energy Resolution
+  // Muon Pt Resolution
   std::vector<resolPlot> plots_mu;
   HistogramsCollection(&plots_mu, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "muons");
-  GetEres<Muon>(&plots_mu, branchMuon, branchParticleMuon, muID, treeReaderMuon);
+  GetPtres<Muon>(&plots_mu, branchMuon, branchParticleMuon, muID, treeReaderMuon);
   TGraphErrors gr_mu = EresGraph(&plots_mu, true);
   TGraphErrors gr_muFwd = EresGraph(&plots_mu, false);
   gr_mu.SetName("Muon");
@@ -861,7 +941,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   // Muon Track Energy Resolution
   std::vector<resolPlot> plots_mutrack;
   HistogramsCollection(&plots_mutrack, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax), "muonsTracks");
-  GetEres<Track>(&plots_mutrack, branchTrackMuon, branchParticleMuon, muID, treeReaderMuon);
+  GetPtres<Track>(&plots_mutrack, branchTrackMuon, branchParticleMuon, muID, treeReaderMuon);
   TGraphErrors gr_mutrack = EresGraph(&plots_mutrack, true);
   TGraphErrors gr_mutrackFwd = EresGraph(&plots_mutrack, false);
   gr_mutrackFwd.SetName("MuonTracksFwd");
@@ -883,7 +963,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_mu.first->Draw("same ][");
   addHist(histos_mu.first, leg_mu1, 1);
 
-  DrawAxis(histos_mutrack.first, leg_mu1, 0);
+  DrawAxis(histos_mutrack.first, leg_mu1, 1);
 
   leg_mu1->Draw();
 
@@ -918,7 +998,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   mg_mu->Draw("ACX");
   leg_mu->Draw();
 
-  DrawAxis(mg_mu, leg_mu, 0.3);
+  DrawAxis(mg_mu, leg_mu, 0.3, 1);
 
   C_mu->cd(2);
   TMultiGraph *mg_muFwd = new TMultiGraph(muResFwd,muResFwd);
@@ -932,7 +1012,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   mg_muFwd->Draw("ACX");
   leg_muFwd->Draw();
 
-  DrawAxis(mg_muFwd, leg_muFwd, 0.3);
+  DrawAxis(mg_muFwd, leg_muFwd, 0.3, 1);
 
   C_mu1->Print("delphes_validation.pdf","pdf");
   C_mu->Print("delphes_validation.pdf","pdf");
@@ -984,7 +1064,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_ph.first->Draw("same ][");
   addHist(histos_ph.first, leg_ph1, 1);
 
-  DrawAxis(histos_phtower.first, leg_ph1, 0);
+  DrawAxis(histos_phtower.first, leg_ph1, 1);
   leg_ph1->Draw();
 
   C_ph1->cd(2);
@@ -1019,7 +1099,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   mg_ph->Draw("ACX");
   leg_ph->Draw();
 
-  DrawAxis(mg_ph, leg_ph, 0.3);
+  DrawAxis(mg_ph, leg_ph, 0.1);
 
   C_ph->cd(2);
   TMultiGraph *mg_phFwd = new TMultiGraph(phResFwd,phResFwd);
@@ -1033,7 +1113,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   mg_phFwd->Draw("ACX");
   leg_phFwd->Draw();
 
-  DrawAxis(mg_phFwd, leg_phFwd, 0.3);
+  DrawAxis(mg_phFwd, leg_phFwd, 0.1);
 
   C_ph1->Print("delphes_validation.pdf","pdf");
   C_ph->Print("delphes_validation.pdf","pdf");
@@ -1090,7 +1170,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_btag.first->Draw();
   addHist(histos_btag.first, leg_btag1, 0);
 
-  DrawAxis(histos_btag.first, leg_btag1, 0);
+  DrawAxis(histos_btag.first, leg_btag1, 1);
   leg_btag1->Draw();
 
   C_btag1->cd(2);
@@ -1102,7 +1182,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_btag.second->Draw();
   addHist(histos_btag.second, leg_btag2, 0);
 
-  DrawAxis(histos_btag.second, leg_btag2, 0);
+  DrawAxis(histos_btag.second, leg_btag2, 1);
   leg_btag2->Draw();
   C_btag1->cd(0);
 
@@ -1118,7 +1198,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_tautag.first->Draw();
   addHist(histos_tautag.first, leg_tautag1, 0);
 
-  DrawAxis(histos_tautag.first, leg_tautag1, 0);
+  DrawAxis(histos_tautag.first, leg_tautag1, 1);
   leg_tautag1->Draw();
 
   C_tautag1->cd(2);
@@ -1130,7 +1210,7 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_tautag.second->Draw();
   addHist(histos_tautag.second, leg_tautag2, 0);
 
-  DrawAxis(histos_tautag.second, leg_tautag2, 0);
+  DrawAxis(histos_tautag.second, leg_tautag2, 1);
   leg_tautag2->Draw();
   C_tautag1->cd(0);
 
@@ -1148,24 +1228,24 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   addGraph(mg_jet, &gr_calojets, leg_jet, 3);
   addGraph(mg_jet, &gr_pfjets, leg_jet, 1);
 
-  mg_jet->Draw("ACX");
+  mg_jet->Draw("ALX");
   leg_jet->Draw();
 
-  DrawAxis(mg_jet, leg_jet, 0.25);
+  DrawAxis(mg_jet, leg_jet, 0.5);
 
   C_jet->cd(2);
   TMultiGraph *mg_jetFwd = new TMultiGraph(jetResFwd,jetResFwd);
   TLegend *leg_jetFwd = new TLegend(resLegXmin,resLegYmin,resLegXmax,resLegYmax);
-  leg_jetFwd->SetHeader("#splitline{jets}{|#eta| < 1.5}");
+  leg_jetFwd->SetHeader("#splitline{jets}{1.5 < |#eta| < 2.5}");
   leg_jetFwd->AddEntry("","","");
 
   addGraph(mg_jetFwd, &gr_calojetsFwd, leg_jetFwd, 3);
   addGraph(mg_jetFwd, &gr_pfjetsFwd, leg_jetFwd, 1);
 
-  mg_jetFwd->Draw("ACX");
+  mg_jetFwd->Draw("ALX");
   leg_jetFwd->Draw();
 
-  DrawAxis(mg_jetFwd, leg_jetFwd, 0.25);
+  DrawAxis(mg_jetFwd, leg_jetFwd, 0.5);
 
   TString metRes = "MetRes";
   TCanvas *C_met = new TCanvas(metRes,metRes, 800, 600);
@@ -1211,6 +1291,14 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   histos_eltower.second->Write();
   C_el1->Write();
   C_el2->Write();
+
+  for (int bin = 0; bin < Nbins; bin++)
+  {
+    plots_mu.at(bin).cenResolHist->Write();
+    plots_mutrack.at(bin).cenResolHist->Write();
+    plots_mu.at(bin).fwdResolHist->Write();
+    plots_mutrack.at(bin).fwdResolHist->Write();
+  }
 
   histos_mu.first->Write();
   histos_mu.second->Write();
