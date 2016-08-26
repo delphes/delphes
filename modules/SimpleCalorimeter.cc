@@ -189,6 +189,9 @@ void SimpleCalorimeter::Process()
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
   Double_t fraction;
   Double_t energy;
+  Double_t sigma;
+  Double_t energyGuess;
+
   Int_t pdgCode;
 
   TFractionMap::iterator itFractionMap;
@@ -363,10 +366,12 @@ void SimpleCalorimeter::Process()
              
        // compute total charged energy	 
        fTrackEnergy += energy;
-       fTrackSigma += ((track->TrackResolution)*momentum.E())*((track->TrackResolution)*momentum.E());
-       
+       sigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
+       if(sigma/momentum.E() < track->TrackResolution) energyGuess = energy;
+       else energyGuess = momentum.E();
+
+       fTrackSigma += ((track->TrackResolution)*energyGuess)*((track->TrackResolution)*energyGuess);
        fTowerTrackArray->Add(track);
-      
       }
        
       else
