@@ -475,8 +475,13 @@ std::pair<Double_t, Double_t> GausFit(TH1* hist)
 {
   TF1 *f1 = new TF1("f1", "gaus", hist->GetMean()-2*hist->GetRMS(), hist->GetMean()+2*hist->GetRMS());
   hist->Fit("f1","RQ");
-  Double_t sig = f1->GetParameter(2);
-  Double_t sigErr = f1->GetParError(2);
+
+  TF1 *f2 = new TF1("f2", "gaus", f1->GetParameter(1) - 2*f1->GetParameter(2), f1->GetParameter(1) + 2*f1->GetParameter(2));
+  hist->Fit("f2","RQ");  
+
+  Double_t sig = f2->GetParameter(2);
+  Double_t sigErr = f2->GetParError(2);
+
   delete f1;
   return make_pair (sig, sigErr);
 }
