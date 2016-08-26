@@ -95,7 +95,7 @@ void MomentumSmearing::Finish()
 void MomentumSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t pt, eta, phi, e;
+  Double_t pt, eta, phi, e, res;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -106,10 +106,14 @@ void MomentumSmearing::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-
+    res = fFormula->Eval(pt, eta, phi, e);
+ 
     // apply smearing formula
     //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
-    pt = LogNormal(pt, fFormula->Eval(pt, eta, phi, e) * pt );
+    
+    res = ( res > 1.0 ) ? 1.0 : res; 
+
+    pt = LogNormal(pt, res * pt );
     
     //if(pt <= 0.0) continue;
 
