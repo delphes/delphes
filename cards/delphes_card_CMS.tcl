@@ -18,7 +18,7 @@ set ExecutionPath {
   ECal
   HCal
  
-  TowerMerger
+  Calorimeter
   EFlowMerger
 
   PhotonEfficiency
@@ -393,7 +393,7 @@ module PdgCodeFilter ElectronFilter {
 # Tower Merger (in case not using e-flow algorithm)
 ###################################################
 
-module Merger TowerMerger {
+module Merger Calorimeter {
 # add InputArray InputArray
   add InputArray ECal/ecalTowers
   add InputArray HCal/hcalTowers
@@ -712,7 +712,7 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
 
   add Branch TrackMerger/tracks Track Track
-  add Branch TowerMerger/towers Tower Tower
+  add Branch Calorimeter/towers Tower Tower
 
   add Branch HCal/eflowTracks EFlowTrack Track
   add Branch ECal/eflowPhotons EFlowPhoton Tower
