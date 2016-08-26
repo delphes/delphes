@@ -163,6 +163,32 @@ public:
 
 //---------------------------------------------------------------------------
 
+template <typename T>
+class CompSumPT2: public CompBase
+{
+  CompSumPT2() {}
+public:
+  static CompSumPT2 *Instance()
+  {
+    static CompSumPT2 single;
+    return &single;
+  }
+
+  Int_t Compare(const TObject *obj1, const TObject *obj2) const
+  {
+    const T *t1 = static_cast<const T*>(obj1);
+    const T *t2 = static_cast<const T*>(obj2);
+    if(t1->SumPT2 > t2->SumPT2)
+      return -1;
+    else if(t1->SumPT2 < t2->SumPT2)
+      return 1;
+    else
+      return 0;
+  }
+};
+
+//---------------------------------------------------------------------------
+
 template <typename T1, typename T2>
 class CompDeltaR: public CompBase
 {

@@ -46,6 +46,8 @@ public:
 
 private:
 
+  Double_t LogNormal(Double_t mean, Double_t sigma);
+
   DelphesFormula *fFormula; //!
 
   TIterator *fItInputArray; //!

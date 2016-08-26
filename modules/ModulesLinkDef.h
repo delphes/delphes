@@ -34,6 +34,7 @@
 #include "modules/IdentificationMap.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
+#include "modules/TrackSmearing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
@@ -57,12 +58,16 @@
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
+#include "modules/BeamSpotFilter.h"
 #include "modules/RecoPuFilter.h"
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/Hector.h"
 #include "modules/JetFlavorAssociation.h"
 #include "modules/JetFakeParticle.h"
+#include "modules/VertexSorter.h"
+#include "modules/VertexFinder.h"
+#include "modules/VertexFinderDA4D.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -80,6 +85,7 @@
 #pragma link C++ class IdentificationMap+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
+#pragma link C++ class TrackSmearing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
@@ -103,12 +109,16 @@
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
+#pragma link C++ class BeamSpotFilter+;
 #pragma link C++ class RecoPuFilter+;
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class Hector+;
 #pragma link C++ class JetFlavorAssociation+;
 #pragma link C++ class JetFakeParticle+;
+#pragma link C++ class VertexSorter+;
+#pragma link C++ class VertexFinder+;
+#pragma link C++ class VertexFinderDA4D+;
 #pragma link C++ class ExampleModule+;
 
 #endif

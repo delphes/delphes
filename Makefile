@@ -142,6 +142,17 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootUtilities.h
+Validation$(ExeSuf): \
+	tmp/examples/Validation.$(ObjSuf)
+
+tmp/examples/Validation.$(ObjSuf): \
+	examples/Validation.cpp \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootUtilities.h
 EXECUTABLE +=  \
 	hepmc2pileup$(ExeSuf) \
 	lhco2root$(ExeSuf) \
@@ -149,7 +160,8 @@ EXECUTABLE +=  \
 	root2lhco$(ExeSuf) \
 	root2pileup$(ExeSuf) \
 	stdhep2pileup$(ExeSuf) \
-	Example1$(ExeSuf)
+	Example1$(ExeSuf) \
+	Validation$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
@@ -158,7 +170,8 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/root2lhco.$(ObjSuf) \
 	tmp/converters/root2pileup.$(ObjSuf) \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
-	tmp/examples/Example1.$(ObjSuf)
+	tmp/examples/Example1.$(ObjSuf) \
+	tmp/examples/Validation.$(ObjSuf)
 
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
@@ -184,6 +197,19 @@ tmp/readers/DelphesLHEF.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootProgressBar.h
+DelphesROOT$(ExeSuf): \
+	tmp/readers/DelphesROOT.$(ObjSuf)
+
+tmp/readers/DelphesROOT.$(ObjSuf): \
+	readers/DelphesROOT.cpp \
+	modules/Delphes.h \
+	classes/DelphesStream.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeReader.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
 DelphesSTDHEP$(ExeSuf): \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
 
@@ -199,11 +225,13 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 EXECUTABLE +=  \
 	DelphesHepMC$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
+	DelphesROOT$(ExeSuf) \
 	DelphesSTDHEP$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesHepMC.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
+	tmp/readers/DelphesROOT.$(ObjSuf) \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
 
 ifeq ($(HAS_CMSSW),true)
@@ -318,6 +346,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
 	modules/MomentumSmearing.h \
+	modules/TrackSmearing.h \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
 	modules/SimpleCalorimeter.h \
@@ -341,11 +370,16 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
 	modules/PdgCodeFilter.h \
+	modules/BeamSpotFilter.h \
+	modules/RecoPuFilter.h \
 	modules/Cloner.h \
 	modules/Weighter.h \
 	modules/Hector.h \
 	modules/JetFlavorAssociation.h \
 	modules/JetFakeParticle.h \
+	modules/VertexSorter.h \
+	modules/VertexFinder.h \
+	modules/VertexFinderDA4D.h \
 	modules/ExampleModule.h
 tmp/modules/ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict.$(SrcSuf)
@@ -552,6 +586,15 @@ tmp/modules/BTagging.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h
+tmp/modules/BeamSpotFilter.$(ObjSuf): \
+	modules/BeamSpotFilter.$(SrcSuf) \
+	modules/BeamSpotFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/Calorimeter.$(ObjSuf): \
 	modules/Calorimeter.$(SrcSuf) \
 	modules/Calorimeter.h \
@@ -784,6 +827,15 @@ tmp/modules/PileUpMergerPythia8.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/RecoPuFilter.$(ObjSuf): \
+	modules/RecoPuFilter.$(SrcSuf) \
+	modules/RecoPuFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/SimpleCalorimeter.$(ObjSuf): \
 	modules/SimpleCalorimeter.$(SrcSuf) \
 	modules/SimpleCalorimeter.h \
@@ -851,6 +903,15 @@ tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/TrackSmearing.$(ObjSuf): \
+	modules/TrackSmearing.$(SrcSuf) \
+	modules/TrackSmearing.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/TreeWriter.$(ObjSuf): \
 	modules/TreeWriter.$(SrcSuf) \
 	modules/TreeWriter.h \
@@ -867,6 +928,36 @@ tmp/modules/UniqueObjectFinder.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/VertexFinder.$(ObjSuf): \
+	modules/VertexFinder.$(SrcSuf) \
+	modules/VertexFinder.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/VertexFinderDA4D.$(ObjSuf): \
+	modules/VertexFinderDA4D.$(SrcSuf) \
+	modules/VertexFinderDA4D.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/VertexSorter.$(ObjSuf): \
+	modules/VertexSorter.$(SrcSuf) \
+	modules/VertexSorter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
@@ -930,6 +1021,7 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
+	tmp/modules/BeamSpotFilter.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
@@ -954,6 +1046,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/PhotonConversions.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
+	tmp/modules/RecoPuFilter.$(ObjSuf) \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
 	tmp/modules/TaggingParticlesSkimmer.$(ObjSuf) \
@@ -962,8 +1055,12 @@ DELPHES_OBJ +=  \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
 	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
+	tmp/modules/TrackSmearing.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
+	tmp/modules/VertexFinder.$(ObjSuf) \
+	tmp/modules/VertexFinderDA4D.$(ObjSuf) \
+	tmp/modules/VertexSorter.$(ObjSuf) \
 	tmp/modules/Weighter.$(ObjSuf)
 
 ifeq ($(HAS_PYTHIA8),true)
@@ -1568,6 +1665,15 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
 
+modules/VertexFinderDA4D.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
+	@touch $@
+
+modules/TrackSmearing.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 external/fastjet/ClusterSequence.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
@@ -1828,8 +1934,18 @@ external/fastjet/internal/Dnn4piCylinder.hh: \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
 
+modules/VertexSorter.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
+	@touch $@
+
 modules/Delphes.h: \
 	classes/DelphesModule.h
+	@touch $@
+
+modules/VertexFinder.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
 	@touch $@
 
 modules/UniqueObjectFinder.h: \
@@ -1898,6 +2014,10 @@ external/fastjet/ClusterSequenceVoronoiArea.hh: \
 	@touch $@
 
 modules/BTagging.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/RecoPuFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
@@ -2000,6 +2120,10 @@ external/fastjet/ClusterSequencePassiveArea.hh: \
 	@touch $@
 
 modules/FastJetFinder.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/BeamSpotFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
