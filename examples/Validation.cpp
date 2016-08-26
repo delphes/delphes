@@ -187,6 +187,10 @@ std::pair<TH1D*, TH1D*> GetEff(TClonesArray *branchReco, TClonesArray *branchPar
   TH1D *histGenPtfwd  = new TH1D(name+" gen spectra Eta",name+" gen spectra fwd", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
   TH1D *histRecoPtfwd = new TH1D(name+" reco spectra Eta",name+" reco spectra fwd", Nbins, TMath::Log10(ptrangemin), TMath::Log10(ptrangemax));
 
+  histGenPtcen->SetDirectory(0);
+  histRecoPtcen->SetDirectory(0);
+  histGenPtfwd->SetDirectory(0);
+  histRecoPtfwd->SetDirectory(0);
 
   BinLogX(histGenPtcen);
   BinLogX(histRecoPtcen);
@@ -323,15 +327,15 @@ void GetEres(std::vector<resolPlot> *histos, TClonesArray *branchReco, TClonesAr
 
       if(deltaR < 0.3)
       {
-        pt  = bestGenMomentum.Pt();
+        pt  = bestGenMomentum.E();
         eta = TMath::Abs(bestGenMomentum.Eta());
 
         for (bin = 0; bin < Nbins; bin++)
         {
-          if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta > 0.0 && eta < 2.5)
+          if(pt > histos->at(bin).ptmin && pt < histos->at(bin).ptmax && eta < 2.5)
           {
-            if (eta < 1.5) {histos->at(bin).cenResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
-            else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill(recoMomentum.Pt()/bestGenMomentum.Pt());}
+            if (eta < 1.5) {histos->at(bin).cenResolHist->Fill(recoMomentum.E()/bestGenMomentum.E());}
+            else if (eta < 2.5) {histos->at(bin).fwdResolHist->Fill(recoMomentum.E()/bestGenMomentum.E());}
           }
         }
       }
@@ -730,6 +734,8 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   int elID = 11;
   std::pair<TH1D*,TH1D*> histos_el = GetEff<Electron>(branchElectron, branchParticleElectron, "Electron", elID, treeReaderElectron);
 
+  histos_el.second->SaveAs("test1.pdf");
+
   // tracking reconstruction efficiency
   std::pair <TH1D*,TH1D*> histos_eltrack = GetEff<Track>(branchTrackElectron, branchParticleElectron, "electronTrack", elID, treeReaderElectron);
 
@@ -794,8 +800,6 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(histos_eltrack.second, leg_el2, 0);
   leg_el2->Draw();
-
-  C_el1->cd(0);
 
   TString elRes = "electronERes";
   TString elResFwd = "electronEResForward";
@@ -1275,7 +1279,7 @@ int main(int argc, char *argv[])
 {
   char *appName = "Validation";
 
-  if(argc != 3)
+  if(argc != 8)
   {
     cout << " Usage: " << appName << " input_file_electron input_file_muon input_file_photon input_file_jet input_file_bjet input_file_taujet output_file" << endl;
     cout << " input_file_electron  - input file in ROOT format ('Delphes' tree)," << endl;
