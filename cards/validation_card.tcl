@@ -8,7 +8,7 @@ module FastJetFinder GenJetFinder {
   set JetPTMin 1.0
 }
 
-module FastJetFinder CaloJetFinder {
+module FastJetFinder FastJetFinder {
   set JetPTMin 1.0
 }
 
