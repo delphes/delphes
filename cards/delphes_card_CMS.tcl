@@ -497,11 +497,9 @@ module Efficiency MuonEfficiency {
   # set EfficiencyFormula {efficiency as a function of eta and pt}
 
   # efficiency formula for muons
-  set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
-                                           (abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-                                           (abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+  set EfficiencyFormula {                                     (pt <= 10.0)                * (0.00) +
+                                           (abs(eta) <= 1.5) * (pt > 10.0)                * (0.95) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0)                * (0.95) +
                          (abs(eta) > 2.4)                                                 * (0.00)}
 }
 
