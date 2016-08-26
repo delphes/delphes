@@ -4,7 +4,7 @@ function runParticleGun {
   pid=$2
   cmnd="examples/Pythia8/configParticleGun_$name.cmnd"
   sed '/Main:spareMode1/s/=[[:space:]]*[0-9]*/= '$pid'/' examples/Pythia8/configParticleGun.cmnd > $cmnd
-  ./DelphesPythia8 cards/delphes_card_CMS.tcl $cmnd delphes_ParticleGun_$name.root
+  ./DelphesPythia8 cards/validation_card.tcl $cmnd delphes_ParticleGun_$name.root
 }
 
 runParticleGun electron 11
