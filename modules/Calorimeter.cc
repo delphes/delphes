@@ -211,6 +211,8 @@ void Calorimeter::Process()
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
   Double_t ecalFraction, hcalFraction;
   Double_t ecalEnergy, hcalEnergy;
+  Double_t ecalSigma, hcalSigma;
+  Double_t energyGuess;
   Int_t pdgCode;
 
   TFractionMap::iterator itFractionMap;
@@ -397,14 +399,22 @@ void Calorimeter::Process()
       if(fECalTrackFractions[number] > 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9)
       {
         fECalTrackEnergy += ecalEnergy;
-        fECalTrackSigma += (track->TrackResolution)*momentum.E()*(track->TrackResolution)*momentum.E();
+        ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());        
+        if(ecalSigma/momentum.E() < track->TrackResolution) energyGuess = ecalEnergy;        
+        else energyGuess = momentum.E();
+
+        fECalTrackSigma += (track->TrackResolution)*energyGuess*(track->TrackResolution)*energyGuess;
         fECalTowerTrackArray->Add(track);
       }
      
       else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] > 1.0E-9)
       {
         fHCalTrackEnergy += hcalEnergy;
-        fHCalTrackSigma += (track->TrackResolution)*momentum.E()*(track->TrackResolution)*momentum.E();
+        hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
+        if(hcalSigma/momentum.E() < track->TrackResolution) energyGuess = hcalEnergy;
+        else energyGuess = momentum.E();
+
+        fHCalTrackSigma += (track->TrackResolution)*energyGuess*(track->TrackResolution)*energyGuess;
         fHCalTowerTrackArray->Add(track);
       }
       
