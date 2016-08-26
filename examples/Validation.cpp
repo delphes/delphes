@@ -739,8 +739,6 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   int elID = 11;
   std::pair<TH1D*,TH1D*> histos_el = GetEff<Electron>(branchElectron, branchParticleElectron, "Electron", elID, treeReaderElectron);
 
-  histos_el.second->SaveAs("test1.pdf");
-
   // tracking reconstruction efficiency
   std::pair <TH1D*,TH1D*> histos_eltrack = GetEff<Track>(branchTrackElectron, branchParticleElectron, "electronTrack", elID, treeReaderElectron);
 
@@ -840,8 +838,8 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_elFwd, leg_elFwd, 0.2);
 
-  C_el1->Print("validation.pdf(","pdf");
-  C_el2->Print("validation.pdf","pdf");
+  C_el1->Print("delphes_validation.pdf(","pdf");
+  C_el2->Print("delphes_validation.pdf","pdf");
 
   gDirectory->cd(0);
 
@@ -941,11 +939,8 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_muFwd, leg_muFwd, 0.3);
 
-  //C_mu1->SaveAs(muEff+".eps");
-  //C_mu->SaveAs(muRes+".eps");
-
-  C_mu1->Print("validation.pdf","pdf");
-  C_mu->Print("validation.pdf","pdf");
+  C_mu1->Print("delphes_validation.pdf","pdf");
+  C_mu->Print("delphes_validation.pdf","pdf");
 
   gDirectory->cd(0);
 
@@ -1012,8 +1007,6 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   DrawAxis(histos_phtower.second, leg_ph2, 1);
   leg_ph2->Draw();
 
-  C_ph1->SaveAs(phEff+".eps");
-
   TString phRes = "phERes";
   TString phResFwd = "phEResFwd";
 
@@ -1047,10 +1040,8 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_phFwd, leg_phFwd, 0.3);
 
-  C_ph->SaveAs(phRes+".eps");
-
-  C_ph1->Print("validation.pdf","pdf");
-  C_ph->Print("validation.pdf","pdf");
+  C_ph1->Print("delphes_validation.pdf","pdf");
+  C_ph->Print("delphes_validation.pdf","pdf");
 
   gDirectory->cd(0);
 
@@ -1181,9 +1172,6 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_jetFwd, leg_jetFwd, 0.25);
 
-  C_btag1->SaveAs(btagEff+".eps");
-  C_jet->SaveAs(jetRes+".eps");
-
   TString metRes = "MetRes";
   TCanvas *C_met = new TCanvas(metRes,metRes, 800, 600);
 
@@ -1203,12 +1191,10 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   mg_met->GetXaxis()->SetTitle("H_{T} [GeV]");
   mg_met->GetYaxis()->SetTitle("#sigma(ME_{x}) [GeV]");
 
-  C_met->SaveAs(metRes+".eps");
-
-  C_jet->Print("validation.pdf","pdf");
-  C_btag1->Print("validation.pdf","pdf");
-  C_tautag1->Print("validation.pdf","pdf");
-  C_met->Print("validation.pdf)","pdf");
+  C_jet->Print("delphes_validation.pdf","pdf");
+  C_btag1->Print("delphes_validation.pdf","pdf");
+  C_tautag1->Print("delphes_validation.pdf","pdf");
+  C_met->Print("delphes_validation.pdf)","pdf");
 
   TFile *fout = new TFile(outputFile,"recreate");
 

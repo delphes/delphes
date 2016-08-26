@@ -212,7 +212,7 @@ module SimpleCalorimeter ECal {
   set IsEcal true
 
   set EnergyMin 0.5
-  set EnergySignificanceMin 1.0
+  set EnergySignificanceMin 2.0
 
   set SmearTowerCenter true
 
@@ -313,7 +313,7 @@ module SimpleCalorimeter HCal {
   set IsEcal false
 
   set EnergyMin 1.0
-  set EnergySignificanceMin 1.0
+  set EnergySignificanceMin 2.0
 
   set SmearTowerCenter true
 
@@ -720,7 +720,7 @@ module TreeWriter TreeWriter {
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
-
+ 
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/photons Photon Photon
