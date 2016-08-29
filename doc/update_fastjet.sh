@@ -1,4 +1,4 @@
-version=3.1.3
+version=3.2.1
 
 wget http://fastjet.fr/repo/fastjet-${version}.tar.gz
 
@@ -92,5 +92,5 @@ sed -i 's/#include "fastjet\/D0RunIBaseConePlugin.hh"/#include "D0RunIBaseConePl
 sed -i 's/#include "fastjet\/D0RunIBaseConePlugin.hh"/#include "D0RunIBaseConePlugin.hh"/' D0RunICone/fastjet/D0RunIConePlugin.hh
 
 sed -i 's/#include "siscone\//#include "/' SISCone/SISConePlugin.cc
-
+sed -i 's/#include <siscone\/config.h>/#include "config.h"/' SISCone/split_merge.h
 cd -

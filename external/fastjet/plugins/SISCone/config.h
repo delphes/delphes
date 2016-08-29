@@ -1,63 +1,117 @@
-/* siscone/config.h.  Generated from config.h.in by configure.  */
+#ifndef _SISCONE_CONFIG_H
+#define _SISCONE_CONFIG_H 1
+ 
+/* siscone/config.h. Generated automatically at end of configure. */
+/* siscone/config_raw.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
-#define HAVE_DLFCN_H 1
+#ifndef SISCONE_HAVE_DLFCN_H 
+#define SISCONE_HAVE_DLFCN_H  1 
+#endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H 1
+#ifndef SISCONE_HAVE_INTTYPES_H 
+#define SISCONE_HAVE_INTTYPES_H  1 
+#endif
 
 /* Define to 1 if you have the `m' library (-lm). */
-#define HAVE_LIBM 1
+#ifndef SISCONE_HAVE_LIBM 
+#define SISCONE_HAVE_LIBM  1 
+#endif
 
 /* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
+#ifndef SISCONE_HAVE_MEMORY_H 
+#define SISCONE_HAVE_MEMORY_H  1 
+#endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
+#ifndef SISCONE_HAVE_STDINT_H 
+#define SISCONE_HAVE_STDINT_H  1 
+#endif
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H 1
+#ifndef SISCONE_HAVE_STDLIB_H 
+#define SISCONE_HAVE_STDLIB_H  1 
+#endif
 
 /* Define to 1 if you have the <strings.h> header file. */
-#define HAVE_STRINGS_H 1
+#ifndef SISCONE_HAVE_STRINGS_H 
+#define SISCONE_HAVE_STRINGS_H  1 
+#endif
 
 /* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
+#ifndef SISCONE_HAVE_STRING_H 
+#define SISCONE_HAVE_STRING_H  1 
+#endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H 1
+#ifndef SISCONE_HAVE_SYS_STAT_H 
+#define SISCONE_HAVE_SYS_STAT_H  1 
+#endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#define HAVE_SYS_TYPES_H 1
+#ifndef SISCONE_HAVE_SYS_TYPES_H 
+#define SISCONE_HAVE_SYS_TYPES_H  1 
+#endif
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H 1
+#ifndef SISCONE_HAVE_UNISTD_H 
+#define SISCONE_HAVE_UNISTD_H  1 
+#endif
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#define LT_OBJDIR ".libs/"
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#ifndef SISCONE_LT_OBJDIR 
+#define SISCONE_LT_OBJDIR  ".libs/" 
+#endif
 
 /* Name of package */
-#define PACKAGE "siscone"
+#ifndef SISCONE_PACKAGE 
+#define SISCONE_PACKAGE  "siscone" 
+#endif
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT ""
+#ifndef SISCONE_PACKAGE_BUGREPORT 
+#define SISCONE_PACKAGE_BUGREPORT  "" 
+#endif
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "SISCone"
+#ifndef SISCONE_PACKAGE_NAME 
+#define SISCONE_PACKAGE_NAME  "SISCone" 
+#endif
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "SISCone 3.0.0"
+#ifndef SISCONE_PACKAGE_STRING 
+#define SISCONE_PACKAGE_STRING  "SISCone 3.0.3" 
+#endif
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "siscone"
+#ifndef SISCONE_PACKAGE_TARNAME 
+#define SISCONE_PACKAGE_TARNAME  "siscone" 
+#endif
+
+/* Define to the home page for this package. */
+#ifndef SISCONE_PACKAGE_URL 
+#define SISCONE_PACKAGE_URL  "" 
+#endif
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.0.0"
+#ifndef SISCONE_PACKAGE_VERSION 
+#define SISCONE_PACKAGE_VERSION  "3.0.3" 
+#endif
 
 /* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
+#ifndef SISCONE_STDC_HEADERS 
+#define SISCONE_STDC_HEADERS  1 
+#endif
+
+/* use unique_ptr instead of auto_ptr */
+/* #undef USES_UNIQUE_PTR_AS_AUTO_PTR */
 
 /* Version number of package */
-#define VERSION "3.0.0"
+#ifndef SISCONE_VERSION 
+#define SISCONE_VERSION  "3.0.3" 
+#endif
+ 
+/* once: _SISCONE_CONFIG_H */
+#endif

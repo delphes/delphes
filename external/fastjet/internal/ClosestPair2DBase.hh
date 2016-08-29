@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClosestPair2DBase.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClosestPair2DBase.hh 4049 2016-03-03 13:45:47Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -47,7 +47,7 @@ class Coord2D {
 public:
   double x, y;
 
-  Coord2D() {};
+  Coord2D() : x(0.0), y(0.0) {};
 
   Coord2D(double a, double b): x(a), y(b) {};
 

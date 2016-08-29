@@ -2,7 +2,7 @@
 #define __JADEPLUGIN_HH__
 
 //FJSTARTHEADER
-// $Id: JadePlugin.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: JadePlugin.hh 4061 2016-03-03 21:51:25Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -76,8 +76,13 @@ class ClusterSequence;
 /// and related routines.
 class JadePlugin : public JetDefinition::Plugin {
 public:
+  /// enum that contains the two clustering strategy options; for
+  /// higher multiplicities, strategy_NNFJN2Plain is about a factor of
+  /// two faster.
+  enum Strategy { strategy_NNH = 0, strategy_NNFJN2Plain = 1};
+  
   /// Main constructor for the Jade Plugin class.  
-  JadePlugin (){}
+  JadePlugin (Strategy strategy = strategy_NNFJN2Plain) : _strategy(strategy) {}
 
   /// copy constructor
   JadePlugin (const JadePlugin & plugin) {
@@ -99,6 +104,9 @@ public:
 
 private:
 
+  template<class N> void _actual_run_clustering(ClusterSequence &) const;
+  
+  Strategy _strategy;
 };
 
 FASTJET_END_NAMESPACE        // defined in fastjet/internal/base.hh

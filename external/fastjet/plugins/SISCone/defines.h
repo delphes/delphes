@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 225                                                          $//
-// $Date:: 2008-05-20 16:59:47 +0200 (Tue, 20 May 2008)                     $//
+// $Revision:: 401                                                          $//
+// $Date:: 2016-05-19 16:44:37 +0200 (Thu, 19 May 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 //! \file defines.h
@@ -34,15 +34,15 @@
 //  siscone::siscone_package_name
 // defined in siscone.h
 // Otherwise, config.h
-// It is also defined as "PACKAGE_NAME" in config.h but this method 
+// It is also defined as "SISCONE_PACKAGE_NAME" in config.h but this method 
 // might lead to conflicts
-//#define PROGRAM   PACKAGE_NAME 
+//#define PROGRAM   SISCONE_PACKAGE_NAME 
 
 // program version
 // we get it from
 //   siscone::siscone_version
 // defined in siscone.h
-// It is also defined as "VERSION" in config.h but this method 
+// It is also defined as "SISCONE_VERSION" in config.h but this method 
 // might lead to conflicts
 
 /// perform final stability check using the quadtree

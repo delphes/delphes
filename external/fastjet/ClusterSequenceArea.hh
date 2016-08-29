@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceArea.hh 3484 2014-07-29 21:39:39Z soyez $
+// $Id: ClusterSequenceArea.hh 4098 2016-03-15 16:38:22Z salam $
 //
 // Copyright (c) 2006-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -79,16 +79,16 @@ public:
 
 
   /// return the area associated with the given jet
-  virtual double area       (const PseudoJet & jet) const {
+  virtual double area       (const PseudoJet & jet) const FASTJET_OVERRIDE {
     return _area_base->area(jet);}
 
   /// return the error (uncertainty) associated with the determination
   /// of the area of this jet
-  virtual double area_error (const PseudoJet & jet) const {
+  virtual double area_error (const PseudoJet & jet) const FASTJET_OVERRIDE {
     return _area_base->area_error(jet);}
 
   /// return the 4-vector area
-  virtual PseudoJet area_4vector(const PseudoJet & jet) const {
+  virtual PseudoJet area_4vector(const PseudoJet & jet) const FASTJET_OVERRIDE {
     return _area_base->area_4vector(jet);}
 
   // /// return the total area, up to |y|<maxrap, that is free of jets
@@ -109,7 +109,7 @@ public:
   /// The selector needs to have a finite area and be applicable jet by
   /// jet (see the BackgroundEstimator and Subtractor tools for more
   /// advanced usage)
-  virtual double empty_area(const Selector & selector) const {
+  virtual double empty_area(const Selector & selector) const FASTJET_OVERRIDE {
     return _area_base->empty_area(selector);}
 
   /// return something similar to the number of pure ghost jets
@@ -121,17 +121,17 @@ public:
   /// The selector needs to have a finite area and be applicable jet by
   /// jet (see the BackgroundEstimator and Subtractor tools for more
   /// advanced usage)
-  virtual double n_empty_jets(const Selector & selector) const {
+  virtual double n_empty_jets(const Selector & selector) const FASTJET_OVERRIDE {
     return _area_base->n_empty_jets(selector);
   }
 
   /// true if a jet is made exclusively of ghosts
-  virtual bool is_pure_ghost(const PseudoJet & jet) const {
+  virtual bool is_pure_ghost(const PseudoJet & jet) const FASTJET_OVERRIDE {
     return _area_base->is_pure_ghost(jet);
   }
 
   /// true if this ClusterSequence has explicit ghosts
-  virtual bool has_explicit_ghosts() const {
+  virtual bool has_explicit_ghosts() const FASTJET_OVERRIDE {
     return _area_base->has_explicit_ghosts();
   }
   
@@ -143,14 +143,15 @@ public:
   /// The selector needs to have a finite area and be applicable jet by
   /// jet (see the BackgroundEstimator and Subtractor tools for more
   /// advanced usage)
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceArea::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const std::vector<PseudoJet> & all_jets,
 					const Selector & selector, 
                                         bool use_area_4vector,
                                         double & median, double & sigma,
                                         double & mean_area,
-					bool all_are_incl = false) const {
+					bool all_are_incl = false) const FASTJET_OVERRIDE {
     _warn_if_range_unsuitable(selector);
-    ClusterSequenceAreaBase::get_median_rho_and_sigma(
+    ClusterSequenceAreaBase::_get_median_rho_and_sigma(
                                  all_jets, selector, use_area_4vector,
 				 median, sigma, mean_area, all_are_incl);
   }
@@ -159,36 +160,37 @@ public:
   /// which actually just does the same thing as the base version (but
   /// since we've overridden the 5-argument version above, we have to
   /// override the 4-argument version too.
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceArea::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const Selector & selector, 
                                         bool use_area_4vector,
-                                        double & median, double & sigma) const {
-    ClusterSequenceAreaBase::get_median_rho_and_sigma(selector,use_area_4vector,
-                                                      median,sigma);
+                                        double & median, double & sigma) const FASTJET_OVERRIDE {
+    ClusterSequenceAreaBase::_get_median_rho_and_sigma(selector,use_area_4vector,
+                                                       median,sigma);
   }
 
   /// overload version of what's in the ClusterSequenceAreaBase class,
   /// which actually just does the same thing as the base version (but
   /// since we've overridden the multi-argument version above, we have to
   /// override the 5-argument version too.
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceArea::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const Selector & selector, 
                                         bool use_area_4vector,
                                         double & median, double & sigma,
-					double & mean_area) const {
-    ClusterSequenceAreaBase::get_median_rho_and_sigma(selector,use_area_4vector,
-                                                      median,sigma, mean_area);
+					double & mean_area) const FASTJET_OVERRIDE {
+    ClusterSequenceAreaBase::_get_median_rho_and_sigma(selector,use_area_4vector,
+                                                       median,sigma, mean_area);
   }
 
 
   /// overload version of what's in the ClusterSequenceAreaBase class, which 
   /// additionally checks compatibility between "range" and region in which
   /// ghosts are thrown.
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceArea::parabolic_pt_per_unit_area(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")  
   virtual void parabolic_pt_per_unit_area(double & a, double & b, 
                                           const Selector & selector, 
                                           double exclude_above=-1.0, 
-                                          bool use_area_4vector=false) const {
-    _warn_if_range_unsuitable(selector);
-    ClusterSequenceAreaBase::parabolic_pt_per_unit_area(
-                                a,b,selector, exclude_above, use_area_4vector);
+                                          bool use_area_4vector=false) const FASTJET_OVERRIDE {
+    return _parabolic_pt_per_unit_area(a,b,selector,exclude_above,use_area_4vector);
   }
 
 
@@ -203,10 +205,25 @@ private:
                                  const std::vector<L> & pseudojets, 
                                  const JetDefinition & jet_def);
 
-  std::auto_ptr<ClusterSequenceAreaBase> _area_base;
+  SharedPtr<ClusterSequenceAreaBase> _area_base;
   AreaDefinition _area_def;
   static LimitedWarning _range_warnings;
   static LimitedWarning _explicit_ghosts_repeats_warnings;
+
+  // the following set of private methods are all deprecated. Their
+  // role is simply to hide the corresponding methods (without the
+  // first underscore) from the public interface so that they can be
+  // used internally until all the deprecated methods are removed.
+  // DO NOT USE ANY OF THESE METHODS: THEY ARE DEPRECATED AND WILL BE
+  // REMOVED.
+  virtual void _parabolic_pt_per_unit_area(double & a, double & b, 
+                                          const Selector & selector, 
+                                          double exclude_above=-1.0, 
+                                          bool use_area_4vector=false) const FASTJET_OVERRIDE {
+    _warn_if_range_unsuitable(selector);
+    ClusterSequenceAreaBase::_parabolic_pt_per_unit_area(
+                                a,b,selector, exclude_above, use_area_4vector);
+  }
 
 };
 
@@ -253,7 +270,7 @@ template<class L> void ClusterSequenceArea::initialize_and_run_cswa(
     //exit(-1);
   }
   // now copy across the information from the area base class
-  _area_base = std::auto_ptr<ClusterSequenceAreaBase>(_area_base_ptr);
+  _area_base = SharedPtr<ClusterSequenceAreaBase>(_area_base_ptr);
   transfer_from_sequence(*_area_base);
 }
 

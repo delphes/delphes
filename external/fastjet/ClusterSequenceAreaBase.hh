@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceAreaBase.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClusterSequenceAreaBase.hh 4098 2016-03-15 16:38:22Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -34,6 +34,7 @@
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/LimitedWarning.hh"
 #include "fastjet/Selector.hh"
+#include "fastjet/internal/deprecated.hh"
 
 FASTJET_BEGIN_NAMESPACE
 
@@ -143,6 +144,7 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::median_pt_per_unit_area(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   double median_pt_per_unit_area(const Selector & selector) const;
 
   /// the median of (pt/area_4vector) for jets contained within the
@@ -150,14 +152,16 @@ public:
   /// 
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::median_pt_per_unit_area_4vector(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   double median_pt_per_unit_area_4vector(const Selector & selector) const;
   
   /// the function that does the work for median_pt_per_unit_area and 
   /// median_pt_per_unit_area_4vector: 
   /// - something_is_area_4vect = false -> use plain area
   /// - something_is_area_4vect = true  -> use 4-vector area
-  double median_pt_per_unit_something(
-                    const Selector & selector, bool use_area_4vector) const;
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::median_pt_per_unit_something(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
+  double median_pt_per_unit_something(const Selector & selector,
+                                      bool use_area_4vector) const;
 
   /// using jets withing the selector range (and with 4-vector areas if
   /// use_area_4vector), calculate the median pt/area, as well as an
@@ -183,6 +187,7 @@ public:
   /// long as rho has also been determined with a 4-vector area;
   /// using a scalar area causes one to neglect terms of relative
   /// order $R^2/8$ in the jet $p_t$.
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const Selector & selector, 
                                         bool use_area_4vector,
                                         double & median, double & sigma,
@@ -207,6 +212,7 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const std::vector<PseudoJet> & all_jets,
 					const Selector & selector, 
                                         bool use_area_4vector,
@@ -220,12 +226,11 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const Selector & selector, 
-                                bool use_area_4vector,
-                                double & median, double & sigma) const {
-    double mean_area;
-    get_median_rho_and_sigma(selector,  use_area_4vector,
-                             median,  sigma, mean_area);
+                                        bool use_area_4vector,
+                                        double & median, double & sigma) const{
+    return _get_median_rho_and_sigma(selector, use_area_4vector, median, sigma);
   }
   
 
@@ -237,6 +242,7 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  //FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::parabolic_pt_per_unit_area(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void parabolic_pt_per_unit_area(double & a, double & b, 
                                           const Selector & selector, 
                                           double exclude_above=-1.0, 
@@ -246,6 +252,7 @@ public:
   /// Only inclusive_jets above ptmin are subtracted and returned.
   /// the ordering is the same as that of sorted_by_pt(cs.inclusive_jets()),
   /// i.e. not necessarily ordered in pt once subtracted
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::subtracted_jets(...) is deprecated since FastJet 3.0. Use the Subtractor tool (with the BackgroundEstimator series of tools) instead")
   std::vector<PseudoJet> subtracted_jets(const double rho,
                                          const double ptmin=0.0) const;
 
@@ -257,10 +264,12 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::subtracted_jets(...) is deprecated since FastJet 3.0. Use the Subtractor tool (with the BackgroundEstimator series of tools) instead")
   std::vector<PseudoJet> subtracted_jets(const Selector & selector, 
                                          const double ptmin=0.0) const;
 
   /// return a subtracted jet, using area_4vector, given rho
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::subtracted_jet(...) is deprecated since FastJet 3.0. Use the Subtractor tool (with the BackgroundEstimator series of tools) instead")
   PseudoJet subtracted_jet(const PseudoJet & jet,
                            const double rho) const;
 
@@ -272,10 +281,12 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::subtracted_jet(...) is deprecated since FastJet 3.0. Use the Subtractor tool (with the BackgroundEstimator series of tools) instead")
   PseudoJet subtracted_jet(const PseudoJet & jet,
                            const Selector & selector) const;
 
   /// return the subtracted pt, given rho
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::subtracted_pt(...) is deprecated since FastJet 3.0. Use the Subtractor tool (with the BackgroundEstimator series of tools) instead")
   double subtracted_pt(const PseudoJet & jet,
                        const double rho,
 	               bool use_area_4vector=false) const;
@@ -287,6 +298,7 @@ public:
   /// The selector passed as an argument has to have a finite area and
   /// apply jet-by-jet (see the BackgroundEstimator and Subtractor
   /// tools for more generic usages)
+  FASTJET_DEPRECATED_MSG("ClusterSequenceAreaBase::subtracted_pt(...) is deprecated since FastJet 3.0. Use the Subtractor tool (with the BackgroundEstimator series of tools) instead")
   double subtracted_pt(const PseudoJet & jet,
                        const Selector & selector,
 	               bool use_area_4vector=false) const;
@@ -295,6 +307,33 @@ protected:
   /// check the selector is suited for the computations i.e. applies jet by jet and has a finite area
   void _check_selector_good_for_median(const Selector &selector) const;
 
+  // the following set of protected methods are all deprecated. Their
+  // role is simply to hide the corresponding methods (without the
+  // first underscore) from the public interface so that they can be
+  // used internally until all the deprecated methods are removed.
+  // DO NOT USE ANY OF THESE METHODS: THEY ARE DEPRECATED AND WILL BE
+  // REMOVED.
+  virtual void _get_median_rho_and_sigma(const Selector & selector, 
+                                         bool use_area_4vector,
+                                         double & median, double & sigma,
+                                         double & mean_area) const;
+  virtual void _get_median_rho_and_sigma(const std::vector<PseudoJet> & all_jets,
+                                         const Selector & selector, 
+                                         bool use_area_4vector,
+                                         double & median, double & sigma,
+                                         double & mean_area,
+                                         bool all_are_inclusive = false) const;
+  virtual void _get_median_rho_and_sigma(const Selector & selector, 
+                                         bool use_area_4vector,
+                                         double & median, double & sigma) const {
+    double mean_area;
+    _get_median_rho_and_sigma(selector,  use_area_4vector,
+                              median,  sigma, mean_area);
+  }
+  virtual void _parabolic_pt_per_unit_area(double & a, double & b, 
+                                           const Selector & selector, 
+                                           double exclude_above=-1.0, 
+                                           bool use_area_4vector=false) const;
 
 private:
   /// handle warning messages
@@ -304,7 +343,26 @@ private:
 
   /// check the jet algorithm is suitable (and if not issue a warning)
   void _check_jet_alg_good_for_median() const;
-  
+
+  // the following set of private methods are all deprecated. Their
+  // role is simply to hide the corresponding methods (without the
+  // first underscore) from the public interface so that they can be
+  // used internally until all the deprecated methods are removed.
+  // DO NOT USE ANY OF THESE METHODS: THEY ARE DEPRECATED AND WILL BE
+  // REMOVED.
+  double _median_pt_per_unit_area(const Selector & selector) const;
+  double _median_pt_per_unit_area_4vector(const Selector & selector) const;
+  double _median_pt_per_unit_something(const Selector & selector,
+                                       bool use_area_4vector) const;
+  std::vector<PseudoJet> _subtracted_jets(const double rho,
+                                          const double ptmin=0.0) const;
+  PseudoJet _subtracted_jet(const PseudoJet & jet,
+                            const double rho) const;
+  PseudoJet _subtracted_jet(const PseudoJet & jet,
+                            const Selector & selector) const;
+  double _subtracted_pt(const PseudoJet & jet,
+                        const double rho,
+                        bool use_area_4vector=false) const;
 };
 
 

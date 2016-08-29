@@ -77,9 +77,9 @@ namespace siscone_plugin_internal{
 /////////////////////////////////////////////
 // static members declaration              //
 /////////////////////////////////////////////
-std::auto_ptr<SISConePlugin>           SISConePlugin::stored_plugin;
-std::auto_ptr<std::vector<PseudoJet> > SISConePlugin::stored_particles;
-std::auto_ptr<Csiscone>                SISConePlugin::stored_siscone;
+SharedPtr<SISConePlugin>           SISConePlugin::stored_plugin;
+SharedPtr<std::vector<PseudoJet> > SISConePlugin::stored_particles;
+SharedPtr<Csiscone>                SISConePlugin::stored_siscone;
 
 
 /////////////////////////////////////////////

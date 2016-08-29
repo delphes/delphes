@@ -2,7 +2,7 @@
 #define __FASTJET_RECTANGULARGRID_HH__
 
 //FJSTARTHEADER
-// $Id: RectangularGrid.hh 3771 2014-12-22 21:13:22Z salam $
+// $Id: RectangularGrid.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -117,26 +117,30 @@ public:
   /// dummy ctor (will give an unusable grid)
   RectangularGrid();
 
-  virtual int n_tiles() const {return _ntotal;}
+  virtual int n_tiles() const FASTJET_OVERRIDE {return _ntotal;}
 
-  virtual int n_good_tiles() const {return _ngood;}
+  virtual int n_good_tiles() const FASTJET_OVERRIDE {return _ngood;}
 
   // this was being kept inline, but it seems to make little
   // difference whether it is or not (at least on Gavin's mac)
-  virtual int tile_index(const PseudoJet & p) const;
+  virtual int tile_index(const PseudoJet & p) const FASTJET_OVERRIDE;
 
   /// returns whether a given tile is good
   // tested in "issue" 2014-08-08-testing-rect-grid
-  virtual bool tile_is_good(int itile) const {return _tile_selector.worker() ? _is_good[itile] : true;}
+  virtual bool tile_is_good(int itile) const FASTJET_OVERRIDE {
+    return _tile_selector.worker() ? _is_good[itile] : true;
+  }
 
   /// returns the area of tile itile.
-  virtual double tile_area(int /* itile */) const {return mean_tile_area();}
+  virtual double tile_area(int /* itile */) const FASTJET_OVERRIDE {
+    return mean_tile_area();
+  }
 
   /// returns the mean area of tiles.
-  virtual double mean_tile_area() const {return _dphi*_dy;};
+  virtual double mean_tile_area() const FASTJET_OVERRIDE {return _dphi*_dy;};
 
   /// returns a textual description of the grid
-  virtual std::string description() const;
+  virtual std::string description() const FASTJET_OVERRIDE;
   
   /// returns the minimum rapidity extent of the grid
   double rapmin() const {return _ymin;}
@@ -148,7 +152,7 @@ public:
   double dphi()   const {return _dphi;}
 
   /// returns true if the grid is in a suitably initialised state
-  virtual bool is_initialised() const {return _ntotal > 0;}
+  virtual bool is_initialised() const FASTJET_OVERRIDE {return _ntotal > 0;}
 
 private:
   void _setup_grid();

@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: PseudoJet.hh 3566 2014-08-11 15:36:34Z salam $
+// $Id: PseudoJet.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -436,7 +436,9 @@ class PseudoJet {
 
   /// retrieve a pointer to the (const) user information
   const UserInfoBase * user_info_ptr() const{
-    if (!_user_info()) return NULL;
+    // the line below is not needed since the next line would anyway
+    // return NULL in that case
+    //if (!_user_info) return NULL;
     return _user_info.get();
   }
 
@@ -840,6 +842,7 @@ inline bool operator==(const double val, const PseudoJet & jet) {return jet == v
 inline bool operator!=(const PseudoJet & a, const double val)  {return !(a==val);}
 inline bool operator!=( const double val, const PseudoJet & a) {return !(a==val);}
 
+/// returns the 4-vector dot product of a and b
 inline double dot_product(const PseudoJet & a, const PseudoJet & b) {
   return a.E()*b.E() - a.px()*b.px() - a.py()*b.py() - a.pz()*b.pz();
 }
@@ -879,7 +882,29 @@ void sort_indices(std::vector<int> & indices,
 /// associated values would be in increasing order (but don't actually
 /// touch the values vector in the process).
 template<class T> std::vector<T> objects_sorted_by_values(const std::vector<T> & objects, 
-					      const std::vector<double> & values);
+					      const std::vector<double> & values) {
+  //assert(objects.size() == values.size());
+  if (objects.size() != values.size()){
+    throw Error("fastjet::objects_sorted_by_values(...): the size of the 'objects' vector must match the size of the 'values' vector");
+  }
+  
+  // get a vector of indices
+  std::vector<int> indices(values.size());
+  for (size_t i = 0; i < indices.size(); i++) {indices[i] = i;}
+  
+  // sort the indices
+  sort_indices(indices, values);
+  
+  // copy the objects 
+  std::vector<T> objects_sorted(objects.size());
+  
+  // place the objects in the correct order
+  for (size_t i = 0; i < indices.size(); i++) {
+    objects_sorted[i] = objects[indices[i]];
+  }
+
+  return objects_sorted;
+}
 
 /// \if internal_doc
 /// @ingroup internal
@@ -969,7 +994,7 @@ const StructureType & PseudoJet::structure() const{
 // (that is, its structure is compatible with a Transformer::StructureType)
 template<typename TransformerType>
 bool PseudoJet::has_structure_of() const{
-  if (!_structure()) return false;
+  if (!_structure) return false;
 
   return dynamic_cast<const typename TransformerType::StructureType *>(_structure.get()) != 0;
 }
@@ -979,7 +1004,7 @@ bool PseudoJet::has_structure_of() const{
 // NULL is returned if the corresponding type is not met
 template<typename TransformerType>
 const typename TransformerType::StructureType & PseudoJet::structure_of() const{
-  if (!_structure()) 
+  if (!_structure) 
     throw Error("Trying to access the structure of a PseudoJet without an associated structure");
 
   return dynamic_cast<const typename TransformerType::StructureType &>(*_structure);

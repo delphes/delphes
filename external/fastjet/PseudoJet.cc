@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: PseudoJet.cc 3652 2014-09-03 13:31:13Z salam $
+// $Id: PseudoJet.cc 4100 2016-03-15 20:50:22Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -408,11 +408,11 @@ double PseudoJet::delta_phi_to(const PseudoJet & other) const {
 
 string PseudoJet::description() const{
   // the "default" case of a PJ which does not belong to any cluster sequence
-  if (!_structure())
+  if (!_structure)
     return "standard PseudoJet (with no associated clustering information)";
   
   // for all the other cases, the description comes from the structure
-  return _structure()->description();
+  return _structure->description();
 }
 
 
@@ -428,7 +428,7 @@ string PseudoJet::description() const{
 // check whether this PseudoJet has an associated parent
 // ClusterSequence
 bool PseudoJet::has_associated_cluster_sequence() const{
-  return (_structure()) && (_structure->has_associated_cluster_sequence());
+  return (_structure) && (_structure->has_associated_cluster_sequence());
 }
 
 //----------------------------------------------------------------------
@@ -445,7 +445,7 @@ const ClusterSequence* PseudoJet::associated_cluster_sequence() const{
 // check whether this PseudoJet has an associated parent
 // ClusterSequence that is still valid
 bool PseudoJet::has_valid_cluster_sequence() const{
-  return (_structure()) && (_structure->has_valid_cluster_sequence());
+  return (_structure) && (_structure->has_valid_cluster_sequence());
 }
 
 //----------------------------------------------------------------------
@@ -466,9 +466,9 @@ void PseudoJet::set_structure_shared_ptr(const SharedPtr<PseudoJetStructureBase>
 }
 
 //----------------------------------------------------------------------
-// return true if there is some strusture associated with this PseudoJet
+// return true if there is some structure associated with this PseudoJet
 bool PseudoJet::has_structure() const{
-  return _structure();
+  return bool(_structure);
 }
 
 //----------------------------------------------------------------------
@@ -477,8 +477,8 @@ bool PseudoJet::has_structure() const{
 //
 // return NULL if there is no associated structure
 const PseudoJetStructureBase* PseudoJet::structure_ptr() const {
-  if (!_structure()) return NULL;
-  return _structure();
+  //if (!_structure) return NULL;
+  return _structure.get();
 }
   
 //----------------------------------------------------------------------
@@ -492,8 +492,8 @@ const PseudoJetStructureBase* PseudoJet::structure_ptr() const {
 // unless you really need a write access to the PseudoJet's
 // underlying structure.
 PseudoJetStructureBase* PseudoJet::structure_non_const_ptr(){
-  if (!_structure()) return NULL;
-  return _structure();
+  //if (!_structure) return NULL;
+  return _structure.get();
 }
   
 //----------------------------------------------------------------------
@@ -502,9 +502,9 @@ PseudoJetStructureBase* PseudoJet::structure_non_const_ptr(){
 //
 // throw an error if there is no associated structure
 const PseudoJetStructureBase* PseudoJet::validated_structure_ptr() const {
-  if (!_structure()) 
+  if (!_structure) 
     throw Error("Trying to access the structure of a PseudoJet which has no associated structure");
-  return _structure();
+  return _structure.get();
 }
   
 //----------------------------------------------------------------------
@@ -572,7 +572,7 @@ bool PseudoJet::is_inside(const PseudoJet &jet) const{
 //----------------------------------------------------------------------
 // returns true if the PseudoJet has constituents
 bool PseudoJet::has_constituents() const{
-  return (_structure()) && (_structure->has_constituents());
+  return (_structure) && (_structure->has_constituents());
 }
 
 //----------------------------------------------------------------------
@@ -585,7 +585,7 @@ vector<PseudoJet> PseudoJet::constituents() const{
 //----------------------------------------------------------------------
 // returns true if the PseudoJet has support for exclusive subjets
 bool PseudoJet::has_exclusive_subjets() const{
-  return (_structure()) && (_structure->has_exclusive_subjets());
+  return (_structure) && (_structure->has_exclusive_subjets());
 }
 
 //----------------------------------------------------------------------
@@ -669,7 +669,7 @@ double PseudoJet::exclusive_subdmerge_max(int nsub) const {
 // By default a single particle or a jet coming from a
 // ClusterSequence have no pieces and this methos will return false.
 bool PseudoJet::has_pieces() const{
-  return ((_structure()) && (_structure->has_pieces(*this)));
+  return ((_structure) && (_structure->has_pieces(*this)));
 }
 
 // retrieve the pieces that make up the jet. 
@@ -764,35 +764,6 @@ void sort_indices(vector<int> & indices,
   sort(indices.begin(), indices.end(), index_sort_helper);
 }
 
-
-
-//----------------------------------------------------------------------
-/// given a vector of values with a one-to-one correspondence with the
-/// vector of objects, sort objects into an order such that the
-/// associated values would be in increasing order
-template<class T> vector<T>  objects_sorted_by_values(
-                       const vector<T> & objects, 
-		       const vector<double> & values) {
-
-  assert(objects.size() == values.size());
-
-  // get a vector of indices
-  vector<int> indices(values.size());
-  for (size_t i = 0; i < indices.size(); i++) {indices[i] = i;}
-  
-  // sort the indices
-  sort_indices(indices, values);
-  
-  // copy the objects 
-  vector<T> objects_sorted(objects.size());
-  
-  // place the objects in the correct order
-  for (size_t i = 0; i < indices.size(); i++) {
-    objects_sorted[i] = objects[indices[i]];
-  }
-
-  return objects_sorted;
-}
 
 //----------------------------------------------------------------------
 /// return a vector of jets sorted into decreasing kt2

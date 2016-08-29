@@ -2,7 +2,7 @@
 #define __FASTJET_ERROR_HH__
 
 //FJSTARTHEADER
-// $Id: Error.hh 3809 2015-02-20 13:05:13Z soyez $
+// $Id: Error.hh 3807 2015-02-20 11:16:55Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -112,7 +112,6 @@ public:
   /// just add a bit of info to the message and pass it to the base class
   InternalError(const std::string & message_in) : Error(std::string("*** CRITICAL INTERNAL FASTJET ERROR *** CONTACT THE AUTHORS *** ") + message_in){ }
 };
-
 
 FASTJET_END_NAMESPACE
 

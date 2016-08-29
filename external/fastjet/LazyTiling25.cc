@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: LazyTiling25.cc 3808 2015-02-20 11:24:53Z soyez $
+// $Id: LazyTiling25.cc 3807 2015-02-20 11:16:55Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -368,8 +368,8 @@ inline void LazyTiling25::_add_untagged_neighbours_to_tile_union_using_max_info(
     // error. We therefore allow for a margin of security
     double dist = _distance_to_tile(jet, *near_tile) - tile_edge_security_margin;
     // cout << "      max info looked at tile " << *near_tile - &_tiles[0] 
-    // 	 << ", dist = " << dist << " " << (*near_tile)->max_NN_dist
-    // 	 << endl;
+    //      << ", dist = " << dist << " " << (*near_tile)->max_NN_dist
+    //      << " -> diff = " << dist-(*near_tile)->max_NN_dist << endl;
     if (dist > (*near_tile)->max_NN_dist) continue;
 
     // cout << "      max info tagged tile " << *near_tile - &_tiles[0] << endl;
@@ -664,6 +664,33 @@ void LazyTiling25::run() {
 
     int n_near_tiles = 0;
 
+    // GS comment:
+    //
+    // At this stage, we have perforned the clustering in
+    // ClusterSequence and we need to update the NNs. The objects we
+    // deal with are jetA and oldB (the once that have been clustered)
+    // as well as jetB (the result of the clustering)
+    //
+    // There are two types of objects we need to update:
+    //  - find jetB NN
+    //  - update the NN of points which had jetA or jetB as their NN
+    //
+    // Wile we find jetB's NN, browsing relevant tiles near jetB, we
+    // also search for points which had jetA or jetB as their
+    // NN. These are tagged. Then we list the relevant tiles where we
+    // can potentially have points to update (i.e. points which had
+    // jetA and oldB as NN) in the yet untagged relevant tiles near
+    // jetA and oldB.
+    //
+    // DEBUG:
+    // if (jetB != NULL) {
+    //   cout << "jetA = " << jetA->_jets_index << " (tile " << jetA->tile_index << "), "
+    //        << "oldB = " << oldB._jets_index  << " (tile " << oldB. tile_index << "), "
+    //        << "jetB = " << jetB->_jets_index << " (tile " << jetB->tile_index << ")" << endl;
+    // } else {
+    //   cout << "jetA = " << jetA->_jets_index << " (tile " << jetA->tile_index << ")" << endl;
+    // }
+    
     // Initialise jetB's NN distance as well as updating it for other
     // particles. While doing so, examine whether jetA or old jetB was
     // some other particle's NN.
@@ -678,6 +705,10 @@ void LazyTiling25::run() {
     	bool relevant_for_jetB  = dist_to_tile <= jetB->NN_dist;
     	bool relevant_for_near_tile = dist_to_tile <= (*near_tile)->max_NN_dist;
         bool relevant = relevant_for_jetB || relevant_for_near_tile;
+
+        // cout << "  Relevance of tile " << *near_tile - & _tiles[0]
+        //      << " wrt jetB is " << relevant << endl;
+
         if (! relevant) continue;
         // now label this tile as having been considered (so that we 
         // don't go over it again later)
@@ -701,9 +732,11 @@ void LazyTiling25::run() {
     // basically a combination of vicinity of the tiles of the two old
     // and one new jet.
     int n_done_tiles = n_near_tiles;
+    //cout << "Looking at relevant tiles to update for jetA" << endl;
     _add_untagged_neighbours_to_tile_union_using_max_info(jetA, 
        					   tile_union, n_near_tiles);
     if (jetB != NULL) {
+      // cout << "Looking at relevant tiles to update for oldB" << endl;
 	_add_untagged_neighbours_to_tile_union_using_max_info(&oldB,
 							      tile_union,n_near_tiles);
       jetB->label_minheap_update_needed();

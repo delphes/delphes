@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence_CP2DChan.cc 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClusterSequence_CP2DChan.cc 4045 2016-03-03 10:01:55Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -45,8 +45,8 @@ namespace Private {
   class MirrorInfo{
   public:
     int orig, mirror;
-    MirrorInfo(int a, int b) : orig(a), mirror(b) {};
-    MirrorInfo() {};
+    MirrorInfo(int a, int b) : orig(a), mirror(b) {}
+    MirrorInfo() : orig(0), mirror(0) {} // set dummy values to keep static code checkers happy
   };
 
   /// if there is a need for a mirror when looking for closest pairs

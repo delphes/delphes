@@ -20,8 +20,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 123                                                          $//
-// $Date:: 2007-03-01 02:52:16 +0100 (Thu, 01 Mar 2007)                     $//
+// $Revision:: 388                                                          $//
+// $Date:: 2016-03-03 10:42:25 +0100 (Thu, 03 Mar 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "vicinity.h"
@@ -79,6 +79,7 @@ Cvicinity::Cvicinity(vector<Cmomentum> &_particle_list){
 #endif
   VR2 = VR = 0.0;
 
+  ve_list = NULL;
   set_particle_list(_particle_list);
 }
 

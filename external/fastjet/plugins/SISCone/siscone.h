@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 369                                                          $//
-// $Date:: 2014-09-04 16:57:55 +0200 (Thu, 04 Sep 2014)                     $//
+// $Revision:: 401                                                          $//
+// $Date:: 2016-05-19 16:44:37 +0200 (Thu, 19 May 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SISCONE_H__
@@ -159,8 +159,8 @@ class Csiscone : public Cstable_cones, public Csplit_merge{
 /** 
  * return SISCone package name.
  * This is nothing but "SISCone", it is a replacement to the
- * PACKAGE_NAME string defined in config.h and which is not
- * public by default.
+ * SISCONE_PACKAGE_NAME string defined in config.h and which is not
+ * guaranteed to be public.
  * \return the SISCone name as a string
  */
 std::string siscone_package_name();

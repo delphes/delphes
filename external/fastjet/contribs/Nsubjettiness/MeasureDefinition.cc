@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: MeasureDefinition.cc 819 2015-06-12 21:23:24Z jthaler $
+//  $Id: MeasureDefinition.cc 946 2016-06-14 19:11:27Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -523,6 +523,7 @@ std::vector<fastjet::PseudoJet> DefaultMeasure::get_one_pass_axes(int n_jets,
    for (int k = 0; k < n_jets; k++) {
       old_axes[k].set_rap( seedAxes[k].rap() );
       old_axes[k].set_phi( seedAxes[k].phi() );
+      old_axes[k].set_mom( seedAxes[k].modp()  );
    }
    
    // Find new axes by iterating (only one pass here)

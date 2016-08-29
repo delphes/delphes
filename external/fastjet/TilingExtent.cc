@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: TilingExtent.cc 3433 2014-07-23 08:17:03Z salam $
+// $Id: TilingExtent.cc 4034 2016-03-02 00:20:27Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -40,7 +40,11 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 TilingExtent::TilingExtent(ClusterSequence & cs) {
   _determine_rapidity_extent(cs.jets());
 }
-  
+
+TilingExtent::TilingExtent(const vector<PseudoJet> &particles) {
+  _determine_rapidity_extent(particles);
+}
+
 void TilingExtent::_determine_rapidity_extent(const vector<PseudoJet> & particles) {
   // have a binning of rapidity that goes from -nrap to nrap
   // in bins of size 1; the left and right-most bins include

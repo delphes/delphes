@@ -1,6 +1,6 @@
 
 //FJSTARTHEADER
-// $Id: base.hh 4047 2016-03-03 13:21:49Z soyez $
+// $Id: deprecated.hh 4098 2016-03-15 16:38:22Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -29,27 +29,22 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#ifndef __FASTJET_FASTJET_BASE_HH__
-#define __FASTJET_FASTJET_BASE_HH__
+#ifndef __FASTJET_FASTJET_DEPRECATED_HH__
+#define __FASTJET_FASTJET_DEPRECATED_HH__
 
 #include "fastjet/config.h"
 
-/// \namespace fastjet
-/// the FastJet namespace
-/// 
-/// all the fastjet-related material is put under that namespace
-
-// define this for easier readability (and obfuscation?) in
-// a range of places
-#define FASTJET_BEGIN_NAMESPACE namespace fastjet {
-#define FASTJET_END_NAMESPACE   }
-
-// define a macro to mark virtual function in derived classes as
-// overriding the base-class definition
-#ifdef FASTJET_HAVE_OVERRIDE
-#define FASTJET_OVERRIDE  override
+// define a deprecation macro based on the capabilities of the compiler
+// (as determined at configure time).
+#if defined(FASTJET_HAVE_CXX14_DEPRECATED)
+#define FASTJET_DEPRECATED               [[deprecated]]
+#define FASTJET_DEPRECATED_MSG(message)  [[deprecated(message)]]
+#elif defined(FASTJET_HAVE_GNUCXX_DEPRECATED)
+#define FASTJET_DEPRECATED               __attribute__((__deprecated__))
+#define FASTJET_DEPRECATED_MSG(message)  __attribute__((__deprecated__))
 #else
-#define FASTJET_OVERRIDE  
+#define FASTJET_DEPRECATED               
+#define FASTJET_DEPRECATED_MSG(message) 
 #endif
 
-#endif // __FASTJET_FASTJET_BASE_HH__
+#endif // __FASTJET_FASTJET_DEPRECATED_HH__

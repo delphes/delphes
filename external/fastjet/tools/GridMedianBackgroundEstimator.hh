@@ -2,7 +2,7 @@
 #define __GRID_MEDIAN_BACKGROUND_ESTIMATOR_HH__
 
 //FJSTARTHEADER
-// $Id: GridMedianBackgroundEstimator.hh 3778 2014-12-24 09:28:09Z salam $
+// $Id: GridMedianBackgroundEstimator.hh 3969 2015-09-21 08:57:59Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -193,7 +193,7 @@ public:
   /// Returns true if this background estimator has support for
   /// determination of rho_m.
   ///
-  /// Note that support for sigma_m is automatic is one has sigma and
+  /// Note that support for sigma_m is automatic if one has sigma and
   /// rho_m support.
   bool has_rho_m() const {return _enable_rho_m;}
 

@@ -1306,7 +1306,8 @@ tmp/external/fastjet/plugins/GridJet/GridJetPlugin.$(ObjSuf): \
 tmp/external/fastjet/plugins/Jade/JadePlugin.$(ObjSuf): \
 	external/fastjet/plugins/Jade/JadePlugin.$(SrcSuf) \
 	external/fastjet/ClusterSequence.hh \
-	external/fastjet/NNH.hh
+	external/fastjet/NNH.hh \
+	external/fastjet/NNFJN2Plain.hh
 tmp/external/fastjet/plugins/NestedDefs/NestedDefsPlugin.$(ObjSuf): \
 	external/fastjet/plugins/NestedDefs/NestedDefsPlugin.$(SrcSuf) \
 	external/fastjet/ClusterSequence.hh
@@ -1348,7 +1349,8 @@ tmp/external/fastjet/tools/CASubJetTagger.$(ObjSuf): \
 tmp/external/fastjet/tools/Filter.$(ObjSuf): \
 	external/fastjet/tools/Filter.$(SrcSuf) \
 	external/fastjet/tools/Filter.hh \
-	external/fastjet/tools/Recluster.hh
+	external/fastjet/tools/Recluster.hh \
+	external/fastjet/tools/Subtractor.hh
 tmp/external/fastjet/tools/GridMedianBackgroundEstimator.$(ObjSuf): \
 	external/fastjet/tools/GridMedianBackgroundEstimator.$(SrcSuf) \
 	external/fastjet/tools/GridMedianBackgroundEstimator.hh
@@ -1681,13 +1683,15 @@ external/fastjet/ClusterSequence.hh: \
 	external/fastjet/SharedPtr.hh \
 	external/fastjet/LimitedWarning.hh \
 	external/fastjet/FunctionOfPseudoJet.hh \
-	external/fastjet/ClusterSequenceStructure.hh
+	external/fastjet/ClusterSequenceStructure.hh \
+	external/fastjet/internal/deprecated.hh
 	@touch $@
 
 external/fastjet/internal/ClosestPair2D.hh: \
 	external/fastjet/internal/ClosestPair2DBase.hh \
 	external/fastjet/internal/SearchTree.hh \
-	external/fastjet/internal/MinHeap.hh
+	external/fastjet/internal/MinHeap.hh \
+	external/fastjet/SharedPtr.hh
 	@touch $@
 
 modules/FastJetGridMedianEstimator.h: \
@@ -1720,6 +1724,7 @@ external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh: \
 external/fastjet/JetDefinition.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/PseudoJet.hh \
+	external/fastjet/internal/deprecated.hh \
 	external/fastjet/ClusterSequence.hh
 	@touch $@
 
@@ -1925,7 +1930,8 @@ external/fastjet/GhostedAreaSpec.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/internal/BasicRandom.hh \
 	external/fastjet/Selector.hh \
-	external/fastjet/LimitedWarning.hh
+	external/fastjet/LimitedWarning.hh \
+	external/fastjet/internal/deprecated.hh
 	@touch $@
 
 external/fastjet/internal/Dnn4piCylinder.hh: \
@@ -1990,7 +1996,8 @@ external/PUPPI/PuppiContainer.hh: \
 external/fastjet/RangeDefinition.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
-	external/fastjet/LimitedWarning.hh
+	external/fastjet/LimitedWarning.hh \
+	external/fastjet/internal/deprecated.hh
 	@touch $@
 
 external/fastjet/PseudoJetStructureBase.hh: \
@@ -2000,7 +2007,8 @@ external/fastjet/PseudoJetStructureBase.hh: \
 external/fastjet/ClusterSequenceAreaBase.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/LimitedWarning.hh \
-	external/fastjet/Selector.hh
+	external/fastjet/Selector.hh \
+	external/fastjet/internal/deprecated.hh
 	@touch $@
 
 modules/PhotonConversions.h: \

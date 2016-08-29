@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceStructure.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClusterSequenceStructure.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -75,7 +75,9 @@ public:
   virtual ~ClusterSequenceStructure();
 
   /// description
-  virtual std::string description() const{ return "PseudoJet with an associated ClusterSequence"; }
+  virtual std::string description() const FASTJET_OVERRIDE{
+    return "PseudoJet with an associated ClusterSequence";
+  }
 
   //-------------------------------------------------------------
   /// @name Direct access to the associated ClusterSequence object.
@@ -84,23 +86,23 @@ public:
   //\{
   //-------------------------------------------------------------
   /// returns true if there is an associated ClusterSequence
-  virtual bool has_associated_cluster_sequence() const{ return true;}
+  virtual bool has_associated_cluster_sequence() const FASTJET_OVERRIDE{ return true;}
 
   /// get a (const) pointer to the parent ClusterSequence (NULL if
   /// inexistent)
-  virtual const ClusterSequence* associated_cluster_sequence() const;
+  virtual const ClusterSequence* associated_cluster_sequence() const FASTJET_OVERRIDE;
   
   /// returns true if there is a valid associated ClusterSequence
-  virtual bool has_valid_cluster_sequence() const;
+  virtual bool has_valid_cluster_sequence() const FASTJET_OVERRIDE;
 
   /// if the jet has a valid associated cluster sequence then return a
   /// pointer to it; otherwise throw an error
-  virtual const ClusterSequence * validated_cs() const;
+  virtual const ClusterSequence * validated_cs() const FASTJET_OVERRIDE;
 
 #ifndef __FJCORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
-  virtual const ClusterSequenceAreaBase * validated_csab() const;
+  virtual const ClusterSequenceAreaBase * validated_csab() const FASTJET_OVERRIDE;
 #endif  // __FJCORE__
 
   /// set the associated csw
@@ -124,7 +126,7 @@ public:
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual bool has_partner(const PseudoJet &reference, PseudoJet &partner) const;
+  virtual bool has_partner(const PseudoJet &reference, PseudoJet &partner) const FASTJET_OVERRIDE;
 
   /// check if it has been recombined with another PseudoJet in which
   /// case, return its child through the argument. Otherwise, 'child'
@@ -132,7 +134,7 @@ public:
   /// 
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual bool has_child(const PseudoJet &reference, PseudoJet &child) const;
+  virtual bool has_child(const PseudoJet &reference, PseudoJet &child) const FASTJET_OVERRIDE;
 
   /// check if it is the product of a recombination, in which case
   /// return the 2 parents through the 'parent1' and 'parent2'
@@ -140,7 +142,7 @@ public:
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual bool has_parents(const PseudoJet &reference, PseudoJet &parent1, PseudoJet &parent2) const;
+  virtual bool has_parents(const PseudoJet &reference, PseudoJet &parent1, PseudoJet &parent2) const FASTJET_OVERRIDE;
 
   /// check if the reference PseudoJet is contained in the second one
   /// passed as argument.
@@ -150,26 +152,26 @@ public:
   ///
   /// false is returned if the 2 PseudoJet do not belong the same
   /// ClusterSequence
-  virtual bool object_in_jet(const PseudoJet &reference, const PseudoJet &jet) const;
+  virtual bool object_in_jet(const PseudoJet &reference, const PseudoJet &jet) const FASTJET_OVERRIDE;
 
   /// return true if the structure supports constituents. 
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual bool has_constituents() const;
+  virtual bool has_constituents() const FASTJET_OVERRIDE;
 
   /// retrieve the constituents. 
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual std::vector<PseudoJet> constituents(const PseudoJet &reference) const;
+  virtual std::vector<PseudoJet> constituents(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
 
   /// return true if the structure supports exclusive_subjets. 
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual bool has_exclusive_subjets() const;
+  virtual bool has_exclusive_subjets() const FASTJET_OVERRIDE;
 
   /// return a vector of all subjets of the current jet (in the sense
   /// of the exclusive algorithm) that would be obtained when running
@@ -182,7 +184,7 @@ public:
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual std::vector<PseudoJet> exclusive_subjets(const PseudoJet &reference, const double & dcut) const;
+  virtual std::vector<PseudoJet> exclusive_subjets(const PseudoJet &reference, const double & dcut) const FASTJET_OVERRIDE;
 
   /// return the size of exclusive_subjets(...); still n ln n with same
   /// coefficient, but marginally more efficient than manually taking
@@ -190,7 +192,7 @@ public:
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual int n_exclusive_subjets(const PseudoJet &reference, const double & dcut) const;
+  virtual int n_exclusive_subjets(const PseudoJet &reference, const double & dcut) const FASTJET_OVERRIDE;
 
   /// return the list of subjets obtained by unclustering the supplied
   /// jet down to nsub subjets (or all constituents if there are fewer
@@ -200,14 +202,14 @@ public:
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual std::vector<PseudoJet> exclusive_subjets_up_to (const PseudoJet &reference, int nsub) const;
+  virtual std::vector<PseudoJet> exclusive_subjets_up_to (const PseudoJet &reference, int nsub) const FASTJET_OVERRIDE;
 
   /// return the dij that was present in the merging nsub+1 -> nsub 
   /// subjets inside this jet.
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual double exclusive_subdmerge(const PseudoJet &reference, int nsub) const;
+  virtual double exclusive_subdmerge(const PseudoJet &reference, int nsub) const FASTJET_OVERRIDE;
 
   /// return the maximum dij that occurred in the whole event at the
   /// stage that the nsub+1 -> nsub merge of subjets occurred inside 
@@ -215,7 +217,7 @@ public:
   ///
   /// an Error is thrown if this PseudoJet has no currently valid
   /// associated ClusterSequence
-  virtual double exclusive_subdmerge_max(const PseudoJet &reference, int nsub) const;
+  virtual double exclusive_subdmerge_max(const PseudoJet &reference, int nsub) const FASTJET_OVERRIDE;
 
 
   //-------------------------------------------------------------------
@@ -223,7 +225,7 @@ public:
   //-------------------------------------------------------------------
   /// by convention, a jet associated with a ClusterSequence will have
   /// its parents as pieces
-  virtual bool has_pieces(const PseudoJet &reference) const;
+  virtual bool has_pieces(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// by convention, a jet associated with a ClusterSequence will have
   /// its parents as pieces
@@ -234,7 +236,7 @@ public:
   /// Note that to answer that question, we need to access the cluster
   /// sequence. If the cluster sequence has gone out of scope, an
   /// error will be thrown
-  virtual std::vector<PseudoJet> pieces(const PseudoJet &reference) const;
+  virtual std::vector<PseudoJet> pieces(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
 
   // the following ones require a computation of the area in the
@@ -243,24 +245,24 @@ public:
 #ifndef __FJCORE__
 
   /// check if it has a defined area
-  virtual bool has_area() const;
+  virtual bool has_area() const FASTJET_OVERRIDE;
 
   /// return the jet (scalar) area.
   /// throws an Error if there is no support for area in the parent CS
-  virtual double area(const PseudoJet &reference) const;
+  virtual double area(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// return the error (uncertainty) associated with the determination
   /// of the area of this jet.
   /// throws an Error if there is no support for area in the parent CS
-  virtual double area_error(const PseudoJet &reference) const;
+  virtual double area_error(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// return the jet 4-vector area.
   /// throws an Error if there is no support for area in the parent CS
-  virtual PseudoJet area_4vector(const PseudoJet &reference) const;
+  virtual PseudoJet area_4vector(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// true if this jet is made exclusively of ghosts.
   /// throws an Error if there is no support for area in the parent CS
-  virtual bool is_pure_ghost(const PseudoJet &reference) const;
+  virtual bool is_pure_ghost(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
 #endif  // __FJCORE__
   //\} --- end of jet structure -------------------------------------

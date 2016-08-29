@@ -20,18 +20,11 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 371                                                          $//
-// $Date:: 2014-09-09 10:05:32 +0200 (Tue, 09 Sep 2014)                     $//
+// $Revision:: 403                                                          $//
+// $Date:: 2016-05-19 16:52:05 +0200 (Thu, 19 May 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
-//#ifdef HAVE_CONFIG_H
 #include "config.h"
-//#else
-//#define PACKAGE_NAME "SISCone"
-//#define VERSION "3.0.0"
-//#warning "No config.h file available, using preset values"
-//#endif
-
 #include "ranlux.h"
 #include "momentum.h"
 #include "defines.h"
@@ -253,6 +246,8 @@ void Csiscone::_initialise_if_needed(){
 
   // print the banner
   if (_banner_ostr != 0){
+    ios::fmtflags flags_to_restore(_banner_ostr->flags());
+
     (*_banner_ostr) << "#ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo" << endl;
     (*_banner_ostr) << "#                    SISCone   version " << setw(28) << left << siscone_version() << "o" << endl;
     (*_banner_ostr) << "#              http://projects.hepforge.org/siscone                o" << endl;
@@ -268,6 +263,7 @@ void Csiscone::_initialise_if_needed(){
     (*_banner_ostr) << endl;
 
     _banner_ostr->flush();
+    _banner_ostr->flags(flags_to_restore);
   }
 }
 
@@ -278,12 +274,12 @@ void Csiscone::_initialise_if_needed(){
 /* 
  * return SISCone package name.
  * This is nothing but "SISCone", it is a replacement to the
- * PACKAGE_NAME string defined in config.h and which is not
- * public by default.
+ * SISCONE_PACKAGE_NAME string defined in config.h and which is not
+ * guaranteed to be public.
  * return the SISCone name as a string
  */
 string siscone_package_name(){
-  return PACKAGE_NAME;
+  return SISCONE_PACKAGE_NAME;
 }
 
 /* 
@@ -292,7 +288,7 @@ string siscone_package_name(){
  *        (alpha, beta, devel) to mention stability status
  */
 string siscone_version(){
-  return VERSION;
+  return SISCONE_VERSION;
 }
 
 }

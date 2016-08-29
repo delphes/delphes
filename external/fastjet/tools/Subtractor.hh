@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: Subtractor.hh 3670 2014-09-08 14:17:59Z soyez $
+// $Id: Subtractor.hh 3970 2015-09-21 10:31:17Z salam $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -202,7 +202,7 @@ protected:
   // that's not allowed in an include file.
   static const double _invalid_rho;
 
-  mutable LimitedWarning _unused_rho_m_warning;
+  static LimitedWarning _unused_rho_m_warning;
 };
 
 FASTJET_END_NAMESPACE

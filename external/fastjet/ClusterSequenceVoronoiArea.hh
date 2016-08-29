@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceVoronoiArea.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClusterSequenceVoronoiArea.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -64,19 +64,19 @@ public:
   ~ClusterSequenceVoronoiArea();
 
   /// return the area associated with the given jet
-  virtual inline double area(const PseudoJet & jet) const {
+  virtual inline double area(const PseudoJet & jet) const FASTJET_OVERRIDE {
     return _voronoi_area[jet.cluster_hist_index()];}
 
   /// return a 4-vector area associated with the given jet -- strictly
   /// this is not the exact 4-vector area, but rather an approximation
   /// made of sums of centres of all Voronoi cells in jet, each
   /// contributing with a normalisation equal to the area of the cell
-  virtual inline PseudoJet area_4vector(const PseudoJet & jet) const {
+  virtual inline PseudoJet area_4vector(const PseudoJet & jet) const FASTJET_OVERRIDE {
     return _voronoi_area_4vector[jet.cluster_hist_index()];}
 
   /// return the error of the area associated with the given jet
   /// (0 by definition for a voronoi area)
-  virtual inline double area_error(const PseudoJet & /*jet*/) const {
+  virtual inline double area_error(const PseudoJet & /*jet*/) const FASTJET_OVERRIDE {
     return 0.0;}
 
   /// passive area calculator -- to be defined in the .cc file (it will do

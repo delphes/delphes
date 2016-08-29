@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClosestPair2D.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClosestPair2D.hh 4059 2016-03-03 20:49:48Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -37,6 +37,7 @@
 #include "fastjet/internal/ClosestPair2DBase.hh"
 #include "fastjet/internal/SearchTree.hh"
 #include "fastjet/internal/MinHeap.hh"
+#include "fastjet/SharedPtr.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -133,8 +134,8 @@ private:
   typedef Tree::const_circulator  const_circulator;
 
 
-  triplet<std::auto_ptr<Tree> >  _trees;
-  std::auto_ptr<MinHeap> _heap;
+  triplet<SharedPtr<Tree> >  _trees;
+  SharedPtr<MinHeap>     _heap;
   std::vector<Point>     _points;
   std::stack<Point *>    _available_points;
 
