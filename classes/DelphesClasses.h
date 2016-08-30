@@ -48,8 +48,8 @@ public:
 
   Long64_t Number; // event number
 
-  Float_t ReadTime;
-  Float_t ProcTime;
+  Float_t ReadTime; // read time
+  Float_t ProcTime; // processing time
 
   ClassDef(Event, 1)
 };
@@ -146,12 +146,12 @@ public:
   Float_t Py; // particle momentum vector (y component) | hepevt.phep[number][1]
   Float_t Pz; // particle momentum vector (z component) | hepevt.phep[number][2]
 
-  Float_t D0;
-  Float_t DZ;
-  Float_t P;
-  Float_t PT;
-  Float_t CtgTheta;
-  Float_t Phi;
+  Float_t D0; // particle transverse impact parameter
+  Float_t DZ; // particle longitudinal impact parameter
+  Float_t P; // particle momentum
+  Float_t PT; // particle transverse momentum
+  Float_t CtgTheta; // particle cotangent of theta
+  Float_t Phi; // particle azimuthal angle
   Float_t Eta; // particle pseudorapidity
   Float_t Rapidity; // particle rapidity
 
@@ -173,18 +173,19 @@ public:
 class Vertex: public SortableObject
 {
 public:
-  Float_t T; // vertex position (t component)
+
   Float_t X; // vertex position (x component)
   Float_t Y; // vertex position (y component)
   Float_t Z; // vertex position (z component)
+  Float_t T; // vertex position (t component)
 
-  Double_t ErrorX;
-  Double_t ErrorY;
-  Double_t ErrorZ;
-  Double_t ErrorT;
+  Double_t ErrorX; // vertex position error (x component)
+  Double_t ErrorY; // vertex position error (y component)
+  Double_t ErrorZ; // vertex position error (z component)
+  Double_t ErrorT; // vertex position error (t component)
 
-  Int_t Index;
-  Int_t NDF;
+  Int_t Index; // vertex index
+  Int_t NDF; // number of degrees of freedom
   Double_t Sigma;
   Double_t SumPT2;
   Double_t BTVSumPT2;
@@ -256,20 +257,18 @@ public:
 
   Float_t E; // photon energy
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // particle arrival time of flight
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
   TRefArray Particles; // references to generated particles
 
-  // Isolation variables
-
-  Float_t IsolationVar;
-  Float_t IsolationVarRhoCorr;
-  Float_t SumPtCharged;
-  Float_t SumPtNeutral;
-  Float_t SumPtChargedPU;
-  Float_t SumPt;
+  Float_t IsolationVar; // isolation variable
+  Float_t IsolationVarRhoCorr; // isolation variable
+  Float_t SumPtCharged; // isolation variable
+  Float_t SumPtNeutral; // isolation variable
+  Float_t SumPtChargedPU; // isolation variable
+  Float_t SumPt; // isolation variable
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -289,7 +288,7 @@ public:
   Float_t Eta; // electron pseudorapidity
   Float_t Phi; // electron azimuthal angle
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // particle arrival time of flight
 
   Int_t Charge; // electron charge
 
@@ -297,14 +296,12 @@ public:
 
   TRef Particle; // reference to generated particle
 
-  // Isolation variables
-
-  Float_t IsolationVar;
-  Float_t IsolationVarRhoCorr;
-  Float_t SumPtCharged;
-  Float_t SumPtNeutral;
-  Float_t SumPtChargedPU;
-  Float_t SumPt;
+  Float_t IsolationVar; // isolation variable
+  Float_t IsolationVarRhoCorr; // isolation variable
+  Float_t SumPtCharged; // isolation variable
+  Float_t SumPtNeutral; // isolation variable
+  Float_t SumPtChargedPU; // isolation variable
+  Float_t SumPt; // isolation variable
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -324,20 +321,18 @@ public:
   Float_t Eta; // muon pseudorapidity
   Float_t Phi; // muon azimuthal angle
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // particle arrival time of flight
 
   Int_t Charge; // muon charge
 
   TRef Particle; // reference to generated particle
 
-   // Isolation variables
-
-  Float_t IsolationVar;
-  Float_t IsolationVarRhoCorr;
-  Float_t SumPtCharged;
-  Float_t SumPtNeutral;
-  Float_t SumPtChargedPU;
-  Float_t SumPt;
+  Float_t IsolationVar; // isolation variable
+  Float_t IsolationVarRhoCorr; // isolation variable
+  Float_t SumPtCharged; // isolation variable
+  Float_t SumPtNeutral; // isolation variable
+  Float_t SumPtChargedPU; // isolation variable
+  Float_t SumPt; // isolation variable
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -364,13 +359,13 @@ public:
   Float_t DeltaEta;  // jet radius in pseudorapidity
   Float_t DeltaPhi;  // jet radius in azimuthal angle
 
-  UInt_t Flavor;
-  UInt_t FlavorAlgo;
-  UInt_t FlavorPhys;
+  UInt_t Flavor; // jet flavor
+  UInt_t FlavorAlgo; // jet flavor
+  UInt_t FlavorPhys; // jet flavor
 
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
-  UInt_t BTagAlgo;
-  UInt_t BTagPhys;
+  UInt_t BTagAlgo; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagPhys; // 0 or 1 for a jet that has been tagged as containing a heavy quark
 
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
@@ -425,37 +420,37 @@ public:
   Float_t X; // track vertex position (x component)
   Float_t Y; // track vertex position (y component)
   Float_t Z; // track vertex position (z component)
-  Float_t T; // track vertex position (z component)
+  Float_t T; // track vertex position (t component)
 
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
-  Float_t TOuter; // track position (z component) at the tracker edge
+  Float_t TOuter; // track position (t component) at the tracker edge
 
   Float_t L; // track path length
-  Float_t ErrorT; // error on the time measurement
+  Float_t ErrorT; // time measurement error
 
-  Float_t D0;     // track signed transverse impact parameter
-  Float_t ErrorD0;    // signed error on the track signed transverse impact parameter
+  Float_t D0; // track transverse impact parameter
+  Float_t ErrorD0; // track transverse impact parameter error
 
-  Float_t DZ; // track transverse momentum
-  Float_t ErrorDZ; // track transverse momentum error
+  Float_t DZ; // track longitudinal impact parameter
+  Float_t ErrorDZ; // track longitudinal impact parameter error
 
-  Float_t P; // track transverse momentum
-  Float_t ErrorP; // track transverse momentum error
+  Float_t P; // track momentum
+  Float_t ErrorP; // track momentum error
 
   Float_t PT; // track transverse momentum
   Float_t ErrorPT; // track transverse momentum error
 
-  Float_t CtgTheta; // track transverse momentum
-  Float_t ErrorCtgTheta; // track transverse momentum error
+  Float_t CtgTheta; // track cotangent of theta
+  Float_t ErrorCtgTheta; // track cotangent of theta error
 
   Float_t Phi; // track azimuthal angle
-  Float_t ErrorPhi; // track azimuthal angle
+  Float_t ErrorPhi; // track azimuthal angle error
 
-  Float_t Xd;      // X coordinate of point of closest approach to vertex
-  Float_t Yd;      // Y coordinate of point of closest approach to vertex
-  Float_t Zd;      // Z coordinate of point of closest approach to vertex
+  Float_t Xd; // X coordinate of point of closest approach to vertex
+  Float_t Yd; // Y coordinate of point of closest approach to vertex
+  Float_t Zd; // Z coordinate of point of closest approach to vertex
 
   TRef Particle; // reference to generated particle
 
