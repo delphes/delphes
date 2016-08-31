@@ -29,6 +29,16 @@
 #include "TMatrixT.h"
 #include "TVector3.h"
 
+#include <utility>
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <string>
+
+using namespace std;
+
 static const Double_t mm  = 1.;
 static const Double_t m = 1000.*mm;
 static const Double_t ns  = 1.;
@@ -75,7 +85,7 @@ void VertexSorter::Init()
  
   fOutputArray = ExportArray(GetString("OutputArray", "clusters"));
 
-  fMethod = GetString ("Method", "BTV");
+  fMethod = GetString("Method", "BTV");
 }
 
 //------------------------------------------------------------------------------
@@ -87,21 +97,24 @@ void VertexSorter::Finish()
 }
 
 //------------------------------------------------------------------------------
-//
-Bool_t VertexSorter::secondDescending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
+
+static Bool_t secondDescending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second > pair1.second);
 }
-Bool_t VertexSorter::secondAscending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
+
+static Bool_t secondAscending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second < pair1.second);
 }
 
+//------------------------------------------------------------------------------
+
 void VertexSorter::Process()
 {
   Candidate *candidate, *jetCandidate, *beamSpotCandidate;
-  unordered_map<Int_t, UInt_t> clusterIDToIndex;
-  unordered_map<Int_t, Double_t> clusterIDToSumPT2;
+  map<Int_t, UInt_t> clusterIDToIndex;
+  map<Int_t, Double_t> clusterIDToSumPT2;
   vector<pair<Int_t, Double_t> > sortedClusterIDs;
 
   for (Int_t iCluster = 0; iCluster < fInputArray->GetEntries (); iCluster++)
@@ -111,7 +124,7 @@ void VertexSorter::Process()
       clusterIDToSumPT2[cluster.ClusterIndex] = 0.0;
     }
 
-  if (fMethod == "BTV")
+  if(fMethod == "BTV")
     {
       if (!fJetInputArray)
         {

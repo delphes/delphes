@@ -27,6 +27,16 @@
 #include "TMatrixT.h"
 #include "TVector3.h"
 
+#include <utility>
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <string>
+
+using namespace std;
+
 static const Double_t mm  = 1.;
 static const Double_t m = 1000.*mm;
 static const Double_t ns  = 1.;
@@ -72,24 +82,24 @@ void VertexFinder::Finish()
 }
 
 //------------------------------------------------------------------------------
-//
-Bool_t VertexFinder::secondAscending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
+
+static Bool_t secondAscending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second < pair1.second);
 }
 
-Bool_t VertexFinder::secondDescending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
+static Bool_t secondDescending (pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
   return (pair0.second > pair1.second);
 }
+
+//------------------------------------------------------------------------------
 
 void VertexFinder::Process()
 {
   Candidate *candidate;
 
-////////////////////////////////////////////////////////////////////////////////
-// Clear the track and cluster maps before starting
-////////////////////////////////////////////////////////////////////////////////
+  // Clear the track and cluster maps before starting
   trackIDToDouble.clear ();
   trackIDToInt.clear ();
   trackIDToBool.clear ();
@@ -98,18 +108,12 @@ void VertexFinder::Process()
   clusterIDToBool.clear ();
   trackPT.clear ();
   clusterSumPT2.clear ();
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// Create the initial cluster seeds
-////////////////////////////////////////////////////////////////////////////////
+  // Create the initial cluster seeds
   createSeeds ();
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// In order of descending seed pt, grow each cluster. If a cluster ends up with
-// fewer than MinNDF tracks, release the tracks for other clusters to claim.
-////////////////////////////////////////////////////////////////////////////////
+  // In order of descending seed pt, grow each cluster. If a cluster ends up with
+  // fewer than MinNDF tracks, release the tracks for other clusters to claim.
   sort (clusterSumPT2.begin (), clusterSumPT2.end (), secondDescending);
   for (vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin (); cluster != clusterSumPT2.end (); cluster++)
     {
@@ -137,11 +141,8 @@ void VertexFinder::Process()
       else
         trackIDToBool[clusterIDToInt.at (cluster->first).at ("seed")]["claimed"] = true;
     }
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// Add tracks to the output array after updating their ClusterIndex.
-////////////////////////////////////////////////////////////////////////////////
+  // Add tracks to the output array after updating their ClusterIndex.
   fItInputArray->Reset ();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
     {
@@ -150,12 +151,9 @@ void VertexFinder::Process()
       candidate->ClusterIndex = trackIDToInt.at (candidate->GetUniqueID ()).at ("clusterIndex");
       fOutputArray->Add(candidate);
     }
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// Add clusters with at least MinNDF tracks to the output array in order of
-// descending sum(pt**2).
-////////////////////////////////////////////////////////////////////////////////
+  // Add clusters with at least MinNDF tracks to the output array in order of
+  // descending sum(pt**2).
   clusterSumPT2.clear ();
   for (map<UInt_t, map<string, Int_t> >::const_iterator cluster = clusterIDToInt.begin (); cluster != clusterIDToInt.end (); cluster++)
   {
@@ -180,18 +178,16 @@ void VertexFinder::Process()
 
     fVertexOutputArray->Add(candidate);
   }
-////////////////////////////////////////////////////////////////////////////////
 }
 
-void
-VertexFinder::createSeeds ()
+//------------------------------------------------------------------------------
+
+void VertexFinder::createSeeds ()
 {
   Candidate *candidate;
   UInt_t clusterIndex = 0, maxSeeds = 0;
 
-////////////////////////////////////////////////////////////////////////////////
-// Loop over all tracks, initializing some variables.
-////////////////////////////////////////////////////////////////////////////////
+  // Loop over all tracks, initializing some variables.
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
     {
@@ -212,12 +208,9 @@ VertexFinder::createSeeds ()
 
       trackPT.push_back (make_pair (candidate->GetUniqueID (), candidate->Momentum.Pt ()));
     }
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// Sort tracks by pt and leave only the SeedMinPT highest pt ones in the
-// trackPT vector.
-////////////////////////////////////////////////////////////////////////////////
+  // Sort tracks by pt and leave only the SeedMinPT highest pt ones in the
+  // trackPT vector.
   sort (trackPT.begin (), trackPT.end (), secondDescending);
   for (vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin (); track != trackPT.end (); track++, maxSeeds++)
     {
@@ -232,21 +225,18 @@ VertexFinder::createSeeds ()
     {
       trackPT.erase (trackPT.begin () + maxSeeds, trackPT.end ());
     }
-////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-// Create the seeds from the SeedMinPT highest pt tracks.
-////////////////////////////////////////////////////////////////////////////////
+  // Create the seeds from the SeedMinPT highest pt tracks.
   for (vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin (); track != trackPT.end (); track++, clusterIndex++)
     {
       addTrackToCluster (track->first, clusterIndex);
       clusterSumPT2.push_back (make_pair (clusterIndex, track->second * track->second));
     }
-////////////////////////////////////////////////////////////////////////////////
 }
 
-void
-VertexFinder::growCluster (const UInt_t clusterIndex)
+//------------------------------------------------------------------------------
+
+void VertexFinder::growCluster (const UInt_t clusterIndex)
 {
   Bool_t done = false;
   UInt_t nearestID;
@@ -255,10 +245,8 @@ VertexFinder::growCluster (const UInt_t clusterIndex)
   vector<UInt_t> nearTracks;
   nearTracks.clear ();
 
-////////////////////////////////////////////////////////////////////////////////
-// Grow the cluster until there are no more tracks within Sigma standard
-// deviations of the cluster.
-////////////////////////////////////////////////////////////////////////////////
+  // Grow the cluster until there are no more tracks within Sigma standard
+  // deviations of the cluster.
   while (!done)
     {
       done = true;
@@ -322,17 +310,18 @@ VertexFinder::growCluster (const UInt_t clusterIndex)
           addTrackToCluster (nearestID, clusterIndex);
         }
     }
-////////////////////////////////////////////////////////////////////////////////
 }
 
-Double_t
-VertexFinder::weight (const UInt_t trackID)
+//------------------------------------------------------------------------------
+
+Double_t VertexFinder::weight (const UInt_t trackID)
 {
   return ((trackIDToDouble.at (trackID).at ("pt") / (trackIDToDouble.at (trackID).at ("ept") * trackIDToDouble.at (trackID).at ("ez"))) * (trackIDToDouble.at (trackID).at ("pt") / (trackIDToDouble.at (trackID).at ("ept") * trackIDToDouble.at (trackID).at ("ez"))));
 }
 
-void
-VertexFinder::removeTrackFromCluster (const UInt_t trackID, const UInt_t clusterID)
+//------------------------------------------------------------------------------
+
+void VertexFinder::removeTrackFromCluster (const UInt_t trackID, const UInt_t clusterID)
 {
   Double_t wz = weight (trackID);
 
@@ -347,8 +336,9 @@ VertexFinder::removeTrackFromCluster (const UInt_t trackID, const UInt_t cluster
   clusterIDToDouble[clusterID]["sumPT2"] -= trackIDToDouble.at (trackID).at ("pt") * trackIDToDouble.at (trackID).at ("pt");
 }
 
-void
-VertexFinder::addTrackToCluster (const UInt_t trackID, const UInt_t clusterID)
+//------------------------------------------------------------------------------
+
+void VertexFinder::addTrackToCluster (const UInt_t trackID, const UInt_t clusterID)
 {
   Double_t wz = weight (trackID);
 

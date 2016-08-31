@@ -12,21 +12,12 @@
 */
 
 #include "classes/DelphesModule.h"
-#include "classes/DelphesClasses.h"
-#include <utility>
-#include <algorithm>
-#include <stdexcept>
-#include <iostream>
-#include <vector>
+
 #include <string>
-#include <unordered_map>
-
-
-using namespace std;
 
 class TObjArray;
+class TIterator;
 class Candidate;
-class TVector3;
 
 class VertexSorter: public DelphesModule
 {
@@ -38,9 +29,6 @@ public:
   void Init();
   void Process();
   void Finish();
-
-  static Bool_t secondDescending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
-  static Bool_t secondAscending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
 
 private:
 
@@ -57,7 +45,7 @@ private:
 
   TObjArray *fOutputArray;
 
-  string fMethod;
+  std::string fMethod;
 
   ClassDef(VertexSorter, 1)
 };

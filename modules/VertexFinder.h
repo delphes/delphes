@@ -11,19 +11,13 @@
 
 
 #include "classes/DelphesModule.h"
-#include "classes/DelphesClasses.h"
-#include <utility>
-#include <algorithm>
-#include <stdexcept>
-#include <iostream>
-#include <vector>
-#include <unordered_map>
 
-using namespace std;
+#include <string>
+#include <vector>
+#include <map>
 
 class TObjArray;
-class Candidate;
-class TVector3;
+class TIterator;
 
 class VertexFinder: public DelphesModule
 {
@@ -35,9 +29,6 @@ public:
   void Init();
   void Process();
   void Finish();
-
-  static Bool_t secondDescending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
-  static Bool_t secondAscending (pair<UInt_t, Double_t>, pair<UInt_t, Double_t>);
 
 private:
 
@@ -60,15 +51,15 @@ private:
   TObjArray *fOutputArray;
   TObjArray *fVertexOutputArray;
 
-  map<UInt_t, map<string, Double_t> > trackIDToDouble;
-  map<UInt_t, map<string, Int_t> > trackIDToInt;
-  map<UInt_t, map<string, Bool_t> > trackIDToBool;
+  std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
+  std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;
+  std::map<UInt_t, std::map<std::string, Bool_t> > trackIDToBool;
 
-  map<UInt_t, map<string, Double_t> > clusterIDToDouble;
-  map<UInt_t, map<string, Int_t> > clusterIDToInt;
-  map<UInt_t, map<string, Bool_t> > clusterIDToBool;
-  vector<pair<UInt_t, Double_t> > trackPT;
-  vector<pair<UInt_t, Double_t> > clusterSumPT2;
+  std::map<UInt_t, std::map<std::string, Double_t> > clusterIDToDouble;
+  std::map<UInt_t, std::map<std::string, Int_t> > clusterIDToInt;
+  std::map<UInt_t, std::map<std::string, Bool_t> > clusterIDToBool;
+  std::vector<std::pair<UInt_t, Double_t> > trackPT;
+  std::vector<std::pair<UInt_t, Double_t> > clusterSumPT2;
 
   ClassDef(VertexFinder, 1)
 };

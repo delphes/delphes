@@ -27,6 +27,14 @@
 #include "TMatrixT.h"
 #include "TVector3.h"
 
+#include <utility>
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
 static const Double_t mm  = 1.;
 static const Double_t m = 1000.*mm;
 static const Double_t ns  = 1.;
