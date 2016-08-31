@@ -7,7 +7,7 @@
 - added DelphesROOT reader
 - added TrackSmearing and BeamSpotFilter modules
 - completed TimeSmearing module
-- added vertex clustering algorithm in 3/4D, VertexFinder and VertexFinder4D (special thanks to A. Hart and L. Gray)
+- added preliminary version of vertex clustering algorithm in 3/4D, VertexFinder and VertexFinder4D (special thanks to A. Hart and L. Gray)
 - fixed muon efficiency at high energy
 - replaced gaussian smearing with lognormal in MomentumSmearing module
 
