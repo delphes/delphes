@@ -41,13 +41,51 @@ static const Double_t ns  = 1.;
 static const Double_t s = 1.e+9 *ns;
 static const Double_t c_light   = 2.99792458e+8 * m/s;
 
+struct track_t
+{
+  double z;      // z-coordinate at point of closest approach to the beamline
+  double t;      // t-coordinate at point of closest approach to the beamline
+  double dz2;    // square of the error of z(pca)
+  double dtz;    // covariance of z-t
+  double dt2;    // square of the error of t(pca)
+  Candidate *tt; // a pointer to the Candidate Track
+  double Z;      // Z[i]   for DA clustering
+  double pi;     // track weight
+  double pt;
+  double eta;
+  double phi;
+};
 
-namespace {
-  bool recTrackLessZ1(const VertexFinderDA4D::track_t & tk1,
-                      const VertexFinderDA4D::track_t & tk2)
-  {
-    return tk1.z < tk2.z;
-  }
+struct vertex_t
+{
+  double z;
+  double t;
+  double pk;     // vertex weight for "constrained" clustering
+  // --- temporary numbers, used during update
+  double ei;
+  double sw;
+  double swz;
+  double swt;
+  double se;
+  // ---for Tc
+  double swE;
+  double Tc;
+};
+
+static bool split(double beta, std::vector<track_t> &tks, std::vector<vertex_t> &y);
+static double update1(double beta, std::vector<track_t> &tks, std::vector<vertex_t> &y);
+static double update2(double beta, std::vector<track_t> &tks, std::vector<vertex_t> &y, double &rho0, const double dzCutOff);
+static void dump(const double beta, const std::vector<vertex_t> & y, const std::vector<track_t> & tks);
+static bool merge(std::vector<vertex_t> &);
+static bool merge(std::vector<vertex_t> &, double &);
+static bool purge(std::vector<vertex_t> &, std::vector<track_t> & , double &, const double, const double);
+static void splitAll(std::vector<vertex_t> &y);
+static double beta0(const double betamax, std::vector<track_t> &tks, std::vector<vertex_t> &y, const double coolingFactor);
+static double Eik(const track_t &t, const vertex_t &k);
+
+static bool recTrackLessZ1(const track_t & tk1, const track_t & tk2)
+{
+  return tk1.z < tk2.z;
 }
 
 using namespace std;
@@ -213,7 +251,7 @@ void VertexFinderDA4D::Process()
      ivtx++;
 
      if (fVerbose){
-	   std::cout << "x,y,z";
+     std::cout << "x,y,z";
        std::cout << ",t";
        std::cout << "=" << candidate->Position.X()/10.0 <<" " << candidate->Position.Y()/10.0 << " " <<  candidate->Position.Z()/10.0;
        std::cout << " " << candidate->Position.T()/c_light;
@@ -241,8 +279,7 @@ void VertexFinderDA4D::Process()
 
 //------------------------------------------------------------------------------
 
-
-void VertexFinderDA4D::clusterize(const TObjArray & tracks, TObjArray & clusters)
+void VertexFinderDA4D::clusterize(const TObjArray &tracks, TObjArray &clusters)
 {
   if(fVerbose) {
     cout << "###################################################" << endl;
@@ -293,7 +330,6 @@ void VertexFinderDA4D::clusterize(const TObjArray & tracks, TObjArray & clusters
 
 }
 
-
 //------------------------------------------------------------------------------
 
 vector< Candidate* > VertexFinderDA4D::vertices()
@@ -302,7 +338,60 @@ vector< Candidate* > VertexFinderDA4D::vertices()
   UInt_t clusterIndex = 0;
   vector< Candidate* > clusters;
 
-  vector<track_t> tks = fill();
+  vector<track_t> tks;
+  track_t tr;
+  Double_t z, dz, t, l, dt, d0, d0error;
+
+  // loop over input tracks
+  fItInputArray->Reset();
+  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  {
+    //TBC everything in cm
+    z = candidate->DZ/10;
+    tr.z = z;
+    dz = candidate->ErrorDZ/10;
+    tr.dz2 = dz*dz          // track error
+    //TBC: beamspot size induced error, take 0 for now.
+    // + (std::pow(beamspot.BeamWidthX()*cos(phi),2.)+std::pow(beamspot.BeamWidthY()*sin(phi),2.))/std::pow(tantheta,2.) // beam-width induced
+    + fVertexSpaceSize*fVertexSpaceSize; // intrinsic vertex size, safer for outliers and short lived decays
+
+    // TBC: the time is in ns for now TBC
+    //t = candidate->Position.T()/c_light;
+    t = candidate->InitialPosition.T()/c_light;
+    l = candidate->L/c_light;
+    double pt = candidate->Momentum.Pt();
+    double eta = candidate->Momentum.Eta();
+    double phi = candidate->Momentum.Phi();
+
+    tr.pt = pt;
+    tr.eta = eta;
+    tr.phi = phi;
+    tr.t = t; //
+    tr.dtz = 0.;
+    dt = candidate->ErrorT/c_light;
+    tr.dt2 = dt*dt + fVertexTimeSize*fVertexTimeSize;   // the ~injected~ timing error plus a small minimum vertex size in time
+    if(fD0CutOff>0)
+    {
+
+      d0 = TMath::Abs(candidate->D0)/10.0;
+      d0error = candidate->ErrorD0/10.0;
+
+      tr.pi=1./(1.+exp((d0*d0)/(d0error*d0error) - fD0CutOff*fD0CutOff));  // reduce weight for high ip tracks
+
+    }
+    else
+    {
+      tr.pi=1.;
+    }
+    tr.tt=&(*candidate);
+    tr.Z=1.;
+
+    // TBC now putting track selection here (> fPTMin)
+    if(tr.pi > 1e-3 && tr.pt > fMinPT)
+    {
+      tks.push_back(tr);
+    }
+  }
 
   //print out input tracks
 
@@ -340,15 +429,15 @@ vector< Candidate* > VertexFinderDA4D::vertices()
   int niter=0;      // number of iterations
 
   // estimate first critical temperature
-  double beta=beta0(fBetaMax, tks, y);
-  niter=0; while((update(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){ }
+  double beta=beta0(fBetaMax, tks, y, fCoolingFactor);
+  niter=0; while((update1(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){ }
 
   // annealing loop, stop when T<Tmin  (i.e. beta>1/Tmin)
   while(beta<fBetaMax){
 
     if(fUseTc){
-      update(beta, tks,y);
-      while(merge(y,beta)){update(beta, tks,y);}
+      update1(beta, tks,y);
+      while(merge(y,beta)){update1(beta, tks,y);}
       split(beta, tks,y);
       beta=beta/fCoolingFactor;
     }else{
@@ -357,30 +446,30 @@ vector< Candidate* > VertexFinderDA4D::vertices()
     }
 
    // make sure we are not too far from equilibrium before cooling further
-   niter=0; while((update(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){ }
+   niter=0; while((update1(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){ }
 
   }
 
   if(fUseTc){
     // last round of splitting, make sure no critical clusters are left
-    update(beta, tks,y);
-    while(merge(y,beta)){update(beta, tks,y);}
+    update1(beta, tks,y);
+    while(merge(y,beta)){update1(beta, tks,y);}
     unsigned int ntry=0;
     while( split(beta, tks,y) && (ntry++<10) ){
       niter=0;
-      while((update(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){}
+      while((update1(beta, tks,y)>1.e-6)  && (niter++ < fMaxIterations)){}
       merge(y,beta);
-      update(beta, tks,y);
+      update1(beta, tks,y);
     }
   }else{
     // merge collapsed clusters
-    while(merge(y,beta)){update(beta, tks,y);}
+    while(merge(y,beta)){update1(beta, tks,y);}
     if(fVerbose ){ cout << "dump after 1st merging " << endl;  dump(beta,y,tks);}
   }
 
   // switch on outlier rejection
   rho0=1./nt; for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){ k->pk =1.; }  // democratic
-  niter=0; while((update(beta, tks,y,rho0) > 1.e-8)  && (niter++ < fMaxIterations)){  }
+  niter=0; while((update2(beta, tks,y,rho0, fDzCutOff) > 1.e-8)  && (niter++ < fMaxIterations)){  }
   if(fVerbose  ){ cout << "rho0=" << rho0 <<   " niter=" << niter <<  endl; dump(beta,y,tks);}
 
 
@@ -391,17 +480,17 @@ vector< Candidate* > VertexFinderDA4D::vertices()
 
   // continue from freeze-out to Tstop (=1) without splitting, eliminate insignificant vertices
   while(beta<=fBetaStop){
-    while(purge(y,tks,rho0, beta)){
-      niter=0; while((update(beta, tks, y, rho0) > 1.e-6)  && (niter++ < fMaxIterations)){  }
+    while(purge(y,tks,rho0, beta, fDzCutOff)){
+      niter=0; while((update2(beta, tks, y, rho0, fDzCutOff) > 1.e-6)  && (niter++ < fMaxIterations)){  }
     }
     beta/=fCoolingFactor;
-    niter=0; while((update(beta, tks, y, rho0) > 1.e-6)  && (niter++ < fMaxIterations)){  }
+    niter=0; while((update2(beta, tks, y, rho0, fDzCutOff) > 1.e-6)  && (niter++ < fMaxIterations)){  }
   }
 
 
 //   // new, one last round of cleaning at T=Tstop
 //   while(purge(y,tks,rho0, beta)){
-//     niter=0; while((update(beta, tks,y,rho0) > 1.e-6)  && (niter++ < fMaxIterations)){  }
+//     niter=0; while((update2(beta, tks,y,rho0, fDzCutOff) > 1.e-6)  && (niter++ < fMaxIterations)){  }
 //   }
 
 
@@ -439,8 +528,8 @@ vector< Candidate* > VertexFinderDA4D::vertices()
     for(unsigned int i=0; i<nt; i++){
       const double invdt = 1.0/std::sqrt(tks[i].dt2);
       if(tks[i].Z>0){
-	double p = k->pk * exp(-beta*Eik(tks[i],*k)) / tks[i].Z;
-	if( (tks[i].pi>0) && ( p > 0.5 ) ){
+  double p = k->pk * exp(-beta*Eik(tks[i],*k)) / tks[i].Z;
+  if( (tks[i].pi>0) && ( p > 0.5 ) ){
           //std::cout << "pushing back " << i << ' ' << tks[i].tt << std::endl;
           //vertexTracks.push_back(*(tks[i].tt)); tks[i].Z=0;
 
@@ -481,89 +570,22 @@ vector< Candidate* > VertexFinderDA4D::vertices()
 
 //------------------------------------------------------------------------------
 
-vector<VertexFinderDA4D::track_t>
-VertexFinderDA4D::fill()const{
-
-  Candidate *candidate;
-  track_t tr;
-  Double_t z, dz, t, l, dt, d0, d0error;
-
-  // prepare track data for clustering
-  vector< track_t > tks;
-
-  // loop over input tracks
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
-  {
-     //TBC everything in cm
-     z = candidate->DZ/10;
-     tr.z = z;
-     dz = candidate->ErrorDZ/10;
-     tr.dz2 = dz*dz          // track error
-   // TBC: beamspot size induced error, take 0 for now.
-   //   + (std::pow(beamspot.BeamWidthX()*cos(phi),2.)+std::pow(beamspot.BeamWidthY()*sin(phi),2.))/std::pow(tantheta,2.) // beam-width induced
-      + fVertexSpaceSize*fVertexSpaceSize;                     // intrinsic vertex size, safer for outliers and short lived decays
-
-     // TBC: the time is in ns for now TBC
-     //t = candidate->Position.T()/c_light;
-     t = candidate->InitialPosition.T()/c_light;
-     l = candidate->L/c_light;
-
-     double pt = candidate->Momentum.Pt();
-     double eta = candidate->Momentum.Eta();
-     double phi = candidate->Momentum.Phi();
-
-     tr.pt = pt;
-     tr.eta = eta;
-     tr.phi = phi;
-     tr.t = t; //
-     tr.dtz = 0.;
-     dt = candidate->ErrorT/c_light;
-     tr.dt2 = dt*dt + fVertexTimeSize*fVertexTimeSize;   // the ~injected~ timing error plus a small minimum vertex size in time
-     if (fD0CutOff>0){
-
-     d0 = TMath::Abs(candidate->D0)/10.0;
-     d0error = candidate->ErrorD0/10.0;
-
-     tr.pi=1./(1.+exp((d0*d0)/(d0error*d0error) - fD0CutOff*fD0CutOff));  // reduce weight for high ip tracks
-
-    }
-    else{
-      tr.pi=1.;
-    }
-    tr.tt=&(*candidate);
-    tr.Z=1.;
-
-    // TBC now putting track selection here (> fPTMin)
-    if( tr.pi > 1e-3 && tr.pt > fMinPT) {
-      tks.push_back(tr);
-    }
-
-  }
-
-  return tks;
-}
-
-
-
-
-//------------------------------------------------------------------------------
-
-double VertexFinderDA4D::Eik(const track_t & t, const vertex_t &k ) const {
+static double Eik(const track_t & t, const vertex_t &k)
+{
   return std::pow(t.z-k.z,2.)/t.dz2 + std::pow(t.t - k.t,2.)/t.dt2;
 }
 
-//--------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-void VertexFinderDA4D::dump(const double beta, const vector<vertex_t> & y, const vector<track_t> & tks0)const{
-
+static void dump(const double beta, const vector<vertex_t> &y, const vector<track_t> &tks0)
+{
   // copy and sort for nicer printout
   vector<track_t> tks;
   for(vector<track_t>::const_iterator t=tks0.begin(); t!=tks0.end(); t++){tks.push_back(*t); }
   std::stable_sort(tks.begin(), tks.end(), recTrackLessZ1);
 
   cout << "-----DAClusterizerInZT::dump ----" << endl;
-  cout << " beta=" << beta << "   betamax= " << fBetaMax << endl;
+  cout << " beta=" << beta << endl;
   cout << "                                                               z= ";
   cout.precision(4);
   for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
@@ -586,50 +608,42 @@ void VertexFinderDA4D::dump(const double beta, const vector<vertex_t> & y, const
   }
   cout  << endl;
 
-  if(fVerbose){
-    double E=0, F=0;
-    cout << endl;
-    cout << "----       z +/- dz        t +/- dt        ip +/-dip       pt    phi  eta    weights  ----" << endl;
-    cout.precision(4);
-    for(unsigned int i=0; i<tks.size(); i++){
-      if (tks[i].Z>0){	F-=log(tks[i].Z)/beta;}
-      double tz= tks[i].z;
-      double tt= tks[i].t;
-      //cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2)
-      //     << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
+  double E=0, F=0;
+  cout << endl;
+  cout << "----       z +/- dz        t +/- dt        ip +/-dip       pt    phi  eta    weights  ----" << endl;
+  cout.precision(4);
+  for(unsigned int i=0; i<tks.size(); i++){
+    if (tks[i].Z>0){  F-=log(tks[i].Z)/beta;}
+    double tz= tks[i].z;
+    double tt= tks[i].t;
+    //cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2)
+    //     << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
 
-      double sump=0.;
-      for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
-	if((tks[i].pi>0)&&(tks[i].Z>0)){
-	  //double p=pik(beta,tks[i],*k);
-	  double p=k->pk * std::exp(-beta*Eik(tks[i],*k)) / tks[i].Z;
-	  if( p > 0.0001){
-	    //cout <<  setw (8) <<  setprecision(3) << p;
-	  }else{
-	    cout << "    .   ";
-	  }
-	  E+=p*Eik(tks[i],*k);
-	  sump+=p;
-	}else{
-	    cout << "        ";
-	}
+    double sump=0.;
+    for(vector<vertex_t>::const_iterator k=y.begin(); k!=y.end(); k++){
+    if((tks[i].pi>0)&&(tks[i].Z>0)){
+    //double p=pik(beta,tks[i],*k);
+    double p=k->pk * std::exp(-beta*Eik(tks[i],*k)) / tks[i].Z;
+    if( p > 0.0001){
+      //cout <<  setw (8) <<  setprecision(3) << p;
+    }else{
+      cout << "    .   ";
+    }
+    E+=p*Eik(tks[i],*k);
+    sump+=p;
+  }else{
+      cout << "        ";
+  }
       }
       cout << endl;
     }
     cout << endl << "T=" << 1/beta  << " E=" << E << " n="<< y.size() << "  F= " << F <<  endl <<  "----------" << endl;
-  }
 }
-
-
-
-
 
 //------------------------------------------------------------------------------
 
-
-double VertexFinderDA4D::update( double beta,
-                                  vector<track_t> & tks,
-                                  vector<vertex_t> & y ) const {
+static double update1(double beta, vector<track_t> &tks, vector<vertex_t> &y)
+{
   //update weights and vertex positions
   // mass constrained annealing without noise
   // returns the squared sum of changes of vertex positions
@@ -660,12 +674,12 @@ double VertexFinderDA4D::update( double beta,
       sumpi += tks[i].pi;
       // accumulate weighted z and weights for vertex update
       for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); ++k){
-	k->se  += tks[i].pi* k->ei / Zi;
-	const double w = k->pk * tks[i].pi* k->ei / ( Zi * ( tks[i].dz2 * tks[i].dt2 ) );
-	k->sw  += w;
-	k->swz += w * tks[i].z;
+  k->se  += tks[i].pi* k->ei / Zi;
+  const double w = k->pk * tks[i].pi* k->ei / ( Zi * ( tks[i].dz2 * tks[i].dt2 ) );
+  k->sw  += w;
+  k->swz += w * tks[i].z;
         k->swt += w * tks[i].t;
-	k->swE += w * Eik(tks[i],*k);
+  k->swE += w * Eik(tks[i],*k);
       }
     }else{
       sumpi += tks[i].pi;
@@ -686,7 +700,7 @@ double VertexFinderDA4D::update( double beta,
       k->t  = tnew;
       k->Tc = 2.*k->swE/k->sw;
     }else{
-      if(fVerbose){cout << " a cluster melted away ?  pk=" << k->pk <<  " sumw=" << k->sw <<  endl;}
+      // cout << " a cluster melted away ?  pk=" << k->pk <<  " sumw=" << k->sw <<  endl
       k->Tc=-1;
     }
 
@@ -699,10 +713,8 @@ double VertexFinderDA4D::update( double beta,
 
 //------------------------------------------------------------------------------
 
-double VertexFinderDA4D::update( double beta,
-                                  vector<track_t> & tks,
-                                  vector<vertex_t> & y,
-                                  double & rho0 ) const {
+static double update2(double beta, vector<track_t> &tks, vector<vertex_t> &y, double &rho0, double dzCutOff)
+{
   // MVF style, no more vertex weights, update tracks weights and vertex positions, with noise
   // returns the squared sum of changes of vertex positions
 
@@ -719,7 +731,7 @@ double VertexFinderDA4D::update( double beta,
   for(unsigned int i=0; i<nt; i++){
 
     // update pik and Zi and Ti
-    double Zi = rho0*std::exp(-beta*(fDzCutOff*fDzCutOff));// cut-off (eventually add finite size in time)
+    double Zi = rho0*std::exp(-beta*(dzCutOff*dzCutOff));// cut-off (eventually add finite size in time)
     //double Ti = 0.; // dt0*std::exp(-beta*fDtCutOff);
     for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){
       k->ei = std::exp(-beta*Eik(tks[i],*k));// cache exponential for one track at a time
@@ -731,12 +743,12 @@ double VertexFinderDA4D::update( double beta,
     if (tks[i].Z>0){
        // accumulate weighted z and weights for vertex update
       for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){
-	k->se += tks[i].pi* k->ei / Zi;
-	double w = k->pk * tks[i].pi * k->ei /( Zi * ( tks[i].dz2 * tks[i].dt2 ) );
-	k->sw  += w;
-	k->swz += w * tks[i].z;
+  k->se += tks[i].pi* k->ei / Zi;
+  double w = k->pk * tks[i].pi * k->ei /( Zi * ( tks[i].dz2 * tks[i].dt2 ) );
+  k->sw  += w;
+  k->swz += w * tks[i].z;
         k->swt += w * tks[i].t;
-	k->swE += w * Eik(tks[i],*k);
+  k->swE += w * Eik(tks[i],*k);
       }
     }
 
@@ -753,7 +765,7 @@ double VertexFinderDA4D::update( double beta,
       k->t   = tnew;
       k->Tc  = 2*k->swE/k->sw;
     }else{
-      if(fVerbose){cout << " a cluster melted away ?  pk=" << k->pk <<  " sumw=" << k->sw <<  endl;}
+      // cout << " a cluster melted away ?  pk=" << k->pk <<  " sumw=" << k->sw <<  endl;
       k->Tc = 0;
     }
 
@@ -765,7 +777,8 @@ double VertexFinderDA4D::update( double beta,
 
 //------------------------------------------------------------------------------
 
-bool VertexFinderDA4D::merge(vector<vertex_t> & y)const{
+static bool merge(vector<vertex_t> &y)
+{
   // merge clusters that collapsed or never separated, return true if vertices were merged, false otherwise
 
   if(y.size()<2)  return false;
@@ -793,7 +806,8 @@ bool VertexFinderDA4D::merge(vector<vertex_t> & y)const{
 
 //------------------------------------------------------------------------------
 
-bool VertexFinderDA4D::merge(vector<vertex_t> & y, double & beta)const{
+static bool merge(vector<vertex_t> &y, double &beta)
+{
   // merge clusters that collapsed or never separated,
   // only merge if the estimated critical temperature of the merged vertex is below the current temperature
   // return true if vertices were merged, false otherwise
@@ -808,19 +822,19 @@ bool VertexFinderDA4D::merge(vector<vertex_t> & y, double & beta)const{
       double Tc=2*swE/(k->sw+(k+1)->sw);
 
       if(Tc*beta<1){
-	if(rho>0){
-	  k->z = ( k->pk * k->z + (k+1)->z * (k+1)->pk)/rho;
+  if(rho>0){
+    k->z = ( k->pk * k->z + (k+1)->z * (k+1)->pk)/rho;
           k->t = ( k->pk * k->t + (k+1)->t * (k+1)->pk)/rho;
-	}else{
-	  k->z = 0.5*(k->z + (k+1)->z);
+  }else{
+    k->z = 0.5*(k->z + (k+1)->z);
           k->t = 0.5*(k->t + (k+1)->t);
-	}
-	k->pk  = rho;
-	k->sw += (k+1)->sw;
-	k->swE = swE;
-	k->Tc  = Tc;
-	y.erase(k+1);
-	return true;
+  }
+  k->pk  = rho;
+  k->sw += (k+1)->sw;
+  k->swE = swE;
+  k->Tc  = Tc;
+  y.erase(k+1);
+  return true;
       }
     }
   }
@@ -830,7 +844,8 @@ bool VertexFinderDA4D::merge(vector<vertex_t> & y, double & beta)const{
 
 //------------------------------------------------------------------------------
 
-bool VertexFinderDA4D::purge(vector<vertex_t> & y, vector<track_t> & tks, double & rho0, const double beta)const{
+static bool purge(vector<vertex_t> &y, vector<track_t> &tks, double & rho0, const double beta, const double dzCutOff)
+{
   // eliminate clusters with only one significant/unique track
   if(y.size()<2)  return false;
 
@@ -840,12 +855,12 @@ bool VertexFinderDA4D::purge(vector<vertex_t> & y, vector<track_t> & tks, double
   for(vector<vertex_t>::iterator k=y.begin(); k!=y.end(); k++){
     int nUnique=0;
     double sump=0;
-    double pmax=k->pk/(k->pk+rho0*exp(-beta*fDzCutOff*fDzCutOff));
+    double pmax=k->pk/(k->pk+rho0*exp(-beta*dzCutOff*dzCutOff));
     for(unsigned int i=0; i<nt; i++){
       if(tks[i].Z > 0){
-	double p = k->pk * std::exp(-beta*Eik(tks[i],*k)) / tks[i].Z ;
-	sump+=p;
-	if( (p > 0.9*pmax) && (tks[i].pi>0) ){ nUnique++; }
+  double p = k->pk * std::exp(-beta*Eik(tks[i],*k)) / tks[i].Z ;
+  sump+=p;
+  if( (p > 0.9*pmax) && (tks[i].pi>0) ){ nUnique++; }
       }
     }
 
@@ -856,8 +871,7 @@ bool VertexFinderDA4D::purge(vector<vertex_t> & y, vector<track_t> & tks, double
   }
 
   if(k0!=y.end()){
-    if(fVerbose){cout << "eliminating prototype at " << k0->z << "," << k0->t
-                      << " with sump=" << sumpmin << endl;}
+    //cout << "eliminating prototype at " << k0->z << "," << k0->t << " with sump=" << sumpmin << endl;
     //rho0+=k0->pk;
     y.erase(k0);
     return true;
@@ -868,9 +882,8 @@ bool VertexFinderDA4D::purge(vector<vertex_t> & y, vector<track_t> & tks, double
 
 //------------------------------------------------------------------------------
 
-double VertexFinderDA4D::beta0( double betamax,
-                                 vector<track_t> & tks,
-                                 vector<vertex_t> & y ) const {
+static double beta0(double betamax, vector<track_t> &tks, vector<vertex_t> &y, const double coolingFactor)
+{
 
   double T0=0;  // max Tc for beta=0
   // estimate critical temperature from beta=0 (T=inf)
@@ -905,24 +918,23 @@ double VertexFinderDA4D::beta0( double betamax,
   }// vertex loop (normally there should be only one vertex at beta=0)
 
   if (T0>1./betamax){
-    return betamax/pow(fCoolingFactor, int(std::log(T0*betamax)/std::log(fCoolingFactor))-1 );
+    return betamax/pow(coolingFactor, int(std::log(T0*betamax)/std::log(coolingFactor))-1 );
   }else{
     // ensure at least one annealing step
-    return betamax/fCoolingFactor;
+    return betamax/coolingFactor;
   }
 }
 
 //------------------------------------------------------------------------------
 
-bool VertexFinderDA4D::split( double beta,
-                               vector<track_t> & tks,
-                               vector<vertex_t> & y) const {
+static bool split(double beta, vector<track_t> &tks, vector<vertex_t> &y)
+{
   // split only critical vertices (Tc >~ T=1/beta   <==>   beta*Tc>~1)
   // an update must have been made just before doing this (same beta, no merging)
   // returns true if at least one cluster was split
 
-  constexpr double epsilon=1e-3;      // split all single vertices by 10 um
-  bool split=false;
+  const double epsilon = 1e-3; // split all single vertices by 10 um
+  bool split = false;
 
   // avoid left-right biases by splitting highest Tc first
 
@@ -942,14 +954,14 @@ bool VertexFinderDA4D::split( double beta,
     //double sumpi=0;
     for(unsigned int i=0; i<tks.size(); i++){
       if(tks[i].Z>0){
-	//sumpi+=tks[i].pi;
-	double p=y[ik].pk * exp(-beta*Eik(tks[i],y[ik])) / tks[i].Z*tks[i].pi;
-	double w=p/(tks[i].dz2 * tks[i].dt2);
-	if(tks[i].z < y[ik].z){
-	  p1+=p; z1+=w*tks[i].z; t1+=w*tks[i].t; w1+=w;
-	}else{
-	  p2+=p; z2+=w*tks[i].z; t2+=w*tks[i].t; w2+=w;
-	}
+  //sumpi+=tks[i].pi;
+  double p=y[ik].pk * exp(-beta*Eik(tks[i],y[ik])) / tks[i].Z*tks[i].pi;
+  double w=p/(tks[i].dz2 * tks[i].dt2);
+  if(tks[i].z < y[ik].z){
+    p1+=p; z1+=w*tks[i].z; t1+=w*tks[i].t; w1+=w;
+  }else{
+    p2+=p; z2+=w*tks[i].z; t2+=w*tks[i].t; w2+=w;
+  }
       }
     }
     if(w1>0){  z1=z1/w1; t1=t1/w1;} else{ z1=y[ik].z-epsilon; t1=y[ik].t-epsilon; }
@@ -973,7 +985,7 @@ bool VertexFinderDA4D::split( double beta,
 
      // adjust remaining pointers
       for(unsigned int jc=ic; jc<critical.size(); jc++){
-	if (critical[jc].second>ik) {critical[jc].second++;}
+        if (critical[jc].second>ik) {critical[jc].second++;}
       }
     }
   }
@@ -984,12 +996,13 @@ bool VertexFinderDA4D::split( double beta,
 
 //------------------------------------------------------------------------------
 
-void VertexFinderDA4D::splitAll( vector<vertex_t> & y ) const {
+void splitAll(vector<vertex_t> &y)
+{
 
 
-  constexpr double epsilon=1e-3;      // split all single vertices by 10 um
-  constexpr double zsep=2*epsilon;    // split vertices that are isolated by at least zsep (vertices that haven't collapsed)
-  constexpr double tsep=2*epsilon;    // check t as well
+  const double epsilon=1e-3;      // split all single vertices by 10 um
+  const double zsep=2*epsilon;    // split vertices that are isolated by at least zsep (vertices that haven't collapsed)
+  const double tsep=2*epsilon;    // check t as well
 
   vector<vertex_t> y1;
 

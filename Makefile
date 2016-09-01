@@ -1668,8 +1668,7 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclVar.$(ObjSuf)
 
 modules/VertexFinderDA4D.h: \
-	classes/DelphesModule.h \
-	classes/DelphesClasses.h
+	classes/DelphesModule.h
 	@touch $@
 
 modules/TrackSmearing.h: \
@@ -1941,8 +1940,7 @@ external/fastjet/internal/Dnn4piCylinder.hh: \
 	@touch $@
 
 modules/VertexSorter.h: \
-	classes/DelphesModule.h \
-	classes/DelphesClasses.h
+	classes/DelphesModule.h
 	@touch $@
 
 modules/Delphes.h: \
@@ -1950,8 +1948,7 @@ modules/Delphes.h: \
 	@touch $@
 
 modules/VertexFinder.h: \
-	classes/DelphesModule.h \
-	classes/DelphesClasses.h
+	classes/DelphesModule.h
 	@touch $@
 
 modules/UniqueObjectFinder.h: \

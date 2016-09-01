@@ -114,8 +114,11 @@ void VertexSorter::Process()
 {
   Candidate *candidate, *jetCandidate, *beamSpotCandidate;
   map<Int_t, UInt_t> clusterIDToIndex;
+  map<Int_t, UInt_t>::const_iterator itClusterIDToIndex;
   map<Int_t, Double_t> clusterIDToSumPT2;
+  map<Int_t, Double_t>::const_iterator itClusterIDToSumPT2;
   vector<pair<Int_t, Double_t> > sortedClusterIDs;
+  vector<pair<Int_t, Double_t> >::const_iterator itSortedClusterIDs;
 
   for (Int_t iCluster = 0; iCluster < fInputArray->GetEntries (); iCluster++)
     {
@@ -160,8 +163,8 @@ void VertexSorter::Process()
           clusterIDToSumPT2.at (candidate->ClusterIndex) += candidate->Momentum.Pt () * candidate->Momentum.Pt ();
         }
 
-      for (const auto &clusterID : clusterIDToSumPT2)
-        sortedClusterIDs.push_back (make_pair (clusterID.first, clusterID.second));
+      for (itClusterIDToSumPT2 = clusterIDToSumPT2.begin(); itClusterIDToSumPT2 != clusterIDToSumPT2.end(); ++itClusterIDToSumPT2)
+        sortedClusterIDs.push_back (make_pair (itClusterIDToSumPT2->first, itClusterIDToSumPT2->second));
       sort (sortedClusterIDs.begin (), sortedClusterIDs.end (), secondDescending);
     }
   else if (fMethod == "GenClosest")
@@ -192,16 +195,16 @@ void VertexSorter::Process()
         {
           if (candidate->IsPU)
             continue;
-          for (const auto &clusterID : clusterIDToIndex)
+          for (itClusterIDToIndex = clusterIDToIndex.begin(); itClusterIDToIndex != clusterIDToIndex.end(); ++itClusterIDToIndex)
             {
-              if (candidate->ClusterIndex != clusterID.first)
+              if (candidate->ClusterIndex != itClusterIDToIndex->first)
                 continue;
-              clusterIDToSumPT2.at (clusterID.first) += candidate->Momentum.Pt () * candidate->Momentum.Pt ();
+              clusterIDToSumPT2.at (itClusterIDToIndex->first) += candidate->Momentum.Pt () * candidate->Momentum.Pt ();
             }
         }
 
-      for (const auto &clusterID : clusterIDToSumPT2)
-        sortedClusterIDs.push_back (make_pair (clusterID.first, clusterID.second));
+      for (itClusterIDToSumPT2 = clusterIDToSumPT2.begin(); itClusterIDToSumPT2 != clusterIDToSumPT2.end(); ++itClusterIDToSumPT2)
+        sortedClusterIDs.push_back (make_pair (itClusterIDToSumPT2->first, itClusterIDToSumPT2->second));
       sort (sortedClusterIDs.begin (), sortedClusterIDs.end (), secondDescending);
     }
   else
@@ -213,16 +216,15 @@ void VertexSorter::Process()
       cout << "  GenBest" << endl;
       throw 0;
     }
-
-  for (const auto &clusterID : sortedClusterIDs)
+  for (itSortedClusterIDs = sortedClusterIDs.begin(); itSortedClusterIDs != sortedClusterIDs.end(); ++itSortedClusterIDs)
     {
-      Candidate *cluster = (Candidate *) fInputArray->At (clusterIDToIndex.at (clusterID.first));
+      Candidate *cluster = (Candidate *) fInputArray->At (clusterIDToIndex.at (itSortedClusterIDs->first));
       if (fMethod == "BTV")
-        cluster->BTVSumPT2 = clusterID.second;
+        cluster->BTVSumPT2 = itSortedClusterIDs->second;
       else if (fMethod == "GenClosest")
-        cluster->GenDeltaZ = clusterID.second;
+        cluster->GenDeltaZ = itSortedClusterIDs->second;
       else if (fMethod == "GenBest")
-        cluster->GenSumPT2 = clusterID.second;
+        cluster->GenSumPT2 = itSortedClusterIDs->second;
       fOutputArray->Add (cluster);
     }
 }
