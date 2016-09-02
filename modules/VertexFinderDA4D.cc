@@ -235,7 +235,6 @@ void VertexFinderDA4D::Process()
      meantime = meantime/normw;
      expv_x2 = expv_x2/normw;
      errtime = TMath::Sqrt((expv_x2 - meantime*meantime)/itr);
-
      meanpos = meanpos/normpos;
      meanerr2 = meanerr2/normpos;
      errpos = TMath::Sqrt(meanerr2/itr);
@@ -258,7 +257,14 @@ void VertexFinderDA4D::Process()
 
        std::cout << std::endl;
        std::cout << "sumpt2 " << candidate->SumPT2<<endl;
-     }
+     
+       std::cout << "ex,ey,ez";
+       std::cout << ",et";
+       std::cout << "=" << candidate->PositionError.X()/10.0 <<" " << candidate->PositionError.Y()/10.0 << " " <<  candidate->PositionError.Z()/10.0;
+       std::cout << " " << candidate->PositionError.T()/c_light;
+       std::cout << std::endl;
+
+      }
    }// end of cluster loop
 
 
