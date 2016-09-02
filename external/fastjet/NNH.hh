@@ -2,7 +2,7 @@
 #define __FASTJET_NNH_HH__
 
 //FJSTARTHEADER
-// $Id: NNH.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: NNH.hh 4034 2016-03-02 00:20:27Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -31,55 +31,21 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include<fastjet/ClusterSequence.hh>
-
+#include <fastjet/NNBase.hh>
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
-
-/// @ingroup advanced_usage
-/// \class _NoInfo
-/// dummy class, used as a default template argument
-class _NoInfo {};
-
-/// @ingroup advanced_usage
-/// \class NNHInfo
-/// template that will help initialise a BJ with a PseudoJet and extra information
-template<class I> class NNHInfo {
-public:
-  NNHInfo()         : _info(NULL) {}
-  NNHInfo(I * info) : _info(info) {}
-  template<class NNBJ> void init_jet(NNBJ * briefjet, const fastjet::PseudoJet & jet, int index) { briefjet->init(jet, index, _info);}
-private:
-  I * _info;
-};
-
-/// @ingroup advanced_usage
-/// Specialisation of NNHInfo for cases where there is no extra info
-template<> class NNHInfo<_NoInfo>  {
-public:
-  NNHInfo()           {}
-  NNHInfo(_NoInfo * ) {}
-  template<class NNBJ> void init_jet(NNBJ * briefjet, const fastjet::PseudoJet & jet, int index) { briefjet->init(jet, index);}
-};
-
 
 //----------------------------------------------------------------------
 /// @ingroup advanced_usage
 /// \class NNH
 /// Help solve closest pair problems with generic interparticle and
-/// beam distance.
+/// beam distance (generic case)
 ///
-/// Class to help solve closest pair problems with generic interparticle
-/// distances and a beam distance, using Anderberg's Nearest Neighbour
-/// Heuristic.
+/// (see NNBase.hh for an introductory description)
 ///
-/// It is templated with a BJ (brief jet) class --- BJ should
-/// basically cache the minimal amount of information that is needed
-/// to efficiently calculate interparticle distances and particle-beam
-/// distances.
-///
-/// This class can be used with or without an extra "Information" template, 
-/// i.e. NNB<BJ> or NNH<BJ,I>
+/// This variant provides an implementation for any distance measure.
+/// It is templated with a BJ (brief jet) classand can be used with or
+/// without an extra "Information" template, i.e. NNH<BJ> or NNH<BJ,I>
 /// 
 /// For the NNH<BJ> version of the class to function, BJ must provide 
 /// three member functions
@@ -87,14 +53,14 @@ public:
 ///  - void   BJ::init(const PseudoJet & jet);       // initialise with a PseudoJet
 ///  - double BJ::distance(const BJ * other_bj_jet); // distance between this and other_bj_jet
 ///  - double BJ::beam_distance()                  ; // distance to the beam
-///
+/// 
 /// For the NNH<BJ,I> version to function, the BJ::init(...) member
 /// must accept an extra argument
 ///
 ///  - void   BJ::init(const PseudoJet & jet, I * info);   // initialise with a PseudoJet + info
 ///
-/// where info might be a pointer to a class that contains, e.g., information
-/// about R, or other parameters of the jet algorithm 
+/// NOTE: THE DISTANCE MUST BE SYMMETRIC I.E. SATISFY
+///     a.distance(b) == b.distance(a)
 ///
 /// For an example of how the NNH<BJ> class is used, see the Jade (and
 /// EECambridge) plugins
@@ -106,18 +72,15 @@ public:
 /// current class is already significantly faster than standard N^3
 /// implementations.
 ///
-///
-/// Implementation note: this class derives from NNHInfo, which deals
-/// with storing any global information that is needed during the clustering
-
-template<class BJ, class I = _NoInfo> class NNH : public NNHInfo<I> {
+template<class BJ, class I = _NoInfo> class NNH : public NNBase<I> {
 public:
 
   /// constructor with an initial set of jets (which will be assigned indices
   /// 0 ... jets.size()-1
-  NNH(const std::vector<PseudoJet> & jets) {start(jets);}
-  NNH(const std::vector<PseudoJet> & jets, I * info) : NNHInfo<I>(info) {start(jets);}
-  
+  NNH(const std::vector<PseudoJet> & jets)           : NNBase<I>()     {start(jets);}
+  NNH(const std::vector<PseudoJet> & jets, I * info) : NNBase<I>(info) {start(jets);}
+
+  // initialisation from a given list of particles
   void start(const std::vector<PseudoJet> & jets);
 
   /// return the dij_min and indices iA, iB, for the corresponding jets.

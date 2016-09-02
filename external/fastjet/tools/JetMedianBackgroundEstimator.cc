@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: JetMedianBackgroundEstimator.cc 3517 2014-08-01 14:23:13Z soyez $
+// $Id: JetMedianBackgroundEstimator.cc 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -193,7 +193,7 @@ void JetMedianBackgroundEstimator::set_jets(const vector<PseudoJet> &jets) {
     throw Error("JetMedianBackgroundEstimator::JetMedianBackgroundEstimator: the jets used to estimate the background properties must be associated with a valid ClusterSequenceAreaBase");
 
   _csi = jets[0].structure_shared_ptr();
-  ClusterSequenceStructure * csi = dynamic_cast<ClusterSequenceStructure*>(_csi());
+  ClusterSequenceStructure * csi = dynamic_cast<ClusterSequenceStructure*>(_csi.get());
   const ClusterSequenceAreaBase * csab = csi->validated_csab();
 
   for (unsigned int i=1;i<jets.size(); i++){
@@ -466,7 +466,7 @@ void JetMedianBackgroundEstimator::_compute() const {
   }
 
   // determine the number of empty jets
-  const ClusterSequenceAreaBase * csab = (dynamic_cast<ClusterSequenceStructure*>(_csi()))->validated_csab();
+  const ClusterSequenceAreaBase * csab = (dynamic_cast<ClusterSequenceStructure*>(_csi.get()))->validated_csab();
   if (csab->has_explicit_ghosts()) {
     _empty_area = 0.0;
     _n_empty_jets = 0;
@@ -502,11 +502,11 @@ void JetMedianBackgroundEstimator::_compute() const {
 // check that the underlying structure is still alive;
 // throw an error otherwise
 void JetMedianBackgroundEstimator::_check_csa_alive() const{
-  ClusterSequenceStructure* csa = dynamic_cast<ClusterSequenceStructure*>(_csi());
+  ClusterSequenceStructure* csa = dynamic_cast<ClusterSequenceStructure*>(_csi.get());
   if (csa == 0) {
     throw Error("JetMedianBackgroundEstimator: there is no cluster sequence associated with the JetMedianBackgroundEstimator");
   }
-  if (! dynamic_cast<ClusterSequenceStructure*>(_csi())->has_associated_cluster_sequence())
+  if (! dynamic_cast<ClusterSequenceStructure*>(_csi.get())->has_associated_cluster_sequence())
     throw Error("JetMedianBackgroundEstimator: modifications are no longer possible as the underlying ClusterSequence has gone out of scope");
 }
 
@@ -520,7 +520,7 @@ void JetMedianBackgroundEstimator::_check_jet_alg_good_for_median() const{
   // if no explicit jet def has been provided, fall back on the
   // cluster sequence
   if (_jet_def.jet_algorithm() == undefined_jet_algorithm){
-    const ClusterSequence * cs = dynamic_cast<ClusterSequenceStructure*>(_csi())->validated_cs();
+    const ClusterSequence * cs = dynamic_cast<ClusterSequenceStructure*>(_csi.get())->validated_cs();
     jet_def = &(cs->jet_def());
   }
 

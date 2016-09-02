@@ -1,7 +1,7 @@
 #ifndef __FASTJET_TOOLS_RECLUSTER_HH__
 #define __FASTJET_TOOLS_RECLUSTER_HH__
 
-// $Id: Recluster.hh 3760 2014-12-19 10:05:10Z soyez $
+// $Id: Recluster.hh 3753 2014-12-17 15:19:55Z salam $
 //
 // Copyright (c) 2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //

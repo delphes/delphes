@@ -21,13 +21,14 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 367                                                          $//
-// $Date:: 2014-09-04 15:57:37 +0200 (Thu, 04 Sep 2014)                     $//
+// $Revision:: 405                                                          $//
+// $Date:: 2016-05-23 20:15:02 +0200 (Mon, 23 May 2016)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SPLIT_MERGE_H__
 #define __SPLIT_MERGE_H__
 
+#include "config.h"
 #include "defines.h"
 #include "geom_2d.h"
 #include "momentum.h"
@@ -38,6 +39,8 @@
 #include <string>
 
 namespace siscone{
+
+const int CJET_INEXISTENT_PASS = -2;
 
 /**
  * \class Cjet
@@ -74,6 +77,8 @@ class Cjet{
 
   /// pass at which the jet has been found
   /// It starts at 0 (first pass), -1 means infinite rapidity
+  /// (it will be initialised to "CJET_INEXISTENT_PASS" which should
+  /// never appear after clustering)
   int pass;
 };
 
@@ -440,8 +445,12 @@ class Csplit_merge{
 
   // jet information
   /// list of jet candidates
+#ifdef SISCONE_USES_UNIQUE_PTR_AS_AUTO_PTR
+  std::unique_ptr<std::multiset<Cjet,Csplit_merge_ptcomparison> > candidates;
+#else
   std::auto_ptr<std::multiset<Cjet,Csplit_merge_ptcomparison> > candidates;
-
+#endif
+  
   /// minimal pt2
   double pt_min2;
 

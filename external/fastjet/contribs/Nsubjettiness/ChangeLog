@@ -1,3 +1,12 @@
+2016-06-08 <jthaler>
+   Fixed bug in MeasureDefinition.cc where axes were not completely defined,
+      leading to problems with multi-pass axes 
+2016-04-04 <jthaler>
+   Fixed Njettiness.cc to give value of _current_tau_components even if less
+      than N constituents
+   Delete extraneous code in example_advanced_usage.cc
+2016-03-29 <jthaler>
+   Update for FJ 3.2.0 to deal with SharedPtr () deprecation
 2015-09-28 <jthaler>
    Updated NEWS for 2.2.1 release.
 2015-09-18 <jthaler>

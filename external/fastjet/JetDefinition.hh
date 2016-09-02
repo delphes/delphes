@@ -2,7 +2,7 @@
 #define __FASTJET_JETDEFINITION_HH__
 
 //FJSTARTHEADER
-// $Id: JetDefinition.hh 3677 2014-09-09 22:45:25Z soyez $
+// $Id: JetDefinition.hh 4074 2016-03-08 09:09:25Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -34,6 +34,7 @@
 #include<cassert>
 #include "fastjet/internal/numconsts.hh"
 #include "fastjet/PseudoJet.hh"
+#include "fastjet/internal/deprecated.hh"
 #include<string>
 #include<memory>
 
@@ -267,7 +268,7 @@ public:
                 double R_in, 
                 RecombinationScheme recomb_scheme_in = E_scheme,
                 Strategy strategy_in = Best) {
-    *this = JetDefinition(jet_algorithm_in, R_in, strategy_in, recomb_scheme_in, 1);
+    *this = JetDefinition(jet_algorithm_in, R_in, recomb_scheme_in, strategy_in, 1);
   }
 
   /// constructor for algorithms that have no free parameters
@@ -276,7 +277,7 @@ public:
                 RecombinationScheme recomb_scheme_in = E_scheme,
                 Strategy strategy_in = Best) {
     double dummyR = 0.0;
-    *this = JetDefinition(jet_algorithm_in, dummyR, strategy_in, recomb_scheme_in, 0);
+    *this = JetDefinition(jet_algorithm_in, dummyR, recomb_scheme_in, strategy_in, 0);
   }
 
   /// constructor for algorithms that require R + one extra parameter to be set 
@@ -286,7 +287,7 @@ public:
                 double xtra_param_in,
                 RecombinationScheme recomb_scheme_in = E_scheme,
                 Strategy strategy_in = Best) {
-    *this = JetDefinition(jet_algorithm_in, R_in, strategy_in, recomb_scheme_in, 2);
+    *this = JetDefinition(jet_algorithm_in, R_in, recomb_scheme_in, strategy_in, 2);
     set_extra_param(xtra_param_in);
   }
 
@@ -343,21 +344,33 @@ public:
     _plugin = plugin_in;
     _strategy = plugin_strategy;
     _Rparam = _plugin->R();
+    _extra_param = 0.0; // a dummy value to keep static code checkers happy
     _jet_algorithm = plugin_algorithm;
     set_recombination_scheme(E_scheme);
   }
 
+  /// constructor to fully specify a jet-definition (together with
+  /// information about how algorithically to run it).
+  JetDefinition(JetAlgorithm jet_algorithm_in, 
+                double R_in, 
+                RecombinationScheme recomb_scheme_in,
+                Strategy strategy_in,
+                int nparameters_in);
 
   /// constructor to fully specify a jet-definition (together with
   /// information about how algorithically to run it).
   ///
   /// the ordering of arguments here is old and deprecated (except
   /// as the common constructor for internal use)
+  FASTJET_DEPRECATED_MSG("This argument ordering is deprecated. Use JetDefinition(alg, R, strategy, scheme[, n_parameters]) instead")
   JetDefinition(JetAlgorithm jet_algorithm_in, 
                 double R_in, 
                 Strategy strategy_in,
                 RecombinationScheme recomb_scheme_in = E_scheme,
-                int nparameters_in = 1);
+                int nparameters_in = 1){
+    (*this) = JetDefinition(jet_algorithm_in,R_in,recomb_scheme_in,strategy_in,nparameters_in);
+  }
+
 
   /// cluster the supplied particles and returns a vector of resulting
   /// jets, sorted by pt (or energy in the case of spherical,
@@ -387,7 +400,7 @@ public:
   /// has been called). In such cases, using set_recombiner(const
   /// Recombiner *) may lead to memory corruption.
   void set_recombiner(const Recombiner * recomb) {
-    if (_shared_recombiner()) _shared_recombiner.reset(recomb);
+    if (_shared_recombiner) _shared_recombiner.reset(recomb);
     _recombiner = recomb;
     _default_recombiner = DefaultRecombiner(external_scheme);
   }
@@ -520,13 +533,13 @@ public:
     DefaultRecombiner(RecombinationScheme recomb_scheme = E_scheme) : 
       _recomb_scheme(recomb_scheme) {}
     
-    virtual std::string description() const;
+    virtual std::string description() const FASTJET_OVERRIDE;
     
     /// recombine pa and pb and put result into pab
     virtual void recombine(const PseudoJet & pa, const PseudoJet & pb, 
-                           PseudoJet & pab) const;
+                           PseudoJet & pab) const FASTJET_OVERRIDE;
 
-    virtual void preprocess(PseudoJet & p) const;
+    virtual void preprocess(PseudoJet & p) const FASTJET_OVERRIDE;
 
     /// return the index of the recombination scheme
     RecombinationScheme scheme() const {return _recomb_scheme;}

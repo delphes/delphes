@@ -57,7 +57,7 @@ private:
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fECalTowerEnergy, fHCalTowerEnergy;
-  Double_t fECalTrackEnergy[2], fHCalTrackEnergy[2];
+  Double_t fECalTrackEnergy, fHCalTrackEnergy;
 
   Double_t fTimingEnergyMin;
   Bool_t fElectronsFromTrack;
@@ -69,6 +69,9 @@ private:
 
   Double_t fECalEnergySignificanceMin;
   Double_t fHCalEnergySignificanceMin;
+
+  Double_t fECalTrackSigma;
+  Double_t fHCalTrackSigma;
 
   Bool_t fSmearTowerCenter;
 
@@ -102,11 +105,11 @@ private:
   TObjArray *fEFlowPhotonOutputArray; //!
   TObjArray *fEFlowNeutralHadronOutputArray; //!
 
-  TObjArray *fECalTowerTrackArray[2]; //!
-  TIterator *fItECalTowerTrackArray[2]; //!
+  TObjArray *fECalTowerTrackArray; //!
+  TIterator *fItECalTowerTrackArray; //!
 
-  TObjArray *fHCalTowerTrackArray[2]; //!
-  TIterator *fItHCalTowerTrackArray[2]; //!
+  TObjArray *fHCalTowerTrackArray; //!
+  TIterator *fItHCalTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

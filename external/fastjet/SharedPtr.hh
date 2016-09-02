@@ -2,7 +2,7 @@
 #define __FASTJET_SHARED_PTR_HH__
 
 //FJSTARTHEADER
-// $Id: SharedPtr.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: SharedPtr.hh 4051 2016-03-03 14:33:38Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -38,6 +38,8 @@
 // for our SharedPtr simply to be derived from the STL TR1 one.
 // #define __FASTJET_USETR1SHAREDPTR
 
+#include "fastjet/internal/deprecated.hh"
+
 #ifdef __FASTJET_USETR1SHAREDPTR
 #include <tr1/memory>
 #endif // __FASTJET_USETR1SHAREDPTR
@@ -71,6 +73,9 @@ public:
   SharedPtr(T * t) : std::tr1::shared_ptr<T>(t) {}
   SharedPtr(const SharedPtr<T> & t) : std::tr1::shared_ptr<T>(t) {}
   // for some reason operator() doesn't get inherited
+  #ifdef FASTJET_HAVE_EXPLICIT_FOR_OPERATORS
+  explicit
+  #endif
   inline operator bool() const {return (this->get()!=NULL);}
   /// return the pointer we're pointing to  
   T* operator ()() const{
@@ -210,7 +215,11 @@ public:
     return *this;
   }
   
-  /// return the pointer we're pointing to  
+  /// return the pointer we're pointing to
+  ///
+  /// Since FastJet 3.2.0, this is depracated since it is no longer
+  /// part of std::shared_ptr<T>. Use SharedPtr<T>::get() instead
+  FASTJET_DEPRECATED_MSG("Use SharedPtr<T>::get() instead")
   T* operator ()() const{
     if (_ptr==NULL) return NULL;
     return _ptr->get(); // automatically returns NULL when out-of-scope
@@ -256,6 +265,9 @@ public:
 
   /// conversion to bool
   /// This will allow you to use the indirection nicely
+  #ifdef FASTJET_HAVE_EXPLICIT_FOR_OPERATORS
+  explicit
+  #endif
   inline operator bool() const{
     return (get()!=NULL);
   }

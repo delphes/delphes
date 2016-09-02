@@ -95,14 +95,14 @@ void ImpactParameterSmearing::Finish()
 void ImpactParameterSmearing::Process()
 {
   Candidate *candidate, *particle, *mother;
-  Double_t xd, yd, zd, dxy, sx, sy, sz, ddxy;
+  Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
 
-    // take momentum before smearing (otherwise apply double smearing on dxy)
+    // take momentum before smearing (otherwise apply double smearing on d0)
     particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
 
     const TLorentzVector &candidateMomentum = particle->Momentum;
@@ -130,9 +130,9 @@ void ImpactParameterSmearing::Process()
     zd += sz;
 
     // calculate impact parameter (after-smearing)
-    dxy = (xd*py - yd*px)/pt;
+    d0 = (xd*py - yd*px)/pt;
 
-    ddxy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
     mother = candidate;
@@ -142,8 +142,8 @@ void ImpactParameterSmearing::Process()
     candidate->Yd = yd;
     candidate->Zd = zd;
 
-    candidate->Dxy = dxy;
-    candidate->SDxy = ddxy;
+    candidate->D0 = d0;
+    candidate->ErrorD0 = dd0;
 
     candidate->AddCandidate(mother);
     fOutputArray->Add(candidate);

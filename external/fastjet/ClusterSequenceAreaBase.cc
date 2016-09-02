@@ -1,6 +1,6 @@
 
 //FJSTARTHEADER
-// $Id: ClusterSequenceAreaBase.cc 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClusterSequenceAreaBase.cc 4079 2016-03-09 12:20:03Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -78,34 +78,70 @@ double ClusterSequenceAreaBase::empty_area_from_jets(
   return empty;
 }
 
+// this is deprecated but used by other deprecated methods. So we hide
+// the implementation in a protected method so that (i) it can still
+// be used internally (without generating a compile-time warning when
+// building FastJet) and the interface can be marked as deprecated.
+// This can disappear once all the public interfaces have disappeared.
 double ClusterSequenceAreaBase::median_pt_per_unit_area(const Selector & selector) const {
-  return median_pt_per_unit_something(selector,false);
+  return _median_pt_per_unit_area(selector);
 }
 
+// the hidden implementation
+double ClusterSequenceAreaBase::_median_pt_per_unit_area(const Selector & selector) const {
+  return _median_pt_per_unit_something(selector,false);
+}
+
+
+
+// this is deprecated but used by other deprecated methods. So we hide
+// the implementation in a protected method so that (i) it can still
+// be used internally (without generating a compile-time warning when
+// building FastJet) and the interface can be marked as deprecated.
+// This can disappear once all the public interfaces have disappeared.
 double ClusterSequenceAreaBase::median_pt_per_unit_area_4vector(const Selector & selector) const {
-  return median_pt_per_unit_something(selector,true);
+  return _median_pt_per_unit_area_4vector(selector);
+}
+
+// the deprecated interface
+double ClusterSequenceAreaBase::_median_pt_per_unit_area_4vector(const Selector & selector) const {
+  return _median_pt_per_unit_something(selector,true);
 }
 
 
 //----------------------------------------------------------------------
-/// the median of (pt/area) for jets contained within range, counting
-/// the empty area as if it were made up of a collection of empty
-/// jets each of area (0.55 * pi R^2).
+// this is deprecated but used by other deprecated methods. So we hide
+// the implementation in a protected method so that (i) it can still
+// be used internally (without generating a compile-time warning when
+// building FastJet) and the interface can be marked as deprecated.
+// This can disappear once all the public interfaces have disappeared.
 double ClusterSequenceAreaBase::median_pt_per_unit_something(
                 const Selector & selector, bool use_area_4vector) const {
+  return _median_pt_per_unit_something(selector, use_area_4vector);
+}
 
+// the median of (pt/area) for jets contained within range, counting
+// the empty area as if it were made up of a collection of empty
+// jets each of area (0.55 * pi R^2).
+double ClusterSequenceAreaBase::_median_pt_per_unit_something(
+                const Selector & selector, bool use_area_4vector) const {
   double median, sigma, mean_area;
-  get_median_rho_and_sigma(selector, use_area_4vector, median, sigma, mean_area);
+  _get_median_rho_and_sigma(selector, use_area_4vector, median, sigma, mean_area);
   return median;
-
 }
 
 
 //----------------------------------------------------------------------
-/// fits a form pt_per_unit_area(y) = a + b*y^2 for jets in range. 
-/// exclude_above allows one to exclude large values of pt/area from fit. 
-/// use_area_4vector = true uses the 4vector areas.
+/// fits a form pt_per_unit_area(y) = a + b*y^2 for jets in range.
+/// exclude_above allows one to exclude large values of pt/area from
+/// fit.  use_area_4vector = true uses the 4vector areas.
 void ClusterSequenceAreaBase::parabolic_pt_per_unit_area(
+       double & a, double & b, const Selector & selector, 
+       double exclude_above, bool use_area_4vector) const {
+  return _parabolic_pt_per_unit_area(a, b, selector, exclude_above, use_area_4vector);
+}
+
+void ClusterSequenceAreaBase::_parabolic_pt_per_unit_area(
        double & a, double & b, const Selector & selector, 
        double exclude_above, bool use_area_4vector) const {
   // sanity check on the selector: we require a finite area and that
@@ -160,18 +196,32 @@ void ClusterSequenceAreaBase::parabolic_pt_per_unit_area(
 }
 
 
-
+//----------------------------------------------------------------------
 void ClusterSequenceAreaBase::get_median_rho_and_sigma(
+            const Selector & selector, bool use_area_4vector,
+            double & median, double & sigma, double & mean_area) const {
+  _get_median_rho_and_sigma(selector, use_area_4vector, median, sigma, mean_area);
+}
+
+void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
             const Selector & selector, bool use_area_4vector,
             double & median, double & sigma, double & mean_area) const {
 
   vector<PseudoJet> incl_jets = inclusive_jets();
-  get_median_rho_and_sigma(incl_jets, selector, use_area_4vector,
-			   median, sigma, mean_area, true);
+  _get_median_rho_and_sigma(incl_jets, selector, use_area_4vector,
+                            median, sigma, mean_area, true);
 }
 
-
 void ClusterSequenceAreaBase::get_median_rho_and_sigma(
+            const vector<PseudoJet> & all_jets,
+            const Selector & selector, bool use_area_4vector,
+            double & median, double & sigma, double & mean_area,
+	    bool all_are_incl) const {
+  _get_median_rho_and_sigma(all_jets, selector, use_area_4vector,
+                            median, sigma, mean_area, all_are_incl);
+}
+
+void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
             const vector<PseudoJet> & all_jets,
             const Selector & selector, bool use_area_4vector,
             double & median, double & sigma, double & mean_area,
@@ -287,38 +337,49 @@ void ClusterSequenceAreaBase::get_median_rho_and_sigma(
 }
 
 
-/// return a vector of all subtracted jets, using area_4vector, given rho.
-/// Only inclusive_jets above ptmin are subtracted and returned.
-/// the ordering is the same as that of sorted_by_pt(cs.inclusive_jets()),
-/// i.e. not necessarily ordered in pt once subtracted
+// return a vector of all subtracted jets, using area_4vector, given rho.
+// Only inclusive_jets above ptmin are subtracted and returned.
+// the ordering is the same as that of sorted_by_pt(cs.inclusive_jets()),
+// i.e. not necessarily ordered in pt once subtracted
 vector<PseudoJet> ClusterSequenceAreaBase::subtracted_jets(const double rho,
                                                            const double ptmin) 
                                                            const {
+  return _subtracted_jets(rho,ptmin);
+}
+
+vector<PseudoJet> ClusterSequenceAreaBase::_subtracted_jets(const double rho,
+                                                            const double ptmin) 
+  const {
   vector<PseudoJet> sub_jets;
   vector<PseudoJet> jets_local = sorted_by_pt(inclusive_jets(ptmin));
   for (unsigned i=0; i<jets_local.size(); i++) {
-     PseudoJet sub_jet = subtracted_jet(jets_local[i],rho);
+     PseudoJet sub_jet = _subtracted_jet(jets_local[i],rho);
      sub_jets.push_back(sub_jet);
   }
   return sub_jets;
 }
 
-/// return a vector of subtracted jets, using area_4vector.
-/// Only inclusive_jets above ptmin are subtracted and returned.
-/// the ordering is the same as that of sorted_by_pt(cs.inclusive_jets()),
-/// i.e. not necessarily ordered in pt once subtracted
+// return a vector of subtracted jets, using area_4vector.
+// Only inclusive_jets above ptmin are subtracted and returned.
+// the ordering is the same as that of sorted_by_pt(cs.inclusive_jets()),
+// i.e. not necessarily ordered in pt once subtracted
 vector<PseudoJet> ClusterSequenceAreaBase::subtracted_jets(
                                                  const Selector & selector, 
 						 const double ptmin)
 						 const {
-  double rho = median_pt_per_unit_area_4vector(selector);
-  return subtracted_jets(rho,ptmin);
+  double rho = _median_pt_per_unit_area_4vector(selector);
+  return _subtracted_jets(rho,ptmin);
 }
 
 
 /// return a subtracted jet, using area_4vector, given rho
 PseudoJet ClusterSequenceAreaBase::subtracted_jet(const PseudoJet & jet,
                                                   const double rho) const {
+  return _subtracted_jet(jet, rho);
+}
+
+PseudoJet ClusterSequenceAreaBase::_subtracted_jet(const PseudoJet & jet,
+                                                   const double rho) const {
   PseudoJet area4vect = area_4vector(jet);
   PseudoJet sub_jet;
   // sanity check
@@ -342,8 +403,13 @@ PseudoJet ClusterSequenceAreaBase::subtracted_jet(const PseudoJet & jet,
 /// jets, because rho will be recalculated each time around.
 PseudoJet ClusterSequenceAreaBase::subtracted_jet(const PseudoJet & jet,
                                        const Selector & selector) const {
-  double rho = median_pt_per_unit_area_4vector(selector);
-  PseudoJet sub_jet = subtracted_jet(jet, rho);
+  return _subtracted_jet(jet, selector);
+}
+
+PseudoJet ClusterSequenceAreaBase::_subtracted_jet(const PseudoJet & jet,
+                                       const Selector & selector) const {
+  double rho = _median_pt_per_unit_area_4vector(selector);
+  PseudoJet sub_jet = _subtracted_jet(jet, rho);
   return sub_jet;
 }
 
@@ -352,8 +418,14 @@ PseudoJet ClusterSequenceAreaBase::subtracted_jet(const PseudoJet & jet,
 double ClusterSequenceAreaBase::subtracted_pt(const PseudoJet & jet,
                                               const double rho,
                                               bool use_area_4vector) const {
+  return _subtracted_pt(jet, rho, use_area_4vector);
+}
+
+double ClusterSequenceAreaBase::_subtracted_pt(const PseudoJet & jet,
+                                              const double rho,
+                                              bool use_area_4vector) const {
   if ( use_area_4vector ) { 
-     PseudoJet sub_jet = subtracted_jet(jet,rho);
+     PseudoJet sub_jet = _subtracted_jet(jet,rho);
      return sub_jet.perp();
   } else {
      return jet.perp() - rho*area(jet);
@@ -368,11 +440,11 @@ double ClusterSequenceAreaBase::subtracted_pt(const PseudoJet & jet,
                                               const Selector & selector,
                                               bool use_area_4vector) const {
   if ( use_area_4vector ) { 
-     PseudoJet sub_jet = subtracted_jet(jet,selector);
+     PseudoJet sub_jet = _subtracted_jet(jet,selector);
      return sub_jet.perp();
   } else {
-     double rho = median_pt_per_unit_area(selector);
-     return subtracted_pt(jet,rho,false);
+     double rho = _median_pt_per_unit_area(selector);
+     return _subtracted_pt(jet,rho,false);
   }
 }  
 

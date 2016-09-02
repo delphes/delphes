@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequencePassiveArea.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClusterSequencePassiveArea.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -64,7 +64,7 @@ public:
 
   /// return an empty area that's appropriate to the passive area
   /// determination carried out
-  virtual double empty_area(const Selector & selector) const;
+  virtual double empty_area(const Selector & selector) const FASTJET_OVERRIDE;
 
 private:
 

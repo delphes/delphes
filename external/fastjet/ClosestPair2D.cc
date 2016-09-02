@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClosestPair2D.cc 3433 2014-07-23 08:17:03Z salam $
+// $Id: ClosestPair2D.cc 4059 2016-03-03 20:49:48Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -144,7 +144,7 @@ void ClosestPair2D::_initialize(const std::vector<Coord2D> & positions,
     sort(shuffles.begin(), shuffles.end());
 
     // and create the search tree
-    _trees[ishift] = auto_ptr<Tree>(new Tree(shuffles, max_size));
+    _trees[ishift] = SharedPtr<Tree>(new Tree(shuffles, max_size));
 
     // now we look for the closest-pair candidates on this tree
     circulator circ = _trees[ishift]->somewhere(), start=circ;
@@ -173,7 +173,7 @@ void ClosestPair2D::_initialize(const std::vector<Coord2D> & positions,
   for (unsigned int i = 0; i < n_positions; i++) {
     mindists2[i] = _points[i].neighbour_dist2;}
   
-  _heap = auto_ptr<MinHeap>(new MinHeap(mindists2, max_size));
+  _heap = SharedPtr<MinHeap>(new MinHeap(mindists2, max_size));
 }
 
 

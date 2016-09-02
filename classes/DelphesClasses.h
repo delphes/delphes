@@ -48,8 +48,8 @@ public:
 
   Long64_t Number; // event number
 
-  Float_t ReadTime;
-  Float_t ProcTime;
+  Float_t ReadTime; // read time
+  Float_t ProcTime; // processing time
 
   ClassDef(Event, 1)
 };
@@ -146,11 +146,16 @@ public:
   Float_t Py; // particle momentum vector (y component) | hepevt.phep[number][1]
   Float_t Pz; // particle momentum vector (z component) | hepevt.phep[number][2]
 
+  Float_t P; // particle momentum
   Float_t PT; // particle transverse momentum
   Float_t Eta; // particle pseudorapidity
   Float_t Phi; // particle azimuthal angle
 
   Float_t Rapidity; // particle rapidity
+  Float_t CtgTheta; // particle cotangent of theta
+
+  Float_t D0; // particle transverse impact parameter
+  Float_t DZ; // particle longitudinal impact parameter
 
   Float_t T; // particle vertex position (t component) | hepevt.vhep[number][3]
   Float_t X; // particle vertex position (x component) | hepevt.vhep[number][0]
@@ -162,20 +167,41 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(GenParticle, 1)
+  ClassDef(GenParticle, 2)
 };
 
 //---------------------------------------------------------------------------
 
-class Vertex: public TObject
+class Vertex: public SortableObject
 {
 public:
+
   Float_t T; // vertex position (t component)
   Float_t X; // vertex position (x component)
   Float_t Y; // vertex position (y component)
   Float_t Z; // vertex position (z component)
 
-  ClassDef(Vertex, 1)
+  Double_t ErrorT; // vertex position error (t component)
+  Double_t ErrorX; // vertex position error (x component)
+  Double_t ErrorY; // vertex position error (y component)
+  Double_t ErrorZ; // vertex position error (z component)
+
+  Int_t Index; // vertex index
+  Int_t NDF; // number of degrees of freedom
+
+  Double_t Sigma; // vertex position (z component) error
+  Double_t SumPT2; // sum pt^2 of tracks attached to the vertex
+  Double_t GenSumPT2; // sum pt^2 of gen tracks attached to the vertex
+
+  Double_t GenDeltaZ; // distance in z to closest generated vertex
+  Double_t BTVSumPT2; // sum pt^2 of tracks attached to the secondary vertex
+
+  TRefArray Constituents; // references to constituents
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  ClassDef(Vertex, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -235,20 +261,18 @@ public:
 
   Float_t E; // photon energy
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // particle arrival time of flight
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
   TRefArray Particles; // references to generated particles
 
-  // Isolation variables
-
-  Float_t IsolationVar;
-  Float_t IsolationVarRhoCorr;
-  Float_t SumPtCharged;
-  Float_t SumPtNeutral;
-  Float_t SumPtChargedPU;
-  Float_t SumPt;
+  Float_t IsolationVar; // isolation variable
+  Float_t IsolationVarRhoCorr; // isolation variable
+  Float_t SumPtCharged; // isolation variable
+  Float_t SumPtNeutral; // isolation variable
+  Float_t SumPtChargedPU; // isolation variable
+  Float_t SumPt; // isolation variable
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -268,7 +292,7 @@ public:
   Float_t Eta; // electron pseudorapidity
   Float_t Phi; // electron azimuthal angle
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // particle arrival time of flight
 
   Int_t Charge; // electron charge
 
@@ -276,14 +300,12 @@ public:
 
   TRef Particle; // reference to generated particle
 
-  // Isolation variables
-
-  Float_t IsolationVar;
-  Float_t IsolationVarRhoCorr;
-  Float_t SumPtCharged;
-  Float_t SumPtNeutral;
-  Float_t SumPtChargedPU;
-  Float_t SumPt;
+  Float_t IsolationVar; // isolation variable
+  Float_t IsolationVarRhoCorr; // isolation variable
+  Float_t SumPtCharged; // isolation variable
+  Float_t SumPtNeutral; // isolation variable
+  Float_t SumPtChargedPU; // isolation variable
+  Float_t SumPt; // isolation variable
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -303,20 +325,18 @@ public:
   Float_t Eta; // muon pseudorapidity
   Float_t Phi; // muon azimuthal angle
 
-  Float_t T; //particle arrival time of flight
+  Float_t T; // particle arrival time of flight
 
   Int_t Charge; // muon charge
 
   TRef Particle; // reference to generated particle
 
-   // Isolation variables
-
-  Float_t IsolationVar;
-  Float_t IsolationVarRhoCorr;
-  Float_t SumPtCharged;
-  Float_t SumPtNeutral;
-  Float_t SumPtChargedPU;
-  Float_t SumPt;
+  Float_t IsolationVar; // isolation variable
+  Float_t IsolationVarRhoCorr; // isolation variable
+  Float_t SumPtCharged; // isolation variable
+  Float_t SumPtNeutral; // isolation variable
+  Float_t SumPtChargedPU; // isolation variable
+  Float_t SumPt; // isolation variable
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -343,13 +363,13 @@ public:
   Float_t DeltaEta;  // jet radius in pseudorapidity
   Float_t DeltaPhi;  // jet radius in azimuthal angle
 
-  UInt_t Flavor;
-  UInt_t FlavorAlgo;
-  UInt_t FlavorPhys;
+  UInt_t Flavor; // jet flavor
+  UInt_t FlavorAlgo; // jet flavor
+  UInt_t FlavorPhys; // jet flavor
 
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
-  UInt_t BTagAlgo;
-  UInt_t BTagPhys;
+  UInt_t BTagAlgo; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagPhys; // 0 or 1 for a jet that has been tagged as containing a heavy quark
 
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
@@ -396,38 +416,52 @@ public:
 
   Int_t Charge; // track charge
 
+  Float_t P; // track momentum
   Float_t PT; // track transverse momentum
-
   Float_t Eta; // track pseudorapidity
   Float_t Phi; // track azimuthal angle
+  Float_t CtgTheta; // track cotangent of theta
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
 
+  Float_t T; // track vertex position (t component)
   Float_t X; // track vertex position (x component)
   Float_t Y; // track vertex position (y component)
   Float_t Z; // track vertex position (z component)
-  Float_t T; // track vertex position (z component)
 
+  Float_t TOuter; // track position (t component) at the tracker edge
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
-  Float_t TOuter; // track position (z component) at the tracker edge
 
-  Float_t Dxy;     // track signed transverse impact parameter
-  Float_t SDxy;    // signed error on the track signed transverse impact parameter
-  Float_t Xd;      // X coordinate of point of closest approach to vertex
-  Float_t Yd;      // Y coordinate of point of closest approach to vertex
-  Float_t Zd;      // Z coordinate of point of closest approach to vertex
+  Float_t Xd; // X coordinate of point of closest approach to vertex
+  Float_t Yd; // Y coordinate of point of closest approach to vertex
+  Float_t Zd; // Z coordinate of point of closest approach to vertex
+
+  Float_t L; // track path length
+  Float_t D0; // track transverse impact parameter
+  Float_t DZ; // track longitudinal impact parameter
+
+  Float_t ErrorP; // track momentum error
+  Float_t ErrorPT; // track transverse momentum error
+  Float_t ErrorPhi; // track azimuthal angle error
+  Float_t ErrorCtgTheta; // track cotangent of theta error
+
+  Float_t ErrorT; // time measurement error
+  Float_t ErrorD0; // track transverse impact parameter error
+  Float_t ErrorDZ; // track longitudinal impact parameter error
 
   TRef Particle; // reference to generated particle
+
+  Int_t VertexIndex; // reference to vertex
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4() const;
 
-  ClassDef(Track, 2)
+  ClassDef(Track, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -525,16 +559,29 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, Area;
+  TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
 
-  Float_t Dxy;
-  Float_t SDxy;
+  Float_t L; // path length
+  Float_t ErrorT; // path length
+  Float_t D0;
+  Float_t ErrorD0;
+  Float_t DZ;
+  Float_t ErrorDZ;
+  Float_t P;
+  Float_t ErrorP;
+  Float_t PT;
+  Float_t ErrorPT;
+  Float_t CtgTheta;
+  Float_t ErrorCtgTheta;
+  Float_t Phi;
+  Float_t ErrorPhi;
+
   Float_t Xd;
   Float_t Yd;
   Float_t Zd;
 
   // tracking resolution
-  
+
   Float_t TrackResolution;
 
   // PileUpJetID variables
@@ -560,6 +607,16 @@ public:
   Float_t SumPtNeutral;
   Float_t SumPtChargedPU;
   Float_t SumPt;
+
+  // vertex variables
+
+  Int_t ClusterIndex;
+  Int_t ClusterNDF;
+  Double_t ClusterSigma;
+  Double_t SumPT2;
+  Double_t BTVSumPT2;
+  Double_t GenDeltaZ;
+  Double_t GenSumPT2;
 
   // N-subjettiness variables
 
@@ -594,7 +651,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 4)
+  ClassDef(Candidate, 5)
 };
 
 #endif // DelphesClasses_h

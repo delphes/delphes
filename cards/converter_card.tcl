@@ -12,6 +12,6 @@ set ExecutionPath {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-  add Branch Delphes/allParticles Particle GenParticle
+  add Branch Delphes/stableParticles Particle GenParticle
 }
 

@@ -95,7 +95,7 @@ void MomentumSmearing::Finish()
 void MomentumSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t pt, eta, phi, e;
+  Double_t pt, eta, phi, e, res;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -106,22 +106,47 @@ void MomentumSmearing::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-
+    res = fFormula->Eval(pt, eta, phi, e);
+ 
     // apply smearing formula
-    pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
+    //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
     
-    if(pt <= 0.0) continue;
+    res = ( res > 1.0 ) ? 1.0 : res; 
+
+    pt = LogNormal(pt, res * pt );
+    
+    //if(pt <= 0.0) continue;
 
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
-    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
+    //candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
+    candidate->TrackResolution = res;
     candidate->AddCandidate(mother);
         
     fOutputArray->Add(candidate);
   }
 }
+//----------------------------------------------------------------
+
+Double_t MomentumSmearing::LogNormal(Double_t mean, Double_t sigma)
+{
+  Double_t a, b;
+
+  if(mean > 0.0)
+  {
+    b = TMath::Sqrt(TMath::Log((1.0 + (sigma*sigma)/(mean*mean))));
+    a = TMath::Log(mean) - 0.5*b*b;
+
+    return TMath::Exp(a + b*gRandom->Gaus(0.0, 1.0));
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
 
 //------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence.cc 3809 2015-02-20 13:05:13Z soyez $
+// $Id: ClusterSequence.cc 4154 2016-07-20 16:20:48Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -151,8 +151,8 @@ std::ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
 ClusterSequence::~ClusterSequence () {
   // set the pointer in the wrapper to this object to NULL to say that
   // we're going out of scope
-  if (_structure_shared_ptr()){
-    ClusterSequenceStructure* csi = dynamic_cast<ClusterSequenceStructure*>(_structure_shared_ptr()); 
+  if (_structure_shared_ptr){
+    ClusterSequenceStructure* csi = dynamic_cast<ClusterSequenceStructure*>(_structure_shared_ptr.get()); 
     // normally the csi is purely internal so it really should not be
     // NULL i.e assert should be OK
     // (we assert rather than throw an error, since failure here is a
@@ -723,8 +723,11 @@ Strategy ClusterSequence::_best_strategy() const {
     }
   }
   
-  bool code_should_never_reach_here = false;
-  assert(code_should_never_reach_here); 
+  //bool code_should_never_reach_here = false;
+  //assert(code_should_never_reach_here);
+
+  assert(0 && "Code should never reach here");
+
   return N2MHTLazy9;
 
 }
@@ -774,6 +777,15 @@ Strategy ClusterSequence::_best_strategy() const {
 // }
 
 
+ClusterSequence & ClusterSequence::operator=(const ClusterSequence & cs) {
+  // self assignment is trivial
+  if (&cs != this) {
+    _deletes_self_when_unused = false;
+    transfer_from_sequence(cs);
+  }
+  return *this;
+}
+
 //----------------------------------------------------------------------
 // transfer the sequence contained in other_seq into our own;
 // any plugin "extras" contained in the from_seq will be lost
@@ -814,7 +826,7 @@ void ClusterSequence::transfer_from_sequence(const ClusterSequence & from_seq,
   _extras   = from_seq._extras;
 
   // clean up existing structure
-  if (_structure_shared_ptr()) {
+  if (_structure_shared_ptr) {
     // If there are jets associated with an old version of the CS and
     // a new one, keeping track of when to delete the CS becomes more
     // complex; so we don't allow this situation to occur.
@@ -822,7 +834,7 @@ void ClusterSequence::transfer_from_sequence(const ClusterSequence & from_seq,
     
     // anything that is currently associated with the cluster sequence
     // should be told that its cluster sequence no longer exists
-    ClusterSequenceStructure* csi = dynamic_cast<ClusterSequenceStructure*>(_structure_shared_ptr()); 
+    ClusterSequenceStructure* csi = dynamic_cast<ClusterSequenceStructure*>(_structure_shared_ptr.get()); 
     assert(csi != NULL);
     csi->set_associated_cs(NULL);
   }
@@ -1454,7 +1466,8 @@ void ClusterSequence::add_constituents (
 //----------------------------------------------------------------------
 // initialise the history in a standard way
 void ClusterSequence::_add_step_to_history (
-	       const int step_number, const int parent1, 
+               //NO_LONGER_USED: const int step_number,
+               const int parent1, 
 	       const int parent2, const int jetp_index,
 	       const double dij) {
 
@@ -1468,7 +1481,9 @@ void ClusterSequence::_add_step_to_history (
   _history.push_back(element);
 
   int local_step = _history.size()-1;
-  assert(local_step == step_number);
+  //#ifndef __NO_ASSERTS__
+  //assert(local_step == step_number);
+  //#endif
 
   // sanity check: make sure the particles have not already been recombined
   //
@@ -1668,8 +1683,12 @@ void ClusterSequence::_do_ij_recombination_step(
   int hist_i = _jets[jet_i].cluster_hist_index();
   int hist_j = _jets[jet_j].cluster_hist_index();
 
-  _add_step_to_history(newstep_k, min(hist_i, hist_j), max(hist_i,hist_j),
+  _add_step_to_history(min(hist_i, hist_j), max(hist_i,hist_j),
 		       newjet_k, dij);
+
+  //  _add_step_to_history(newstep_k, min(hist_i, hist_j), max(hist_i,hist_j),
+  //		       newjet_k, dij);
+
 
 }
 
@@ -1679,12 +1698,15 @@ void ClusterSequence::_do_ij_recombination_step(
 /// jet_i with the beam
 void ClusterSequence::_do_iB_recombination_step(
 				  const int jet_i, const double diB) {
-  // get history index
-  int newstep_k = _history.size();
-
   // recombine the jet with the beam
-  _add_step_to_history(newstep_k,_jets[jet_i].cluster_hist_index(),BeamJet,
+  _add_step_to_history(_jets[jet_i].cluster_hist_index(),BeamJet,
 		       Invalid, diB);
+
+  // // get history index
+  // int newstep_k = _history.size();
+  // 
+  // _add_step_to_history(newstep_k,_jets[jet_i].cluster_hist_index(),BeamJet,
+  //         	       Invalid, diB);
 
 }
 

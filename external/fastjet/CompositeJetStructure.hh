@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: CompositeJetStructure.hh 3652 2014-09-03 13:31:13Z salam $
+// $Id: CompositeJetStructure.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -63,13 +63,13 @@ public:
   };
 
   /// description
-  virtual std::string description() const;
+  virtual std::string description() const FASTJET_OVERRIDE;
 
   // things reimplemented from the base structure
   //-------------------------------------------------------------------
   /// true unless the jet has no pieces (see also the description of
   /// constituents() below)
-  virtual bool has_constituents() const;
+  virtual bool has_constituents() const FASTJET_OVERRIDE;
 
   /// return the constituents (i.e. the union of the constituents of each piece)
   /// 
@@ -77,39 +77,39 @@ public:
   /// considered as a constituent
   /// Note that as a consequence, a composite jet with no pieces will
   /// have an empty vector as constituents
-  virtual std::vector<PseudoJet> constituents(const PseudoJet &jet) const;
+  virtual std::vector<PseudoJet> constituents(const PseudoJet &jet) const FASTJET_OVERRIDE;
 
   //-------------------------------------------------------------------
   // information related to the pieces of the jet
   //-------------------------------------------------------------------
   /// true if it has pieces (always the case)
-  virtual bool has_pieces(const PseudoJet & /*jet*/) const {return true;}
+  virtual bool has_pieces(const PseudoJet & /*jet*/) const FASTJET_OVERRIDE {return true;}
 
   /// returns the pieces
-  virtual std::vector<PseudoJet> pieces(const PseudoJet &jet) const;
+  virtual std::vector<PseudoJet> pieces(const PseudoJet &jet) const FASTJET_OVERRIDE;
 
   // area-related material
 #ifndef __FJCORE__
 
   /// check if it has a well-defined area
-  virtual bool has_area() const;
+  virtual bool has_area() const FASTJET_OVERRIDE;
 
   /// return the jet (scalar) area.
-  virtual double area(const PseudoJet &reference) const;
+  virtual double area(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// return the error (uncertainty) associated with the determination
   /// of the area of this jet.
   ///
   /// Be conservative: return the sum of the errors
-  virtual double area_error(const PseudoJet &reference) const;
+  virtual double area_error(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// return the jet 4-vector area.
-  virtual PseudoJet area_4vector(const PseudoJet &reference) const;
+  virtual PseudoJet area_4vector(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   /// true if this jet is made exclusively of ghosts.
   ///
   /// In this case, it will be true if all pieces are pure ghost
-  virtual bool is_pure_ghost(const PseudoJet &reference) const;
+  virtual bool is_pure_ghost(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
   //unused: // allows one to modify the area information
   //unused: // (for use in join())

@@ -26,6 +26,16 @@
   <td>event number</td>
   <td></td>
 </tr>
+<tr class="odd">
+  <td>ReadTime</td>
+  <td>read time</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>ProcTime</td>
+  <td>processing time</td>
+  <td></td>
+</tr>
 <tr class="class"><td colspan="3" id="LHCOEvent">class LHCOEvent</td></tr>
 <tr class="odd">
   <td><a href="#Event">Event</a></td>
@@ -67,6 +77,17 @@
   <td>AlphaQCD</td>
   <td>value of the QCD coupling used in the event </td>
   <td> hepup.AQCDUP</td>
+</tr>
+<tr class="class"><td colspan="3" id="LHEFWeight">class LHEFWeight</td></tr>
+<tr class="even">
+  <td>ID</td>
+  <td>weight ID</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>Weight</td>
+  <td>weight value</td>
+  <td></td>
 </tr>
 <tr class="class"><td colspan="3" id="HepMCEvent">class HepMCEvent</td></tr>
 <tr class="odd">
@@ -206,23 +227,43 @@
   <td> hepevt.phep[number][2]</td>
 </tr>
 <tr class="odd">
+  <td>P</td>
+  <td>particle momentum</td>
+  <td></td>
+</tr>
+<tr class="even">
   <td>PT</td>
   <td>particle transverse momentum</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>Eta</td>
   <td>particle pseudorapidity</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>Phi</td>
   <td>particle azimuthal angle</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>Rapidity</td>
   <td>particle rapidity</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>CtgTheta</td>
+  <td>particle cotangent of theta</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>D0</td>
+  <td>particle transverse impact parameter</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>DZ</td>
+  <td>particle longitudinal impact parameter</td>
   <td></td>
 </tr>
 <tr class="odd">
@@ -264,6 +305,66 @@
 <tr class="odd">
   <td>Z</td>
   <td>vertex position (z component)</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>ErrorT</td>
+  <td>vertex position error (t component)</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>ErrorX</td>
+  <td>vertex position error (x component)</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>ErrorY</td>
+  <td>vertex position error (y component)</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>ErrorZ</td>
+  <td>vertex position error (z component)</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>Index</td>
+  <td>vertex index</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>NDF</td>
+  <td>number of degrees of freedom</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>Sigma</td>
+  <td>vertex position (z component) error</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPT2</td>
+  <td>sum pt^2 of tracks attached to the vertex</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>GenSumPT2</td>
+  <td>sum pt^2 of gen tracks attached to the vertex</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>GenDeltaZ</td>
+  <td>distance in z to closest generated vertex</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>BTVSumPT2</td>
+  <td>sum pt^2 of tracks attached to the secondary vertex</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>Constituents</td>
+  <td>references to constituents</td>
   <td></td>
 </tr>
 <tr class="class"><td colspan="3" id="MissingET">class MissingET</td></tr>
@@ -327,13 +428,48 @@
   <td></td>
 </tr>
 <tr class="even">
+  <td>T</td>
+  <td>particle arrival time of flight</td>
+  <td></td>
+</tr>
+<tr class="odd">
   <td>EhadOverEem</td>
   <td>ratio of the hadronic versus electromagnetic energy deposited in the calorimeter</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>Particles</td>
   <td>references to generated particles</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>IsolationVar</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>IsolationVarRhoCorr</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPtCharged</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>SumPtNeutral</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPtChargedPU</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>SumPt</td>
+  <td>isolation variable</td>
   <td></td>
 </tr>
 <tr class="class"><td colspan="3" id="Electron">class Electron</td></tr>
@@ -353,18 +489,53 @@
   <td></td>
 </tr>
 <tr class="odd">
+  <td>T</td>
+  <td>particle arrival time of flight</td>
+  <td></td>
+</tr>
+<tr class="even">
   <td>Charge</td>
   <td>electron charge</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>EhadOverEem</td>
   <td>ratio of the hadronic versus electromagnetic energy deposited in the calorimeter</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>Particle</td>
   <td>reference to generated particle</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>IsolationVar</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>IsolationVarRhoCorr</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPtCharged</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>SumPtNeutral</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPtChargedPU</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>SumPt</td>
+  <td>isolation variable</td>
   <td></td>
 </tr>
 <tr class="class"><td colspan="3" id="Muon">class Muon</td></tr>
@@ -384,13 +555,48 @@
   <td></td>
 </tr>
 <tr class="odd">
+  <td>T</td>
+  <td>particle arrival time of flight</td>
+  <td></td>
+</tr>
+<tr class="even">
   <td>Charge</td>
   <td>muon charge</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>Particle</td>
   <td>reference to generated particle</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>IsolationVar</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>IsolationVarRhoCorr</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>SumPtCharged</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPtNeutral</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>SumPtChargedPU</td>
+  <td>isolation variable</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>SumPt</td>
+  <td>isolation variable</td>
   <td></td>
 </tr>
 <tr class="class"><td colspan="3" id="Jet">class Jet</td></tr>
@@ -415,91 +621,126 @@
   <td></td>
 </tr>
 <tr class="even">
+  <td>Flavor</td>
+  <td>jet flavor</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>FlavorAlgo</td>
+  <td>jet flavor</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>FlavorPhys</td>
+  <td>jet flavor</td>
+  <td></td>
+</tr>
+<tr class="odd">
   <td>BTag</td>
   <td>0 or 1 for a jet that has been tagged as containing a heavy quark</td>
   <td></td>
 </tr>
+<tr class="even">
+  <td>BTagAlgo</td>
+  <td>0 or 1 for a jet that has been tagged as containing a heavy quark</td>
+  <td></td>
+</tr>
 <tr class="odd">
+  <td>BTagPhys</td>
+  <td>0 or 1 for a jet that has been tagged as containing a heavy quark</td>
+  <td></td>
+</tr>
+<tr class="even">
   <td>TauTag</td>
   <td>0 or 1 for a jet that has been tagged as a tau</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>Charge</td>
   <td>tau charge</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>EhadOverEem</td>
   <td>ratio of the hadronic versus electromagnetic energy deposited in the calorimeter</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>NCharged</td>
-  <td>number of charged constituents </td>
+  <td>number of charged constituents</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>NNeutrals</td>
-  <td>number of neutral constituents </td>
-  <td></td>
-</tr>
-<tr class="even">
-  <td>Beta</td>
-  <td>(sum pt of charged pile-up constituents)/(sum pt of charged constituents) </td>
+  <td>number of neutral constituents</td>
   <td></td>
 </tr>
 <tr class="odd">
-  <td>BetaStar</td>
-  <td>(sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents) </td>
+  <td>Beta</td>
+  <td>(sum pt of charged pile-up constituents)/(sum pt of charged constituents)</td>
   <td></td>
 </tr>
 <tr class="even">
+  <td>BetaStar</td>
+  <td>(sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)</td>
+  <td></td>
+</tr>
+<tr class="odd">
   <td>MeanSqDeltaR</td>
   <td>average distance (squared) between constituent and jet weighted by pt (squared) of constituent</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>PTD</td>
   <td>average pt between constituent and jet weighted by pt of constituent</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>FracPt[5]</td>
-  <td>(sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents) </td>
-  <td></td>
-</tr>
-<tr class="odd">
-  <td>Tau1</td>
-  <td>1-subjettiness</td>
+  <td>(sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents)</td>
   <td></td>
 </tr>
 <tr class="even">
-  <td>Tau2</td>
-  <td>2-subjettiness</td>
+  <td>Tau[5]</td>
+  <td>N-subjettiness</td>
   <td></td>
 </tr>
 <tr class="odd">
-  <td>Tau3</td>
-  <td>3-subjettiness</td>
+  <td>TrimmedP4[5]</td>
+  <td>first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta</td>
   <td></td>
 </tr>
 <tr class="even">
-  <td>Tau4</td>
-  <td>4-subjettiness</td>
+  <td>PrunedP4[5]</td>
+  <td>first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta</td>
   <td></td>
 </tr>
 <tr class="odd">
-  <td>Tau5</td>
-  <td>5-subjettiness</td>
+  <td>SoftDroppedP4[5]</td>
+  <td>first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta</td>
   <td></td>
 </tr>
 <tr class="even">
+  <td>NSubJetsTrimmed</td>
+  <td>number of subjets trimmed</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>NSubJetsPruned</td>
+  <td>number of subjets pruned</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>NSubJetsSoftDropped</td>
+  <td>number of subjets soft-dropped</td>
+  <td></td>
+</tr>
+<tr class="odd">
   <td>Constituents</td>
   <td>references to constituents</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>Particles</td>
   <td>references to generated particles</td>
   <td></td>
@@ -516,18 +757,28 @@
   <td></td>
 </tr>
 <tr class="even">
+  <td>P</td>
+  <td>track momentum</td>
+  <td></td>
+</tr>
+<tr class="odd">
   <td>PT</td>
   <td>track transverse momentum</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>Eta</td>
   <td>track pseudorapidity</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>Phi</td>
   <td>track azimuthal angle</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>CtgTheta</td>
+  <td>track cotangent of theta</td>
   <td></td>
 </tr>
 <tr class="odd">
@@ -541,48 +792,118 @@
   <td></td>
 </tr>
 <tr class="odd">
+  <td>T</td>
+  <td>track vertex position (t component)</td>
+  <td></td>
+</tr>
+<tr class="even">
   <td>X</td>
   <td>track vertex position (x component)</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>Y</td>
   <td>track vertex position (y component)</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>Z</td>
   <td>track vertex position (z component)</td>
   <td></td>
 </tr>
-<tr class="even">
-  <td>T</td>
-  <td>track vertex position (z component)</td>
+<tr class="odd">
+  <td>TOuter</td>
+  <td>track position (t component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>XOuter</td>
   <td>track position (x component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
   <td>YOuter</td>
   <td>track position (y component) at the tracker edge</td>
   <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
   <td>ZOuter</td>
   <td>track position (z component) at the tracker edge</td>
   <td></td>
 </tr>
+<tr class="odd">
+  <td>Xd</td>
+  <td>X coordinate of point of closest approach to vertex</td>
+  <td></td>
+</tr>
 <tr class="even">
-  <td>TOuter</td>
-  <td>track position (z component) at the tracker edge</td>
+  <td>Yd</td>
+  <td>Y coordinate of point of closest approach to vertex</td>
   <td></td>
 </tr>
 <tr class="odd">
+  <td>Zd</td>
+  <td>Z coordinate of point of closest approach to vertex</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>L</td>
+  <td>track path length</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>D0</td>
+  <td>track transverse impact parameter</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>DZ</td>
+  <td>track longitudinal impact parameter</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>ErrorP</td>
+  <td>track momentum error</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>ErrorPT</td>
+  <td>track transverse momentum error</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>ErrorPhi</td>
+  <td>track azimuthal angle error</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>ErrorCtgTheta</td>
+  <td>track cotangent of theta error</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>ErrorT</td>
+  <td>time measurement error</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>ErrorD0</td>
+  <td>track transverse impact parameter error</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>ErrorDZ</td>
+  <td>track longitudinal impact parameter error</td>
+  <td></td>
+</tr>
+<tr class="even">
   <td>Particle</td>
   <td>reference to generated particle</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>VertexIndex</td>
+  <td>reference to vertex</td>
   <td></td>
 </tr>
 <tr class="class"><td colspan="3" id="Tower">class Tower</td></tr>
@@ -604,6 +925,16 @@
 <tr class="odd">
   <td>E</td>
   <td>calorimeter tower energy</td>
+  <td></td>
+</tr>
+<tr class="even">
+  <td>T</td>
+  <td>ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared</td>
+  <td></td>
+</tr>
+<tr class="odd">
+  <td>NTimeHits</td>
+  <td>number of hits contributing to time measurement</td>
   <td></td>
 </tr>
 <tr class="even">

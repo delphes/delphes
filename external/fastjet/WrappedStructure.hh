@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: WrappedStructure.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: WrappedStructure.hh 4047 2016-03-03 13:21:49Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -56,7 +56,7 @@ public:
   /// the argument is the structure we need to wrap
   WrappedStructure(const SharedPtr<PseudoJetStructureBase> & to_be_shared)
     : _structure(to_be_shared){
-    if (!_structure())
+    if (!_structure)
       throw Error("Trying to construct a wrapped structure around an empty (NULL) structure");
   }
 
@@ -64,7 +64,7 @@ public:
   virtual ~WrappedStructure(){}
 
   /// description
-  virtual std::string description() const{ 
+  virtual std::string description() const FASTJET_OVERRIDE{ 
     return "PseudoJet wrapping the structure ("+_structure->description()+")"; 
   }
 
@@ -75,31 +75,31 @@ public:
   //\{
   //-------------------------------------------------------------
   /// returns true if there is an associated ClusterSequence
-  virtual bool has_associated_cluster_sequence() const {
+  virtual bool has_associated_cluster_sequence() const FASTJET_OVERRIDE {
     return _structure->has_associated_cluster_sequence();
   }
 
   /// get a (const) pointer to the parent ClusterSequence (NULL if
   /// inexistent)
-  virtual const ClusterSequence* associated_cluster_sequence() const{
+  virtual const ClusterSequence* associated_cluster_sequence() const FASTJET_OVERRIDE{
     return _structure->associated_cluster_sequence();
   }
   
   /// returns true if this PseudoJet has an associated and still
   /// valid ClusterSequence.
-  virtual bool has_valid_cluster_sequence() const {
+  virtual bool has_valid_cluster_sequence() const FASTJET_OVERRIDE {
     return _structure->has_valid_cluster_sequence();
   }
 
   /// if the jet has a valid associated cluster sequence then return a
   /// pointer to it; otherwise throw an error
-  virtual const ClusterSequence * validated_cs() const{
+  virtual const ClusterSequence * validated_cs() const FASTJET_OVERRIDE{
     return _structure->validated_cs();
   }
 
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
-  virtual const ClusterSequenceAreaBase * validated_csab() const{
+  virtual const ClusterSequenceAreaBase * validated_csab() const FASTJET_OVERRIDE{
     return _structure->validated_csab();
   }
 
@@ -119,7 +119,7 @@ public:
   /// 'partner' is set to 0.
   ///
   /// By default, throws an Error
-  virtual bool has_partner(const PseudoJet &reference, PseudoJet &partner) const{
+  virtual bool has_partner(const PseudoJet &reference, PseudoJet &partner) const FASTJET_OVERRIDE{
     return _structure->has_partner(reference, partner);
   }
 
@@ -128,7 +128,7 @@ public:
   /// is set to 0.
   /// 
   /// By default, throws an Error
-  virtual bool has_child(const PseudoJet &reference, PseudoJet &child) const{
+  virtual bool has_child(const PseudoJet &reference, PseudoJet &child) const FASTJET_OVERRIDE{
     return _structure->has_child(reference, child);
   }
 
@@ -137,7 +137,8 @@ public:
   /// arguments. Otherwise, set these to 0.
   ///
   /// By default, throws an Error
-  virtual bool has_parents(const PseudoJet &reference, PseudoJet &parent1, PseudoJet &parent2) const{
+  virtual bool has_parents(const PseudoJet &reference,
+                           PseudoJet &parent1, PseudoJet &parent2) const FASTJET_OVERRIDE{
     return _structure->has_parents(reference, parent1, parent2);
   }
 
@@ -145,7 +146,8 @@ public:
   /// passed as argument.
   ///
   /// By default, throws an Error
-  virtual bool object_in_jet(const PseudoJet &reference, const PseudoJet &jet) const{
+  virtual bool object_in_jet(const PseudoJet &reference,
+                             const PseudoJet &jet) const FASTJET_OVERRIDE{
     return _structure->object_in_jet(reference, jet);
   }
 
@@ -153,19 +155,19 @@ public:
   /// return true if the structure supports constituents. 
   ///
   /// false by default
-  virtual bool has_constituents() const {
+  virtual bool has_constituents() const  FASTJET_OVERRIDE{
     return _structure->has_constituents();
   }
 
   /// retrieve the constituents. 
   ///
   /// By default, throws an Error
-  virtual std::vector<PseudoJet> constituents(const PseudoJet &reference) const{
+  virtual std::vector<PseudoJet> constituents(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->constituents(reference);
   }
 
   /// return true if the structure supports exclusive_subjets. 
-  virtual bool has_exclusive_subjets() const {
+  virtual bool has_exclusive_subjets() const  FASTJET_OVERRIDE{
     return _structure->has_exclusive_subjets();
   }
 
@@ -179,7 +181,8 @@ public:
   /// just getting that list of constituents.
   ///
   /// By default, throws an Error
-  virtual std::vector<PseudoJet> exclusive_subjets(const PseudoJet &reference, const double & dcut) const{
+  virtual std::vector<PseudoJet> exclusive_subjets(const PseudoJet &reference,
+                                                   const double & dcut) const FASTJET_OVERRIDE{
     return _structure->exclusive_subjets(reference, dcut);
   }
 
@@ -188,7 +191,8 @@ public:
   /// exclusive_subjets.size()
   ///
   /// By default, throws an Error
-  virtual int n_exclusive_subjets(const PseudoJet &reference, const double & dcut) const{
+  virtual int n_exclusive_subjets(const PseudoJet &reference,
+                                  const double & dcut) const FASTJET_OVERRIDE{
     return _structure->n_exclusive_subjets(reference, dcut);
   }
 
@@ -197,7 +201,8 @@ public:
   /// than n).
   ///
   /// By default, throws an Error
-  virtual std::vector<PseudoJet> exclusive_subjets_up_to (const PseudoJet &reference, int nsub) const{
+  virtual std::vector<PseudoJet> exclusive_subjets_up_to (const PseudoJet &reference,
+                                                          int nsub) const FASTJET_OVERRIDE{
     return _structure->exclusive_subjets_up_to (reference, nsub);
   }
 
@@ -205,7 +210,7 @@ public:
   /// subjets inside this jet.
   ///
   /// By default, throws an Error
-  virtual double exclusive_subdmerge(const PseudoJet &reference, int nsub) const{
+  virtual double exclusive_subdmerge(const PseudoJet &reference, int nsub) const FASTJET_OVERRIDE{
     return _structure->exclusive_subdmerge(reference, nsub);
   }
 
@@ -214,7 +219,7 @@ public:
   /// this jet.
   ///
   /// By default, throws an Error
-  virtual double exclusive_subdmerge_max(const PseudoJet &reference, int nsub) const{
+  virtual double exclusive_subdmerge_max(const PseudoJet &reference, int nsub) const FASTJET_OVERRIDE{
     return _structure->exclusive_subdmerge_max(reference, nsub);
   }
 
@@ -225,14 +230,14 @@ public:
   /// return true if the structure supports pieces. 
   ///
   /// false by default
-  virtual bool has_pieces(const PseudoJet &reference) const {
+  virtual bool has_pieces(const PseudoJet &reference) const FASTJET_OVERRIDE {
     return _structure->has_pieces(reference);
   }
 
   /// retrieve the pieces building the jet. 
   ///
   /// By default, throws an Error
-  virtual std::vector<PseudoJet> pieces(const PseudoJet &reference) const{
+  virtual std::vector<PseudoJet> pieces(const PseudoJet &reference) const FASTJET_OVERRIDE {
     return _structure->pieces(reference);
   }
 
@@ -243,14 +248,14 @@ public:
   /// check if it has a defined area
   ///
   /// false by default
-  virtual bool has_area() const {
+  virtual bool has_area() const FASTJET_OVERRIDE  {
     return _structure->has_area();
   }
 
   /// return the jet (scalar) area.
   ///
   /// By default, throws an Error
-  virtual double area(const PseudoJet &reference) const{
+  virtual double area(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->area(reference);
   }
 
@@ -258,21 +263,21 @@ public:
   /// of the area of this jet.
   ///
   /// By default, throws an Error
-  virtual double area_error(const PseudoJet &reference) const{
+  virtual double area_error(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->area_error(reference);
   }
 
   /// return the jet 4-vector area.
   ///
   /// By default, throws an Error
-  virtual PseudoJet area_4vector(const PseudoJet &reference) const{
+  virtual PseudoJet area_4vector(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->area_4vector(reference);
   }
 
   /// true if this jet is made exclusively of ghosts.
   ///
   /// By default, throws an Error
-  virtual bool is_pure_ghost(const PseudoJet &reference) const{
+  virtual bool is_pure_ghost(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->is_pure_ghost(reference);
   }
 

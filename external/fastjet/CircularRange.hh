@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: CircularRange.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: CircularRange.hh 4074 2016-03-08 09:09:25Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -34,6 +34,7 @@
 
 #include "fastjet/RangeDefinition.hh"
 #include "fastjet/Error.hh"
+#include "fastjet/internal/deprecated.hh"
 
 // for backwards compatibility: one should now use SelectorCircle,
 // defined in fastjet/Selector.hh, instead CircularRange
@@ -49,9 +50,11 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 class CircularRange : public fastjet::RangeDefinition {
 public:
   /// constructor
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
   CircularRange() {_set_invalid_rapphi();}
   
   /// initialise CircularRange with a jet
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
   CircularRange(const fastjet::PseudoJet & jet, double distance) {
                 _distance = distance;
 		_rapjet = jet.rap();
@@ -59,6 +62,7 @@ public:
 		_total_area = fastjet::pi*_distance*_distance;  }
 
   /// initialise CircularRange with a (rap,phi) point
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
   CircularRange(double rap, double phi, double distance) {
                 _distance = distance;
 		_rapjet = rap;
@@ -66,6 +70,7 @@ public:
 		_total_area = fastjet::pi*_distance*_distance;  }
 
   /// initialise CircularRange with just the radius parameter
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
   CircularRange(double distance) {
                 _set_invalid_rapphi();
                 _distance = distance;
@@ -75,17 +80,17 @@ public:
   virtual ~CircularRange() {}
   
   /// return description of range
-  virtual inline std::string description() const {
+  virtual inline std::string description() const FASTJET_OVERRIDE {
     std::ostringstream ostr;
     ostr << "CircularRange: within distance "<< _distance << " of given jet or point." ;
     return ostr.str(); }
 
   /// returns true since this range is localizable (i.e. set_position
   /// does something meaningful)
-  virtual inline bool is_localizable() const { return true; }
+  virtual inline bool is_localizable() const FASTJET_OVERRIDE { return true; }
   
   /// return bool according to whether (rap,phi) is in range
-  virtual inline bool is_in_range(double rap, double phi) const {
+  virtual inline bool is_in_range(double rap, double phi) const FASTJET_OVERRIDE {
      if (! _rapphi_are_valid()) {
        throw Error("Circular range used without a center having being defined (use set_position())");
      }
@@ -97,7 +102,7 @@ public:
      return inrange; }
 
   /// return the minimal and maximal rapidity of this range
-  virtual inline void get_rap_limits(double & rapmin, double & rapmax) const {
+  virtual inline void get_rap_limits(double & rapmin, double & rapmax) const FASTJET_OVERRIDE {
      rapmin = _rapjet - _distance;
      rapmax = _rapjet + _distance; }
 

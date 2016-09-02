@@ -63,8 +63,13 @@
 #define FASTJET_ENABLE_PLUGIN_TRACKJET  /**/ 
 #endif
 
-/* defined if C++11 features have been enabled */
-/* #undef HAVE_CXX11_FEATURES */
+/* compile the deprecated parts of the interface using auto-ptr */
+#ifndef FASTJET_HAVE_AUTO_PTR_INTERFACE 
+#define FASTJET_HAVE_AUTO_PTR_INTERFACE  /**/ 
+#endif
+
+/* compiler supports c++14 deprecated keyword */
+/* #undef HAVE_CXX14_DEPRECATED */
 
 /* defined if demangling is enabled at configure time and is supported through
    the GNU C++ ABI */
@@ -78,6 +83,14 @@
 /* Define to 1 if you have the <execinfo.h> header file. */
 #ifndef FASTJET_HAVE_EXECINFO_H 
 #define FASTJET_HAVE_EXECINFO_H  1 
+#endif
+
+/* compiler supports the "explicit" keyword for operators */
+/* #undef HAVE_EXPLICIT_FOR_OPERATORS */
+
+/* compiler supports GNU c++ deprecated attribute */
+#ifndef FASTJET_HAVE_GNUCXX_DEPRECATED 
+#define FASTJET_HAVE_GNUCXX_DEPRECATED  /**/ 
 #endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
@@ -94,6 +107,9 @@
 #ifndef FASTJET_HAVE_MEMORY_H 
 #define FASTJET_HAVE_MEMORY_H  1 
 #endif
+
+/* compiler supports the "override" keyword */
+/* #undef HAVE_OVERRIDE */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #ifndef FASTJET_HAVE_STDINT_H 
@@ -130,8 +146,7 @@
 #define FASTJET_HAVE_UNISTD_H  1 
 #endif
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #ifndef FASTJET_LT_OBJDIR 
 #define FASTJET_LT_OBJDIR  ".libs/" 
 #endif
@@ -153,7 +168,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef FASTJET_PACKAGE_STRING 
-#define FASTJET_PACKAGE_STRING  "FastJet 3.1.3" 
+#define FASTJET_PACKAGE_STRING  "FastJet 3.2.1" 
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -161,9 +176,14 @@
 #define FASTJET_PACKAGE_TARNAME  "fastjet" 
 #endif
 
+/* Define to the home page for this package. */
+#ifndef FASTJET_PACKAGE_URL 
+#define FASTJET_PACKAGE_URL  "" 
+#endif
+
 /* Define to the version of this package. */
 #ifndef FASTJET_PACKAGE_VERSION 
-#define FASTJET_PACKAGE_VERSION  "3.1.3" 
+#define FASTJET_PACKAGE_VERSION  "3.2.1" 
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
@@ -173,7 +193,7 @@
 
 /* Version number of package */
 #ifndef FASTJET_VERSION 
-#define FASTJET_VERSION  "3.1.3" 
+#define FASTJET_VERSION  "3.2.1" 
 #endif
 
 /* Major version of this package */
@@ -183,17 +203,17 @@
 
 /* Minor version of this package */
 #ifndef FASTJET_VERSION_MINOR 
-#define FASTJET_VERSION_MINOR  1 
+#define FASTJET_VERSION_MINOR  2 
 #endif
 
 /* Version of the package under the form XYYZZ (instead of X.Y.Z) */
 #ifndef FASTJET_VERSION_NUMBER 
-#define FASTJET_VERSION_NUMBER  30103 
+#define FASTJET_VERSION_NUMBER  30201 
 #endif
 
 /* Patch version of this package */
 #ifndef FASTJET_VERSION_PATCHLEVEL 
-#define FASTJET_VERSION_PATCHLEVEL  3 
+#define FASTJET_VERSION_PATCHLEVEL  1 
 #endif
 
 /* Pre-release version of this package */

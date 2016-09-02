@@ -92,21 +92,28 @@ void TimeSmearing::Finish()
 void TimeSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t t;
+  Double_t ti, tf_smeared, tf;
   const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
-    t = candidatePosition.T()*1.0E-3/c_light;
+    const TLorentzVector &candidateInitialPosition = candidate->InitialPosition;
+    const TLorentzVector &candidateFinalPosition = candidate->Position;
+
+    ti = candidateInitialPosition.T()*1.0E-3/c_light;
+    tf = candidateFinalPosition.T()*1.0E-3/c_light;
 
     // apply smearing formula
-    t = gRandom->Gaus(t, fTimeResolution);
+    tf_smeared = gRandom->Gaus(tf, fTimeResolution);
+    ti = ti + tf_smeared - tf;
 
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->Position.SetT(t*1.0E3*c_light);
+    candidate->InitialPosition.SetT(ti*1.0E3*c_light);
+    candidate->Position.SetT(tf*1.0E3*c_light);
+
+    candidate->ErrorT = fTimeResolution*1.0E3*c_light;
 
     candidate->AddCandidate(mother);
 

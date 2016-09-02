@@ -165,9 +165,9 @@ private:
 
   // part needed for the cache 
   // variables for caching the results and the input
-  static std::auto_ptr<SISConeSphericalPlugin        > stored_plugin;
-  static std::auto_ptr<std::vector<PseudoJet>        > stored_particles;
-  static std::auto_ptr<siscone_spherical::CSphsiscone> stored_siscone;
+  static SharedPtr<SISConeSphericalPlugin        > stored_plugin;
+  static SharedPtr<std::vector<PseudoJet>        > stored_particles;
+  static SharedPtr<siscone_spherical::CSphsiscone> stored_siscone;
 };
 
 //======================================================================

@@ -31,6 +31,11 @@ The key new features are:
   * (v2.2)  XConePlugin, which improves on the previous NjettinessPlugin to use
     N-jettiness as a jet finder using the new ConicalGeometric measure.
 
+-- 2.2.4:  (Jun 14, 2016) Fixed bug where multi-pass minimization could yield
+           pathological axes (thanks Gregory Soyez) 
+-- 2.2.3:  (Apr 4, 2016) Fixed bug where a jet with fewer than N constituents
+           could give random value for tau_N (thanks Nathan Hartland)
+-- 2.2.2:  (Mar 29, 2016)  Updating SharedPtr interface for FJ 3.2
 -- 2.2.1:  (Sept 28, 2015)  Fix of small Makefile bug
 -- 2.2.0:  (Sept 7, 2015)  Inclusion of the XCone jet algorithm, as well as a
            few new measures, including the "conical geometric" measure and

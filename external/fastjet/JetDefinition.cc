@@ -1,5 +1,5 @@
 //FJSTARTHEADER
-// $Id: JetDefinition.cc 3677 2014-09-09 22:45:25Z soyez $
+// $Id: JetDefinition.cc 4074 2016-03-08 09:09:25Z soyez $
 //
 // Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -44,8 +44,8 @@ const double JetDefinition::max_allowable_R = 1000.0;
 //  from .hh to .cc]
 JetDefinition::JetDefinition(JetAlgorithm jet_algorithm_in, 
 			     double R_in, 
-			     Strategy strategy_in,
 			     RecombinationScheme recomb_scheme_in,
+			     Strategy strategy_in,
                              int nparameters) :
   _jet_algorithm(jet_algorithm_in), _Rparam(R_in), _strategy(strategy_in) {
 
@@ -184,7 +184,7 @@ void JetDefinition::set_recombination_scheme(
   _default_recombiner = JetDefinition::DefaultRecombiner(recomb_scheme);
 
   // do not forget to delete the existing recombiner if needed
-  if (_shared_recombiner()) _shared_recombiner.reset();
+  if (_shared_recombiner) _shared_recombiner.reset();
 
   _recombiner = 0;
 }
