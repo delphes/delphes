@@ -20,7 +20,7 @@ set ExecutionPath {
   ECal
   HCal
 
-  TowerMerger
+  Calorimeter
   EFlowMerger
 
   PhotonEfficiency
@@ -329,12 +329,13 @@ module PdgCodeFilter ElectronFilter {
 # Tower Merger (in case not using e-flow algorithm)
 ###################################################
 
-module Merger TowerMerger {
+module Merger Calorimeter {
 # add InputArray InputArray
   add InputArray ECal/ecalTowers
   add InputArray HCal/hcalTowers
   set OutputArray towers
 }
+
 
 ####################
 # Energy flow merger
@@ -424,7 +425,7 @@ module Merger GenMissingET {
 ############
 
 module FastJetFinder FastJetFinder {
-#  set InputArray TowerMerger/towers
+#  set InputArray Calorimeter/towers
   set InputArray EFlowMerger/eflow
 
   set OutputArray jets
@@ -646,7 +647,7 @@ module TreeWriter TreeWriter {
   add Branch GenMissingET/momentum GenMissingET MissingET
 
   add Branch TrackMerger/tracks Track Track
-  add Branch TowerMerger/towers Tower Tower
+  add Branch Calorimeter/towers Tower Tower
 
   add Branch HCal/eflowTracks EFlowTrack Track
   add Branch ECal/eflowPhotons EFlowPhoton Tower
