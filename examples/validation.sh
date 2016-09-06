@@ -12,7 +12,7 @@
 # 
 #  e.g.
 # 
-# ./examples/validation.sh delphes_card_CMS.tcl 100000
+# ./examples/validation.sh cards/delphes_card_CMS.tcl 100000
 #
 # Note that the more events you specify, the more accurate the controls plots will be ...
 #
@@ -26,11 +26,11 @@ E_BADARGS=65
 if [ $# -ne $EXPECTED_ARGS ]
 then
   echo "Usage: ./examples/validation.sh [detector_card] [number_of_events]"
-  echo "for instance: ./examples/validation.sh delphes_card_CMS.tcl 10000"
+  echo "for instance: ./examples/validation.sh cards/delphes_card_CMS.tcl 10000"
   exit $E_BADARGS
 fi
 
-card=$1
+card=$(basename $1)
 nEvents=$2
 validationCard=cards/validation_$card
 output=validation_${card%.*}.root
@@ -41,8 +41,8 @@ function runParticleGun {
   name=$1
   pid=$2
   cmnd="examples/Pythia8/configParticleGun_$name.cmnd"
-  sed '/Main:spareMode1/s/=[[:space:]]*[0-9]*/= '$pid'/' examples/Pythia8/configParticleGun.cmnd > $cmnd
-  sed '/Main:numberOfEvents/s/=[[:space:]]*[0-9]*/= '$nEvents'/' examples/Pythia8/configParticleGun.cmnd  > $cmnd 
+  sed '/Main:spareMode1/s/=[[:space:]]*[0-9]*/= '$pid'/' examples/Pythia8/configParticleGun.cmnd > examples/Pythia8/tmp.cmnd
+  sed '/Main:numberOfEvents/s/=[[:space:]]*[0-9]*/= '$nEvents'/' examples/Pythia8/tmp.cmnd  > $cmnd 
   ./DelphesPythia8 $validationCard $cmnd delphes_ParticleGun_$name.root
 }
 
