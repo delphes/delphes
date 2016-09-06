@@ -550,7 +550,7 @@ std::pair<Double_t, Double_t> GausFit(TH1* hist)
   hist->Fit("f1","RQ");
 
   TF1 *f2 = new TF1("f2", "gaus", f1->GetParameter(1) - 2*f1->GetParameter(2), f1->GetParameter(1) + 2*f1->GetParameter(2));
-  hist->Fit("f2","RQ");  
+  hist->Fit("f2","RQ");
 
   Double_t sig = f2->GetParameter(2);
   Double_t sigErr = f2->GetParError(2);
@@ -913,8 +913,11 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_elFwd, leg_elFwd, 0.2);
 
-  C_el1->Print("delphes_validation.pdf(","pdf");
-  C_el2->Print("delphes_validation.pdf","pdf");
+  TString pdfOutput(outputFile);
+  pdfOutput.ReplaceAll(".root", ".pdf");
+
+  C_el1->Print(pdfOutput+"(","pdf");
+  C_el2->Print(pdfOutput,"pdf");
 
   gDirectory->cd(0);
 
@@ -1014,8 +1017,8 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_muFwd, leg_muFwd, 0.3, 1);
 
-  C_mu1->Print("delphes_validation.pdf","pdf");
-  C_mu->Print("delphes_validation.pdf","pdf");
+  C_mu1->Print(pdfOutput,"pdf");
+  C_mu->Print(pdfOutput,"pdf");
 
   gDirectory->cd(0);
 
@@ -1115,8 +1118,8 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
 
   DrawAxis(mg_phFwd, leg_phFwd, 0.1);
 
-  C_ph1->Print("delphes_validation.pdf","pdf");
-  C_ph->Print("delphes_validation.pdf","pdf");
+  C_ph1->Print(pdfOutput,"pdf");
+  C_ph->Print(pdfOutput,"pdf");
 
   gDirectory->cd(0);
 
@@ -1266,10 +1269,10 @@ void Validation(const char *inputFileElectron, const char *inputFileMuon, const 
   mg_met->GetXaxis()->SetTitle("H_{T} [GeV]");
   mg_met->GetYaxis()->SetTitle("#sigma(ME_{x}) [GeV]");
 
-  C_jet->Print("delphes_validation.pdf","pdf");
-  C_btag1->Print("delphes_validation.pdf","pdf");
-  C_tautag1->Print("delphes_validation.pdf","pdf");
-  C_met->Print("delphes_validation.pdf)","pdf");
+  C_jet->Print(pdfOutput,"pdf");
+  C_btag1->Print(pdfOutput,"pdf");
+  C_tautag1->Print(pdfOutput,"pdf");
+  C_met->Print(pdfOutput+")","pdf");
 
   TFile *fout = new TFile(outputFile,"recreate");
 
