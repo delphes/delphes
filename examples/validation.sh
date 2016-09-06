@@ -34,6 +34,7 @@ card=$(basename $1)
 nEvents=$2
 validationCard=cards/validation_$card
 output=validation_${card%.*}.root
+cardlabel=${card%.*}
 
 sed 's/delphes_card_CMS.tcl/'$card'/g' cards/validation_card.tcl  > $validationCard
 
@@ -41,9 +42,11 @@ function runParticleGun {
   name=$1
   pid=$2
   cmnd="examples/Pythia8/configParticleGun_$name.cmnd"
+  rootfile="particleGun_${name}_${cardlabel}.root"
   sed '/Main:spareMode1/s/=[[:space:]]*[0-9]*/= '$pid'/' examples/Pythia8/configParticleGun.cmnd > examples/Pythia8/tmp.cmnd
   sed '/Main:numberOfEvents/s/=[[:space:]]*[0-9]*/= '$nEvents'/' examples/Pythia8/tmp.cmnd  > $cmnd 
-  ./DelphesPythia8 $validationCard $cmnd delphes_ParticleGun_$name.root
+  ./DelphesPythia8 $validationCard $cmnd $rootfile
+  
 }
 
 runParticleGun electron 11
@@ -53,4 +56,4 @@ runParticleGun jet 1
 runParticleGun bjet 5
 runParticleGun taujet 15
 
-./Validation delphes_ParticleGun_electron.root delphes_ParticleGun_muon.root delphes_ParticleGun_photon.root delphes_ParticleGun_jet.root delphes_ParticleGun_bjet.root delphes_ParticleGun_taujet.root $output
+./Validation particleGun_electron_$cardlabel.root particleGun_muon_$cardlabel.root particleGun_photon_$cardlabel.root particleGun_jet_$cardlabel.root particleGun_bjet_$cardlabel.root particleGun_taujet_$cardlabel.root $output
