@@ -6,8 +6,8 @@ Main:numberOfEvents = 10000        ! number of events to generate
 Main:timesAllowErrors = 3          ! how many aborts before run stops
 Main:spareFlag1 = on               ! true means particle gun
 Main:spareMode1 = 11               ! 1-5 - di-quark, 21 - di-gluon, 11 - single electron, 13 - single muon, 15 - single tau, 22 - single photon
-Main:spareParm1 = 10000            ! max pt
-Main:spareParm2 = 2.5              ! max eta
+Main:spareParm1 = 50000            ! max energy
+Main:spareParm2 = 6.0              ! max eta
 
 ! 2) Settings related to output in init(), next() and stat().
 
