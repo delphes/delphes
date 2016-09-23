@@ -152,7 +152,7 @@ void SignalHandler(int sig)
 // Optional final argument to put particle at rest => E = m.
 // from pythia8 example 21
 
-void fillParticle(int id, double pt_max, double eta_max,
+void fillParticle(int id, double p_max, double eta_max,
   Pythia8::Event &event, Pythia8::ParticleData &pdt, Pythia8::Rndm &rndm)
 {
   // Reset event record to allow for new event.
@@ -160,35 +160,39 @@ void fillParticle(int id, double pt_max, double eta_max,
 
   // Generate uniform pt and eta.
   double pt, eta, phi, pp, ee, mm;
-  pt = pow(10, 1.0 + (log10(pt_max) - 1.0) * rndm.flat());
+  
+  //pmin = 0.1 GeV for single particles
+  pp = pow(10, - 1.0 + (log10(p_max) + 1.0) * rndm.flat()); 
   eta = (2.0 * rndm.flat() - 1.0) * eta_max;
   phi = 2.0 * M_PI * rndm.flat();
-  pp = pt * cosh(eta);
   mm = pdt.mSel(id);
   ee = Pythia8::sqrtpos(pp*pp + mm*mm);
+  pt = pp / cosh(eta);
 
   // Store the particle in the event record.
   event.append(id, 1, 0, 0, pt * cos(phi), pt * sin(phi), pt * sinh(eta), ee, mm);
 }
 
-void fillPartons(int id, double pt_max, double eta_max,
+void fillPartons(int id, double p_max, double eta_max,
   Pythia8::Event &event, Pythia8::ParticleData &pdt, Pythia8::Rndm &rndm)
 {
 
   // Reset event record to allow for new event.
   event.reset();
 
-  // Information on a q qbar system, to be hadronized.
-
   // Generate uniform pt and eta.
   double pt, eta, phi, pp, ee, mm;
-  pt = pow(10, 1.0 + (log10(pt_max) - 1.0) * rndm.flat());
+
+  //pmin = 1 GeV for jets
+  pp = pow(10, log10(p_max) * rndm.flat());  
   eta = (2.0 * rndm.flat() - 1.0) * eta_max;
   phi = 2.0 * M_PI * rndm.flat();
-  pp = pt * cosh(eta);
-  mm = pdt.m0(id);
+  mm = pdt.mSel(id);
   ee = Pythia8::sqrtpos(pp*pp + mm*mm);
+  pt = pp / cosh(eta);
 
+  if( (id == 4 || id == 5) && pt < 10.0) return;
+ 
   if(id == 21)
   {
     event.append(21, 23, 101, 102, pt * cos(phi), pt * sin(phi), pt * sinh(eta), ee);
@@ -337,7 +341,7 @@ int main(int argc, char *argv[])
 
       if (pythia->flag("Main:spareFlag1"))
       {
-        if (pythia->mode("Main:spareMode1") == 11 || pythia->mode("Main:spareMode1") == 13 || pythia->mode("Main:spareMode1") == 15 || pythia->mode("Main:spareMode1") == 22) 
+        if (pythia->mode("Main:spareMode1") == 11 || pythia->mode("Main:spareMode1") == 13 || pythia->mode("Main:spareMode1") == 15 || pythia->mode("Main:spareMode1") == 22 || pythia->mode("Main:spareMode1") == 211 || pythia->mode("Main:spareMode1") == 2112) 
         { 
           fillParticle(pythia->mode("Main:spareMode1"), pythia->parm("Main:spareParm1"), pythia->parm("Main:spareParm2"), pythia->event, pythia->particleData, pythia->rndm);
         }
