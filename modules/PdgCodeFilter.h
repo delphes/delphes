@@ -52,6 +52,9 @@ private:
   Bool_t fInvert; //!
   Bool_t fRequireStatus; //!
   Int_t fStatus; //!
+  Bool_t fRequireCharge; //!
+  Int_t fCharge; //!
+
 
   std::vector<Int_t> fPdgCodes;
 

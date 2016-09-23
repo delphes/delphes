@@ -78,6 +78,9 @@ void PdgCodeFilter::Init()
   fRequireStatus = GetBool("RequireStatus", false);
   fStatus = GetInt("Status", 1);
 
+  fRequireCharge = GetBool("RequireCharge", false);
+  fCharge = GetInt("Charge", 1);
+
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
@@ -122,6 +125,7 @@ void PdgCodeFilter::Process()
 
     if(pt < fPTMin) continue;
     if(fRequireStatus && (candidate->Status != fStatus)) continue;
+    if(fRequireCharge && (candidate->Charge != fCharge)) continue;
 
     pass = kTRUE;
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
