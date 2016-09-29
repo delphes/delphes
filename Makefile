@@ -131,6 +131,14 @@ tmp/converters/stdhep2pileup.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootProgressBar.h
+CaloGrid$(ExeSuf): \
+	tmp/examples/CaloGrid.$(ObjSuf)
+
+tmp/examples/CaloGrid.$(ObjSuf): \
+	examples/CaloGrid.cpp \
+	display/Delphes3DGeometry.h \
+	classes/DelphesClasses.h \
+	external/ExRootAnalysis/ExRootConfReader.h
 Example1$(ExeSuf): \
 	tmp/examples/Example1.$(ObjSuf)
 
@@ -160,6 +168,7 @@ EXECUTABLE +=  \
 	root2lhco$(ExeSuf) \
 	root2pileup$(ExeSuf) \
 	stdhep2pileup$(ExeSuf) \
+	CaloGrid$(ExeSuf) \
 	Example1$(ExeSuf) \
 	Validation$(ExeSuf)
 
@@ -170,6 +179,7 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/root2lhco.$(ObjSuf) \
 	tmp/converters/root2pileup.$(ObjSuf) \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
+	tmp/examples/CaloGrid.$(ObjSuf) \
 	tmp/examples/Example1.$(ObjSuf) \
 	tmp/examples/Validation.$(ObjSuf)
 
@@ -1800,11 +1810,11 @@ external/fastjet/internal/TilingExtent.hh: \
 	external/fastjet/ClusterSequence.hh
 	@touch $@
 
-modules/Efficiency.h: \
+modules/TrackPileUpSubtractor.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-modules/TrackPileUpSubtractor.h: \
+modules/Efficiency.h: \
 	classes/DelphesModule.h
 	@touch $@
 
