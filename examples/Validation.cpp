@@ -1264,6 +1264,7 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double xmin, double xmax, double ym
   if(logx) gPad->SetLogx();
   if(logy) gPad->SetLogy();
 
+
   //gPad->SetGridx();
   //gPad->SetGridy();
   gPad->SetBottomMargin(0.2);
@@ -1274,7 +1275,17 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double xmin, double xmax, double ym
 }
 
 
-void Validation(const char *inputFilePion, const char *inputFileElectron, const char *inputFileMuon, const char *inputFilePhoton, const char *inputFileNeutralHadron, const char *inputFileJet, const char *inputFileBJet, const char *inputFileCJet, const char *inputFileTauJet, const char *outputFile)
+void Validation(const char *inputFilePion,
+                const char *inputFileElectron,
+                const char *inputFileMuon,
+                const char *inputFilePhoton,
+                const char *inputFileNeutralHadron,
+                const char *inputFileJet,
+                const char *inputFileBJet,
+                const char *inputFileCJet,
+                const char *inputFileTauJet,
+                const char *outputFile,
+                const char *version)
 {
 
   TChain *chainPion = new TChain("Delphes");
@@ -1378,6 +1389,24 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   Int_t sizePath = figPath.Length();
   figPath.Remove(lastSlash+1,sizePath);
 
+  TString header = pdfOutput;
+  header.ReplaceAll(".pdf", "");
+  header.ReplaceAll("validation_", "");
+  lastSlash = header.Last('/');
+  sizePath = header.Length();
+  header.Remove(0,lastSlash+1);
+
+  TString vrs(version);
+
+  TPaveText *pave = new TPaveText(0.0, 0.89, 0.94, 0.94,"NDC");
+  pave->SetTextAlign(kHAlignRight);
+  pave->SetTextFont(132);
+  pave->SetBorderSize(0);
+  pave->SetShadowColor(0);
+  pave->SetFillColor(0);
+  pave->SetFillStyle(0);
+  pave->AddText("Delphes "+vrs+" - "+header);
+
   TString s_etaMin, s_etaMax, s_eta, s_pt, s_e;
 
   Double_t ptMin = 1.;
@@ -1473,6 +1502,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkpi_res_pt->Draw("APE");
   DrawAxis(mg_trkpi_res_pt, leg_trkpi_res_pt, ptMin, ptMax, 0.01, 100, "p_{T} [GeV]", "(track resolution in p_{T})/p_{T} (%)", true, true);
   leg_trkpi_res_pt->Draw();
+  pave->Draw();
 
   c_trkpi_res_pt->Print(pdfOutput+"(","pdf");
   c_trkpi_res_pt->Print(figPath+"img_trkpi_res_pt.pdf","pdf");
@@ -1483,6 +1513,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkpi_res_eta->Draw("APE");
   DrawAxis(mg_trkpi_res_eta, leg_trkpi_res_eta, etaMin, etaMax, 0.01, 100, " #eta ", "(track resolution in p_{T})/p_{T} (%)", false, true);
   leg_trkpi_res_eta->Draw();
+  pave->Draw();
 
   c_trkpi_res_eta->Print(pdfOutput,"pdf");
   c_trkpi_res_eta->Print(figPath+"img_trkpi_res_eta.pdf","pdf");
@@ -1493,6 +1524,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkpi_eff_pt->Draw("APE");
   DrawAxis(mg_trkpi_eff_pt, leg_trkpi_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "tracking efficiency (%)", true, false);
   leg_trkpi_eff_pt->Draw();
+  pave->Draw();
 
   c_trkpi_eff_pt->Print(pdfOutput,"pdf");
   c_trkpi_eff_pt->Print(figPath+"img_trkpi_eff_pt.pdf","pdf");
@@ -1503,6 +1535,8 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkpi_eff_eta->Draw("APE");
   DrawAxis(mg_trkpi_eff_eta, leg_trkpi_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "tracking efficiency (%)", false, false);
   leg_trkpi_eff_eta->Draw();
+  pave->Draw();
+
 
   c_trkpi_eff_eta->Print(pdfOutput,"pdf");
   c_trkpi_eff_eta->Print(figPath+"img_trkpi_eff_eta.pdf","pdf");
@@ -1570,6 +1604,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkele_res_pt->Draw("APE");
   DrawAxis(mg_trkele_res_pt, leg_trkele_res_pt, ptMin, ptMax, 0.01, 100, "p_{T} [GeV]", "(track resolution in p_{T})/p_{T} (%)", true, true);
   leg_trkele_res_pt->Draw();
+  pave->Draw();
 
   c_trkele_res_pt->Print(pdfOutput,"pdf");
   c_trkele_res_pt->Print(figPath+"img_trkele_res_pt.pdf","pdf");
@@ -1580,6 +1615,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkele_res_eta->Draw("APE");
   DrawAxis(mg_trkele_res_eta, leg_trkele_res_eta, etaMin, etaMax, 0.01, 100, " #eta ", "(track resolution in p_{T})/p_{T} (%)", false, true);
   leg_trkele_res_eta->Draw();
+  pave->Draw();
 
   c_trkele_res_eta->Print(pdfOutput,"pdf");
   c_trkele_res_eta->Print(figPath+"img_trkele_res_eta.pdf","pdf");
@@ -1590,6 +1626,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkele_eff_pt->Draw("APE");
   DrawAxis(mg_trkele_eff_pt, leg_trkele_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "tracking efficiency (%)", true, false);
   leg_trkele_eff_pt->Draw();
+  pave->Draw();
 
   c_trkele_eff_pt->Print(pdfOutput,"pdf");
   c_trkele_eff_pt->Print(figPath+"img_trkele_eff_pt.pdf","pdf");
@@ -1600,6 +1637,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkele_eff_eta->Draw("APE");
   DrawAxis(mg_trkele_eff_eta, leg_trkele_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "tracking efficiency (%)", false, false);
   leg_trkele_eff_eta->Draw();
+  pave->Draw();
 
   c_trkele_eff_eta->Print(pdfOutput,"pdf");
   c_trkele_eff_eta->Print(figPath+"img_trkele_eff_eta.pdf","pdf");
@@ -1670,6 +1708,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkmu_res_pt->Draw("APE");
   DrawAxis(mg_trkmu_res_pt, leg_trkmu_res_pt, ptMin, ptMax, 0.01, 100, "p_{T} [GeV]", "(track resolution in p_{T})/p_{T} (%)", true, true);
   leg_trkmu_res_pt->Draw();
+  pave->Draw();
 
   c_trkmu_res_pt->Print(pdfOutput,"pdf");
   c_trkmu_res_pt->Print(figPath+"img_trkmu_res_pt.pdf","pdf");
@@ -1680,6 +1719,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkmu_res_eta->Draw("APE");
   DrawAxis(mg_trkmu_res_eta, leg_trkmu_res_eta, etaMin, etaMax, 0.01, 100, " #eta ", "(track resolution in p_{T})/p_{T} (%)", false, true);
   leg_trkmu_res_eta->Draw();
+  pave->Draw();
 
   c_trkmu_res_eta->Print(pdfOutput,"pdf");
   c_trkmu_res_eta->Print(figPath+"img_trkmu_res_eta.pdf","pdf");
@@ -1690,6 +1730,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkmu_eff_pt->Draw("APE");
   DrawAxis(mg_trkmu_eff_pt, leg_trkmu_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "tracking efficiency (%)", true, false);
   leg_trkmu_eff_pt->Draw();
+  pave->Draw();
 
   c_trkmu_eff_pt->Print(pdfOutput,"pdf");
   c_trkmu_eff_pt->Print(figPath+"img_trkmu_eff_pt.pdf","pdf");
@@ -1700,6 +1741,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   mg_trkmu_eff_eta->Draw("APE");
   DrawAxis(mg_trkmu_eff_eta, leg_trkmu_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "tracking efficiency (%)", false, false);
   leg_trkmu_eff_eta->Draw();
+  pave->Draw();
 
   c_trkmu_eff_eta->Print(pdfOutput,"pdf");
   c_trkmu_eff_eta->Print(figPath+"img_trkmu_eff_eta.pdf","pdf");
@@ -1757,6 +1799,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
  // DrawAxis(mg_ecal_res_e, leg_ecal_res_e, ptMin, ptMax, 0.5, 100, "E [GeV]", "(ECAL resolution in E)/E (%)", true, true);
   DrawAxis(mg_ecal_res_e, leg_ecal_res_e, ptMin, ptMax, 0.0, 20, "E [GeV]", "(ECAL resolution in E)/E (%)", true, false);
   leg_ecal_res_e->Draw();
+  pave->Draw();
 
   c_ecal_res_e->Print(pdfOutput,"pdf");
   c_ecal_res_e->Print(figPath+"img_ecal_res_e.pdf","pdf");
@@ -1768,6 +1811,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   //DrawAxis(mg_ecal_res_eta, leg_ecal_res_eta, etaMin, etaMax, 0.5, 100, " #eta ", "(ECAL resolution in E)/E (%)", false, true);
   DrawAxis(mg_ecal_res_eta, leg_ecal_res_eta, etaMin, etaMax, 0.0, 20, " #eta ", "(ECAL resolution in E)/E (%)", false, false);
   leg_ecal_res_eta->Draw();
+  pave->Draw();
 
   c_ecal_res_eta->Print(pdfOutput,"pdf");
   c_ecal_res_eta->Print(figPath+"img_ecal_res_eta.pdf","pdf");
@@ -1826,6 +1870,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   //DrawAxis(mg_hcal_res_e, leg_hcal_res_e, ptMin, ptMax, 1, 100, "E [GeV]", "(HCAL resolution in E)/E (%)", true, true);
   DrawAxis(mg_hcal_res_e, leg_hcal_res_e, ptMin, ptMax, 0.0, 50, "E [GeV]", "(HCAL resolution in E)/E (%)", true, false);
   leg_hcal_res_e->Draw();
+  pave->Draw();
 
   c_hcal_res_e->Print(pdfOutput,"pdf");
   c_hcal_res_e->Print(figPath+"img_hcal_res_e.pdf","pdf");
@@ -1837,6 +1882,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
   //DrawAxis(mg_hcal_res_eta, leg_hcal_res_eta, etaMin, etaMax, 1, 100, " #eta ", "(HCAL resolution in E)/E (%)", false, true);
   DrawAxis(mg_hcal_res_eta, leg_hcal_res_eta, etaMin, etaMax, 0.0, 50, " #eta ", "(HCAL resolution in E)/E (%)", false, false);
   leg_hcal_res_eta->Draw();
+  pave->Draw();
 
   c_hcal_res_eta->Print(pdfOutput,"pdf");
   c_hcal_res_eta->Print(figPath+"img_hcal_res_eta.pdf","pdf");
@@ -1888,6 +1934,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
      //DrawAxis(mg_pfele_res_e[k], leg_pfele_res_e[k], ptMin, ptMax, 0.1, 100, "E [GeV]", "(resolution in E)/E (%)", true, true);
      DrawAxis(mg_pfele_res_e[k], leg_pfele_res_e[k], ptMin, ptMax, 0.0, 20, "E [GeV]", "(resolution in E)/E (%)", true, false);
      leg_pfele_res_e[k]->Draw();
+     pave->Draw();
 
      TString s_etarange = "eta_"+s_etaMin+"_"+s_etaMax+"_";
 
@@ -1926,6 +1973,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
      //DrawAxis(mg_pfele_res_eta[k], leg_pfele_res_eta[k], etaMin, etaMax, 0.1, 1000, "#eta", "(resolution in E)/E (%)", false, true);
      DrawAxis(mg_pfele_res_eta[k], leg_pfele_res_eta[k], etaMin, etaMax, 0.0, 50, "#eta", "(resolution in E)/E (%)", false, false);
      leg_pfele_res_eta[k]->Draw();
+     pave->Draw();
 
      TString s_ptrange = Form("pt_%.0f_",ptVals.at(k));
 
@@ -1981,6 +2029,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
      //DrawAxis(mg_pfpi_res_e[k], leg_pfpi_res_e[k], ptMin, ptMax, 0.1, 100, "E [GeV]", "(resolution in E)/E (%)", true, true);
      DrawAxis(mg_pfpi_res_e[k], leg_pfpi_res_e[k], ptMin, ptMax, 0.1, 50, "E [GeV]", "(resolution in E)/E (%)", true, false);
      leg_pfpi_res_e[k]->Draw();
+     pave->Draw();
 
      TString s_etarange = "eta_"+s_etaMin+"_"+s_etaMax+"_";
 
@@ -2018,6 +2067,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
      //DrawAxis(mg_pfpi_res_eta[k], leg_pfpi_res_eta[k], etaMin, etaMax, 0.1, 1000, "#eta", "(resolution in E)/E (%)", false, true);
      DrawAxis(mg_pfpi_res_eta[k], leg_pfpi_res_eta[k], etaMin, etaMax, 0.0, 50, "#eta", "(resolution in E)/E (%)", false, false);
      leg_pfpi_res_eta[k]->Draw();
+     pave->Draw();
 
      TString s_ptrange = Form("pt_%.0f_",ptVals.at(k));
 
@@ -2083,6 +2133,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
      //DrawAxis(mg_pfjet_res_e[k], leg_pfjet_res_e[k], 10, ptMax, 0.5, 100, "E [GeV]", "(resolution in E)/E (%)", true, true);
      DrawAxis(mg_pfjet_res_e[k], leg_pfjet_res_e[k], 10, ptMax, 0.0, 30, "E [GeV]", "(resolution in E)/E (%)", true, false);
      leg_pfjet_res_e[k]->Draw();
+     pave->Draw();
 
      TString s_etarange = "eta_"+s_etaMin+"_"+s_etaMax+"_";
 
@@ -2124,6 +2175,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
      //DrawAxis(mg_pfjet_res_eta[k], leg_pfjet_res_eta[k], etaMin, etaMax, 0.1, 1000, "#eta", "(resolution in E)/E (%)", false, true);
      DrawAxis(mg_pfjet_res_eta[k], leg_pfjet_res_eta[k], etaMin, etaMax, 0.0, 50, "#eta", "(resolution in E)/E (%)", false, false);
      leg_pfjet_res_eta[k]->Draw();
+     pave->Draw();
 
      TString s_ptrange = Form("pt_%.0f_",ptVals.at(k));
 
@@ -2161,7 +2213,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     DrawAxis(mg_met_res_ht, leg_met_res_ht, 10, 10000, 0.1, 1000, " #sum p_{T} [GeV]", "resolution in E_{x,y} [GeV]", true, true);
 
     leg_met_res_ht->Draw();
-
+    pave->Draw();
     c_met_res_ht->Print(pdfOutput,"pdf");
     c_met_res_ht->Print(figPath+"img_met_res_ht.pdf","pdf");
     c_met_res_ht->Print(figPath+"img_met_res_ht.png","png");
@@ -2214,6 +2266,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recele_eff_pt->Draw("APE");
     DrawAxis(mg_recele_eff_pt, leg_recele_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "reconstruction efficiency (%)", true, false);
     leg_recele_eff_pt->Draw();
+    pave->Draw();
 
     c_recele_eff_pt->Print(pdfOutput,"pdf");
     c_recele_eff_pt->Print(figPath+"img_recele_eff_pt.pdf","pdf");
@@ -2224,6 +2277,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recele_eff_eta->Draw("APE");
     DrawAxis(mg_recele_eff_eta, leg_recele_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "reconstruction efficiency (%)", false, false);
     leg_recele_eff_eta->Draw();
+    pave->Draw();
 
     c_recele_eff_eta->Print(pdfOutput,"pdf");
     c_recele_eff_eta->Print(figPath+"img_recele_eff_eta.pdf","pdf");
@@ -2277,6 +2331,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recmu_eff_pt->Draw("APE");
     DrawAxis(mg_recmu_eff_pt, leg_recmu_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "reconstruction efficiency (%)", true, false);
     leg_recmu_eff_pt->Draw();
+    pave->Draw();
 
     c_recmu_eff_pt->Print(pdfOutput,"pdf");
     c_recmu_eff_pt->Print(figPath+"img_recmu_eff_pt.pdf","pdf");
@@ -2287,6 +2342,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recmu_eff_eta->Draw("APE");
     DrawAxis(mg_recmu_eff_eta, leg_recmu_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "reconstruction efficiency (%)", false, false);
     leg_recmu_eff_eta->Draw();
+    pave->Draw();
 
     c_recmu_eff_eta->Print(pdfOutput,"pdf");
     c_recmu_eff_eta->Print(figPath+"img_recmu_eff_eta.pdf","pdf");
@@ -2340,6 +2396,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recpho_eff_pt->Draw("APE");
     DrawAxis(mg_recpho_eff_pt, leg_recpho_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "reconstruction efficiency (%)", true, false);
     leg_recpho_eff_pt->Draw();
+    pave->Draw();
 
     c_recpho_eff_pt->Print(pdfOutput,"pdf");
     c_recpho_eff_pt->Print(figPath+"img_recpho_eff_pt.pdf","pdf");
@@ -2350,6 +2407,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recpho_eff_eta->Draw("APE");
     DrawAxis(mg_recpho_eff_eta, leg_recpho_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "reconstruction efficiency (%)", false, false);
     leg_recpho_eff_eta->Draw();
+    pave->Draw();
 
     c_recpho_eff_eta->Print(pdfOutput,"pdf");
     c_recpho_eff_eta->Print(figPath+"img_recpho_eff_eta.pdf","pdf");
@@ -2402,6 +2460,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recbjet_eff_pt->Draw("APE");
     DrawAxis(mg_recbjet_eff_pt, leg_recbjet_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "b - tag efficiency (%)", true, false);
     leg_recbjet_eff_pt->Draw();
+    pave->Draw();
 
     c_recbjet_eff_pt->Print(pdfOutput,"pdf");
     c_recbjet_eff_pt->Print(figPath+"img_recbjet_eff_pt.pdf","pdf");
@@ -2412,6 +2471,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recbjet_eff_eta->Draw("APE");
     DrawAxis(mg_recbjet_eff_eta, leg_recbjet_eff_eta, etaMin, etaMax, 0.0, 100, " #eta ", "b - tag efficiency (%)", false, false);
     leg_recbjet_eff_eta->Draw();
+    pave->Draw();
 
     c_recbjet_eff_eta->Print(pdfOutput,"pdf");
     c_recbjet_eff_eta->Print(figPath+"img_recbjet_eff_eta.pdf","pdf");
@@ -2464,6 +2524,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recbjet_cmis_pt->Draw("APE");
     DrawAxis(mg_recbjet_cmis_pt, leg_recbjet_cmis_pt, ptMin, ptMax, 0.0, 20, "p_{T} [GeV]", "c - mistag rate (%)", true, false);
     leg_recbjet_cmis_pt->Draw();
+    pave->Draw();
 
     c_recbjet_cmis_pt->Print(pdfOutput,"pdf");
     c_recbjet_cmis_pt->Print(figPath+"img_recbjet_cmis_pt.pdf","pdf");
@@ -2474,6 +2535,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recbjet_cmis_eta->Draw("APE");
     DrawAxis(mg_recbjet_cmis_eta, leg_recbjet_cmis_eta, etaMin, etaMax, 0.0, 20, " #eta ", "c - mistag rate (%)", false, false);
     leg_recbjet_cmis_eta->Draw();
+    pave->Draw();
 
     c_recbjet_cmis_eta->Print(pdfOutput,"pdf");
     c_recbjet_cmis_eta->Print(figPath+"img_recbjet_cmis_eta.pdf","pdf");
@@ -2524,6 +2586,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recbjet_lmis_pt->Draw("APE");
     DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 0.1, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
     leg_recbjet_lmis_pt->Draw();
+    pave->Draw();
 
     c_recbjet_lmis_pt->Print(pdfOutput,"pdf");
     c_recbjet_lmis_pt->Print(figPath+"img_recbjet_lmis_pt.pdf","pdf");
@@ -2534,6 +2597,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_recbjet_lmis_eta->Draw("APE");
     DrawAxis(mg_recbjet_lmis_eta, leg_recbjet_lmis_eta, etaMin, etaMax, 0.0, 0.1, " #eta ", "light - mistag rate (%)", false, false);
     leg_recbjet_lmis_eta->Draw();
+    pave->Draw();
 
     c_recbjet_lmis_eta->Print(pdfOutput,"pdf");
     c_recbjet_lmis_eta->Print(figPath+"img_recbjet_lmis_eta.pdf","pdf");
@@ -2588,6 +2652,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_rectaujet_eff_pt->Draw("APE");
     DrawAxis(mg_rectaujet_eff_pt, leg_rectaujet_eff_pt, ptMin, ptMax, 0.0, 100, "p_{T} [GeV]", "#tau - tag efficiency (%)", true, false);
     leg_rectaujet_eff_pt->Draw();
+    pave->Draw();
 
     c_rectaujet_eff_pt->Print(pdfOutput,"pdf");
     c_rectaujet_eff_pt->Print(figPath+"img_rectaujet_eff_pt.pdf","pdf");
@@ -2598,6 +2663,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_rectaujet_eff_eta->Draw("APE");
     DrawAxis(mg_rectaujet_eff_eta, leg_rectaujet_eff_eta, etaMin, etaMax, 0.0000001, 100, " #eta ", "#tau - tag efficiency (%)", false, true);
     leg_rectaujet_eff_eta->Draw();
+    pave->Draw();
 
     c_rectaujet_eff_eta->Print(pdfOutput,"pdf");
     c_rectaujet_eff_eta->Print(figPath+"img_rectaujet_eff_eta.pdf","pdf");
@@ -2649,6 +2715,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_rectaujet_mis_pt->Draw("APE");
     DrawAxis(mg_rectaujet_mis_pt, leg_rectaujet_mis_pt, ptMin, ptMax, 0.0, 10., "p_{T} [GeV]", "#tau - mistag(%)", true, false);
     leg_rectaujet_mis_pt->Draw();
+    pave->Draw();
 
     c_rectaujet_mis_pt->Print(pdfOutput,"pdf");
     c_rectaujet_mis_pt->Print(figPath+"img_rectaujet_mis_pt.pdf","pdf");
@@ -2659,6 +2726,7 @@ void Validation(const char *inputFilePion, const char *inputFileElectron, const 
     mg_rectaujet_mis_eta->Draw("APE");
     DrawAxis(mg_rectaujet_mis_eta, leg_rectaujet_mis_eta, etaMin, etaMax, 0.0, 5., " #eta ", "#tau - mistag (%)", false, false);
     leg_rectaujet_mis_eta->Draw();
+    pave->Draw();
 
     c_rectaujet_mis_eta->Print(pdfOutput+")","pdf");
     c_rectaujet_mis_eta->Print(figPath+"img_rectaujet_mis_eta.pdf","pdf");
@@ -2730,7 +2798,7 @@ int main(int argc, char *argv[])
 {
   char *appName = "Validation";
 
-  if(argc != 11)
+  if(argc != 12)
   {
     cout << " Usage: " << appName << " input_file_electron input_file_muon input_file_photon input_file_jet input_file_bjet input_file_taujet output_file" << endl;
     cout << " input_file_pion  - input file in ROOT format ('Delphes' tree)," << endl;
@@ -2743,6 +2811,8 @@ int main(int argc, char *argv[])
     cout << " input_file_cjet - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " input_file_taujet - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " output_file - output file in ROOT format" << endl;
+    cout << " delphes version" << endl;
+
     return 1;
   }
 
@@ -2752,7 +2822,7 @@ int main(int argc, char *argv[])
   char *appargv[] = {appName};
   TApplication app(appName, &appargc, appargv);
 
-  Validation(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], argv[10]);
+  Validation(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], argv[10], argv[11]);
 }
 
 

@@ -15,6 +15,7 @@
 # ./examples/validation.sh cards/delphes_card_CMS.tcl 100000
 #
 # Note that the more events you specify, the more accurate the controls plots will be ...
+# This said, 500k events should be ok for most cases. 
 #
 ############################################################################################
 
@@ -30,18 +31,22 @@ then
   exit $E_BADARGS
 fi
 
-card=$(basename $1)
+cardbase=$(basename $1)
+carddir=$(dirname $1)
 nEvents=$2
-validationCard=cards/validation_$card
-output=validation_${card%.*}.root
-mainoutputdir=report_${card%.*}
-outputroot=report_${card%.*}/root
-cardlabel=${card%.*}
+validationCard=$carddir/validation_$cardbase
+output=validation_${cardbase%.*}.root
+mainoutputdir=report_${cardbase%.*}
+outputroot=report_${cardbase%.*}/root
+cardlabel=${cardbase%.*}
+version=$(cat VERSION)
+outpdf=$mainoutputdir/${output%.*}.pdf
+
 
 mkdir -p $outputroot
 mkdir -p $mainoutputdir/www/fig
 
-sed 's/delphes_card_CMS.tcl/'$card'/g' cards/validation_card.tcl  > $validationCard
+sed 's/delphes_card_CMS.tcl/'$cardbase'/g' cards/validation_card.tcl  > $validationCard
 
 function runParticleGun {
   name=$1
@@ -64,4 +69,25 @@ runParticleGun bjet 5
 runParticleGun cjet 4
 runParticleGun taujet 15
 
-./Validation $outputroot/particleGun_pion_$cardlabel.root $outputroot/particleGun_electron_$cardlabel.root $outputroot/particleGun_muon_$cardlabel.root $outputroot/particleGun_photon_$cardlabel.root $outputroot/particleGun_neutron_$cardlabel.root $outputroot/particleGun_jet_$cardlabel.root $outputroot/particleGun_bjet_$cardlabel.root $outputroot/particleGun_cjet_$cardlabel.root $outputroot/particleGun_taujet_$cardlabel.root $mainoutputdir/$output
+./Validation $outputroot/particleGun_pion_$cardlabel.root $outputroot/particleGun_electron_$cardlabel.root $outputroot/particleGun_muon_$cardlabel.root $outputroot/particleGun_photon_$cardlabel.root $outputroot/particleGun_neutron_$cardlabel.root $outputroot/particleGun_jet_$cardlabel.root $outputroot/particleGun_bjet_$cardlabel.root $outputroot/particleGun_cjet_$cardlabel.root $outputroot/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
+
+echo $outpdf
+if grep -q SimpleCalorimeter "$1"; then
+  ./CaloGrid $1 ECal
+  ./CaloGrid $1 HCal
+  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf ECal.pdf  
+  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=$outpdf tmp/tmp1.pdf HCal.pdf
+  mv ECal.pdf $mainoutputdir/www/fig/img_ecal.pdf 
+  mv ECal.png $mainoutputdir/www/fig/img_ecal.png 
+  mv HCal.pdf $mainoutputdir/www/fig/img_hcal.pdf
+  mv HCal.png $mainoutputdir/www/fig/img_hcal.png
+else 
+  ./CaloGrid $1 Calorimeter
+  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf Calorimeter.pdf
+  mv Calorimeter.pdf $mainoutputdir/www/fig/img_ecal.pdf
+  mv Calorimeter.png $mainoutputdir/www/fig/img_ecal.png
+fi
+
+
+
+
