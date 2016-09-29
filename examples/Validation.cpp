@@ -1327,6 +1327,7 @@ void Validation(const char *inputFilePion,
   TClonesArray *branchParticleElectron = treeReaderElectron->UseBranch("Particle");
   TClonesArray *branchTrackElectron = treeReaderElectron->UseBranch("Track");
   TClonesArray *branchElectron = treeReaderElectron->UseBranch("Electron");
+  TClonesArray *branchElectronPF = treeReaderElectron->UseBranch("ElectronPF");
 
   TClonesArray *branchParticleMuon = treeReaderMuon->UseBranch("Particle");
   TClonesArray *branchTrackMuon = treeReaderMuon->UseBranch("Track");
@@ -1914,7 +1915,7 @@ void Validation(const char *inputFilePion,
      leg_pfele_res_e[k] = new TLegend(0.40,0.60,0.75,0.90);
 
      HistogramsCollection(&plots_pfele_res_e[k], TMath::Log10(ptMin), TMath::Log10(ptMax), "pfele");
-     GetEres<Electron>(&plots_pfele_res_e[k], branchElectron, branchParticleElectron, 11, etaVals.at(k), etaVals.at(k+1), treeReaderElectron);
+     GetEres<Electron>(&plots_pfele_res_e[k], branchElectronPF, branchParticleElectron, 11, etaVals.at(k), etaVals.at(k+1), treeReaderElectron);
      gr_pfele_res_e[k] = EresGraph(&plots_pfele_res_e[k]);
 
      s_etaMin = Form("%.1f",etaVals.at(k));
@@ -1924,9 +1925,9 @@ void Validation(const char *inputFilePion,
      leg_pfele_res_e[k]->SetTextFont(132);
      leg_pfele_res_e[k]->SetHeader(s_eta);
 
-     addResoGraph(mg_pfele_res_e[k], &gr_ecal_res_e[k], leg_pfele_res_e[k], markerStyles.at(0), colors.at(0), "ecal");
-     addResoGraph(mg_pfele_res_e[k], &gr_trkele_res_pt[k], leg_pfele_res_e[k], markerStyles.at(1), colors.at(1), "track");
-     addResoGraph(mg_pfele_res_e[k], &gr_pfele_res_e[k], leg_pfele_res_e[k], markerStyles.at(2), colors.at(2), "p-flow");
+     addResoGraph(mg_pfele_res_e[k], &gr_ecal_res_e[k], leg_pfele_res_e[k], markerStyles.at(0), colors.at(0), "ECAL");
+     addResoGraph(mg_pfele_res_e[k], &gr_trkele_res_pt[k], leg_pfele_res_e[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfele_res_e[k], &gr_pfele_res_e[k], leg_pfele_res_e[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfele_res_e[k] = new TCanvas("","", 800, 600);
 
@@ -1953,7 +1954,7 @@ void Validation(const char *inputFilePion,
      leg_pfele_res_eta[k] = new TLegend(0.40,0.60,0.75,0.90);
 
      HistogramsCollectionVsEta(&plots_pfele_res_eta[k], etaMin, etaMax, 0.5*ptVals.at(k), 2.0*ptVals.at(k), "pfele", 0.0, 2.0);
-     GetEresVsEta<Electron>(&plots_pfele_res_eta[k], branchElectron, branchParticleElectron, 11, 0.5*ptVals.at(k), 2.0*ptVals.at(k), treeReaderElectron);
+     GetEresVsEta<Electron>(&plots_pfele_res_eta[k], branchElectronPF, branchParticleElectron, 11, 0.5*ptVals.at(k), 2.0*ptVals.at(k), treeReaderElectron);
      gr_pfele_res_eta[k] = EresGraphVsEta(&plots_pfele_res_eta[k]);
 
      s_e = Form("e^{ #pm}, E = %.0f GeV",ptVals.at(k));
@@ -1963,9 +1964,9 @@ void Validation(const char *inputFilePion,
      leg_pfele_res_eta[k]->SetTextFont(132);
      leg_pfele_res_eta[k]->SetHeader(s_e);
 
-     addResoGraph(mg_pfele_res_eta[k], &gr_ecal_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(0), colors.at(0), "ecal");
-     addResoGraph(mg_pfele_res_eta[k], &gr_trkele_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(1), colors.at(1), "track");
-     addResoGraph(mg_pfele_res_eta[k], &gr_pfele_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(2), colors.at(2), "p-flow");
+     addResoGraph(mg_pfele_res_eta[k], &gr_ecal_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(0), colors.at(0), "ECAL");
+     addResoGraph(mg_pfele_res_eta[k], &gr_trkele_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfele_res_eta[k], &gr_pfele_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfele_res_eta[k] = new TCanvas("","", 800, 600);
 
@@ -2019,9 +2020,9 @@ void Validation(const char *inputFilePion,
      leg_pfpi_res_e[k]->SetTextFont(132);
      leg_pfpi_res_e[k]->SetHeader(s_eta);
 
-     addResoGraph(mg_pfpi_res_e[k], &gr_hcal_res_e[k], leg_pfpi_res_e[k], markerStyles.at(0), colors.at(0), "hcal");
-     addResoGraph(mg_pfpi_res_e[k], &gr_trkpi_res_pt[k], leg_pfpi_res_e[k], markerStyles.at(1), colors.at(1), "track");
-     addResoGraph(mg_pfpi_res_e[k], &gr_pfpi_res_e[k], leg_pfpi_res_e[k], markerStyles.at(2), colors.at(2), "p-flow");
+     addResoGraph(mg_pfpi_res_e[k], &gr_hcal_res_e[k], leg_pfpi_res_e[k], markerStyles.at(0), colors.at(0), "HCAL");
+     addResoGraph(mg_pfpi_res_e[k], &gr_trkpi_res_pt[k], leg_pfpi_res_e[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfpi_res_e[k], &gr_pfpi_res_e[k], leg_pfpi_res_e[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfpi_res_e[k] = new TCanvas("","", 800, 600);
 
@@ -2057,9 +2058,9 @@ void Validation(const char *inputFilePion,
      leg_pfpi_res_eta[k]->SetTextFont(132);
      leg_pfpi_res_eta[k]->SetHeader(s_e);
 
-     addResoGraph(mg_pfpi_res_eta[k], &gr_hcal_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(0), colors.at(0), "hcal");
-     addResoGraph(mg_pfpi_res_eta[k], &gr_trkpi_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(1), colors.at(1), "track");
-     addResoGraph(mg_pfpi_res_eta[k], &gr_pfpi_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(2), colors.at(2), "p-flow");
+     addResoGraph(mg_pfpi_res_eta[k], &gr_hcal_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(0), colors.at(0), "HCAL");
+     addResoGraph(mg_pfpi_res_eta[k], &gr_trkpi_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfpi_res_eta[k], &gr_pfpi_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfpi_res_eta[k] = new TCanvas("","", 800, 600);
 
@@ -2106,7 +2107,7 @@ void Validation(const char *inputFilePion,
   {
 
      mg_pfjet_res_e[k] = new TMultiGraph("","");
-     leg_pfjet_res_e[k] = new TLegend(0.60,0.60,0.90,0.90);
+     leg_pfjet_res_e[k] = new TLegend(0.40,0.70,0.90,0.90);
 
      HistogramsCollection(&plots_pfjet_res_e[k], TMath::Log10(ptMin), TMath::Log10(ptMax), "pfjet");
      HistogramsCollection(&plots_cajet_res_e[k], TMath::Log10(ptMin), TMath::Log10(ptMax), "cajet");
@@ -2119,13 +2120,13 @@ void Validation(const char *inputFilePion,
 
      s_etaMin = Form("%.1f",etaVals.at(k));
      s_etaMax = Form("%.1f",etaVals.at(k+1));
-     s_eta    = "jets, "+ s_etaMin + " < | #eta | < " + s_etaMax;
+     s_eta    = "anti-k_{T},  R = 0.4,  "+ s_etaMin + " < | #eta | < " + s_etaMax;
 
      leg_pfjet_res_e[k]->SetTextFont(132);
      leg_pfjet_res_e[k]->SetHeader(s_eta);
 
-     addResoGraph(mg_pfjet_res_e[k], &gr_cajet_res_e[k], leg_pfjet_res_e[k], markerStyles.at(0), colors.at(0), "calo");
-     addResoGraph(mg_pfjet_res_e[k], &gr_pfjet_res_e[k], leg_pfjet_res_e[k], markerStyles.at(1), colors.at(1), "p-flow");
+     addResoGraph(mg_pfjet_res_e[k], &gr_cajet_res_e[k], leg_pfjet_res_e[k], markerStyles.at(0), colors.at(0), "Calorimeter Jets");
+     addResoGraph(mg_pfjet_res_e[k], &gr_pfjet_res_e[k], leg_pfjet_res_e[k], markerStyles.at(1), colors.at(1), "Particle-flow Jets");
 
      c_pfjet_res_e[k] = new TCanvas("","", 800, 600);
 
@@ -2149,7 +2150,7 @@ void Validation(const char *inputFilePion,
   {
 
      mg_pfjet_res_eta[k] = new TMultiGraph("","");
-     leg_pfjet_res_eta[k] = new TLegend(0.40,0.60,0.75,0.90);
+     leg_pfjet_res_eta[k] = new TLegend(0.30,0.70,0.85,0.90);
 
      HistogramsCollectionVsEta(&plots_pfjet_res_eta[k], etaMin, etaMax, 0.5*ptVals.at(k), 2.0*ptVals.at(k), "pfjet", 0.0, 2.0);
      HistogramsCollectionVsEta(&plots_cajet_res_eta[k], etaMin, etaMax, 0.5*ptVals.at(k), 2.0*ptVals.at(k), "cajet", 0.0, 2.0);
@@ -2160,14 +2161,14 @@ void Validation(const char *inputFilePion,
      gr_pfjet_res_eta[k] = EresGraphVsEta(&plots_pfjet_res_eta[k]);
      gr_cajet_res_eta[k] = EresGraphVsEta(&plots_cajet_res_eta[k]);
 
-     s_e = Form("jets, E = %.0f GeV",ptVals.at(k));
-     if(ptVals.at(k) >= 1000.) s_e = Form("jets, E = %.0f TeV",ptVals.at(k)/1000.);
+     s_e = Form("anti-k_{T},  R = 0.4,  jets, E = %.0f GeV",ptVals.at(k));
+     if(ptVals.at(k) >= 1000.) s_e = Form("anti-k_{T},  R = 0.4,  E = %.0f TeV",ptVals.at(k)/1000.);
 
      leg_pfjet_res_eta[k]->SetTextFont(132);
      leg_pfjet_res_eta[k]->SetHeader(s_e);
 
-     addResoGraph(mg_pfjet_res_eta[k], &gr_cajet_res_eta[k], leg_pfjet_res_eta[k], markerStyles.at(0), colors.at(0), "calo");
-     addResoGraph(mg_pfjet_res_eta[k], &gr_pfjet_res_eta[k], leg_pfjet_res_eta[k], markerStyles.at(1), colors.at(1), "p-flow");
+     addResoGraph(mg_pfjet_res_eta[k], &gr_cajet_res_eta[k], leg_pfjet_res_eta[k], markerStyles.at(0), colors.at(0), "Calorimeter Jets");
+     addResoGraph(mg_pfjet_res_eta[k], &gr_pfjet_res_eta[k], leg_pfjet_res_eta[k], markerStyles.at(1), colors.at(1), "Particle-flow Jets");
 
      c_pfjet_res_eta[k] = new TCanvas("","", 800, 600);
 
@@ -2204,13 +2205,13 @@ void Validation(const char *inputFilePion,
     TGraphErrors gr_pfmet_res_ht = MetResGraph(&plots_pfmet, true);
     TGraphErrors gr_camet_res_ht = MetResGraph(&plots_camet, true);
 
-    addResoGraph(mg_met_res_ht, &gr_camet_res_ht, leg_met_res_ht, markerStyles.at(0), colors.at(0), "calo");
-    addResoGraph(mg_met_res_ht, &gr_pfmet_res_ht, leg_met_res_ht, markerStyles.at(1), colors.at(1), "p-flow");
+    addResoGraph(mg_met_res_ht, &gr_camet_res_ht, leg_met_res_ht, markerStyles.at(0), colors.at(0), "Calorimeter E_{T}^{miss}");
+    addResoGraph(mg_met_res_ht, &gr_pfmet_res_ht, leg_met_res_ht, markerStyles.at(1), colors.at(1), "Particle-flow E_{T}^{miss}");
 
     TCanvas *c_met_res_ht = new TCanvas("","", 800, 600);
 
     mg_met_res_ht->Draw("APE");
-    DrawAxis(mg_met_res_ht, leg_met_res_ht, 10, 10000, 0.1, 1000, " #sum p_{T} [GeV]", "resolution in E_{x,y} [GeV]", true, true);
+    DrawAxis(mg_met_res_ht, leg_met_res_ht, 10, 10000, 0.1, 1000, " #sum p_{T} [GeV]", "resolution in E_{x,y}^{miss} [GeV]", true, true);
 
     leg_met_res_ht->Draw();
     pave->Draw();
