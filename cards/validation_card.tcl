@@ -69,4 +69,5 @@ module TreeWriter TreeWriter {
   add Branch CaloMissingET/momentum CaloMissingET MissingET
   add Branch GenScalarHT/energy GenScalarHT ScalarHT
   add Branch PionFilter/pions Pion Track 
+  add Branch ElectronFilter/electrons ElectronPF Electron 
 }
