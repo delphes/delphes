@@ -42,7 +42,6 @@ cardlabel=${cardbase%.*}
 version=$(cat VERSION)
 outpdf=$mainoutputdir/${output%.*}.pdf
 
-
 mkdir -p $outputroot
 mkdir -p $mainoutputdir/www/fig
 
@@ -71,22 +70,16 @@ runParticleGun taujet 15
 
 ./Validation $outputroot/particleGun_pion_$cardlabel.root $outputroot/particleGun_electron_$cardlabel.root $outputroot/particleGun_muon_$cardlabel.root $outputroot/particleGun_photon_$cardlabel.root $outputroot/particleGun_neutron_$cardlabel.root $outputroot/particleGun_jet_$cardlabel.root $outputroot/particleGun_bjet_$cardlabel.root $outputroot/particleGun_cjet_$cardlabel.root $outputroot/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
 
-echo $outpdf
-if grep -q SimpleCalorimeter "$1"; then
-  ./CaloGrid $1 ECal
-  ./CaloGrid $1 HCal
-  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf ECal.pdf  
-  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=$outpdf tmp/tmp1.pdf HCal.pdf
-  mv ECal.pdf $mainoutputdir/www/fig/img_ecal.pdf 
-  mv ECal.png $mainoutputdir/www/fig/img_ecal.png 
-  mv HCal.pdf $mainoutputdir/www/fig/img_hcal.pdf
-  mv HCal.png $mainoutputdir/www/fig/img_hcal.png
-else 
-  ./CaloGrid $1 Calorimeter
-  gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf Calorimeter.pdf
-  mv Calorimeter.pdf $mainoutputdir/www/fig/img_ecal.pdf
-  mv Calorimeter.png $mainoutputdir/www/fig/img_ecal.png
-fi
+
+# produce calo grid plots 
+./CaloGrid $1 ECal
+./CaloGrid $1 HCal
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf ECal.pdf  
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=$outpdf tmp/tmp1.pdf HCal.pdf
+mv ECal.pdf $mainoutputdir/www/fig/img_ecal.pdf 
+mv ECal.png $mainoutputdir/www/fig/img_ecal.png 
+mv HCal.pdf $mainoutputdir/www/fig/img_hcal.pdf
+mv HCal.png $mainoutputdir/www/fig/img_hcal.png
 
 
 
