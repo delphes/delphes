@@ -1346,7 +1346,7 @@ void Validation(const char *inputFilePion,
 
   TClonesArray *branchGenJet = treeReaderJet->UseBranch("GenJet");
   TClonesArray *branchParticleJet = treeReaderJet->UseBranch("Particle");
-  TClonesArray *branchPFJet = treeReaderJet->UseBranch("Jet");
+  TClonesArray *branchPFJet = treeReaderJet->UseBranch("PFJet");
   TClonesArray *branchCaloJet = treeReaderJet->UseBranch("CaloJet");
 
   TClonesArray *branchParticleBJet = treeReaderBJet->UseBranch("Particle");
@@ -1359,7 +1359,7 @@ void Validation(const char *inputFilePion,
   TClonesArray *branchPFTauJet = treeReaderTauJet->UseBranch("Jet");
 
   TClonesArray *branchGenScalarHT = treeReaderJet->UseBranch("GenScalarHT");
-  TClonesArray *branchMet = treeReaderJet->UseBranch("MissingET");
+  TClonesArray *branchMet = treeReaderJet->UseBranch("PFMissingET");
   TClonesArray *branchCaloMet = treeReaderJet->UseBranch("CaloMissingET");
 
   std::vector<Color_t> colors;
