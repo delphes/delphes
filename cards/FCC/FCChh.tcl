@@ -548,10 +548,18 @@ module Efficiency PhotonEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   set EfficiencyFormula {
-  (pt <= 10.0) * (0.00) + \
-  (abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) + \
-  (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.90) + \
-  (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 10.0)  * (0.80) + \
+  (pt <= 1.0) * (0.00) + \
+  (abs(eta) <= 1.5) * (pt > 1.0 && pt < 5.0)  * (0.70) +
+  (abs(eta) <= 1.5) * (pt > 5.0 && pt < 10.0) * (0.85) +
+  (abs(eta) <= 1.5) * (pt > 10.0)             * (0.95) +
+    
+  (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt < 5.0)  * (0.60) + 
+  (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 5.0 && pt < 10.0) * (0.80) + 
+  (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)		* (0.90) +   
+  
+  (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 1.0 && pt < 5.0)  * (0.50) + \
+  (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 5.0 && pt < 10.0) * (0.70) + \
+  (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 10.0)             * (0.80) + \
   (abs(eta) > 6.0) * (0.00)}
 
 }
