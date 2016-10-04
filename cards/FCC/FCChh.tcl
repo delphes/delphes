@@ -38,6 +38,8 @@ set ExecutionPath {
   ElectronFilter
   ElectronIsolation
 
+  ChargedHadronFilter
+
   MuonIsolation
 
   NeutrinoFilter
@@ -367,6 +369,22 @@ module PdgCodeFilter ElectronFilter {
   add PdgCode {11}
   add PdgCode {-11}
 }
+
+
+######################
+# ChargedHadronFilter
+######################
+
+module PdgCodeFilter ChargedHadronFilter {
+  set InputArray HCal/eflowTracks
+  set OutputArray chargedHadrons
+  
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
 
 ###################################################
 # Tower Merger (in case not using e-flow algorithm)
