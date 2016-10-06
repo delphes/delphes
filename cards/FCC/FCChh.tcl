@@ -99,10 +99,10 @@ module Efficiency ChargedHadronTrackingEfficiency {
  # tracking efficiency formula for charged hadrons
 
   set EfficiencyFormula { (pt <= 0.5) * (0.00) + \
-(abs(eta) <= 1.5) * (pt > 0.5 && pt <= 1) * (0.90) + \
-(abs(eta) <= 1.5) * (pt > 1) * (0.95) + \
-(abs(eta) > 1.5 && abs(eta) <= 4) * (pt > 0.5 && pt <= 1) * (0.85) + \
-(abs(eta) > 1.5 && abs(eta) <= 4) * (pt > 1) * (0.90) + \
+(abs(eta) <= 2.5) * (pt > 0.5 && pt <= 1) * (0.90) + \
+(abs(eta) <= 2.5) * (pt > 1) * (0.95) + \
+(abs(eta) > 2.5 && abs(eta) <= 4) * (pt > 0.5 && pt <= 1) * (0.85) + \
+(abs(eta) > 2.5 && abs(eta) <= 4) * (pt > 1) * (0.90) + \
 (abs(eta) > 4 && abs(eta) <= 6) * (pt > 0.5 && pt <= 1) * (0.80) + \
 (abs(eta) > 4 && abs(eta) <= 6) * (pt > 1.0) * (0.85) + \
 (abs(eta) > 6.0) * (0.00)}
@@ -121,10 +121,10 @@ module Efficiency ElectronTrackingEfficiency {
 # putting same as charged hadrons for now...
 
   set EfficiencyFormula { (pt <= 0.5) * (0.00) + \
-  (abs(eta) <= 1.5) * (pt > 0.5 && pt <= 1) * (0.90) + \
-  (abs(eta) <= 1.5) * (pt > 1) * (0.95) + \
-  (abs(eta) > 1.5 && abs(eta) <= 4) * (pt > 0.5 && pt <= 1) * (0.85) + \
-  (abs(eta) > 1.5 && abs(eta) <= 4) * (pt > 1) * (0.90) + \
+  (abs(eta) <= 2.5) * (pt > 0.5 && pt <= 1) * (0.90) + \
+  (abs(eta) <= 2.5) * (pt > 1) * (0.95) + \
+  (abs(eta) > 2.5 && abs(eta) <= 4) * (pt > 0.5 && pt <= 1) * (0.85) + \
+  (abs(eta) > 2.5 && abs(eta) <= 4) * (pt > 1) * (0.90) + \
   (abs(eta) > 4 && abs(eta) <= 6) * (pt > 0.5 && pt <= 1) * (0.80) + \
   (abs(eta) > 4 && abs(eta) <= 6) * (pt > 1.0) * (0.85) + \
   (abs(eta) > 6.0) * (0.00)}
@@ -635,23 +635,29 @@ module BTagging BTagging {
 
   add EfficiencyFormula {0} {
 
-  (pt <= 10.0)     * (0.00) +
-  (abs(eta) < 4.0) * (pt > 10.0 && pt < 500) * (0.001) + \
-  (abs(eta) < 4.0) * (pt > 500.0) * (0.001*exp(0.5 - pt*0.001)) + \
+  (pt <= 10.0)                       * (0.00) +
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500) * (0.001) + \
+  (abs(eta) < 2.5)                   * (pt > 500.0)            * (0.001)*(1.0 - pt/50000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500) * (0.00075) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0)            * (0.00075)*(1.0 - pt/50000.) + \
   (abs(eta) > 4.0) * (0.00)}
 
   add EfficiencyFormula {4} {
 
-  (pt <= 10.0)     * (0.00) +
-  (abs(eta) < 4.0) * (pt > 10.0 && pt < 500) * (0.04) + \
-  (abs(eta) < 4.0) * (pt > 500.0) * (0.04*exp(0.5 - pt*0.001)) + \
+  (pt <= 10.0)                       * (0.00) +
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500) * (0.04) + \
+  (abs(eta) < 2.5)                   * (pt > 500.0)            * (0.04)*(1.0 - pt/50000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500) * (0.03) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0)            * (0.03)*(1.0 - pt/50000.) + \
   (abs(eta) > 4.0) * (0.00)}
 
   add EfficiencyFormula {5} {
 
-  (pt <= 10.0)     * (0.00) +
-  (abs(eta) < 4.0) * (pt > 10.0 && pt < 500) * (0.80) + \
-  (abs(eta) < 4.0) * (pt > 500.0) * (0.85*exp(0.5 - pt*0.001)) + \
+  (pt <= 10.0)                       * (0.00) +
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500) * (0.85) + \
+  (abs(eta) < 2.5)                   * (pt > 500.0)            * (0.85)*(1.0 - pt/50000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500) * (0.64) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0)            * (0.64)*(1.0 - pt/50000.) + \
   (abs(eta) > 4.0) * (0.00)}
 
 }
@@ -705,21 +711,30 @@ module TauTagging TauTagging {
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
   add EfficiencyFormula {0} {
 
-  (pt <= 10.0)     * (0.00) +
-  (abs(eta) < 4.0) * (pt > 10.0) * (0.01) + \
-  (abs(eta) > 4.0) * (pt > 10.0) * (0.00)}
+  (pt <= 10.0)                                                    * (0.00) +
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 5000.0) * (0.01) + \
+  (abs(eta) < 2.5)                   * (pt > 5000.0)              * (0.01)  *(8./9. - pt/45000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 5000.0) * (0.0075) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 5000.0)              * (0.0075)*(8./9. - pt/45000.) + \
+  (abs(eta) > 4.0)                   * (0.00)}
 
   add EfficiencyFormula {11} {
 
-  (pt <= 10.0)     * (0.00) +
-  (abs(eta) < 4.0) * (pt > 10.0) * (0.005) + \
-  (abs(eta) > 4.0) * (pt > 10.0) * (0.00)}
+  (pt <= 10.0)                                                    * (0.00) +
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 5000.0) * (0.005) + \
+  (abs(eta) < 2.5)                   * (pt > 5000.0)              * (0.005)    *(8./9. - pt/45000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 5000.0) * (0.00375) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 5000.0)              * (0.00375)*(8./9. - pt/45000.) + \
+  (abs(eta) > 4.0)                   * (0.00)}
 
   add EfficiencyFormula {15} {
 
-  (pt <= 10.0)     * (0.00) +
-  (abs(eta) < 4.0) * (pt > 10.0) * (0.6) + \
-  (abs(eta) > 4.0) * (pt > 10.0) * (0.00)}
+  (pt <= 10.0)                                                    * (0.00) +
+  (abs(eta) < 2.5) * (pt > 10.0 && pt < 5000.0)                   * (0.6)                      + \
+  (abs(eta) < 2.5) * (pt > 5000.0)                                * (0.6) *(8./9. - pt/45000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 5000.0) * (0.45) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 5000.0)              * (0.45)*(8./9. - pt/45000.) + \
+  (abs(eta) > 4.0)                                                * (0.00)}
 
 }
 
