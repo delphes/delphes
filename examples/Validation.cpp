@@ -262,6 +262,8 @@ TH1D* GetEffPt(TClonesArray *branchReco, TClonesArray *branchParticle, TString n
           // having infite rapidity ...
         //if(Momentum.Px() == 0 && genMomentum.Py() == 0) continue;
 
+
+
           // take the closest parton candidate
           if(TMath::Abs(pdgID) == 5)
           {
@@ -276,11 +278,11 @@ TH1D* GetEffPt(TClonesArray *branchReco, TClonesArray *branchParticle, TString n
             Jet *jet = (Jet *)recoObj;
             if( !(jet->BTag & (1 << 0)) ) continue;
           }
-
-           if(TMath::Abs(pdgID) == 1)
+        
+	  if(TMath::Abs(pdgID) == 1)
           {
             Jet *jet = (Jet *)recoObj;
-            if( !(jet->BTag & (1 << 0)) ) continue;
+	    if( !(jet->BTag & (1 << 0)) ) continue;
           }
 
           if(TMath::Abs(pdgID) == 15)
@@ -1348,7 +1350,8 @@ void Validation(const char *inputFilePion,
   TClonesArray *branchParticleJet = treeReaderJet->UseBranch("Particle");
   TClonesArray *branchPFJet = treeReaderJet->UseBranch("PFJet");
   TClonesArray *branchCaloJet = treeReaderJet->UseBranch("CaloJet");
-
+  TClonesArray *branchJet = treeReaderJet->UseBranch("Jet");
+  
   TClonesArray *branchParticleBJet = treeReaderBJet->UseBranch("Particle");
   TClonesArray *branchPFBJet = treeReaderBJet->UseBranch("Jet");
 
@@ -2556,8 +2559,8 @@ void Validation(const char *inputFilePion,
     // loop over eta bins
     for (k = 0; k < etaVals.size()-1; k++)
     {
-
-       h_recbjet_lmis_pt = GetEffPt<Jet>(branchPFJet, branchParticleJet, "Jet", 1, ptMin, ptMax, etaVals.at(k), etaVals.at(k+1), treeReaderJet);
+       
+       h_recbjet_lmis_pt = GetEffPt<Jet>(branchJet, branchParticleJet, "Jet", 1, ptMin, ptMax, etaVals.at(k), etaVals.at(k+1), treeReaderJet);
        gr_recbjet_lmis_pt[k] = TGraphErrors(h_recbjet_lmis_pt);
 
        s_etaMin = Form("%.1f",etaVals.at(k));
@@ -2573,7 +2576,7 @@ void Validation(const char *inputFilePion,
     // loop over pt
     for (k = 0; k < ptVals.size(); k++)
     {
-       h_recbjet_lmis_eta = GetEffEta<Jet>(branchPFJet, branchParticleJet, "Jet", 1, 0.5*ptVals.at(k), 2.0*ptVals.at(k) ,etaMin, etaMax , treeReaderJet);
+       h_recbjet_lmis_eta = GetEffEta<Jet>(branchJet, branchParticleJet, "Jet", 1, 0.5*ptVals.at(k), 2.0*ptVals.at(k) ,etaMin, etaMax , treeReaderJet);
        gr_recbjet_lmis_eta[k] = TGraphErrors(h_recbjet_lmis_eta);
 
        s_pt = Form("uds-jet , p_{T} = %.0f GeV",ptVals.at(k));
@@ -2686,7 +2689,7 @@ void Validation(const char *inputFilePion,
     for (k = 0; k < etaVals.size()-1; k++)
     {
 
-       h_rectaujet_mis_pt = GetTauEffPt<Jet>(branchPFJet, branchParticleJet, "TauJet", 1, ptMin, ptMax, etaVals.at(k), etaVals.at(k+1), treeReaderJet);
+       h_rectaujet_mis_pt = GetTauEffPt<Jet>(branchJet, branchParticleJet, "TauJet", 1, ptMin, ptMax, etaVals.at(k), etaVals.at(k+1), treeReaderJet);
        gr_rectaujet_mis_pt[k] = TGraphErrors(h_rectaujet_mis_pt);
 
        s_etaMin = Form("%.1f",etaVals.at(k));
@@ -2702,7 +2705,7 @@ void Validation(const char *inputFilePion,
     // loop over pt
     for (k = 0; k < ptVals.size(); k++)
     {
-       h_rectaujet_mis_eta = GetTauEffEta<Jet>(branchPFJet, branchParticleJet, "TauJet", 1, 0.5*ptVals.at(k), 2.0*ptVals.at(k) ,etaMin, etaMax , treeReaderJet);
+       h_rectaujet_mis_eta = GetTauEffEta<Jet>(branchJet, branchParticleJet, "TauJet", 1, 0.5*ptVals.at(k), 2.0*ptVals.at(k) ,etaMin, etaMax , treeReaderJet);
        gr_rectaujet_mis_eta[k] = TGraphErrors(h_rectaujet_mis_eta);
 
        s_pt = Form("uds-jet , p_{T} = %.0f GeV",ptVals.at(k));
