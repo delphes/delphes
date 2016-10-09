@@ -98,8 +98,9 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   {
     handleParticle.getByLabel(event, "genParticles");
   }
-  else if (!((handlePackedParticle.getBranchNameFor(event, "packedGenParticles")).empty()))
+  else if (!((handlePackedParticle.getBranchNameFor(event, "packedGenParticles")).empty()) && !((handleParticle.getBranchNameFor(event,"prunedGenParticles")).empty()))
   {
+    handleParticle.getByLabel(event, "prunedGenParticles");
     handlePackedParticle.getByLabel(event, "packedGenParticles");
   }
   else
@@ -158,116 +159,115 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   }
 
   pdg = TDatabasePDG::Instance();
-  if( !isMiniAOD) {
-    for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
+
+  for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
+  {
+    const reco::GenParticle &particle = *itParticle;
+    if( !isMiniAOD || particle.status() != 1 ) vectorCandidate.push_back(&*itParticle);
+  }
+
+  for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
+  {
+    const reco::GenParticle &particle = *itParticle;
+
+    pid = particle.pdgId();
+    status = particle.status();
+    if( isMiniAOD && particle.status() == 1 ) continue;
+    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
+    x = particle.vx(); y = particle.vy(); z = particle.vz();
+
+    candidate = factory->NewCandidate();
+
+    candidate->PID = pid;
+    pdgCode = TMath::Abs(candidate->PID);
+
+    candidate->Status = status;
+
+    if(particle.mother())
     {
-      vectorCandidate.push_back(&*itParticle);
+      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.mother());
+      if(itCandidate != vectorCandidate.end()) candidate->M1 = distance(vectorCandidate.begin(), itCandidate);
     }
 
-    for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
+    if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
+
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(particle.numberOfDaughters() - 1));
+    if(itCandidate != vectorCandidate.end()) candidate->D2 = distance(vectorCandidate.begin(), itCandidate);
+
+    pdgParticle = pdg->GetParticle(pid);
+    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Mass = mass;
+
+    candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+
+    candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
+
+    allParticleOutputArray->Add(candidate);
+
+    if(!pdgParticle) continue;
+
+    if( status == 1)
     {
-      const reco::GenParticle &particle = *itParticle;
-
-      pid = particle.pdgId();
-      status = particle.status();
-      px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
-      x = particle.vx(); y = particle.vy(); z = particle.vz();
-
-      candidate = factory->NewCandidate();
-
-      candidate->PID = pid;
-      pdgCode = TMath::Abs(candidate->PID);
-
-      candidate->Status = status;
-
-      if(particle.mother())
-      {
-        itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.mother());
-        if(itCandidate != vectorCandidate.end()) candidate->M1 = distance(vectorCandidate.begin(), itCandidate);
-      }
-
-      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
-      if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
-
-      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(particle.numberOfDaughters() - 1));
-      if(itCandidate != vectorCandidate.end()) candidate->D2 = distance(vectorCandidate.begin(), itCandidate);
-
-      pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
-      candidate->Mass = mass;
-
-      candidate->Momentum.SetPxPyPzE(px, py, pz, e);
-
-      candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
-
-      allParticleOutputArray->Add(candidate);
-
-      if(!pdgParticle) continue;
-
-      if(status == 1)
-      {
-        stableParticleOutputArray->Add(candidate);
-      }
-      else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-      {
-        partonOutputArray->Add(candidate);
-      }
+      // Prevent duplicated particle.
+      if ( !isMiniAOD ) stableParticleOutputArray->Add(candidate);
+    }
+    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    {
+      partonOutputArray->Add(candidate);
     }
   }
-  else {
-    for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
+  if ( !isMiniAOD) return ;
+  // For MiniAOD sample,
+  // Only status==1 particles are saved to packedGenParticles.
+  for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
+  {
+    vectorCandidate.push_back(&*itPackedParticle);
+  }
+
+  for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
+  {
+    const pat::PackedGenParticle &particle = *itPackedParticle;
+
+    pid = particle.pdgId();
+    status = particle.status();
+    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
+    x = particle.vx(); y = particle.vy(); z = particle.vz();
+
+    candidate = factory->NewCandidate();
+
+    candidate->PID = pid;
+    pdgCode = TMath::Abs(candidate->PID);
+
+    candidate->Status = status;
+
+    if(particle.mother(0))
     {
-      vectorCandidate.push_back(&*itPackedParticle);
+      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.mother(0));
+      if(itCandidate != vectorCandidate.end()) candidate->M1 = distance(vectorCandidate.begin(), itCandidate);
     }
 
-    for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
+    if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
+
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(particle.numberOfDaughters() - 1));
+    if(itCandidate != vectorCandidate.end()) candidate->D2 = distance(vectorCandidate.begin(), itCandidate);
+
+    pdgParticle = pdg->GetParticle(pid);
+    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Mass = mass;
+
+    candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+
+    candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
+
+    allParticleOutputArray->Add(candidate);
+
+    if(!pdgParticle) continue;
+
+    if(status == 1)
     {
-      const pat::PackedGenParticle &particle = *itPackedParticle;
-  
-      pid = particle.pdgId();
-      status = particle.status();
-      px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
-      x = particle.vx(); y = particle.vy(); z = particle.vz();
-
-      candidate = factory->NewCandidate();
-
-      candidate->PID = pid;
-      pdgCode = TMath::Abs(candidate->PID);
-
-      candidate->Status = status;
-
-      if(particle.mother(0))
-      {
-        itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.mother(0));
-        if(itCandidate != vectorCandidate.end()) candidate->M1 = distance(vectorCandidate.begin(), itCandidate);
-      }
-
-      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
-      if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
-
-      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(particle.numberOfDaughters() - 1));
-      if(itCandidate != vectorCandidate.end()) candidate->D2 = distance(vectorCandidate.begin(), itCandidate);
-
-      pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
-      candidate->Mass = mass;
-
-      candidate->Momentum.SetPxPyPzE(px, py, pz, e);
-
-      candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
-
-      allParticleOutputArray->Add(candidate);
-
-      if(!pdgParticle) continue;
-
-      if(status == 1)
-      {
-        stableParticleOutputArray->Add(candidate);
-      }
-      else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-      {
-        partonOutputArray->Add(candidate);
-      }
+      stableParticleOutputArray->Add(candidate);
     }
   }
 }
