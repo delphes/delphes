@@ -249,8 +249,10 @@ TH1D* GetEffPt(TClonesArray *branchReco, TClonesArray *branchParticle, TString n
       pt  = genMomentum.Pt();
       eta = TMath::Abs(genMomentum.Eta());
 
+
       if(eta > etamax || eta < etamin ) continue;
 
+      //cout<<"b parton: "<<pt<<endl;
       if (particle->PID == pdgID && genMomentum.Pt() > ptmin && genMomentum.Pt() < ptmax )
       {
         // Loop over all reco object in event
@@ -278,8 +280,8 @@ TH1D* GetEffPt(TClonesArray *branchReco, TClonesArray *branchParticle, TString n
             Jet *jet = (Jet *)recoObj;
             if( !(jet->BTag & (1 << 0)) ) continue;
           }
-        
-	  if(TMath::Abs(pdgID) == 1)
+
+	    if(TMath::Abs(pdgID) == 1)
           {
             Jet *jet = (Jet *)recoObj;
 	    if( !(jet->BTag & (1 << 0)) ) continue;
@@ -298,9 +300,8 @@ TH1D* GetEffPt(TClonesArray *branchReco, TClonesArray *branchParticle, TString n
             bestRecoMomentum = recoMomentum;
           }
         }
-
         histGenPt->Fill(pt);
-        if(deltaR < 0.3) { histRecoPt->Fill(pt); }
+        if(deltaR < 0.3 && bestRecoMomentum.Pt()> 0.20*pt ) { histRecoPt->Fill(pt);}
 
       }
     }
@@ -1351,7 +1352,7 @@ void Validation(const char *inputFilePion,
   TClonesArray *branchPFJet = treeReaderJet->UseBranch("PFJet");
   TClonesArray *branchCaloJet = treeReaderJet->UseBranch("CaloJet");
   TClonesArray *branchJet = treeReaderJet->UseBranch("Jet");
-  
+
   TClonesArray *branchParticleBJet = treeReaderBJet->UseBranch("Particle");
   TClonesArray *branchPFBJet = treeReaderBJet->UseBranch("Jet");
 
@@ -1437,7 +1438,6 @@ void Validation(const char *inputFilePion,
 
   const int n_etabins = etaVals.size()-1;
   const int n_ptbins = ptVals.size();
-
 
   //////////////////////////
   // Tracking performance //
@@ -1905,7 +1905,11 @@ void Validation(const char *inputFilePion,
   TGraphErrors gr_pfele_res_e[n_etabins];
   TGraphErrors gr_pfele_res_eta[n_ptbins];
 
+  TGraphErrors gr_trkele_res_e[n_etabins];
+  TGraphErrors gr_trkele_res_eeta[n_ptbins];
+
   std::vector<resolPlot> plots_pfele_res_e[n_etabins], plots_pfele_res_eta[n_ptbins];
+  std::vector<resolPlot> plots_trkele_res_e[n_etabins], plots_trkele_res_eeta[n_ptbins];
 
   TCanvas *c_pfele_res_e[n_etabins];
   TCanvas *c_pfele_res_eta[n_ptbins];
@@ -1921,6 +1925,10 @@ void Validation(const char *inputFilePion,
      GetEres<Electron>(&plots_pfele_res_e[k], branchElectronPF, branchParticleElectron, 11, etaVals.at(k), etaVals.at(k+1), treeReaderElectron);
      gr_pfele_res_e[k] = EresGraph(&plots_pfele_res_e[k]);
 
+     HistogramsCollection(&plots_trkele_res_e[k], TMath::Log10(ptMin), TMath::Log10(ptMax), "trkele");
+     GetEres<Track>(&plots_trkele_res_e[k], branchTrackElectron, branchParticleElectron, 11, etaVals.at(k), etaVals.at(k+1), treeReaderElectron);
+     gr_trkele_res_e[k] = EresGraph(&plots_trkele_res_e[k]);
+
      s_etaMin = Form("%.1f",etaVals.at(k));
      s_etaMax = Form("%.1f",etaVals.at(k+1));
      s_eta    = "e^{ #pm}, "+ s_etaMin + " < | #eta | < " + s_etaMax;
@@ -1929,7 +1937,7 @@ void Validation(const char *inputFilePion,
      leg_pfele_res_e[k]->SetHeader(s_eta);
 
      addResoGraph(mg_pfele_res_e[k], &gr_ecal_res_e[k], leg_pfele_res_e[k], markerStyles.at(0), colors.at(0), "ECAL");
-     addResoGraph(mg_pfele_res_e[k], &gr_trkele_res_pt[k], leg_pfele_res_e[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfele_res_e[k], &gr_trkele_res_e[k], leg_pfele_res_e[k], markerStyles.at(1), colors.at(1), "Track");
      addResoGraph(mg_pfele_res_e[k], &gr_pfele_res_e[k], leg_pfele_res_e[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfele_res_e[k] = new TCanvas("","", 800, 600);
@@ -1960,6 +1968,10 @@ void Validation(const char *inputFilePion,
      GetEresVsEta<Electron>(&plots_pfele_res_eta[k], branchElectronPF, branchParticleElectron, 11, 0.5*ptVals.at(k), 2.0*ptVals.at(k), treeReaderElectron);
      gr_pfele_res_eta[k] = EresGraphVsEta(&plots_pfele_res_eta[k]);
 
+     HistogramsCollectionVsEta(&plots_trkele_res_eeta[k], etaMin, etaMax, 0.5*ptVals.at(k), 2.0*ptVals.at(k), "trkele", 0.0, 2.0);
+     GetEresVsEta<Track>(&plots_trkele_res_eeta[k], branchTrackElectron, branchParticleElectron, 11, 0.5*ptVals.at(k), 2.0*ptVals.at(k), treeReaderElectron);
+     gr_trkele_res_eeta[k] = EresGraphVsEta(&plots_trkele_res_eeta[k]);
+
      s_e = Form("e^{ #pm}, E = %.0f GeV",ptVals.at(k));
      if(ptVals.at(k) >= 1000.) s_e = Form("e^{ #pm}, E = %.0f TeV",ptVals.at(k)/1000.);
 
@@ -1968,7 +1980,7 @@ void Validation(const char *inputFilePion,
      leg_pfele_res_eta[k]->SetHeader(s_e);
 
      addResoGraph(mg_pfele_res_eta[k], &gr_ecal_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(0), colors.at(0), "ECAL");
-     addResoGraph(mg_pfele_res_eta[k], &gr_trkele_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfele_res_eta[k], &gr_trkele_res_eeta[k], leg_pfele_res_eta[k], markerStyles.at(1), colors.at(1), "Track");
      addResoGraph(mg_pfele_res_eta[k], &gr_pfele_res_eta[k], leg_pfele_res_eta[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfele_res_eta[k] = new TCanvas("","", 800, 600);
@@ -2000,7 +2012,11 @@ void Validation(const char *inputFilePion,
   TGraphErrors gr_pfpi_res_e[n_etabins];
   TGraphErrors gr_pfpi_res_eta[n_ptbins];
 
+  TGraphErrors gr_trkpi_res_e[n_etabins];
+  TGraphErrors gr_trkpi_res_eeta[n_ptbins];
+
   std::vector<resolPlot> plots_pfpi_res_e[n_etabins], plots_pfpi_res_eta[n_ptbins];
+  std::vector<resolPlot> plots_trkpi_res_e[n_etabins], plots_trkpi_res_eeta[n_ptbins];
 
   TCanvas *c_pfpi_res_e[n_etabins];
   TCanvas *c_pfpi_res_eta[n_ptbins];
@@ -2016,6 +2032,11 @@ void Validation(const char *inputFilePion,
      GetEres<Track>(&plots_pfpi_res_e[k], branchPion, branchParticlePion, 211, etaVals.at(k), etaVals.at(k+1), treeReaderPion);
      gr_pfpi_res_e[k] = EresGraph(&plots_pfpi_res_e[k]);
 
+     HistogramsCollection(&plots_trkpi_res_e[k], TMath::Log10(ptMin), TMath::Log10(ptMax), "trkpi");
+     GetEres<Track>(&plots_trkpi_res_e[k], branchTrackPion, branchParticlePion, 211, etaVals.at(k), etaVals.at(k+1), treeReaderPion);
+     gr_trkpi_res_e[k] = EresGraph(&plots_trkpi_res_e[k]);
+
+
      s_etaMin = Form("%.1f",etaVals.at(k));
      s_etaMax = Form("%.1f",etaVals.at(k+1));
      s_eta    = "#pi^{ #pm}, "+ s_etaMin + " < | #eta | < " + s_etaMax;
@@ -2024,7 +2045,7 @@ void Validation(const char *inputFilePion,
      leg_pfpi_res_e[k]->SetHeader(s_eta);
 
      addResoGraph(mg_pfpi_res_e[k], &gr_hcal_res_e[k], leg_pfpi_res_e[k], markerStyles.at(0), colors.at(0), "HCAL");
-     addResoGraph(mg_pfpi_res_e[k], &gr_trkpi_res_pt[k], leg_pfpi_res_e[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfpi_res_e[k], &gr_trkpi_res_e[k], leg_pfpi_res_e[k], markerStyles.at(1), colors.at(1), "Track");
      addResoGraph(mg_pfpi_res_e[k], &gr_pfpi_res_e[k], leg_pfpi_res_e[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfpi_res_e[k] = new TCanvas("","", 800, 600);
@@ -2055,6 +2076,11 @@ void Validation(const char *inputFilePion,
      GetEresVsEta<Track>(&plots_pfpi_res_eta[k], branchPion, branchParticlePion, 211, 0.5*ptVals.at(k), 2.0*ptVals.at(k), treeReaderPion);
      gr_pfpi_res_eta[k] = EresGraphVsEta(&plots_pfpi_res_eta[k]);
 
+     HistogramsCollectionVsEta(&plots_trkpi_res_eeta[k], etaMin, etaMax, 0.5*ptVals.at(k), 2.0*ptVals.at(k), "trkpi", 0.0, 2.0);
+     GetEresVsEta<Track>(&plots_trkpi_res_eeta[k], branchPion, branchParticlePion, 211, 0.5*ptVals.at(k), 2.0*ptVals.at(k), treeReaderPion);
+     gr_trkpi_res_eeta[k] = EresGraphVsEta(&plots_trkpi_res_eeta[k]);
+
+
      s_e = Form("#pi^{ #pm}, E = %.0f GeV",ptVals.at(k));
      if(ptVals.at(k) >= 1000.) s_e = Form("#pi^{ #pm}, E = %.0f TeV",ptVals.at(k)/1000.);
 
@@ -2062,7 +2088,7 @@ void Validation(const char *inputFilePion,
      leg_pfpi_res_eta[k]->SetHeader(s_e);
 
      addResoGraph(mg_pfpi_res_eta[k], &gr_hcal_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(0), colors.at(0), "HCAL");
-     addResoGraph(mg_pfpi_res_eta[k], &gr_trkpi_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(1), colors.at(1), "Track");
+     addResoGraph(mg_pfpi_res_eta[k], &gr_trkpi_res_eeta[k], leg_pfpi_res_eta[k], markerStyles.at(1), colors.at(1), "Track");
      addResoGraph(mg_pfpi_res_eta[k], &gr_pfpi_res_eta[k], leg_pfpi_res_eta[k], markerStyles.at(2), colors.at(2), "Particle-flow");
 
      c_pfpi_res_eta[k] = new TCanvas("","", 800, 600);
@@ -2417,6 +2443,7 @@ void Validation(const char *inputFilePion,
     c_recpho_eff_eta->Print(figPath+"img_recpho_eff_eta.pdf","pdf");
     c_recpho_eff_eta->Print(figPath+"img_recpho_eff_eta.png","png");
 
+
     /////////////////////////////////////////
     // B-jets  Efficiency/ mistag rates   ///
     /////////////////////////////////////////
@@ -2480,8 +2507,6 @@ void Validation(const char *inputFilePion,
     c_recbjet_eff_eta->Print(pdfOutput,"pdf");
     c_recbjet_eff_eta->Print(figPath+"img_recbjet_eff_eta.pdf","pdf");
     c_recbjet_eff_eta->Print(figPath+"img_recbjet_eff_eta.png","png");
-
-
 
     // ------ c - mistag  ------
 
@@ -2559,7 +2584,7 @@ void Validation(const char *inputFilePion,
     // loop over eta bins
     for (k = 0; k < etaVals.size()-1; k++)
     {
-       
+
        h_recbjet_lmis_pt = GetEffPt<Jet>(branchJet, branchParticleJet, "Jet", 1, ptMin, ptMax, etaVals.at(k), etaVals.at(k+1), treeReaderJet);
        gr_recbjet_lmis_pt[k] = TGraphErrors(h_recbjet_lmis_pt);
 
@@ -2588,7 +2613,7 @@ void Validation(const char *inputFilePion,
     TCanvas *c_recbjet_lmis_pt = new TCanvas("","", 800, 600);
 
     mg_recbjet_lmis_pt->Draw("APE");
-    DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 0.005, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
+    DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 0.5, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
     leg_recbjet_lmis_pt->Draw();
     pave->Draw();
 
@@ -2599,7 +2624,7 @@ void Validation(const char *inputFilePion,
     TCanvas *c_recbjet_lmis_eta = new TCanvas("","", 800, 600);
 
     mg_recbjet_lmis_eta->Draw("APE");
-    DrawAxis(mg_recbjet_lmis_eta, leg_recbjet_lmis_eta, etaMin, etaMax, 0.0, 0.005, " #eta ", "light - mistag rate (%)", false, false);
+    DrawAxis(mg_recbjet_lmis_eta, leg_recbjet_lmis_eta, etaMin, etaMax, 0.0, 0.5, " #eta ", "light - mistag rate (%)", false, false);
     leg_recbjet_lmis_eta->Draw();
     pave->Draw();
 
@@ -2717,7 +2742,7 @@ void Validation(const char *inputFilePion,
     TCanvas *c_rectaujet_mis_pt = new TCanvas("","", 800, 600);
 
     mg_rectaujet_mis_pt->Draw("APE");
-    DrawAxis(mg_rectaujet_mis_pt, leg_rectaujet_mis_pt, ptMin, ptMax, 0.0, 10., "p_{T} [GeV]", "#tau - mistag(%)", true, false);
+    DrawAxis(mg_rectaujet_mis_pt, leg_rectaujet_mis_pt, ptMin, ptMax, 0.0, 5., "p_{T} [GeV]", "#tau - mistag(%)", true, false);
     leg_rectaujet_mis_pt->Draw();
     pave->Draw();
 
@@ -2749,7 +2774,7 @@ void Validation(const char *inputFilePion,
     {
        plots_trkpi_res_pt[k].at(bin).resolHist->Write();
        plots_trkele_res_pt[k].at(bin).resolHist->Write();
-	   plots_trkmu_res_pt[k].at(bin).resolHist->Write();
+       plots_trkmu_res_pt[k].at(bin).resolHist->Write();
        plots_ecal_res_e[k].at(bin).resolHist->Write();
        plots_hcal_res_e[k].at(bin).resolHist->Write();
        plots_pfele_res_e[k].at(bin).resolHist->Write();
@@ -2779,6 +2804,9 @@ void Validation(const char *inputFilePion,
   }
 
   fout->Write();
+
+
+
 
   cout << "** Exiting..." << endl;
 
