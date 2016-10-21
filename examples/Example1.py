@@ -10,6 +10,12 @@ if len(sys.argv) < 2:
 
 ROOT.gSystem.Load("libDelphes")
 
+try:
+  ROOT.gInterpreter.Declare('#include "classes/DelphesClasses.h"')
+  ROOT.gInterpreter.Declare('#include "external/ExRootAnalysis/ExRootTreeReader.h"')
+except:
+  pass
+
 inputFile = sys.argv[1]
 
 # Create chain of root trees
