@@ -1404,7 +1404,7 @@ void Validation(const char *inputFilePion,
   TString vrs(version);
 
   TPaveText *pave = new TPaveText(0.0, 0.89, 0.94, 0.94,"NDC");
-  pave->SetTextAlign(kHAlignRight);
+  pave->SetTextAlign(30);
   pave->SetTextFont(132);
   pave->SetBorderSize(0);
   pave->SetShadowColor(0);
