@@ -50,7 +50,7 @@
 
 using namespace std;
 
-static const int kBufferSize  = 1024;
+static const int kBufferSize = 16384;
 
 //---------------------------------------------------------------------------
 
