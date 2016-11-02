@@ -31,7 +31,8 @@ set ExecutionPath {
 
   Calorimeter
   EFlowMerger
-
+  EFlowFilter
+  
   PhotonEfficiency
   PhotonIsolation
 
@@ -409,6 +410,20 @@ module Merger EFlowMerger {
   set OutputArray eflow
 }
 
+######################
+# EFlowFilter
+######################
+
+module PdgCodeFilter EFlowFilter {
+  set InputArray EFlowMerger/eflow
+  set OutputArray eflow
+  
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
 
 ###################
 # Missing ET merger
@@ -572,7 +587,7 @@ module Efficiency PhotonEfficiency {
 
 module Isolation PhotonIsolation {
   set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray photons
 
@@ -592,7 +607,7 @@ module Isolation PhotonIsolation {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronFilter/electrons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray electrons
 
@@ -612,7 +627,7 @@ module Isolation ElectronIsolation {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonMomentumSmearing/muons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray muons
 

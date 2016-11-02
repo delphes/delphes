@@ -20,7 +20,8 @@ set ExecutionPath {
 
   Calorimeter
   EFlowMerger
-
+  EFlowFilter
+  
   PhotonEfficiency
   PhotonIsolation
 
@@ -404,6 +405,20 @@ module Merger EFlowMerger {
   set OutputArray eflow
 }
 
+######################
+# EFlowFilter
+######################
+
+module PdgCodeFilter EFlowFilter {
+  set InputArray EFlowMerger/eflow
+  set OutputArray eflow
+  
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
 ###################
 # Photon efficiency
 ###################
@@ -427,7 +442,7 @@ module Efficiency PhotonEfficiency {
 
 module Isolation PhotonIsolation {
   set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray photons
 
@@ -438,17 +453,6 @@ module Isolation PhotonIsolation {
   set PTRatioMax 0.12
 }
 
-#################
-# Electron filter
-#################
-
-module PdgCodeFilter ElectronFilter {
-  set InputArray HCal/eflowTracks
-  set OutputArray electrons
-  set Invert true
-  add PdgCode {11}
-  add PdgCode {-11}
-}
 
 #####################
 # Electron efficiency
@@ -473,7 +477,7 @@ module Efficiency ElectronEfficiency {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray electrons
 
@@ -507,7 +511,7 @@ module Efficiency MuonEfficiency {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray muons
 
