@@ -103,14 +103,14 @@ void StatusPidFilter::Process()
 
     pass = kFALSE;
 
-    // status == 3
-    if(status == 3) pass = kTRUE;
+    // hard scattering particles (first condition for Py6, second for Py8)
+    if(status == 3 || (status > 20 && status < 30 )) pass = kTRUE;
 
     // electrons, muons, taus and neutrinos
     if(pdgCode > 10 && pdgCode < 17) pass = kTRUE;
 
     // heavy quarks
-    if(pdgCode == 5 || pdgCode == 6) pass = kTRUE;
+    if(pdgCode == 4 ||pdgCode == 5 || pdgCode == 6) pass = kTRUE;
 
     // Gauge bosons and other fundamental bosons
     if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
