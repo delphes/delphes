@@ -103,8 +103,8 @@ void StatusPidFilter::Process()
 
     pass = kFALSE;
 
-    // status == 3
-    if(status == 3) pass = kTRUE;
+    // hard scattering particles (first condition for Py6, second for Py8)
+    if(status == 3 || (status > 20 && status < 30) pass = kTRUE;
 
     // electrons, muons, taus and neutrinos
     if(pdgCode > 10 && pdgCode < 17) pass = kTRUE;
