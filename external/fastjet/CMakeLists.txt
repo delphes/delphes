@@ -1,4 +1,4 @@
-include_directories(${CMAKE_SOURCE_DIR}/external)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/external)
 
 file(GLOB sources *.cc plugins/*/*.cc contribs/*/*.cc tools/*.cc)
 
