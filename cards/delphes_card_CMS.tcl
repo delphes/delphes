@@ -317,7 +317,7 @@ module SimpleCalorimeter HCal {
   set IsEcal false
 
   set EnergyMin 1.0
-  set EnergySignificanceMin 2.0
+  set EnergySignificanceMin 1.0
 
   set SmearTowerCenter true
 
