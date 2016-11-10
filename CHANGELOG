@@ -4,15 +4,14 @@
 - improved particle flow algorithm
 - updated FastJet library to 3.2.1
 - updated Nsubjettiness library to 2.2.4
-- added scripts that produce validation plots
+- added script that produce validation plots
 - added DelphesROOT reader
 - added TrackSmearing and BeamSpotFilter modules
 - completed TimeSmearing module
 - added preliminary version of vertex clustering algorithm in 3/4D, VertexFinder and VertexFinder4D (special thanks to A. Hart and L. Gray)
 - fixed muon efficiency at high energy
 - replaced gaussian smearing with lognormal in MomentumSmearing module
-- make pyROOT Example1.py compatible with ROOT
-- included automatic card validation code
+- made pyROOT Example1.py compatible with ROOT
 
 3.3.3:
 - improved compatibility with ROOT >= 6.04
