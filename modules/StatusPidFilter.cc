@@ -104,7 +104,8 @@ void StatusPidFilter::Process()
     pass = kFALSE;
 
     // hard scattering particles (first condition for Py6, second for Py8)
-    if(status == 3 || (status > 20 && status < 30 )) pass = kTRUE;
+    if(status == 3) pass = kTRUE;
+    if(status > 20 && status < 30 ) pass = kTRUE;
 
     // electrons, muons, taus and neutrinos
     if(pdgCode > 10 && pdgCode < 17) pass = kTRUE;
@@ -115,7 +116,7 @@ void StatusPidFilter::Process()
     // Gauge bosons and other fundamental bosons
     if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
 
-    if(!pass || candidate->Momentum.Pt() <= fPTMin) continue;
+    if(!pass || candidate->Momentum.Pt() < fPTMin) continue;
 
     fOutputArray->Add(candidate);
   }
