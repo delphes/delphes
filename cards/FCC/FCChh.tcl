@@ -14,6 +14,7 @@
 #######################################
 
 set ExecutionPath {
+
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -62,6 +63,8 @@ set ExecutionPath {
   ScalarHT
 
   UniqueObjectFinder
+  
+  GenParticleFilter
 
   TreeWriter
 }
@@ -779,6 +782,15 @@ module UniqueObjectFinder UniqueObjectFinder {
 
 }
 
+######################
+# GenParticleFilter 
+######################
+
+# store only interesting particles
+module StatusPidFilter GenParticleFilter {
+  set InputArray Delphes/allParticles
+  set OutputArray filteredParticles
+}
 
 ##################
 # ROOT tree writer
@@ -787,6 +799,7 @@ module UniqueObjectFinder UniqueObjectFinder {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
+  add Branch GenParticleFilter/filteredParticles FilteredParticle GenParticle
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
