@@ -52,6 +52,7 @@
 #include "DataFormats/FWLite/interface/Event.h"
 #include "DataFormats/FWLite/interface/Handle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
@@ -62,16 +63,18 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
-  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
-  DelphesFactory *factory, TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
+    ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
+    DelphesFactory *factory, TObjArray *allParticleOutputArray,
+    TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
 {
 
   fwlite::Handle< GenEventInfoProduct > handleGenEventInfo;
   fwlite::Handle< LHEEventProduct > handleLHEEvent;
   fwlite::Handle< vector< reco::GenParticle > > handleParticle;
+  fwlite::Handle< vector< pat::PackedGenParticle > > handlePackedParticle;
 
   vector< reco::GenParticle >::const_iterator itParticle;
+  vector< pat::PackedGenParticle >::const_iterator itPackedParticle;
 
   vector< const reco::Candidate * > vectorCandidate;
   vector< const reco::Candidate * >::iterator itCandidate;
@@ -95,9 +98,10 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   {
     handleParticle.getByLabel(event, "genParticles");
   }
-  else if (!((handleParticle.getBranchNameFor(event, "prunedGenParticles")).empty()))
+  else if (!((handlePackedParticle.getBranchNameFor(event, "packedGenParticles")).empty()) && !((handleParticle.getBranchNameFor(event,"prunedGenParticles")).empty()))
   {
     handleParticle.getByLabel(event, "prunedGenParticles");
+    handlePackedParticle.getByLabel(event, "packedGenParticles");
   }
   else
   {
@@ -106,6 +110,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   }
 
   Bool_t foundLHE = !((handleLHEEvent.getBranchNameFor(event, "source")).empty()) || !((handleLHEEvent.getBranchNameFor(event, "externalLHEProducer")).empty());
+  Bool_t isMiniAOD = !((handlePackedParticle.getBranchNameFor(event, "packedGenParticles")).empty()) && ((handleParticle.getBranchNameFor(event, "genParticles")).empty()) ;
 
   HepMCEvent *element;
   Weight *weight;
@@ -145,7 +150,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   {
     const vector< gen::WeightsInfo > &vectorWeightsInfo = handleLHEEvent->weights();
     vector< gen::WeightsInfo >::const_iterator itWeightsInfo;
-    
+
     for(itWeightsInfo = vectorWeightsInfo.begin(); itWeightsInfo != vectorWeightsInfo.end(); ++itWeightsInfo)
     {
       weight = static_cast<Weight *>(branchRwgt->NewEntry());
@@ -157,7 +162,8 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
   {
-    vectorCandidate.push_back(&*itParticle);
+    const reco::GenParticle &particle = *itParticle;
+    if( !isMiniAOD || particle.status() != 1 ) vectorCandidate.push_back(&*itParticle);
   }
 
   for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
@@ -166,6 +172,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     pid = particle.pdgId();
     status = particle.status();
+    if( isMiniAOD && particle.status() == 1 ) continue;
     px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
     x = particle.vx(); y = particle.vy(); z = particle.vz();
 
@@ -200,13 +207,67 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     if(!pdgParticle) continue;
 
-    if(status == 1)
+    if( status == 1)
     {
-      stableParticleOutputArray->Add(candidate);
+      // Prevent duplicated particle.
+      if ( !isMiniAOD ) stableParticleOutputArray->Add(candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
       partonOutputArray->Add(candidate);
+    }
+  }
+  if ( !isMiniAOD) return ;
+  // For MiniAOD sample,
+  // Only status==1 particles are saved to packedGenParticles.
+  for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
+  {
+    vectorCandidate.push_back(&*itPackedParticle);
+  }
+
+  for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
+  {
+    const pat::PackedGenParticle &particle = *itPackedParticle;
+
+    pid = particle.pdgId();
+    status = particle.status();
+    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
+    x = particle.vx(); y = particle.vy(); z = particle.vz();
+
+    candidate = factory->NewCandidate();
+
+    candidate->PID = pid;
+    pdgCode = TMath::Abs(candidate->PID);
+
+    candidate->Status = status;
+
+    if(particle.mother(0))
+    {
+      itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.mother(0));
+      if(itCandidate != vectorCandidate.end()) candidate->M1 = distance(vectorCandidate.begin(), itCandidate);
+    }
+
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(0));
+    if(itCandidate != vectorCandidate.end()) candidate->D1 = distance(vectorCandidate.begin(), itCandidate);
+
+    itCandidate = find(vectorCandidate.begin(), vectorCandidate.end(), particle.daughter(particle.numberOfDaughters() - 1));
+    if(itCandidate != vectorCandidate.end()) candidate->D2 = distance(vectorCandidate.begin(), itCandidate);
+
+    pdgParticle = pdg->GetParticle(pid);
+    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Mass = mass;
+
+    candidate->Momentum.SetPxPyPzE(px, py, pz, e);
+
+    candidate->Position.SetXYZT(x*10.0, y*10.0, z*10.0, 0.0);
+
+    allParticleOutputArray->Add(candidate);
+
+    if(!pdgParticle) continue;
+
+    if(status == 1)
+    {
+      stableParticleOutputArray->Add(candidate);
     }
   }
 }
@@ -257,7 +318,7 @@ int main(int argc, char *argv[])
   TApplication app(appName, &appargc, appargv);
 
   FWLiteEnabler::enable();
-  
+
   try
   {
     outputFile = TFile::Open(argv[2], "CREATE");
@@ -316,9 +377,9 @@ int main(int argc, char *argv[])
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
         ConvertInput(event, eventCounter, branchEvent, branchRwgt, factory,
-          allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
+            allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
         modularDelphes->ProcessTask();
-          
+
         firstEvent = kFALSE;
 
         treeWriter->Fill();
