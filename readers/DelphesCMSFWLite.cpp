@@ -63,9 +63,9 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
-    ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
-    DelphesFactory *factory, TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
+  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
+  DelphesFactory *factory, TObjArray *allParticleOutputArray,
+  TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
 {
 
   fwlite::Handle< GenEventInfoProduct > handleGenEventInfo;
@@ -81,24 +81,24 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   handleGenEventInfo.getByLabel(event, "generator");
 
-  if (!((handleLHEEvent.getBranchNameFor(event, "source")).empty()))
-  { 
+  if(!((handleLHEEvent.getBranchNameFor(event, "source")).empty()))
+  {
     handleLHEEvent.getByLabel(event, "source");
   }
-  else if (!((handleLHEEvent.getBranchNameFor(event, "externalLHEProducer")).empty()))
+  else if(!((handleLHEEvent.getBranchNameFor(event, "externalLHEProducer")).empty()))
   {
     handleLHEEvent.getByLabel(event, "externalLHEProducer");
   }
-  else if (firstEvent)
+  else if(firstEvent)
   {
-    std::cout<<"Wrong LHEEvent Label! Please, check the input file."<<std::endl;
+    cout << "Wrong LHEEvent Label! Please, check the input file." << endl;
   }
 
-  if (!((handleParticle.getBranchNameFor(event, "genParticles")).empty()))
+  if(!((handleParticle.getBranchNameFor(event, "genParticles")).empty()))
   {
     handleParticle.getByLabel(event, "genParticles");
   }
-  else if (!((handlePackedParticle.getBranchNameFor(event, "packedGenParticles")).empty()) && !((handleParticle.getBranchNameFor(event,"prunedGenParticles")).empty()))
+  else if(!((handlePackedParticle.getBranchNameFor(event, "packedGenParticles")).empty()) && !((handleParticle.getBranchNameFor(event,"prunedGenParticles")).empty()))
   {
     handleParticle.getByLabel(event, "prunedGenParticles");
     handlePackedParticle.getByLabel(event, "packedGenParticles");
@@ -145,7 +145,6 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   element->ReadTime = 0.0;
   element->ProcTime = 0.0;
 
-
   if(foundLHE)
   {
     const vector< gen::WeightsInfo > &vectorWeightsInfo = handleLHEEvent->weights();
@@ -155,7 +154,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
     {
       weight = static_cast<Weight *>(branchRwgt->NewEntry());
       weight->Weight = itWeightsInfo->wgt;
-    }  
+    }
   }
 
   pdg = TDatabasePDG::Instance();
@@ -163,7 +162,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
   {
     const reco::GenParticle &particle = *itParticle;
-    if( !isMiniAOD || particle.status() != 1 ) vectorCandidate.push_back(&*itParticle);
+    if(!isMiniAOD || particle.status() != 1) vectorCandidate.push_back(&*itParticle);
   }
 
   for(itParticle = handleParticle->begin(); itParticle != handleParticle->end(); ++itParticle)
@@ -172,7 +171,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     pid = particle.pdgId();
     status = particle.status();
-    if( isMiniAOD && particle.status() == 1 ) continue;
+    if(isMiniAOD && particle.status() == 1) continue;
     px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.energy(); mass = particle.mass();
     x = particle.vx(); y = particle.vy(); z = particle.vz();
 
@@ -207,17 +206,18 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     if(!pdgParticle) continue;
 
-    if( status == 1)
+    if(status == 1)
     {
       // Prevent duplicated particle.
-      if ( !isMiniAOD ) stableParticleOutputArray->Add(candidate);
+      if(!isMiniAOD) stableParticleOutputArray->Add(candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
       partonOutputArray->Add(candidate);
     }
   }
-  if ( !isMiniAOD) return ;
+
+  if(!isMiniAOD) return;
   // For MiniAOD sample,
   // Only status==1 particles are saved to packedGenParticles.
   for(itPackedParticle = handlePackedParticle->begin(); itPackedParticle != handlePackedParticle->end(); ++itPackedParticle)
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
         ConvertInput(event, eventCounter, branchEvent, branchRwgt, factory,
-            allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
+          allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
         modularDelphes->ProcessTask();
 
         firstEvent = kFALSE;
