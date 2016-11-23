@@ -31,6 +31,8 @@ set ExecutionPath {
   ElectronEfficiency
   ElectronIsolation
 
+  ChargedHadronFilter
+
   MuonEfficiency
   MuonIsolation
 
@@ -216,9 +218,9 @@ module SimpleCalorimeter ECal {
     add PhiBins [expr {$i * $pi/360.0}]
   }
 
-  # 0.01 unit in eta up to eta = 2.5
-  for {set i -500} {$i <= 500} {incr i} {
-    set eta [expr {$i * 0.005}]
+  # 0.01 unit in eta up to eta = 3.0
+  for {set i -300} {$i <= 300} {incr i} {
+    set eta [expr {$i * 0.01}]
     add EtaPhiBins $eta $PhiBins
   }
 
@@ -325,6 +327,22 @@ module PdgCodeFilter ElectronFilter {
   add PdgCode {11}
   add PdgCode {-11}
 }
+
+######################
+# ChargedHadronFilter
+######################
+
+module PdgCodeFilter ChargedHadronFilter {
+  set InputArray HCal/eflowTracks
+  set OutputArray chargedHadrons
+  
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+
 
 ###################################################
 # Tower Merger (in case not using e-flow algorithm)
