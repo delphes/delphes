@@ -20,3 +20,10 @@ add_library(classes OBJECT ${sources} ClassesDict.cxx)
 
 # install public headers
 install(FILES ${headers} DESTINATION include/classes)
+
+# install pcms if they are created
+if (${ROOT_VERSION} GREATER 6)
+  install(FILES
+      ${PROJECT_BINARY_DIR}/classes/libClassesDict_rdict.pcm
+      DESTINATION lib)
+endif()
