@@ -31,6 +31,7 @@ add_subdirectory(examples)
 add_subdirectory(external)
 add_subdirectory(modules)
 add_subdirectory(readers)
+add_subdirectory(cards)
 
 add_library(Delphes SHARED
   $<TARGET_OBJECTS:classes> 
