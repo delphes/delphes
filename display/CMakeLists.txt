@@ -15,6 +15,6 @@ add_library(display OBJECT ${sources} DisplayDict.cxx)
 # install pcms if they are created
 if (${ROOT_VERSION} GREATER 6)
   install(FILES
-      ${PROJECT_BINARY_DIR}/external/DisplayDict_rdict.pcm
+      ${PROJECT_BINARY_DIR}/display/libDisplayDict_rdict.pcm
       DESTINATION lib)
 endif()
