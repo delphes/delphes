@@ -49,18 +49,21 @@ set ExecutionPath {
   RunPUPPI
 
   PhotonFilter
-
+  
+  PhotonCloner
   PhotonIsolation
   PhotonIsolationCHS
   PhotonEfficiency
   PhotonEfficiencyCHS
-
+  
+  ElectronCloner
   ElectronIsolation
   ElectronIsolationCHS
 
   ElectronEfficiency
   ElectronEfficiencyCHS
 
+  MuonCloner
   MuonIsolation
   MuonIsolationCHS
 
@@ -954,6 +957,34 @@ module PdgCodeFilter PhotonFilter {
 }
 
 
+##################
+# Muon cloner    #
+##################
+
+module Cloner MuonCloner {
+  set InputArray MuonMomentumSmearing/muons
+  set OutputArray muons
+}
+
+####################
+# Electron cloner  #
+####################
+
+module Cloner ElectronCloner {
+  set InputArray ElectronFilter/electrons
+  set OutputArray electrons
+}
+
+##################
+# Photon cloner  #
+##################
+
+module Cloner PhotonCloner {
+  set InputArray PhotonFilter/photons
+  set OutputArray photons
+}
+
+
 ####################
 # Photon isolation #
 ####################
@@ -992,7 +1023,7 @@ module Isolation PhotonIsolation {
 module Isolation PhotonIsolationCHS {
 
   # particle for which calculate the isolation
-  set CandidateInputArray PhotonFilter/photons
+  set CandidateInputArray PhotonCloner/photons
 
   # isolation collection
   set IsolationInputArray EFlowMerger/eflow
@@ -1078,7 +1109,7 @@ module Isolation ElectronIsolation {
 
 module Isolation ElectronIsolationCHS {
 
-  set CandidateInputArray ElectronFilter/electrons
+  set CandidateInputArray ElectronCloner/electrons
 
   # isolation collection
   set IsolationInputArray EFlowMerger/eflow
@@ -1181,6 +1212,7 @@ module Efficiency ElectronEfficiencyCHS {
 }
 
 
+
 ##################
 # Muon isolation #
 ##################
@@ -1204,7 +1236,7 @@ module Isolation MuonIsolation {
 ######################
 
 module Isolation MuonIsolationCHS {
-  set CandidateInputArray MuonMomentumSmearing/muons
+  set CandidateInputArray MuonCloner/muons
 
   # isolation collection
   set IsolationInputArray EFlowMerger/eflow
