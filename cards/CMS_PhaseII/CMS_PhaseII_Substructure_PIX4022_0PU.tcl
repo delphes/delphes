@@ -155,8 +155,8 @@ module PileUpMerger PileUpMerger {
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray PileUpMerger/stableParticles
-  #set InputArray Delphes/stableParticles
+  #set InputArray PileUpMerger/stableParticles
+  set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
