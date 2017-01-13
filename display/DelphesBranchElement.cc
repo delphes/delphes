@@ -86,20 +86,31 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
       data_->AddElement(eveJetCone);
     }
   } else if(TString(GetType())=="MissingET") {
-    TIter itMet(branch_);
+    // MissingET as invisible track (like a photon)
     MissingET *MET;
-    TEveArrow *eveMet;
-    // Missing Et
-    while((MET = (MissingET*) itMet.Next())) {
-      eveMet = new TEveArrow((tkRadius_ * MET->MET/maxPt_)*cos(MET->Phi), (tkRadius_ * MET->MET/maxPt_)*sin(MET->Phi), 0., 0., 0., 0.);
-      eveMet->SetMainColor(GetColor());
-      eveMet->SetTubeR(0.04);
-      eveMet->SetConeR(0.08);
-      eveMet->SetConeL(0.10);
-      eveMet->SetPickable(kTRUE);
+    TEveTrack *eveMet;
+    TEveTrackPropagator *trkProp = new TEveTrackPropagator();
+    trkProp->SetMagField(0., 0., -tk_Bz_);
+    trkProp->SetMaxR(tkRadius_);
+    trkProp->SetMaxZ(tkHalfLength_);
+    if(branch_->GetEntriesFast() > 0) {
+      MET = (MissingET*) branch_->At(0);
+      TParticle pb(13, 1, 0, 0, 0, 0,
+                   (tkRadius_ * MET->MET/maxPt_)*cos(MET->Phi),
+                   (tkRadius_ * MET->MET/maxPt_)*sin(MET->Phi),
+                   0., MET->MET, 0.0, 0.0, 0.0, 0.0);
+      eveMet = new TEveTrack(&pb, 0, trkProp);
       eveMet->SetName("Missing Et");
-      eveMet->SetTitle(Form("Missing Et (%.1f GeV)",MET->MET));
+      eveMet->SetStdTitle();
+      eveMet->SetRnrPoints(0);
+      eveMet->SetMarkerColor(kMagenta);
+      eveMet->SetMarkerStyle(4);
+      eveMet->SetMarkerSize(2.);
+      eveMet->SetLineWidth(2.);
+      eveMet->SetLineStyle(7);
       data_->AddElement(eveMet);
+      eveMet->SetLineColor(GetColor());
+      eveMet->MakeTrack();
     }
   }
 }
