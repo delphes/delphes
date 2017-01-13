@@ -33,7 +33,7 @@
 class DelphesBranchBase
 {
   public:
-    DelphesBranchBase(const char* name="", TClonesArray* branch=NULL, const enum EColor color=kBlack, Float_t maxPt=50.):name_(name),branch_(branch),color_(color) {}
+    DelphesBranchBase(const char* name="", TClonesArray* branch=NULL, const enum EColor color=kBlack, Float_t maxPt=50.):name_(name),maxPt_(maxPt),branch_(branch),color_(color) {}
     virtual ~DelphesBranchBase() {}
     const char* GetName() const { return (const char*)name_; }
     const char* GetType() const { return branch_ ? branch_->GetClass()->GetName() : "None"; }
