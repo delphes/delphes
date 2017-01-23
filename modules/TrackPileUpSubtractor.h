@@ -33,6 +33,7 @@
 
 class TIterator;
 class TObjArray;
+class DelphesFormula;
 
 class TrackPileUpSubtractor: public DelphesModule
 {
@@ -47,7 +48,7 @@ public:
 
 private:
 
-  Double_t fZVertexResolution;
+  DelphesFormula *fFormula; //!
 
   Double_t fPTMin;
 
