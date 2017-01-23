@@ -463,7 +463,7 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   set VertexInputArray PileUpMerger/vertices
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
-  set ZVertexResolution 0.0001
+  set ZVertexResolution {0.0001}
 }
 
 

@@ -133,7 +133,6 @@ module PileUpMerger PileUpMerger {
 
   # pre-generated minbias input file
   set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
-  #set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 200
@@ -539,7 +538,7 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   set VertexInputArray PileUpMerger/vertices
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
-  set ZVertexResolution 0.0001
+  set ZVertexResolution {0.0001}
 }
 
 ########################
@@ -1116,6 +1115,10 @@ module Isolation ElectronIsolationCHS {
 
   set OutputArray electrons
 
+  # veto isolation cand. based on proximity to input cand.
+  set DeltaRMin 0.01
+  set UseMiniCone true
+
   set DeltaRMax 0.3
   set PTMin 1.0
   set PTRatioMax 9999.
@@ -1242,6 +1245,11 @@ module Isolation MuonIsolationCHS {
   set IsolationInputArray EFlowMerger/eflow
 
   set OutputArray muons
+
+
+  # veto isolation cand. based on proximity to input cand.
+  set DeltaRMin 0.01
+  set UseMiniCone true
 
   set DeltaRMax 0.3
   set PTMin 1.0
