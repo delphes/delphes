@@ -5,9 +5,9 @@
 #                Filip Moortgat (CERN)
 #                Michele Selvaggi (CERN)
 #
-#  Released on: Oct 02th, 2016
+#  Released on: Nov 14th, 2016
 #
-#  Configuration: FCC-hh generic detector without dipole in the forward region, no pile-up
+#  Configuration: FCC-hh baseline detector 
 #
 #######################################
 # Order of execution of various modules
@@ -63,8 +63,6 @@ set ExecutionPath {
   ScalarHT
 
   UniqueObjectFinder
-  
-  GenParticleFilter
 
   TreeWriter
 }
@@ -782,17 +780,6 @@ module UniqueObjectFinder UniqueObjectFinder {
 
 }
 
-######################
-# GenParticleFilter 
-######################
-
-# store only interesting particles
-module StatusPidFilter GenParticleFilter {
-  set InputArray Delphes/allParticles
-  set OutputArray filteredParticles
-  set PTMin 0.0
-
-}
 
 ##################
 # ROOT tree writer
@@ -801,7 +788,6 @@ module StatusPidFilter GenParticleFilter {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
-  add Branch GenParticleFilter/filteredParticles FilteredParticle GenParticle
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
