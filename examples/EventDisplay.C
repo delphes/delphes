@@ -15,7 +15,7 @@ void EventDisplay(const char *configfile = "delphes_card_CMS.tcl",
                   const char *ParticlePropagator = "ParticlePropagator",
                   const char *TrackingEfficiency = "ChargedHadronTrackingEfficiency",
                   const char *MuonEfficiency = "MuonEfficiency",
-                  const char *Calorimeters = "Ecal,Hcal",
+                  const char *Calorimeters = "HCal",
                   bool displayGeometryOnly = false)
 {
   // load the libraries
