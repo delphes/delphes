@@ -52,14 +52,17 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::TrackPileUpSubtractor()
+TrackPileUpSubtractor::TrackPileUpSubtractor() :
+fFormula(0) 
 {
+  fFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TrackPileUpSubtractor::~TrackPileUpSubtractor()
 {
+  if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -71,7 +74,8 @@ void TrackPileUpSubtractor::Init()
   fVertexInputArray = ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"));
   fItVertexInputArray = fVertexInputArray->MakeIterator();
 
-  fZVertexResolution  = GetDouble("ZVertexResolution", 0.005)*1.0E3;
+  // read resolution formula in m
+  fFormula->Compile(GetString("ZVertexResolution", "0.001"));
 
   fPTMin = GetDouble("PTMin", 0.);
 
@@ -118,6 +122,7 @@ void TrackPileUpSubtractor::Process()
   TIterator *iterator;
   TObjArray *array;
   Double_t z, zvtx=0;
+  Double_t pt, eta, phi, e;
 
 
   // find z position of primary vertex
@@ -143,12 +148,19 @@ void TrackPileUpSubtractor::Process()
     while((candidate = static_cast<Candidate*>(iterator->Next())))
     {
       particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+      const TLorentzVector &candidateMomentum = particle->Momentum;
+
+      eta = candidateMomentum.Eta();
+      pt = candidateMomentum.Pt();
+      phi = candidateMomentum.Phi();
+      e = candidateMomentum.E();
+      
       z = particle->Position.Z();
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
 
-      if(candidate->Charge !=0 && TMath::Abs(z-zvtx) > fZVertexResolution)
+      if(candidate->Charge !=0 && TMath::Abs(z-zvtx) > fFormula->Eval(pt, eta, phi, e)* 1.0e3)
       {
         candidate->IsRecoPU = 1;
       }
@@ -160,5 +172,3 @@ void TrackPileUpSubtractor::Process()
     }
   }
 }
-
-//------------------------------------------------------------------------------
