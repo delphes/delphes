@@ -253,6 +253,7 @@ void Candidate::Copy(TObject &obj) const
   object.Charge = Charge;
   object.Mass = Mass;
   object.IsPU = IsPU;
+  object.IsRecoPU = IsRecoPU;
   object.IsConstituent = IsConstituent;
   object.IsFromConversion = IsFromConversion;
   object.ClusterIndex = ClusterIndex;
