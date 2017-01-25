@@ -165,7 +165,6 @@ void RunPUPPI::Process(){
   float PVZ = 0.;
   Candidate *pv = static_cast<Candidate*>(fPVItInputArray->Next());
   if (pv) PVZ = pv->Position.Z();
-
   // Fill input particles for puppi
   std::vector<RecoObj> puppiInputVector;
   puppiInputVector.clear();
@@ -178,8 +177,7 @@ void RunPUPPI::Process(){
       curRecoObj.eta = momentum.Eta();
       curRecoObj.phi = momentum.Phi();
       curRecoObj.m   = momentum.M();  
-      particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
-      //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
+      particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));//if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
       //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
       if (candidate->IsRecoPU and candidate->Charge !=0) { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
 	lNBad++;
@@ -191,7 +189,7 @@ void RunPUPPI::Process(){
         else curRecoObj.pfType = 1;
         curRecoObj.dZ = particle->Position.Z()-PVZ;
       } 
-      else if(!candidate->IsRecoPU and candidate->Charge !=0) {
+      else if(!candidate->IsRecoPU && candidate->Charge !=0) {
 	curRecoObj.id    = 1;  // charge from LV
         curRecoObj.vtxId = 1; // from PV
 	if(TMath::Abs(candidate->PID) == 11)      curRecoObj.pfType = 2;
@@ -218,8 +216,7 @@ void RunPUPPI::Process(){
       curRecoObj.phi = momentum.Phi();
       curRecoObj.m   = momentum.M();
       curRecoObj.charge = 0;
-      particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
-
+      particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
       if(candidate->Charge == 0){
 	curRecoObj.id    = 0; // neutrals have id==0
 	curRecoObj.vtxId = 0; // neutrals have vtxId==0 
