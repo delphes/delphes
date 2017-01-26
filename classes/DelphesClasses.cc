@@ -380,6 +380,7 @@ void Candidate::Clear(Option_t* option)
   Charge = 0;
   Mass = 0.0;
   IsPU = 0;
+  IsRecoPU = 0;
   IsConstituent = 0;
   IsFromConversion = 0;
   Flavor = 0;
