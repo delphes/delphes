@@ -41,6 +41,7 @@ set ExecutionPath {
   LeptonFilterNoLep
   LeptonFilterLep
   RunPUPPIBase
+  RunPUPPIMerger
   RunPUPPI
   
   EFlowFilter
@@ -97,7 +98,7 @@ module PileUpMerger PileUpMerger {
   set PileUpFile MinBias.pileup
   
   # average expected pile up
-  set MeanPileUp 1000
+  set MeanPileUp 100
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -538,9 +539,15 @@ module RunPUPPI RunPUPPIBase {
   set OutputArrayNeutrals puppiNeutrals
 }
 
-module Merger RunPUPPI {
+module Merger RunPUPPIMerger {
   add InputArray RunPUPPIBase/PuppiParticles
   add InputArray LeptonFilterLep/eflowTracksLeptons
+  set OutputArray PuppiParticles
+}
+
+# need this because of leptons that were added back
+module RecoPuFilter RunPUPPI {
+  set InputArray RunPUPPIMerger/PuppiParticles
   set OutputArray PuppiParticles
 }
 
@@ -759,7 +766,7 @@ module Isolation PhotonIsolation {
   set CandidateInputArray PhotonFilter/photons
 
   # isolation collection
-  set IsolationInputArray EFlowFilter/eflow
+  set IsolationInputArray RunPUPPI/PuppiParticles
 
   # output array
   set OutputArray photons
@@ -787,9 +794,13 @@ module Isolation PhotonIsolation {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronFilter/electrons
-  set IsolationInputArray EFlowFilter/eflow
+  set IsolationInputArray RunPUPPI/PuppiParticles
 
   set OutputArray electrons
+
+  # veto isolation cand. based on proximity to input cand.
+  set DeltaRMin 0.01
+  set UseMiniCone true
 
   set DeltaRMax 0.3
 
@@ -807,9 +818,13 @@ module Isolation ElectronIsolation {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonMomentumSmearing/muons
-  set IsolationInputArray EFlowFilter/eflow
+  set IsolationInputArray RunPUPPI/PuppiParticles
 
   set OutputArray muons
+
+  # veto isolation cand. based on proximity to input cand.
+  set DeltaRMin 0.01
+  set UseMiniCone true
 
   set DeltaRMax 0.3
 
@@ -982,6 +997,7 @@ module TreeWriter TreeWriter {
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
+  add Branch GenPileUpMissingET/momentum GenPileUpMissingET MissingET
 
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/electrons Electron Electron
@@ -989,6 +1005,7 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/jets Jet Jet
 
   add Branch MissingET/momentum MissingET MissingET
+  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 }
 

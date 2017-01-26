@@ -46,6 +46,7 @@ set ExecutionPath {
   LeptonFilterNoLep
   LeptonFilterLep
   RunPUPPIBase
+  RunPUPPIMerger
   RunPUPPI
 
   PhotonFilter
@@ -133,6 +134,7 @@ module PileUpMerger PileUpMerger {
 
   # pre-generated minbias input file
   set PileUpFile ../eos/cms/store/group/upgrade/delphes/PhaseII/MinBias_100k.pileup
+  #set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 200
@@ -650,9 +652,15 @@ module RunPUPPI RunPUPPIBase {
   set OutputArrayNeutrals puppiNeutrals
 }
 
-module Merger RunPUPPI {
+module Merger RunPUPPIMerger {
   add InputArray RunPUPPIBase/PuppiParticles
   add InputArray LeptonFilterLep/eflowTracksLeptons
+  set OutputArray PuppiParticles
+}
+
+# need this because of leptons that were added back
+module RecoPuFilter RunPUPPI {
+  set InputArray RunPUPPIMerger/PuppiParticles
   set OutputArray PuppiParticles
 }
 
