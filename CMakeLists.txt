@@ -35,7 +35,6 @@ add_subdirectory(cards)
 
 add_library(Delphes SHARED
   $<TARGET_OBJECTS:classes> 
-  $<TARGET_OBJECTS:display>
   $<TARGET_OBJECTS:modules> 
   $<TARGET_OBJECTS:ExRootAnalysis>
   $<TARGET_OBJECTS:fastjet>
@@ -44,6 +43,18 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:PUPPI>
 )
 
-target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
+add_library(DelphesDisplay SHARED
+  $<TARGET_OBJECTS:classes>
+  $<TARGET_OBJECTS:display>
+  $<TARGET_OBJECTS:modules>
+  $<TARGET_OBJECTS:ExRootAnalysis>
+  $<TARGET_OBJECTS:fastjet>
+  $<TARGET_OBJECTS:tcl>
+  $<TARGET_OBJECTS:Hector>
+  $<TARGET_OBJECTS:PUPPI>
+)
 
-install(TARGETS Delphes DESTINATION lib)
+target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
+target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
+
+install(TARGETS Delphes DelphesDisplay DESTINATION lib)
