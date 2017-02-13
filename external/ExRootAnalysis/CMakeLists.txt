@@ -11,22 +11,8 @@ DELPHES_GENERATE_DICTIONARY(ExRootAnalysisDict ${headers} LINKDEF ExRootAnalysis
 
 add_library(ExRootAnalysis OBJECT ${sources} ExRootAnalysisDict.cxx)
 
-# install headers needed by public Delphes headers to include/
-install(FILES
-  ExRootClassifier.h
-  ExRootConfReader.h
-  ExRootFilter.h
-  ExRootProgressBar.h
-  ExRootResult.h
-  ExRootTask.h
-  ExRootTreeBranch.h
-  ExRootTreeReader.h
-  ExRootTreeWriter.h
-  ExRootUtilities.h
-  DESTINATION include/ExRootAnalysis)
-
-# install all LinkDef files into the same folder to ease user environment
-install(FILES ExRootAnalysisLinkDef.h DESTINATION include)
+# install public headers
+install(FILES ${headers} DESTINATION include/ExRootAnalysis)
 
 # install pcms if they are created
 if (${ROOT_VERSION} GREATER 6)
