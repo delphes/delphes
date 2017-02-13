@@ -21,6 +21,9 @@ add_library(classes OBJECT ${sources} ClassesDict.cxx)
 # install public headers
 install(FILES ${headers} DESTINATION include/classes)
 
+# install all LinkDef files into the same folder to ease user environment
+install(FILES ClassesLinkDef.h DESTINATION include)
+
 # install pcms if they are created
 if (${ROOT_VERSION} GREATER 6)
   install(FILES
