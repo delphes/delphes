@@ -16,7 +16,7 @@ PcmSuf = _rdict.pcm
 
 CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
-DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml  $(SYSLIBS)
+DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml $(SYSLIBS)
 
 ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
 HAS_CMSSW = true
@@ -41,7 +41,7 @@ ifeq ($(HAS_PYTHIA8),true)
 ifneq ($(PYTHIA8),)
 CXXFLAGS += -I$(PYTHIA8)/include
 CXXFLAGS += -I$(PYTHIA8)/include/Pythia8
-OPT_LIBS += -L$(PYTHIA8)/lib -lpythia8 -ldl
+OPT_LIBS += -L$(PYTHIA8)/lib -lpythia8 -ldl -lz
 endif
 endif
 
