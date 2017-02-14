@@ -18,8 +18,8 @@ list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/PileUpMergerPythia8.cc)
 
 add_library(modules OBJECT ${sources} FastJetDict.cxx ModulesDict.cxx)
 
-# install public headers
-install(FILES Delphes.h DESTINATION include/modules)
+# install headers
+install(FILES ${headers} DESTINATION include/modules)
 
 # install pcms if they are created
 if (${ROOT_VERSION} GREATER 6)

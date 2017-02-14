@@ -11,7 +11,7 @@ DELPHES_GENERATE_DICTIONARY(ExRootAnalysisDict ${headers} LINKDEF ExRootAnalysis
 
 add_library(ExRootAnalysis OBJECT ${sources} ExRootAnalysisDict.cxx)
 
-# install public headers
+# install headers
 install(FILES ${headers} DESTINATION include/ExRootAnalysis)
 
 # install pcms if they are created
