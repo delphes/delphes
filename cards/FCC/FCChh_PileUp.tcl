@@ -98,7 +98,7 @@ module PileUpMerger PileUpMerger {
   set PileUpFile MinBias.pileup
   
   # average expected pile up
-  set MeanPileUp 100
+  set MeanPileUp 200
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -116,7 +116,7 @@ module PileUpMerger PileUpMerger {
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray Delphes/stableParticles
+  set InputArray PileUpMerger/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
