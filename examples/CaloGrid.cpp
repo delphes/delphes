@@ -10,7 +10,7 @@
 
 #include "display/Delphes3DGeometry.h"
 #include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootConfReader.h"
+#include "ExRootAnalysis/ExRootConfReader.h"
 
 #include "TCanvas.h"
 #include "TStyle.h"

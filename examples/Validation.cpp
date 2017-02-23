@@ -1455,11 +1455,14 @@ void Validation(const char *inputFilePion,
   TLegend *leg_trkpi_res_eta = (TLegend*)leg_trkpi_res_pt->Clone();
   TLegend *leg_trkpi_eff_eta = (TLegend*)leg_trkpi_res_eta->Clone();
 
-
-  TGraphErrors gr_trkpi_res_pt[n_etabins], gr_trkpi_eff_pt[n_etabins], gr_trkpi_res_eta[n_ptbins], gr_trkpi_eff_eta[n_ptbins];
+  TGraphErrors *gr_trkpi_res_pt  = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkpi_eff_pt  = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkpi_res_eta = new TGraphErrors[n_ptbins];
+  TGraphErrors *gr_trkpi_eff_eta = new TGraphErrors[n_ptbins];
   TH1D* h_trkpi_eff_pt, *h_trkpi_eff_eta;
 
-  std::vector<resolPlot> plots_trkpi_res_pt[n_etabins], plots_trkpi_res_eta[n_ptbins];
+  std::vector<resolPlot> *plots_trkpi_res_pt   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_trkpi_res_eta  = new std::vector<resolPlot>[n_ptbins];
 
   // loop over eta bins
   for (k = 0; k < etaVals.size()-1; k++)
@@ -1558,10 +1561,15 @@ void Validation(const char *inputFilePion,
   TLegend *leg_trkele_res_eta = (TLegend*)leg_trkele_res_pt->Clone();
   TLegend *leg_trkele_eff_eta = (TLegend*)leg_trkele_res_eta->Clone();
 
-  TGraphErrors gr_trkele_res_pt[n_etabins], gr_trkele_eff_pt[n_etabins], gr_trkele_res_eta[n_ptbins], gr_trkele_eff_eta[n_ptbins];
+  TGraphErrors *gr_trkele_res_pt  = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkele_eff_pt  = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkele_res_eta = new TGraphErrors[n_ptbins];
+  TGraphErrors *gr_trkele_eff_eta = new TGraphErrors[n_ptbins];
+
   TH1D* h_trkele_eff_pt, *h_trkele_eff_eta;
 
-  std::vector<resolPlot> plots_trkele_res_pt[n_etabins], plots_trkele_res_eta[n_ptbins];
+  std::vector<resolPlot> *plots_trkele_res_pt   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_trkele_res_eta  = new std::vector<resolPlot>[n_ptbins];
 
   // loop over eta bins
   for (k = 0; k < etaVals.size()-1; k++)
@@ -1662,10 +1670,15 @@ void Validation(const char *inputFilePion,
   TLegend *leg_trkmu_eff_eta = (TLegend*)leg_trkmu_res_eta->Clone();
 
 
-  TGraphErrors gr_trkmu_res_pt[n_etabins], gr_trkmu_eff_pt[n_etabins], gr_trkmu_res_eta[n_ptbins], gr_trkmu_eff_eta[n_ptbins];
+  TGraphErrors *gr_trkmu_res_pt  = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkmu_eff_pt  = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkmu_res_eta = new TGraphErrors[n_ptbins];
+  TGraphErrors *gr_trkmu_eff_eta = new TGraphErrors[n_ptbins];
+
   TH1D* h_trkmu_eff_pt, *h_trkmu_eff_eta;
 
-  std::vector<resolPlot> plots_trkmu_res_pt[n_etabins], plots_trkmu_res_eta[n_ptbins];
+  std::vector<resolPlot> *plots_trkmu_res_pt   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_trkmu_res_eta  = new std::vector<resolPlot>[n_ptbins];
 
   // loop over eta bins
   for (k = 0; k < etaVals.size()-1; k++)
@@ -1763,9 +1776,11 @@ void Validation(const char *inputFilePion,
   TLegend *leg_ecal_res_e = new TLegend(0.55,0.64,0.90,0.90);
   TLegend *leg_ecal_res_eta = new TLegend(0.60,0.59,0.95,0.90);
 
-  TGraphErrors gr_ecal_res_e[n_etabins], gr_ecal_res_eta[n_ptbins];
+  TGraphErrors *gr_ecal_res_e    = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_ecal_res_eta  = new TGraphErrors[n_ptbins];
 
-  std::vector<resolPlot> plots_ecal_res_e[n_etabins], plots_ecal_res_eta[n_ptbins];
+  std::vector<resolPlot> *plots_ecal_res_e   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_ecal_res_eta = new std::vector<resolPlot>[n_ptbins];
 
   // loop over eta bins
   for (k = 0; k < etaVals.size()-1; k++)
@@ -1832,9 +1847,11 @@ void Validation(const char *inputFilePion,
   TLegend *leg_hcal_res_e = new TLegend(0.55,0.64,0.90,0.90);
   TLegend *leg_hcal_res_eta = new TLegend(0.60,0.59,0.95,0.90);
 
-  TGraphErrors gr_hcal_res_e[n_etabins], gr_hcal_res_eta[n_ptbins];
+  TGraphErrors *gr_hcal_res_e   = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_hcal_res_eta = new TGraphErrors[n_ptbins];
 
-  std::vector<resolPlot> plots_hcal_res_e[n_etabins], plots_hcal_res_eta[n_ptbins];
+  std::vector<resolPlot> *plots_hcal_res_e   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_hcal_res_eta = new std::vector<resolPlot>[n_ptbins];
 
   // loop over eta bins
   for (k = 0; k < etaVals.size()-1; k++)
@@ -1902,14 +1919,15 @@ void Validation(const char *inputFilePion,
   TLegend *leg_pfele_res_e[n_etabins];
   TLegend *leg_pfele_res_eta[n_ptbins];
 
-  TGraphErrors gr_pfele_res_e[n_etabins];
-  TGraphErrors gr_pfele_res_eta[n_ptbins];
+  TGraphErrors *gr_pfele_res_e = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_pfele_res_eta = new TGraphErrors[n_ptbins];
+  TGraphErrors *gr_trkele_res_e = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkele_res_eeta = new TGraphErrors[n_ptbins];
 
-  TGraphErrors gr_trkele_res_e[n_etabins];
-  TGraphErrors gr_trkele_res_eeta[n_ptbins];
-
-  std::vector<resolPlot> plots_pfele_res_e[n_etabins], plots_pfele_res_eta[n_ptbins];
-  std::vector<resolPlot> plots_trkele_res_e[n_etabins], plots_trkele_res_eeta[n_ptbins];
+  std::vector<resolPlot> *plots_pfele_res_e     = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_pfele_res_eta   = new std::vector<resolPlot>[n_ptbins];
+  std::vector<resolPlot> *plots_trkele_res_e    = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_trkele_res_eeta = new std::vector<resolPlot>[n_ptbins];
 
   TCanvas *c_pfele_res_e[n_etabins];
   TCanvas *c_pfele_res_eta[n_ptbins];
@@ -2009,14 +2027,16 @@ void Validation(const char *inputFilePion,
   TLegend *leg_pfpi_res_e[n_etabins];
   TLegend *leg_pfpi_res_eta[n_ptbins];
 
-  TGraphErrors gr_pfpi_res_e[n_etabins];
-  TGraphErrors gr_pfpi_res_eta[n_ptbins];
+  TGraphErrors *gr_pfpi_res_e     = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_pfpi_res_eta   = new TGraphErrors[n_ptbins];
 
-  TGraphErrors gr_trkpi_res_e[n_etabins];
-  TGraphErrors gr_trkpi_res_eeta[n_ptbins];
+  TGraphErrors *gr_trkpi_res_e    = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_trkpi_res_eeta = new TGraphErrors[n_ptbins];
 
-  std::vector<resolPlot> plots_pfpi_res_e[n_etabins], plots_pfpi_res_eta[n_ptbins];
-  std::vector<resolPlot> plots_trkpi_res_e[n_etabins], plots_trkpi_res_eeta[n_ptbins];
+  std::vector<resolPlot> *plots_pfpi_res_e     = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_pfpi_res_eta   = new std::vector<resolPlot>[n_ptbins];
+  std::vector<resolPlot> *plots_trkpi_res_e    = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_trkpi_res_eeta = new std::vector<resolPlot>[n_ptbins];
 
   TCanvas *c_pfpi_res_e[n_etabins];
   TCanvas *c_pfpi_res_eta[n_ptbins];
@@ -2118,14 +2138,16 @@ void Validation(const char *inputFilePion,
   TLegend *leg_pfjet_res_e[n_etabins];
   TLegend *leg_pfjet_res_eta[n_ptbins];
 
-  TGraphErrors gr_pfjet_res_e[n_etabins];
-  TGraphErrors gr_pfjet_res_eta[n_ptbins];
+  TGraphErrors *gr_pfjet_res_e   = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_pfjet_res_eta = new TGraphErrors[n_ptbins];
 
-  TGraphErrors gr_cajet_res_e[n_etabins];
-  TGraphErrors gr_cajet_res_eta[n_ptbins];
+  TGraphErrors *gr_cajet_res_e   = new TGraphErrors[n_etabins];
+  TGraphErrors *gr_cajet_res_eta = new TGraphErrors[n_ptbins];
 
-  std::vector<resolPlot> plots_pfjet_res_e[n_etabins], plots_pfjet_res_eta[n_ptbins];
-  std::vector<resolPlot> plots_cajet_res_e[n_etabins], plots_cajet_res_eta[n_ptbins];
+  std::vector<resolPlot> *plots_pfjet_res_e   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_pfjet_res_eta = new std::vector<resolPlot>[n_ptbins];
+  std::vector<resolPlot> *plots_cajet_res_e   = new std::vector<resolPlot>[n_etabins];
+  std::vector<resolPlot> *plots_cajet_res_eta = new std::vector<resolPlot>[n_ptbins];
 
   TCanvas *c_pfjet_res_e[n_etabins];
   TCanvas *c_pfjet_res_eta[n_ptbins];
@@ -2259,7 +2281,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_recele_eff_pt  = new TLegend(0.55,0.22,0.90,0.48);
     TLegend *leg_recele_eff_eta = new TLegend(0.55,0.22,0.90,0.48);
 
-    TGraphErrors gr_recele_eff_pt[n_etabins], gr_recele_eff_eta[n_ptbins];
+    TGraphErrors *gr_recele_eff_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_recele_eff_eta = new TGraphErrors[n_ptbins];
     TH1D* h_recele_eff_pt, *h_recele_eff_eta;
 
     // loop over eta bins
@@ -2324,7 +2347,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_recmu_eff_pt  = new TLegend(0.55,0.22,0.90,0.48);
     TLegend *leg_recmu_eff_eta = new TLegend(0.55,0.22,0.90,0.48);
 
-    TGraphErrors gr_recmu_eff_pt[n_etabins], gr_recmu_eff_eta[n_ptbins];
+    TGraphErrors *gr_recmu_eff_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_recmu_eff_eta = new TGraphErrors[n_ptbins];
     TH1D* h_recmu_eff_pt, *h_recmu_eff_eta;
 
     // loop over eta bins
@@ -2389,7 +2413,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_recpho_eff_pt  = new TLegend(0.55,0.22,0.90,0.48);
     TLegend *leg_recpho_eff_eta = new TLegend(0.55,0.22,0.90,0.48);
 
-    TGraphErrors gr_recpho_eff_pt[n_etabins], gr_recpho_eff_eta[n_ptbins];
+    TGraphErrors *gr_recpho_eff_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_recpho_eff_eta = new TGraphErrors[n_ptbins];
     TH1D* h_recpho_eff_pt, *h_recpho_eff_eta;
 
     // loop over eta bins
@@ -2454,7 +2479,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_recbjet_eff_pt  = new TLegend(0.50,0.22,0.90,0.48);
     TLegend *leg_recbjet_eff_eta = new TLegend(0.50,0.22,0.90,0.48);
 
-    TGraphErrors gr_recbjet_eff_pt[n_etabins], gr_recbjet_eff_eta[n_ptbins];
+    TGraphErrors *gr_recbjet_eff_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_recbjet_eff_eta = new TGraphErrors[n_ptbins];
     TH1D* h_recbjet_eff_pt, *h_recbjet_eff_eta;
 
     // loop over eta bins
@@ -2516,7 +2542,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_recbjet_cmis_pt  = new TLegend(0.50,0.64,0.90,0.90);
     TLegend *leg_recbjet_cmis_eta = new TLegend(0.50,0.64,0.90,0.90);
 
-    TGraphErrors gr_recbjet_cmis_pt[n_etabins], gr_recbjet_cmis_eta[n_ptbins];
+    TGraphErrors *gr_recbjet_cmis_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_recbjet_cmis_eta = new TGraphErrors[n_ptbins];
     TH1D* h_recbjet_cmis_pt, *h_recbjet_cmis_eta;
 
     // loop over eta bins
@@ -2578,7 +2605,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_recbjet_lmis_pt  = new TLegend(0.50,0.64,0.90,0.90);
     TLegend *leg_recbjet_lmis_eta = new TLegend(0.50,0.64,0.90,0.90);
 
-    TGraphErrors gr_recbjet_lmis_pt[n_etabins], gr_recbjet_lmis_eta[n_ptbins];
+    TGraphErrors *gr_recbjet_lmis_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_recbjet_lmis_eta = new TGraphErrors[n_ptbins];
     TH1D* h_recbjet_lmis_pt, *h_recbjet_lmis_eta;
 
     // loop over eta bins
@@ -2643,7 +2671,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_rectaujet_eff_pt  = new TLegend(0.50,0.22,0.90,0.48);
     TLegend *leg_rectaujet_eff_eta = new TLegend(0.50,0.22,0.90,0.48);
 
-    TGraphErrors gr_rectaujet_eff_pt[n_etabins], gr_rectaujet_eff_eta[n_ptbins];
+    TGraphErrors *gr_rectaujet_eff_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_rectaujet_eff_eta = new TGraphErrors[n_ptbins];
     TH1D* h_rectaujet_eff_pt, *h_rectaujet_eff_eta;
 
     // loop over eta bins
@@ -2707,7 +2736,8 @@ void Validation(const char *inputFilePion,
     TLegend *leg_rectaujet_mis_pt  = new TLegend(0.50,0.64,0.90,0.90);
     TLegend *leg_rectaujet_mis_eta = new TLegend(0.50,0.64,0.90,0.90);
 
-    TGraphErrors gr_rectaujet_mis_pt[n_etabins], gr_rectaujet_mis_eta[n_ptbins];
+    TGraphErrors *gr_rectaujet_mis_pt  = new TGraphErrors[n_etabins];
+    TGraphErrors *gr_rectaujet_mis_eta = new TGraphErrors[n_ptbins];
     TH1D* h_rectaujet_mis_pt, *h_rectaujet_mis_eta;
 
     // loop over eta bins
