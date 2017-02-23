@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", LHEFEvent::Class());
-    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
+    branchWeight = treeWriter->NewBranch("Weight", LHEFWeight::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
