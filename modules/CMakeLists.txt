@@ -22,7 +22,7 @@ add_library(modules OBJECT ${sources} FastJetDict.cxx ModulesDict.cxx)
 install(FILES ${headers} DESTINATION include/modules)
 
 # install pcms if they are created
-if (${ROOT_VERSION} GREATER 6)
+if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
   install(FILES
       ${PROJECT_BINARY_DIR}/modules/libModulesDict_rdict.pcm
       ${PROJECT_BINARY_DIR}/modules/libFastJetDict_rdict.pcm
