@@ -81,10 +81,10 @@ TObject *ExRootTreeBranch::NewEntry()
 
 //------------------------------------------------------------------------------
 
-void ExRootTreeBranch::Clear()
+void ExRootTreeBranch::Clear(Option_t *option)
 {
   fSize = 0;
-  if(fData) fData->Clear();
+  if(fData) fData->Clear(option);
 }
 
 //------------------------------------------------------------------------------

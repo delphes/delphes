@@ -23,7 +23,7 @@ public:
   ~ExRootTreeBranch();
 
   TObject *NewEntry();
-  void Clear();
+  virtual void Clear(Option_t *option="");
 
 private:
 

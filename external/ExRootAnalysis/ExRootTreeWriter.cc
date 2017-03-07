@@ -58,20 +58,30 @@ void ExRootTreeWriter::Fill()
 
 //------------------------------------------------------------------------------
 
-void ExRootTreeWriter::Write()
+Int_t ExRootTreeWriter::Write(const char *name, Int_t option, Int_t bufsize) const
 {
-  fFile = fTree ? fTree->GetCurrentFile() : 0;
-  if(fFile) fFile->Write();
+  if (fTree != 0) {
+    return fTree->GetCurrentFile()->Write(name, option, bufsize);
+  }
+  return 0;
 }
 
 //------------------------------------------------------------------------------
 
-void ExRootTreeWriter::Clear()
+Int_t ExRootTreeWriter::Write(const char *name, Int_t option, Int_t bufsize)
+{
+  // forward call to const version of this function
+  return static_cast<const ExRootTreeWriter*>(this)->Write(name, option, bufsize);
+}
+
+//------------------------------------------------------------------------------
+
+void ExRootTreeWriter::Clear(Option_t *option)
 {
   set<ExRootTreeBranch*>::iterator itBranches;
   for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
   {
-    (*itBranches)->Clear();
+    (*itBranches)->Clear(option);
   }
 }
 
