@@ -22,7 +22,7 @@ add_library(classes OBJECT ${sources} ClassesDict.cxx)
 install(FILES ${headers} DESTINATION include/classes)
 
 # install pcms if they are created
-if (${ROOT_VERSION} GREATER 6)
+if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
   install(FILES
       ${PROJECT_BINARY_DIR}/classes/libClassesDict_rdict.pcm
       DESTINATION lib)
