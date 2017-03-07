@@ -19,7 +19,7 @@ install(FILES ExRootTask.h ExRootConfReader.h ExRootTreeWriter.h ExRootTreeBranc
 install(FILES ExRootAnalysisLinkDef.h DESTINATION include)
 
 # install pcms if they are created
-if (${ROOT_VERSION} GREATER 6)
+if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
   install(FILES
       ${PROJECT_BINARY_DIR}/external/ExRootAnalysis/libExRootAnalysisDict_rdict.pcm
       DESTINATION lib)
