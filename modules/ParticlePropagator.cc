@@ -86,6 +86,9 @@ void ParticlePropagator::Init()
     return;
   }
 
+  fRadiusMax = GetDouble("RadiusMax", fRadius);
+  fHalfLengthMax = GetDouble("HalfLengthMax", fHalfLength);
+
   // import array with output from filter/classifier module
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
@@ -159,7 +162,7 @@ void ParticlePropagator::Process()
     q = candidate->Charge;
 
     // check that particle position is inside the cylinder
-    if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
+    if(TMath::Hypot(x, y) > fRadiusMax || TMath::Abs(z) > fHalfLengthMax)
     {
       continue;
     }
@@ -176,7 +179,21 @@ void ParticlePropagator::Process()
       continue;
     }
 
-    if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
+    if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
+    {
+      mother = candidate;
+      candidate = static_cast<Candidate*>(candidate->Clone());
+
+      candidate->InitialPosition = candidatePosition;
+      candidate->Position = candidatePosition;
+      candidate->L = 0.0;
+
+      candidate->Momentum = candidateMomentum;
+      candidate->AddCandidate(mother);
+
+      fOutputArray->Add(candidate);
+    }
+    else if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
     {
       // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
       tmp = px*y - py*x;
@@ -270,8 +287,8 @@ void ParticlePropagator::Process()
       // use perigee momentum rather than original particle
       // momentum, since the orignal particle momentum isn't known
 
-      px = TMath::Sign(1.0,r) * pt * (-y_c / r_c);
-      py = TMath::Sign(1.0,r) * pt * (x_c / r_c);
+      px = TMath::Sign(1.0, r) * pt * (-y_c / r_c);
+      py = TMath::Sign(1.0, r) * pt * (x_c / r_c);
       etap = candidateMomentum.Eta();
       phip = TMath::ATan2(py, px);
 
@@ -279,10 +296,10 @@ void ParticlePropagator::Process()
 
       // calculate additional track parameters (correct for beamspot position)
 
-      d0        = (  (x - bsx) * py - (y - bsy) * px) / pt;
+      d0        = ((x - bsx) * py - (y - bsy) * px) / pt;
       dz        = z - ((x - bsx) * px + (y - bsy) * py) / pt * (pz / pt);
       p         = candidateMomentum.P();
-      ctgTheta  = 1.0 / TMath::Tan (candidateMomentum.Theta ());
+      ctgTheta  = 1.0 / TMath::Tan (candidateMomentum.Theta());
 
 
       // 3. time evaluation t = TMath::Min(t_r, t_z)
@@ -300,7 +317,7 @@ void ParticlePropagator::Process()
       }
       else
       {
-        asinrho = TMath::ASin( (fRadius*fRadius - r_c*r_c - r*r) / (2*TMath::Abs(r)*r_c)  );
+        asinrho = TMath::ASin((fRadius*fRadius - r_c*r_c - r*r) / (2*TMath::Abs(r)*r_c));
         delta = phi_0 - phi;
         if(delta <-TMath::Pi()) delta += 2*TMath::Pi();
         if(delta > TMath::Pi()) delta -= 2*TMath::Pi();
@@ -355,9 +372,9 @@ void ParticlePropagator::Process()
 
         candidate->Momentum = candidateMomentum;
 
-	    candidate->L  =  l*1.0E3;
+        candidate->L = l*1.0E3;
 
-	    candidate->Xd = xd*1.0E3;
+        candidate->Xd = xd*1.0E3;
         candidate->Yd = yd*1.0E3;
         candidate->Zd = zd*1.0E3;
 
