@@ -49,7 +49,7 @@ public:
 
 private:
 
-  Double_t fRadius, fRadius2, fHalfLength;
+  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
   Double_t fBz;
 
   TIterator *fItInputArray; //!
