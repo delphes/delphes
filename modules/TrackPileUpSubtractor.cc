@@ -160,7 +160,7 @@ void TrackPileUpSubtractor::Process()
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
 
-      if(candidate->Charge !=0 && TMath::Abs(z-zvtx) > fFormula->Eval(pt, eta, phi, e)* 1.0e3)
+      if(candidate->Charge !=0 && candidate->IsPU && TMath::Abs(z-zvtx) > fFormula->Eval(pt, eta, phi, e)* 1.0e3)
       {
         candidate->IsRecoPU = 1;
       }
