@@ -51,6 +51,7 @@ set ExecutionPath {
 
   GenJetFinder
   FastJetFinder
+  FatJetFinder
 
   JetEnergyScale
 
@@ -524,6 +525,42 @@ module FastJetFinder FastJetFinder {
 }
 
 ##################
+# Fat Jet finder
+##################
+
+module FastJetFinder FatJetFinder {
+  set InputArray EFlowMerger/eflow
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 0.8
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeTrimming 1
+  set RTrim 0.2
+  set PtFracTrim 0.05
+
+  set ComputePruning 1
+  set ZcutPrun 0.1
+  set RcutPrun 0.5
+  set RPrun 0.8
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 0.8
+
+  set JetPTMin 200.0
+}
+
+
+
+##################
 # Jet Energy Scale
 ##################
 
@@ -803,6 +840,8 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/muons Muon Muon
   add Branch UniqueObjectFinder/jets Jet Jet
+
+  add Branch FatJetFinder/jets FatJet Jet
 
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
