@@ -1,3 +1,16 @@
+3.4.1:
+- added RadiusMax and HalfLengthMax to ParticlePropagator to keep decay products of the long-lived particles (#1084)
+- fixed compilation of Validation.cpp
+- improved CMake configuration
+- fixed weights in LHEFReader
+- fixed bug in Charged Hadron Subtraction (CHS) 
+- promoted z vertex resolution to TFormula
+- fixed bugs in DelphesDisplay
+- added jet substructure to default CMS and FCC cards
+- updated tracker and calorimeter resolution in the FCC card
+- added preliminary FCC-hh card with pile-up
+- corrected ECAL granularity in the ILD detector configuration
+
 3.4.0:
 - corrected granularities for ECAL and HCAL in ATLAS and CMS cards
 - included latest FCC-hh and CEPC detector cards
