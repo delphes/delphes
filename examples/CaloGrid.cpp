@@ -118,7 +118,6 @@ int main(int argc, char *argv[])
     if(debug)cout<<it->first<<","<<it->second<<endl;
     liney = new TLine(it->first,0,it->first,6.28);
     liney->SetLineColor(kRed+3);
-    liney->SetLineWidth(0.05);
     liney->Draw();
     
     set<std::pair<Double_t, Int_t> >::iterator it2 = it;
@@ -133,7 +132,6 @@ int main(int argc, char *argv[])
       
       linex = new TLine(it->first,yval0,it2->first,yval0);
       linex->SetLineColor(kRed+3);
-      linex->SetLineWidth(0.05);
       linex->Draw();
          
     } 
