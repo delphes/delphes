@@ -11,7 +11,7 @@
 
 #include "tcl/tcl.h"
 
-#include <libgen.h>
+#include "TSystem.h"
 
 #include <iostream>
 #include <iomanip>
@@ -56,7 +56,7 @@ void ExRootConfReader::ReadFile(const char *fileName, bool isTop)
     throw runtime_error(message.str());
   }
 
-  if(isTop) fTopDir = dirname(const_cast<char *>(fileName));
+  if(isTop) fTopDir = gSystem->DirName(fileName);
 
   int file_length = inputFileStream.tellg();
   inputFileStream.seekg(0, ios::beg);
