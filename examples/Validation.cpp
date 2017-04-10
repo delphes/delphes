@@ -2641,7 +2641,7 @@ void Validation(const char *inputFilePion,
     TCanvas *c_recbjet_lmis_pt = new TCanvas("","", 800, 600);
 
     mg_recbjet_lmis_pt->Draw("APE");
-    DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 0.5, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
+    DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 20.0, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
     leg_recbjet_lmis_pt->Draw();
     pave->Draw();
 
@@ -2652,7 +2652,7 @@ void Validation(const char *inputFilePion,
     TCanvas *c_recbjet_lmis_eta = new TCanvas("","", 800, 600);
 
     mg_recbjet_lmis_eta->Draw("APE");
-    DrawAxis(mg_recbjet_lmis_eta, leg_recbjet_lmis_eta, etaMin, etaMax, 0.0, 0.5, " #eta ", "light - mistag rate (%)", false, false);
+    DrawAxis(mg_recbjet_lmis_eta, leg_recbjet_lmis_eta, etaMin, etaMax, 0.0, 20.0, " #eta ", "light - mistag rate (%)", false, false);
     leg_recbjet_lmis_eta->Draw();
     pave->Draw();
 
