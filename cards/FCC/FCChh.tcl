@@ -276,8 +276,8 @@ module SimpleCalorimeter ECal {
   # add EnergyFraction {3122} {0.3}
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula {                     (abs(eta) <= 4.0) * sqrt(energy^2*0.01^2 + energy*0.10^2) + \
-                            (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.01^2  + energy*0.10^2)}
+  set ResolutionFormula {                     (abs(eta) <= 4.0) * sqrt(energy^2*0.007^2 + energy*0.10^2) + \
+                            (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.035^2  + energy*0.30^2)}
 
 
 }
@@ -359,8 +359,8 @@ module SimpleCalorimeter HCal {
 
    # set HCalResolutionFormula {resolution formula as a function of eta and energy}
   set ResolutionFormula {                     (abs(eta) <= 1.7) * sqrt(energy^2*0.03^2 + energy*0.50^2) + \
-                            (abs(eta) > 1.7 && abs(eta) <= 4.0) * sqrt(energy^2*0.05^2 + energy*0.80^2) + \
-                            (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
+                            (abs(eta) > 1.7 && abs(eta) <= 4.0) * sqrt(energy^2*0.03^2 + energy*0.60^2) + \
+                            (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.10^2 + energy*1.00^2)}
 }
 
 #################
