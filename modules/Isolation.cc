@@ -166,10 +166,12 @@ void Isolation::Process()
   // select isolation objects
   fFilter->Reset();
   isolationArray = fFilter->GetSubArray(fClassifier, 0);
+  cout<<"------------------------------------"<<endl;
 
   if(isolationArray == 0) return;
 
   TIter itIsolationArray(isolationArray);
+
 
   // loop over all input jets
   fItCandidateInputArray->Reset();
@@ -259,6 +261,9 @@ void Isolation::Process()
     sumRhoCorr = sumChargedNoPU + TMath::Max(sumNeutral - TMath::Max(rho, 0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(), 0.0);
     ratioDBeta = sumDBeta/candidateMomentum.Pt();
     ratioRhoCorr = sumRhoCorr/candidateMomentum.Pt();
+
+    cout<<"------------------------------------"<<endl;
+    cout<<sumDBeta<<endl;
 
     candidate->IsolationVar = ratioDBeta;
     candidate->IsolationVarRhoCorr = ratioRhoCorr;

@@ -2641,7 +2641,9 @@ void Validation(const char *inputFilePion,
     TCanvas *c_recbjet_lmis_pt = new TCanvas("","", 800, 600);
 
     mg_recbjet_lmis_pt->Draw("APE");
-    DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 10, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
+    
+    DrawAxis(mg_recbjet_lmis_pt, leg_recbjet_lmis_pt, ptMin, ptMax, 0.0, 10.0, "p_{T} [GeV]", "light - mistag rate (%)", true, false);
+    
     leg_recbjet_lmis_pt->Draw();
     pave->Draw();
 
