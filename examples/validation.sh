@@ -1,3 +1,4 @@
+#!/bin/sh
 ##############################################################################################
 #
 # This code produces at set of validation plots for a given detector card. 
@@ -19,8 +20,6 @@
 #
 ############################################################################################
 
-#! /bin/sh
-
 EXPECTED_ARGS=2
 E_BADARGS=65
 
@@ -41,11 +40,13 @@ outputroot=report_${cardbase%.*}/root
 cardlabel=${cardbase%.*}
 version=$(cat VERSION)
 outpdf=$mainoutputdir/${output%.*}.pdf
+qcdPgLocation="/home/fynu/mselvaggi/storage/DelphesValidationSamples"
 
 mkdir -p $outputroot
 mkdir -p $mainoutputdir/www/fig
 
 sed 's/delphes_card_CMS.tcl/'$cardbase'/g' cards/validation_card.tcl  > $validationCard
+sed -i "1i set MaxEvents ${nEvents}" "$validationCard"
 
 function runParticleGun {
   name=$1
@@ -58,15 +59,30 @@ function runParticleGun {
   
 }
 
-runParticleGun pion 211
-runParticleGun electron 11
-runParticleGun muon 13
-runParticleGun photon 22
-runParticleGun neutron 2112
-runParticleGun jet 1
-runParticleGun bjet 5
-runParticleGun cjet 4
-runParticleGun taujet 15
+
+function runJetsGun {
+  name=$1
+  pid=$2
+  inputroot="${qcdPgLocation}/${pid}.root"
+  rootfile="particleGun_${name}_${cardlabel}.root"
+  ./DelphesROOT $validationCard $outputroot/$rootfile $inputroot
+  echo "./DelphesROOT $validationCard $outputroot/$rootfile $inputroot"
+}
+
+
+runParticleGun pion 211 
+runParticleGun electron 11 
+runParticleGun muon 13 
+runParticleGun photon 22 
+runParticleGun neutron 2112 
+runParticleGun taujet 15 
+runJetsGun jet 1 &
+runJetsGun bjet 5 &
+runJetsGun cjet 4 &
+
+wait
+echo all particle guns complete ...
+
 
 ./Validation $outputroot/particleGun_pion_$cardlabel.root $outputroot/particleGun_electron_$cardlabel.root $outputroot/particleGun_muon_$cardlabel.root $outputroot/particleGun_photon_$cardlabel.root $outputroot/particleGun_neutron_$cardlabel.root $outputroot/particleGun_jet_$cardlabel.root $outputroot/particleGun_bjet_$cardlabel.root $outputroot/particleGun_cjet_$cardlabel.root $outputroot/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
 
