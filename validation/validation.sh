@@ -25,8 +25,8 @@ E_BADARGS=65
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: ./examples/validation.sh [detector_card] [number_of_events]"
-  echo "for instance: ./examples/validation.sh cards/delphes_card_CMS.tcl 10000"
+  echo "Usage: ./validation/validation.sh [detector_card] [number_of_events]"
+  echo "for instance: ./validation/validation.sh cards/delphes_card_CMS.tcl 10000"
   exit $E_BADARGS
 fi
 
