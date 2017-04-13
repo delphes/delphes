@@ -69,7 +69,7 @@ function runJetsGun {
 
   if [ ! -f $inputroot ]
   then
-    python FlatGunLHEventProducer.py --pdg $pid --ptmin 1 --ptmax 50000 --etamin -6 --etamax 6 --size $nEvents --seed 1 --output $samplesdir/events_$pid.lhe --log --ecm 100000
+    python validation/FlatGunLHEventProducer.py --pdg $pid --ptmin 1 --ptmax 50000 --etamin -6 --etamax 6 --size $nEvents --seed 1 --output $samplesdir/events_$pid.lhe --log --ecm 100000
 
     cp examples/Pythia8/configLHE.cmnd $cmnd
     echo "Beams:LHEF = $samplesdir/events_$pid.lhe" >> $cmnd
