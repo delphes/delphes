@@ -40,7 +40,7 @@ version=$(cat VERSION)
 outpdf=$mainoutputdir/${output%.*}.pdf
 cardsdir=validation/cards
 samplesdir=validation/samples
-validationcard=$cardsdir/validation_$cardbase
+validationcard=cards/validation_$cardbase
 
 mkdir -p $cardsdir
 mkdir -p $samplesdir
