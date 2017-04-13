@@ -166,11 +166,7 @@ void Isolation::Process()
   // select isolation objects
   fFilter->Reset();
   isolationArray = fFilter->GetSubArray(fClassifier, 0);
-
-  //if(isolationArray == 0) return;
-
   TIter itIsolationArray(isolationArray);
-
 
   // loop over all input jets
   fItCandidateInputArray->Reset();
