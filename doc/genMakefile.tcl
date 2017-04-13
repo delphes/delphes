@@ -260,7 +260,7 @@ all:
 
 }
 
-executableDeps {converters/*.cpp} {examples/*.cpp}
+executableDeps {converters/*.cpp} {examples/*.cpp} {validation/*.cpp}
 
 executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp} {readers/DelphesROOT.cpp}
 
@@ -399,7 +399,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a CHANGELOG CMakeLists.txt COPYING CREDITS DelphesEnv.sh README README_4LHCb VERSION Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers $(DISTDIR)
+	@cp -a CHANGELOG CMakeLists.txt COPYING CREDITS DelphesEnv.sh README README_4LHCb VERSION Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)

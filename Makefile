@@ -151,10 +151,10 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootUtilities.h
 Validation$(ExeSuf): \
-	tmp/examples/Validation.$(ObjSuf)
+	tmp/validation/Validation.$(ObjSuf)
 
-tmp/examples/Validation.$(ObjSuf): \
-	examples/Validation.cpp \
+tmp/validation/Validation.$(ObjSuf): \
+	validation/Validation.cpp \
 	classes/DelphesClasses.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
@@ -181,7 +181,7 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
 	tmp/examples/CaloGrid.$(ObjSuf) \
 	tmp/examples/Example1.$(ObjSuf) \
-	tmp/examples/Validation.$(ObjSuf)
+	tmp/validation/Validation.$(ObjSuf)
 
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
@@ -2245,7 +2245,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a CHANGELOG CMakeLists.txt COPYING CREDITS DelphesEnv.sh README README_4LHCb VERSION Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers $(DISTDIR)
+	@cp -a CHANGELOG CMakeLists.txt COPYING CREDITS DelphesEnv.sh README README_4LHCb VERSION Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)
