@@ -31,6 +31,7 @@ then
 fi
 
 cardbase=$(basename $1)
+carddir=$(dirname $1)
 nEvents=$2
 output=validation_${cardbase%.*}.root
 mainoutputdir=report_${cardbase%.*}
@@ -40,7 +41,7 @@ version=$(cat VERSION)
 outpdf=$mainoutputdir/${output%.*}.pdf
 cardsdir=validation/cards
 samplesdir=validation/samples
-validationcard=cards/validation_$cardbase
+validationcard=$carddir/validation_$cardbase
 
 mkdir -p $cardsdir
 mkdir -p $samplesdir
@@ -57,6 +58,7 @@ function runParticleGun {
   outputroot=particleGun_${name}_${cardlabel}.root
   sed "/Main:spareMode1/s/=[[:space:]]*[0-9]*/= $pid/; /Main:numberOfEvents/s/=[[:space:]]*[0-9]*/= $nEvents/" examples/Pythia8/configParticleGun.cmnd > $cmnd
   ./DelphesPythia8 $validationcard $cmnd $outputrootdir/$outputroot
+
 }
 
 
@@ -94,7 +96,6 @@ runJetsGun cjet 4 &
 
 wait
 echo all particle guns complete ...
-
 
 ./Validation $outputrootdir/particleGun_pion_$cardlabel.root $outputrootdir/particleGun_electron_$cardlabel.root $outputrootdir/particleGun_muon_$cardlabel.root $outputrootdir/particleGun_photon_$cardlabel.root $outputrootdir/particleGun_neutron_$cardlabel.root $outputrootdir/particleGun_jet_$cardlabel.root $outputrootdir/particleGun_bjet_$cardlabel.root $outputrootdir/particleGun_cjet_$cardlabel.root $outputrootdir/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
 
