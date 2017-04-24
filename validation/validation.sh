@@ -1,22 +1,22 @@
 #!/bin/sh
 ################################################################################
 #
-# This code produces at set of validation plots for a given detector card. 
+# This code produces at set of validation plots for a given detector card.
 #
-# In order to run this you need to compile Delphes with Pythia8 first, see: 
-# 
+# In order to run this you need to compile Delphes with Pythia8 first, see:
+#
 # https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Pythia8
 #
 # After you (re-)compiled Delphes with Pythia8 you are ready to go, execute from Delphes main dir:
 #
-# ./examples/validation.sh [detector_card] [number_of_events] 
-# 
+# ./examples/validation.sh [detector_card] [number_of_events]
+#
 #  e.g.
-# 
+#
 # ./examples/validation.sh cards/delphes_card_CMS.tcl 100000
 #
 # Note that the more events you specify, the more accurate the controls plots will be ...
-# This said, 500k events should be ok for most cases. 
+# This said, 500k events should be ok for most cases.
 #
 ################################################################################
 
@@ -83,12 +83,12 @@ function runJetsGun {
 }
 
 
-runParticleGun pion 211 
-runParticleGun electron 11 
-runParticleGun muon 13 
-runParticleGun photon 22 
-runParticleGun neutron 2112 
-runParticleGun taujet 15 
+runParticleGun pion 211
+runParticleGun electron 11
+runParticleGun muon 13
+runParticleGun photon 22
+runParticleGun neutron 2112
+runParticleGun taujet 15
 runJetsGun jet 1 &
 runJetsGun bjet 5 &
 runJetsGun cjet 4 &
@@ -99,13 +99,13 @@ echo all particle guns complete ...
 ./Validation $outputrootdir/particleGun_pion_$cardlabel.root $outputrootdir/particleGun_electron_$cardlabel.root $outputrootdir/particleGun_muon_$cardlabel.root $outputrootdir/particleGun_photon_$cardlabel.root $outputrootdir/particleGun_neutron_$cardlabel.root $outputrootdir/particleGun_jet_$cardlabel.root $outputrootdir/particleGun_bjet_$cardlabel.root $outputrootdir/particleGun_cjet_$cardlabel.root $outputrootdir/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
 
 
-# produce calo grid plots 
+# produce calo grid plots
 ./CaloGrid $1 ECal
 ./CaloGrid $1 HCal
-gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf ECal.pdf  
+gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=tmp/tmp1.pdf $outpdf ECal.pdf
 gs -dBATCH -dNOPAUSE -q -sDEVICE=pdfwrite -sOutputFile=$outpdf tmp/tmp1.pdf HCal.pdf
-mv ECal.pdf $mainoutputdir/www/fig/img_ecal.pdf 
-mv ECal.png $mainoutputdir/www/fig/img_ecal.png 
+mv ECal.pdf $mainoutputdir/www/fig/img_ecal.pdf
+mv ECal.png $mainoutputdir/www/fig/img_ecal.png
 mv HCal.pdf $mainoutputdir/www/fig/img_hcal.pdf
 mv HCal.png $mainoutputdir/www/fig/img_hcal.png
 
