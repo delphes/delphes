@@ -56,7 +56,7 @@ function runParticleGun {
   pid=$2
   cmnd=$cardsdir/configParticleGun_$name.cmnd
   outputroot=particleGun_${name}_${cardlabel}.root
-  sed "/Main:spareMode1/s/=[[:space:]]*[0-9]*/= $pid/; /Main:numberOfEvents/s/=[[:space:]]*[0-9]*/= $nEvents/" examples/Pythia8/configParticleGun.cmnd > $cmnd
+  sed "/Main:spareMode1/s|=[[:space:]]*[0-9]*|= $pid|; /Main:numberOfEvents/s|=[[:space:]]*[0-9]*|= $nEvents|" examples/Pythia8/configParticleGun.cmnd > $cmnd
   ./DelphesPythia8 $validationcard $cmnd $outputrootdir/$outputroot
 
 }
@@ -65,17 +65,16 @@ function runParticleGun {
 function runJetsGun {
   name=$1
   pid=$2
-  cmnd=$cardsdir/configLHE_$pid.cmnd
-  inputroot=$samplesdir/$pid.root
+  lhe=$samplesdir/events_$name.lhe
+  cmnd=$cardsdir/configLHE_$name.cmnd
+  inputroot=$samplesdir/$name.root
   outputroot=particleGun_${name}_${cardlabel}.root
 
   if [ ! -f $inputroot ]
   then
-    python validation/FlatGunLHEventProducer.py --pdg $pid --ptmin 1 --ptmax 50000 --etamin -6 --etamax 6 --size $nEvents --seed 1 --output $samplesdir/events_$pid.lhe --log --ecm 100000
+    python validation/FlatGunLHEventProducer.py --pdg $pid --ptmin 1 --ptmax 50000 --etamin -6 --etamax 6 --size $nEvents --seed 1 --output $lhe --log --ecm 100000
 
-    cp examples/Pythia8/configLHE.cmnd $cmnd
-    echo "Beams:LHEF = $samplesdir/events_$pid.lhe" >> $cmnd
-    echo "Main:numberOfEvents = $nEvents" >> $cmnd
+    sed "/Beams:LHEF/s|=[[:space:]].*|= $lhe|; /Main:numberOfEvents/s/=[[:space:]]*[0-9]*/= $nEvents/" examples/Pythia8/configLHE.cmnd > $cmnd
 
     ./DelphesPythia8 cards/gen_card.tcl $cmnd $inputroot
   fi
