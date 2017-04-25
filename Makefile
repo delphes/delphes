@@ -150,11 +150,11 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootUtilities.h
-Validation$(ExeSuf): \
-	tmp/validation/Validation.$(ObjSuf)
+DelphesValidation$(ExeSuf): \
+	tmp/validation/DelphesValidation.$(ObjSuf)
 
-tmp/validation/Validation.$(ObjSuf): \
-	validation/Validation.cpp \
+tmp/validation/DelphesValidation.$(ObjSuf): \
+	validation/DelphesValidation.cpp \
 	classes/DelphesClasses.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
@@ -170,7 +170,7 @@ EXECUTABLE +=  \
 	stdhep2pileup$(ExeSuf) \
 	CaloGrid$(ExeSuf) \
 	Example1$(ExeSuf) \
-	Validation$(ExeSuf)
+	DelphesValidation$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
@@ -181,7 +181,7 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
 	tmp/examples/CaloGrid.$(ObjSuf) \
 	tmp/examples/Example1.$(ObjSuf) \
-	tmp/validation/Validation.$(ObjSuf)
+	tmp/validation/DelphesValidation.$(ObjSuf)
 
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)

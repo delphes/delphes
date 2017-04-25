@@ -1450,17 +1450,18 @@ void DrawAxis(TMultiGraph *mg, TLegend *leg, double xmin, double xmax, double ym
 }
 
 
-void Validation(const char *inputFilePion,
-                const char *inputFileElectron,
-                const char *inputFileMuon,
-                const char *inputFilePhoton,
-                const char *inputFileNeutralHadron,
-                const char *inputFileJet,
-                const char *inputFileBJet,
-                const char *inputFileCJet,
-                const char *inputFileTauJet,
-                const char *outputFile,
-                const char *version)
+void DelphesValidation(
+  const char *inputFilePion,
+  const char *inputFileElectron,
+  const char *inputFileMuon,
+  const char *inputFilePhoton,
+  const char *inputFileNeutralHadron,
+  const char *inputFileJet,
+  const char *inputFileBJet,
+  const char *inputFileCJet,
+  const char *inputFileTauJet,
+  const char *outputFile,
+  const char *version)
 {
 
   TChain *chainPion = new TChain("Delphes");
@@ -3035,13 +3036,13 @@ void Validation(const char *inputFilePion,
 
 int main(int argc, char *argv[])
 {
-  char *appName = "Validation";
+  char *appName = "DelphesValidation";
 
   if(argc != 12)
   {
-    cout << " Usage: " << appName << " input_file_electron input_file_muon input_file_photon input_file_jet input_file_bjet input_file_taujet output_file" << endl;
-    cout << " input_file_pion  - input file in ROOT format ('Delphes' tree)," << endl;
-    cout << " input_file_electron  - input file in ROOT format ('Delphes' tree)," << endl;
+    cout << " Usage: " << appName << " input_file_electron input_file_muon input_file_photon input_file_jet input_file_bjet input_file_taujet output_file version" << endl;
+    cout << " input_file_pion - input file in ROOT format ('Delphes' tree)," << endl;
+    cout << " input_file_electron - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " input_file_muon - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " input_file_photon - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " input_file_neutralhadron - input file in ROOT format ('Delphes' tree)," << endl;
@@ -3049,8 +3050,8 @@ int main(int argc, char *argv[])
     cout << " input_file_bjet - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " input_file_cjet - input file in ROOT format ('Delphes' tree)," << endl;
     cout << " input_file_taujet - input file in ROOT format ('Delphes' tree)," << endl;
-    cout << " output_file - output file in ROOT format" << endl;
-    cout << " delphes version" << endl;
+    cout << " output_file - output file in ROOT format," << endl;
+    cout << " version - Delphes version" << endl;
 
     return 1;
   }
@@ -3061,7 +3062,7 @@ int main(int argc, char *argv[])
   char *appargv[] = {appName};
   TApplication app(appName, &appargc, appargv);
 
-  Validation(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], argv[10], argv[11]);
+  DelphesValidation(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], argv[10], argv[11]);
 }
 
 

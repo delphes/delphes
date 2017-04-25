@@ -96,7 +96,7 @@ runJetsGun cjet 4 &
 wait
 echo all particle guns complete ...
 
-./Validation $outputrootdir/particleGun_pion_$cardlabel.root $outputrootdir/particleGun_electron_$cardlabel.root $outputrootdir/particleGun_muon_$cardlabel.root $outputrootdir/particleGun_photon_$cardlabel.root $outputrootdir/particleGun_neutron_$cardlabel.root $outputrootdir/particleGun_jet_$cardlabel.root $outputrootdir/particleGun_bjet_$cardlabel.root $outputrootdir/particleGun_cjet_$cardlabel.root $outputrootdir/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
+./DelphesValidation $outputrootdir/particleGun_pion_$cardlabel.root $outputrootdir/particleGun_electron_$cardlabel.root $outputrootdir/particleGun_muon_$cardlabel.root $outputrootdir/particleGun_photon_$cardlabel.root $outputrootdir/particleGun_neutron_$cardlabel.root $outputrootdir/particleGun_jet_$cardlabel.root $outputrootdir/particleGun_bjet_$cardlabel.root $outputrootdir/particleGun_cjet_$cardlabel.root $outputrootdir/particleGun_taujet_$cardlabel.root $mainoutputdir/$output $version
 
 
 # produce calo grid plots
