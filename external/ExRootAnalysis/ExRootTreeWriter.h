@@ -30,9 +30,10 @@ public:
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
 
-  void Clear();
+  virtual void Clear(Option_t *option = "");
   void Fill();
-  void Write();
+  virtual Int_t Write(const char *name=0, Int_t option=0, Int_t bufsize=0) const;
+  virtual Int_t Write(const char *name=0, Int_t option=0, Int_t bufsize=0);
 
 private:
 
