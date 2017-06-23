@@ -38,6 +38,7 @@
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
+#include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
 #include "modules/OldCalorimeter.h"
 #include "modules/Isolation.h"
@@ -89,6 +90,7 @@
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
+#pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
 #pragma link C++ class OldCalorimeter+;
 #pragma link C++ class Isolation+;
