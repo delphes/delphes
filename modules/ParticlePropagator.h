@@ -58,6 +58,7 @@ private:
   const TObjArray *fBeamSpotInputArray; //!
 
   TObjArray *fOutputArray; //!
+  TObjArray *fNeutralOutputArray; //!
   TObjArray *fChargedHadronOutputArray; //!
   TObjArray *fElectronOutputArray; //!
   TObjArray *fMuonOutputArray; //!

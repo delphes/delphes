@@ -106,6 +106,7 @@ void ParticlePropagator::Init()
   // create output arrays
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fNeutralOutputArray = ExportArray(GetString("NeutralOutputArray", "neutralParticles"));
   fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
   fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons"));
   fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons"));
@@ -249,6 +250,10 @@ void ParticlePropagator::Process()
           default:
             fChargedHadronOutputArray->Add(candidate);
         }
+      }
+      else
+      {
+         fNeutralOutputArray->Add(candidate);
       }
     }
     else
