@@ -50,7 +50,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
   TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
   TClonesArray *branchEFlowPhoton = treeReader->UseBranch("EFlowPhoton");
   TClonesArray *branchEFlowNeutralHadron = treeReader->UseBranch("EFlowNeutralHadron");
-  TClonesArray *branchJet = treeReader->UseBranch("Jet");
+  TClonesArray *branchJet = treeReader->UseBranch("FatJet");
 
   Long64_t allEntries = treeReader->GetEntries();
 
@@ -113,7 +113,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, TestPlots *plots)
       }
     }
   }
-  plots->fhistNum->Divide(plots->fhistDen);
+  //plots->fhistNum->Divide(plots->fhistDen);
 }
 
 //------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ void PrintHistograms(ExRootResult *result, TestPlots *plots)
 
 //------------------------------------------------------------------------------
 
-void CoreTrack(const char *inputFile)
+void DenseTracks(const char *inputFile)
 {
   gSystem->Load("libDelphes");
 
