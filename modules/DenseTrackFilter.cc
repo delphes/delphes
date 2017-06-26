@@ -137,7 +137,7 @@ void DenseTrackFilter::Process()
   Candidate *candidate, *track, *bestTrack, *mother;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
-  Int_t number;
+  Int_t number, towerTrackHits;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
 
   Double_t pt, ptmax, eta, phi;
@@ -188,6 +188,7 @@ void DenseTrackFilter::Process()
   bestTrack = 0;
   fTower = 0;
   ptmax = 0.0;
+  towerTrackHits = 0;
 
   for(itTowerHits = fTowerHits.begin(); itTowerHits != fTowerHits.end(); ++itTowerHits)
   {
@@ -195,14 +196,13 @@ void DenseTrackFilter::Process()
     flags = (towerHit >> 24) & 0x00000000000000FFLL;
     number = (towerHit) & 0x0000000000FFFFFFLL;
     hitEtaPhi = towerHit >> 32;
-
     if(towerEtaPhi != hitEtaPhi)
     {
       // switch to next tower
       towerEtaPhi = hitEtaPhi;
       
       // saving track with highest pT that hit the tower
-      if(fTowerTrackHits > 0)
+      if(towerTrackHits > 0)
       {
          mother = bestTrack;
          candidate = static_cast<Candidate*>(bestTrack->Clone());
@@ -217,14 +217,14 @@ void DenseTrackFilter::Process()
       }
 
       ptmax = 0.0;
-      fTowerTrackHits = 0;
+      towerTrackHits = 0;
       bestTrack = 0;
     }
     // check for track hits
     
     if(flags & 1)
     {
-      ++fTowerTrackHits;
+      ++towerTrackHits;
       track = static_cast<Candidate*>(fTrackInputArray->At(number));
       momentum = track->Momentum;
 

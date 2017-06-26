@@ -53,7 +53,6 @@ private:
   typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
 
   Candidate *fTower;
-  Int_t fTowerTrackHits;
 
   Double_t fEtaPhiRes;
 
