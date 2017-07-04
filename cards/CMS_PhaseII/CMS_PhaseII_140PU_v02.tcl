@@ -153,8 +153,8 @@ module PileUpMerger PileUpMerger {
 #################################
 
 module ParticlePropagator DenseProp {
-  #set InputArray PileUpMerger/stableParticles
-  set InputArray Delphes/stableParticles
+  set InputArray PileUpMerger/stableParticles
+  #set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set NeutralOutputArray neutralParticles
