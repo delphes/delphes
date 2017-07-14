@@ -766,7 +766,7 @@ module Isolation PhotonIsolation {
   set CandidateInputArray PhotonFilter/photons
 
   # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
+  set IsolationInputArray EFlowFilter/eflow
 
   # output array
   set OutputArray photons
@@ -794,7 +794,7 @@ module Isolation PhotonIsolation {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronFilter/electrons
-  set IsolationInputArray RunPUPPI/PuppiParticles
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray electrons
 
@@ -818,7 +818,7 @@ module Isolation ElectronIsolation {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonMomentumSmearing/muons
-  set IsolationInputArray RunPUPPI/PuppiParticles
+  set IsolationInputArray EFlowFilter/eflow
 
   set OutputArray muons
 

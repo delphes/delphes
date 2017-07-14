@@ -53,6 +53,9 @@ set ExecutionPath {
   RunPUPPIMerger
   RunPUPPI
 
+  EFlowFilterPuppi
+  EFlowFilterCHS
+
   PhotonFilter
   
   PhotonCloner
@@ -827,6 +830,35 @@ module RecoPuFilter RunPUPPI {
   set OutputArray PuppiParticles
 }
 
+######################
+# EFlowFilterPuppi
+######################
+
+module PdgCodeFilter EFlowFilterPuppi {
+  set InputArray RunPUPPI/PuppiParticles
+  set OutputArray eflow
+  
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+######################
+# EFlowFilterCHS
+######################
+
+module PdgCodeFilter EFlowFilterCHS {
+  set InputArray EFlowMergerCHS/eflow
+  set OutputArray eflow
+  
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+
 ###################
 # Missing ET merger
 ###################
@@ -1160,7 +1192,7 @@ module Isolation PhotonIsolation {
   set CandidateInputArray PhotonFilter/photons
 
   # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
+  set IsolationInputArray EFlowFilterPuppi/eflow
 
   # output array
   set OutputArray photons
@@ -1191,7 +1223,7 @@ module Isolation PhotonIsolationCHS {
   set CandidateInputArray PhotonCloner/photons
 
   # isolation collection
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilterCHS/eflow
 
   # output array
   set OutputArray photons
@@ -1256,8 +1288,7 @@ module Isolation ElectronIsolation {
   set CandidateInputArray ElectronFilter/electrons
 
   # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
-  #set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilterPuppi/eflow
 
   set OutputArray electrons
 
@@ -1277,7 +1308,7 @@ module Isolation ElectronIsolationCHS {
   set CandidateInputArray ElectronCloner/electrons
 
   # isolation collection
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilterCHS/eflow
 
   set OutputArray electrons
 
@@ -1390,7 +1421,7 @@ module Isolation MuonIsolation {
   set CandidateInputArray MuonMomentumSmearing/muons
 
   # isolation collection
-  set IsolationInputArray RunPUPPI/PuppiParticles
+  set IsolationInputArray EFlowFilterPuppi/eflow
 
   set OutputArray muons
 
@@ -1408,7 +1439,7 @@ module Isolation MuonIsolationCHS {
   set CandidateInputArray MuonCloner/muons
 
   # isolation collection
-  set IsolationInputArray EFlowMerger/eflow
+  set IsolationInputArray EFlowFilterCHS/eflow
 
   set OutputArray muons
 
