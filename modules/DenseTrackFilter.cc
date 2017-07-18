@@ -110,7 +110,7 @@ void DenseTrackFilter::Init()
   }
 
   // Eta x Phi smearing to be applied
-  fEtaPhiRes = GetBool("EtaPhiRes", 0.005);
+  fEtaPhiRes = GetDouble("EtaPhiRes", 0.005);
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
   fItTrackInputArray = fTrackInputArray->MakeIterator();
