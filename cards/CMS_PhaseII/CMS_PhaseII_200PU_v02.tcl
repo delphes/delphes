@@ -166,7 +166,7 @@ module ParticlePropagator DenseProp {
   set MuonOutputArray muons
 
   # radius of the first pixel layer
-  set Radius 0.03
+  set Radius 0.3
   # half-length of the magnetic field coverage, in m
   set HalfLength 0.7
 
