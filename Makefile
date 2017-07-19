@@ -360,6 +360,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
 	modules/SimpleCalorimeter.h \
+	modules/DenseTrackFilter.h \
 	modules/Calorimeter.h \
 	modules/OldCalorimeter.h \
 	modules/Isolation.h \
@@ -643,6 +644,15 @@ tmp/modules/Delphes.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootConfReader.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h
+tmp/modules/DenseTrackFilter.$(ObjSuf): \
+	modules/DenseTrackFilter.$(SrcSuf) \
+	modules/DenseTrackFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/Efficiency.$(ObjSuf): \
 	modules/Efficiency.$(SrcSuf) \
 	modules/Efficiency.h \
@@ -1036,6 +1046,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
+	tmp/modules/DenseTrackFilter.$(ObjSuf) \
 	tmp/modules/Efficiency.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
 	tmp/modules/EnergySmearing.$(ObjSuf) \
@@ -1676,6 +1687,10 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclStringObj.$(ObjSuf) \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
+
+modules/DenseTrackFilter.h: \
+	classes/DelphesModule.h
+	@touch $@
 
 modules/VertexFinderDA4D.h: \
 	classes/DelphesModule.h
