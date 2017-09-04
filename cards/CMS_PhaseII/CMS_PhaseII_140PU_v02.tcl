@@ -1335,8 +1335,8 @@ module Efficiency ElectronEfficiency {
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for electrons
+  # efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id        
   set EfficiencyFormula {
-  # efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id
                                       (pt <= 4.0)  * (1.00) + \
                          (abs(eta) <= 1.45 ) * (pt >  4.0 && pt <= 6.0)   * (0.50) + \
                          (abs(eta) <= 1.45 ) * (pt >  6.0 && pt <= 8.0)   * (0.70) + \
@@ -1380,8 +1380,8 @@ module Efficiency ElectronEfficiencyCHS {
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for electrons
-  set EfficiencyFormula {# efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id
-                                      (pt <= 4.0)  * (1.00) + \
+  # efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id        
+  set EfficiencyFormula {             (pt <= 4.0)  * (1.00) + \
                          (abs(eta) <= 1.45 ) * (pt >  4.0 && pt <= 6.0)   * (0.50) + \
                          (abs(eta) <= 1.45 ) * (pt >  6.0 && pt <= 8.0)   * (0.70) + \
                          (abs(eta) <= 1.45 ) * (pt >  8.0 && pt <= 10.0)  * (0.85) + \

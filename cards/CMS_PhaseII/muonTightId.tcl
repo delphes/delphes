@@ -1,7 +1,6 @@
    # tracking + TightID efficiency formula for muons
+   # efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id
     set EfficiencyFormula {
-
-        # efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id
         (pt <= 5.0) * (1.00) + \
                 (pt > 5 && pt < 10) * (abs(eta) > 0 && abs(eta) < 0.2) * 0.949 + \
                 (pt > 5 && pt < 10) * (abs(eta) > 0.2 && abs(eta) < 0.4) * 0.894 + \
