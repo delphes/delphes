@@ -1,7 +1,7 @@
 #
-#  Main authors: Michele Selvaggi (UCL)
+#  Main authors: Michele Selvaggi (CERN)
 #
-#  Released on: Jun 26 - 2007
+#  Released on: Jun 26 - 2017
 #
 #  Version: v02
 #
@@ -264,13 +264,13 @@ module Efficiency ChargedHadronTrackingEfficiency {
   # tracking efficiency formula for charged hadrons
   set EfficiencyFormula {
       (pt <= 0.2) * (0.00) + \
-	  (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
-	  (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.87) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.82) + \
-	  (abs(eta) > 4.0) * (0.00)
+          (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
+          (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.87) + \
+          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.82) + \
+          (abs(eta) > 4.0) * (0.00)
   }
 }
 
@@ -285,15 +285,15 @@ module Efficiency ElectronTrackingEfficiency {
   # tracking efficiency formula for electrons
   set EfficiencyFormula {
       (pt <= 0.2) * (0.00) + \
-	  (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
-	  (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 10.0) * (0.82+pt*0.01) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 10.0) * (0.90) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.8+pt*0.01) + \
-	  (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 10.0) * (0.85) + \
-	  (abs(eta) > 4.0) * (0.00)
+          (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
+          (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 10.0) * (0.82+pt*0.01) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 10.0) * (0.90) + \
+          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.8+pt*0.01) + \
+          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 10.0) * (0.85) + \
+          (abs(eta) > 4.0) * (0.00)
 
   }
 }
@@ -308,13 +308,13 @@ module Efficiency MuonTrackingEfficiency {
   # tracking efficiency formula for muons
   set EfficiencyFormula {
       (pt <= 0.2) * (0.00) + \
-	  (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 1.00) + \
-	  (abs(eta) <= 1.2) * (pt > 1.0) * (1.00) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.8) * (pt > 0.2 && pt <= 1.0) * (pt*1.00) + \
-	  (abs(eta) > 1.2 && abs(eta) <= 2.8) * (pt > 1.0) * (1.00) + \
-	  (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
-	  (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
-	  (abs(eta) > 4.0) * (0.00)
+          (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 1.00) + \
+          (abs(eta) <= 1.2) * (pt > 1.0) * (1.00) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.8) * (pt > 0.2 && pt <= 1.0) * (pt*1.00) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.8) * (pt > 1.0) * (1.00) + \
+          (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
+          (abs(eta) > 2.8 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
+          (abs(eta) > 4.0) * (0.00)
 
   }
 }
@@ -660,8 +660,8 @@ module SimpleCalorimeter HCal {
 
 # set ResolutionFormula {resolution formula as a function of eta and energy}
   set ResolutionFormula {                    (abs(eta) <= 1.5) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
-						   (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
-						   (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*2.80^2)}
+                                                   (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
+                                                   (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*2.80^2)}
 
 }
 
@@ -1254,9 +1254,9 @@ module Efficiency PhotonEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for photons
   set EfficiencyFormula {                      (pt <= 10.0) * (0.00) + \
-	                   (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
-	 (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
-	 (abs(eta) > 4.0)                                   * (0.00)}
+                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
+         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
+         (abs(eta) > 4.0)                                   * (0.00)}
 
 }
 
@@ -1274,9 +1274,9 @@ module Efficiency PhotonEfficiencyCHS {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for photons
   set EfficiencyFormula {                      (pt <= 10.0) * (0.00) + \
-	                   (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
-	 (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
-	 (abs(eta) > 4.0)                                   * (0.00)}
+                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.9635) + \
+         (abs(eta) > 1.5 && abs(eta) <= 4.0) * (pt > 10.0)  * (0.9624) + \
+         (abs(eta) > 4.0)                                   * (0.00)}
 
 }
 
@@ -1336,7 +1336,8 @@ module Efficiency ElectronEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for electrons
   set EfficiencyFormula {
-                                      (pt <= 4.0)  * (0.00) + \
+  # efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id
+                                      (pt <= 4.0)  * (1.00) + \
                          (abs(eta) <= 1.45 ) * (pt >  4.0 && pt <= 6.0)   * (0.50) + \
                          (abs(eta) <= 1.45 ) * (pt >  6.0 && pt <= 8.0)   * (0.70) + \
                          (abs(eta) <= 1.45 ) * (pt >  8.0 && pt <= 10.0)  * (0.85) + \
@@ -1359,11 +1360,11 @@ module Efficiency ElectronEfficiency {
                          (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \
                          (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.90) + \
                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 4.0 && pt <= 10.0) * (0.65) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0) * (0.75) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0) * (0.90) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0) * (0.90) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 70.0 ) * (0.90) + \
-					  (abs(eta) > 4.0) * (0.00)
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0) * (0.75) + \
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0) * (0.90) + \
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0) * (0.90) + \
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 70.0 ) * (0.90) + \
+                                          (abs(eta) > 4.0) * (0.00)
 
   }
 }
@@ -1379,8 +1380,8 @@ module Efficiency ElectronEfficiencyCHS {
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for electrons
-  set EfficiencyFormula {
-                                      (pt <= 4.0)  * (0.00) + \
+  set EfficiencyFormula {# efficiency for low pT leptons is set artifically to 100%. Analyzers should rescale according to proper lepton Id
+                                      (pt <= 4.0)  * (1.00) + \
                          (abs(eta) <= 1.45 ) * (pt >  4.0 && pt <= 6.0)   * (0.50) + \
                          (abs(eta) <= 1.45 ) * (pt >  6.0 && pt <= 8.0)   * (0.70) + \
                          (abs(eta) <= 1.45 ) * (pt >  8.0 && pt <= 10.0)  * (0.85) + \
@@ -1403,11 +1404,11 @@ module Efficiency ElectronEfficiencyCHS {
                          (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \
                          (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.90) + \
                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 4.0 && pt <= 10.0) * (0.65) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0) * (0.75) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0) * (0.90) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0) * (0.90) + \
-					  (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 70.0 ) * (0.90) + \
-					  (abs(eta) > 4.0) * (0.00)
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0) * (0.75) + \
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0) * (0.90) + \
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0) * (0.90) + \
+                                          (abs(eta) > 2.5 && abs(eta) <= 4.0 ) * (pt > 70.0 ) * (0.90) + \
+                                          (abs(eta) > 4.0) * (0.00)
 
   }
 }
