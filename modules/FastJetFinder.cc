@@ -125,7 +125,7 @@ void FastJetFinder::Init()
   fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
   fN = GetInt("N", 2);                  // used only if Njettiness is used as jet clustering algo (case 8)
      
-  fMeasureDef = new UnnormalizedMeasure(fBeta);
+  fMeasureDef = new NormalizedMeasure(fBeta, fParameterR);
    
   switch(fAxisMode)
   {
