@@ -1224,6 +1224,7 @@ module Isolation PhotonIsolationCHS {
 
   # isolation collection
   set IsolationInputArray EFlowFilterCHS/eflow
+  set RhoInputArray Rho/rho
 
   # output array
   set OutputArray photons
@@ -1309,6 +1310,7 @@ module Isolation ElectronIsolationCHS {
 
   # isolation collection
   set IsolationInputArray EFlowFilterCHS/eflow
+  set RhoInputArray Rho/rho
 
   set OutputArray electrons
 
@@ -1442,6 +1444,7 @@ module Isolation MuonIsolationCHS {
 
   # isolation collection
   set IsolationInputArray EFlowFilterCHS/eflow
+  set RhoInputArray Rho/rho
 
   set OutputArray muons
 
