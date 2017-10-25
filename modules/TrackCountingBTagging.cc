@@ -121,7 +121,7 @@ void TrackCountingBTagging::Process()
       tpt = trkMomentum.Pt();
       xd = track->Xd;
       yd = track->Yd;
-      d0 = TMath::Hypot(xd, yd);
+      d0 = TMath::Abs(track->D0);
       dd0 = track->ErrorD0;
 
       if(tpt < fPtMin) continue;
