@@ -71,6 +71,8 @@ void TrackCountingBTagging::Init()
   fSigMin = GetDouble("SigMin", 6.5);
   fNtracks = GetInt("Ntracks", 3);
 
+  fUse3D = GetBool("Use3D", false);
+
   // import input array(s)
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"));
@@ -94,9 +96,9 @@ void TrackCountingBTagging::Process()
 {
   Candidate *jet, *track;
 
-  Double_t jpx, jpy;
+  Double_t jpx, jpy, jpz;
   Double_t dr, tpt;
-  Double_t xd, yd, d0, dd0, ip, sip;
+  Double_t xd, yd, zd, d0, dd0, dz, ddz, sip;
 
   Int_t sign;
 
@@ -109,6 +111,7 @@ void TrackCountingBTagging::Process()
     const TLorentzVector &jetMomentum = jet->Momentum;
     jpx = jetMomentum.Px();
     jpy = jetMomentum.Py();
+    jpz = jetMomentum.Pz();
 
     // loop over all input tracks
     fItTrackInputArray->Reset();
@@ -121,17 +124,25 @@ void TrackCountingBTagging::Process()
       tpt = trkMomentum.Pt();
       xd = track->Xd;
       yd = track->Yd;
+      zd = track->Zd;
       d0 = TMath::Abs(track->D0);
-      dd0 = track->ErrorD0;
+      dd0 = TMath::Abs(track->ErrorD0);
+      dz = TMath::Abs(track->DZ);
+      ddz = TMath::Abs(track->ErrorDZ);
 
       if(tpt < fPtMin) continue;
       if(dr > fDeltaR) continue;
       if(d0 > fIPmax) continue;
 
-      sign = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
-
-      ip = sign*d0;
-      sip = ip / TMath::Abs(dd0);
+      if(fUse3D){
+        sign = (jpx*xd + jpy*yd + jpz*zd > 0.0) ? 1 : -1;
+        //add transvers and longitudinal significances in quadrature
+        sip = sign * TMath::Sqrt( TMath::Power(d0 / dd0, 2) + TMath::Power(dz / ddz, 2) );
+      }
+      else {
+        sign = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
+        sip = sign * d0 / TMath::Abs(dd0);
+      }
 
       if(sip > fSigMin) count++;
     }
