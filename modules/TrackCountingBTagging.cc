@@ -116,27 +116,29 @@ void TrackCountingBTagging::Process()
     // loop over all input tracks
     fItTrackInputArray->Reset();
     count = 0;
-    while((track = static_cast<Candidate*>(fItTrackInputArray->Next())))
+    // stop once we have enough tracks
+    while((track = static_cast<Candidate*>(fItTrackInputArray->Next())) and count < fNtracks)
     {
       const TLorentzVector &trkMomentum = track->Momentum;
-      
-      dr = jetMomentum.DeltaR(trkMomentum);
       tpt = trkMomentum.Pt();
+      if(tpt < fPtMin) continue;
+      
+      d0 = TMath::Abs(track->D0);
+      if(d0 > fIPmax) continue;
+
+      dr = jetMomentum.DeltaR(trkMomentum);
+      if(dr > fDeltaR) continue;
+
       xd = track->Xd;
       yd = track->Yd;
       zd = track->Zd;
-      d0 = TMath::Abs(track->D0);
       dd0 = TMath::Abs(track->ErrorD0);
       dz = TMath::Abs(track->DZ);
       ddz = TMath::Abs(track->ErrorDZ);
 
-      if(tpt < fPtMin) continue;
-      if(dr > fDeltaR) continue;
-      if(d0 > fIPmax) continue;
-
       if(fUse3D){
         sign = (jpx*xd + jpy*yd + jpz*zd > 0.0) ? 1 : -1;
-        //add transvers and longitudinal significances in quadrature
+        //add transverse and longitudinal significances in quadrature
         sip = sign * TMath::Sqrt( TMath::Power(d0 / dd0, 2) + TMath::Power(dz / ddz, 2) );
       }
       else {
