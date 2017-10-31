@@ -60,6 +60,8 @@ TrackSmearing::~TrackSmearing()
 
 void TrackSmearing::Init()
 {
+  fBz = GetDouble("Bz", 0.0);
+
   // read resolution formula
 
   // !!! IF WE WANT TO KEEP ROOT INPUT !!!
@@ -157,6 +159,10 @@ void TrackSmearing::Process()
   Candidate *candidate, *mother;
   Double_t pt, eta, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
   Double_t x, y, z, t, px, py, pz, theta;
+  Double_t q, r;
+  Double_t x_c, y_c, r_c, phi_0;
+  Double_t rcu, rc2, xd, yd, zd;
+  const Double_t c_light = 2.99792458E8;
   TProfile2D *d0ErrorHist = NULL,
              *dzErrorHist = NULL,
              *pErrorHist = NULL,
@@ -348,9 +354,39 @@ void TrackSmearing::Process()
     x = candidate->InitialPosition.X ();
     y = candidate->InitialPosition.Y ();
     candidate->InitialPosition.SetZ (z + ((pz * (px * (x - beamSpotPosition.X ()) + py * (y - beamSpotPosition.Y ())) + pt * pt * (dz - z)) / (pt * pt)));
-  
+    z = candidate->InitialPosition.Z ();
+
     candidate->InitialPosition.SetT(t);
-    
+
+    // update closest approach
+    x *= 1.0E-3;
+    y *= 1.0E-3;
+    z *= 1.0E-3;
+
+    q = candidate->Charge;
+
+    r = pt / (q * fBz) * 1.0E9/c_light;        // in [m]
+    phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
+
+    // 2. helix axis coordinates
+    x_c = x + r*TMath::Sin(phi_0);
+    y_c = y - r*TMath::Cos(phi_0);
+    r_c = TMath::Hypot(x_c, y_c);
+
+    rcu = TMath::Abs(r);
+    rc2 = r_c*r_c;
+
+    // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
+    xd = x_c*x_c*x_c - x_c*rcu*r_c + x_c*y_c*y_c;
+    xd = (rc2 > 0.0) ? xd / rc2 : -999;
+    yd = y_c*(-rcu*r_c + rc2);
+    yd = (rc2 > 0.0) ? yd / rc2 : -999;
+    zd = z + (TMath::Sqrt(xd*xd + yd*yd) - TMath::Sqrt(x*x + y*y))*pz/pt;
+
+    candidate->Xd = xd*1.0E3;
+    candidate->Yd = yd*1.0E3;
+    candidate->Zd = zd*1.0E3;
+
     if (fApplyToPileUp || !candidate->IsPU)
     {
        candidate->ErrorD0 = d0Error;

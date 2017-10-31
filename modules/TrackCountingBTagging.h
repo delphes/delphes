@@ -53,6 +53,7 @@ private:
   Double_t fIPmax;
   Double_t fSigMin;
   Int_t    fNtracks;
+  Bool_t   fUse3D;
 
   TIterator *fItTrackInputArray; //!
   TIterator *fItJetInputArray; //!

@@ -32,6 +32,8 @@ private:
 
   Double_t ptError (const Double_t, const Double_t, const Double_t, const Double_t);
 
+  Double_t fBz;
+
   DelphesFormula *fD0Formula; //!
   std::string fD0ResolutionFile;
   std::string fD0ResolutionHist;

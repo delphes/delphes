@@ -71,6 +71,8 @@ void TrackCountingBTagging::Init()
   fSigMin = GetDouble("SigMin", 6.5);
   fNtracks = GetInt("Ntracks", 3);
 
+  fUse3D = GetBool("Use3D", false);
+
   // import input array(s)
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"));
@@ -94,9 +96,9 @@ void TrackCountingBTagging::Process()
 {
   Candidate *jet, *track;
 
-  Double_t jpx, jpy;
+  Double_t jpx, jpy, jpz;
   Double_t dr, tpt;
-  Double_t xd, yd, d0, dd0, ip, sip;
+  Double_t xd, yd, zd, d0, dd0, dz, ddz, sip;
 
   Int_t sign;
 
@@ -109,29 +111,40 @@ void TrackCountingBTagging::Process()
     const TLorentzVector &jetMomentum = jet->Momentum;
     jpx = jetMomentum.Px();
     jpy = jetMomentum.Py();
+    jpz = jetMomentum.Pz();
 
     // loop over all input tracks
     fItTrackInputArray->Reset();
     count = 0;
-    while((track = static_cast<Candidate*>(fItTrackInputArray->Next())))
+    // stop once we have enough tracks
+    while((track = static_cast<Candidate*>(fItTrackInputArray->Next())) and count < fNtracks)
     {
       const TLorentzVector &trkMomentum = track->Momentum;
-      
-      dr = jetMomentum.DeltaR(trkMomentum);
       tpt = trkMomentum.Pt();
-      xd = track->Xd;
-      yd = track->Yd;
-      d0 = TMath::Hypot(xd, yd);
-      dd0 = track->ErrorD0;
-
       if(tpt < fPtMin) continue;
-      if(dr > fDeltaR) continue;
+      
+      d0 = TMath::Abs(track->D0);
       if(d0 > fIPmax) continue;
 
-      sign = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
+      dr = jetMomentum.DeltaR(trkMomentum);
+      if(dr > fDeltaR) continue;
 
-      ip = sign*d0;
-      sip = ip / TMath::Abs(dd0);
+      xd = track->Xd;
+      yd = track->Yd;
+      zd = track->Zd;
+      dd0 = TMath::Abs(track->ErrorD0);
+      dz = TMath::Abs(track->DZ);
+      ddz = TMath::Abs(track->ErrorDZ);
+
+      if(fUse3D){
+        sign = (jpx*xd + jpy*yd + jpz*zd > 0.0) ? 1 : -1;
+        //add transverse and longitudinal significances in quadrature
+        sip = sign * TMath::Sqrt( TMath::Power(d0 / dd0, 2) + TMath::Power(dz / ddz, 2) );
+      }
+      else {
+        sign = (jpx*xd + jpy*yd > 0.0) ? 1 : -1;
+        sip = sign * d0 / TMath::Abs(dd0);
+      }
 
       if(sip > fSigMin) count++;
     }
