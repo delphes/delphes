@@ -2273,11 +2273,9 @@ dist:
 	@mkdir -p $(@D)
 	@echo ">> Generating $@"
 	@rootcint -f $@ -c -Iexternal $<
-	@echo "#define private public" > $@.arch
-	@echo "#define protected public" >> $@.arch
 	@mv $@ $@.base
-	@cat $@.arch $< $@.base > $@
-	@rm $@.arch $@.base
+	@cat $< $@.base > $@
+	@rm $@.base
 
 $(DELPHES_DICT_PCM): %Dict$(PcmSuf):
 	@echo ">> Copying $@"
