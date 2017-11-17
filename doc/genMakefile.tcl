@@ -412,8 +412,7 @@ dist:
 	@mkdir -p $(@D)
 	@echo ">> Generating $@"
 	@rootcint -f $@ -c -Iexternal $<
-	@echo "#define private public" > $@.arch
-	@echo "#define protected public" >> $@.arch
+	@echo " " > $@.arch
 	@mv $@ $@.base
 	@cat $@.arch $< $@.base > $@
 	@rm $@.arch $@.base
