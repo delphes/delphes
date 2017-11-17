@@ -4,8 +4,13 @@ import sys
 
 import ROOT
 
+try:
+  input = raw_input
+except:
+  pass
+
 if len(sys.argv) < 2:
-  print " Usage: Example1.py input_file"
+  print(" Usage: Example1.py input_file")
   sys.exit(1)
 
 ROOT.gSystem.Load("libDelphes")
@@ -48,7 +53,7 @@ for entry in range(0, numberOfEntries):
     histJetPT.Fill(jet.PT)
 
     # Print jet transverse momentum
-    print jet.PT
+    print(jet.PT)
 
   # If event contains at least 2 electrons
   if branchElectron.GetEntries() > 1:
@@ -63,4 +68,4 @@ for entry in range(0, numberOfEntries):
 histJetPT.Draw()
 histMass.Draw()
 
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")
