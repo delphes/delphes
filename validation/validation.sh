@@ -83,12 +83,12 @@ function runJetsGun {
 }
 
 
-runParticleGun pion 211
-runParticleGun electron 11
-runParticleGun muon 13
-runParticleGun photon 22
-runParticleGun neutron 2112
-runParticleGun taujet 15
+runParticleGun pion 211 &
+runParticleGun electron 11 &
+runParticleGun muon 13 &
+runParticleGun photon 22 &
+runParticleGun neutron 2112 &
+runParticleGun taujet 15 &
 runJetsGun jet 1 &
 runJetsGun bjet 5 &
 runJetsGun cjet 4 &
