@@ -1,0 +1,27 @@
+24-02-2015  Marcel Vos <marcel.vos@ific.uv.es>
+
+	*VERSION 2.0.0
+	Releasing first production version
+	
+21-02-2015  Marcel Vos <marcel.vos@ific.uv.es>
+	
+	*VERSION 2.0-devel
+
+	*ValenciaPlugin.cc 
+	changed diB filled after in NNH record after discussion with FJ team
+	released 2.0-devel
+	
+27-01-2015  Marcel Vos <marcel.vos@ific.uv.es>
+	
+	*VERSION creating version 2.0-devel 
+	ValenciaPlugin.cc
+	The algorithm now accepts three parameters:
+	R, the usual radius parameter
+	beta, the exponent of the energy in dij
+	gamma, the exponent of sin(theta) in diB
+	
+13-03-2014  Marcel Vos <marcel.vos@ific.uv.es>
+
+	*VERSION first development version 1.0-devel
+	ValenciaPlugin.cc
+	Implements the algorithm described in arXiv:1404.4294
