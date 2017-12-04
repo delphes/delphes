@@ -378,7 +378,8 @@ void FastJetFinder::Process()
 
   if(fExclusiveClustering)
     {
-      outputList = sorted_by_pt(sequence->exclusive_jets( fNJets ));
+      //not neccessary to sort
+      outputList = sequence->exclusive_jets( fNJets );
     }
   else
     {
