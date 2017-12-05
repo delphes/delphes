@@ -69,6 +69,10 @@ private:
 
   TObjArray *fTrackOutputArray; //!
 
+
+  const TObjArray *fDenseChargedInputArray;
+  TIterator *fItDenseChargedInputArray;
+
   ClassDef(DenseTrackFilter, 1)
 };
 
