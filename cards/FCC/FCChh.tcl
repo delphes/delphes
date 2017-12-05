@@ -3,7 +3,7 @@
 #
 #  Main authors:  Michele Selvaggi (CERN)
 #
-#  Released on: Apr. 6th, 2017
+#  Released on: Dec. 1st, 2017
 #
 #  Configuration: FCC-hh baseline detector
 #
@@ -12,7 +12,7 @@
 #######################################
 
 set ExecutionPath {
-
+  
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -23,6 +23,9 @@ set ExecutionPath {
   ElectronMomentumSmearing
   MuonMomentumSmearing
 
+  DenseProp
+  DenseMergeTracks
+  TrackMergerProp  
   TrackMerger
 
   ECal
@@ -66,13 +69,13 @@ set ExecutionPath {
   TreeWriter
 }
 
+#
 #################################
 # Propagate particles in cylinder
 #################################
 
 module ParticlePropagator ParticlePropagator {
   set InputArray Delphes/stableParticles
-
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
   set ElectronOutputArray electrons
@@ -186,17 +189,90 @@ module MomentumSmearing MuonMomentumSmearing {
   source muonMomentumResolutionVsP.tcl 
 }
 
+
 ##############
 # Track merger
 ##############
 
-module Merger TrackMerger {
+module Merger TrackMergerProp {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronMomentumSmearing/electrons
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
+
+
+#################################
+# Dense Track propagation
+#################################
+
+module ParticlePropagator DenseProp {
+  set InputArray Delphes/stableParticles
+
+  set OutputArray stableParticles
+  set NeutralOutputArray neutralParticles
+  set ChargedHadronOutputArray chargedHadrons
+  set ElectronOutputArray electrons
+  set MuonOutputArray muons
+
+  # radius of the magnetic field coverage, in m
+  set Radius 0.45
+  set RadiusMax 1.5
+  # half-length of the magnetic field coverage, in m
+  set HalfLength 0.8
+  set HalfLengthMax 5
+
+  # magnetic field
+  set Bz 4.0
+}
+
+####################
+# Dense Track merger
+###################
+
+module Merger DenseMergeTracks {
+# add InputArray InputArray
+  add InputArray DenseProp/chargedHadrons
+  add InputArray DenseProp/electrons
+  add InputArray DenseProp/muons
+  set OutputArray tracks
+}
+
+
+######################
+#   Dense Track Filter
+######################
+
+module DenseTrackFilter TrackMerger {
+  set TrackInputArray TrackMergerProp/tracks
+  set DenseChargedInputArray DenseMergeTracks/tracks
+
+  set TrackOutputArray tracks
+
+  set EtaPhiRes 0.001
+  set EtaMax 6.0
+
+  set pi [expr {acos(-1)}]
+
+  set nbins_phi [expr {$pi/$EtaPhiRes} ]
+  set nbins_phi [expr {int($nbins_phi)} ]
+
+  set PhiBins {}
+  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
+    add PhiBins [expr {$i * $pi/$nbins_phi}]
+  }
+
+  set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
+  set nbins_eta [expr {int($nbins_eta)} ]
+
+  for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
+    set eta [expr {$i * $EtaPhiRes}]
+    add EtaPhiBins $eta $PhiBins
+  }
+}
+
+
 
 #############
 #   ECAL
@@ -523,6 +599,24 @@ module FastJetFinder FastJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.4
 
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeTrimming 1
+  set RTrim 0.2
+  set PtFracTrim 0.05
+
+  set ComputePruning 1
+  set ZcutPrun 0.1
+  set RcutPrun 0.5
+  set RPrun 0.8
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 0.8
+
   set JetPTMin 30.0
 }
 
@@ -679,6 +773,7 @@ module Isolation MuonIsolation {
 }
 
 
+
 ###########
 # b-tagging
 ###########
@@ -702,8 +797,8 @@ module BTagging BTagging {
   add EfficiencyFormula {4} {
 
   (pt <= 10.0)                       * (0.00) +
-  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500)      * (0.04) + \
-  (abs(eta) < 2.5)                   * (pt > 500.0 && pt < 15000.0) * (0.04)*(1.0 - pt/15000.) + \
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500)      * (0.05) + \
+  (abs(eta) < 2.5)                   * (pt > 500.0 && pt < 15000.0) * (0.05)*(1.0 - pt/15000.) + \
   (abs(eta) < 2.5)                   * (pt > 15000.0)               * (0.000) + \
   (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500)      * (0.03) + \
   (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0 && pt < 15000.0) * (0.03)*(1.0 - pt/15000.) + \
