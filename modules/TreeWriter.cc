@@ -680,6 +680,11 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->NSubJetsPruned = candidate->NSubJetsPruned;
     entry->NSubJetsSoftDropped = candidate->NSubJetsSoftDropped;
 
+    entry->SoftDroppedJet     = candidate->SoftDroppedJet ;
+    entry->SoftDroppedSubJet1 = candidate->SoftDroppedSubJet1 ;
+    entry->SoftDroppedSubJet2 = candidate->SoftDroppedSubJet2;
+
+
     for(i = 0; i < 5; i++)
     {
       entry->FracPt[i] = candidate -> FracPt[i];

@@ -493,10 +493,14 @@ void FastJetFinder::Process()
       subjets    = sorted_by_pt(subjets);
       candidate->NSubJetsSoftDropped = softdrop_jet.pieces().size();
 
+      candidate->SoftDroppedJet = candidate->SoftDroppedP4[0];
+
       for (size_t i = 0; i < subjets.size()  and i < 4; i++)
       {
 	    if(subjets.at(i).pt() < 0) continue ; 
   	    candidate->SoftDroppedP4[i+1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+            if(i==0) candidate->SoftDroppedSubJet1 = candidate->SoftDroppedP4[i+1];
+            if(i==1) candidate->SoftDroppedSubJet2 = candidate->SoftDroppedP4[i+1];
       }
     }
   
