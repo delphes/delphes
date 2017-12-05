@@ -1,4 +1,13 @@
 #######################################
+# CLICdet model
+# based on CLICdp-Note-2017-001
+# Ulrike Schnoor ulrike.schnoor@cern.ch
+# 
+# Jet finding with Valencia algorithm:
+# use exclusive clustering with njets
+# according to final state
+# 
+#######################################
 # Order of execution of various modules
 #######################################
 
@@ -37,8 +46,32 @@ set ExecutionPath {
     NeutrinoFilter
     GenJetFinder
     FastJetFinderKt
-    FastJetFinderVLC_05_2
-    FastJetFinderVLC_05_3
+    FastJetFinderVLC_R05_N2
+    FastJetFinderVLC_R05_N3
+    FastJetFinderVLC_R05_N4
+    FastJetFinderVLC_R05_N5
+    FastJetFinderVLC_R05_N6
+    FastJetFinderVLC_R07_N2
+    FastJetFinderVLC_R07_N3
+    FastJetFinderVLC_R07_N4
+    FastJetFinderVLC_R07_N5
+    FastJetFinderVLC_R07_N6
+    FastJetFinderVLC_R10_N2
+    FastJetFinderVLC_R10_N3
+    FastJetFinderVLC_R10_N4
+    FastJetFinderVLC_R10_N5
+    FastJetFinderVLC_R10_N6
+    FastJetFinderVLC_R12_N2
+    FastJetFinderVLC_R12_N3
+    FastJetFinderVLC_R12_N4
+    FastJetFinderVLC_R12_N5
+    FastJetFinderVLC_R12_N6
+    FastJetFinderVLC_R15_N2
+    FastJetFinderVLC_R15_N3
+    FastJetFinderVLC_R15_N4
+    FastJetFinderVLC_R15_N5
+    FastJetFinderVLC_R15_N6
+
 
 
     MissingET
@@ -555,12 +588,12 @@ module FastJetFinder FastJetFinderKt {
 ############
 # Jet finder VLC
 ############
-
-module FastJetFinder FastJetFinderVLC_05_2 {
+#R05 N2
+module FastJetFinder FastJetFinderVLC_R05_N2 {
     #  set InputArray Calorimeter/towers
     set InputArray EFlowMerger/eflow
 
-    set OutputArray VLCjets052
+    set OutputArray VLCjetsR05N2
 
     # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, 7 anti-kt with winner-take-all axis (for N-subjettiness), 8 N-jettiness, 9 Valencia
     set NJets 2
@@ -572,24 +605,298 @@ module FastJetFinder FastJetFinderVLC_05_2 {
 
     set JetPTMin 20.0
 }
-
-
-module FastJetFinder FastJetFinderVLC_05_3 {
-    #  set InputArray Calorimeter/towers
+#R05 N3
+module FastJetFinder FastJetFinderVLC_R05_N3 {
     set InputArray EFlowMerger/eflow
-
-    set OutputArray VLCjets053
-
+    set OutputArray VLCjetsR05N3
     set NJets 3
     set ExclusiveClustering true
     set JetAlgorithm 9
     set ParameterR 0.5
     set Beta 1.0
     set Gamma 1.0
-
+    set JetPTMin 20.0
+}
+#R05 N4
+module FastJetFinder FastJetFinderVLC_R05_N4 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR05N4
+    set NJets 4
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R05 N5
+module FastJetFinder FastJetFinderVLC_R05_N5 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR05N5
+    set NJets 5
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R05 N6
+module FastJetFinder FastJetFinderVLC_R05_N6 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR05N6
+    set NJets 6
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R07 N2
+module FastJetFinder FastJetFinderVLC_R07_N2 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR07N2
+    set NJets 2
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.7
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R07 N3
+module FastJetFinder FastJetFinderVLC_R07_N3 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR07N3
+    set NJets 3
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.7
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R07 N4
+module FastJetFinder FastJetFinderVLC_R07_N4 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR07N4
+    set NJets 4
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.7
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R07 N5
+module FastJetFinder FastJetFinderVLC_R07_N5 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR07N5
+    set NJets 5
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.7
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R07 N6
+module FastJetFinder FastJetFinderVLC_R07_N6 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR07N6
+    set NJets 6
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 0.7
+    set Beta 1.0
+    set Gamma 1.0
     set JetPTMin 20.0
 }
 
+#R10N2
+module FastJetFinder FastJetFinderVLC_R10_N2 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR10N2
+    set NJets 2
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.0
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R10 N3
+module FastJetFinder FastJetFinderVLC_R10_N3 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR10N3
+    set NJets 3
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.0
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R10 N4
+module FastJetFinder FastJetFinderVLC_R10_N4 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR10N4
+    set NJets 4
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.0
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R10 N5
+module FastJetFinder FastJetFinderVLC_R10_N5 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR10N5
+    set NJets 5
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.0
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R10 N6
+module FastJetFinder FastJetFinderVLC_R10_N6 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR10N6
+    set NJets 6
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.0
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+
+#R12 N2
+module FastJetFinder FastJetFinderVLC_R12_N2 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR12N2
+    set NJets 2
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.2
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R12 N3
+module FastJetFinder FastJetFinderVLC_R12_N3 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR12N3
+    set NJets 3
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.2
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R12 N4
+module FastJetFinder FastJetFinderVLC_R12_N4 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR12N4
+    set NJets 4
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.2
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R12 N5
+module FastJetFinder FastJetFinderVLC_R12_N5 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR12N5
+    set NJets 5
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.2
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R12 N6
+module FastJetFinder FastJetFinderVLC_R12_N6 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR12N6
+    set NJets 6
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.2
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+
+
+#R15 N2
+module FastJetFinder FastJetFinderVLC_R15_N2 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR15N2
+    set NJets 2
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R15 N3
+module FastJetFinder FastJetFinderVLC_R15_N3 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR15N3
+    set NJets 3
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R15 N4
+module FastJetFinder FastJetFinderVLC_R15_N4 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR15N4
+    set NJets 4
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R15 N5
+module FastJetFinder FastJetFinderVLC_R15_N5 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR15N5
+    set NJets 5
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
+#R15 N6
+module FastJetFinder FastJetFinderVLC_R15_N6 {
+    set InputArray EFlowMerger/eflow
+    set OutputArray VLCjetsR15N6
+    set NJets 6
+    set ExclusiveClustering true
+    set JetAlgorithm 9
+    set ParameterR 1.5
+    set Beta 1.0
+    set Gamma 1.0
+    set JetPTMin 20.0
+}
 ##################
 # Jet Energy Scale
 ##################
@@ -799,9 +1106,37 @@ module TreeWriter TreeWriter {
     add Branch GenJetFinder/jets GenJet Jet
 
     add Branch FastJetFinderKt/KTjets KTjet Jet
-    add Branch FastJetFinderVLC_05_2/VLCjets052 VLCjet052 Jet
-    add Branch FastJetFinderVLC_05_3/VLCjets053 VLCjet053 Jet
+    add Branch FastJetFinderVLC_R05_N2/VLCjetsR05N2 VLCjetR05N2 Jet
+    add Branch FastJetFinderVLC_R05_N3/VLCjetsR05N3 VLCjetR05N3 Jet
+    add Branch FastJetFinderVLC_R05_N4/VLCjetsR05N4 VLCjetR05N4 Jet
+    add Branch FastJetFinderVLC_R05_N5/VLCjetsR05N5 VLCjetR05N5 Jet
+    add Branch FastJetFinderVLC_R05_N6/VLCjetsR05N6 VLCjetR05N6 Jet
 
+    add Branch FastJetFinderVLC_R07_N2/VLCjetsR07N2 VLCjetR07N2 Jet
+    add Branch FastJetFinderVLC_R07_N3/VLCjetsR07N3 VLCjetR07N3 Jet
+    add Branch FastJetFinderVLC_R07_N4/VLCjetsR07N4 VLCjetR07N4 Jet
+    add Branch FastJetFinderVLC_R07_N5/VLCjetsR07N5 VLCjetR07N5 Jet
+    add Branch FastJetFinderVLC_R07_N6/VLCjetsR07N6 VLCjetR07N6 Jet
+
+    add Branch FastJetFinderVLC_R10_N2/VLCjetsR10N2 VLCjetR10N2 Jet
+    add Branch FastJetFinderVLC_R10_N3/VLCjetsR10N3 VLCjetR10N3 Jet
+    add Branch FastJetFinderVLC_R10_N4/VLCjetsR10N4 VLCjetR10N4 Jet
+    add Branch FastJetFinderVLC_R10_N5/VLCjetsR10N5 VLCjetR10N5 Jet
+    add Branch FastJetFinderVLC_R10_N6/VLCjetsR10N6 VLCjetR10N6 Jet
+
+    add Branch FastJetFinderVLC_R12_N2/VLCjetsR12N2 VLCjetR12N2 Jet
+    add Branch FastJetFinderVLC_R12_N3/VLCjetsR12N3 VLCjetR12N3 Jet
+    add Branch FastJetFinderVLC_R12_N4/VLCjetsR12N4 VLCjetR12N4 Jet
+    add Branch FastJetFinderVLC_R12_N5/VLCjetsR12N5 VLCjetR12N5 Jet
+    add Branch FastJetFinderVLC_R12_N6/VLCjetsR12N6 VLCjetR12N6 Jet
+
+    add Branch FastJetFinderVLC_R15_N2/VLCjetsR15N2 VLCjetR15N2 Jet
+    add Branch FastJetFinderVLC_R15_N3/VLCjetsR15N3 VLCjetR15N3 Jet
+    add Branch FastJetFinderVLC_R15_N4/VLCjetsR15N4 VLCjetR15N4 Jet
+    add Branch FastJetFinderVLC_R15_N5/VLCjetsR15N5 VLCjetR15N5 Jet
+    add Branch FastJetFinderVLC_R15_N6/VLCjetsR15N6 VLCjetR15N6 Jet
+
+    
     add Branch GenMissingET/momentum GenMissingET MissingET
 
     add Branch TrackMerger/tracks Track Track
