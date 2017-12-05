@@ -610,12 +610,12 @@ module FastJetFinder FastJetFinder {
   set ComputePruning 1
   set ZcutPrun 0.1
   set RcutPrun 0.5
-  set RPrun 0.8
+  set RPrun 0.4
 
   set ComputeSoftDrop 1
   set BetaSoftDrop 0.0
   set SymmetryCutSoftDrop 0.1
-  set R0SoftDrop 0.8
+  set R0SoftDrop 0.4
 
   set JetPTMin 30.0
 }
