@@ -156,6 +156,10 @@ Candidate::Candidate() :
   NSubJetsTrimmed(0),
   NSubJetsPruned(0),
   NSubJetsSoftDropped(0),
+  ExclYmerge23(0),
+  ExclYmerge34(0),
+  ExclYmerge45(0),
+  ExclYmerge56(0),
   fFactory(0),
   fArray(0)
 {
