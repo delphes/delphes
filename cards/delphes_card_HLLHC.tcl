@@ -1,11 +1,10 @@
 #
-# Official Delphes card prepared by FCC-hh collaboration
+# Beta card for HL-LHC and HE-LHC studies
 #
 #  Main authors:  Michele Selvaggi (CERN)
 #
-#  Released on: Apr. 6th, 2017
+#  Released on: Dec. 6th, 2017
 #
-#  Configuration: FCC-hh baseline detector
 #
 #######################################
 # Order of execution of various modules
