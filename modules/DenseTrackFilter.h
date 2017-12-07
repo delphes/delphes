@@ -52,7 +52,9 @@ private:
 
   typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
 
-  Candidate *fTower;
+  Candidate *fBestTrack;
+
+  Int_t fTowerTrackHits;
 
   Double_t fEtaPhiRes;
 
@@ -72,7 +74,8 @@ private:
 
   const TObjArray *fDenseChargedInputArray;
   TIterator *fItDenseChargedInputArray;
-
+  
+  void FillTrack();
   ClassDef(DenseTrackFilter, 1)
 };
 
