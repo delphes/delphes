@@ -262,7 +262,7 @@ module DenseTrackFilter TrackMerger {
 
   set TrackOutputArray tracks
 
-  set EtaPhiRes 0.01
+  set EtaPhiRes 0.001
   set EtaMax 6.0
 
   set pi [expr {acos(-1)}]
@@ -1156,6 +1156,7 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles Particle GenParticle
 
   add Branch GenMissingET/momentum GenMissingET MissingET
+  add Branch GenJetFinder02/jets GenJet Jet
 
   add Branch TrackMerger/tracks Track Track
   add Branch Calorimeter/towers Tower Tower
