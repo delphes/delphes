@@ -132,9 +132,9 @@ module Efficiency ElectronTrackingEfficiency {
           (abs(eta) <= 1.2) * (pt > 0.5 && pt <= 1.0) * (pt * 0.90) + \
           (abs(eta) <= 1.2) * (pt > 1.0) * (0.95) + \
           (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.5 && pt <= 1.0) * (pt*0.85) + \
-          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.90)/(-5.*log10(pt) + 90) + \
+          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.90)/(-0.033*log10(pt) + 1.033) + \
           (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.5 && pt <= 1.0) * (pt*0.80) + \
-          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.85)/(-5.*log10(pt) + 90) + \
+          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.85)/(-0.033*log10(pt) + 1.033) + \
           (abs(eta) > 4.0) * (0.00)
   }
 
