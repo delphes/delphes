@@ -842,8 +842,8 @@ module Merger GenMissingET {
 ############
 
 module FastJetFinder FastJetFinder {
-#  set InputArray Calorimeter/towers
-  set InputArray EFlowMerger/eflow
+  set InputArray Calorimeter/towers
+#  set InputArray EFlowMerger/eflow
 
   set OutputArray jets
 
@@ -884,7 +884,7 @@ module FastJetFinder FatJetFinder {
   set SymmetryCutSoftDrop 0.1
   set R0SoftDrop 0.8
 
-  set JetPTMin 30.0
+  set JetPTMin 200.0
 }
 
 
