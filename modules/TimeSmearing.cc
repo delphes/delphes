@@ -107,7 +107,8 @@ void TimeSmearing::Process()
     // apply smearing formula
     tf_smeared = gRandom->Gaus(tf, fTimeResolution);
     ti = ti + tf_smeared - tf;
-
+    tf = tf_smeared;
+    
     mother = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
     candidate->InitialPosition.SetT(ti*1.0E3*c_light);
