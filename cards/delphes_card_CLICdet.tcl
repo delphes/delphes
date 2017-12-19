@@ -29,7 +29,7 @@ set ExecutionPath {
 
     Calorimeter
     EFlowMerger
-    EFlowFilter
+
     
     PhotonEfficiency
     PhotonIsolation
@@ -43,6 +43,8 @@ set ExecutionPath {
     MuonEfficiency
     MuonIsolation
 
+    EFlowFilter
+    
     NeutrinoFilter
     GenJetFinder
     FastJetFinderKt
@@ -87,7 +89,7 @@ set ExecutionPath {
 
     ScalarHT
 
-    UniqueObjectFinder
+
 
     TreeWriter
 }
@@ -483,19 +485,112 @@ module Merger EFlowMerger {
     set OutputArray eflow
 }
 
-######################
-# EFlowFilter
-######################
+##here
 
-module PdgCodeFilter EFlowFilter {
-    set InputArray EFlowMerger/eflow
-    set OutputArray eflow
-    
-    add PdgCode {11}
-    add PdgCode {-11}
-    add PdgCode {13}
-    add PdgCode {-13}
+###################
+# Photon efficiency
+###################
+
+module Efficiency PhotonEfficiency {
+    set InputArray ECal/eflowPhotons
+    set OutputArray photons
+
+    # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+
+    # efficiency formula for photons
+    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
+	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
+	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
+	(abs(eta) > 2.5)                                   * (0.00)}
 }
+
+##################
+# Photon isolation
+##################
+
+module Isolation PhotonIsolation {
+    set CandidateInputArray PhotonEfficiency/photons
+    set IsolationInputArray EFlowMerger/eflow
+
+    set OutputArray photons
+
+    set DeltaRMax 0.5
+
+    set PTMin 0.5
+
+    set PTRatioMax 0.12
+}
+
+#####################
+# Electron efficiency
+#####################
+
+module Efficiency ElectronEfficiency {
+    set InputArray ElectronFilter/electrons
+    set OutputArray electrons
+
+    # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+
+    # efficiency formula for electrons
+    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
+	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
+	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
+	(abs(eta) > 2.5)                                   * (0.00)}
+}
+
+####################
+# Electron isolation
+####################
+
+module Isolation ElectronIsolation {
+    set CandidateInputArray ElectronEfficiency/electrons
+    set IsolationInputArray EFlowMerger/eflow
+
+    set OutputArray electrons
+
+    set DeltaRMax 0.5
+
+    set PTMin 0.5
+
+    set PTRatioMax 0.12
+}
+
+#################
+# Muon efficiency
+#################
+
+module Efficiency MuonEfficiency {
+    set InputArray MuonMomentumSmearing/muons
+    set OutputArray muons
+
+    # set EfficiencyFormula {efficiency as a function of eta and pt}
+
+    # efficiency formula for muons
+    set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
+	(abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
+	(abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+	(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
+	(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+	(abs(eta) > 2.4)                                                 * (0.00)}
+}
+
+################
+# Muon isolation
+################
+
+module Isolation MuonIsolation {
+    set CandidateInputArray MuonEfficiency/muons
+    set IsolationInputArray EFlowMerger/eflow
+
+    set OutputArray muons
+
+    set DeltaRMax 0.5
+
+    set PTMin 0.5
+
+    set PTRatioMax 0.25
+}
+
 
 
 ###################
@@ -518,6 +613,27 @@ module Merger ScalarHT {
     add InputArray EFlowMerger/eflow
     set EnergyOutputArray energy
 }
+######################
+# EFlowFilter (UniqueObjectFinder)
+######################
+module UniqueObjectFinder EFlowFilter {
+    add InputArray PhotonIsolation/photons photons
+    add InputArray ElectronIsolation/electrons electrons
+    add InputArray MuonIsolation/muons muons
+    add InputArray EFlowMerger/eflow eflow
+}
+
+
+#
+#module PdgCodeFilter EFlowFilter {
+#    set InputArray EFlowMerger/eflow
+#    set OutputArray eflow
+#    
+#    add PdgCode {11}
+#    add PdgCode {-11}
+#    add PdgCode {13}
+#    add PdgCode {-13}
+#}
 
 #################
 # Neutrino Filter
@@ -591,7 +707,7 @@ module FastJetFinder FastJetFinderKt {
 #R05 N2
 module FastJetFinder FastJetFinderVLC_R05_N2 {
     #  set InputArray Calorimeter/towers
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
 
     set OutputArray VLCjetsR05N2
 
@@ -607,7 +723,7 @@ module FastJetFinder FastJetFinderVLC_R05_N2 {
 }
 #R05 N3
 module FastJetFinder FastJetFinderVLC_R05_N3 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR05N3
     set NJets 3
     set ExclusiveClustering true
@@ -619,7 +735,7 @@ module FastJetFinder FastJetFinderVLC_R05_N3 {
 }
 #R05 N4
 module FastJetFinder FastJetFinderVLC_R05_N4 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR05N4
     set NJets 4
     set ExclusiveClustering true
@@ -631,7 +747,7 @@ module FastJetFinder FastJetFinderVLC_R05_N4 {
 }
 #R05 N5
 module FastJetFinder FastJetFinderVLC_R05_N5 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR05N5
     set NJets 5
     set ExclusiveClustering true
@@ -643,7 +759,7 @@ module FastJetFinder FastJetFinderVLC_R05_N5 {
 }
 #R05 N6
 module FastJetFinder FastJetFinderVLC_R05_N6 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR05N6
     set NJets 6
     set ExclusiveClustering true
@@ -655,7 +771,7 @@ module FastJetFinder FastJetFinderVLC_R05_N6 {
 }
 #R07 N2
 module FastJetFinder FastJetFinderVLC_R07_N2 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR07N2
     set NJets 2
     set ExclusiveClustering true
@@ -667,7 +783,7 @@ module FastJetFinder FastJetFinderVLC_R07_N2 {
 }
 #R07 N3
 module FastJetFinder FastJetFinderVLC_R07_N3 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR07N3
     set NJets 3
     set ExclusiveClustering true
@@ -679,7 +795,7 @@ module FastJetFinder FastJetFinderVLC_R07_N3 {
 }
 #R07 N4
 module FastJetFinder FastJetFinderVLC_R07_N4 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR07N4
     set NJets 4
     set ExclusiveClustering true
@@ -691,7 +807,7 @@ module FastJetFinder FastJetFinderVLC_R07_N4 {
 }
 #R07 N5
 module FastJetFinder FastJetFinderVLC_R07_N5 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR07N5
     set NJets 5
     set ExclusiveClustering true
@@ -703,7 +819,7 @@ module FastJetFinder FastJetFinderVLC_R07_N5 {
 }
 #R07 N6
 module FastJetFinder FastJetFinderVLC_R07_N6 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR07N6
     set NJets 6
     set ExclusiveClustering true
@@ -716,7 +832,7 @@ module FastJetFinder FastJetFinderVLC_R07_N6 {
 
 #R10N2
 module FastJetFinder FastJetFinderVLC_R10_N2 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR10N2
     set NJets 2
     set ExclusiveClustering true
@@ -728,7 +844,7 @@ module FastJetFinder FastJetFinderVLC_R10_N2 {
 }
 #R10 N3
 module FastJetFinder FastJetFinderVLC_R10_N3 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR10N3
     set NJets 3
     set ExclusiveClustering true
@@ -740,7 +856,7 @@ module FastJetFinder FastJetFinderVLC_R10_N3 {
 }
 #R10 N4
 module FastJetFinder FastJetFinderVLC_R10_N4 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR10N4
     set NJets 4
     set ExclusiveClustering true
@@ -752,7 +868,7 @@ module FastJetFinder FastJetFinderVLC_R10_N4 {
 }
 #R10 N5
 module FastJetFinder FastJetFinderVLC_R10_N5 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR10N5
     set NJets 5
     set ExclusiveClustering true
@@ -764,7 +880,7 @@ module FastJetFinder FastJetFinderVLC_R10_N5 {
 }
 #R10 N6
 module FastJetFinder FastJetFinderVLC_R10_N6 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR10N6
     set NJets 6
     set ExclusiveClustering true
@@ -777,7 +893,7 @@ module FastJetFinder FastJetFinderVLC_R10_N6 {
 
 #R12 N2
 module FastJetFinder FastJetFinderVLC_R12_N2 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR12N2
     set NJets 2
     set ExclusiveClustering true
@@ -789,7 +905,7 @@ module FastJetFinder FastJetFinderVLC_R12_N2 {
 }
 #R12 N3
 module FastJetFinder FastJetFinderVLC_R12_N3 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR12N3
     set NJets 3
     set ExclusiveClustering true
@@ -801,7 +917,7 @@ module FastJetFinder FastJetFinderVLC_R12_N3 {
 }
 #R12 N4
 module FastJetFinder FastJetFinderVLC_R12_N4 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR12N4
     set NJets 4
     set ExclusiveClustering true
@@ -813,7 +929,7 @@ module FastJetFinder FastJetFinderVLC_R12_N4 {
 }
 #R12 N5
 module FastJetFinder FastJetFinderVLC_R12_N5 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR12N5
     set NJets 5
     set ExclusiveClustering true
@@ -825,7 +941,7 @@ module FastJetFinder FastJetFinderVLC_R12_N5 {
 }
 #R12 N6
 module FastJetFinder FastJetFinderVLC_R12_N6 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR12N6
     set NJets 6
     set ExclusiveClustering true
@@ -839,7 +955,7 @@ module FastJetFinder FastJetFinderVLC_R12_N6 {
 
 #R15 N2
 module FastJetFinder FastJetFinderVLC_R15_N2 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR15N2
     set NJets 2
     set ExclusiveClustering true
@@ -851,7 +967,7 @@ module FastJetFinder FastJetFinderVLC_R15_N2 {
 }
 #R15 N3
 module FastJetFinder FastJetFinderVLC_R15_N3 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR15N3
     set NJets 3
     set ExclusiveClustering true
@@ -863,7 +979,7 @@ module FastJetFinder FastJetFinderVLC_R15_N3 {
 }
 #R15 N4
 module FastJetFinder FastJetFinderVLC_R15_N4 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR15N4
     set NJets 4
     set ExclusiveClustering true
@@ -875,7 +991,7 @@ module FastJetFinder FastJetFinderVLC_R15_N4 {
 }
 #R15 N5
 module FastJetFinder FastJetFinderVLC_R15_N5 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR15N5
     set NJets 5
     set ExclusiveClustering true
@@ -887,7 +1003,7 @@ module FastJetFinder FastJetFinderVLC_R15_N5 {
 }
 #R15 N6
 module FastJetFinder FastJetFinderVLC_R15_N6 {
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
     set OutputArray VLCjetsR15N6
     set NJets 6
     set ExclusiveClustering true
@@ -902,7 +1018,7 @@ module FastJetFinder FastJetFinderVLC_R15_N6 {
 ##################
 
 module EnergyScale JetEnergyScale {
-    set InputArray FastJetFinderKt/KTjets
+    set InputArray FastJetFinderVLC_R10_N4/VLCjetsR10N4
     set OutputArray jets
 
     # scale formula for jets
@@ -925,110 +1041,6 @@ module JetFlavorAssociation JetFlavorAssociation {
     set PartonPTMin 1.0
     set PartonEtaMax 2.5
 
-}
-
-###################
-# Photon efficiency
-###################
-
-module Efficiency PhotonEfficiency {
-    set InputArray ECal/eflowPhotons
-    set OutputArray photons
-
-    # set EfficiencyFormula {efficiency formula as a function of eta and pt}
-
-    # efficiency formula for photons
-    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 2.5)                                   * (0.00)}
-}
-
-##################
-# Photon isolation
-##################
-
-module Isolation PhotonIsolation {
-    set CandidateInputArray PhotonEfficiency/photons
-    set IsolationInputArray EFlowFilter/eflow
-
-    set OutputArray photons
-
-    set DeltaRMax 0.5
-
-    set PTMin 0.5
-
-    set PTRatioMax 0.12
-}
-
-#####################
-# Electron efficiency
-#####################
-
-module Efficiency ElectronEfficiency {
-    set InputArray ElectronFilter/electrons
-    set OutputArray electrons
-
-    # set EfficiencyFormula {efficiency formula as a function of eta and pt}
-
-    # efficiency formula for electrons
-    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 2.5)                                   * (0.00)}
-}
-
-####################
-# Electron isolation
-####################
-
-module Isolation ElectronIsolation {
-    set CandidateInputArray ElectronEfficiency/electrons
-    set IsolationInputArray EFlowFilter/eflow
-
-    set OutputArray electrons
-
-    set DeltaRMax 0.5
-
-    set PTMin 0.5
-
-    set PTRatioMax 0.12
-}
-
-#################
-# Muon efficiency
-#################
-
-module Efficiency MuonEfficiency {
-    set InputArray MuonMomentumSmearing/muons
-    set OutputArray muons
-
-    # set EfficiencyFormula {efficiency as a function of eta and pt}
-
-    # efficiency formula for muons
-    set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
-	(abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-	(abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-	(abs(eta) > 2.4)                                                 * (0.00)}
-}
-
-################
-# Muon isolation
-################
-
-module Isolation MuonIsolation {
-    set CandidateInputArray MuonEfficiency/muons
-    set IsolationInputArray EFlowFilter/eflow
-
-    set OutputArray muons
-
-    set DeltaRMax 0.5
-
-    set PTMin 0.5
-
-    set PTRatioMax 0.25
 }
 
 
@@ -1085,15 +1097,16 @@ module TauTagging TauTagging {
 # Find uniquely identified photons/electrons/tau/jets
 #####################################################
 
-module UniqueObjectFinder UniqueObjectFinder {
-    # earlier arrays take precedence over later ones
-    # add InputArray InputArray OutputArray
-    add InputArray PhotonIsolation/photons photons
-    add InputArray ElectronIsolation/electrons electrons
-    add InputArray MuonIsolation/muons muons
-    add InputArray JetEnergyScale/jets jets
-}
-
+#module UniqueObjectFinder UniqueObjectFinder {
+#    # earlier arrays take precedence over later ones
+#    # add InputArray InputArray OutputArray
+#    add InputArray PhotonIsolation/photons photons
+#    add InputArray ElectronIsolation/electrons electrons
+#    add InputArray MuonIsolation/muons muons
+#    add InputArray JetEnergyScale/jets jets
+####not necessary any more, since these objects have already been removed if necessary??
+#}
+#
 
 ##################
 # ROOT tree writer
@@ -1146,10 +1159,21 @@ module TreeWriter TreeWriter {
     add Branch ECal/eflowPhotons EFlowPhoton Tower
     add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
     
-    add Branch UniqueObjectFinder/photons Photon Photon
-    add Branch UniqueObjectFinder/electrons Electron Electron
-    add Branch UniqueObjectFinder/muons Muon Muon
-    add Branch UniqueObjectFinder/jets Jet Jet
+#    add Branch UniqueObjectFinder/photons Photon Photon
+#    add Branch UniqueObjectFinder/electrons Electron Electron
+#    add Branch UniqueObjectFinder/muons Muon Muon
+#    add Branch UniqueObjectFinder/jets Jet Jet
+#    
+
+#    add Branch PhotonIsolation/photons Photon Photon
+#    add Branch ElectronIsolation/electrons Electron Electron
+#    add Branch MuonIsolation/muons Muon Muon
+
+    add Branch EFlowFilter/photons Photon Photon
+    add Branch EFlowFilter/electrons Electron Electron
+    add Branch EFlowFilter/muons Muon Muon
+    
+        
     
     add Branch MissingET/momentum MissingET MissingET
     add Branch ScalarHT/energy ScalarHT ScalarHT
