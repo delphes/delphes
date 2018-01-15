@@ -82,7 +82,6 @@ set ExecutionPath {
     JetEnergyScale
 
     JetFlavorAssociation
-
     BTagging
     
     TauTagging
@@ -122,14 +121,16 @@ module ParticlePropagator ParticlePropagator {
 module Efficiency ChargedHadronTrackingEfficiency {
     set InputArray ParticlePropagator/chargedHadrons
     set OutputArray chargedHadrons
+    # Current full simulation with CLICdet provides for pions:
 
-    # FIXME currently uses tracking efficiency from muon simulation
     set EfficiencyFormula {
- 	(abs(eta) > 2.66)                                               * (0.000) +
-	(abs(eta) < 2.66 && abs(eta) > 2.44) * (pt > 0.1)               * (0.997) + 
-	(abs(eta) < 2.44 && abs(eta) > 2.25) * (pt > 0.1 && pt < 0.174) * (0.997) +
-	(abs(eta) < 2.44 && abs(eta) > 2.25) * (pt > 0.174)             * (1.000) +
-	(abs(eta) < 2.25)                    * (pt > 0.1)               * (1.000)                     }
+(abs(eta) > 2.54) * (0.000) +
+(energy >= 100) * (abs(eta) < 2.54)  * (1.000) +
+(energy < 100 && energy >= 10) * (abs(eta) <=2.54 && abs(eta) > 2.34)  * (0.994) +
+(energy < 100 && energy >= 10) * (abs(eta) <= 2.34) * (1.000) +
+(energy < 10  && energy >= 1) * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.000) +
+(energy < 10  && energy >= 1) * (abs(eta) <= 0.55 ) * (1.000) 
+    }
 }
 
 ##############################
@@ -140,13 +141,19 @@ module Efficiency ElectronTrackingEfficiency {
     set InputArray ParticlePropagator/electrons
     set OutputArray electrons
 
-    # FIXME currently uses tracking efficiency from muon simulation
+
+    # Current full simulation with CLICdet provides for electrons:
     set EfficiencyFormula {
-	(abs(eta) > 2.66)                                               * (0.000) +
-	(abs(eta) < 2.66 && abs(eta) > 2.44) * (pt > 0.1)               * (0.997) + 
-	(abs(eta) < 2.44 && abs(eta) > 2.25) * (pt > 0.1 && pt < 0.174) * (0.997) +
-	(abs(eta) < 2.44 && abs(eta) > 2.25) * (pt > 0.174)             * (1.000) +
-	(abs(eta) < 2.25)                    * (pt > 0.1)               * (1.000)
+		(pt <= 1)                                                               * (0.000) +
+		(abs(eta) > 2.54)                                                       * (0.000) +
+		(energy > 100)                 * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
+		(energy > 100)                 * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
+		(energy > 100)                 * (abs(eta) <= 2.34  )                   * (1.000) +
+		(energy <= 100 && energy > 10) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
+		(energy <= 100 && energy > 10) * (abs(eta) <= 2.17)                     * (1.000) +
+		(energy <= 10 && energy > 1)   * (abs(eta) > 2.34 )                     * (0.000) +
+		(energy <= 10 && energy > 1)   * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
+		(energy <= 10 && energy > 1)   * (abs(eta) <= 0.76)                     * (0.999)
      }
 }
 
@@ -160,12 +167,15 @@ module Efficiency MuonTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for muons:
     set EfficiencyFormula {
-	(abs(eta) > 2.66)                                               * (0.000) +
-	(abs(eta) < 2.66 && abs(eta) > 2.44) * (pt > 0.1)               * (0.997) + 
-	(abs(eta) < 2.44 && abs(eta) > 2.25) * (pt > 0.1 && pt < 0.174) * (0.997) +
-	(abs(eta) < 2.44 && abs(eta) > 2.25) * (pt > 0.174)             * (1.000) +
-	(abs(eta) < 2.25)                    * (pt > 0.1)               * (1.000)
-     }
+	(pt < 1) * (0.000)+
+	(abs(eta) > 2.54) * (0.0000) +
+	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 100)                * (0.994) +
+	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 10 && energy < 100) * (0.997) +
+	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 1  && energy < 10)  * (0.996) +
+	(abs(eta) <= 2.44 )                    * (energy >= 10)                 * (1.000) +
+	(abs(eta) <= 2.44 && abs(eta) > 2.25 ) * (energy >= 1 && energy < 10)   * (0.999) +
+	(abs(eta) <= 2.25 )                    * (energy >= 1)                  * (1.000) 
+    }
 }
 
 ########################################
@@ -176,15 +186,15 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
     set InputArray ChargedHadronTrackingEfficiency/chargedHadrons
     set OutputArray chargedHadrons
 
-    # Using eta mid-points between evaluated resolutions from full simulation
+
     # Resolution given in dpT/pT.
-    # FIXME: currently uses momentum resolution from single muon simulation!
     set ResolutionFormula {
-	                   (abs(eta) <= 0.26) * (pt > 0.1) * sqrt(0.0162^2 + pt^2*5.863e-4^2) +
-	(abs(eta) > 0.26 && abs(eta) <= 0.45) * (pt > 0.1) * sqrt(0.0065^2 + pt^2*5.949e-5^2) +
-	(abs(eta) > 0.45 && abs(eta) <= 0.65) * (pt > 0.1) * sqrt(0.0041^2 + pt^2*3.014e-5^2) +
-	(abs(eta) > 0.65 && abs(eta) <= 2.75) * (pt > 0.1) * sqrt(0.0036^2 + pt^2*2.977e-5^2) +
-	(abs(eta) > 2.75)                     * (pt > 0.1) * sqrt(0.0021^2 + pt^2*2.189e-5^2)
+	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
+	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
+	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt( 1.16768e-05^2 * pt^2 +0.00255204^2    ) +
+	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt( 1.28327e-05^2 * pt^2 +0.00220587^2   ) +
+	(abs(eta) < 0.18)                      * sqrt( 1.32845e-05^2 * pt^2 +0.00209325^2   )
+	
     }
 }
 
@@ -196,15 +206,14 @@ module MomentumSmearing ElectronMomentumSmearing {
     set InputArray ElectronTrackingEfficiency/electrons
     set OutputArray electrons
 
-    # Using eta mid-points between evaluated resolutions from full simulation
     # Resolution given in dpT/pT.
-    # FIXME: currently uses momentum resolution from single muon simulation!
     set ResolutionFormula {
-	                   (abs(eta) <= 0.26) * (pt > 0.1) * sqrt(0.0162^2 + pt^2*5.863e-4^2) +
-	(abs(eta) > 0.26 && abs(eta) <= 0.45) * (pt > 0.1) * sqrt(0.0065^2 + pt^2*5.949e-5^2) +
-	(abs(eta) > 0.45 && abs(eta) <= 0.65) * (pt > 0.1) * sqrt(0.0041^2 + pt^2*3.014e-5^2) +
-	(abs(eta) > 0.65 && abs(eta) <= 2.75) * (pt > 0.1) * sqrt(0.0036^2 + pt^2*2.977e-5^2) +
-	(abs(eta) > 2.75)                     * (pt > 0.1) * sqrt(0.0021^2 + pt^2*2.189e-5^2)
+	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
+	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
+	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt( 1.15518e-05^2 * pt^2  + 0.00398644^2  ) +
+	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt( 1.3307e-05 ^2 * pt^2  + 0.00317807^2  ) +
+	(abs(eta) < 0.18)                      * sqrt( 1.40722e-05^2 * pt^2  + 0.00292138^2  )
+
     }
 }
 
@@ -216,14 +225,15 @@ module MomentumSmearing MuonMomentumSmearing {
     set InputArray MuonTrackingEfficiency/muons
     set OutputArray muons
 
-    # Using eta mid-points between evaluated resolutions from full simulation
     # Resolution given in dpT/pT.
     set ResolutionFormula {
-	                   (abs(eta) <= 0.26) * (pt > 0.1) * sqrt(0.0162^2 + pt^2*5.863e-4^2) +
-	(abs(eta) > 0.26 && abs(eta) <= 0.45) * (pt > 0.1) * sqrt(0.0065^2 + pt^2*5.949e-5^2) +
-	(abs(eta) > 0.45 && abs(eta) <= 0.65) * (pt > 0.1) * sqrt(0.0041^2 + pt^2*3.014e-5^2) +
-	(abs(eta) > 0.65 && abs(eta) <= 2.75) * (pt > 0.1) * sqrt(0.0036^2 + pt^2*2.977e-5^2) +
-	(abs(eta) > 2.75)                     * (pt > 0.1) * sqrt(0.0021^2 + pt^2*2.189e-5^2)
+
+	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
+	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt(9.81626e-06^2 * pt^2*   + 0.00379895^2  ) +
+	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt(1.1959e-05^2 * pt^2*   +  0.00242417^2 ) +
+	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt(1.20149e-05^2 * pt^2  + 0.00219291^2  ) +
+	(abs(eta) < 0.18)                      * sqrt(1.29686e-05^2 * pt^2  + 0.0020392^2      ) 
+
     }
 }
 
@@ -1057,7 +1067,7 @@ module BTagging BTagging {
     # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
     # gluon's PDG code has the lowest priority
 
-    # based on arXiv:1211.4462
+    # based on arXiv:1211.4462 (CMS)
     
     # default efficiency formula (misidentification rate)
     add EfficiencyFormula {0} {0.01+0.000038*pt}
