@@ -79,15 +79,118 @@ set ExecutionPath {
     MissingET
     GenMissingET
 
-    JetEnergyScale
-
-    JetFlavorAssociation
-    BTagging
     
-    TauTagging
+
+    JetFlavorAssociation_R05N2
+	JetFlavorAssociation_R05N3
+	JetFlavorAssociation_R05N4
+	JetFlavorAssociation_R05N5
+	JetFlavorAssociation_R05N6
+	
+	JetFlavorAssociation_R07N2
+	JetFlavorAssociation_R07N3
+	JetFlavorAssociation_R07N4
+	JetFlavorAssociation_R07N5
+	JetFlavorAssociation_R07N6
+
+	JetFlavorAssociation_R10N2
+	JetFlavorAssociation_R10N3
+	JetFlavorAssociation_R10N4
+	JetFlavorAssociation_R10N5
+	JetFlavorAssociation_R10N6
+
+	JetFlavorAssociation_R12N2
+	JetFlavorAssociation_R12N3
+	JetFlavorAssociation_R12N4
+	JetFlavorAssociation_R12N5
+	JetFlavorAssociation_R12N6
+
+	JetFlavorAssociation_R15N2
+	JetFlavorAssociation_R15N3
+	JetFlavorAssociation_R15N4
+	JetFlavorAssociation_R15N5
+	JetFlavorAssociation_R15N6
+
+	BTaggingWP50_R05N2
+	BTaggingWP70_R05N2
+	BTaggingWP90_R05N2
+	BTaggingWP50_R05N3
+	BTaggingWP70_R05N3
+	BTaggingWP90_R05N3
+	BTaggingWP50_R05N4
+	BTaggingWP70_R05N4
+	BTaggingWP90_R05N4
+	BTaggingWP50_R05N5
+	BTaggingWP70_R05N5
+	BTaggingWP90_R05N5
+	BTaggingWP50_R05N6
+	BTaggingWP70_R05N6
+	BTaggingWP90_R05N6
+	BTaggingWP50_R07N2
+	BTaggingWP70_R07N2
+	BTaggingWP90_R07N2
+	BTaggingWP50_R07N3
+	BTaggingWP70_R07N3
+	BTaggingWP90_R07N3
+	BTaggingWP50_R07N4
+	BTaggingWP70_R07N4
+	BTaggingWP90_R07N4
+	BTaggingWP50_R07N5
+	BTaggingWP70_R07N5
+	BTaggingWP90_R07N5
+	BTaggingWP50_R07N6
+	BTaggingWP70_R07N6
+	BTaggingWP90_R07N6
+	BTaggingWP50_R10N2
+	BTaggingWP70_R10N2
+	BTaggingWP90_R10N2
+	BTaggingWP50_R10N3
+	BTaggingWP70_R10N3
+	BTaggingWP90_R10N3
+	BTaggingWP50_R10N4
+	BTaggingWP70_R10N4
+	BTaggingWP90_R10N4
+	BTaggingWP50_R10N5
+	BTaggingWP70_R10N5
+	BTaggingWP90_R10N5
+	BTaggingWP50_R10N6
+	BTaggingWP70_R10N6
+	BTaggingWP90_R10N6
+	BTaggingWP50_R12N2
+	BTaggingWP70_R12N2
+	BTaggingWP90_R12N2
+	BTaggingWP50_R12N3
+	BTaggingWP70_R12N3
+	BTaggingWP90_R12N3
+	BTaggingWP50_R12N4
+	BTaggingWP70_R12N4
+	BTaggingWP90_R12N4
+	BTaggingWP50_R12N5
+	BTaggingWP70_R12N5
+	BTaggingWP90_R12N5
+	BTaggingWP50_R12N6
+	BTaggingWP70_R12N6
+	BTaggingWP90_R12N6
+	BTaggingWP50_R15N2
+	BTaggingWP70_R15N2
+	BTaggingWP90_R15N2
+	BTaggingWP50_R15N3
+	BTaggingWP70_R15N3
+	BTaggingWP90_R15N3
+	BTaggingWP50_R15N4
+	BTaggingWP70_R15N4
+	BTaggingWP90_R15N4
+	BTaggingWP50_R15N5
+	BTaggingWP70_R15N5
+	BTaggingWP90_R15N5
+	BTaggingWP50_R15N6
+	BTaggingWP70_R15N6
+	BTaggingWP90_R15N6
+
+    
+    TauTagging_R05N2
 
     ScalarHT
-
 
 
     TreeWriter
@@ -711,383 +814,45 @@ module FastJetFinder FastJetFinderKt {
     set JetPTMin 20.0
 }
 
-############
-# Jet finder VLC
-############
-#R05 N2
-module FastJetFinder FastJetFinderVLC_R05_N2 {
-    #  set InputArray Calorimeter/towers
-    set InputArray EFlowFilter/eflow
-
-    set OutputArray VLCjetsR05N2
-
-    # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, 7 anti-kt with winner-take-all axis (for N-subjettiness), 8 N-jettiness, 9 Valencia
-    set NJets 2
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.5
-    set Beta 1.0
-    set Gamma 1.0
-
-    set JetPTMin 20.0
-}
-#R05 N3
-module FastJetFinder FastJetFinderVLC_R05_N3 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR05N3
-    set NJets 3
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R05 N4
-module FastJetFinder FastJetFinderVLC_R05_N4 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR05N4
-    set NJets 4
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R05 N5
-module FastJetFinder FastJetFinderVLC_R05_N5 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR05N5
-    set NJets 5
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R05 N6
-module FastJetFinder FastJetFinderVLC_R05_N6 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR05N6
-    set NJets 6
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R07 N2
-module FastJetFinder FastJetFinderVLC_R07_N2 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR07N2
-    set NJets 2
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.7
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R07 N3
-module FastJetFinder FastJetFinderVLC_R07_N3 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR07N3
-    set NJets 3
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.7
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R07 N4
-module FastJetFinder FastJetFinderVLC_R07_N4 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR07N4
-    set NJets 4
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.7
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R07 N5
-module FastJetFinder FastJetFinderVLC_R07_N5 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR07N5
-    set NJets 5
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.7
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R07 N6
-module FastJetFinder FastJetFinderVLC_R07_N6 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR07N6
-    set NJets 6
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 0.7
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-
-#R10N2
-module FastJetFinder FastJetFinderVLC_R10_N2 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR10N2
-    set NJets 2
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.0
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R10 N3
-module FastJetFinder FastJetFinderVLC_R10_N3 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR10N3
-    set NJets 3
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.0
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R10 N4
-module FastJetFinder FastJetFinderVLC_R10_N4 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR10N4
-    set NJets 4
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.0
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R10 N5
-module FastJetFinder FastJetFinderVLC_R10_N5 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR10N5
-    set NJets 5
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.0
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R10 N6
-module FastJetFinder FastJetFinderVLC_R10_N6 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR10N6
-    set NJets 6
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.0
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-
-#R12 N2
-module FastJetFinder FastJetFinderVLC_R12_N2 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR12N2
-    set NJets 2
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.2
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R12 N3
-module FastJetFinder FastJetFinderVLC_R12_N3 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR12N3
-    set NJets 3
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.2
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R12 N4
-module FastJetFinder FastJetFinderVLC_R12_N4 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR12N4
-    set NJets 4
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.2
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R12 N5
-module FastJetFinder FastJetFinderVLC_R12_N5 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR12N5
-    set NJets 5
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.2
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R12 N6
-module FastJetFinder FastJetFinderVLC_R12_N6 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR12N6
-    set NJets 6
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.2
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
+source CLICdet_JetReco.tcl
 
 
-#R15 N2
-module FastJetFinder FastJetFinderVLC_R15_N2 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR15N2
-    set NJets 2
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R15 N3
-module FastJetFinder FastJetFinderVLC_R15_N3 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR15N3
-    set NJets 3
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R15 N4
-module FastJetFinder FastJetFinderVLC_R15_N4 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR15N4
-    set NJets 4
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R15 N5
-module FastJetFinder FastJetFinderVLC_R15_N5 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR15N5
-    set NJets 5
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-#R15 N6
-module FastJetFinder FastJetFinderVLC_R15_N6 {
-    set InputArray EFlowFilter/eflow
-    set OutputArray VLCjetsR15N6
-    set NJets 6
-    set ExclusiveClustering true
-    set JetAlgorithm 9
-    set ParameterR 1.5
-    set Beta 1.0
-    set Gamma 1.0
-    set JetPTMin 20.0
-}
-##################
-# Jet Energy Scale
-##################
-
-module EnergyScale JetEnergyScale {
-    set InputArray FastJetFinderVLC_R10_N4/VLCjetsR10N4
-    set OutputArray jets
-
-    # scale formula for jets
-    set ScaleFormula {1.00}
-}
+###################
+## Jet Energy Scale
+###################
+#
+#module EnergyScale JetEnergyScale {
+#    set InputArray FastJetFinderVLC_R10_N4/VLCjetsR10N4
+#    set OutputArray jets
+#
+#    # scale formula for jets
+#    set ScaleFormula {1.00}
+#}
 
 
 ########################
 # Jet Flavor Association
 ########################
 
-module JetFlavorAssociation JetFlavorAssociation {
-
-    set PartonInputArray Delphes/partons
-    set ParticleInputArray Delphes/allParticles
-    set ParticleLHEFInputArray Delphes/allParticlesLHEF
-    set JetInputArray JetEnergyScale/jets
-
-    set DeltaR 0.5
-    set PartonPTMin 1.0
-    set PartonEtaMax 2.5
-
-}
-
+source CLICdet_JetFlavorAssociation.tcl
 
 ###########
 # b-tagging
 ###########
+# based on CLICdp-Note-2014-002    
 
-module BTagging BTagging {
-    set JetInputArray JetEnergyScale/jets
+source CLICdet_BTagging.tcl
 
-    set BitNumber 0
-
-    # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
-    # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
-    # gluon's PDG code has the lowest priority
-
-    # based on arXiv:1211.4462 (CMS)
-    
-    # default efficiency formula (misidentification rate)
-    add EfficiencyFormula {0} {0.01+0.000038*pt}
-
-    # efficiency formula for c-jets (misidentification rate)
-    add EfficiencyFormula {4} {0.25*tanh(0.018*pt)*(1/(1+ 0.0013*pt))}
-
-    # efficiency formula for b-jets
-    add EfficiencyFormula {5} {0.85*tanh(0.0025*pt)*(25.0/(1+0.063*pt))}
-}
 
 #############
 # tau-tagging
 #############
 
 
-module TauTagging TauTagging {
+module TauTagging TauTagging_R05N2 {
     set ParticleInputArray Delphes/allParticles
     set PartonInputArray Delphes/partons
-    set JetInputArray JetEnergyScale/jets
+    set JetInputArray FastJetFinderVLC_R05_N2/VLCjetsR05N2
 
     set DeltaR 0.5
 
@@ -1159,8 +924,10 @@ module TreeWriter TreeWriter {
     add Branch FastJetFinderVLC_R15_N5/VLCjetsR15N5 VLCjetR15N5 Jet
     add Branch FastJetFinderVLC_R15_N6/VLCjetsR15N6 VLCjetR15N6 Jet
 
-    
-    add Branch GenMissingET/momentum GenMissingET MissingET
+#	add Branch BTaggingWP50/jets BTagged Jet
+#	add Branch FastJetFinderVLC_R05_N2/VLCjetsR05N2 BTagged Jet
+
+	add Branch GenMissingET/momentum GenMissingET MissingET
 
     add Branch TrackMerger/tracks Track Track
     add Branch Calorimeter/towers Tower Tower
