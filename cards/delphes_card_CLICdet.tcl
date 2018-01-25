@@ -227,12 +227,12 @@ module Efficiency ChargedHadronTrackingEfficiency {
     # Current full simulation with CLICdet provides for pions:
 
     set EfficiencyFormula {
-(abs(eta) > 2.54) * (0.000) +
-(energy >= 100) * (abs(eta) < 2.54)  * (1.000) +
-(energy < 100 && energy >= 10) * (abs(eta) <=2.54 && abs(eta) > 2.34)  * (0.994) +
-(energy < 100 && energy >= 10) * (abs(eta) <= 2.34) * (1.000) +
-(energy < 10  && energy >= 1) * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.000) +
-(energy < 10  && energy >= 1) * (abs(eta) <= 0.55 ) * (1.000) 
+	(abs(eta) > 2.54) * (0.000) +
+	(energy >= 100) * (abs(eta) < 2.54)  * (1.000) +
+	(energy < 100 && energy >= 10) * (abs(eta) <=2.54 && abs(eta) > 2.34)  * (0.994) +
+	(energy < 100 && energy >= 10) * (abs(eta) <= 2.34) * (1.000) +
+	(energy < 10  && energy >= 1) * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.000) +
+	(energy < 10  && energy >= 1) * (abs(eta) <= 0.55 ) * (1.000) 
     }
 }
 
@@ -247,17 +247,17 @@ module Efficiency ElectronTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for electrons:
     set EfficiencyFormula {
-		(pt <= 1)                                                               * (0.000) +
-		(abs(eta) > 2.54)                                                       * (0.000) +
-		(energy > 100)                 * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
-		(energy > 100)                 * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
-		(energy > 100)                 * (abs(eta) <= 2.34  )                   * (1.000) +
-		(energy <= 100 && energy > 10) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
-		(energy <= 100 && energy > 10) * (abs(eta) <= 2.17)                     * (1.000) +
-		(energy <= 10 && energy > 1)   * (abs(eta) > 2.34 )                     * (0.000) +
-		(energy <= 10 && energy > 1)   * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
-		(energy <= 10 && energy > 1)   * (abs(eta) <= 0.76)                     * (0.999)
-     }
+	(pt <= 1)                                                               * (0.000) +
+	(abs(eta) > 2.54)                                                       * (0.000) +
+	(energy > 100)                 * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
+	(energy > 100)                 * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
+	(energy > 100)                 * (abs(eta) <= 2.34  )                   * (1.000) +
+	(energy <= 100 && energy > 10) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
+	(energy <= 100 && energy > 10) * (abs(eta) <= 2.17)                     * (1.000) +
+	(energy <= 10 && energy > 1)   * (abs(eta) > 2.34 )                     * (0.000) +
+	(energy <= 10 && energy > 1)   * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
+	(energy <= 10 && energy > 1)   * (abs(eta) <= 0.76)                     * (0.999)
+    }
 }
 
 ##########################
@@ -291,6 +291,7 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
 
 
     # Resolution given in dpT/pT.
+    # CLICdet internal studies
     set ResolutionFormula {
 	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
 	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
@@ -310,6 +311,7 @@ module MomentumSmearing ElectronMomentumSmearing {
     set OutputArray electrons
 
     # Resolution given in dpT/pT.
+    # CLICdet internal studies
     set ResolutionFormula {
 	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
 	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
@@ -329,6 +331,8 @@ module MomentumSmearing MuonMomentumSmearing {
     set OutputArray muons
 
     # Resolution given in dpT/pT.
+
+    # CLICdet internal studies
     set ResolutionFormula {
 
 	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
@@ -454,7 +458,7 @@ module SimpleCalorimeter ECal {
     add EnergyFraction {3122} {0.3}
 
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-
+    # not from CLICdet
     set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.01^2 + energy*0.15^2) }
 
 }
@@ -541,11 +545,10 @@ module SimpleCalorimeter HCal {
     add EnergyFraction {3122} {0.7}
 
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-
-	# set ResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.015^2 + energy*0.50^2)}
-	set ResolutionFormula { (abs(eta)< 0.8) * sqrt(1.48^2  + 0.251^2*energy  + 0.0537^2*energy^2) +
+    #CLICdet internal studies
+    set ResolutionFormula { (abs(eta)< 0.8) * sqrt(1.48^2  + 0.251^2*energy  + 0.0537^2*energy^2) +
 	(abs(eta)>= 0.8 && abs(eta)<=3) * sqrt( 1.09^2 + 0.321^2*energy + 0.0517^2*energy^2  )}
-
+    
 }
 
 #################
@@ -600,7 +603,6 @@ module Merger EFlowMerger {
     set OutputArray eflow
 }
 
-##here
 
 ###################
 # Photon efficiency
@@ -613,17 +615,9 @@ module Efficiency PhotonEfficiency {
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
     # efficiency formula for photons
-	# including converted photons
-	#0.94 for |costheta| < 0.6, i.e. |eta|< 0.7
-	#0.9 for |costheta| > 0.6, i.e. |eta|>0.7 but smaller than 3
-
-
+    # current full simulation of CLICdet yields:
 	set EfficiencyFormula {(abs(eta) < 0.7)*(0.94) + (abs(eta) >=0.7 && abs(eta) <=3.0) * (0.9)	}
-	#old:
-    #set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-	#(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-	#(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
-	#(abs(eta) > 2.5)                                   * (0.00)}
+
 }
 
 ##################
@@ -690,13 +684,8 @@ module Efficiency MuonEfficiency {
     # set EfficiencyFormula {efficiency as a function of eta and pt}
 
     # efficiency formula for muons
+    # current full simulation of CLICdet yields:
 	set EfficiencyFormula {(energy  < 50 )*(0.98) + (energy>=50) *(0.999)}
-    #set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
-	#(abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-	#(abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-	#(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-	#(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-	#(abs(eta) > 2.4)                                                 * (0.00)}
 }
 
 ################
@@ -747,18 +736,6 @@ module UniqueObjectFinder EFlowFilter {
     add InputArray MuonIsolation/muons muons
     add InputArray EFlowMerger/eflow eflow
 }
-
-
-#
-#module PdgCodeFilter EFlowFilter {
-#    set InputArray EFlowMerger/eflow
-#    set OutputArray eflow
-#    
-#    add PdgCode {11}
-#    add PdgCode {-11}
-#    add PdgCode {13}
-#    add PdgCode {-13}
-#}
 
 #################
 # Neutrino Filter
@@ -826,7 +803,7 @@ module FastJetFinder FastJetFinderKt {
     set JetPTMin 20.0
 }
 
-source CLICdet_JetReco.tcl
+source CLICdet/CLICdet_JetReco.tcl
 
 
 ###################
@@ -846,14 +823,14 @@ source CLICdet_JetReco.tcl
 # Jet Flavor Association
 ########################
 
-source CLICdet_JetFlavorAssociation.tcl
+source  CLICdet/CLICdet_JetFlavorAssociation.tcl
 
 ###########
 # b-tagging
 ###########
 # based on CLICdp-Note-2014-002    
 
-source CLICdet_BTagging.tcl
+source  CLICdet/CLICdet_BTagging.tcl
 
 
 #############
