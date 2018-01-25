@@ -542,7 +542,9 @@ module SimpleCalorimeter HCal {
 
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
 
-    set ResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.015^2 + energy*0.50^2)}
+	# set ResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.015^2 + energy*0.50^2)}
+	set ResolutionFormula { (abs(eta)< 0.8) * sqrt(1.48^2  + 0.251^2*energy  + 0.0537^2*energy^2) +
+	(abs(eta)>= 0.8 && abs(eta)<=3) * sqrt( 1.09^2 + 0.321^2*energy + 0.0517^2*energy^2  )}
 
 }
 
@@ -611,10 +613,17 @@ module Efficiency PhotonEfficiency {
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
     # efficiency formula for photons
-    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 2.5)                                   * (0.00)}
+	# including converted photons
+	#0.94 for |costheta| < 0.6, i.e. |eta|< 0.7
+	#0.9 for |costheta| > 0.6, i.e. |eta|>0.7 but smaller than 3
+
+
+	set EfficiencyFormula {(abs(eta) < 0.7)*(0.94) + (abs(eta) >=0.7 && abs(eta) <=3.0) * (0.9)	}
+	#old:
+    #set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
+	#(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
+	#(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
+	#(abs(eta) > 2.5)                                   * (0.00)}
 }
 
 ##################
@@ -679,12 +688,13 @@ module Efficiency MuonEfficiency {
     # set EfficiencyFormula {efficiency as a function of eta and pt}
 
     # efficiency formula for muons
-    set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
-	(abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-	(abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
-	(abs(eta) > 2.4)                                                 * (0.00)}
+	set EfficiencyFormula {(energy  < 50 )*(0.98) + (energy>=50) *(0.999)}
+    #set EfficiencyFormula {                                      (pt <= 10.0)               * (0.00) +
+	#(abs(eta) <= 1.5) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
+	#(abs(eta) <= 1.5) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+	#(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 10.0 && pt <= 1.0e3) * (0.95) +
+	#(abs(eta) > 1.5 && abs(eta) <= 2.4) * (pt > 1.0e3)               * (0.95 * exp(0.5 - pt*5.0e-4)) +
+	#(abs(eta) > 2.4)                                                 * (0.00)}
 }
 
 ################
