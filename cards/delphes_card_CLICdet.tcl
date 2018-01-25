@@ -652,12 +652,14 @@ module Efficiency ElectronEfficiency {
     set OutputArray electrons
 
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+	set EfficiencyFormula {(abs( eta)<0.7 )*(  0.89)+
+		(abs(eta) > 0.7 && abs(eta) < 3)*( 0.8)}
 
     # efficiency formula for electrons
-    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
-	(abs(eta) > 2.5)                                   * (0.00)}
+#    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
+#	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
+#	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
+#	(abs(eta) > 2.5)                                   * (0.00)}
 }
 
 ####################
