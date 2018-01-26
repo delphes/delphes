@@ -547,9 +547,9 @@ module SimpleCalorimeter HCal {
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     #CLICdet internal studies
     set ResolutionFormula {
-		(abs(eta)<= 0.78) * sqrt(1.48^2  + 0.251^2*energy  + 0.0537^2*energy^2) +
-		(abs(eta)<=1.099 && abs(eta) >0.78) * sqrt(  1.25^2 + 0.311^2*energy + 0.0515^*energy^2 ) +
-		(abs(eta)<=3 && abs(eta)> 1.099) * sqrt( 1.09^2 + 0.321^2*energy + 0.0517^2*energy^2  )
+		(abs(eta)<= 0.78) * sqrt(1.48^2  + energy*0.251^2  + energy^2*0.0537^2) +
+		(abs(eta)<=1.099 && abs(eta) > 0.78) * sqrt(  1.25^2 + energy*0.311^2 + energy^2*0.0515^2 ) +
+		(abs(eta)<=3 && abs(eta)> 1.099) * sqrt( 1.09^2 + energy*0.321^2 + energy^2*0.0517^2  )
 	}
     
 }
