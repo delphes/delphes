@@ -77,13 +77,13 @@ Delphes::Delphes(const char *name) :
 
 Delphes::~Delphes()
 {
-  if(fFactory) delete fFactory;
   TFolder *folder = GetFolder();
   if(folder)
   {
     folder->Clear();
     delete folder;
   }
+  if(fFactory) delete fFactory;
 }
 
 //------------------------------------------------------------------------------
