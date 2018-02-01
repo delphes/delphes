@@ -459,8 +459,10 @@ module SimpleCalorimeter ECal {
 
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
     # not from CLICdet
-    set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.01^2 + energy*0.15^2) }
-
+    #set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.01^2 + energy*0.15^2) }
+    set ResolutionFormula { (abs(eta) <= 0.78)                   * sqrt(energy^2*0.009^2 + energy*0.156^2)+
+	(abs(eta) > 0.78 && abs(eta) <=0.83 ) * sqrt( energy^2*2e-7^2 + energy*0.175^2  ) +
+	(abs(eta) <= 3 && abs(eta) > 0.83) * sqrt( energy^2*0.0057^2 + energy*0.151^2  )}
 }
 
 #############
@@ -619,7 +621,10 @@ module Efficiency PhotonEfficiency {
 
     # efficiency formula for photons
     # current full simulation of CLICdet yields:
-	set EfficiencyFormula {(abs(eta) < 0.7)*(0.94) + (abs(eta) >=0.7 && abs(eta) <=3.0) * (0.9)	}
+    set EfficiencyFormula {
+	(energy < 2.0 ) * (0.000) +
+	(energy >= 2.0) * (abs(eta) < 0.7)*(0.94) +
+	(energy >= 2.0) * (abs(eta) >=0.7 && abs(eta) <=3.0) * (0.9)	}
 
 }
 
@@ -649,14 +654,12 @@ module Efficiency ElectronEfficiency {
     set OutputArray electrons
 
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
-	set EfficiencyFormula {(abs( eta)<0.7 )*(  0.89)+
-		(abs(eta) > 0.7 && abs(eta) < 3)*( 0.8)}
+    set EfficiencyFormula {
+	(energy < 2.0 ) * (0.000) +
+	(energy >= 2.0) * (abs( eta)<0.7 )*(  0.89)+
+	(energy >= 2.0) * (abs(eta) > 0.7 && abs(eta) < 3)*( 0.8)}
 
-    # efficiency formula for electrons
-#    set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-#	(abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-#	(abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.95) +
-#	(abs(eta) > 2.5)                                   * (0.00)}
+   
 }
 
 ####################
@@ -688,7 +691,9 @@ module Efficiency MuonEfficiency {
 
     # efficiency formula for muons
     # current full simulation of CLICdet yields:
-	set EfficiencyFormula {(energy  < 50 )*(0.98) + (energy>=50) *(0.999)}
+    set EfficiencyFormula {
+	(energy < 2.0 ) * (0.000) +
+	(energy  < 50 && energy >=2.0 )*(0.98) + (energy>=50) *(0.999)}
 }
 
 ################
