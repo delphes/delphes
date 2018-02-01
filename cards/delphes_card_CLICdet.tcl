@@ -458,8 +458,6 @@ module SimpleCalorimeter ECal {
     add EnergyFraction {3122} {0.3}
 
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-    # not from CLICdet
-    #set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.01^2 + energy*0.15^2) }
     set ResolutionFormula { (abs(eta) <= 0.78)                   * sqrt(energy^2*0.009^2 + energy*0.156^2)+
 	(abs(eta) > 0.78 && abs(eta) <=0.83 ) * sqrt( energy^2*2e-7^2 + energy*0.175^2  ) +
 	(abs(eta) <= 3 && abs(eta) > 0.83) * sqrt( energy^2*0.0057^2 + energy*0.151^2  )}
@@ -655,9 +653,9 @@ module Efficiency ElectronEfficiency {
 
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
     set EfficiencyFormula {
-	(energy < 2.0 ) * (0.000) +
-	(energy >= 2.0) * (abs( eta)<0.7 )*(  0.89)+
-	(energy >= 2.0) * (abs(eta) > 0.7 && abs(eta) < 3)*( 0.8)}
+	(energy < 5.0 ) * (0.000) +
+	(energy >= 5.0) * (abs( eta)<0.7 )*(  0.89)+
+	(energy >= 5.0) * (abs(eta) > 0.7 && abs(eta) < 3)*( 0.8)}
 
    
 }
@@ -775,7 +773,7 @@ module FastJetFinder GenJetFinder {
 
     set OutputArray jets
 
-    # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+    # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, 7 anti-kt with winner-take-all axis (for N-subjettiness), 8 N-jettiness, 9 Valencia
     set JetAlgorithm 9
     set ParameterR 0.5
 
@@ -804,12 +802,17 @@ module FastJetFinder FastJetFinderKt {
 
     set OutputArray KTjets
 
-    # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+    # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, 7 anti-kt with winner-take-all axis (for N-subjettiness), 8 N-jettiness, 9 Valencia
     set JetAlgorithm 4
     set ParameterR 0.5
 
     set JetPTMin 20.0
 }
+
+################
+# Jet finder VLC
+################
+
 
 source CLICdet/CLICdet_JetReco.tcl
 
@@ -858,27 +861,13 @@ module TauTagging TauTagging_R05N2 {
     set TauEtaMax 4.0
 
     # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
-
+    # not from CLICdet
     # default efficiency formula (misidentification rate)
     add EfficiencyFormula {0} {0.001}
     # efficiency formula for tau-jets
     add EfficiencyFormula {15} {0.4}
 }
 
-#####################################################
-# Find uniquely identified photons/electrons/tau/jets
-#####################################################
-
-#module UniqueObjectFinder UniqueObjectFinder {
-#    # earlier arrays take precedence over later ones
-#    # add InputArray InputArray OutputArray
-#    add InputArray PhotonIsolation/photons photons
-#    add InputArray ElectronIsolation/electrons electrons
-#    add InputArray MuonIsolation/muons muons
-#    add InputArray JetEnergyScale/jets jets
-####not necessary any more, since these objects have already been removed if necessary??
-#}
-#
 
 ##################
 # ROOT tree writer
@@ -921,10 +910,7 @@ module TreeWriter TreeWriter {
     add Branch FastJetFinderVLC_R15_N5/VLCjetsR15N5 VLCjetR15N5 Jet
     add Branch FastJetFinderVLC_R15_N6/VLCjetsR15N6 VLCjetR15N6 Jet
 
-#	add Branch BTaggingWP50/jets BTagged Jet
-#	add Branch FastJetFinderVLC_R05_N2/VLCjetsR05N2 BTagged Jet
-
-	add Branch GenMissingET/momentum GenMissingET MissingET
+    add Branch GenMissingET/momentum GenMissingET MissingET
 
     add Branch TrackMerger/tracks Track Track
     add Branch Calorimeter/towers Tower Tower
@@ -933,21 +919,9 @@ module TreeWriter TreeWriter {
     add Branch ECal/eflowPhotons EFlowPhoton Tower
     add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
     
-#    add Branch UniqueObjectFinder/photons Photon Photon
-#    add Branch UniqueObjectFinder/electrons Electron Electron
-#    add Branch UniqueObjectFinder/muons Muon Muon
-#    add Branch UniqueObjectFinder/jets Jet Jet
-#    
-
-#    add Branch PhotonIsolation/photons Photon Photon
-#    add Branch ElectronIsolation/electrons Electron Electron
-#    add Branch MuonIsolation/muons Muon Muon
-
     add Branch EFlowFilter/photons Photon Photon
     add Branch EFlowFilter/electrons Electron Electron
     add Branch EFlowFilter/muons Muon Muon
-    
-        
     
     add Branch MissingET/momentum MissingET MissingET
     add Branch ScalarHT/energy ScalarHT ScalarHT
