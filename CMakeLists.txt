@@ -40,8 +40,9 @@ include_directories(${tricktrack_INCLUDE_DIR})
 include_directories($ENV{EIGEN_INCLUDE_DIR})
 
 # WJF: Declare Pythia8 dependancy
+find_package(Pythia8)
 if(PYTHIA8_FOUND)
-  find_package(Pythia8)
+  message(STATUS "Pythia8 found")
   include_directories(${PYTHIA8_INCLUDE_DIRS})
   set(LIBS ${LIBS} ${PYTHIA8_LIBRARIES})
 endif(PYTHIA8_FOUND)
