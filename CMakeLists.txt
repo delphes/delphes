@@ -40,12 +40,12 @@ include_directories(${tricktrack_INCLUDE_DIR})
 include_directories($ENV{EIGEN_INCLUDE_DIR})
 
 # WJF: Declare Pythia8 dependancy
-#include_directories($ENV{PYTHIA_INCLUDE_DIR})
-find_package(Pythia8)
-include_directories(${PYTHIA8_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${PYTHIA8_LIBRARIES})
+if(PYTHIA8_FOUND)
+  find_package(Pythia8)
+  include_directories(${PYTHIA8_INCLUDE_DIRS})
+  set(LIBS ${LIBS} ${PYTHIA8_LIBRARIES})
+endif(PYTHIA8_FOUND)
 
-# WJF test
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR "lib")
@@ -72,6 +72,7 @@ add_subdirectory(external)
 add_subdirectory(modules)
 add_subdirectory(readers)
 add_subdirectory(cards)
+add_subdirectory(analysis) # WJF: add for my analysis code 
 
 add_library(Delphes SHARED
   $<TARGET_OBJECTS:classes> 
@@ -96,7 +97,9 @@ add_library(DelphesDisplay SHARED
 
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
-target_link_libraries(Delphes ${LIBS})
+if(PYTHIA8_FOUND)
+  target_link_libraries(Delphes ${LIBS}) #WJF: add (needed for DelphesPythia8)
+endif(PYTHIA8_FOUND)
 
 
 install(TARGETS Delphes DelphesDisplay DESTINATION lib)

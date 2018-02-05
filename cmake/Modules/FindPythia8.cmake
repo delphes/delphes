@@ -9,6 +9,8 @@
 # PYTHIA8_VERSION       version of Pythia8 if found
 
 set(_pythia8dirs
+    ${PYTHIA8}
+    $ENV{PYTHIA8}
     ${PYTHIA8_DIR}
     $ENV{PYTHIA8_DIR}
     /usr
