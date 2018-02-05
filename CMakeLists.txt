@@ -25,9 +25,27 @@ IF(SET_RPATH)
   ENDIF(${isSystemDir} EQUAL -1)
 ENDIF(SET_RPATH)
     
+# WJF: add path to place where Find*.cmake files can be found (for external libraries)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 # Declare ROOT dependency
 find_package(ROOT COMPONENTS EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
 include(${ROOT_USE_FILE})
+
+# WJF: Declare TrickTrack dependency
+find_package(tricktrack)
+include_directories(${tricktrack_INCLUDE_DIR})
+
+# WJF: Declare Eigen dependency 
+include_directories($ENV{EIGEN_INCLUDE_DIR})
+
+# WJF: Declare Pythia8 dependancy
+#include_directories($ENV{PYTHIA_INCLUDE_DIR})
+find_package(Pythia8)
+include_directories(${PYTHIA8_INCLUDE_DIRS})
+set(LIBS ${LIBS} ${PYTHIA8_LIBRARIES})
+
+# WJF test
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR "lib")
@@ -40,6 +58,8 @@ function(DELPHES_GENERATE_DICTIONARY dictionary)
     ROOT_GENERATE_DICTIONARY(${dictionary} MODULE ${dictionary} ${ARGN})
   endif()
 endfunction()
+
+
 
 # Declare position of all other externals needed
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
@@ -76,5 +96,7 @@ add_library(DelphesDisplay SHARED
 
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
+target_link_libraries(Delphes ${LIBS})
+
 
 install(TARGETS Delphes DelphesDisplay DESTINATION lib)
