@@ -25,21 +25,14 @@ IF(SET_RPATH)
   ENDIF(${isSystemDir} EQUAL -1)
 ENDIF(SET_RPATH)
     
-# WJF: add path to place where Find*.cmake files can be found (for external libraries)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Declare ROOT dependency
 find_package(ROOT COMPONENTS EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
 include(${ROOT_USE_FILE})
 
-# WJF: Declare TrickTrack dependency
-find_package(tricktrack)
-include_directories(${tricktrack_INCLUDE_DIR})
 
-# WJF: Declare Eigen dependency 
-include_directories($ENV{EIGEN_INCLUDE_DIR})
-
-# WJF: Declare Pythia8 dependancy
+# Declare Pythia8 dependancy
 find_package(Pythia8)
 if(PYTHIA8_FOUND)
   message(STATUS "Pythia8 found")
@@ -73,7 +66,6 @@ add_subdirectory(external)
 add_subdirectory(modules)
 add_subdirectory(readers)
 add_subdirectory(cards)
-add_subdirectory(analysis) # WJF: add for my analysis code 
 
 add_library(Delphes SHARED
   $<TARGET_OBJECTS:classes> 
@@ -99,7 +91,7 @@ add_library(DelphesDisplay SHARED
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 if(PYTHIA8_FOUND)
-  target_link_libraries(Delphes ${LIBS}) #WJF: add (needed for DelphesPythia8)
+  target_link_libraries(Delphes ${LIBS}) # needed for DelphesPythia8
 endif(PYTHIA8_FOUND)
 
 
