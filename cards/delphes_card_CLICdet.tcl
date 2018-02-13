@@ -293,8 +293,8 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
     # Resolution given in dpT/pT.
     # CLICdet internal studies
     set ResolutionFormula {
-	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
-	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
+	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.01 ) * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
 	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt( 1.16768e-05^2 * pt^2 +0.00255204^2    ) +
 	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt( 1.28327e-05^2 * pt^2 +0.00220587^2   ) +
 	(abs(eta) < 0.18)                      * sqrt( 1.32845e-05^2 * pt^2 +0.00209325^2   )
@@ -313,8 +313,8 @@ module MomentumSmearing ElectronMomentumSmearing {
     # Resolution given in dpT/pT.
     # CLICdet internal studies
     set ResolutionFormula {
-	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
-	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
+	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.01 ) * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
 	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt( 1.15518e-05^2 * pt^2  + 0.00398644^2  ) +
 	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt( 1.3307e-05 ^2 * pt^2  + 0.00317807^2  ) +
 	(abs(eta) < 0.18)                      * sqrt( 1.40722e-05^2 * pt^2  + 0.00292138^2  )
@@ -335,8 +335,8 @@ module MomentumSmearing MuonMomentumSmearing {
     # CLICdet internal studies
     set ResolutionFormula {
 
-	(abs(eta) < 2.66 && abs(eta) >= 2.03 ) * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
-	(abs(eta) < 2.03 && abs(eta) >= 1.01 ) * sqrt(9.81626e-06^2 * pt^2*   + 0.00379895^2  ) +
+	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.01 ) * sqrt(9.81626e-06^2 * pt^2*   + 0.00379895^2  ) +
 	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt(1.1959e-05^2 * pt^2*   +  0.00242417^2 ) +
 	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt(1.20149e-05^2 * pt^2  + 0.00219291^2  ) +
 	(abs(eta) < 0.18)                      * sqrt(1.29686e-05^2 * pt^2  + 0.0020392^2      ) 
@@ -458,7 +458,9 @@ module SimpleCalorimeter ECal {
     add EnergyFraction {3122} {0.3}
 
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-    set ResolutionFormula { (abs(eta) <= 0.78)                   * sqrt(energy^2*0.01^2 + energy*0.156^2)+
+    set ResolutionFormula {
+	(abs(eta) <= 0.3) *  sqrt(energy^2*0.01^2 + energy*0.124^2)+
+	(abs(eta) <= 0.78 && abs(eta)> 0.3)  * sqrt(energy^2*0.01^2 + energy*0.156^2)+
 	(abs(eta) > 0.78 && abs(eta) <=0.83 ) * sqrt( energy^0.01^2 + energy*0.175^2  ) +
 	(abs(eta) <= 3 && abs(eta) > 0.83) * sqrt( energy^2*0.01^2 + energy*0.151^2  )}
 }
@@ -547,9 +549,10 @@ module SimpleCalorimeter HCal {
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     #CLICdet internal studies
     set ResolutionFormula {
-		(abs(eta)<= 0.78) * sqrt(1.48^2  + energy*0.251^2  + energy^2*0.0537^2) +
-		(abs(eta)<=1.099 && abs(eta) > 0.78) * sqrt(  1.25^2 + energy*0.311^2 + energy^2*0.0515^2 ) +
-		(abs(eta)<=3 && abs(eta)> 1.099) * sqrt( 1.09^2 + energy*0.321^2 + energy^2*0.0517^2  )
+	(abs(eta)<= 0.3) * sqrt(1.18^2  + energy*0.2^2  + energy^2*0.043^2) +
+	 (abs(eta)<= 0.78 && abs(eta) > 0.3) * sqrt(1.48^2  + energy*0.251^2  + energy^2*0.0537^2) +
+	 (abs(eta)<=1.099 && abs(eta) > 0.78) * sqrt(  1.25^2 + energy*0.311^2 + energy^2*0.0515^2 ) +
+	 (abs(eta)<=3 && abs(eta)> 1.099) * sqrt( 1.09^2 + energy*0.321^2 + energy^2*0.0517^2  )
 	}
     
 }
