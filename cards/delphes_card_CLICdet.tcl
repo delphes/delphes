@@ -228,11 +228,11 @@ module Efficiency ChargedHadronTrackingEfficiency {
 
     set EfficiencyFormula {
 	(abs(eta) > 2.54) * (0.000) +
-	(energy >= 100) * (abs(eta) < 2.54)  * (1.000) +
-	(energy < 100 && energy >= 10) * (abs(eta) <=2.54 && abs(eta) > 2.34)  * (0.994) +
-	(energy < 100 && energy >= 10) * (abs(eta) <= 2.34) * (1.000) +
-	(energy < 10  && energy >= 1) * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.000) +
-	(energy < 10  && energy >= 1) * (abs(eta) <= 0.55 ) * (1.000) 
+	(energy >= 80) * (abs(eta) < 2.54)  * (1.000) +
+	(energy < 80 && energy >= 3) * (abs(eta) <=2.54 && abs(eta) > 2.34)  * (0.994) +
+	(energy < 80 && energy >= 3) * (abs(eta) <= 2.34) * (1.000) +
+	(energy < 3) * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.000) +
+	(energy < 3) * (abs(eta) <= 0.55 ) * (1.000) 
     }
 }
 
@@ -249,14 +249,14 @@ module Efficiency ElectronTrackingEfficiency {
     set EfficiencyFormula {
 	(pt <= 1)                                                               * (0.000) +
 	(abs(eta) > 2.54)                                                       * (0.000) +
-	(energy > 100)                 * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
-	(energy > 100)                 * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
-	(energy > 100)                 * (abs(eta) <= 2.34  )                   * (1.000) +
-	(energy <= 100 && energy > 10) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
-	(energy <= 100 && energy > 10) * (abs(eta) <= 2.17)                     * (1.000) +
-	(energy <= 10 && energy > 1)   * (abs(eta) > 2.34 )                     * (0.000) +
-	(energy <= 10 && energy > 1)   * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
-	(energy <= 10 && energy > 1)   * (abs(eta) <= 0.76)                     * (0.999)
+	(energy >= 80)                 * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
+	(energy >= 80)                 * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
+	(energy >= 80)                 * (abs(eta) <= 2.34  )                   * (1.000) +
+	(energy < 80 && energy >= 5) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
+	(energy < 80 && energy >= 5) * (abs(eta) <= 2.17)                     * (1.000) +
+	(energy < 5)   * (abs(eta) > 2.34 )                     * (0.000) +
+	(energy < 5)   * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
+	(energy < 5)   * (abs(eta) <= 0.76)                     * (0.999)
     }
 }
 
@@ -270,14 +270,16 @@ module Efficiency MuonTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for muons:
     set EfficiencyFormula {
-	(pt < 1) * (0.000)+
-	(abs(eta) > 2.54) * (0.0000) +
-	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 100)                * (0.994) +
-	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 10 && energy < 100) * (0.997) +
-	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 1  && energy < 10)  * (0.996) +
-	(abs(eta) <= 2.44 )                    * (energy >= 10)                 * (1.000) +
-	(abs(eta) <= 2.44 && abs(eta) > 2.25 ) * (energy >= 1 && energy < 10)   * (0.999) +
+	(pt < 1)                                                                * (0.000) +
+	(abs(eta) > 2.54)                                                       * (0.000) +
+	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 80)                 * (0.994) +
+	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 5 && energy < 80)   * (0.996) +
+	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy < 5 )                  * (0.996) +
+	(abs(eta) <= 2.44 )                    * (energy >= 5 )                 * (1.000) +
+	(abs(eta) <= 2.44 && abs(eta) > 2.25 ) * (energy < 5 && pt >=1 )        * (0.999) +
 	(abs(eta) <= 2.25 )                    * (energy >= 1)                  * (1.000) 
+
+	
     }
 }
 
@@ -459,11 +461,10 @@ module SimpleCalorimeter ECal {
 
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
     set ResolutionFormula {
-	(abs(eta) <= 0.3) *  sqrt(energy^2*0.01^2 + energy*0.124^2)+
-	(abs(eta) <= 0.78 && abs(eta)> 0.3)  * sqrt(energy^2*0.01^2 + energy*0.156^2)+
+	(abs(eta) <= 0.78 )  * sqrt(energy^2*0.01^2 + energy*0.156^2)+
 	(abs(eta) > 0.78 && abs(eta) <=0.83 ) * sqrt( energy^0.01^2 + energy*0.175^2  ) +
 	(abs(eta) <= 3 && abs(eta) > 0.83) * sqrt( energy^2*0.01^2 + energy*0.151^2  )}
-}
+}    
 
 #############
 #   HCAL
@@ -549,10 +550,10 @@ module SimpleCalorimeter HCal {
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     #CLICdet internal studies
     set ResolutionFormula {
-	(abs(eta)<= 0.3) * sqrt(1.18^2  + energy*0.2^2  + energy^2*0.043^2) +
-	 (abs(eta)<= 0.78 && abs(eta) > 0.3) * sqrt(1.48^2  + energy*0.251^2  + energy^2*0.0537^2) +
-	 (abs(eta)<=1.099 && abs(eta) > 0.78) * sqrt(  1.25^2 + energy*0.311^2 + energy^2*0.0515^2 ) +
-	 (abs(eta)<=3 && abs(eta)> 1.099) * sqrt( 1.09^2 + energy*0.321^2 + energy^2*0.0517^2  )
+	(abs(eta)<= 0.3) * sqrt(1.38^2  + energy*0.308^2  + energy^2*0.050^2) +
+	 (abs(eta)<= 0.78 && abs(eta) > 0.3) * sqrt(1.25^2  + energy*0.322^2  + energy^2*0.048^2) +
+	 (abs(eta)<=1.099 && abs(eta) > 0.78) * sqrt(  1.159^2 + energy*0.341^2 + energy^2*0.049^2 ) +
+	 (abs(eta)<=3 && abs(eta)> 1.099) * sqrt( 1.09^2 + energy*0.319^2 + energy^2*0.052^2  )
 	}
     
 }
@@ -696,12 +697,19 @@ module Efficiency MuonEfficiency {
 
     # efficiency formula for muons
     # current full simulation of CLICdet yields:
+
+
+#	(energy < 2.0 )                                                        * (0.00) +
+#	(energy  < 50 && energy >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
+#	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
+#	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) + 
+#	(energy>=50)                                                           * (0.999)
+
     set EfficiencyFormula {
 	(energy < 2.0 )                                                        * (0.00) +
-	(energy  < 50 && energy >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
-	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
-	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) + 
-	(energy>=50)                                                           * (0.999)
+	(energy  >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
+	(energy  >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
+	(energy  >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) 
     }
 }
 
