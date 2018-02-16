@@ -656,15 +656,17 @@ module Efficiency ElectronEfficiency {
     set OutputArray electrons
 
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
+#	(energy >= 5.0) * ( abs(eta) > 1.95 )                     * (0.6 ) +
+#	(energy >= 5.0) * ( abs(eta) <= 1.95 && abs(eta) > 1.22 ) * (0.77) +
+#	(energy >= 5.0) * ( abs(eta) <= 1.22 && abs(eta) > 1.1  ) * (0.67) + 
+#	(energy >= 5.0) * ( abs(eta) <= 1.1 && abs(eta) > 1.0   ) * (0.76) +
+#	(energy >= 5.0) * ( abs(eta) <= 1.0 && abs(eta) > 0.66  ) * (0.8 ) +
+#	(energy >= 5.0) * ( abs(eta) <= 0.66 && abs(eta) >0.4   ) * (0.86) +
+#	(energy >= 5.0) * ( abs(eta) <= 0.4)                      * (0.89)
+
     set EfficiencyFormula {
-	(energy < 5.0 )                                           * (0.00) +
-	(energy >= 5.0) * ( abs(eta) > 1.95 )                     * (0.6 ) +
-	(energy >= 5.0) * ( abs(eta) <= 1.95 && abs(eta) > 1.22 ) * (0.77) +
-	(energy >= 5.0) * ( abs(eta) <= 1.22 && abs(eta) > 1.1  ) * (0.67) + 
-	(energy >= 5.0) * ( abs(eta) <= 1.1 && abs(eta) > 1.0   ) * (0.76) +
-	(energy >= 5.0) * ( abs(eta) <= 1.0 && abs(eta) > 0.66  ) * (0.8 ) +
-	(energy >= 5.0) * ( abs(eta) <= 0.66 && abs(eta) >0.4   ) * (0.86) +
-	(energy >= 5.0) * ( abs(eta) <= 0.4)                      * (0.89)
+	(energy < 5.0 ) * (0.00) +
+	(energy >= 5.0) * (0.95)
     }
 }
 
@@ -706,10 +708,8 @@ module Efficiency MuonEfficiency {
 #	(energy>=50)                                                           * (0.999)
 
     set EfficiencyFormula {
-	(energy < 2.0 )                                                        * (0.00) +
-	(energy  >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
-	(energy  >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
-	(energy  >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) 
+	(energy < 2.0 )   * (0.00) +
+	(energy >= 2.0 )  * (0.999)
     }
 }
 
