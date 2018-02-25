@@ -174,12 +174,13 @@ void StatusPidFilter::Process()
 
     // logic ported from HepPDF: http://lcgapp.cern.ch/project/simu/HepPDT/HepPDT.2.05.02/html/ParticleID_8cc-source.html#l00081
     bool is_b_hadron = hasBottom(pdgCode);
+    bool is_b_quark  = (pdgCode == 5);
 
     if (is_b_hadron)
       pass = kTRUE;
 
-    // fPTMin not applied to b_hadrons to allow for b-enriched sample stitching
-    if(!pass || (candidate->Momentum.Pt() < fPTMin && !is_b_hadron) ) continue;
+    // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
+    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark)) ) continue;
 
     fOutputArray->Add(candidate);
   }
