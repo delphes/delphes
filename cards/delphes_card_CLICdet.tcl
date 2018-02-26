@@ -74,8 +74,13 @@ set ExecutionPath {
     FastJetFinderVLC_R15_N5
     FastJetFinderVLC_R15_N6
 
+    FastJetFinderVLC_R05_inclusive
+    FastJetFinderVLC_R07_inclusive
+    FastJetFinderVLC_R10_inclusive
+    FastJetFinderVLC_R12_inclusive
+    FastJetFinderVLC_R15_inclusive
 
-
+    
     MissingET
     GenMissingET
 
@@ -656,17 +661,75 @@ module Efficiency ElectronEfficiency {
     set OutputArray electrons
 
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
-#	(energy >= 5.0) * ( abs(eta) > 1.95 )                     * (0.6 ) +
-#	(energy >= 5.0) * ( abs(eta) <= 1.95 && abs(eta) > 1.22 ) * (0.77) +
-#	(energy >= 5.0) * ( abs(eta) <= 1.22 && abs(eta) > 1.1  ) * (0.67) + 
-#	(energy >= 5.0) * ( abs(eta) <= 1.1 && abs(eta) > 1.0   ) * (0.76) +
-#	(energy >= 5.0) * ( abs(eta) <= 1.0 && abs(eta) > 0.66  ) * (0.8 ) +
-#	(energy >= 5.0) * ( abs(eta) <= 0.66 && abs(eta) >0.4   ) * (0.86) +
-#	(energy >= 5.0) * ( abs(eta) <= 0.4)                      * (0.89)
 
     set EfficiencyFormula {
-	(energy < 5.0 ) * (0.00) +
-	(energy >= 5.0) * (0.95)
+	(energy < 3.0) * ( 0.00 ) +
+	( energy >=3 && energy < 8  ) * (abs(eta) > 1.95)                     * (0.58 ) +
+	( energy >=3 && energy < 8  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * ( 0.7 ) + 	 
+	( energy >=3 && energy < 8  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * ( 0.6 ) +	 
+	( energy >=3 && energy < 8  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * ( 0.7 ) +	 
+	( energy >=3 && energy < 8  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * ( 0.8 ) +	 
+	( energy >=3 && energy < 8  ) * (abs(eta) <= 0.69)                    * (0.84 ) +      
+	( energy >=8 && energy < 13  ) * (abs(eta) > 1.95)                     * (  0.6 ) +
+	( energy >=8 && energy < 13  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * ( 0.76 ) + 	 
+	( energy >=8 && energy < 13  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * ( 0.67 ) +	 
+	( energy >=8 && energy < 13  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * ( 0.78 ) +	 
+	( energy >=8 && energy < 13  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * ( 0.86 ) +	 
+	( energy >=8 && energy < 13  ) * (abs(eta) <= 0.69)                    * ( 0.88 ) +      
+	( energy >=13 && energy < 18  ) * (abs(eta) > 1.95)                     * (  0.6 ) +
+	( energy >=13 && energy < 18  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * (  0.8 ) + 	 
+	( energy >=13 && energy < 18  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * ( 0.68 ) +	 
+	( energy >=13 && energy < 18  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * ( 0.84 ) +	 
+	( energy >=13 && energy < 18  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * ( 0.88 ) +	 
+	( energy >=13 && energy < 18  ) * (abs(eta) <= 0.69)                    * (  0.9 ) +      
+	( energy >=18 && energy < 23  ) * (abs(eta) > 1.95)                     * (0.64 ) +
+	( energy >=18 && energy < 23  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * (0.82 ) + 	 
+	( energy >=18 && energy < 23  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * ( 0.7 ) +	 
+	( energy >=18 && energy < 23  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * (0.84 ) +	 
+	( energy >=18 && energy < 23  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * ( 0.9 ) +	 
+	( energy >=18 && energy < 23  ) * (abs(eta) <= 0.69)                    * (0.92 ) +      
+	( energy >= 23 && energy < 28  ) * (abs(eta) > 1.95)                     * (0.64 ) +
+	( energy >= 23 && energy < 28  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * (0.86 ) + 	 
+	( energy >= 23 && energy < 28  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * (0.74 ) +	 
+	( energy >= 23 && energy < 28  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * (0.87 ) +	 
+	( energy >= 23 && energy < 28  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * (0.91 ) +	 
+	( energy >= 23 && energy < 28  ) * (abs(eta) <= 0.69)                    * (0.94 ) +      
+	( energy >=28 && energy < 35  ) * (abs(eta) > 1.95)                     * (0.67 ) +
+	( energy >=28 && energy < 35  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * (0.88 ) + 	 
+	( energy >=28 && energy < 35  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * (0.78 ) +	 
+	( energy >=28 && energy < 35  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * ( 0.9 ) +	 
+	( energy >=28 && energy < 35  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * (0.94 ) +	 
+	( energy >=28 && energy < 35  ) * (abs(eta) <= 0.69)                    * (0.94 ) +      
+	( energy >=35 && energy < 45  ) * (abs(eta) > 1.95)                     * (0.68 ) +
+	( energy >=35 && energy < 45  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * ( 0.9 ) + 	 
+	( energy >=35 && energy < 45  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * (0.86 ) +	 
+	( energy >=35 && energy < 45  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * (0.92 ) +	 
+	( energy >=35 && energy < 45  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * (0.94 ) +	 
+	( energy >=35 && energy < 45  ) * (abs(eta) <= 0.69)                    * (0.96 ) +      
+	( energy >=45 && energy < 80  ) * (abs(eta) > 1.95)                     * (  0.7 ) +
+	( energy >=45 && energy < 80  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * ( 0.92 ) + 	 
+	( energy >=45 && energy < 80  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * (  0.8 ) +	 
+	( energy >=45 && energy < 80  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * ( 0.94 ) +	 
+	( energy >=45 && energy < 80  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * ( 0.96 ) +	 
+	( energy >=45 && energy < 80  ) * (abs(eta) <= 0.69)                    * ( 0.97 ) +      
+	( energy >=80 && energy < 200  ) * (abs(eta) > 1.95)                     * (0.68 ) +
+	( energy >=80 && energy < 200  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * (0.96 ) + 	 
+	( energy >=80 && energy < 200  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * (0.84 ) +	 
+	( energy >=80 && energy < 200  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * (0.94 ) +	 
+	( energy >=80 && energy < 200  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * (0.98 ) +	 
+	( energy >=80 && energy < 200  ) * (abs(eta) <= 0.69)                    * (0.98 ) +      
+	( energy >=200 && energy < 400  ) * (abs(eta) > 1.95)                     * ( 0.68 ) +
+	( energy >=200 && energy < 400  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * ( 0.97 ) + 	 
+	( energy >=200 && energy < 400  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * ( 0.86 ) +	 
+	( energy >=200 && energy < 400  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * ( 0.96 ) +	 
+	( energy >=200 && energy < 400  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * ( 0.98 ) +	 
+	( energy >=200 && energy < 400  ) * (abs(eta) <= 0.69)                    * ( 0.98 ) +      
+	( energy >=400  ) * (abs(eta) > 1.95)                     * (0.68 ) +
+	( energy >=400  ) * (abs(eta) <= 1.95 && abs(eta) > 1.22) * (0.96 ) + 	 
+	( energy >=400  ) * (abs(eta) <= 1.22 && abs(eta) > 1.1 ) * (0.82 ) +	 
+	( energy >=400  ) * (abs(eta) <= 1.1 && abs(eta) > 0.91 ) * (0.96 ) +	 
+	( energy >=400  ) * (abs(eta) <= 0.91 && abs(eta) > 0.69) * (0.98 ) +	 
+	( energy >=400  ) * (abs(eta) <= 0.69)                    * (0.98 )       
     }
 }
 
@@ -701,15 +764,14 @@ module Efficiency MuonEfficiency {
     # current full simulation of CLICdet yields:
 
 
-#	(energy < 2.0 )                                                        * (0.00) +
-#	(energy  < 50 && energy >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
-#	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
-#	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) + 
-#	(energy>=50)                                                           * (0.999)
 
     set EfficiencyFormula {
-	(energy < 2.0 )   * (0.00) +
-	(energy >= 2.0 )  * (0.999)
+	(energy < 2.0 )                                                        * (0.00) +
+	(energy  < 50 && energy >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
+	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
+	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) + 
+	(energy>=50)                                                           * (0.999)
+
     }
 }
 
@@ -912,6 +974,13 @@ module TreeWriter TreeWriter {
     add Branch FastJetFinderVLC_R15_N4/VLCjetsR15N4 VLCjetR15N4 Jet
     add Branch FastJetFinderVLC_R15_N5/VLCjetsR15N5 VLCjetR15N5 Jet
     add Branch FastJetFinderVLC_R15_N6/VLCjetsR15N6 VLCjetR15N6 Jet
+
+    add Branch FastJetFinderVLC_R05_inclusive/VLCjetsR05_inclusive VLCjetR05_inclusive Jet
+    add Branch FastJetFinderVLC_R07_inclusive/VLCjetsR07_inclusive VLCjetR07_inclusive Jet
+    add Branch FastJetFinderVLC_R10_inclusive/VLCjetsR10_inclusive VLCjetR10_inclusive Jet
+    add Branch FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive VLCjetR12_inclusive Jet
+    add Branch FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive VLCjetR15_inclusive Jet
+
 
     add Branch GenMissingET/momentum GenMissingET MissingET
 
