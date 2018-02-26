@@ -50,6 +50,62 @@
 
 using namespace std;
 
+namespace {
+  // integer power (faster than TMath::Pow() + cast to integer)
+  int ipow(int base, int exp)
+  {
+      int result = 1;
+      while (exp)
+      {
+          if (exp & 1)
+              result *= base;
+          exp >>= 1;
+          base *= base;
+      }
+
+      return result;
+  }
+
+  // standalone function to extract the i-th digit from a number (counting from 0 = rightmost, etc..)
+  int digit(int val, int i)
+  {
+      int y    = ipow(10,i);
+      int z    = val/y;
+      int val2 = val / (y * 10);
+      return (z - val2*10);
+  }
+
+  //  return the first two digits if this is a "fundamental" particle
+  //  ID = 100 is a special case (internal generator ID's are 81-100)
+  //  also, 101 and 102 are now used (by HepPID) for geantinos
+  int fundamentalID(int pdgCode)
+  {
+      pdgCode = abs(pdgCode);
+      if( ( digit(pdgCode, 9) == 1 ) && ( digit(pdgCode, 8) == 0 ) ) { return 0; }
+      if( digit(pdgCode, 2) == 0 && digit(pdgCode, 3) == 0) {
+          return pdgCode%10000;
+      } else if( pdgCode <= 102 ) {
+          return pdgCode;
+      } else {
+          return 0;
+      }
+  }
+
+  bool hasBottom(int pdgCode)
+  {
+      if ( (pdgCode/10000000) > 0)
+        return false;
+      if (pdgCode <= 100)
+        return false;
+      if (fundamentalID(pdgCode) <= 100 && fundamentalID(pdgCode) > 0)
+        return false;
+      if( digit(pdgCode, 3) == 5 || digit(pdgCode, 2) == 5 || digit(pdgCode, 1) == 5 )
+        return true;      
+      return false;
+  }
+}
+
+
 //------------------------------------------------------------------------------
 
 StatusPidFilter::StatusPidFilter() :
@@ -116,7 +172,15 @@ void StatusPidFilter::Process()
     // Gauge bosons and other fundamental bosons
     if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
 
-    if(!pass || candidate->Momentum.Pt() < fPTMin) continue;
+    // logic ported from HepPDF: http://lcgapp.cern.ch/project/simu/HepPDT/HepPDT.2.05.02/html/ParticleID_8cc-source.html#l00081
+    bool is_b_hadron = hasBottom(pdgCode);
+    bool is_b_quark  = (pdgCode == 5);
+
+    if (is_b_hadron)
+      pass = kTRUE;
+
+    // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
+    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark)) ) continue;
 
     fOutputArray->Add(candidate);
   }
