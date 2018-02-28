@@ -502,3 +502,108 @@ module TauTagging TauTagging_R15N6 {
  } 
  } 
 
+
+module TauTagging TauTagging_R05_inclusive {
+ set ParticleInputArray Delphes/allParticles
+ set PartonInputArray Delphes/partons
+ set JetInputArray FastJetFinderVLC_R05_inclusive/VLCjetsR05_inclusive
+ set DeltaR 0.5
+ set TauPTMin 1.0
+ set TauEtaMax 4.0
+ add EfficiencyFormula {0} {0.03} 
+ add EfficiencyFormula {15} { 
+ (pt < 5) * (0.0) +
+ (pt >=5 && pt < 12.5) * (0.84) +
+	(pt >=12.5 && pt < 25) * (0.79) +
+	(pt >=25 && pt < 50) * (0.74) +
+	(pt >=50 && pt < 75) * (0.66) +
+	(pt >=75 && pt < 125) * (0.61) +
+	(pt >=125 && pt < 250) * (0.51) +
+	(pt >=250 ) * (0.36)
+ } 
+ } 
+
+
+module TauTagging TauTagging_R07_inclusive {
+ set ParticleInputArray Delphes/allParticles
+ set PartonInputArray Delphes/partons
+ set JetInputArray FastJetFinderVLC_R07_inclusive/VLCjetsR07_inclusive
+ set DeltaR 0.5
+ set TauPTMin 1.0
+ set TauEtaMax 4.0
+ add EfficiencyFormula {0} {0.03} 
+ add EfficiencyFormula {15} { 
+ (pt < 5) * (0.0) +
+ (pt >=5 && pt < 12.5) * (0.84) +
+	(pt >=12.5 && pt < 25) * (0.79) +
+	(pt >=25 && pt < 50) * (0.74) +
+	(pt >=50 && pt < 75) * (0.66) +
+	(pt >=75 && pt < 125) * (0.61) +
+	(pt >=125 && pt < 250) * (0.51) +
+	(pt >=250 ) * (0.36)
+ } 
+ } 
+
+
+module TauTagging TauTagging_R10_inclusive {
+ set ParticleInputArray Delphes/allParticles
+ set PartonInputArray Delphes/partons
+ set JetInputArray FastJetFinderVLC_R10_inclusive/VLCjetsR10_inclusive
+ set DeltaR 0.5
+ set TauPTMin 1.0
+ set TauEtaMax 4.0
+ add EfficiencyFormula {0} {0.03} 
+ add EfficiencyFormula {15} { 
+ (pt < 5) * (0.0) +
+ (pt >=5 && pt < 12.5) * (0.84) +
+	(pt >=12.5 && pt < 25) * (0.79) +
+	(pt >=25 && pt < 50) * (0.74) +
+	(pt >=50 && pt < 75) * (0.66) +
+	(pt >=75 && pt < 125) * (0.61) +
+	(pt >=125 && pt < 250) * (0.51) +
+	(pt >=250 ) * (0.36)
+ } 
+ } 
+
+
+module TauTagging TauTagging_R12_inclusive {
+ set ParticleInputArray Delphes/allParticles
+ set PartonInputArray Delphes/partons
+ set JetInputArray FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive
+ set DeltaR 0.5
+ set TauPTMin 1.0
+ set TauEtaMax 4.0
+ add EfficiencyFormula {0} {0.03} 
+ add EfficiencyFormula {15} { 
+ (pt < 5) * (0.0) +
+ (pt >=5 && pt < 12.5) * (0.84) +
+	(pt >=12.5 && pt < 25) * (0.79) +
+	(pt >=25 && pt < 50) * (0.74) +
+	(pt >=50 && pt < 75) * (0.66) +
+	(pt >=75 && pt < 125) * (0.61) +
+	(pt >=125 && pt < 250) * (0.51) +
+	(pt >=250 ) * (0.36)
+ } 
+ } 
+
+
+module TauTagging TauTagging_R15_inclusive {
+ set ParticleInputArray Delphes/allParticles
+ set PartonInputArray Delphes/partons
+ set JetInputArray FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive
+ set DeltaR 0.5
+ set TauPTMin 1.0
+ set TauEtaMax 4.0
+ add EfficiencyFormula {0} {0.03} 
+ add EfficiencyFormula {15} { 
+ (pt < 5) * (0.0) +
+ (pt >=5 && pt < 12.5) * (0.84) +
+	(pt >=12.5 && pt < 25) * (0.79) +
+	(pt >=25 && pt < 50) * (0.74) +
+	(pt >=50 && pt < 75) * (0.66) +
+	(pt >=75 && pt < 125) * (0.61) +
+	(pt >=125 && pt < 250) * (0.51) +
+	(pt >=250 ) * (0.36)
+ } 
+ } 
+

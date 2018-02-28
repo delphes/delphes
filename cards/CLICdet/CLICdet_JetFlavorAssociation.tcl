@@ -308,3 +308,64 @@ module JetFlavorAssociation JetFlavorAssociation_R15N6 {
     set PartonEtaMax 2.5
 
 }
+
+module JetFlavorAssociation JetFlavorAssociation_R05_inclusive {
+
+    set PartonInputArray Delphes/partons
+    set ParticleInputArray Delphes/allParticles
+    set ParticleLHEFInputArray Delphes/allParticlesLHEF
+    set JetInputArray FastJetFinderVLC_R05_inclusive/VLCjetsR05_inclusive
+
+    set DeltaR 0.5
+    set PartonPTMin 1.0
+    set PartonEtaMax 2.5
+
+}
+module JetFlavorAssociation JetFlavorAssociation_R07_inclusive {
+
+    set PartonInputArray Delphes/partons
+    set ParticleInputArray Delphes/allParticles
+    set ParticleLHEFInputArray Delphes/allParticlesLHEF
+    set JetInputArray FastJetFinderVLC_R07_inclusive/VLCjetsR07_inclusive
+
+    set DeltaR 0.5
+    set PartonPTMin 1.0
+    set PartonEtaMax 2.5
+
+}
+module JetFlavorAssociation JetFlavorAssociation_R10_inclusive {
+
+    set PartonInputArray Delphes/partons
+    set ParticleInputArray Delphes/allParticles
+    set ParticleLHEFInputArray Delphes/allParticlesLHEF
+    set JetInputArray FastJetFinderVLC_R10_inclusive/VLCjetsR10_inclusive
+
+    set DeltaR 0.5
+    set PartonPTMin 1.0
+    set PartonEtaMax 2.5
+
+}
+module JetFlavorAssociation JetFlavorAssociation_R12_inclusive {
+
+    set PartonInputArray Delphes/partons
+    set ParticleInputArray Delphes/allParticles
+    set ParticleLHEFInputArray Delphes/allParticlesLHEF
+    set JetInputArray FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive
+
+    set DeltaR 0.5
+    set PartonPTMin 1.0
+    set PartonEtaMax 2.5
+
+}
+module JetFlavorAssociation JetFlavorAssociation_R15_inclusive {
+
+    set PartonInputArray Delphes/partons
+    set ParticleInputArray Delphes/allParticles
+    set ParticleLHEFInputArray Delphes/allParticlesLHEF
+    set JetInputArray FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive
+
+    set DeltaR 0.5
+    set PartonPTMin 1.0
+    set PartonEtaMax 2.5
+
+}

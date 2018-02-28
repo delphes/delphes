@@ -381,3 +381,83 @@ module BTagging BTaggingWP90_R15N6 {
 	set BitNumber 2
 	source CLICdet/CLICdet_BTag_90.tcl
 }
+
+########################
+# inclusive clustering
+########################
+
+module BTagging BTaggingWP50_R05_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R05_inclusive/VLCjetsR05_inclusive                         
+ set BitNumber 0                                                                               
+ source CLICdet/CLICdet_BTag_50.tcl                                                                    
+ }                                                                                             
+module BTagging BTaggingWP70_R05_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R05_inclusive/VLCjetsR05_inclusive                         
+ set BitNumber 1                                                                               
+ source CLICdet/CLICdet_BTag_70.tcl                                                                    
+}                                                                                              
+module BTagging BTaggingWP90_R05_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R05_inclusive/VLCjetsR05_inclusive                         
+ set BitNumber 2                                                                               
+ source CLICdet/CLICdet_BTag_90.tcl                                                                    
+}                                                                                              
+module BTagging BTaggingWP50_R07_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R07_inclusive/VLCjetsR07_inclusive                         
+ set BitNumber 0                                                                               
+ source CLICdet/CLICdet_BTag_50.tcl                                                                    
+ }                                                                                             
+module BTagging BTaggingWP70_R07_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R07_inclusive/VLCjetsR07_inclusive                         
+ set BitNumber 1                                                                               
+ source CLICdet/CLICdet_BTag_70.tcl                                                                    
+}                                                                                              
+module BTagging BTaggingWP90_R07_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R07_inclusive/VLCjetsR07_inclusive                         
+ set BitNumber 2                                                                               
+ source CLICdet/CLICdet_BTag_90.tcl                                                                    
+}                                                                                              
+module BTagging BTaggingWP50_R10_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R10_inclusive/VLCjetsR10_inclusive                         
+ set BitNumber 0                                                                               
+ source CLICdet/CLICdet_BTag_50.tcl                                                                    
+ }                                                                                             
+module BTagging BTaggingWP70_R10_inclusive {                                                   
+ set JetInputArray FastJetFinderVLC_R10_inclusive/VLCjetsR10_inclusive                         
+ set BitNumber 1                                                                               
+ source CLICdet/CLICdet_BTag_70.tcl                                                                    
+}
+module BTagging BTaggingWP90_R10_inclusive {
+ set JetInputArray FastJetFinderVLC_R10_inclusive/VLCjetsR10_inclusive
+ set BitNumber 2
+ source CLICdet/CLICdet_BTag_90.tcl
+}
+module BTagging BTaggingWP50_R12_inclusive {
+ set JetInputArray FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive
+ set BitNumber 0
+ source CLICdet/CLICdet_BTag_50.tcl
+ }
+module BTagging BTaggingWP70_R12_inclusive {
+ set JetInputArray FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive
+ set BitNumber 1
+ source CLICdet/CLICdet_BTag_70.tcl
+}
+module BTagging BTaggingWP90_R12_inclusive {
+ set JetInputArray FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive
+ set BitNumber 2
+ source CLICdet/CLICdet_BTag_90.tcl
+}
+module BTagging BTaggingWP50_R15_inclusive {
+ set JetInputArray FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive
+ set BitNumber 0
+ source CLICdet/CLICdet_BTag_50.tcl
+ }
+module BTagging BTaggingWP70_R15_inclusive {
+ set JetInputArray FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive
+ set BitNumber 1
+ source CLICdet/CLICdet_BTag_70.tcl
+}
+module BTagging BTaggingWP90_R15_inclusive {
+ set JetInputArray FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive
+ set BitNumber 2
+ source CLICdet/CLICdet_BTag_90.tcl
+}

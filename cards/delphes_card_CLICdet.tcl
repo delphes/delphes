@@ -114,8 +114,15 @@ set ExecutionPath {
 	JetFlavorAssociation_R15N3
 	JetFlavorAssociation_R15N4
 	JetFlavorAssociation_R15N5
-	JetFlavorAssociation_R15N6
+        JetFlavorAssociation_R15N6
 
+        JetFlavorAssociation_R05_inclusive
+        JetFlavorAssociation_R07_inclusive
+        JetFlavorAssociation_R10_inclusive
+        JetFlavorAssociation_R12_inclusive
+        JetFlavorAssociation_R15_inclusive
+
+    
 	BTaggingWP50_R05N2
 	BTaggingWP70_R05N2
 	BTaggingWP90_R05N2
@@ -191,9 +198,56 @@ set ExecutionPath {
 	BTaggingWP50_R15N6
 	BTaggingWP70_R15N6
 	BTaggingWP90_R15N6
+    BTaggingWP50_R05_inclusive
+    BTaggingWP70_R05_inclusive
+    BTaggingWP90_R05_inclusive
+    BTaggingWP50_R07_inclusive
+    BTaggingWP70_R07_inclusive
+    BTaggingWP90_R07_inclusive
+    BTaggingWP50_R10_inclusive
+    BTaggingWP70_R10_inclusive
+    BTaggingWP90_R10_inclusive
+    BTaggingWP50_R12_inclusive
+    BTaggingWP70_R12_inclusive
+    BTaggingWP90_R12_inclusive
+    BTaggingWP50_R15_inclusive
+    BTaggingWP70_R15_inclusive
+    BTaggingWP90_R15_inclusive
 
     
     TauTagging_R05N2
+    TauTagging_R05N3
+    TauTagging_R05N4
+    TauTagging_R05N5
+    TauTagging_R05N6
+    TauTagging_R07N2
+    TauTagging_R07N3
+    TauTagging_R07N4
+    TauTagging_R07N5
+    TauTagging_R07N6
+    TauTagging_R10N2
+    TauTagging_R10N3
+    TauTagging_R10N4
+    TauTagging_R10N5
+    TauTagging_R10N6
+    TauTagging_R12N2
+    TauTagging_R12N3
+    TauTagging_R12N4
+    TauTagging_R12N5
+    TauTagging_R12N6
+    TauTagging_R15N2
+    TauTagging_R15N3
+    TauTagging_R15N4
+    TauTagging_R15N5
+    TauTagging_R15N6
+
+    TauTagging_R05_inclusive
+    TauTagging_R07_inclusive
+    TauTagging_R10_inclusive
+    TauTagging_R12_inclusive
+    TauTagging_R15_inclusive
+
+
 
     ScalarHT
 
