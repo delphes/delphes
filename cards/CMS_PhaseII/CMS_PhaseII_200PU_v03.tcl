@@ -602,18 +602,18 @@ module SimpleCalorimeter HCal {
   # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- HCAL)
 
   set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
+  for {set i -45} {$i <= 45} {incr i} {
+    add PhiBins [expr {$i * $pi/45.0}]
   }
 
   # 0.02 unit in eta up to eta = 3
-  for {set i 1} {$i <= 84} {incr i} {
-    set eta [expr { -2.958 + $i * 0.0174}]
+  for {set i 1} {$i <= 21} {incr i} {
+    set eta [expr { -2.958 + $i * 0.0696}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  for {set i 1} {$i <= 84} {incr i} {
-    set eta [expr { 1.4964 + $i * 0.0174}]
+  for {set i 1} {$i <= 21} {incr i} {
+    set eta [expr { 1.4964 + $i * 0.0696}]
     add EtaPhiBins $eta $PhiBins
   }
 
