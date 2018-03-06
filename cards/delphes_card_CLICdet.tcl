@@ -85,6 +85,37 @@ set ExecutionPath {
     GenMissingET
 
     
+    JetMomentumSmearing_VLCR05N2                                                                 
+    JetMomentumSmearing_VLCR05N3                                                                 
+    JetMomentumSmearing_VLCR05N4                                                                 
+    JetMomentumSmearing_VLCR05N5
+    JetMomentumSmearing_VLCR05N6
+    JetMomentumSmearing_VLCR05_inclusive
+    JetMomentumSmearing_VLCR07N2
+    JetMomentumSmearing_VLCR07N3
+    JetMomentumSmearing_VLCR07N4
+    JetMomentumSmearing_VLCR07N5
+    JetMomentumSmearing_VLCR07N6
+    JetMomentumSmearing_VLCR07_inclusive
+    JetMomentumSmearing_VLCR10N2
+    JetMomentumSmearing_VLCR10N3
+    JetMomentumSmearing_VLCR10N4
+    JetMomentumSmearing_VLCR10N5
+    JetMomentumSmearing_VLCR10N6
+    JetMomentumSmearing_VLCR10_inclusive
+    JetMomentumSmearing_VLCR12N2
+    JetMomentumSmearing_VLCR12N3
+    JetMomentumSmearing_VLCR12N4
+    JetMomentumSmearing_VLCR12N5
+    JetMomentumSmearing_VLCR12N6
+    JetMomentumSmearing_VLCR12_inclusive
+    JetMomentumSmearing_VLCR15N2
+    JetMomentumSmearing_VLCR15N3
+    JetMomentumSmearing_VLCR15N4
+    JetMomentumSmearing_VLCR15N5
+    JetMomentumSmearing_VLCR15N6
+    JetMomentumSmearing_VLCR15_inclusive
+
 
     JetFlavorAssociation_R05N2
 	JetFlavorAssociation_R05N3
@@ -574,14 +605,14 @@ module SimpleCalorimeter HCal {
     for {set i -30} {$i <=30} {incr i} {
 	add PhiBins [expr {$i * $pi/30.0}]
     }
-    # deta =0.1 for 0.9 < |eta| <=3.5
-    #for -3.5 to -0.9, 26 segments
-    for {set i 1} {$i <=27} {incr i} {
-	set eta [expr {-3.6 + $i * 0.1}]
+    # deta =0.1 for 0.9 < |eta| <=3.0
+    #for -3.0 to -0.9, 21 segments
+    for {set i 1} {$i <=22} {incr i} {
+	set eta [expr {-3.1 + $i * 0.1}]
 	add EtaPhiBins $eta $PhiBins
     }
-    #same for 0.9 to 3.5
-    for {set i 1} {$i <=27} {incr i} {
+    #same for 0.9 to 3.0
+    for {set i 1} {$i <=22} {incr i} {
 	set eta [expr {0.8 + $i * 0.1 }]
 	add EtaPhiBins $eta $PhiBins
     }
@@ -963,7 +994,12 @@ source CLICdet/CLICdet_JetReco.tcl
 #    # scale formula for jets
 #    set ScaleFormula {1.00}
 #}
+#########################################
+# Jet Momentum Smearing to mimick overlay
+#########################################
 
+
+source CLICdet/CLICdet_JetSmearing.tcl
 
 ########################
 # Jet Flavor Association
@@ -1035,6 +1071,45 @@ module TreeWriter TreeWriter {
     add Branch FastJetFinderVLC_R12_inclusive/VLCjetsR12_inclusive VLCjetR12_inclusive Jet
     add Branch FastJetFinderVLC_R15_inclusive/VLCjetsR15_inclusive VLCjetR15_inclusive Jet
 
+
+    ###with JER
+    add Branch JetMomentumSmearing_VLCR05N2/JER_VLCjetsR05N2 JER_VLCjetR05N2 Jet
+    add Branch JetMomentumSmearing_VLCR05N3/JER_VLCjetsR05N3 JER_VLCjetR05N3 Jet
+    add Branch JetMomentumSmearing_VLCR05N4/JER_VLCjetsR05N4 JER_VLCjetR05N4 Jet
+    add Branch JetMomentumSmearing_VLCR05N5/JER_VLCjetsR05N5 JER_VLCjetR05N5 Jet
+    add Branch JetMomentumSmearing_VLCR05N6/JER_VLCjetsR05N6 JER_VLCjetR05N6 Jet
+
+    add Branch JetMomentumSmearing_VLCR07N2/JER_VLCjetsR07N2 JER_VLCjetR07N2 Jet
+    add Branch JetMomentumSmearing_VLCR07N3/JER_VLCjetsR07N3 JER_VLCjetR07N3 Jet
+    add Branch JetMomentumSmearing_VLCR07N4/JER_VLCjetsR07N4 JER_VLCjetR07N4 Jet
+    add Branch JetMomentumSmearing_VLCR07N5/JER_VLCjetsR07N5 JER_VLCjetR07N5 Jet
+    add Branch JetMomentumSmearing_VLCR07N6/JER_VLCjetsR07N6 JER_VLCjetR07N6 Jet
+
+    add Branch JetMomentumSmearing_VLCR10N2/JER_VLCjetsR10N2 JER_VLCjetR10N2 Jet
+    add Branch JetMomentumSmearing_VLCR10N3/JER_VLCjetsR10N3 JER_VLCjetR10N3 Jet
+    add Branch JetMomentumSmearing_VLCR10N4/JER_VLCjetsR10N4 JER_VLCjetR10N4 Jet
+    add Branch JetMomentumSmearing_VLCR10N5/JER_VLCjetsR10N5 JER_VLCjetR10N5 Jet
+    add Branch JetMomentumSmearing_VLCR10N6/JER_VLCjetsR10N6 JER_VLCjetR10N6 Jet
+
+    add Branch JetMomentumSmearing_VLCR12N2/JER_VLCjetsR12N2 JER_VLCjetR12N2 Jet
+    add Branch JetMomentumSmearing_VLCR12N3/JER_VLCjetsR12N3 JER_VLCjetR12N3 Jet
+    add Branch JetMomentumSmearing_VLCR12N4/JER_VLCjetsR12N4 JER_VLCjetR12N4 Jet
+    add Branch JetMomentumSmearing_VLCR12N5/JER_VLCjetsR12N5 JER_VLCjetR12N5 Jet
+    add Branch JetMomentumSmearing_VLCR12N6/JER_VLCjetsR12N6 JER_VLCjetR12N6 Jet
+
+    add Branch JetMomentumSmearing_VLCR15N2/JER_VLCjetsR15N2 JER_VLCjetR15N2 Jet
+    add Branch JetMomentumSmearing_VLCR15N3/JER_VLCjetsR15N3 JER_VLCjetR15N3 Jet
+    add Branch JetMomentumSmearing_VLCR15N4/JER_VLCjetsR15N4 JER_VLCjetR15N4 Jet
+    add Branch JetMomentumSmearing_VLCR15N5/JER_VLCjetsR15N5 JER_VLCjetR15N5 Jet
+    add Branch JetMomentumSmearing_VLCR15N6/JER_VLCjetsR15N6 JER_VLCjetR15N6 Jet
+
+    add Branch JetMomentumSmearing_VLCR05_inclusive/JER_VLCjetsR05_inclusive JER_VLCjetR05_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR07_inclusive/JER_VLCjetsR07_inclusive JER_VLCjetR07_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR10_inclusive/JER_VLCjetsR10_inclusive JER_VLCjetR10_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR12_inclusive/JER_VLCjetsR12_inclusive JER_VLCjetR12_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR15_inclusive/JER_VLCjetsR15_inclusive JER_VLCjetR15_inclusive Jet
+
+    ####
 
     add Branch GenMissingET/momentum GenMissingET MissingET
 

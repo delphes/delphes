@@ -383,7 +383,13 @@ void FastJetFinder::Process()
   
   if(fExclusiveClustering)
     {
-      outputList = sorted_by_pt(sequence->exclusive_jets( fNJets ));
+   try{
+     outputList = sorted_by_pt(sequence->exclusive_jets( fNJets ));
+   }
+   catch(fastjet::Error)
+     {
+       outputList.clear();
+     }
 
       excl_ymerge23 = sequence->exclusive_ymerge( 2 );
       excl_ymerge34 = sequence->exclusive_ymerge( 3 );
