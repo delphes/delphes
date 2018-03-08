@@ -54,9 +54,7 @@ or
    curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root
 ```
 
-For more detailed documentation, please visit 
-
-https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
+For more detailed documentation, please visit https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
 
 Configure Delphes on lxplus.cern.ch
 ====================================
@@ -73,11 +71,10 @@ source /afs/cern.ch/sw/lcg/app/releases/ROOT/6.06.00/x86_64-slc6-gcc49-opt/root/
 make 
 ```
 
-
 Simple analysis using TTree::Draw
 =================================
 
-Now we can start ROOT and look at the data stored in the output ROOT file.
+Now we can start [ROOT](root.cern) and look at the data stored in the output ROOT file.
 
 Start ROOT and load Delphes shared library:
 
@@ -94,17 +91,12 @@ Open ROOT file and do some basic analysis using Draw or TBrowser:
    TBrowser browser;
 ```
 
-Note 1: Delphes - tree name, it can be learned e.g. from TBrowser
+Notes:
+* ```Delphes``` is the tree name. It can be learned e.g. from TBrowser.
+* ```Electron```is the branch name; ```PT``` is a variable (leaf) of this branch.
 
-Note 2: Electron - branch name; PT - variable (leaf) of this branch
-
-Complete description of all branches can be found in
-
-   doc/RootTreeDescription.html
-
-This information is also available at
-
-   https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
+Complete description of all branches can be found in [doc/RootTreeDescription.html](doc/RootTreeDescription.html).
+This information is also available [in the workbook](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
 
 Macro-based analysis
 ====================
@@ -164,11 +156,10 @@ Basic analysis macro:
 }
 ```
 
-
 More advanced macro-based analysis
 ==================================
 
-The 'examples' directory contains ROOT macros Example1.C, Example2.C and Example3.C.
+The 'examples' directory contains ROOT macros [Example1.C](examples/Example1.C), [Example2.C](examples/Example2.C) and [Example3.C](examples/Example3.C).
 
 Here are the commands to run these ROOT macros:
 
