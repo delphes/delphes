@@ -1,9 +1,10 @@
 Delphes Licensing
 ============================================
 
-This file attempts to include all licenses that apply within Delphes (this program) source tree, in particular any that are supposed to be exposed to the end user for credit requirements for instance. 
+This file attempts to include all licenses that apply within Delphes (this program) source tree, 
+in particular any that are supposed to be exposed to the end user for credit requirements for instance. 
 
-Delphes, a framework for fast simulation of a generic collider experiment
+Delphes is a framework for fast simulation of a generic collider experiment.
 
 Centre for Cosmology, Particle Physics and Phenomenology (CP3)
 Universite Catholique de Louvain (UCL)
@@ -23,7 +24,10 @@ Delphes General
 -----------------------------------------
 
 This program (Delphes) is free software: 
-you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+you can redistribute it and/or modify it under the terms of the 
+GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) 
+any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,24 +35,26 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program (see COPYING file).  If not, 
+along with this program (see COPYING file). If not, 
 see <http://www.gnu.org/licenses/>.
 
-The documentation for this program is under a creative commons share-alike 3.0 license.  
-http://creativecommons.org/licenses/by-sa/3.0/
+The documentation for this program is under a creative commons Attribution-ShareAlike 4.0 license.  
+http://creativecommons.org/licenses/by-sa/4.0/
 It can be found here:  http://cp3.irmp.ucl.ac.be/projects/delphes
 
 This program has dependencies on other libraries and Website depedencies which are or not under GPL and that are commonly distributed with this program core libraries.
 
 Dependencies are as follows:
 
-fastjet                                 GPLv2+                          http://www.fastjet.fr/
-tcl                                     University of California        https://www.tcl.tk/
-PUPPI                                   Delphes General Licence         https://github.com/nhanvtran/ProjectPUPPI/
-ExRootAnalysis                          Delphes General Licence         https://cp3.irmp.ucl.ac.be/projects/ExRootAnalysis/wiki/UserManual
-Hector                                  Delphes General Licence         https://github.com/hectorhep/hector
-ROOT                                    LGPL 2.1                        http://root.cern
-PYTHIA8                                 GPLv2 (discussions ongoing)     http://home.thep.lu.se/~torbjorn/Pythia.html
+fastjet          GPLv2+                       http://www.fastjet.fr/
+tcl              University of California     https://www.tcl.tk/
+PUPPI            Delphes General Licence      https://github.com/nhanvtran/ProjectPUPPI/
+ExRootAnalysis   Delphes General Licence      https://cp3.irmp.ucl.ac.be/projects/ExRootAnalysis/wiki/UserManual
+Hector           Delphes General Licence      https://github.com/hectorhep/hector
+ROOT             LGPL 2.1                     http://root.cern
+PUPPI            GPLv3+                       Currently only distributed with Delphes
+PYTHIA8          GPLv2 (discussions ongoing)  http://home.thep.lu.se/~torbjorn/Pythia.html
+
 
 Licences & Credits of dependencies
 ----------------------------------
@@ -56,12 +62,46 @@ Licences & Credits of dependencies
 #####
 Fastjet
 #####
+
+Unknown Copyright. FastJet was written and is maintained and developed 
+by Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+
 FastJet is released under the terms of the GNU General Public License
 v2 (GPLv2). FastJet includes a significant body of third-party code,
 for example for third party plugin algorithms and for computational
 geometry methods. These too are usually released under the GPL or
 permissive licenses.
-Specifically, 
+
+*/NOTICE: Several files are part of FastJet and released with the following mention, 
+thus explicitly allowing to use a later version than version 2 of the GNU GPL license:
+
+//  FastJet is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation; either version 2 of the License, or
+//  (at your option) any later version.
+//
+//  The algorithms that underlie FastJet have required considerable
+//  development. They are described in the original FastJet paper,
+//  hep-ph/0512210 and in the manual, arXiv:1111.6097. If you use
+//  FastJet as part of work towards a scientific publication, please
+//  quote the version you use and include a citation to the manual and
+//  optionally also to hep-ph/0512210.
+//
+//  FastJet is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with FastJet. If not, see <http://www.gnu.org/licenses/>.
+
+Nearly all depedencies of FastJet are released with the same mention thus
+also explicitly allowing to use a later version than version 2 of the GNU GPL license:
+"... either version 2 of the License, or (at your option) any later version..."
+
+Finally, we have received express autorisations to release the only dependencies under
+GNU GPL v2: D0 RunI and RunII cone plugins and ATLAScone code, 
+under GNU GPL v3 or later license. Specifically, 
   - we received agreement from Joey Huston <Huston@pa.msu.edu> to distribute the ATLAScone code under GPL v3 or later;
   - we received agreement from Paul Grannis for the D0 collaboration to distribute the D0 RunI and RunII cone plugins under GPL v3 or later.
 
@@ -80,13 +120,14 @@ This is to explicitly give you permission to license the D0 jet code for the GPL
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU General Public License for more details.*/
 
 -----------------------------------------------------------------------------
 
 ####
 tcl
 ####
+
 This software is copyrighted by the Regents of the University of
 California, Sun Microsystems, Inc., Scriptics Corporation,
 and other parties.  The following terms apply to all files associated
@@ -119,6 +160,9 @@ MODIFICATIONS.
 ####
 ROOT
 ####
+
+Unknown Copyright
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
@@ -132,8 +176,33 @@ Lesser General Public License for more details.
 -----------------------------------------------------------------------------
 
 ####
+PUPPI
+####
+
+Copyright (C) <2005-2018> <European Organization for Nuclear Research (CERN), Switzerland >
+
+This program (PUPPI) is free software: 
+you can redistribute it and/or modify it under the terms of the 
+GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) 
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program (see COPYING file). If not, 
+see <http://www.gnu.org/licenses/>.
+
+-----------------------------------------------------------------------------
+
+####
 PYTHIA
 ####
+
+Unknown Copyright
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -144,4 +213,4 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
------------------------------------------------------------------------------
+
