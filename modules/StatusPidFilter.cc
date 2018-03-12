@@ -103,6 +103,23 @@ namespace {
         return true;      
       return false;
   }
+
+  bool isTauDaughter(int pdgCode, int M1, const TObjArray *fInputArray){
+    //not needed, just to speed up the code - can be further refined but gives only negligible improvement:
+    if ( pdgCode==15 || pdgCode<11 || (pdgCode > 22 && pdgCode < 100) || pdgCode>1000 )
+      return false;
+
+    if ( M1 < 0 ) 
+      return false;
+
+    Candidate *mother;
+    mother = static_cast<Candidate*>(fInputArray->At( M1 ));
+    if ( TMath::Abs(mother->PID) == 15 )
+      return true;
+
+    return false;
+  }
+
 }
 
 
@@ -176,11 +193,17 @@ void StatusPidFilter::Process()
     bool is_b_hadron = hasBottom(pdgCode);
     bool is_b_quark  = (pdgCode == 5);
 
+    bool is_tau_daughter = isTauDaughter(pdgCode, candidate->M1, fInputArray);
+
     if (is_b_hadron)
       pass = kTRUE;
 
+    if (is_tau_daughter)
+      pass = kTRUE;
+
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
-    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark)) ) continue;
+    // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
+    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter)) ) continue;
 
     fOutputArray->Add(candidate);
   }
