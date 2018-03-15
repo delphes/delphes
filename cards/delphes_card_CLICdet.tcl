@@ -117,6 +117,39 @@ set ExecutionPath {
     JetMomentumSmearing_VLCR15_inclusive
 
 
+       
+    JetEnergyScale_VLCR05N2                                                                 
+    JetEnergyScale_VLCR05N3                                                                 
+    JetEnergyScale_VLCR05N4                                                                 
+    JetEnergyScale_VLCR05N5
+    JetEnergyScale_VLCR05N6
+    JetEnergyScale_VLCR05_inclusive
+    JetEnergyScale_VLCR07N2
+    JetEnergyScale_VLCR07N3
+    JetEnergyScale_VLCR07N4
+    JetEnergyScale_VLCR07N5
+    JetEnergyScale_VLCR07N6
+    JetEnergyScale_VLCR07_inclusive
+    JetEnergyScale_VLCR10N2
+    JetEnergyScale_VLCR10N3
+    JetEnergyScale_VLCR10N4
+    JetEnergyScale_VLCR10N5
+    JetEnergyScale_VLCR10N6
+    JetEnergyScale_VLCR10_inclusive
+    JetEnergyScale_VLCR12N2
+    JetEnergyScale_VLCR12N3
+    JetEnergyScale_VLCR12N4
+    JetEnergyScale_VLCR12N5
+    JetEnergyScale_VLCR12N6
+    JetEnergyScale_VLCR12_inclusive
+    JetEnergyScale_VLCR15N2
+    JetEnergyScale_VLCR15N3
+    JetEnergyScale_VLCR15N4
+    JetEnergyScale_VLCR15N5
+    JetEnergyScale_VLCR15N6
+    JetEnergyScale_VLCR15_inclusive
+
+
     JetFlavorAssociation_R05N2
 	JetFlavorAssociation_R05N3
 	JetFlavorAssociation_R05N4
@@ -386,9 +419,10 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
     # CLICdet internal studies
     set ResolutionFormula {
 	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
-	(abs(eta) < 1.74 && abs(eta) >= 1.01 ) * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
-	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt( 1.16768e-05^2 * pt^2 +0.00255204^2    ) +
-	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt( 1.28327e-05^2 * pt^2 +0.00220587^2   ) +
+      	(abs(eta) < 1.74 && abs(eta) >= 1.32 ) * 2 * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
+	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * 2 * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
+	(abs(eta) < 0.76 && abs(eta) >= 0.36 ) * sqrt( 1.16768e-05^2 * pt^2 +0.00255204^2    ) +
+	(abs(eta) < 0.36 && abs(eta) >= 0.18 ) * sqrt( 1.28327e-05^2 * pt^2 +0.00220587^2   ) +
 	(abs(eta) < 0.18)                      * sqrt( 1.32845e-05^2 * pt^2 +0.00209325^2   )
 	
     }
@@ -406,9 +440,10 @@ module MomentumSmearing ElectronMomentumSmearing {
     # CLICdet internal studies
     set ResolutionFormula {
 	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
-	(abs(eta) < 1.74 && abs(eta) >= 1.01 ) * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
-	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt( 1.15518e-05^2 * pt^2  + 0.00398644^2  ) +
-	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt( 1.3307e-05 ^2 * pt^2  + 0.00317807^2  ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.32 ) * 2 * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
+	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * 2 * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
+	(abs(eta) < 0.76 && abs(eta) >= 0.36 ) * sqrt( 1.15518e-05^2 * pt^2  + 0.00398644^2  ) +
+	(abs(eta) < 0.36 && abs(eta) >= 0.18 ) * sqrt( 1.3307e-05 ^2 * pt^2  + 0.00317807^2  ) +
 	(abs(eta) < 0.18)                      * sqrt( 1.40722e-05^2 * pt^2  + 0.00292138^2  )
 
     }
@@ -427,11 +462,12 @@ module MomentumSmearing MuonMomentumSmearing {
     # CLICdet internal studies
     set ResolutionFormula {
 
-	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
-	(abs(eta) < 1.74 && abs(eta) >= 1.01 ) * sqrt(9.81626e-06^2 * pt^2*   + 0.00379895^2  ) +
-	(abs(eta) < 1.01 && abs(eta) >= 0.55 ) * sqrt(1.1959e-05^2 * pt^2*   +  0.00242417^2 ) +
-	(abs(eta) < 0.55 && abs(eta) >= 0.18 ) * sqrt(1.20149e-05^2 * pt^2  + 0.00219291^2  ) +
-	(abs(eta) < 0.18)                      * sqrt(1.29686e-05^2 * pt^2  + 0.0020392^2      ) 
+	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) 	 * 2 * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.32 )   * 2 * sqrt(4.57439e-05^2 * pt^2*   + 0.0149328^2	   ) +
+	(abs(eta) < 1.32 && abs(eta) >= 0.76 )	 * 2 * sqrt(9.81626e-06^2 * pt^2*   + 0.00379895^2  ) +
+	(abs(eta) < 0.76 && abs(eta) >= 0.36 )	 * sqrt(1.1959e-05^2 * pt^2*   +  0.00242417^2 ) +
+	(abs(eta) < 0.36 && abs(eta) >= 0.18 )	 * sqrt(1.20149e-05^2 * pt^2  + 0.00219291^2  ) +
+	(abs(eta) < 0.18)                     	 * sqrt(1.29686e-05^2 * pt^2  + 0.0020392^2      ) 
 
     }
 }
@@ -1001,6 +1037,15 @@ source CLICdet/CLICdet_JetReco.tcl
 
 source CLICdet/CLICdet_JetSmearing.tcl
 
+#########################################
+# Jet Energy Scale to mimick overlay
+#########################################
+
+source CLICdet/CLICdet_JetScale.tcl
+
+
+
+
 ########################
 # Jet Flavor Association
 ########################
@@ -1108,6 +1153,44 @@ module TreeWriter TreeWriter {
     add Branch JetMomentumSmearing_VLCR10_inclusive/JER_VLCjetsR10_inclusive JER_VLCjetR10_inclusive Jet
     add Branch JetMomentumSmearing_VLCR12_inclusive/JER_VLCjetsR12_inclusive JER_VLCjetR12_inclusive Jet
     add Branch JetMomentumSmearing_VLCR15_inclusive/JER_VLCjetsR15_inclusive JER_VLCjetR15_inclusive Jet
+
+    
+   ###with JES
+    add Branch JetEnergyScale_VLCR05N2/JES_VLCjetsR05N2 JES_VLCjetR05N2 Jet
+    add Branch JetEnergyScale_VLCR05N3/JES_VLCjetsR05N3 JES_VLCjetR05N3 Jet
+    add Branch JetEnergyScale_VLCR05N4/JES_VLCjetsR05N4 JES_VLCjetR05N4 Jet
+    add Branch JetEnergyScale_VLCR05N5/JES_VLCjetsR05N5 JES_VLCjetR05N5 Jet
+    add Branch JetEnergyScale_VLCR05N6/JES_VLCjetsR05N6 JES_VLCjetR05N6 Jet
+
+    add Branch JetEnergyScale_VLCR07N2/JES_VLCjetsR07N2 JES_VLCjetR07N2 Jet
+    add Branch JetEnergyScale_VLCR07N3/JES_VLCjetsR07N3 JES_VLCjetR07N3 Jet
+    add Branch JetEnergyScale_VLCR07N4/JES_VLCjetsR07N4 JES_VLCjetR07N4 Jet
+    add Branch JetEnergyScale_VLCR07N5/JES_VLCjetsR07N5 JES_VLCjetR07N5 Jet
+    add Branch JetEnergyScale_VLCR07N6/JES_VLCjetsR07N6 JES_VLCjetR07N6 Jet
+
+    add Branch JetEnergyScale_VLCR10N2/JES_VLCjetsR10N2 JES_VLCjetR10N2 Jet
+    add Branch JetEnergyScale_VLCR10N3/JES_VLCjetsR10N3 JES_VLCjetR10N3 Jet
+    add Branch JetEnergyScale_VLCR10N4/JES_VLCjetsR10N4 JES_VLCjetR10N4 Jet
+    add Branch JetEnergyScale_VLCR10N5/JES_VLCjetsR10N5 JES_VLCjetR10N5 Jet
+    add Branch JetEnergyScale_VLCR10N6/JES_VLCjetsR10N6 JES_VLCjetR10N6 Jet
+
+    add Branch JetEnergyScale_VLCR12N2/JES_VLCjetsR12N2 JES_VLCjetR12N2 Jet
+    add Branch JetEnergyScale_VLCR12N3/JES_VLCjetsR12N3 JES_VLCjetR12N3 Jet
+    add Branch JetEnergyScale_VLCR12N4/JES_VLCjetsR12N4 JES_VLCjetR12N4 Jet
+    add Branch JetEnergyScale_VLCR12N5/JES_VLCjetsR12N5 JES_VLCjetR12N5 Jet
+    add Branch JetEnergyScale_VLCR12N6/JES_VLCjetsR12N6 JES_VLCjetR12N6 Jet
+
+    add Branch JetEnergyScale_VLCR15N2/JES_VLCjetsR15N2 JES_VLCjetR15N2 Jet
+    add Branch JetEnergyScale_VLCR15N3/JES_VLCjetsR15N3 JES_VLCjetR15N3 Jet
+    add Branch JetEnergyScale_VLCR15N4/JES_VLCjetsR15N4 JES_VLCjetR15N4 Jet
+    add Branch JetEnergyScale_VLCR15N5/JES_VLCjetsR15N5 JES_VLCjetR15N5 Jet
+    add Branch JetEnergyScale_VLCR15N6/JES_VLCjetsR15N6 JES_VLCjetR15N6 Jet
+
+    add Branch JetEnergyScale_VLCR05_inclusive/JES_VLCjetsR05_inclusive JES_VLCjetR05_inclusive Jet
+    add Branch JetEnergyScale_VLCR07_inclusive/JES_VLCjetsR07_inclusive JES_VLCjetR07_inclusive Jet
+    add Branch JetEnergyScale_VLCR10_inclusive/JES_VLCjetsR10_inclusive JES_VLCjetR10_inclusive Jet
+    add Branch JetEnergyScale_VLCR12_inclusive/JES_VLCjetsR12_inclusive JES_VLCjetR12_inclusive Jet
+    add Branch JetEnergyScale_VLCR15_inclusive/JES_VLCjetsR15_inclusive JES_VLCjetR15_inclusive Jet
 
     ####
 
