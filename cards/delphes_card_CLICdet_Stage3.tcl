@@ -469,7 +469,7 @@ module MomentumSmearing MuonMomentumSmearing {
 	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) 	 * 2 * sqrt(4.57439e-05^2 * pt^2   + 0.0149328^2	   ) +
 	(abs(eta) < 1.74 && abs(eta) >= 1.32 )   * 2 * sqrt(4.57439e-05^2 * pt^2   + 0.0149328^2	   ) +
 	(abs(eta) < 1.32 && abs(eta) >= 0.76 )	 * 2 * sqrt(9.81626e-06^2 * pt^2   + 0.00379895^2  ) +
-	(abs(eta) < 0.76 && abs(eta) >= 0.36 )	 * sqrt(1.1959e-05^2 * pt^2*   +  0.00242417^2 ) +
+	(abs(eta) < 0.76 && abs(eta) >= 0.36 )	 * sqrt(1.1959e-05^2 * pt^2   +  0.00242417^2 ) +
 	(abs(eta) < 0.36 && abs(eta) >= 0.18 )	 * sqrt(1.20149e-05^2 * pt^2  + 0.00219291^2  ) +
 	(abs(eta) < 0.18)                     	 * sqrt(1.29686e-05^2 * pt^2  + 0.0020392^2      ) 
 
