@@ -3,7 +3,7 @@ module EnergyScale JetEnergyScale_VLCR05N2 {
     set OutputArray JES_VLCjetsR05N2
 
      # Scale Formula
-    set ScaleFormula { (abs(eta) < 0.76) * ( 1.07 ) + (abs(eta) >= 0.76 ) * (1.1)}
+    set ScaleFormula { (abs(eta) < 0.76) * ( 1.02 ) + (abs(eta) >= 0.76 ) * (1.1)}
 }
 module EnergyScale JetEnergyScale_VLCR05N3 {                                       
  set InputArray  JetMomentumSmearing_VLCR05N3/JER_VLCjetsR05N3                                        
