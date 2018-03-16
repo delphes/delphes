@@ -3,6 +3,10 @@
 # based on CLICdp-Note-2017-001
 # Ulrike Schnoor ulrike.schnoor@cern.ch
 # 
+# 
+# For the high energy stage of
+# CLIC: 3 TeV
+#
 # Jet finding with Valencia algorithm:
 # use exclusive clustering with njets
 # according to final state
