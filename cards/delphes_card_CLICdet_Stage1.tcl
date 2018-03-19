@@ -827,11 +827,8 @@ module Efficiency MuonEfficiency {
 
 
     set EfficiencyFormula {
-	(energy < 2.0 )                                                        * (0.00) +
-	(energy  < 50 && energy >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
-	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
-	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) + 
-	(energy>=50)                                                           * (0.999)
+	(energy < 2.0 )     * (0.00) +
+	(energy>=2.0)        * (0.999)
 
     }
 }

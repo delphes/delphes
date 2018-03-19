@@ -448,7 +448,7 @@ module MomentumSmearing ElectronMomentumSmearing {
 	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * 2 * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
 	(abs(eta) < 0.76 && abs(eta) >= 0.36 ) * sqrt( 1.15518e-05^2 * pt^2  + 0.00398644^2  ) +
 	(abs(eta) < 0.36 && abs(eta) >= 0.18 ) * sqrt( 1.3307e-05 ^2 * pt^2  + 0.00317807^2  ) +
-	(abs(eta) < 0.18)                      * sqrt( 1.40722e-05^2 * pt^2  + 0.00292138^2  )
+	(abs(eta) < 0.18)                      * sqrt( 1.40722e-05^2 * pt^2 + 0.00292138^2  )
 
     }
 }
@@ -891,12 +891,8 @@ module Efficiency MuonEfficiency {
 
 
     set EfficiencyFormula {
-	(energy < 2.0 )                                                        * (0.00) +
-	(energy  < 50 && energy >=2.0 ) * ( abs(eta) > 1.95 )                  * (0.73) + 
-	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 1.95 && abs(eta) > 0.2) * (0.98) + 
-	(energy  < 50 && energy >=2.0 ) * (abs(eta) <= 0.2)                    * (0.87) + 
-	(energy>=50)                                                           * (0.999)
-
+	(energy < 2.0 )     * (0.00) +
+	(energy>=2.0)        * (0.999)
     }
 }
 
