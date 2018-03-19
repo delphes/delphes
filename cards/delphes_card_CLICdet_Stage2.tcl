@@ -890,9 +890,8 @@ module Efficiency MuonEfficiency {
 
 
     set EfficiencyFormula {
-	(energy < 2.0 )                                                        * (0.00) +
-	(energy>=50)                                                           * (0.999)
-
+	(energy < 2.0 )     * (0.00) +
+	(energy>=2.0)        * (0.999)
     }
 }
 
