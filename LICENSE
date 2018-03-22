@@ -53,7 +53,7 @@ ExRootAnalysis   Delphes General Licence      https://cp3.irmp.ucl.ac.be/project
 Hector           Delphes General Licence      https://github.com/hectorhep/hector
 ROOT             LGPL 2.1                     http://root.cern
 PUPPI            GPLv3+                       Currently only distributed with Delphes
-PYTHIA8          GPLv2 (discussions ongoing)  http://home.thep.lu.se/~torbjorn/Pythia.html
+PYTHIA8          GPLv2+                       http://home.thep.lu.se/~torbjorn/Pythia.html
 
 
 Licences & Credits of dependencies
@@ -161,7 +161,7 @@ MODIFICATIONS.
 ROOT
 ####
 
-Unknown Copyright
+Copyright (c) ROOT authors
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -202,7 +202,7 @@ see <http://www.gnu.org/licenses/>.
 PYTHIA
 ####
 
-Unknown Copyright
+Copyright Pythia authors
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
