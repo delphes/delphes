@@ -423,8 +423,8 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
     # CLICdet internal studies
     set ResolutionFormula {
 	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
-      	(abs(eta) < 1.74 && abs(eta) >= 1.32 ) * 2 * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
-	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * 2 * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
+      	(abs(eta) < 1.74 && abs(eta) >= 1.32 ) * 1.5 * sqrt( 8.56036e-05^2 * pt^2 +0.0148987^2    ) +
+	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * sqrt( 1.12382e-05^2 * pt^2 +0.00391722^2   ) +
 	(abs(eta) < 0.76 && abs(eta) >= 0.36 ) * sqrt( 1.16768e-05^2 * pt^2 +0.00255204^2    ) +
 	(abs(eta) < 0.36 && abs(eta) >= 0.18 ) * sqrt( 1.28327e-05^2 * pt^2 +0.00220587^2   ) +
 	(abs(eta) < 0.18)                      * sqrt( 1.32845e-05^2 * pt^2 +0.00209325^2   )
@@ -444,8 +444,8 @@ module MomentumSmearing ElectronMomentumSmearing {
     # CLICdet internal studies
     set ResolutionFormula {
 	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) * 2 * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
-	(abs(eta) < 1.74 && abs(eta) >= 1.32 ) * 2 * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
-	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * 2 * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.32 ) * 1.5 * sqrt( 8.62283e-05^2 * pt^2  + 0.0177556^2   ) +
+	(abs(eta) < 1.32 && abs(eta) >= 0.76 ) * sqrt( 1.0915e-05 ^2 * pt^2  + 0.00663766^2  ) +
 	(abs(eta) < 0.76 && abs(eta) >= 0.36 ) * sqrt( 1.15518e-05^2 * pt^2  + 0.00398644^2  ) +
 	(abs(eta) < 0.36 && abs(eta) >= 0.18 ) * sqrt( 1.3307e-05 ^2 * pt^2  + 0.00317807^2  ) +
 	(abs(eta) < 0.18)                      * sqrt( 1.40722e-05^2 * pt^2 + 0.00292138^2  )
@@ -467,8 +467,8 @@ module MomentumSmearing MuonMomentumSmearing {
     set ResolutionFormula {
 
 	(abs(eta) < 2.66 && abs(eta) >= 1.74 ) 	 * 2 * sqrt(4.57439e-05^2 * pt^2   + 0.0149328^2	   ) +
-	(abs(eta) < 1.74 && abs(eta) >= 1.32 )   * 2 * sqrt(4.57439e-05^2 * pt^2   + 0.0149328^2	   ) +
-	(abs(eta) < 1.32 && abs(eta) >= 0.76 )	 * 2 * sqrt(9.81626e-06^2 * pt^2   + 0.00379895^2  ) +
+	(abs(eta) < 1.74 && abs(eta) >= 1.32 )   * 1.5 * sqrt(4.57439e-05^2 * pt^2   + 0.0149328^2	   ) +
+	(abs(eta) < 1.32 && abs(eta) >= 0.76 )	 * sqrt(9.81626e-06^2 * pt^2   + 0.00379895^2  ) +
 	(abs(eta) < 0.76 && abs(eta) >= 0.36 )	 * sqrt(1.1959e-05^2 * pt^2   +  0.00242417^2 ) +
 	(abs(eta) < 0.36 && abs(eta) >= 0.18 )	 * sqrt(1.20149e-05^2 * pt^2  + 0.00219291^2  ) +
 	(abs(eta) < 0.18)                     	 * sqrt(1.29686e-05^2 * pt^2  + 0.0020392^2      ) 
@@ -1019,17 +1019,6 @@ module FastJetFinder FastJetFinderKt {
 source CLICdet/CLICdet_JetReco.tcl
 
 
-###################
-## Jet Energy Scale
-###################
-#
-#module EnergyScale JetEnergyScale {
-#    set InputArray FastJetFinderVLC_R10_N4/VLCjetsR10N4
-#    set OutputArray jets
-#
-#    # scale formula for jets
-#    set ScaleFormula {1.00}
-#}
 #########################################
 # Jet Momentum Smearing to mimick overlay
 #########################################
