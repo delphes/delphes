@@ -189,6 +189,9 @@ void StatusPidFilter::Process()
     // Gauge bosons and other fundamental bosons
     if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
 
+    //Stable photons 
+    if(pdgCode == 22 && status==1) pass = kTRUE;
+
     // logic ported from HepPDF: http://lcgapp.cern.ch/project/simu/HepPDT/HepPDT.2.05.02/html/ParticleID_8cc-source.html#l00081
     bool is_b_hadron = hasBottom(pdgCode);
     bool is_b_quark  = (pdgCode == 5);
