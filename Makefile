@@ -1902,15 +1902,11 @@ display/DelphesBranchElement.h: \
 	display/DelphesCaloData.h
 	@touch $@
 
-<<<<<<< HEAD
-
 external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/JetDefinition.hh
 	@touch $@
 
-=======
->>>>>>> upstream/master
 external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/JetDefinition.hh
