@@ -359,7 +359,6 @@ module Merger EFlowMergerAllTracks {
   set OutputArray eflow
 }
 
-
 ####################
 # Energy flow merger
 ####################
@@ -377,7 +376,7 @@ module Merger EFlowMerger {
 ######################
 
 module PdgCodeFilter EFlowFilter {
-  set InputArray EFlowMergerAllTracks/eflow
+  set InputArray EFlowMerger/eflow
   set OutputArray eflow
   
   add PdgCode {11}

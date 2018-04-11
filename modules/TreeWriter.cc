@@ -375,6 +375,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     eta = (cosTheta == 1.0 ? signz*999.9 : momentum.Eta());
     rapidity = (cosTheta == 1.0 ? signz*999.9 : momentum.Rapidity());
 
+    entry->P = p;
     entry->PT  = pt;
     entry->Eta = eta;
     entry->Phi = phi;

@@ -1,4 +1,4 @@
-#
+
 #  Main authors: Michele Selvaggi (CERN)
 #
 #  Released on: Jun 26 - 2017
@@ -27,6 +27,7 @@ set ExecutionPath {
   DenseMergeTracks
   TrackMergerProp  
   TrackMerger
+  TrackSmearing
 
   ECal
   HCal
@@ -86,6 +87,7 @@ set ExecutionPath {
   GenPileUpMissingET
 
   GenJetFinder
+  GenJetFinder04
   GenJetFinderAK8
   FastJetFinder
   FastJetFinderAK8
@@ -134,7 +136,7 @@ module PileUpMerger PileUpMerger {
   #set PileUpFile MinBias.pileup
 
   # average expected pile up
-  set MeanPileUp 200
+  set MeanPileUp 1000
 
   # maximum spread in the beam direction in m
   set ZVertexSpread 0.25
@@ -461,6 +463,21 @@ module DenseTrackFilter TrackMerger {
   }
 
 }
+################################                                                                    
+# Track impact parameter smearing                                                                   
+################################                                                                    
+
+module TrackSmearing TrackSmearing {
+  set InputArray TrackMerger/tracks
+#  set BeamSpotInputArray BeamSpotFilter/beamSpotParticle
+  set OutputArray tracks
+#  set ApplyToPileUp true
+
+  # magnetic field
+  set Bz 4.0
+
+  source trackResolution.tcl
+}
 
 
 #############
@@ -469,14 +486,13 @@ module DenseTrackFilter TrackMerger {
 
 module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray TrackMerger/tracks
+  set TrackInputArray TrackSmearing/tracks
 
   set TowerOutputArray ecalTowers
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowPhotons
 
   set IsEcal true
-
   set EnergyMin 0.5
   set EnergySignificanceMin 1.0
 
@@ -698,7 +714,7 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   set VertexInputArray PileUpMerger/vertices
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
-  set ZVertexResolution {0.0001}
+  set ZVertexResolution {0.0002}
 }
 
 ########################
@@ -1004,7 +1020,7 @@ module FastJetFinder FastJetFinderAK8 {
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.8
+  set ParameterR 0.4
 
   set ComputeNsubjettiness 1
   set Beta 1.0
@@ -1017,15 +1033,43 @@ module FastJetFinder FastJetFinderAK8 {
   set ComputePruning 1
   set ZcutPrun 0.1
   set RcutPrun 0.5
-  set RPrun 0.8
+  set RPrun 0.4
 
   set ComputeSoftDrop 1
   set BetaSoftDrop 0.0
   set SymmetryCutSoftDrop 0.1
-  set R0SoftDrop 0.8
+  set R0SoftDrop 0.4
 
   set JetPTMin 200.0
 }
+
+#####################
+# MC truth jet finder
+#####################
+
+# TBC: is jet radius fine?
+
+module FastJetFinder GenJetFinder04 {
+  set InputArray NeutrinoFilter/filteredParticles
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 0.4
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 0.4
+
+  set JetPTMin 25.0
+}
+
 
 ###########################
 # Jet Pile-Up Subtraction
@@ -1074,7 +1118,7 @@ module FastJetFinder FastJetFinderPUPPIAK8 {
   set OutputArray jets
 
   set JetAlgorithm 6
-  set ParameterR 0.8
+  set ParameterR 0.4
 
   set ComputeNsubjettiness 1
   set Beta 1.0
@@ -1087,12 +1131,12 @@ module FastJetFinder FastJetFinderPUPPIAK8 {
   set ComputePruning 1
   set ZcutPrun 0.1
   set RcutPrun 0.5
-  set RPrun 0.8
+  set RPrun 0.4
 
   set ComputeSoftDrop 1
   set BetaSoftDrop 0.0
   set SymmetryCutSoftDrop 0.1
-  set R0SoftDrop 0.8
+  set R0SoftDrop 0.4
 
   set JetPTMin 200.0
 }
@@ -2421,9 +2465,11 @@ module TreeWriter TreeWriter {
   add Branch GenJetFinderAK8/jetsAK8 GenJetAK8 Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
-#  add Branch HCal/eflowTracks EFlowTrack Track
-#  add Branch ECal/eflowPhotons EFlowPhoton Tower
-#  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+  #add Branch HCal/eflowTracks EFlowTrack Track
+  #add Branch ECal/eflowPhotons EFlowPhoton Tower
+  #add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+
+  add Branch RunPUPPI/PuppiParticles PuppiParticlesTrack Track
 
   add Branch PhotonEfficiency/photons Photon Photon
   add Branch ElectronEfficiency/electrons Electron Electron
@@ -2438,8 +2484,8 @@ module TreeWriter TreeWriter {
   add Branch JetEnergyScale/jets Jet Jet
   add Branch JetEnergyScalePUPPI/jets JetPUPPI Jet
   add Branch JetEnergyScaleAK8/jets JetAK8 Jet
-  add Branch JetEnergyScalePUPPIAK8/jets JetPUPPIAK8 Jet
-
+  add Branch JetEnergyScalePUPPIAK8/jets ParticleFlowJet04 Jet
+  add Branch GenJetFinder04/jets GenJet04 Jet
   add Branch Rho/rho Rho Rho
 
   add Branch MissingET/momentum MissingET MissingET

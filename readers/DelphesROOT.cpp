@@ -125,8 +125,6 @@ int main(int argc, char *argv[])
    
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
-   
-    maxEvents = confReader->GetInt("::MaxEvents", 0);
 
     if(maxEvents < 0)
     {
@@ -177,9 +175,8 @@ int main(int argc, char *argv[])
       for(Int_t entry = 0; entry < numberOfEvents && !interrupted; ++entry)
       {
     
-        if(entry >= maxEvents) break;
         treeReader->ReadEntry(entry);
-       
+
         // -- TBC need also to include event weights --  
         
         eve = (HepMCEvent*) branchHepMCEvent->At(0);

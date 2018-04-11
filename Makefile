@@ -1256,8 +1256,6 @@ tmp/external/fastjet/TilingExtent.$(ObjSuf): \
 tmp/external/fastjet/Voronoi.$(ObjSuf): \
 	external/fastjet/Voronoi.$(SrcSuf) \
 	external/fastjet/internal/Voronoi.hh
-tmp/external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.$(ObjSuf): \
-	external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.$(ObjSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/AxesDefinition.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/AxesDefinition.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.$(ObjSuf): \
@@ -1288,6 +1286,9 @@ tmp/external/fastjet/contribs/RecursiveTools/SoftDrop.$(ObjSuf): \
 	external/fastjet/contribs/RecursiveTools/SoftDrop.$(SrcSuf)
 tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf): \
 	external/fastjet/contribs/SoftKiller/SoftKiller.$(SrcSuf)
+tmp/external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.$(ObjSuf): \
+	external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.$(SrcSuf) \
+	external/fastjet/NNH.hh
 tmp/external/fastjet/plugins/ATLASCone/ATLASConePlugin.$(ObjSuf): \
 	external/fastjet/plugins/ATLASCone/ATLASConePlugin.$(SrcSuf) \
 	external/fastjet/ClusterSequence.hh
@@ -1418,11 +1419,11 @@ tmp/modules/FastJetFinder.$(ObjSuf): \
 	external/fastjet/plugins/SISCone/fastjet/SISConePlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh \
-	external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh \
 	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/Njettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh \
 	external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh \
+	external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh \
 	external/fastjet/tools/Filter.hh \
 	external/fastjet/tools/Pruner.hh \
 	external/fastjet/contribs/RecursiveTools/SoftDrop.hh
@@ -1446,7 +1447,6 @@ tmp/modules/FastJetGridMedianEstimator.$(ObjSuf): \
 	external/fastjet/plugins/SISCone/fastjet/SISConePlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh \
 	external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh \
-	external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh \
 	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/Njettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh \
@@ -1504,7 +1504,6 @@ FASTJET_OBJ +=  \
 	tmp/external/fastjet/Selector.$(ObjSuf) \
 	tmp/external/fastjet/TilingExtent.$(ObjSuf) \
 	tmp/external/fastjet/Voronoi.$(ObjSuf) \
-	tmp/external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/AxesDefinition.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/MeasureDefinition.$(ObjSuf) \
@@ -1518,6 +1517,7 @@ FASTJET_OBJ +=  \
 	tmp/external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/SoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf) \
+	tmp/external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/ATLASCone/ATLASConePlugin.$(ObjSuf) \
 	tmp/external/fastjet/plugins/ATLASCone/Jet.$(ObjSuf) \
 	tmp/external/fastjet/plugins/ATLASCone/JetConeFinderTool.$(ObjSuf) \
@@ -1879,6 +1879,11 @@ modules/TrackCountingTauTagging.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh: \
+	external/fastjet/JetDefinition.hh \
+	external/fastjet/ClusterSequence.hh
+	@touch $@
+
 external/fastjet/RectangularGrid.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Selector.hh
@@ -1897,12 +1902,15 @@ display/DelphesBranchElement.h: \
 	display/DelphesCaloData.h
 	@touch $@
 
+<<<<<<< HEAD
 
 external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/JetDefinition.hh
 	@touch $@
 
+=======
+>>>>>>> upstream/master
 external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/JetDefinition.hh
