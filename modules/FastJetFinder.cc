@@ -79,8 +79,8 @@ using namespace fastjet::contrib;
 //------------------------------------------------------------------------------
 
 FastJetFinder::FastJetFinder() :
-  fPlugin(0), fRecomb(0), fAxesDef(0), fMeasureDef(0), fNjettinessPlugin(0), 
-  fDefinition(0), fAreaDefinition(0), fItInputArray(0), fValenciaPlugin(0)
+  fPlugin(0), fRecomb(0), fAxesDef(0), fMeasureDef(0), fNjettinessPlugin(0), fValenciaPlugin(0),
+  fDefinition(0), fAreaDefinition(0), fItInputArray(0)
 {
 
 }
@@ -331,7 +331,11 @@ void FastJetFinder::Process()
   vector< PseudoJet > inputList, outputList, subjets;
   vector< PseudoJet >::iterator itInputList, itOutputList;
   vector< TEstimatorStruct >::iterator itEstimators;
-
+  Double_t excl_ymerge23 = 0.0;
+  Double_t excl_ymerge34 = 0.0;
+  Double_t excl_ymerge45 = 0.0;
+  Double_t excl_ymerge56 = 0.0;
+  
   DelphesFactory *factory = GetFactory();
 
   inputList.clear();
@@ -376,9 +380,21 @@ void FastJetFinder::Process()
 
   outputList.clear();
 
+  
   if(fExclusiveClustering)
     {
-      outputList = sorted_by_pt(sequence->exclusive_jets( fNJets ));
+   try{
+     outputList = sorted_by_pt(sequence->exclusive_jets( fNJets ));
+   }
+   catch(fastjet::Error)
+     {
+       outputList.clear();
+     }
+
+      excl_ymerge23 = sequence->exclusive_ymerge( 2 );
+      excl_ymerge34 = sequence->exclusive_ymerge( 3 );
+      excl_ymerge45 = sequence->exclusive_ymerge( 4 );
+      excl_ymerge56 = sequence->exclusive_ymerge( 5 );
     }
   else
     {
@@ -399,6 +415,8 @@ void FastJetFinder::Process()
     area.reset(0.0, 0.0, 0.0, 0.0);
     if(fAreaDefinition) area = itOutputList->area_4vector();
 
+
+    
     candidate = factory->NewCandidate();
 
     time = 0.0;
@@ -442,6 +460,13 @@ void FastJetFinder::Process()
     candidate->Charge = charge; 
     candidate->NNeutrals = nneutrals;
     candidate->NCharged = ncharged;
+
+
+    //for exclusive clustering, access y_n,n+1 as exclusive_ymerge (fNJets);
+    candidate->ExclYmerge23 = excl_ymerge23;
+    candidate->ExclYmerge34 = excl_ymerge34;
+    candidate->ExclYmerge45 = excl_ymerge45;
+    candidate->ExclYmerge56 = excl_ymerge56;
     
     //------------------------------------
     // Trimming

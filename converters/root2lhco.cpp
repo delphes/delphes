@@ -55,7 +55,7 @@ LHC Olympics format discription from http://www.jthaler.net/olympicswiki/doku.ph
 class LHCOWriter
 {
 public:
-  LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile);
+  LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string JetBranchName);
   ~LHCOWriter();
 
   void ProcessEvent();
@@ -106,7 +106,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile) :
+LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string JetBranchName) :
   fTriggerWord(0), fEventNumber(1), fTreeReader(0), fOutputFile(0),
   fBranchEvent(0), fBranchTrack(0), fBranchTower(0), fBranchPhoton(0),
   fBranchElectron(0), fBranchMuon(0), fBranchJet(0), fBranchMissingET(0)
@@ -127,7 +127,7 @@ LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile) :
   // reconstructed muons
   fBranchMuon = fTreeReader->UseBranch("Muon");
   // reconstructed jets
-  fBranchJet = fTreeReader->UseBranch("Jet");
+  fBranchJet = fTreeReader->UseBranch(JetBranchName.c_str());
   // missing transverse energy
   fBranchMissingET = fTreeReader->UseBranch("MissingET");
 
@@ -348,7 +348,7 @@ void LHCOWriter::AnalyseTauJets()
     Reset();
 
     counter = 1;
-   
+
    /*
     fItTrack->Reset();
     while((track = static_cast<Track*>(fItTrack->Next())))
@@ -435,6 +435,35 @@ void SignalHandler(int sig)
 
 //---------------------------------------------------------------------------
 
+pair<string,string> stringToOption(string s) {
+
+	string delimiter = "=";
+
+	vector<string> vs;
+	pair<string,string> res;
+
+	size_t pos = 0;
+	string token;
+	while ((pos = s.find(delimiter)) != std::string::npos) {
+	    token = s.substr(0, pos);
+	    //cout << token << std::endl;
+			vs.push_back(token);
+	    s.erase(0, pos + delimiter.length());
+	}
+
+	//std::cout << s << std::endl;
+	vs.push_back(s);
+
+	if (vs.size()==2){
+		res.first=vs[0];
+		res.second=vs[1];
+	}
+
+	return res;
+
+}
+
+
 int main(int argc, char *argv[])
 {
   char appName[] = "root2lhco";
@@ -444,15 +473,31 @@ int main(int argc, char *argv[])
   LHCOWriter *writer = 0;
   ExRootTreeReader *treeReader = 0;
   Long64_t entry, allEntries;
+  string  JetBranchName="Jet";
 
-  if(argc < 2 || argc > 3)
+  if(argc < 2 || argc > 4)
   {
-    cerr << " Usage: " << appName << " input_file" << " [output_file]" << endl;
+    cerr << " Usage: " << appName << " input_file" << " [output_file]  [--jet-branch=Jet]" << endl;
     cerr << " input_file - input file in ROOT format," << endl;
     cerr << " output_file - output file in LHCO format," << endl;
     cerr << " with no output_file, or when output_file is -, write to standard output." << endl;
+    cerr << " in order to specify the jet-branch name the output_file cannot be omitted." << endl;
     return 1;
   }
+
+  for(int iarg=3; iarg< argc	; iarg++){
+
+		string argument=argv[iarg];
+		pair<string,string> option;
+		option=stringToOption(argument);
+
+		if ( option.first == "--jet-branch" ) {
+      JetBranchName = option.second;
+      cout << " Using the jet branch named " << JetBranchName << endl;
+    }
+	}
+  cout << " Using the default jet branch named " << JetBranchName << endl;
+
 
   signal(SIGINT, SignalHandler);
 
@@ -493,7 +538,7 @@ int main(int argc, char *argv[])
     if(allEntries > 0)
     {
       // Create LHC Olympics converter:
-      writer = new LHCOWriter(treeReader, outputFile);
+      writer = new LHCOWriter(treeReader, outputFile, JetBranchName);
 
       ExRootProgressBar progressBar(allEntries - 1);
       // Loop over all events
@@ -530,5 +575,3 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
-
-
