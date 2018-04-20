@@ -13,6 +13,9 @@ jobs:
       - run:
           name: Install ROOT and build Delphes
           command: |
-            curl -sL https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz | tar -zxf -
+            df -h
+            ls
+            curl -sLO https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
+            tar -zxf root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
             source root/bin/thisroot.sh
             make
