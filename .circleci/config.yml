@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: ubuntu:zesty
+    steps:
+      - checkout
+      - run:
+          name: Install packages
+          command: apt-get -y install build-essential
+      - run:
+          name: Print the Current Time
+          command: date
+
