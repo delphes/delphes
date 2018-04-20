@@ -6,9 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Print Debian version
+          command: cat /etc/debian_version
+      - run:
           name: Install packages
           command: apt-get -y install build-essential
-      - run:
-          name: Print the Current Time
-          command: date
 
