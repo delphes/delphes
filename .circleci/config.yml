@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Update packages
+          command: apt-get update
+      - run:
           name: Install packages
           command: apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tcl
       - run:
