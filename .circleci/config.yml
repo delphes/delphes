@@ -9,11 +9,13 @@ jobs:
           name: Install packages
           command: |
              apt-get update
-             apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpcre3-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tar tcl
+             apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpcre3-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tar tcl wget
       - run:
           name: Install ROOT and build Delphes
           command: |
-            curl -sLO https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
-            tar -zxf root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
+            wget https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
+            ls -l root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
+            tar -zxvf root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz
+            ls -l root/bin/thisroot.sh
             source root/bin/thisroot.sh
             make
