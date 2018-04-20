@@ -6,17 +6,13 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Update packages
-          command: apt-get update
-      - run:
           name: Install packages
-          command: apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tcl
+          command: |
+             apt-get update
+             apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpcre3-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tcl
       - run:
-          name: Install ROOT
-          command: curl -L https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz | tar -zxf -
-      - run:
-          name: Setup ROOT
-          command: source root/bin/thisroot.sh
-      - run:
-          name: Build Delphes
-          command: make
+          name: Install ROOT and build Delphes
+          command: |
+            curl -sL https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz | tar -zxf -
+            source root/bin/thisroot.sh
+            make
