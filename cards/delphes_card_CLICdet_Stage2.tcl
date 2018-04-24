@@ -1015,7 +1015,7 @@ module FastJetFinder FastJetFinderKt {
 ################
 
 
-source CLICdet/CLICdet_JetReco.tcl
+source CLIC/CLICdet_JetReco.tcl
 
 
 ###################
@@ -1034,13 +1034,13 @@ source CLICdet/CLICdet_JetReco.tcl
 #########################################
 
 
-source CLICdet/CLICdet_JetSmearing_1500.tcl
+source CLIC/CLICdet_JetSmearing_1500.tcl
 
 #########################################
 # Jet Energy Scale to mimick overlay
 #########################################
 
-source CLICdet/CLICdet_JetScale_1500.tcl
+source CLIC/CLICdet_JetScale_1500.tcl
 
 
 
@@ -1049,14 +1049,14 @@ source CLICdet/CLICdet_JetScale_1500.tcl
 # Jet Flavor Association
 ########################
 
-source  CLICdet/CLICdet_JetFlavorAssociation.tcl
+source  CLIC/CLICdet_JetFlavorAssociation.tcl
 
 ###########
 # b-tagging
 ###########
 # based on CLICdp-Note-2014-002    
 
-source  CLICdet/CLICdet_BTagging.tcl
+source  CLIC/CLICdet_BTagging.tcl
 
 
 #############
@@ -1064,7 +1064,7 @@ source  CLICdet/CLICdet_BTagging.tcl
 #############
 # based on LCD-2010-009
 
-source CLICdet/CLICdet_TauTagging.tcl
+source CLIC/CLICdet_TauTagging.tcl
 
 
 
