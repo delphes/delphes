@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/delphes/delphes.svg?style=shield)](https://circleci.com/gh/delphes/delphes)
+
 Delphes
 =======
 
