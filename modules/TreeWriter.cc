@@ -462,7 +462,6 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
 
-
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
@@ -475,7 +474,6 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
     entry->E = momentum.E();
-
     entry->T = position.T()*1.0E-3/c_light;
 
     // Isolation variables
@@ -488,6 +486,9 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->SumPt = candidate->SumPt ;
 
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
+
+    // 1: prompt -- 2: non prompt -- 3: fake
+    entry->Status = candidate->Status;
 
     FillParticles(candidate, &entry->Particles);
   }
