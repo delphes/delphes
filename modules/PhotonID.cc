@@ -136,8 +136,6 @@ void PhotonID::Process()
     if (pt < fPTMin) continue;
 
     //cout<< "              ---- photon -----: "<<pt<<","<<eta<<","<<phi<<endl;
-        
-    fOutputArray->Add(candidate);
     
     // find out if photon matches does not match photon in gen collection and apply fae efficiency
     if (isFake(candidate) ) 
