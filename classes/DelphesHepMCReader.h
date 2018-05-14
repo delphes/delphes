@@ -58,6 +58,8 @@ public:
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
+  void AnalyzeWeight(ExRootTreeBranch *branch);
+
 private:
 
   void AnalyzeParticle(DelphesFactory *factory,
