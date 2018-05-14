@@ -4,12 +4,11 @@ jobs:
     docker:
       - image: ubuntu:artful
     steps:
-      - checkout
       - run:
           name: Install packages
           command: |
             apt-get update
-            apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpcre3-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libtbb-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tar tcl wget
+            apt-get -y install cmake curl gfortran git graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpcre3-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libtbb-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tar tcl wget
       - run:
           name: Install ROOT
           command: |
@@ -19,6 +18,7 @@ jobs:
             echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
             echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
+      - checkout
       - run:
           name: Build Delphes
           command: |
