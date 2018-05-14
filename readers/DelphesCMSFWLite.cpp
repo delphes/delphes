@@ -63,7 +63,7 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
-  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchRwgt,
+  ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchWeight,
   DelphesFactory *factory, TObjArray *allParticleOutputArray,
   TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
 {
@@ -152,7 +152,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     for(itWeightsInfo = vectorWeightsInfo.begin(); itWeightsInfo != vectorWeightsInfo.end(); ++itWeightsInfo)
     {
-      weight = static_cast<Weight *>(branchRwgt->NewEntry());
+      weight = static_cast<Weight *>(branchWeight->NewEntry());
       weight->Weight = itWeightsInfo->wgt;
     }
   }
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
   TFile *outputFile = 0;
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0, *branchRwgt = 0;
+  ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-    branchRwgt = treeWriter->NewBranch("Weight", Weight::Class());
+    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -376,7 +376,7 @@ int main(int argc, char *argv[])
 
       for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
       {
-        ConvertInput(event, eventCounter, branchEvent, branchRwgt, factory,
+        ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
           allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
         modularDelphes->ProcessTask();
 
