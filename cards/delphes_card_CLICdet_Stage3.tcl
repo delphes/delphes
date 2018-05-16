@@ -122,37 +122,6 @@ set ExecutionPath {
 
 
        
-    JetEnergyScale_VLCR05N2                                                                 
-    JetEnergyScale_VLCR05N3                                                                 
-    JetEnergyScale_VLCR05N4                                                                 
-    JetEnergyScale_VLCR05N5
-    JetEnergyScale_VLCR05N6
-    JetEnergyScale_VLCR05_inclusive
-    JetEnergyScale_VLCR07N2
-    JetEnergyScale_VLCR07N3
-    JetEnergyScale_VLCR07N4
-    JetEnergyScale_VLCR07N5
-    JetEnergyScale_VLCR07N6
-    JetEnergyScale_VLCR07_inclusive
-    JetEnergyScale_VLCR10N2
-    JetEnergyScale_VLCR10N3
-    JetEnergyScale_VLCR10N4
-    JetEnergyScale_VLCR10N5
-    JetEnergyScale_VLCR10N6
-    JetEnergyScale_VLCR10_inclusive
-    JetEnergyScale_VLCR12N2
-    JetEnergyScale_VLCR12N3
-    JetEnergyScale_VLCR12N4
-    JetEnergyScale_VLCR12N5
-    JetEnergyScale_VLCR12N6
-    JetEnergyScale_VLCR12_inclusive
-    JetEnergyScale_VLCR15N2
-    JetEnergyScale_VLCR15N3
-    JetEnergyScale_VLCR15N4
-    JetEnergyScale_VLCR15N5
-    JetEnergyScale_VLCR15N6
-    JetEnergyScale_VLCR15_inclusive
-
 
     JetFlavorAssociation_R05N2
 	JetFlavorAssociation_R05N3
@@ -1026,13 +995,6 @@ source CLIC/CLICdet_JetReco.tcl
 
 source CLIC/CLICdet_JetSmearing.tcl
 
-#########################################
-# Jet Energy Scale to mimick overlay
-#########################################
-
-source CLIC/CLICdet_JetScale.tcl
-
-
 
 
 ########################
@@ -1108,42 +1070,42 @@ module TreeWriter TreeWriter {
 
    
     
-   ###with jet energy smearing and jet energy scale
-    add Branch JetEnergyScale_VLCR05N2/JES_VLCjetsR05N2 JES_VLCjetR05N2 Jet
-    add Branch JetEnergyScale_VLCR05N3/JES_VLCjetsR05N3 JES_VLCjetR05N3 Jet
-    add Branch JetEnergyScale_VLCR05N4/JES_VLCjetsR05N4 JES_VLCjetR05N4 Jet
-    add Branch JetEnergyScale_VLCR05N5/JES_VLCjetsR05N5 JES_VLCjetR05N5 Jet
-    add Branch JetEnergyScale_VLCR05N6/JES_VLCjetsR05N6 JES_VLCjetR05N6 Jet
+   ###with jet energy smearing
+    add Branch JetMomentumSmearing_VLCR05N2/JER_VLCjetsR05N2 JER_VLCjetR05N2 Jet
+    add Branch JetMomentumSmearing_VLCR05N3/JER_VLCjetsR05N3 JER_VLCjetR05N3 Jet
+    add Branch JetMomentumSmearing_VLCR05N4/JER_VLCjetsR05N4 JER_VLCjetR05N4 Jet
+    add Branch JetMomentumSmearing_VLCR05N5/JER_VLCjetsR05N5 JER_VLCjetR05N5 Jet
+    add Branch JetMomentumSmearing_VLCR05N6/JER_VLCjetsR05N6 JER_VLCjetR05N6 Jet
 
-    add Branch JetEnergyScale_VLCR07N2/JES_VLCjetsR07N2 JES_VLCjetR07N2 Jet
-    add Branch JetEnergyScale_VLCR07N3/JES_VLCjetsR07N3 JES_VLCjetR07N3 Jet
-    add Branch JetEnergyScale_VLCR07N4/JES_VLCjetsR07N4 JES_VLCjetR07N4 Jet
-    add Branch JetEnergyScale_VLCR07N5/JES_VLCjetsR07N5 JES_VLCjetR07N5 Jet
-    add Branch JetEnergyScale_VLCR07N6/JES_VLCjetsR07N6 JES_VLCjetR07N6 Jet
+    add Branch JetMomentumSmearing_VLCR07N2/JER_VLCjetsR07N2 JER_VLCjetR07N2 Jet
+    add Branch JetMomentumSmearing_VLCR07N3/JER_VLCjetsR07N3 JER_VLCjetR07N3 Jet
+    add Branch JetMomentumSmearing_VLCR07N4/JER_VLCjetsR07N4 JER_VLCjetR07N4 Jet
+    add Branch JetMomentumSmearing_VLCR07N5/JER_VLCjetsR07N5 JER_VLCjetR07N5 Jet
+    add Branch JetMomentumSmearing_VLCR07N6/JER_VLCjetsR07N6 JER_VLCjetR07N6 Jet
 
-    add Branch JetEnergyScale_VLCR10N2/JES_VLCjetsR10N2 JES_VLCjetR10N2 Jet
-    add Branch JetEnergyScale_VLCR10N3/JES_VLCjetsR10N3 JES_VLCjetR10N3 Jet
-    add Branch JetEnergyScale_VLCR10N4/JES_VLCjetsR10N4 JES_VLCjetR10N4 Jet
-    add Branch JetEnergyScale_VLCR10N5/JES_VLCjetsR10N5 JES_VLCjetR10N5 Jet
-    add Branch JetEnergyScale_VLCR10N6/JES_VLCjetsR10N6 JES_VLCjetR10N6 Jet
+    add Branch JetMomentumSmearing_VLCR10N2/JER_VLCjetsR10N2 JER_VLCjetR10N2 Jet
+    add Branch JetMomentumSmearing_VLCR10N3/JER_VLCjetsR10N3 JER_VLCjetR10N3 Jet
+    add Branch JetMomentumSmearing_VLCR10N4/JER_VLCjetsR10N4 JER_VLCjetR10N4 Jet
+    add Branch JetMomentumSmearing_VLCR10N5/JER_VLCjetsR10N5 JER_VLCjetR10N5 Jet
+    add Branch JetMomentumSmearing_VLCR10N6/JER_VLCjetsR10N6 JER_VLCjetR10N6 Jet
 
-    add Branch JetEnergyScale_VLCR12N2/JES_VLCjetsR12N2 JES_VLCjetR12N2 Jet
-    add Branch JetEnergyScale_VLCR12N3/JES_VLCjetsR12N3 JES_VLCjetR12N3 Jet
-    add Branch JetEnergyScale_VLCR12N4/JES_VLCjetsR12N4 JES_VLCjetR12N4 Jet
-    add Branch JetEnergyScale_VLCR12N5/JES_VLCjetsR12N5 JES_VLCjetR12N5 Jet
-    add Branch JetEnergyScale_VLCR12N6/JES_VLCjetsR12N6 JES_VLCjetR12N6 Jet
+    add Branch JetMomentumSmearing_VLCR12N2/JER_VLCjetsR12N2 JER_VLCjetR12N2 Jet
+    add Branch JetMomentumSmearing_VLCR12N3/JER_VLCjetsR12N3 JER_VLCjetR12N3 Jet
+    add Branch JetMomentumSmearing_VLCR12N4/JER_VLCjetsR12N4 JER_VLCjetR12N4 Jet
+    add Branch JetMomentumSmearing_VLCR12N5/JER_VLCjetsR12N5 JER_VLCjetR12N5 Jet
+    add Branch JetMomentumSmearing_VLCR12N6/JER_VLCjetsR12N6 JER_VLCjetR12N6 Jet
 
-    add Branch JetEnergyScale_VLCR15N2/JES_VLCjetsR15N2 JES_VLCjetR15N2 Jet
-    add Branch JetEnergyScale_VLCR15N3/JES_VLCjetsR15N3 JES_VLCjetR15N3 Jet
-    add Branch JetEnergyScale_VLCR15N4/JES_VLCjetsR15N4 JES_VLCjetR15N4 Jet
-    add Branch JetEnergyScale_VLCR15N5/JES_VLCjetsR15N5 JES_VLCjetR15N5 Jet
-    add Branch JetEnergyScale_VLCR15N6/JES_VLCjetsR15N6 JES_VLCjetR15N6 Jet
+    add Branch JetMomentumSmearing_VLCR15N2/JER_VLCjetsR15N2 JER_VLCjetR15N2 Jet
+    add Branch JetMomentumSmearing_VLCR15N3/JER_VLCjetsR15N3 JER_VLCjetR15N3 Jet
+    add Branch JetMomentumSmearing_VLCR15N4/JER_VLCjetsR15N4 JER_VLCjetR15N4 Jet
+    add Branch JetMomentumSmearing_VLCR15N5/JER_VLCjetsR15N5 JER_VLCjetR15N5 Jet
+    add Branch JetMomentumSmearing_VLCR15N6/JER_VLCjetsR15N6 JER_VLCjetR15N6 Jet
 
-    add Branch JetEnergyScale_VLCR05_inclusive/JES_VLCjetsR05_inclusive JES_VLCjetR05_inclusive Jet
-    add Branch JetEnergyScale_VLCR07_inclusive/JES_VLCjetsR07_inclusive JES_VLCjetR07_inclusive Jet
-    add Branch JetEnergyScale_VLCR10_inclusive/JES_VLCjetsR10_inclusive JES_VLCjetR10_inclusive Jet
-    add Branch JetEnergyScale_VLCR12_inclusive/JES_VLCjetsR12_inclusive JES_VLCjetR12_inclusive Jet
-    add Branch JetEnergyScale_VLCR15_inclusive/JES_VLCjetsR15_inclusive JES_VLCjetR15_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR05_inclusive/JER_VLCjetsR05_inclusive JER_VLCjetR05_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR07_inclusive/JER_VLCjetsR07_inclusive JER_VLCjetR07_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR10_inclusive/JER_VLCjetsR10_inclusive JER_VLCjetR10_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR12_inclusive/JER_VLCjetsR12_inclusive JER_VLCjetR12_inclusive Jet
+    add Branch JetMomentumSmearing_VLCR15_inclusive/JER_VLCjetsR15_inclusive JER_VLCjetR15_inclusive Jet
 
     ####
 

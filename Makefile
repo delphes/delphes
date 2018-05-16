@@ -1753,7 +1753,8 @@ external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh: \
 external/fastjet/JetDefinition.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/PseudoJet.hh \
-	external/fastjet/internal/deprecated.hh
+	external/fastjet/internal/deprecated.hh \
+	external/fastjet/ClusterSequence.hh
 	@touch $@
 
 modules/ConstituentFilter.h: \
@@ -1900,11 +1901,6 @@ external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh: \
 
 display/DelphesBranchElement.h: \
 	display/DelphesCaloData.h
-	@touch $@
-
-external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh: \
-	external/fastjet/ClusterSequence.hh \
-	external/fastjet/JetDefinition.hh
 	@touch $@
 
 external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh: \
