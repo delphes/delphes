@@ -12,7 +12,8 @@ jobs:
             echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
             echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
+            echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
       - run:
           name: Build Delphes
           command: |
-            make -j `nproc`
+            make -j `nproc` HAS_PYTHIA8=true
