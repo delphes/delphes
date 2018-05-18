@@ -14,6 +14,13 @@ jobs:
             echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
             echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
       - run:
-          name: Build Delphes
+          name: Build Delphes using make
           command: |
             make -j `nproc` HAS_PYTHIA8=true
+      - run:
+          name: Build Delphes using cmake
+          command: |
+            mkdir -p build
+            cd build
+            cmake ..
+            make -j `nproc`
