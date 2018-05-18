@@ -31,15 +31,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(ROOT COMPONENTS EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
 include(${ROOT_USE_FILE})
 
-
 # Declare Pythia8 dependancy
 find_package(Pythia8)
 if(PYTHIA8_FOUND)
-  message(STATUS "Pythia8 found")
   include_directories(${PYTHIA8_INCLUDE_DIRS})
-  set(LIBS ${LIBS} ${PYTHIA8_LIBRARIES})
 endif(PYTHIA8_FOUND)
-
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR "lib")
@@ -91,7 +87,7 @@ add_library(DelphesDisplay SHARED
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 if(PYTHIA8_FOUND)
-  target_link_libraries(Delphes ${LIBS}) # needed for DelphesPythia8
+  target_link_libraries(Delphes ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
 endif(PYTHIA8_FOUND)
 
 
