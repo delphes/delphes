@@ -1,26 +1,36 @@
 version: 2
+
+shared: &shared
+  steps:
+    - checkout
+    - run:
+      name: Setup environment
+      command: |
+        echo 'export ROOTSYS=/opt/root' >> $BASH_ENV
+        echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
+        echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
+        echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
+        echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
+    - run:
+      name: Build Delphes using make
+      command: |
+        make distclean
+        make -j `nproc` HAS_PYTHIA8=true
+    - run:
+      name: Build Delphes using cmake
+      command: |
+        rm -rf build
+        mkdir -p build
+        cd build
+        cmake ..
+        make -j `nproc`
+
 jobs:
-  build:
+  build_1:
+    <<: *shared
     docker:
       - image: delphes/docker-ubuntu-1710:latest
-    steps:
-      - checkout
-      - run:
-          name: Setup environment
-          command: |
-            echo 'export ROOTSYS=/opt/root' >> $BASH_ENV
-            echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
-            echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
-            echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
-            echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
-      - run:
-          name: Build Delphes using make
-          command: |
-            make -j `nproc` HAS_PYTHIA8=true
-      - run:
-          name: Build Delphes using cmake
-          command: |
-            mkdir -p build
-            cd build
-            cmake ..
-            make -j `nproc`
+  build_2:
+    <<: *shared
+    docker:
+      - image: delphes/docker-fedora-28:latest
