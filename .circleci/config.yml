@@ -34,3 +34,10 @@ jobs:
     <<: *shared
     docker:
       - image: delphes/docker-fedora-28:latest
+
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - build_1
+      - build_2
