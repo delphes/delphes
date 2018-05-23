@@ -16,6 +16,8 @@ shared: &shared
     - run:
         name: Build Delphes using make
         command: |
+          env
+          which root-config
           make distclean
           make -j `nproc` HAS_PYTHIA8=true
     - run:
