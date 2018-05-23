@@ -254,8 +254,10 @@ void TauTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficency formula
-    jet->TauTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
-    
+    Double_t eff=formula->Eval(pt, eta, phi, e);
+    jet->TauTag |= (gRandom->Uniform() <= eff) << fBitNumber;
+    jet->TauWeight = eff;     
+
     // set tau charge
     jet->Charge = charge;
   }
