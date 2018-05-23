@@ -6,8 +6,7 @@ shared: &shared
     - run:
         name: Setup environment
         command: |
-          ls -l /opt/root
-          if [ -d /opt/root ]; then
+          if [[ -d /opt/root ]]; then
             echo 'export ROOTSYS=/opt/root' >> $BASH_ENV
             echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
             echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
