@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   TFile *outputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
   ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0;
+  ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
@@ -102,6 +102,7 @@ int main(int argc, char *argv[])
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
+    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
@@ -193,6 +194,7 @@ int main(int argc, char *argv[])
             procStopWatch.Stop();
 
             reader->AnalyzeEvent(branchEvent, eventCounter, &readStopWatch, &procStopWatch);
+            reader->AnalyzeWeight(branchWeight);
 
             treeWriter->Fill();
 

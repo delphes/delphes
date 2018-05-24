@@ -374,6 +374,7 @@ public:
   UInt_t BTagPhys; // 0 or 1 for a jet that has been tagged as containing a heavy quark
 
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
+  Float_t TauWeight; // probability for jet to be identified as tau
 
   Int_t Charge; // tau charge
 
@@ -562,6 +563,7 @@ public:
   UInt_t BTagPhys;
 
   UInt_t TauTag;
+  Float_t TauWeight;
 
   Float_t Eem;
   Float_t Ehad;

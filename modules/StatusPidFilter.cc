@@ -176,6 +176,9 @@ void StatusPidFilter::Process()
 
     pass = kFALSE;
 
+    // Store all SUSY particles
+    if(pdgCode >= 1000001 && pdgCode <= 1000039) pass = kTRUE;
+
     // hard scattering particles (first condition for Py6, second for Py8)
     if(status == 3) pass = kTRUE;
     if(status > 20 && status < 30 ) pass = kTRUE;

@@ -1,25 +1,45 @@
 version: 2
-jobs:
-  build:
-    docker:
-      - image: ubuntu:artful
-    steps:
-      - checkout
-      - run:
-          name: Install packages
-          command: |
-            apt-get update
-            apt-get -y install cmake curl gfortran graphviz-dev libcfitsio-dev libfftw3-dev libftgl-dev libglew-dev libglu1-mesa-dev libgsl-dev libjpeg-dev libkrb5-dev libldap2-dev libmysqlclient-dev libpcre3-dev libpng-dev libqt4-dev libqt4-opengl-dev libssl-dev libtbb-dev libx11-dev libxext-dev libxft-dev libxi-dev libxml2-dev libxmu-dev libxpm-dev libxt-dev make python-dev tar tcl wget
-      - run:
-          name: Install ROOT
-          command: |
-            mkdir -p /opt
-            curl -sL https://root.cern.ch/download/root_v6.12.06.Linux-ubuntu17-x86_64-gcc7.2.tar.gz | tar -C /opt -zxf -
+
+shared: &shared
+  steps:
+    - checkout
+    - run:
+        name: Setup environment
+        command: |
+          if [[ -d /opt/root ]]; then
             echo 'export ROOTSYS=/opt/root' >> $BASH_ENV
             echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
             echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
-      - run:
-          name: Build Delphes
-          command: |
-            make
+          fi
+          echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
+    - run:
+        name: Build Delphes using make
+        command: |
+          make distclean
+          make -j `nproc` HAS_PYTHIA8=true
+    - run:
+        name: Build Delphes using cmake
+        command: |
+          rm -rf build
+          mkdir -p build
+          cd build
+          cmake ..
+          make -j `nproc`
+
+jobs:
+  build_1:
+    <<: *shared
+    docker:
+      - image: delphes/docker-ubuntu-1710:latest
+  build_2:
+    <<: *shared
+    docker:
+      - image: delphes/docker-fedora-28:latest
+
+workflows:
+  version: 2
+  build_all:
+    jobs:
+      - build_1
+      - build_2

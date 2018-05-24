@@ -332,6 +332,21 @@ void DelphesHepMCReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventN
 
 //---------------------------------------------------------------------------
 
+void DelphesHepMCReader::AnalyzeWeight(ExRootTreeBranch *branch)
+{
+  Weight *element;
+  vector< double >::const_iterator itWeight;
+
+  for(itWeight = fWeight.begin(); itWeight != fWeight.end(); ++itWeight)
+  {
+    element = static_cast<Weight *>(branch->NewEntry());
+
+    element->Weight = *itWeight;
+  }
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesHepMCReader::AnalyzeParticle(DelphesFactory *factory,
   TObjArray *allParticleOutputArray,
   TObjArray *stableParticleOutputArray,
