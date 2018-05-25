@@ -4060,7 +4060,7 @@ module StatusPidFilter GenParticleFilter {
 
     set InputArray Delphes/allParticles
     set OutputArray filteredParticles
-    set PTMin 5.0
+    set PTMin 0.0
 
 }
 
