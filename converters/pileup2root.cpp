@@ -25,9 +25,6 @@
 #include <signal.h>
 #include <stdio.h>
 
-#include <rpc/types.h>
-#include <rpc/xdr.h>
-
 #include "TROOT.h"
 #include "TApplication.h"
 
