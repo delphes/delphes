@@ -5,7 +5,7 @@ include_directories(
 
 file(GLOB executables RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
-# TODO: implement switch to enable CMSSW, ProMC and Pythia8 if present
+# TODO: implement switch to enable CMSSW and ProMC if present
 list(REMOVE_ITEM executables DelphesCMSFWLite.cpp)
 list(REMOVE_ITEM executables DelphesProMC.cpp)
 if(NOT PYTHIA8_FOUND)
