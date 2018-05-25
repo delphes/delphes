@@ -106,7 +106,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string JetBranchName) :
+LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string jetBranchName) :
   fTriggerWord(0), fEventNumber(1), fTreeReader(0), fOutputFile(0),
   fBranchEvent(0), fBranchTrack(0), fBranchTower(0), fBranchPhoton(0),
   fBranchElectron(0), fBranchMuon(0), fBranchJet(0), fBranchMissingET(0)
@@ -127,7 +127,7 @@ LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string Je
   // reconstructed muons
   fBranchMuon = fTreeReader->UseBranch("Muon");
   // reconstructed jets
-  fBranchJet = fTreeReader->UseBranch(JetBranchName.c_str());
+  fBranchJet = fTreeReader->UseBranch(jetBranchName.c_str());
   // missing transverse energy
   fBranchMissingET = fTreeReader->UseBranch("MissingET");
 
@@ -435,37 +435,29 @@ void SignalHandler(int sig)
 
 //---------------------------------------------------------------------------
 
-pair<string,string> stringToOption(string s) {
+vector<string> ArgSplitter(char *arg)
+{
+  string s = arg;
+  string delimiter = "=";
+  vector<string> result;
+  size_t first = 0, last = 0;
 
-	string delimiter = "=";
+  while((last = s.find(delimiter, first)) != string::npos)
+  {
+    result.push_back(s.substr(first, last - first));
+    first = last + delimiter.length();
+  }
 
-	vector<string> vs;
-	pair<string,string> res;
+  result.push_back(s.substr(first, last));
 
-	size_t pos = 0;
-	string token;
-	while ((pos = s.find(delimiter)) != std::string::npos) {
-	    token = s.substr(0, pos);
-	    //cout << token << std::endl;
-			vs.push_back(token);
-	    s.erase(0, pos + delimiter.length());
-	}
-
-	//std::cout << s << std::endl;
-	vs.push_back(s);
-
-	if (vs.size()==2){
-		res.first=vs[0];
-		res.second=vs[1];
-	}
-
-	return res;
-
+  return result;
 }
 
+//---------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
+  int i, j;
   char appName[] = "root2lhco";
   stringstream message;
   FILE *outputFile = 0;
@@ -473,31 +465,31 @@ int main(int argc, char *argv[])
   LHCOWriter *writer = 0;
   ExRootTreeReader *treeReader = 0;
   Long64_t entry, allEntries;
-  string  JetBranchName="Jet";
+  string jetBranchName = "Jet";
+  vector<string> result;
 
   if(argc < 2 || argc > 4)
   {
-    cerr << " Usage: " << appName << " input_file" << " [output_file]  [--jet-branch=Jet]" << endl;
+    cerr << " Usage: " << appName << " input_file" << " [output_file] [--jet-branch=Jet]" << endl;
     cerr << " input_file - input file in ROOT format," << endl;
     cerr << " output_file - output file in LHCO format," << endl;
     cerr << " with no output_file, or when output_file is -, write to standard output." << endl;
-    cerr << " in order to specify the jet-branch name the output_file cannot be omitted." << endl;
     return 1;
   }
 
-  for(int iarg=3; iarg< argc	; iarg++){
+  for(i = 2; i < argc; ++i)
+  {
+    result = ArgSplitter(argv[i]);
 
-		string argument=argv[iarg];
-		pair<string,string> option;
-		option=stringToOption(argument);
-
-		if ( option.first == "--jet-branch" ) {
-      JetBranchName = option.second;
-      cout << " Using the jet branch named " << JetBranchName << endl;
+    if(result.size() == 2 && result[0] == "--jet-branch")
+    {
+      jetBranchName = result[1];
+      for(j = i + 1; j < argc; ++j) argv[j - 1] = argv[j];
+      --argc;
+      break;
     }
-	}
-  cout << " Using the default jet branch named " << JetBranchName << endl;
-
+  }
+  cerr << "** Using the jet branch named " << jetBranchName << endl;
 
   signal(SIGINT, SignalHandler);
 
@@ -538,7 +530,7 @@ int main(int argc, char *argv[])
     if(allEntries > 0)
     {
       // Create LHC Olympics converter:
-      writer = new LHCOWriter(treeReader, outputFile, JetBranchName);
+      writer = new LHCOWriter(treeReader, outputFile, jetBranchName);
 
       ExRootProgressBar progressBar(allEntries - 1);
       // Loop over all events
