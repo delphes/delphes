@@ -477,7 +477,8 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  for(i = 2; i < argc; ++i)
+  i = 2;
+  while(i < argc)
   {
     result = ArgSplitter(argv[i]);
 
@@ -486,7 +487,10 @@ int main(int argc, char *argv[])
       jetBranchName = result[1];
       for(j = i + 1; j < argc; ++j) argv[j - 1] = argv[j];
       --argc;
-      break;
+    }
+    else
+    {
+      ++i;
     }
   }
   cerr << "** Using the jet branch named " << jetBranchName << endl;
