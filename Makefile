@@ -378,6 +378,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TrackPileUpSubtractor.h \
 	modules/TaggingParticlesSkimmer.h \
 	modules/PileUpJetID.h \
+	modules/PhotonID.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
 	modules/PdgCodeFilter.h \
@@ -827,6 +828,15 @@ tmp/modules/PhotonConversions.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/PhotonID.$(ObjSuf): \
+	modules/PhotonID.$(SrcSuf) \
+	modules/PhotonID.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/PileUpJetID.$(ObjSuf): \
 	modules/PileUpJetID.$(SrcSuf) \
 	modules/PileUpJetID.h \
@@ -1076,6 +1086,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/ParticlePropagator.$(ObjSuf) \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
 	tmp/modules/PhotonConversions.$(ObjSuf) \
+	tmp/modules/PhotonID.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
 	tmp/modules/RecoPuFilter.$(ObjSuf) \
@@ -1938,6 +1949,10 @@ external/fastjet/PseudoJet.hh: \
 	external/fastjet/SharedPtr.hh \
 	external/fastjet/Error.hh \
 	external/fastjet/PseudoJetStructureBase.hh
+	@touch $@
+
+modules/PhotonID.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/tools/Pruner.hh: \

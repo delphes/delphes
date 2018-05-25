@@ -274,6 +274,8 @@ public:
   Float_t SumPtChargedPU; // isolation variable
   Float_t SumPt; // isolation variable
 
+  Int_t Status; // 1: prompt -- 2: non prompt -- 3: fake
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -550,7 +552,6 @@ public:
   Int_t IsRecoPU;
 
   Int_t IsConstituent;
-
   Int_t IsFromConversion;
 
   UInt_t Flavor;
