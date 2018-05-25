@@ -35,7 +35,7 @@ include(${ROOT_USE_FILE})
 find_package(Pythia8)
 if(PYTHIA8_FOUND)
   include_directories(${PYTHIA8_INCLUDE_DIRS})
-endif(PYTHIA8_FOUND)
+endif()
 
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR "lib")
@@ -48,8 +48,6 @@ function(DELPHES_GENERATE_DICTIONARY dictionary)
     ROOT_GENERATE_DICTIONARY(${dictionary} MODULE ${dictionary} ${ARGN})
   endif()
 endfunction()
-
-
 
 # Declare position of all other externals needed
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
@@ -86,9 +84,9 @@ add_library(DelphesDisplay SHARED
 
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
 target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
+
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
-endif(PYTHIA8_FOUND)
-
+endif()
 
 install(TARGETS Delphes DelphesDisplay DESTINATION lib)
