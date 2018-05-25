@@ -12,7 +12,11 @@ shared: &shared
             echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
             echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
           fi
-          echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
+          if [[ -d /opt/pythia ]]; then
+            echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
+          else
+            echo 'export PYTHIA8=/usr' >> $BASH_ENV
+          fi
     - run:
         name: Build Delphes using make
         command: |
