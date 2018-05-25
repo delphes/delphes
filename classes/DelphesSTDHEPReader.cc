@@ -33,8 +33,8 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "TObjArray.h"
 #include "TStopwatch.h"
@@ -44,6 +44,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesXDRReader.h"
 
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
@@ -54,10 +55,9 @@ static const int kBufferSize  = 1000000;
 //---------------------------------------------------------------------------
 
 DelphesSTDHEPReader::DelphesSTDHEPReader() :
-  fInputFile(0), fInputXDR(0), fBuffer(0), fPDG(0), fBlockType(-1)
+  fInputFile(0), fBuffer(0), fPDG(0), fBlockType(-1)
 {
-  fInputXDR = new XDR;
-  fBuffer = new char[kBufferSize*96 + 24];
+  fBuffer = new uint8_t[kBufferSize*96 + 24];
 
   fPDG = TDatabasePDG::Instance();
 }
@@ -67,7 +67,6 @@ DelphesSTDHEPReader::DelphesSTDHEPReader() :
 DelphesSTDHEPReader::~DelphesSTDHEPReader()
 {
   if(fBuffer) delete fBuffer;
-  if(fInputXDR) delete fInputXDR;
 }
 
 //---------------------------------------------------------------------------
@@ -75,7 +74,7 @@ DelphesSTDHEPReader::~DelphesSTDHEPReader()
 void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
 {
   fInputFile = inputFile;
-  xdrstdio_create(fInputXDR, inputFile, XDR_DECODE);
+  fReader[0].SetFile(inputFile);
 }
 
 //---------------------------------------------------------------------------
@@ -99,9 +98,9 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   TObjArray *stableParticleOutputArray,
   TObjArray *partonOutputArray)
 {
-  if(feof(fInputFile)) return kFALSE;
+  fReader[0].ReadValue(&fBlockType, 4);
 
-  xdr_int(fInputXDR, &fBlockType);
+  if(feof(fInputFile)) return kFALSE;
 
   SkipBytes(4);
 
@@ -145,10 +144,10 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::SkipBytes(u_int size)
+void DelphesSTDHEPReader::SkipBytes(int size)
 {
   int rc;
-  u_int rndup;
+  int rndup;
 
   rndup = size % 4;
   if(rndup > 0)
@@ -160,16 +159,16 @@ void DelphesSTDHEPReader::SkipBytes(u_int size)
 
   if(rc != 0 && errno == ESPIPE)
   {
-    xdr_opaque(fInputXDR, fBuffer, size);
+    fReader[0].ReadRaw(fBuffer, size);
   }
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::SkipArray(u_int elsize)
+void DelphesSTDHEPReader::SkipArray(int elsize)
 {
-  u_int size;
-  xdr_u_int(fInputXDR, &size);
+  uint32_t size;
+  fReader[0].ReadValue(&size, 4);
   SkipBytes(size*elsize);
 }
 
@@ -177,14 +176,14 @@ void DelphesSTDHEPReader::SkipArray(u_int elsize)
 
 void DelphesSTDHEPReader::ReadFileHeader()
 {
-  u_int i;
+  uint32_t i;
   enum STDHEPVersion {UNKNOWN, V1, V2, V21} version;
 
   // version
-  xdr_string(fInputXDR, &fBuffer, 100);
+  fReader[0].ReadString(fBuffer, 100);
   if(fBuffer[0] == '\0' || fBuffer[1] == '\0') version = UNKNOWN;
   else if(fBuffer[0] == '1') version = V1;
-  else if(strncmp(fBuffer, "2.01", 4) == 0) version = V21;
+  else if(strncmp((char *)fBuffer, "2.01", 4) == 0) version = V21;
   else if(fBuffer[0] == '2') version = V2;
   else version = UNKNOWN;
 
@@ -206,19 +205,19 @@ void DelphesSTDHEPReader::ReadFileHeader()
   SkipBytes(4);
 
   // Number of events
-  xdr_u_int(fInputXDR, &fEntries);
+  fReader[0].ReadValue(&fEntries, 4);
 
   SkipBytes(8);
 
   // Number of blocks
-  u_int nBlocks = 0;
-  xdr_u_int(fInputXDR, &nBlocks);
+  uint32_t nBlocks = 0;
+  fReader[0].ReadValue(&nBlocks, 4);
 
   // Number of NTuples
-  u_int nNTuples = 0;
+  uint32_t nNTuples = 0;
   if(version != V1)
   {
-    xdr_u_int(fInputXDR, &nNTuples);
+    fReader[0].ReadValue(&nNTuples, 4);
   }
 
   if(nNTuples != 0)
@@ -243,8 +242,8 @@ void DelphesSTDHEPReader::ReadFileHeader()
 void DelphesSTDHEPReader::ReadEventTable()
 {
   // version
-  xdr_string(fInputXDR, &fBuffer, 100);
-  if(strncmp(fBuffer, "1.00", 4) == 0)
+  fReader[0].ReadString(fBuffer, 100);
+  if(strncmp((char *)fBuffer, "1.00", 4) == 0)
   {
     SkipBytes(8);
 
@@ -254,7 +253,7 @@ void DelphesSTDHEPReader::ReadEventTable()
     SkipArray(4);
     SkipArray(4);
   }
-  else if(strncmp(fBuffer, "2.00", 4) == 0)
+  else if(strncmp((char *)fBuffer, "2.00", 4) == 0)
   {
     SkipBytes(12);
 
@@ -271,15 +270,15 @@ void DelphesSTDHEPReader::ReadEventTable()
 void DelphesSTDHEPReader::ReadEventHeader()
 {
   bool skipNTuples = false;
-  u_int skipSize = 4;
+  int skipSize = 4;
 
   // version
-  xdr_string(fInputXDR, &fBuffer, 100);
-  if(strncmp(fBuffer, "2.00", 4) == 0)
+  fReader[0].ReadString(fBuffer, 100);
+  if(strncmp((char *)fBuffer, "2.00", 4) == 0)
   {
     skipNTuples = true;
   }
-  else if(strncmp(fBuffer, "3.00", 4) == 0)
+  else if(strncmp((char *)fBuffer, "3.00", 4) == 0)
   {
     skipNTuples = true;
     skipSize = 8;
@@ -287,14 +286,14 @@ void DelphesSTDHEPReader::ReadEventHeader()
 
   SkipBytes(20);
 
-  u_int dimBlocks = 0;
-  xdr_u_int(fInputXDR, &dimBlocks);
+  uint32_t dimBlocks = 0;
+  fReader[0].ReadValue(&dimBlocks, 4);
 
-  u_int dimNTuples = 0;
+  uint32_t dimNTuples = 0;
   if(skipNTuples)
   {
     SkipBytes(4);
-    xdr_u_int(fInputXDR, &dimNTuples);
+    fReader[0].ReadValue(&dimNTuples, 4);
   }
 
   // Processing blocks extraction
@@ -317,14 +316,14 @@ void DelphesSTDHEPReader::ReadEventHeader()
 void DelphesSTDHEPReader::ReadSTDCM1()
 {
   // version
-  xdr_string(fInputXDR, &fBuffer, 100);
+  fReader[0].ReadString(fBuffer, 100);
 
   // skip 5*4 + 2*8 = 36 bytes
   SkipBytes(36);
 
-  if((strncmp(fBuffer, "1.", 2) == 0) || (strncmp(fBuffer, "2.", 2) == 0) ||
-     (strncmp(fBuffer, "3.", 2) == 0) || (strncmp(fBuffer, "4.", 2) == 0) ||
-     (strncmp(fBuffer, "5.00", 4) == 0))
+  if((strncmp((char *)fBuffer, "1.", 2) == 0) || (strncmp((char *)fBuffer, "2.", 2) == 0) ||
+     (strncmp((char *)fBuffer, "3.", 2) == 0) || (strncmp((char *)fBuffer, "4.", 2) == 0) ||
+     (strncmp((char *)fBuffer, "5.00", 4) == 0))
   {
     return;
   }
@@ -332,7 +331,7 @@ void DelphesSTDHEPReader::ReadSTDCM1()
   SkipArray(1);
   SkipArray(1);
 
-  if(strncmp(fBuffer, "5.01", 4) == 0)
+  if(strncmp((char *)fBuffer, "5.01", 4) == 0)
   {
     return;
   }
@@ -344,16 +343,16 @@ void DelphesSTDHEPReader::ReadSTDCM1()
 
 void DelphesSTDHEPReader::ReadSTDHEP()
 {
-  u_int idhepSize, isthepSize, jmohepSize, jdahepSize, phepSize, vhepSize;
+  uint32_t idhepSize, isthepSize, jmohepSize, jdahepSize, phepSize, vhepSize;
 
   // version
-  xdr_string(fInputXDR, &fBuffer, 100);
+  fReader[0].ReadString(fBuffer, 100);
 
   // Extracting the event number
-  xdr_int(fInputXDR, &fEventNumber);
+  fReader[0].ReadValue(&fEventNumber, 4);
 
   // Extracting the number of particles
-  xdr_int(fInputXDR, &fEventSize);
+  fReader[0].ReadValue(&fEventSize, 4);
 
   if(fEventSize >= kBufferSize)
   {
@@ -363,14 +362,21 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   // 4*n + 4*n + 8*n + 8*n + 40*n + 32*n +
   // 4 + 4 + 4 + 4 + 4 + 4 = 96*n + 24
 
-  xdr_opaque(fInputXDR, fBuffer, 96*fEventSize + 24);
+  fReader[0].ReadRaw(fBuffer, 96*fEventSize + 24);
 
-  idhepSize = ntohl(*(u_int*)(fBuffer));
-  isthepSize = ntohl(*(u_int*)(fBuffer + 4*1 + 4*1*fEventSize));
-  jmohepSize = ntohl(*(u_int*)(fBuffer + 4*2 + 4*2*fEventSize));
-  jdahepSize = ntohl(*(u_int*)(fBuffer + 4*3 + 4*4*fEventSize));
-  phepSize = ntohl(*(u_int*)(fBuffer + 4*4 + 4*6*fEventSize));
-  vhepSize = ntohl(*(u_int*)(fBuffer + 4*5 + 4*16*fEventSize));
+  fReader[1].SetBuffer(fBuffer);
+  fReader[2].SetBuffer(fBuffer + 4*1 + 4*1*fEventSize);
+  fReader[3].SetBuffer(fBuffer + 4*2 + 4*2*fEventSize);
+  fReader[4].SetBuffer(fBuffer + 4*3 + 4*4*fEventSize);
+  fReader[5].SetBuffer(fBuffer + 4*4 + 4*6*fEventSize);
+  fReader[6].SetBuffer(fBuffer + 4*5 + 4*16*fEventSize);
+
+  fReader[1].ReadValue(&idhepSize, 4);
+  fReader[2].ReadValue(&isthepSize, 4);
+  fReader[3].ReadValue(&jmohepSize, 4);
+  fReader[4].ReadValue(&jdahepSize, 4);
+  fReader[5].ReadValue(&phepSize, 4);
+  fReader[6].ReadValue(&vhepSize, 4);
 
   if(fEventSize < 0 ||
      fEventSize != (int)idhepSize      || fEventSize != (int)isthepSize     ||
@@ -391,22 +397,22 @@ void DelphesSTDHEPReader::ReadSTDHEP()
 
 void DelphesSTDHEPReader::ReadSTDHEP4()
 {
-  u_int number;
+  uint32_t number;
 
   // Extracting the event weight
-  xdr_double(fInputXDR, &fWeight);
+  fReader[0].ReadValue(&fWeight, 8);
 
   // Extracting alpha QED
-  xdr_double(fInputXDR, &fAlphaQED);
+  fReader[0].ReadValue(&fAlphaQED, 8);
 
   // Extracting alpha QCD
-  xdr_double(fInputXDR, &fAlphaQCD);
+  fReader[0].ReadValue(&fAlphaQCD, 8);
 
   // Extracting the event scale
-  xdr_u_int(fInputXDR, &fScaleSize);
+  fReader[0].ReadValue(&fScaleSize, 4);
   for(number = 0; number < fScaleSize; ++number)
   {
-    xdr_double(fInputXDR, &fScale[number]);
+    fReader[0].ReadValue(&fScale[number], 8);
   }
 
   SkipArray(8);
@@ -449,37 +455,29 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
   int pdgCode;
 
   int number;
-  int pid, status, m1, m2, d1, d2;
+  int32_t pid, status, m1, m2, d1, d2;
   double px, py, pz, e, mass;
   double x, y, z, t;
 
-  XDR bufferXDR[6];
-  xdrmem_create(&bufferXDR[0], fBuffer + 4*1, 4*fEventSize, XDR_DECODE);
-  xdrmem_create(&bufferXDR[1], fBuffer + 4*2 + 4*1*fEventSize, 4*fEventSize, XDR_DECODE);
-  xdrmem_create(&bufferXDR[2], fBuffer + 4*3 + 4*2*fEventSize, 8*fEventSize, XDR_DECODE);
-  xdrmem_create(&bufferXDR[3], fBuffer + 4*4 + 4*4*fEventSize, 8*fEventSize, XDR_DECODE);
-  xdrmem_create(&bufferXDR[4], fBuffer + 4*5 + 4*6*fEventSize, 40*fEventSize, XDR_DECODE);
-  xdrmem_create(&bufferXDR[5], fBuffer + 4*6 + 4*16*fEventSize, 32*fEventSize, XDR_DECODE);
-
   for(number = 0; number < fEventSize; ++number)
   {
-    xdr_int(&bufferXDR[0], &status);
-    xdr_int(&bufferXDR[1], &pid);
-    xdr_int(&bufferXDR[2], &m1);
-    xdr_int(&bufferXDR[2], &m2);
-    xdr_int(&bufferXDR[3], &d1);
-    xdr_int(&bufferXDR[3], &d2);
+    fReader[1].ReadValue(&status, 4);
+    fReader[2].ReadValue(&pid, 4);
+    fReader[3].ReadValue(&m1, 4);
+    fReader[3].ReadValue(&m2, 4);
+    fReader[4].ReadValue(&d1, 4);
+    fReader[4].ReadValue(&d2, 4);
 
-    xdr_double(&bufferXDR[4], &px);
-    xdr_double(&bufferXDR[4], &py);
-    xdr_double(&bufferXDR[4], &pz);
-    xdr_double(&bufferXDR[4], &e);
-    xdr_double(&bufferXDR[4], &mass);
+    fReader[5].ReadValue(&px, 8);
+    fReader[5].ReadValue(&py, 8);
+    fReader[5].ReadValue(&pz, 8);
+    fReader[5].ReadValue(&e, 8);
+    fReader[5].ReadValue(&mass, 8);
 
-    xdr_double(&bufferXDR[5], &x);
-    xdr_double(&bufferXDR[5], &y);
-    xdr_double(&bufferXDR[5], &z);
-    xdr_double(&bufferXDR[5], &t);
+    fReader[6].ReadValue(&x, 8);
+    fReader[6].ReadValue(&y, 8);
+    fReader[6].ReadValue(&z, 8);
+    fReader[6].ReadValue(&t, 8);
 
     candidate = factory->NewCandidate();
 

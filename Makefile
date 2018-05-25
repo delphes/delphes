@@ -14,7 +14,7 @@ ROOT_MAJOR := $(shell $(RC) --version | cut -d'.' -f1)
 SrcSuf = cc
 PcmSuf = _rdict.pcm
 
-CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl -I/usr/include/tirpc
+CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml $(SYSLIBS)
 
@@ -480,15 +480,18 @@ tmp/classes/DelphesModule.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h
 tmp/classes/DelphesPileUpReader.$(ObjSuf): \
 	classes/DelphesPileUpReader.$(SrcSuf) \
-	classes/DelphesPileUpReader.h
+	classes/DelphesPileUpReader.h \
+	classes/DelphesXDRReader.h
 tmp/classes/DelphesPileUpWriter.$(ObjSuf): \
 	classes/DelphesPileUpWriter.$(SrcSuf) \
-	classes/DelphesPileUpWriter.h
+	classes/DelphesPileUpWriter.h \
+	classes/DelphesXDRWriter.h
 tmp/classes/DelphesSTDHEPReader.$(ObjSuf): \
 	classes/DelphesSTDHEPReader.$(SrcSuf) \
 	classes/DelphesSTDHEPReader.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
+	classes/DelphesXDRReader.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h
 tmp/classes/DelphesStream.$(ObjSuf): \
 	classes/DelphesStream.$(SrcSuf) \
@@ -496,6 +499,12 @@ tmp/classes/DelphesStream.$(ObjSuf): \
 tmp/classes/DelphesTF2.$(ObjSuf): \
 	classes/DelphesTF2.$(SrcSuf) \
 	classes/DelphesTF2.h
+tmp/classes/DelphesXDRReader.$(ObjSuf): \
+	classes/DelphesXDRReader.$(SrcSuf) \
+	classes/DelphesXDRReader.h
+tmp/classes/DelphesXDRWriter.$(ObjSuf): \
+	classes/DelphesXDRWriter.$(SrcSuf) \
+	classes/DelphesXDRWriter.h
 tmp/external/ExRootAnalysis/ExRootConfReader.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootConfReader.$(SrcSuf) \
 	external/ExRootAnalysis/ExRootConfReader.h \
@@ -1003,6 +1012,8 @@ DELPHES_OBJ +=  \
 	tmp/classes/DelphesSTDHEPReader.$(ObjSuf) \
 	tmp/classes/DelphesStream.$(ObjSuf) \
 	tmp/classes/DelphesTF2.$(ObjSuf) \
+	tmp/classes/DelphesXDRReader.$(ObjSuf) \
+	tmp/classes/DelphesXDRWriter.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootConfReader.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootFilter.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootProgressBar.$(ObjSuf) \
@@ -2015,6 +2026,10 @@ modules/ParticlePropagator.h: \
 
 modules/PdgCodeFilter.h: \
 	classes/DelphesModule.h
+	@touch $@
+
+classes/DelphesSTDHEPReader.h: \
+	classes/DelphesXDRReader.h
 	@touch $@
 
 external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh: \

@@ -1,6 +1,6 @@
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
- *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
+ *  Copyright (C) 2018  Universite catholique de Louvain (UCL), Belgium
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DelphesPileUpWriter_h
-#define DelphesPileUpWriter_h
+#ifndef DelphesXDRReader_h
+#define DelphesXDRReader_h
 
-/** \class DelphesPileUpWriter
+/** \class DelphesXDRReader
  *
- *  Writes pile-up binary file
+ *  Reads XDR
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -30,37 +30,26 @@
 #include <stdio.h>
 #include <stdint.h>
 
-class DelphesXDRWriter;
-
-class DelphesPileUpWriter
+class DelphesXDRReader
 {
 public:
 
-  DelphesPileUpWriter(const char *fileName);
+  DelphesXDRReader();
 
-  ~DelphesPileUpWriter();
+  void SetFile(FILE *file);
+  void SetBuffer(void *buffer);
+  void SetOffset(int offset);
 
-  void WriteParticle(int32_t pid,
-    float x, float y, float z, float t,
-    float px, float py, float pz, float e);
-
-  void WriteEntry();
-
-  void WriteIndex();
+  void ReadRaw(void *value, int size);
+  void ReadValue(void *value, int size);
+  void ReadString(void *value, int maxSize);
 
 private:
 
-  int64_t fEntries;
-  int32_t fEntrySize;
-  int64_t fOffset;
-
-  FILE *fPileUpFile;
-  uint8_t *fIndex;
+  FILE *fFile;
   uint8_t *fBuffer;
 
-  DelphesXDRWriter *fOutputWriter;
-  DelphesXDRWriter *fIndexWriter;
-  DelphesXDRWriter *fBufferWriter;
+  int fOffset;
 };
 
-#endif // DelphesPileUpWriter_h
+#endif // DelphesXDRReader_h

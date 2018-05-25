@@ -32,8 +32,9 @@
 #include <sstream>
 
 #include <stdio.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <stdint.h>
+
+#include "classes/DelphesXDRWriter.h"
 
 using namespace std;
 
@@ -46,17 +47,18 @@ static const int kRecordSize = 9;
 DelphesPileUpWriter::DelphesPileUpWriter(const char *fileName) :
   fEntries(0), fEntrySize(0), fOffset(0),
   fPileUpFile(0), fIndex(0), fBuffer(0),
-  fOutputXDR(0), fIndexXDR(0), fBufferXDR(0)
+  fOutputWriter(0), fIndexWriter(0), fBufferWriter(0)
 {
   stringstream message;
 
-  fIndex = new char[kIndexSize*8];
-  fBuffer = new char[kBufferSize*kRecordSize*4];
-  fOutputXDR = new XDR;
-  fIndexXDR = new XDR;
-  fBufferXDR = new XDR;
-  xdrmem_create(fIndexXDR, fIndex, kIndexSize*8, XDR_ENCODE);
-  xdrmem_create(fBufferXDR, fBuffer, kBufferSize*kRecordSize*4, XDR_ENCODE);
+  fIndex = new uint8_t[kIndexSize*8];
+  fBuffer = new uint8_t[kBufferSize*kRecordSize*4];
+  fOutputWriter = new DelphesXDRWriter;
+  fIndexWriter = new DelphesXDRWriter;
+  fBufferWriter = new DelphesXDRWriter;
+
+  fIndexWriter->SetBuffer(fIndex);
+  fBufferWriter->SetBuffer(fBuffer);
 
   fPileUpFile = fopen(fileName, "w+");
 
@@ -66,27 +68,24 @@ DelphesPileUpWriter::DelphesPileUpWriter(const char *fileName) :
     throw runtime_error(message.str());
   }
 
-  xdrstdio_create(fOutputXDR, fPileUpFile, XDR_ENCODE);
+  fOutputWriter->SetFile(fPileUpFile);
 }
 
 //------------------------------------------------------------------------------
 
 DelphesPileUpWriter::~DelphesPileUpWriter()
 {
-  xdr_destroy(fOutputXDR);
   if(fPileUpFile) fclose(fPileUpFile);
-  xdr_destroy(fBufferXDR);
-  xdr_destroy(fIndexXDR);
-  if(fBufferXDR) delete fBufferXDR;
-  if(fIndexXDR) delete fIndexXDR;
-  if(fOutputXDR) delete fOutputXDR;
+  if(fBufferWriter) delete fBufferWriter;
+  if(fIndexWriter) delete fIndexWriter;
+  if(fOutputWriter) delete fOutputWriter;
   if(fBuffer) delete[] fBuffer;
   if(fIndex) delete[] fIndex;
 }
 
 //------------------------------------------------------------------------------
 
-void DelphesPileUpWriter::WriteParticle(int pid,
+void DelphesPileUpWriter::WriteParticle(int32_t pid,
   float x, float y, float z, float t,
   float px, float py, float pz, float e)
 {
@@ -95,15 +94,15 @@ void DelphesPileUpWriter::WriteParticle(int pid,
     throw runtime_error("too many particles in pile-up event");
   }
 
-  xdr_int(fBufferXDR, &pid);
-  xdr_float(fBufferXDR, &x);
-  xdr_float(fBufferXDR, &y);
-  xdr_float(fBufferXDR, &z);
-  xdr_float(fBufferXDR, &t);
-  xdr_float(fBufferXDR, &px);
-  xdr_float(fBufferXDR, &py);
-  xdr_float(fBufferXDR, &pz);
-  xdr_float(fBufferXDR, &e);
+  fBufferWriter->WriteValue(&pid, 4);
+  fBufferWriter->WriteValue(&x, 4);
+  fBufferWriter->WriteValue(&y, 4);
+  fBufferWriter->WriteValue(&z, 4);
+  fBufferWriter->WriteValue(&t, 4);
+  fBufferWriter->WriteValue(&px, 4);
+  fBufferWriter->WriteValue(&py, 4);
+  fBufferWriter->WriteValue(&pz, 4);
+  fBufferWriter->WriteValue(&e, 4);
 
   ++fEntrySize;
 }
@@ -117,15 +116,15 @@ void DelphesPileUpWriter::WriteEntry()
     throw runtime_error("too many pile-up events");
   }
 
-  xdr_int(fOutputXDR, &fEntrySize);
-  xdr_opaque(fOutputXDR, fBuffer, fEntrySize*kRecordSize*4);
+  fOutputWriter->WriteValue(&fEntrySize, 4);
+  fOutputWriter->WriteRaw(fBuffer, fEntrySize*kRecordSize*4);
 
-  xdr_hyper(fIndexXDR, &fOffset);
+  fIndexWriter->WriteValue(&fOffset, 8);
   fOffset += fEntrySize*kRecordSize*4 + 4;
 
-  xdr_setpos(fBufferXDR, 0);
+  fBufferWriter->SetOffset(0);
   fEntrySize = 0;
-        
+
   ++fEntries;
 }
 
@@ -133,8 +132,8 @@ void DelphesPileUpWriter::WriteEntry()
 
 void DelphesPileUpWriter::WriteIndex()
 {
-  xdr_opaque(fOutputXDR, fIndex, fEntries*8);
-  xdr_hyper(fOutputXDR, &fEntries);
+  fOutputWriter->WriteRaw(fIndex, fEntries*8);
+  fOutputWriter->WriteValue(&fEntries, 8);
 }
 
 //------------------------------------------------------------------------------

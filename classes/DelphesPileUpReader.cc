@@ -32,8 +32,9 @@
 #include <sstream>
 
 #include <stdio.h>
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#include <stdint.h>
+
+#include "classes/DelphesXDRReader.h"
 
 using namespace std;
 
@@ -46,17 +47,18 @@ static const int kRecordSize = 9;
 DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   fEntries(0), fEntrySize(0), fCounter(0),
   fPileUpFile(0), fIndex(0), fBuffer(0),
-  fInputXDR(0), fIndexXDR(0), fBufferXDR(0)
+  fInputReader(0), fIndexReader(0), fBufferReader(0)
 {
   stringstream message;
 
-  fIndex = new char[kIndexSize*8];
-  fBuffer = new char[kBufferSize*kRecordSize*4];
-  fInputXDR = new XDR;
-  fIndexXDR = new XDR;
-  fBufferXDR = new XDR;
-  xdrmem_create(fIndexXDR, fIndex, kIndexSize*8, XDR_DECODE);
-  xdrmem_create(fBufferXDR, fBuffer, kBufferSize*kRecordSize*4, XDR_DECODE);
+  fIndex = new uint8_t[kIndexSize*8];
+  fBuffer = new uint8_t[kBufferSize*kRecordSize*4];
+  fInputReader = new DelphesXDRReader;
+  fIndexReader = new DelphesXDRReader;
+  fBufferReader = new DelphesXDRReader;
+
+  fIndexReader->SetBuffer(fIndex);
+  fBufferReader->SetBuffer(fBuffer);
 
   fPileUpFile = fopen(fileName, "r");
 
@@ -66,11 +68,11 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
     throw runtime_error(message.str());
   }
 
-  xdrstdio_create(fInputXDR, fPileUpFile, XDR_DECODE);
+  fInputReader->SetFile(fPileUpFile);
 
   // read number of events
   fseeko(fPileUpFile, -8, SEEK_END);
-  xdr_hyper(fInputXDR, &fEntries);
+  fInputReader->ReadValue(&fEntries, 8);
 
   if(fEntries >= kIndexSize)
   {
@@ -80,41 +82,38 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
 
   // read index of events
   fseeko(fPileUpFile, -8 - 8*fEntries, SEEK_END);
-  xdr_opaque(fInputXDR, fIndex, fEntries*8);
+  fInputReader->ReadRaw(fIndex, fEntries*8);
 }
 
 //------------------------------------------------------------------------------
 
 DelphesPileUpReader::~DelphesPileUpReader()
 {
-  xdr_destroy(fInputXDR);
   if(fPileUpFile) fclose(fPileUpFile);
-  xdr_destroy(fBufferXDR);
-  xdr_destroy(fIndexXDR);
-  if(fBufferXDR) delete fBufferXDR;
-  if(fIndexXDR) delete fIndexXDR;
-  if(fInputXDR) delete fInputXDR;
+  if(fBufferReader) delete fBufferReader;
+  if(fIndexReader) delete fIndexReader;
+  if(fInputReader) delete fInputReader;
   if(fBuffer) delete[] fBuffer;
   if(fIndex) delete[] fIndex;
 }
 
 //------------------------------------------------------------------------------
 
-bool DelphesPileUpReader::ReadParticle(int &pid,
+bool DelphesPileUpReader::ReadParticle(int32_t &pid,
   float &x, float &y, float &z, float &t,
   float &px, float &py, float &pz, float &e)
 {
   if(fCounter >= fEntrySize) return false;
 
-  xdr_int(fBufferXDR, &pid);
-  xdr_float(fBufferXDR, &x);
-  xdr_float(fBufferXDR, &y);
-  xdr_float(fBufferXDR, &z);
-  xdr_float(fBufferXDR, &t);
-  xdr_float(fBufferXDR, &px);
-  xdr_float(fBufferXDR, &py);
-  xdr_float(fBufferXDR, &pz);
-  xdr_float(fBufferXDR, &e);
+  fBufferReader->ReadValue(&pid, 4);
+  fBufferReader->ReadValue(&x, 4);
+  fBufferReader->ReadValue(&y, 4);
+  fBufferReader->ReadValue(&z, 4);
+  fBufferReader->ReadValue(&t, 4);
+  fBufferReader->ReadValue(&px, 4);
+  fBufferReader->ReadValue(&py, 4);
+  fBufferReader->ReadValue(&pz, 4);
+  fBufferReader->ReadValue(&e, 4);
 
   ++fCounter;
 
@@ -123,27 +122,27 @@ bool DelphesPileUpReader::ReadParticle(int &pid,
 
 //------------------------------------------------------------------------------
 
-bool DelphesPileUpReader::ReadEntry(quad_t entry)
+bool DelphesPileUpReader::ReadEntry(int64_t entry)
 {
-  quad_t offset;
+  int64_t offset;
 
   if(entry >= fEntries) return false;
 
   // read event position
-  xdr_setpos(fIndexXDR, 8*entry);
-  xdr_hyper(fIndexXDR, &offset);
+  fIndexReader->SetOffset(8*entry);
+  fIndexReader->ReadValue(&offset, 8);
 
   // read event
   fseeko(fPileUpFile, offset, SEEK_SET);
-  xdr_int(fInputXDR, &fEntrySize);
+  fInputReader->ReadValue(&fEntrySize, 4);
 
   if(fEntrySize >= kBufferSize)
   {
     throw runtime_error("too many particles in pile-up event");
   }
 
-  xdr_opaque(fInputXDR, fBuffer, fEntrySize*kRecordSize*4);
-  xdr_setpos(fBufferXDR, 0);
+  fInputReader->ReadRaw(fBuffer, fEntrySize*kRecordSize*4);
+  fBufferReader->SetOffset(0);
   fCounter = 0;
 
   return true;
