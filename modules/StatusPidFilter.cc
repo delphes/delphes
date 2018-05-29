@@ -120,6 +120,17 @@ namespace {
     return false;
   }
 
+  bool isWDaughter(int M1, const TObjArray *fInputArray)
+  {
+     if ( M1 < 0 ) return false;
+
+     Candidate *mother;
+     mother = static_cast<Candidate*>(fInputArray->At( M1 ));
+     if ( TMath::Abs(mother->PID) == 24 ) return true;
+
+     return false;
+  }
+
 }
 
 
@@ -207,9 +218,13 @@ void StatusPidFilter::Process()
     if (is_tau_daughter)
       pass = kTRUE;
 
+    bool is_W_daughter = isWDaughter(candidate->M1, fInputArray);
+    if (is_W_daughter) 
+      pass = kTRUE;
+
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
-    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter)) ) continue;
+    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter || is_W_daughter)) ) continue;
 
     fOutputArray->Add(candidate);
   }
