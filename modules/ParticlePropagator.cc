@@ -371,12 +371,15 @@ void ParticlePropagator::Process()
       {
 
         // store these variables before cloning
-        particle->D0 = d0*1.0E3;
-        particle->DZ = dz*1.0E3;
-        particle->P  = p;
-        particle->PT = pt;
-        particle->CtgTheta = ctgTheta;
-        particle->Phi = phip;
+        if(particle == candidate)
+        {
+          particle->D0 = d0*1.0E3;
+          particle->DZ = dz*1.0E3;
+          particle->P = p;
+          particle->PT = pt;
+          particle->CtgTheta = ctgTheta;
+          particle->Phi = phip;
+        }
 
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
