@@ -243,36 +243,31 @@ void DenseTrackFilter::FillTrack()
   Int_t numberOfCandidates;
 
   // saving track with highest pT that hit the tower
-  if(fTowerTrackHits > 0) 
-  {
+  if(fTowerTrackHits < 1) return;
     
-    numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
-    if (numberOfCandidates > 1)
-    {  
+  numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
+  if(numberOfCandidates < 1) return;
 
-      track = static_cast<Candidate*>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
-      candidate = static_cast<Candidate*>(track->Clone());
-      pt = candidate->Momentum.Pt();
-      eta = candidate->Momentum.Eta();
-      phi = candidate->Momentum.Phi();
-      eta = gRandom->Gaus(eta, fEtaPhiRes);
-      phi = gRandom->Gaus(phi, fEtaPhiRes);
-      candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
-      candidate->AddCandidate(track);
-      fTrackOutputArray->Add(candidate);
-      switch(TMath::Abs(candidate->PID))
-      {
-        case 11:
-          fElectronOutputArray->Add(candidate);
-          break;
-        case 13:
-          fMuonOutputArray->Add(candidate);
-          break;
-        default:
-          fChargedHadronOutputArray->Add(candidate);
-      }
+  track = static_cast<Candidate*>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
+  candidate = static_cast<Candidate*>(track->Clone());
+  pt = candidate->Momentum.Pt();
+  eta = candidate->Momentum.Eta();
+  phi = candidate->Momentum.Phi();
+  eta = gRandom->Gaus(eta, fEtaPhiRes);
+  phi = gRandom->Gaus(phi, fEtaPhiRes);
+  candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
+  candidate->AddCandidate(track);
 
-    }
+  fTrackOutputArray->Add(candidate);
+  switch(TMath::Abs(candidate->PID))
+  {
+    case 11:
+      fElectronOutputArray->Add(candidate);
+      break;
+    case 13:
+      fMuonOutputArray->Add(candidate);
+      break;
+    default:
+      fChargedHadronOutputArray->Add(candidate);
   }
-
 }
