@@ -87,6 +87,7 @@ target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIE
 
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
+  target_link_libraries(DelphesDisplay ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
 
 install(TARGETS Delphes DelphesDisplay DESTINATION lib)
