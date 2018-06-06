@@ -1,6 +1,3 @@
-set RandomSeed 123
-set MaxEvents 10
-
 ########################################
 #
 #  Main authors: Michele Selvaggi (CERN)
@@ -36,8 +33,6 @@ set ExecutionPath {
 
   ECal
   HCal
-
-  MuonFilter
 
   PhotonEnergySmearing
   ElectronFilter
@@ -166,9 +161,9 @@ module PileUpMerger PileUpMerger {
 
 
 
-#################################
-# Dense Track propagation calo
-#################################
+#####################################
+# Track propagation to calorimeters
+#####################################
 
 module ParticlePropagator ParticlePropagator {
   set InputArray PileUpMerger/stableParticles
@@ -202,19 +197,13 @@ module Merger TrackMergerProp {
 }
 
 
-#################################
-# Dense Track propagation
-#################################
+####################################
+# Track propagation to pseudo-pixel
+####################################
 
 module ParticlePropagator DenseProp {
 
   set InputArray TrackMergerProp/tracks
-
-  set OutputArray stableParticles
-  set NeutralOutputArray neutralParticles
-  set ChargedHadronOutputArray chargedHadrons
-  set ElectronOutputArray electrons
-  set MuonOutputArray muons
 
   # radius of the first pixel layer
   set Radius 0.3
@@ -245,9 +234,10 @@ module Merger DenseMergeTracks {
 ######################
 
 module DenseTrackFilter DenseTrackFilter {
-  set TrackInputArray DenseMergeTracks/tracks
-  set TrackOutputArray tracks
 
+  set TrackInputArray DenseMergeTracks/tracks
+
+  set TrackOutputArray tracks
   set ChargedHadronOutputArray chargedHadrons
   set ElectronOutputArray electrons
   set MuonOutputArray muons
@@ -445,18 +435,6 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
 }
 
 
-##############
-# Track merger
-##############
-
-module Merger TrackMerger {
-# add InputArray InputArray
-  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronEnergySmearing/electrons
-  add InputArray MuonMomentumSmearing/muons
-  set OutputArray tracks
-}
-
 #################################
 # Energy resolution for electrons
 #################################
@@ -497,6 +475,18 @@ module MomentumSmearing MuonMomentumSmearing {
 }
 
 
+
+##############
+# Track merger
+##############
+
+module Merger TrackMerger {
+# add InputArray InputArray
+  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
+  add InputArray ElectronEnergySmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
+  set OutputArray tracks
+}
 
 
 #############
@@ -720,17 +710,6 @@ module PdgCodeFilter ElectronFilter {
   add PdgCode {-11}
 }
 
-#################
-# Muon filter
-#################
-
-module PdgCodeFilter MuonFilter {
-  set InputArray HCal/eflowTracks
-  set OutputArray muons
-  set Invert true
-  add PdgCode {13}
-  add PdgCode {-13}
-}
 
 
 ##########################
@@ -741,7 +720,7 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
 # add InputArray InputArray OutputArray
   add InputArray HCal/eflowTracks eflowTracks
   add InputArray ElectronFilter/electrons electrons
-  add InputArray MuonFilter/muons muons
+  add InputArray MuonMomentumSmearing/muons muons
 
   set VertexInputArray PileUpMerger/vertices
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
@@ -1199,7 +1178,7 @@ module PdgCodeFilter PhotonFilter {
 ##################
 
 module Cloner MuonCloner {
-  set InputArray MuonFilter/muons
+  set InputArray MuonMomentumSmearing/muons
   set OutputArray muons
 }
 
@@ -2206,7 +2185,7 @@ module Efficiency ElectronEfficiencyCHS {
 ##################
 
 module Isolation MuonIsolation {
-  set CandidateInputArray MuonFilter/muons
+  set CandidateInputArray MuonMomentumSmearing/muons
 
   # isolation collection
   set IsolationInputArray EFlowFilterPuppi/eflow
@@ -4121,8 +4100,6 @@ module TreeWriter TreeWriter {
   add Branch GenJetFinderAK8/jetsAK8 GenJetAK8 Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
-  add Branch TrackMerger/tracks TrackMerger Track
-  add Branch HCal/eflowTracks EFlowTrack Track
 #  add Branch HCal/eflowTracks EFlowTrack Track
 #  add Branch ECal/eflowPhotons EFlowPhoton Tower
 #  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower

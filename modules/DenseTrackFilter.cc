@@ -242,17 +242,11 @@ void DenseTrackFilter::FillTrack()
   Double_t pt, eta, phi;
   Int_t numberOfCandidates;
 
-  
-  cout<<fBestTrack<<endl;
-  
   // saving track with highest pT that hit the tower
   if(fTowerTrackHits > 0) 
   {
     
     numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
-    if (numberOfCandidates < 2)
-       cout<<fBestTrack<<endl;
-
     if (numberOfCandidates > 1)
     {  
 
@@ -277,7 +271,7 @@ void DenseTrackFilter::FillTrack()
         default:
           fChargedHadronOutputArray->Add(candidate);
       }
- 
+
     }
   }
 
