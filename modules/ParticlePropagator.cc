@@ -123,8 +123,8 @@ void ParticlePropagator::Finish()
 
 void ParticlePropagator::Process()
 {
-  Candidate *candidate, *mother;
-  TLorentzVector candidatePosition, candidateMomentum, beamSpotPosition;
+  Candidate *candidate, *mother, *particle;
+  TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, pt2, e, q;
   Double_t x, y, z, t, r, phi;
   Double_t x_c, y_c, r_c, phi_c, phi_0;
@@ -150,17 +150,26 @@ void ParticlePropagator::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    candidatePosition = candidate->Position;
-    candidateMomentum = candidate->Momentum;
-    x = candidatePosition.X()*1.0E-3;
-    y = candidatePosition.Y()*1.0E-3;
-    z = candidatePosition.Z()*1.0E-3;
+    if(candidate->GetCandidates()->GetEntriesFast() == 0)
+    {
+      particle = candidate;
+    }
+    else
+    {
+      particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+    }
+
+    particlePosition = particle->Position;
+    particleMomentum = particle->Momentum;
+    x = particlePosition.X()*1.0E-3;
+    y = particlePosition.Y()*1.0E-3;
+    z = particlePosition.Z()*1.0E-3;
 
     bsx = beamSpotPosition.X()*1.0E-3;
     bsy = beamSpotPosition.Y()*1.0E-3;
     bsz = beamSpotPosition.Z()*1.0E-3;
 
-    q = candidate->Charge;
+    q = particle->Charge;
 
     // check that particle position is inside the cylinder
     if(TMath::Hypot(x, y) > fRadiusMax || TMath::Abs(z) > fHalfLengthMax)
@@ -168,12 +177,12 @@ void ParticlePropagator::Process()
       continue;
     }
 
-    px = candidateMomentum.Px();
-    py = candidateMomentum.Py();
-    pz = candidateMomentum.Pz();
-    pt = candidateMomentum.Pt();
-    pt2 = candidateMomentum.Perp2();
-    e = candidateMomentum.E();
+    px = particleMomentum.Px();
+    py = particleMomentum.Py();
+    pz = particleMomentum.Pz();
+    pt = particleMomentum.Pt();
+    pt2 = particleMomentum.Perp2();
+    e = particleMomentum.E();
 
     if(pt2 < 1.0E-9)
     {
@@ -185,11 +194,11 @@ void ParticlePropagator::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
-      candidate->InitialPosition = candidatePosition;
-      candidate->Position = candidatePosition;
+      candidate->InitialPosition = particlePosition;
+      candidate->Position = particlePosition;
       candidate->L = 0.0;
 
-      candidate->Momentum = candidateMomentum;
+      candidate->Momentum = particleMomentum;
       candidate->AddCandidate(mother);
 
       fOutputArray->Add(candidate);
@@ -229,11 +238,11 @@ void ParticlePropagator::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
-      candidate->InitialPosition = candidatePosition;
-      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*e*1.0E3);
+      candidate->InitialPosition = particlePosition;
+      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*e*1.0E3);
       candidate->L = l*1.0E3;
 
-      candidate->Momentum = candidateMomentum;
+      candidate->Momentum = particleMomentum;
       candidate->AddCandidate(mother);
 
       fOutputArray->Add(candidate);
@@ -294,17 +303,17 @@ void ParticlePropagator::Process()
 
       px = TMath::Sign(1.0, r) * pt * (-y_c / r_c);
       py = TMath::Sign(1.0, r) * pt * (x_c / r_c);
-      etap = candidateMomentum.Eta();
+      etap = particleMomentum.Eta();
       phip = TMath::ATan2(py, px);
 
-      candidateMomentum.SetPtEtaPhiE(pt, etap, phip, candidateMomentum.E());
+      particleMomentum.SetPtEtaPhiE(pt, etap, phip, particleMomentum.E());
 
       // calculate additional track parameters (correct for beamspot position)
 
       d0        = ((x - bsx) * py - (y - bsy) * px) / pt;
       dz        = z - ((x - bsx) * px + (y - bsy) * py) / pt * (pz / pt);
-      p         = candidateMomentum.P();
-      ctgTheta  = 1.0 / TMath::Tan (candidateMomentum.Theta());
+      p         = particleMomentum.P();
+      ctgTheta  = 1.0 / TMath::Tan (particleMomentum.Theta());
 
 
       // 3. time evaluation t = TMath::Min(t_r, t_z)
@@ -362,20 +371,20 @@ void ParticlePropagator::Process()
       {
 
         // store these variables before cloning
-        candidate->D0 = d0*1.0E3;
-        candidate->DZ = dz*1.0E3;
-        candidate->P  = p;
-        candidate->PT = pt;
-        candidate->CtgTheta = ctgTheta;
-        candidate->Phi = phip;
+        particle->D0 = d0*1.0E3;
+        particle->DZ = dz*1.0E3;
+        particle->P  = p;
+        particle->PT = pt;
+        particle->CtgTheta = ctgTheta;
+        particle->Phi = phip;
 
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
-        candidate->InitialPosition = candidatePosition;
-        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, candidatePosition.T() + t*c_light*1.0E3);
+        candidate->InitialPosition = particlePosition;
+        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*c_light*1.0E3);
 
-        candidate->Momentum = candidateMomentum;
+        candidate->Momentum = particleMomentum;
 
         candidate->L = l*1.0E3;
 
