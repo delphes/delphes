@@ -142,6 +142,7 @@ void RunPUPPI::Init(){
 void RunPUPPI::Finish(){
   if(fItTrackInputArray)   delete fItTrackInputArray;
   if(fItNeutralInputArray) delete fItNeutralInputArray;
+  if(fPuppi) delete fPuppi;
 }
 
 //------------------------------------------------------------------------------
