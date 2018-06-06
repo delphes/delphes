@@ -1294,12 +1294,22 @@ tmp/external/fastjet/contribs/Nsubjettiness/TauComponents.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/TauComponents.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/XConePlugin.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/XConePlugin.$(SrcSuf)
+tmp/external/fastjet/contribs/RecursiveTools/BottomUpSoftDrop.$(ObjSuf): \
+	external/fastjet/contribs/RecursiveTools/BottomUpSoftDrop.$(SrcSuf) \
+	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh \
+	external/fastjet/Selector.hh \
+	external/fastjet/config.h
+tmp/external/fastjet/contribs/RecursiveTools/IteratedSoftDrop.$(ObjSuf): \
+	external/fastjet/contribs/RecursiveTools/IteratedSoftDrop.$(SrcSuf)
 tmp/external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(ObjSuf): \
 	external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(SrcSuf) \
 	external/fastjet/JetDefinition.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh
 tmp/external/fastjet/contribs/RecursiveTools/Recluster.$(ObjSuf): \
 	external/fastjet/contribs/RecursiveTools/Recluster.$(SrcSuf)
+tmp/external/fastjet/contribs/RecursiveTools/RecursiveSoftDrop.$(ObjSuf): \
+	external/fastjet/contribs/RecursiveTools/RecursiveSoftDrop.$(SrcSuf) \
+	external/fastjet/ClusterSequence.hh
 tmp/external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(ObjSuf): \
 	external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(SrcSuf) \
 	external/fastjet/JetDefinition.hh \
@@ -1534,8 +1544,11 @@ FASTJET_OBJ +=  \
 	tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/TauComponents.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/XConePlugin.$(ObjSuf) \
+	tmp/external/fastjet/contribs/RecursiveTools/BottomUpSoftDrop.$(ObjSuf) \
+	tmp/external/fastjet/contribs/RecursiveTools/IteratedSoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/Recluster.$(ObjSuf) \
+	tmp/external/fastjet/contribs/RecursiveTools/RecursiveSoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/RecursiveSymmetryCutBase.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/SoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/SoftKiller/SoftKiller.$(ObjSuf) \
