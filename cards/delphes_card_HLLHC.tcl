@@ -734,9 +734,12 @@ module PdgCodeFilter ChargedHadronFilter {
 
 module Merger Calorimeter {
 # add InputArray InputArray
+
   add InputArray ECal/ecalTowers
   add InputArray HCal/hcalTowers
+  add InputArray MuonMomentumSmearing/muons
   set OutputArray towers
+
 }
 
 ####################
