@@ -1,3 +1,9 @@
+2018-07-06 <jthaler>
+   Updated comments in AxesDefinition.hh about role of JetDefinitionWrapper
+   Updated AUTHORS with JHEP publication information for XCone
+   Prepared VERSION and NEWS for 2.2.5 release
+2018-07-05 <jthaler>
+   Fixed bug in AxesDefinition.hh where _recomb was used before it was declared.
 2016-06-08 <jthaler>
    Fixed bug in MeasureDefinition.cc where axes were not completely defined,
       leading to problems with multi-pass axes 

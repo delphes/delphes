@@ -1,7 +1,7 @@
-#ifndef __FASTJET_TOOLS_RECLUSTER_HH__
-#define __FASTJET_TOOLS_RECLUSTER_HH__
+#ifndef __FASTJET_CONTRIB_TOOLS_RECLUSTER_HH__
+#define __FASTJET_CONTRIB_TOOLS_RECLUSTER_HH__
 
-// $Id: Recluster.hh 700 2014-07-07 12:50:05Z gsoyez $
+// $Id: Recluster.hh 723 2014-07-30 09:11:01Z gsoyez $
 //
 // Copyright (c) 2014-, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -180,4 +180,4 @@ private:
 
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh
 
-#endif   // __FASTJET_TOOLS_RECLUSTER_HH__
+#endif   // __FASTJET_CONTRIB_TOOLS_RECLUSTER_HH__

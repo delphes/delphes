@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id: CMSIterativeConePlugin.hh 1508 2009-04-10 22:46:49Z soyez $
 //
-// Copyright (c) 2007-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

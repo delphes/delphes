@@ -31,6 +31,8 @@ The key new features are:
   * (v2.2)  XConePlugin, which improves on the previous NjettinessPlugin to use
     N-jettiness as a jet finder using the new ConicalGeometric measure.
 
+-- 2.2.5:  (June 6, 2018) Fixed bug involved undefined pointer for in
+           AxesDefinition (thanks Attila Krasznahorkay)
 -- 2.2.4:  (Jun 14, 2016) Fixed bug where multi-pass minimization could yield
            pathological axes (thanks Gregory Soyez) 
 -- 2.2.3:  (Apr 4, 2016) Fixed bug where a jet with fewer than N constituents

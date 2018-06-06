@@ -1,4 +1,4 @@
-// $Id: SoftDrop.hh 686 2014-06-14 03:25:09Z jthaler $
+// $Id: SoftDrop.hh 1034 2017-08-01 10:03:53Z gsoyez $
 //
 // Copyright (c) 2014-, Gregory Soyez, Jesse Thaler
 // based on arXiv:1402.2657 by Andrew J. Larkoski, Simone Marzani,
@@ -111,20 +111,30 @@ public:
            const FunctionOfPseudoJet<PseudoJet> * subtractor = 0) : 
      RecursiveSymmetryCutBase(symmetry_measure, mu_cut, recursion_choice, subtractor),
      _beta(beta), _symmetry_cut(symmetry_cut), _R0sqr(R0*R0)
-  {}
+  {
+    // change the default: use grooming mode
+    set_grooming_mode();
+  }
 
   /// default destructor
   virtual ~SoftDrop(){}
 
+  //----------------------------------------------------------------------
+  // access to class info
+  double beta()         const { return _beta; }
+  double symmetry_cut() const { return _symmetry_cut; }
+  double R0()           const { return sqrt(_R0sqr); }
+  
 protected:
 
   // Unlike MMDT, the SoftDrop symmetry_cut_fn depends on the subjet kinematics
   // since the symmetry condition depends on the DeltaR between subjets.
-  virtual double symmetry_cut_fn(const PseudoJet & /* p1 */, 
-                                 const PseudoJet & /* p2 */) const;
+  virtual double symmetry_cut_fn(const PseudoJet & p1, 
+                                 const PseudoJet & p2,
+                                 void * optional_R0sqr_ptr = 0) const;
   virtual std::string symmetry_cut_description() const;
 
-private:
+  //private:
   double _beta;         ///< the power of the angular distance to be used
                         ///< in the symmetry condition
   double _symmetry_cut; ///< the value of zcut (the prefactor in the asymmetry cut)

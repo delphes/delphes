@@ -2,9 +2,9 @@
 #define __FASTJET_JETDEFINITION_HH__
 
 //FJSTARTHEADER
-// $Id: JetDefinition.hh 4074 2016-03-08 09:09:25Z soyez $
+// $Id: JetDefinition.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -213,7 +213,7 @@ enum RecombinationScheme {
   BIpt2_scheme=6,
   /// pt-based Winner-Takes-All (WTA) recombination: the
   /// result of the recombination has the rapidity, azimuth and mass
-  /// of the the PseudoJet with the larger pt, and a pt equal to the
+  /// of the PseudoJet with the larger pt, and a pt equal to the
   /// sum of the two pt's
   WTA_pt_scheme=7,
   /// mod-p-based Winner-Takes-All (WTA) recombination: the result of

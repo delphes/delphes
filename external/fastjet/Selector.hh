@@ -2,9 +2,9 @@
 #define __FASTJET_SELECTOR_HH__
 
 //FJSTARTHEADER
-// $Id: Selector.hh 3711 2014-09-29 13:54:51Z salam $
+// $Id: Selector.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2009-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

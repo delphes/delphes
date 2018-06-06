@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: PseudoJet.cc 4100 2016-03-15 20:50:22Z salam $
+// $Id: PseudoJet.cc 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -202,7 +202,7 @@ PseudoJet operator/ (const PseudoJet & jet, double coeff) {
 
 //----------------------------------------------------------------------
 /// multiply the jet's momentum by the coefficient
-void PseudoJet::operator*=(double coeff) {
+PseudoJet & PseudoJet::operator*=(double coeff) {
   // operator*= aims to maintain the rapidity and azimuth
   // for the PseudoJet; if they have already been evaluated
   // this is fine, but if they haven't and coeff is sufficiently
@@ -217,34 +217,38 @@ void PseudoJet::operator*=(double coeff) {
   _E  *= coeff;
   _kt2*= coeff*coeff;
   // phi and rap are unchanged
+  return *this;
 }
 
 //----------------------------------------------------------------------
 /// divide the jet's momentum by the coefficient
-void PseudoJet::operator/=(double coeff) {
+PseudoJet & PseudoJet::operator/=(double coeff) {
   (*this) *= 1.0/coeff;
+  return *this;
 }
 
 
 //----------------------------------------------------------------------
 /// add the other jet's momentum to this jet
-void PseudoJet::operator+=(const PseudoJet & other_jet) {
+PseudoJet & PseudoJet::operator+=(const PseudoJet & other_jet) {
   _px += other_jet._px;
   _py += other_jet._py;
   _pz += other_jet._pz;
   _E  += other_jet._E ;
   _finish_init(); // we need to recalculate phi,rap,kt2
+  return *this;
 }
 
 
 //----------------------------------------------------------------------
 /// subtract the other jet's momentum from this jet
-void PseudoJet::operator-=(const PseudoJet & other_jet) {
+PseudoJet & PseudoJet::operator-=(const PseudoJet & other_jet) {
   _px -= other_jet._px;
   _py -= other_jet._py;
   _pz -= other_jet._pz;
   _E  -= other_jet._E ;
   _finish_init(); // we need to recalculate phi,rap,kt2
+  return *this;
 }
 
 //----------------------------------------------------------------------

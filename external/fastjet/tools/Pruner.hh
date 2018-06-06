@@ -2,9 +2,9 @@
 #define __FASTJET_TOOLS_PRUNER_HH__
 
 //FJSTARTHEADER
-// $Id: Pruner.hh 3481 2014-07-29 17:24:12Z soyez $
+// $Id: Pruner.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

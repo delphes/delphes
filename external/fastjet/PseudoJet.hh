@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: PseudoJet.hh 4047 2016-03-03 13:21:49Z soyez $
+// $Id: PseudoJet.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -82,8 +82,10 @@ class PseudoJet {
   PseudoJet(const double px, const double py, const double pz, const double E);
 
   /// constructor from any object that has px,py,pz,E = some_four_vector[0--3],
+  #ifndef SWIG
   template <class L> PseudoJet(const L & some_four_vector);
-
+  #endif
+  
   // Constructor that performs minimal initialisation (only that of
   // the shared pointers), of use in certain speed-critical contexts
   //
@@ -169,6 +171,14 @@ class PseudoJet {
   /// return the transverse energy squared
   inline double Et2() const {return (_kt2==0) ? 0.0 : _E*_E/(1.0+_pz*_pz/_kt2);}
 
+  /// cos of the polar angle
+  /// should we have: min(1.0,max(-1.0,_pz/sqrt(modp2()))); 
+  inline double cos_theta() const {
+    return std::min(1.0, std::max(-1.0, _pz/sqrt(modp2())));
+  }
+  /// polar angle
+  inline double theta() const { return acos(cos_theta()); }
+
   /// returns component i, where X==0, Y==1, Z==2, E==3
   double operator () (int i) const ; 
   /// returns component i, where X==0, Y==1, Z==2, E==3
@@ -219,16 +229,16 @@ class PseudoJet {
   //\{
   //----------------------------------------------------------------------
   /// transform this jet (given in the rest frame of prest) into a jet
-  /// in the lab frame [NOT FULLY TESTED]
+  /// in the lab frame
   PseudoJet & boost(const PseudoJet & prest);
   /// transform this jet (given in lab) into a jet in the rest
-  /// frame of prest  [NOT FULLY TESTED]
+  /// frame of prest
   PseudoJet & unboost(const PseudoJet & prest);
 
-  void operator*=(double);
-  void operator/=(double);
-  void operator+=(const PseudoJet &);
-  void operator-=(const PseudoJet &);
+  PseudoJet & operator*=(double);
+  PseudoJet & operator/=(double);
+  PseudoJet & operator+=(const PseudoJet &);
+  PseudoJet & operator-=(const PseudoJet &);
 
   /// reset the 4-momentum according to the supplied components and
   /// put the user and history indices back to their default values
@@ -248,6 +258,7 @@ class PseudoJet {
   /// reset the 4-momentum according to the supplied generic 4-vector
   /// (accessible via indexing, [0]==px,...[3]==E) and put the user
   /// and history indices back to their default values.
+#ifndef SWIG
   template <class L> inline void reset(const L & some_four_vector) {
     // check if some_four_vector can be cast to a PseudoJet
     //
@@ -269,6 +280,7 @@ class PseudoJet {
 	    some_four_vector[2], some_four_vector[3]);
     }
   }
+#endif // SWIG
 
   /// reset the PseudoJet according to the specified pt, rapidity,
   /// azimuth and mass (also resetting indices, etc.)
@@ -847,6 +859,17 @@ inline double dot_product(const PseudoJet & a, const PseudoJet & b) {
   return a.E()*b.E() - a.px()*b.px() - a.py()*b.py() - a.pz()*b.pz();
 }
 
+/// returns the cosine of the angle between a and b
+inline double cos_theta(const PseudoJet & a, const PseudoJet & b) {
+  double dot_3d = a.px()*b.px() + a.py()*b.py() + a.pz()*b.pz();
+  return std::min(1.0, std::max(-1.0, dot_3d/sqrt(a.modp2()*b.modp2())));
+}
+
+/// returns the angle between a and b
+inline double theta(const PseudoJet & a, const PseudoJet & b) {
+  return acos(cos_theta(a,b));
+}
+
 /// returns true if the momenta of the two input jets are identical
 bool have_same_momentum(const PseudoJet &, const PseudoJet &);
 
@@ -928,9 +951,11 @@ private:
 /// constructor from any object that has px,py,pz,E = some_four_vector[0--3],
 // NB: do not know if it really needs to be inline, but when it wasn't
 //     linking failed with g++ (who knows what was wrong...)
+#ifndef SWIG
 template <class L> inline  PseudoJet::PseudoJet(const L & some_four_vector) {
   reset(some_four_vector);
 }
+#endif
 
 //----------------------------------------------------------------------
 inline void PseudoJet::_reset_indices() { 

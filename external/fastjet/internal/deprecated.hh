@@ -1,8 +1,8 @@
 
 //FJSTARTHEADER
-// $Id: deprecated.hh 4098 2016-03-15 16:38:22Z salam $
+// $Id: deprecated.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -34,9 +34,11 @@
 
 #include "fastjet/config.h"
 
+#ifndef SWIG
+
 // define a deprecation macro based on the capabilities of the compiler
 // (as determined at configure time).
-#if defined(FASTJET_HAVE_CXX14_DEPRECATED)
+#if defined(FASTJET_HAVE_CXX14_DEPRECATED) and (!defined(__FJCORE__))
 #define FASTJET_DEPRECATED               [[deprecated]]
 #define FASTJET_DEPRECATED_MSG(message)  [[deprecated(message)]]
 #elif defined(FASTJET_HAVE_GNUCXX_DEPRECATED)
@@ -46,5 +48,11 @@
 #define FASTJET_DEPRECATED               
 #define FASTJET_DEPRECATED_MSG(message) 
 #endif
+
+#else  // SIWG
+#define FASTJET_DEPRECATED               
+#define FASTJET_DEPRECATED_MSG(message) 
+#endif // SWIG
+
 
 #endif // __FASTJET_FASTJET_DEPRECATED_HH__

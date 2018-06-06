@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: JadePlugin.cc 4063 2016-03-04 10:31:40Z salam $
+// $Id: JadePlugin.cc 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2007-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

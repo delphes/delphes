@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: MassDropTagger.cc 3433 2014-07-23 08:17:03Z salam $
+// $Id: MassDropTagger.cc 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -35,6 +35,7 @@
 FASTJET_BEGIN_NAMESPACE
 
 LimitedWarning MassDropTagger::_warnings_nonca;
+LimitedWarning MassDropTagger::_negative_mass_warning;
 
 using namespace std;
 
@@ -70,6 +71,11 @@ PseudoJet MassDropTagger::result(const PseudoJet & jet) const{
   // appropriate errors will be thrown automatically if this is not
   // the case
   while ((had_parents = j.has_parents(j1,j2))) {
+    if (j.m2() <= 0) {
+      _negative_mass_warning.warn(
+           "MassDropTagger: parent (sub)jet has mass^2<=0; returning null jet");
+      return PseudoJet();
+    }
     // make parent1 the more massive jet
     if (j1.m2() < j2.m2()) std::swap(j1,j2);
 
@@ -90,9 +96,8 @@ PseudoJet MassDropTagger::result(const PseudoJet & jet) const{
   // create the result and its structure
   PseudoJet result_local = j;
   MassDropTaggerStructure * s = new MassDropTaggerStructure(result_local);
-//  s->_original_jet = jet;
-  s->_mu = (j.m2()!=0.0) ? sqrt(j1.m2()/j.m2()) : 0.0;
-  s->_y  = (j.m2()!=0.0) ? j1.kt_distance(j2)/j.m2() : 0.0;
+  s->_mu = j1.m() / j.m();
+  s->_y  = j1.kt_distance(j2)/j.m2();
 
   result_local.set_structure_shared_ptr(SharedPtr<PseudoJetStructureBase>(s));
 

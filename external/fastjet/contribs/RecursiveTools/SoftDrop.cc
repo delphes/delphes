@@ -1,4 +1,4 @@
-// $Id: SoftDrop.cc 686 2014-06-14 03:25:09Z jthaler $
+// $Id: SoftDrop.cc 1059 2017-09-07 20:48:00Z gsoyez $
 //
 // Copyright (c) 2014-, Gregory Soyez, Jesse. Thaler
 // based on arXiv:1402.2657 by Andrew J. Larkoski, Simone Marzani,
@@ -56,8 +56,10 @@ namespace contrib{
 
 //----------------------------------------------------------------------
 double SoftDrop::symmetry_cut_fn(const PseudoJet & p1, 
-                                 const PseudoJet & p2) const{
-  return _symmetry_cut * pow(p1.squared_distance(p2)/_R0sqr, 0.5*_beta);
+                                 const PseudoJet & p2,
+                                 void *optional_R0sqr_ptr) const{
+  double R0sqr = (optional_R0sqr_ptr == 0) ? _R0sqr : *((double*) optional_R0sqr_ptr);
+  return _symmetry_cut * pow(squared_geometric_distance(p1,p2)/R0sqr, 0.5*_beta);
 }
 
 //----------------------------------------------------------------------

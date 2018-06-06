@@ -2,9 +2,9 @@
 #define __FASTJET_ERROR_HH__
 
 //FJSTARTHEADER
-// $Id: Error.hh 3807 2015-02-20 11:16:55Z soyez $
+// $Id: Error.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -62,6 +62,9 @@ public:
   /// the error message
   std::string message() const {return _message;}
 
+  /// an alternative access to the error message (more standard)
+  std::string description() const {return message();}
+  
   /// controls whether the error message (and the backtrace, if its printing is enabled) 
   /// is printed out or not
   static void set_print_errors(bool print_errors) {_print_errors = print_errors;}

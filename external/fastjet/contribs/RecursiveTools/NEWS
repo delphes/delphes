@@ -1,2 +1,11 @@
+2018/05/31: release of version 2.0.0-beta2 with corrected syntax
+
+2017/10/10: release of version 2.0.0-beta1 including implementations of
+
+* RecursiveSoftDrop (see example_rsd.hh for usage)
+* IteratedSoftDrop (see example_isd.hh for usage)
+* e+e- version of the recursive tools (see example_mmdt_ee.hh for usage)
+* BottomUpSoftDrop (see example_bottomup_softdrop.cc for usage)
+
 2014/07/09: release of version 1.0.0 of RecursiveTools including
             ModifiedMassDropTagger and SoftDrop (as well as Recluster)
