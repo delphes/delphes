@@ -57,18 +57,22 @@ set ExecutionPath {
   GenJetFinder02
   GenJetFinder04
   GenJetFinder08
+  GenJetFinder15
 
   FastJetFinder02
   FastJetFinder04
   FastJetFinder08
+  FastJetFinder15
 
   CaloJetFinder02
   CaloJetFinder04
   CaloJetFinder08
+  CaloJetFinder15
 
   TrackJetFinder02
   TrackJetFinder04
   TrackJetFinder08
+  TrackJetFinder15
 
   JetEnergyScale
 

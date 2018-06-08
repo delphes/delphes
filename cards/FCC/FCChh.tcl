@@ -55,18 +55,22 @@ set ExecutionPath {
   GenJetFinder02
   GenJetFinder04
   GenJetFinder08
+  GenJetFinder15
 
   FastJetFinder02
   FastJetFinder04
   FastJetFinder08
+  FastJetFinder15
 
   CaloJetFinder02
   CaloJetFinder04
   CaloJetFinder08
+  CaloJetFinder15
 
   TrackJetFinder02
   TrackJetFinder04
   TrackJetFinder08
+  TrackJetFinder15
 
   JetEnergyScale
 
@@ -173,6 +177,14 @@ module DenseTrackFilter DenseTrackFilter {
   set PhiBins {}
   for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
     add PhiBins [expr {$i * $pi/$nbins_phi}]
+  }
+
+  set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
+  set nbins_eta [expr {int($nbins_eta)} ]
+
+  for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
+    set eta [expr {$i * $EtaPhiRes}]
+    add EtaPhiBins $eta $PhiBins
   }
 }
 
@@ -576,6 +588,7 @@ module Merger GenMissingET {
 }
 
 
+
 #####################
 # MC truth jet finder
 #####################
@@ -657,6 +670,33 @@ module FastJetFinder GenJetFinder08 {
   set JetPTMin 25.0
 }
 
+#####################
+# MC truth jet finder
+#####################
+
+# TBC: is jet radius fine?
+
+module FastJetFinder GenJetFinder15 {
+  set InputArray NeutrinoFilter/filteredParticles
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 1.5
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 1.5
+
+  set JetPTMin 25.0
+}
+
 
 ##################
 # Fast Jet finder
@@ -734,6 +774,30 @@ module FastJetFinder FastJetFinder08 {
   set JetPTMin 25.0
 }
 
+##################
+# Fast Jet finder
+##################
+
+module FastJetFinder FastJetFinder15 {
+  set InputArray EFlowMerger/eflow
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 1.5
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 1.5
+
+  set JetPTMin 25.0
+}
 
 
 ##################
@@ -808,6 +872,31 @@ module FastJetFinder CaloJetFinder08 {
   set BetaSoftDrop 0.0
   set SymmetryCutSoftDrop 0.1
   set R0SoftDrop 0.8
+
+  set JetPTMin 25.0
+}
+
+##################
+# Fast Jet finder
+##################
+
+module FastJetFinder CaloJetFinder15 {
+  set InputArray Calorimeter/towers
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 1.5
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 1.5
 
   set JetPTMin 25.0
 }
@@ -889,6 +978,30 @@ module FastJetFinder TrackJetFinder08 {
   set JetPTMin 25.0
 }
 
+##################
+# Fast Jet finder
+##################
+
+module FastJetFinder TrackJetFinder15 {
+  set InputArray TrackMerger/tracks
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 1.5
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeSoftDrop 1
+  set BetaSoftDrop 0.0
+  set SymmetryCutSoftDrop 0.1
+  set R0SoftDrop 1.5
+
+  set JetPTMin 25.0
+}
 
 
 ##################
