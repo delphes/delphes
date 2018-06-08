@@ -1289,18 +1289,22 @@ module TreeWriter TreeWriter {
   add Branch GenJetFinder02/jets GenJet02 Jet
   add Branch GenJetFinder04/jets GenJet04 Jet
   add Branch GenJetFinder08/jets GenJet08 Jet
+  add Branch GenJetFinder15/jets GenJet15 Jet
 
   add Branch FastJetFinder02/jets ParticleFlowJet02 Jet
   add Branch FastJetFinder04/jets ParticleFlowJet04 Jet
   add Branch FastJetFinder08/jets ParticleFlowJet08 Jet
+  add Branch FastJetFinder15/jets ParticleFlowJet15 Jet
 
   add Branch CaloJetFinder02/jets CaloJet02 Jet
   add Branch CaloJetFinder04/jets CaloJet04 Jet
   add Branch CaloJetFinder08/jets CaloJet08 Jet
+  add Branch CaloJetFinder15/jets CaloJet15 Jet
 
   add Branch TrackJetFinder02/jets TrackJet02 Jet
   add Branch TrackJetFinder04/jets TrackJet04 Jet
   add Branch TrackJetFinder08/jets TrackJet08 Jet
+  add Branch TrackJetFinder15/jets TrackJet15 Jet
 
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
