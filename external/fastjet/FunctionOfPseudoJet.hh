@@ -2,9 +2,9 @@
 #define __FASTJET_FUNCTION_OF_PSEUDOJET_HH__
 
 //FJSTARTHEADER
-// $Id: FunctionOfPseudoJet.hh 3433 2014-07-23 08:17:03Z salam $
+// $Id: FunctionOfPseudoJet.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

@@ -1,4 +1,4 @@
-// $Id: ModifiedMassDropTagger.hh 688 2014-06-17 14:29:56Z jthaler $
+// $Id: ModifiedMassDropTagger.hh 1032 2017-07-31 14:20:03Z gsoyez $
 //
 // Copyright (c) 2014-, Gavin P. Salam
 // based on arXiv:1307.007 by Mrinal Dasgupta, Simone Marzani and Gavin P. Salam
@@ -104,12 +104,17 @@ public:
   /// default destructor
   virtual ~ModifiedMassDropTagger(){}
 
+  //----------------------------------------------------------------------
+  // access to class info
+  double symmetry_cut() const { return _symmetry_cut; }
+  
 protected:
 
   /// The symmetry cut function for MMDT returns just a constant, since the cut value
   /// has no dependence on the subjet kinematics
   virtual double symmetry_cut_fn(const PseudoJet & /* p1 */, 
-                                 const PseudoJet & /* p2 */
+                                 const PseudoJet & /* p2 */,
+                                 void *extra_parameters = 0
                                  ) const {return _symmetry_cut;}
   virtual std::string symmetry_cut_description() const;
 

@@ -2,9 +2,9 @@
 #define __FASTJET_NNFJN2TILED_HH__
 
 //FJSTARTHEADER
-// $Id: NNFJN2Tiled.hh 4056 2016-03-03 15:27:35Z soyez $
+// $Id: NNFJN2Tiled.hh 4355 2018-04-22 15:38:54Z salam $
 //
-// Copyright (c) 2016, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2016-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -257,7 +257,8 @@ private:
   };
 
   // structure that holds the real, full, distance (as well as a pointer to the corresponding TiledJet)
-  struct diJ_plus_link {
+  class diJ_plus_link {
+  public:
     double     diJ; // the distance
     TiledJet * jet; // the jet (i) for which we've found this distance
                     // (whose NN will the J).

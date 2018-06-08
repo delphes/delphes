@@ -2,9 +2,9 @@
 #define __FASTJET_TOOLS_FILTER_HH__
 
 //FJSTARTHEADER
-// $Id: Filter.hh 3846 2015-03-08 08:35:43Z soyez $
+// $Id: Filter.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

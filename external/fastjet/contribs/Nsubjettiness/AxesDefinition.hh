@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: AxesDefinition.hh 833 2015-07-23 14:35:23Z jthaler $
+//  $Id: AxesDefinition.hh 1130 2018-06-06 12:09:46Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -507,8 +507,8 @@ protected:
 /// \class JetDefinitionWrapper
 /// \brief Wrapper for jet definitions (for memory management)
 ///
-/// This class was introduced to avoid issue of a FastJet bug when using genKT clustering
-/// Now using this for all AxesDefinition with a manual recombiner to use the delete_recombiner_when_unused function
+/// This class is used by all AxesDefinition with a manual recombiner to
+/// ensure that the delete_recombiner_when_unused function is always called
 ///------------------------------------------------------------------------
 class JetDefinitionWrapper {
 
@@ -548,7 +548,7 @@ public:
    WTA_KT_Axes()
    : ExclusiveJetAxes(JetDefinitionWrapper(fastjet::kt_algorithm,
                                           fastjet::JetDefinition::max_allowable_R, //maximum jet radius constant
-                                          _recomb = new WinnerTakeAllRecombiner(), // Needs to be explicitly declared (this will be deleted by JetDefinitionWrapper)
+                                          new WinnerTakeAllRecombiner(), // Needs to be explicitly declared (this will be deleted by JetDefinitionWrapper)
                                           fastjet::Best).getJetDef()
                       ) {
       setNPass(NO_REFINING);
@@ -570,9 +570,6 @@ public:
    /// For copying purposes
    virtual WTA_KT_Axes* create() const {return new WTA_KT_Axes(*this);}
 
-private:
-   const WinnerTakeAllRecombiner *_recomb;  ///< Internal recombiner
-
 };
    
 ///------------------------------------------------------------------------
@@ -587,7 +584,7 @@ public:
    WTA_CA_Axes()
    : ExclusiveJetAxes(JetDefinitionWrapper(fastjet::cambridge_algorithm,
                                              fastjet::JetDefinition::max_allowable_R, //maximum jet radius constant
-                                             _recomb = new WinnerTakeAllRecombiner(), // Needs to be explicitly declared (this will be deleted by JetDefinitionWrapper)
+                                             new WinnerTakeAllRecombiner(), // Needs to be explicitly declared (this will be deleted by JetDefinitionWrapper)
                                              fastjet::Best).getJetDef()) {
     setNPass(NO_REFINING);
   }
@@ -607,10 +604,7 @@ public:
    
    /// For copying purposes
    virtual WTA_CA_Axes* create() const {return new WTA_CA_Axes(*this);}
-   
-private:
-   const WinnerTakeAllRecombiner *_recomb;  ///< Internal recombiner
-
+  
 };
 
 
@@ -673,7 +667,7 @@ public:
    : ExclusiveJetAxes(JetDefinitionWrapper(fastjet::genkt_algorithm,
                                             R0,
                                             p,
-                                            _recomb = new WinnerTakeAllRecombiner()
+                                            new WinnerTakeAllRecombiner()
                                             ).getJetDef()), _p(p), _R0(R0) {
       if (p < 0) throw Error("WTA_GenKT_Axes:  Currently only p >=0 is supported.");
       setNPass(NO_REFINING);
@@ -701,7 +695,6 @@ public:
 protected:
    double _p;   ///< genkT power
    double _R0;  ///< jet radius
-   const WinnerTakeAllRecombiner *_recomb; ///< Internal recombiner
 };
    
 ///------------------------------------------------------------------------
@@ -716,7 +709,7 @@ class GenET_GenKT_Axes : public ExclusiveJetAxes {
 public:
    /// Constructor
    GenET_GenKT_Axes(double delta, double p, double R0 = fastjet::JetDefinition::max_allowable_R)
-   : ExclusiveJetAxes((JetDefinitionWrapper(fastjet::genkt_algorithm, R0, p, _recomb = new GeneralEtSchemeRecombiner(delta))).getJetDef() ),
+   : ExclusiveJetAxes((JetDefinitionWrapper(fastjet::genkt_algorithm, R0, p, new GeneralEtSchemeRecombiner(delta))).getJetDef() ),
     _delta(delta), _p(p), _R0(R0) {
        if (p < 0) throw Error("GenET_GenKT_Axes:  Currently only p >=0 is supported.");
        if (delta <= 0) throw Error("GenET_GenKT_Axes:  Currently only delta >0 is supported.");
@@ -749,7 +742,6 @@ protected:
    double _delta; ///< Recombination pT weighting
    double _p;     ///< GenkT power
    double _R0;    ///< jet radius
-   const GeneralEtSchemeRecombiner *_recomb;   ///< Internal recombiner
 };
 
 ///------------------------------------------------------------------------
@@ -1200,7 +1192,7 @@ class Comb_WTA_GenKT_Axes : public ExclusiveCombinatorialJetAxes {
 public:
    /// Constructor
    Comb_WTA_GenKT_Axes(int nExtra, double p, double R0 = fastjet::JetDefinition::max_allowable_R)
-   : ExclusiveCombinatorialJetAxes((JetDefinitionWrapper(fastjet::genkt_algorithm, R0, p, _recomb = new WinnerTakeAllRecombiner())).getJetDef(), nExtra),
+   : ExclusiveCombinatorialJetAxes((JetDefinitionWrapper(fastjet::genkt_algorithm, R0, p, new WinnerTakeAllRecombiner())).getJetDef(), nExtra),
     _p(p), _R0(R0) {
        if (p < 0) throw Error("Comb_WTA_GenKT_Axes:  Currently only p >=0 is supported.");
        setNPass(NO_REFINING);
@@ -1226,7 +1218,6 @@ private:
    double _nExtra;   ///< Number of extra axes
    double _p;        ///< GenkT power
    double _R0;       ///< jet radius
-   const WinnerTakeAllRecombiner *_recomb;   ///< Internal recombiner
 };
    
 ///------------------------------------------------------------------------
@@ -1240,7 +1231,7 @@ class Comb_GenET_GenKT_Axes : public ExclusiveCombinatorialJetAxes {
 public:
    /// Constructor
    Comb_GenET_GenKT_Axes(int nExtra, double delta, double p, double R0 = fastjet::JetDefinition::max_allowable_R)
-   : ExclusiveCombinatorialJetAxes((JetDefinitionWrapper(fastjet::genkt_algorithm, R0, p, _recomb = new GeneralEtSchemeRecombiner(delta))).getJetDef(), nExtra),
+   : ExclusiveCombinatorialJetAxes((JetDefinitionWrapper(fastjet::genkt_algorithm, R0, p, new GeneralEtSchemeRecombiner(delta))).getJetDef(), nExtra),
     _delta(delta), _p(p), _R0(R0) {
        if (p < 0) throw Error("Comb_GenET_GenKT_Axes:  Currently only p >=0 is supported.");
        if (delta <= 0) throw Error("Comb_GenET_GenKT_Axes:  Currently only delta >=0 is supported.");
@@ -1270,7 +1261,6 @@ private:
    double _delta;    ///< Recombination pT weighting exponent
    double _p;        ///< GenkT power
    double _R0;       ///< jet radius
-   const GeneralEtSchemeRecombiner *_recomb;  ///<  Internal recombiner
 };
    
 

@@ -2,9 +2,9 @@
 #define __FASTJET_NNFJN2PLAIN_HH__
 
 //FJSTARTHEADER
-// $Id: NNFJN2Plain.hh 4058 2016-03-03 15:39:40Z salam $
+// $Id: NNFJN2Plain.hh 4355 2018-04-22 15:38:54Z salam $
 //
-// Copyright (c) 2016, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

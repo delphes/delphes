@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: MeasureDefinition.cc 946 2016-06-14 19:11:27Z jthaler $
+//  $Id: MeasureDefinition.cc 943 2016-06-09 00:55:29Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //

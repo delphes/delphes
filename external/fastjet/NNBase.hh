@@ -2,9 +2,9 @@
 #define __FASTJET_NNBASE_HH__
 
 //FJSTARTHEADER
-// $Id: NNBase.hh 4060 2016-03-03 21:46:49Z salam $
+// $Id: NNBase.hh 4355 2018-04-22 15:38:54Z salam $
 //
-// Copyright (c) 2016, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2016-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

@@ -2,9 +2,9 @@
 #define __FASTJET_CLUSTERSEQUENCE_HH__
 
 //FJSTARTHEADER
-// $Id: ClusterSequence.hh 4154 2016-07-20 16:20:48Z soyez $
+// $Id: ClusterSequence.hh 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -366,12 +366,14 @@ class ClusterSequence {
   /// 
   /// As of FJ v3.1, this is deprecated, in line with the deprecation
   /// of auto_ptr in C++11
+#ifndef SWIG
 #ifdef FASTJET_HAVE_AUTO_PTR_INTERFACE
   FASTJET_DEPRECATED_MSG("Please use ClusterSequence::plugin_associate_extras(Extras * extras_in)) instead")
   inline void plugin_associate_extras(std::auto_ptr<Extras> extras_in){
     _extras.reset(extras_in.release());
   }
 #endif
+#endif //SWIG
 
   /// returns true when the plugin is allowed to run the show.
   inline bool plugin_activated() const {return _plugin_activated;}

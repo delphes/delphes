@@ -53,7 +53,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 DenseTrackFilter::DenseTrackFilter() :
-  fItTrackInputArray(0),   fItDenseChargedInputArray(0)
+  fItTrackInputArray(0)
 {
 }
 
@@ -115,10 +115,10 @@ void DenseTrackFilter::Init()
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMergerProp/tracks"));
   fItTrackInputArray = fTrackInputArray->MakeIterator();
 
-  fDenseChargedInputArray = ImportArray(GetString("DenseChargedInputArray", "DenseMergeTracks/tracks"));
-  fItDenseChargedInputArray = fDenseChargedInputArray->MakeIterator();
-
   fTrackOutputArray = ExportArray(GetString("TrackOutputArray", "tracks"));
+  fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
+  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons"));
+  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons"));
 }
 
 //------------------------------------------------------------------------------
@@ -127,7 +127,6 @@ void DenseTrackFilter::Finish()
 {
   vector< vector< Double_t >* >::iterator itPhiBin;
   if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItDenseChargedInputArray) delete fItDenseChargedInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;
@@ -154,9 +153,9 @@ void DenseTrackFilter::Process()
   fTowerHits.clear();
 
   // loop over all tracks
-  fItDenseChargedInputArray->Reset();
+  fItTrackInputArray->Reset();
   number = -1;
-  while((track = static_cast<Candidate*>(fItDenseChargedInputArray->Next())))
+  while((track = static_cast<Candidate*>(fItTrackInputArray->Next())))
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -203,7 +202,7 @@ void DenseTrackFilter::Process()
     {
       // switch to next tower
       towerEtaPhi = hitEtaPhi;
-     
+
       // saving track with highest pT that hit the tower
       FillTrack();
 
@@ -212,70 +211,63 @@ void DenseTrackFilter::Process()
       fBestTrack = 0;
     }
     // check for track hits
-    
+
     if(flags & 1)
     {
       ++fTowerTrackHits;
-      track = static_cast<Candidate*>(fDenseChargedInputArray->At(number));
+      track = static_cast<Candidate*>(fTrackInputArray->At(number));
       momentum = track->Momentum;
 
-      if (momentum.Pt() > ptmax) 
+      if(momentum.Pt() > ptmax)
       {
-	ptmax = momentum.Pt();
+        ptmax = momentum.Pt();
         fBestTrack = track;
       }
       continue;
     }
-  
+
   }
-  
+
   // here fill last tower
   FillTrack();
-  
+
 }
-
-
 
 //------------------------------------------------------------------------------
 
 void DenseTrackFilter::FillTrack()
 {
-  
-  Candidate *candidate, *track, *mother, *trackRef, *bestTrackRef;
+
+  Candidate *candidate, *track;
   Double_t pt, eta, phi;
-  Bool_t matched;
-  
+  Int_t numberOfCandidates;
+
   // saving track with highest pT that hit the tower
-  if(fTowerTrackHits > 0)
+  if(fTowerTrackHits < 1) return;
+    
+  numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
+  if(numberOfCandidates < 1) return;
+
+  track = static_cast<Candidate*>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
+  candidate = static_cast<Candidate*>(track->Clone());
+  pt = candidate->Momentum.Pt();
+  eta = candidate->Momentum.Eta();
+  phi = candidate->Momentum.Phi();
+  eta = gRandom->Gaus(eta, fEtaPhiRes);
+  phi = gRandom->Gaus(phi, fEtaPhiRes);
+  candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
+  candidate->AddCandidate(track);
+
+  fTrackOutputArray->Add(candidate);
+  switch(TMath::Abs(candidate->PID))
   {
-     bestTrackRef = static_cast<Candidate*>(fBestTrack->GetCandidates()->At(0));
-
-     // find corresponding track in properly propagated tracks
-     fItTrackInputArray->Reset();
-     matched = kFALSE;
-     int ntrack = 0;
-     while((track = static_cast<Candidate*>(fItTrackInputArray->Next())))
-     {
-       ntrack++;
-       trackRef = static_cast<Candidate*>(track->GetCandidates()->At(0));
-
-       if (trackRef->GetUniqueID() == bestTrackRef->GetUniqueID())
-       {
-	 mother = track;
-	 candidate = static_cast<Candidate*>(track->Clone());
-	 pt = candidate->Momentum.Pt();
-	 eta = candidate->Momentum.Eta();
-	 phi = candidate->Momentum.Phi();
-	 eta = gRandom->Gaus(eta, fEtaPhiRes);
-	 phi = gRandom->Gaus(phi, fEtaPhiRes);
-	 candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
-	 candidate->AddCandidate(mother);
-	 fTrackOutputArray->Add(candidate);
-	 matched = kTRUE;
-       }
-       if (matched) break;
-     }
-  } 
-
-
+    case 11:
+      fElectronOutputArray->Add(candidate);
+      break;
+    case 13:
+      fMuonOutputArray->Add(candidate);
+      break;
+    default:
+      fChargedHadronOutputArray->Add(candidate);
+  }
 }

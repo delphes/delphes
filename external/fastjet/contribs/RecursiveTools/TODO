@@ -1,3 +1,19 @@
+For v2.0
+--------
+
+- CHECK: lines 100-102 of RecursiveSymmetryCutBase.hh: this was
+  initially setting the structure members to 0. I think it's highly
+  preferable to set them to their default of -1, signalling the
+  absence of substructure. [0 dR might happen with a perfectly
+  collinear splitting]
+
+- CHECK: are we happy with how the structure info is stored and the
+  recursive_soft_drop_prongs(...) function in RecursiveSoftDrop.hh?
+
+- QUESTION: do we move set_min_deltaR_squared in the base class?
+
+- Add option to define z wrt to original jet?
+
 For future releases?
 --------------------
 - JDT:  In Recluster, change "single" to an enum for user clarity?
@@ -6,3 +22,5 @@ For future releases?
   help those of us who use XCode to edit, which is aggressive about
   auto-indenting. [Consider this for the full contrib??]
 - More generic kinematic cuts?
+- KZ: common base class for IteratedSoftDrop and RecursiveSoftDrop?
+- KZ: make IteratedSoftDrop use Recluster

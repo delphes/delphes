@@ -1,4 +1,4 @@
-// $Id: RecursiveSymmetryCutBase.hh 700 2014-07-07 12:50:05Z gsoyez $
+// $Id: RecursiveSymmetryCutBase.hh 1074 2017-09-18 15:15:20Z gsoyez $
 //
 // Copyright (c) 2014-, Gavin P. Salam, Gregory Soyez, Jesse Thaler
 //
@@ -23,23 +23,31 @@
 #define __FASTJET_CONTRIB_RECURSIVESYMMETRYCUTBASE_HH__
 
 #include <limits>
+#include <cassert>
 #include <fastjet/internal/base.hh>
 #include "fastjet/tools/Transformer.hh"
 #include "fastjet/WrappedStructure.hh"
+#include "fastjet/CompositeJetStructure.hh"
 
+#include "fastjet/config.h"
+
+// we'll use the native FJ class for reculstering if available
+#if FASTJET_VERSION_NUMBER >= 30100
+#include "fastjet/tools/Recluster.hh"
+#else
 #include "Recluster.hh"
+#endif
 
 /** \mainpage RecursiveTools contrib 
 
-    The aims RecursiveTools contrib to provide a set of tools for
-    recursive investigation of the substructure of jets.
-
-    Currently it includes:
+    The RecursiveTools contrib provides a set of tools for
+    recursive investigation jet substructure. Currently it includes:
     - fastjet::contrib::ModifiedMassDropTagger
     - fastjet::contrib::SoftDrop
-    - the two above classes derive from fastjet::contrib::RecursiveSymmetryCutBase
-    - fastjet::contrib::Recluster provides a reclustering transformer
-    - example*.cc provides a usage examples
+    - fastjet::contrib::RecursiveSymmetryCutBase (from which the above two classes derive)
+    - fastjet::contrib::IteratedSoftDropSymmetryFactors (defines ISD procedure)
+    - fastjet::contrib::IteratedSoftDropMultiplicity (defines a useful observable using ISD)  
+    - example*.cc provides usage examples
  */
 
 
@@ -77,16 +85,19 @@ public:
   //----------------------------------------------------------------------
 
   /// an enum of the different (a)symmetry measures that can be used
-  enum SymmetryMeasure{scalar_z, ///< \f$ \min(p_{ti}, p_{tj})/(p_{ti} + p_{tj}) \f$
-                       vector_z, ///< \f$ \min(p_{ti}, p_{tj})/p_{t(i+j)} \f$
-                       y         ///  \f$ \min(p_{ti}^2,p_{tj}^2) \Delta R_{ij}^2 / m_{ij}^2 \f$
-                       
+  enum SymmetryMeasure{scalar_z,   ///< \f$ \min(p_{ti}, p_{tj})/(p_{ti} + p_{tj}) \f$
+                       vector_z,   ///< \f$ \min(p_{ti}, p_{tj})/p_{t(i+j)} \f$
+                       y,          ///< \f$ \min(p_{ti}^2,p_{tj}^2) \Delta R_{ij}^2 / m_{ij}^2 \f$
+                       theta_E,    ///< \f$ \min(E_i,E_j)/(E_i+E_j) \f$ with 3d angle (ee collisions)
+                       cos_theta_E ///< \f$ \min(E_i,E_j)/(E_i+E_j) \f$ with
+                                   ///  \f$ \sqrt{2[1-cos(theta)]}\f$ for angles (ee collisions)
   };
 
   /// an enum for the options of how to choose which of two subjets to recurse into
   enum RecursionChoice{larger_pt, ///< choose the subjet with larger \f$ p_t \f$
                        larger_mt, ///< choose the subjet with larger \f$ m_t \equiv (m^2+p_t^2)^{\frac12}] \f$
-                       larger_m   ///  choose the subjet with larger mass (deprecated)
+                       larger_m,  ///< choose the subjet with larger mass (deprecated)
+                       larger_E   ///< choose the subjet with larger energy (meant for ee collisions)
   }; 
 
   /// Full constructor, which takes the following parameters:
@@ -118,6 +129,12 @@ public:
   /// default destructor
   virtual ~RecursiveSymmetryCutBase(){}
 
+  // access to class info
+  //----------------------------------------------------------------------
+  SymmetryMeasure symmetry_measure() const { return _symmetry_measure; }
+  double mu_cut() const { return _mu_cut; }
+  RecursionChoice recursion_choice() const { return _recursion_choice; }
+
   // internal subtraction configuration
   //----------------------------------------------------------------------
 
@@ -146,7 +163,7 @@ public:
   // reclustering behaviour
   //----------------------------------------------------------------------
 
-  /// configure the reclustering prior to the SoftDrop de-clustering
+  /// configure the reclustering prior to the recursive de-clustering
   ///  \param do_reclustering   recluster the jet or not?
   ///  \param recluster         how to recluster the jet 
   ///                           (only if do_recluster is true; 
@@ -173,6 +190,7 @@ public:
   /// Allows access to verbose information about recursive declustering,
   /// in particular values of symmetry, delta_R, and mu of dropped branches
   void set_verbose_structure(bool enable=true) { _verbose_structure = enable; }
+  bool has_verbose_structure() const { return _verbose_structure; }
   
   
   // inherited from the Transformer base
@@ -184,12 +202,15 @@ public:
   /// explicitly called before) and the result of the MMDT will be a
   /// subtracted jet.
   virtual PseudoJet result(const PseudoJet & j) const;
-
+  
   /// description of the tool
   virtual std::string description() const;
 
-  /// the type of the associated structure
-  //typedef RecursiveSymmetryCutBaseStructure StructureType;  
+  /// returns the gepometrical distance between the two particles
+  /// depending on the symmetry measure used
+  double squared_geometric_distance(const PseudoJet &j1,
+                                    const PseudoJet &j2) const;
+  
 
   class StructureType;
 
@@ -202,9 +223,49 @@ protected:
   /// the cut on the symmetry measure (typically z) that one need to
   /// apply for a given pair of subjets p1 and p2
   virtual double symmetry_cut_fn(const PseudoJet & /* p1 */, 
-                                 const PseudoJet & /* p2 */) const = 0;
+                                 const PseudoJet & /* p2 */,
+                                 void *extra_parameters = 0) const = 0;
   /// the associated dwescription
   virtual std::string symmetry_cut_description() const = 0;
+
+  //----------------------------------------------------------------------
+  /// this defines status codes when checking for substructure
+  enum RecursionStatus{
+    recursion_success=0,   //< found some substructure
+    recursion_dropped,     //< dropped softest prong; recursion continues
+    recursion_no_parents,  //< down to constituents; bottom of recursion
+    recursion_issue        //< something went wrong; recursion stops
+  };
+  
+  //----------------------------------------------------------------------
+  /// the method below is the one actually performing one step of the
+  /// recursion.
+  ///
+  /// It returns a status code (defined above)
+  ///
+  /// In case of success, all the information is filled
+  /// In case of "no parents", piee1 is the same subjet
+  /// In case of trouble, piece2 will be a 0 PJ and piece1 is the PJ we
+  ///   should return (either 0 itself if the issue was critical, or
+  ///   non-wero in case of a minor issue just causing the recursion to
+  ///   stop)
+  ///
+  /// The extra_parameter argument allows one to pass extra agruments
+  /// to the symmetry condition
+  RecursionStatus recurse_one_step(const PseudoJet & subjet,
+                                   PseudoJet &piece1, PseudoJet &piece2,
+                                   double &sym, double &mu2,
+                                   void *extra_parameters = 0) const;
+
+  //----------------------------------------------------------------------
+  /// helper for handling the reclustering
+  PseudoJet _recluster_if_needed(const PseudoJet &jet) const;
+  
+  //----------------------------------------------------------------------
+  // helpers for selecting between ee and pp cases
+  bool is_ee() const{
+    return ((_symmetry_measure==theta_E) || (_symmetry_measure==cos_theta_E));
+  }
 
 private:
   SymmetryMeasure  _symmetry_measure;
@@ -237,59 +298,85 @@ private:
 class RecursiveSymmetryCutBase::StructureType : public WrappedStructure {
 public:
   StructureType(const PseudoJet & j) :
-    WrappedStructure(j.structure_shared_ptr()),
+    WrappedStructure(j.structure_shared_ptr()), _delta_R(-1.0), _symmetry(-1.0), _mu(-1.0),
+    _is_composite(false), _has_verbose(false) // by default, do not store verbose structure
+  {}
+
+  /// construct a structure with
+  ///  - basic info inherited from the reference jet "j"
+  ///  - a given deltaR       for substructure
+  ///  - a given symmetry     for substructure
+  ///  - a given mu parameter for substructure
+  /// If j is a "copmposite jet", it means that it has further
+  /// substructure to potentially recurse  into
+  StructureType(const PseudoJet & j, double delta_R_in, double symmetry_in, double mu_in=-1.0) :
+    WrappedStructure(j.structure_shared_ptr()), _delta_R(delta_R_in), _symmetry(symmetry_in), _mu(mu_in),
+    _is_composite(dynamic_cast<const CompositeJetStructure*>(j.structure_ptr()) != NULL),
     _has_verbose(false) // by default, do not store verbose structure
   {}
   
   // information about kept branch
-  double delta_R()  const {return _delta_R;};
-  double symmetry() const {return _symmetry;};
-  double mu()       const {return _mu;};
+  double delta_R()  const {return _delta_R;}
+  double thetag()   const {return _delta_R;}  // alternative name
+  double symmetry() const {return _symmetry;}
+  double zg()       const {return _symmetry;} // alternative name
+  double mu()       const {return _mu;}
   
   // additional verbose information about dropped branches
   bool has_verbose() const { return _has_verbose;}
-  
-  // number of dropped branches
-  int dropped_count() const {
-    if (!_has_verbose) throw Error("RecursiveSymmetryCutBase::StructureType: Verbose structure must be turned on to get dropped_count() values.");
-    return _dropped_delta_R.size();
-  }
-  
-  // delta_R of dropped branches
-  std::vector<double> dropped_delta_R() const {
-    if (!_has_verbose) throw Error("RecursiveSymmetryCutBase::StructureType: Verbose structure must be turned on to get dropped_delta_R() values.");
-    return _dropped_delta_R;
-  }
+  void set_verbose(bool value) { _has_verbose = value;}
 
-  // symmetry values of dropped branches
-  std::vector<double> dropped_symmetry() const {
-    if (!_has_verbose) throw Error("RecursiveSymmetryCutBase::StructureType: Verbose structure must be turned on to get dropped_symmetry() values.");
-    return _dropped_symmetry;
-  }
+  /// returns true if the current jet has some substructure (i.e. has
+  /// been tagged by the resursion) or not
+  ///
+  /// Note that this should include deltaR==0 (e.g. a perfectly
+  /// collinear branching with SoftDrop)
+  bool has_substructure() const { return _delta_R>=0; }
+  
+  /// number of dropped branches
+  int dropped_count(bool global=true) const;
+  
+  /// delta_R of dropped branches
+  /// when "global" is set, recurse into possile further substructure
+  std::vector<double> dropped_delta_R(bool global=true) const;
+  void set_dropped_delta_R(const std::vector<double> &v) { _dropped_delta_R = v; }
 
-  // mass drop values of dropped branches
-  std::vector<double> dropped_mu() const {
-    if (!_has_verbose) throw Error("RecursiveSymmetryCutBase::StructureType: Verbose structure must be turned on to get dropped_mu() values.");
-    return _dropped_mu;
-  }
+  /// symmetry values of dropped branches
+  std::vector<double> dropped_symmetry(bool global=true) const;
+  void set_dropped_symmetry(const std::vector<double> &v) { _dropped_symmetry = v; }
+
+  /// mass drop values of dropped branches
+  std::vector<double> dropped_mu(bool global=true) const;
+  void set_dropped_mu(const std::vector<double> &v) { _dropped_mu = v; }
   
-  // maximum symmetry value dropped
-  double max_dropped_symmetry() const {
-    if (!_has_verbose) throw Error("RecursiveSymmetryCutBase::StructureType: Verbose structure must be turned on to get max_dropped_symmetry().");
-    if (_dropped_symmetry.size() == 0) return 0.0;
-    return *std::max_element(_dropped_symmetry.begin(),_dropped_symmetry.end());
-  }
-  
+  /// maximum symmetry value dropped
+  double max_dropped_symmetry(bool global=true) const;
+
+  /// (global) list of groomed away elements as zg and thetag
+  /// sorted from largest to smallest anlge
+  std::vector<std::pair<double,double> > sorted_zg_and_thetag() const;
+
 private:
   double _delta_R, _symmetry, _mu;
   friend class RecursiveSymmetryCutBase;
 
+  bool _is_composite;
+  
   // additional verbose information
   bool _has_verbose;
   // information about dropped values
   std::vector<double> _dropped_delta_R;
   std::vector<double> _dropped_symmetry;
   std::vector<double> _dropped_mu;
+
+  bool check_verbose(const std::string &what) const{
+    if (!_has_verbose){
+      throw Error("RecursiveSymmetryCutBase::StructureType: Verbose structure must be turned on to get "+what+".");
+      return false;
+    }
+    return true;
+  }
+    
   
 };
 

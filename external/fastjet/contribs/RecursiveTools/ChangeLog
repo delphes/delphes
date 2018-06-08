@@ -1,3 +1,397 @@
+2018-05-29  Jesse Thaler  <jthaler@jthaler.net>
+
+	* VERSION
+	* NEWS
+	Changed to 2.0.0-beta2, noted in news
+
+2018-04-21  Jesse Thaler  <jthaler@jthaler.net>
+
+	* AUTHORS: updated arxiv number for RecursiveSoftDrop
+
+2018-04-21  Gavin Salam  <gavin.salam@cern.ch>
+
+	* README: updated arxiv number for RecursiveSoftDrop & Bottom-up
+	Soft Drop.
+
+2018-04-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.cc (contrib):
+	fixed syntax of calls to structure_of<...>
+	(thanks to Attila Krasznahorkay)
+
+2018-01-24  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.cc:
+	for the (dafault) dynamical R0 implementation, the dynamical R0 is
+	evolved independently in each branch.
+
+2017-10-10  Jesse Thaler  <jthaler@jthaler.net>
+	* AUTHORS
+	Added mention of BUSD
+
+	* README
+	Some tweaks to the wording
+
+2017-10-11  Gregory Soyez  <soyez@fastjet.fr>
+
+	* IteratedSoftDrop.hh:
+	IteratedSoftDropInfo::size() and multiplicity() now return an
+	unsigned int instead of a double
+
+2017-10-10  Jesse Thaler  <jthaler@jthaler.net>
+	* AUTHORS
+	Updated journal reference for ISD
+
+	* example_isd.{cc,ref}:
+	Included soft drop multiplicity in example
+
+	* README
+	Added warning at top that documentation has not been updated
+
+	* VERSION
+	Changed to 2.0.0-beta1
+
+2017-10-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example_isd.ref:
+	updated to reflect the bugfix below
+
+	* IteratedSoftDrop.cc:
+	fixed issue in description (was taking sqrt of -ve number when
+	there were no angular cut)
+
+	* NEWS:
+	drafted for RecursiveTools-2.0.0-beta1
+
+	* TODO:
+	updated list in view of a beta release
+
+	* example_isd.cc:
+	pointed to the right header for IteratedSoftDrop
+
+	* RecursiveSoftDrop.{hh,cc}:
+	* IteratedSoftDrop.{hh,cc}:
+	moved IteratedSoftDrop to its own file (replacing the old
+	implementation)
+
+	* example_advanced_usage.ref:
+	updated reference file following the fix below.
+
+2017-09-28  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSymmetryCutBase.cc:
+	when no substructure is found, keep the _symmetry, _delta_R and
+	_mu structure variables at -1.  This for example allows one to
+	trigger on substructure by checking if delta_R>=0.
+
+	Note: we could set it to 0 (as it was before) and trigger using
+	_delta_R>0 but there might be some genuine substructure exactly
+	collinear.
+
+2017-09-19  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example_isd.ref:
+	updated to the latest version of the example
+
+2017-09-18  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Makefile:
+	updating make check to use all the examples (failing on ISD as
+	expected, see below)
+
+	* example_bottomup_softdrop.cc:
+	fixed typo
+
+	* example_bottomup_softdrop.ref:
+	* example_recursive_softdrop.ref:
+	added reference output for this example
+
+	* RecursiveSoftDrop.{hh,cc}:
+	* RecursiveSymmetryCutBase.{cc,hh}:
+	moved the "all_prongs" method from the base structure t oa
+	standalone function in RecursiveSoftDrop.hh
+
+	In practice, this is irrelevant for mMDT and SD (since pieces()
+	gets the job done, and the substructure class does not have (as
+	is) reliable info to get the full structure)
+
+	* RecursiveSymmetryCutBase.cc:
+	revamped a series of requests for substructure info to better
+	handle possible recursion into deeper jet substructure.
+
+	* RecursiveSoftDrop.{hh,cc}:
+	updated "description" to reuse the info from the base class
+
+	* example_isd.cc:
+	updated to use the newer implementation of ISD. Checked that it
+	gives the same results as the former implementation.
+
+	Note: make check still needs fixing because the example now
+	      computes a different set of angularities
+
+	* RecursiveSoftDrop.hh:
+	added a few helpers to IteratedSoftDropInfo ([] operator and size,
+	meaning it can be used as a vector<pair<double,double> >)
+
+	* RecursiveSymmetryCutBase.cc:
+	. fixed bugs in the calculation of the geometric distances for ee
+	  coordinates
+	. fixed bug in the computation of the (zg,thetag) pairs [it was
+	  returning the groomed ones instead of the ones passing the
+	  condition]
+
+	* example_recursive_softdrop.cc:
+	set the R0 parameter to the original jet radius
+
+2017-09-13  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example_recursive_softdrop.cc:
+	tied up a few comments and the code output
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	removed the unneeded _is_composite
+
+	* RecursiveSoftDrop.cc:
+	fixed issue with "verbose" dropped info on branches with no
+	further substructure
+
+2017-09-11  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.{hh,cc}:
+	have IteratedSoftDDrop returning by default an object of type
+	IteratedSoftDropInfo; added several helpers
+
+2017-09-08  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.{hh,cc}:
+	updated IteratedSoftDrop to give it the flexibility of
+	RecursiveSoftDrop
+
+	* RecursiveSymmetryCutBase.hh:
+	fixed typo in comment
+
+	* example_mmdt_ee.cc:     *** ADDED ***
+	added an example to illustrat usage in ee collisions
+
+	* example_isd.cc:
+	* BottomUpSoftDrop.cc:
+	* IteratedSoftDrop.cc:
+	* RecursiveSoftDrop.cc:
+	Fixed compilation issues with FJ 3.0 (mostly the usage of features
+	introduced only in FJ3.1)
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	used the internal Recluster class for FJ<3.1.0 and the FJ antive
+	one for FJ>=3.1.0
+
+	* BottomUpSoftDrop.{hh,cc}:
+	moved the implementation of global_grooming to the source file and
+	fixed a few trivial compilation errors
+
+2017-09-08  Frédéric Dreyer  <frederic.dreyer@gmail.com>
+
+	* BottomUpSoftDrop.hh:
+	added the global_grooming method to process full event
+
+2017-09-07  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.cc:
+	cleaned (mostly by removing older commented-out code)
+
+	* RecursiveSoftDrop.{hh,cc}:
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	* SoftDrop.cc:
+
+	added support for ee coordinates.  For that, the symmetry measure
+	has to be set to either theta_E (which uses the 3-vector angle
+	theta) or to cos_theta_E which uses sqrt(2*[1-cos(theta)])
+
+	Accordingly, the recursion_choice can be set to larger_E to
+	recurse into the branch with the largest energy. The larger_m
+	mode, recorsing into the larger-mass branch is also possible but
+	not advised (for the same reason as the pp version).
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	switched to the Recluster class provided with FastJet. ASlso
+	included the recluster description to RecursiveSymmetryCutBase
+	when it is user-defined.
+
+2017-09-06  Gregory Soyez  <soyez@fastjet.fr>
+
+	* BottomUpSoftDrop.{hh,cc}:
+	. renamed SoftDropStructure  -> BottomUpSoftDropStructure
+	          SoftDropRecombiner -> BottomUpSoftDropRecombiner
+	          SoftDropPlugin     -> BottomUpSoftDropPlugin
+	. moved 'description' to source file (instead of header)
+	. kept the "area" information when available (jets will just
+	appear as having a 0 area)
+	. added most class description (main class still missing)
+
+	* RecursiveSoftDrop.cc:
+	. put internal classes to handle CS history in an internal namespace
+	. replaced the "switch" in the mail loop by a series of if (allows
+	  us a few simplificatins/cleaning)
+	. more uniform treatment of issues in the presence of an angular cut
+	  (as part of the above reorganisation)
+
+	* example_advanced_usage.ref:
+	updated reference output file following the bugfix (missing
+	"grooming mode" initialisation in one of the SoftDrop ctors) on
+	2017-08-01
+
+	* RecursiveSymmetryCutBase.cc:
+	removed redundent code
+
+2017-08-10  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.cc:
+	fixed trivial typo in variable name
+
+>>>>>>> .r1071
+2017-08-04  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.cc:
+	do not impose an angular cut in IterativeSD if it is -ve.
+
+2017-08-01  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example_recursive_softdrop.cc:
+	added a series of optional flags
+
+	* RecursiveSoftDrop.cc:
+	fixed a few issues with the fixed depth version
+
+	* RecursiveSymmetryCutBase.hh:
+	a jet is now considered as havig substructure if deltaR>0
+	(coherent with released version)
+
+	* SoftDrop.hh:
+	bugfix: set the "grooming mode" by default in all ctors
+	EDIT: caused issue with make check, fixed on 2017-09-069 (see
+	      above)
+
+	* RecursiveSoftDrop.{hh,cc}:
+	added support for the "same depth" variant
+
+	* RecursiveSymmetryCutBase.cc:
+	also associate a RecursiveSymmetryCutBase::StructureType structure
+	to the result jet in case it is just a single particle (in
+	grooming mode)
+
+2017-07-31  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	added the option to pass an extra parameter to the symmetry cut
+	function
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	* ModifiedMassDropTagger.hh
+	* SoftDrop.hh:
+	minor adaptions due to the above change + added a few methods to
+	query the class information (symmetry cut, beta, ...)
+
+	* RecursiveSoftDrop.{hh,cc}:
+	Added support for
+	- a dynamical R0
+	- recursing only in the hardest branch
+	- imposing a min deltaR cut
+
+	Added a tentative IterativeSoftDrop class
+
+2017-07-28  Gregory Soyez  <soyez@fastjet.fr>
+
+	* RecursiveSoftDrop.cc:
+	adapted to the latest changes in RecursiveSymmetryCutBase
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	reorganised the output of the recursion step (recurse_one_step)
+	using an enum to make iot more readable (and to fix issues where
+	the dropped prong is actually 0, e.g. after subtraction)
+
+2017-07-26  Gregory Soyez  <soyez@fastjet.fr>
+
+	* example_recursive_softdrop.cc:   *** ADDED ***
+	added a draft example for the use of RecursiveSoftDrop
+
+	* RecursiveSoftDrop.{hh,cc}:       *** ADDED ***
+	added a first pass at an implementation of RecursiveSoftDrop.
+
+	This is based on Frederic's initial version but keeps the
+	branching structure of the jet. Some of the features, like
+	dynamical R0, direct access to the substructure or the same depth
+	variant, are still unsupported.
+
+	* SoftDrop.hh:
+	declared _beta, _symmetry_cut and _R0sqr as protected (was
+	private) so they ca n be used by RecursiveSoftDrop
+
+	* RecursiveSymmetryCutBase.{hh,cc}:
+	extracted from result() the part that performs one step of the
+	resursion (implemented as recurse_one_step()). This is repeatedly
+	called by result(). It has specific conventions to indicate
+	whether or not some substructure has been found or if one ran into
+	some issue.
+
+2017-04-25  Kevin Zhou  <knzhou@mit.edu>
+
+	* IteratedSoftDrop.hh
+	  . Added Doxygen documentation
+
+	* RecursiveSymmetryCutBase.hh
+	  . Added references to ISD
+
+2017-04-25  Jesse Thaler  <jthaler@jthaler.net>
+	* AUTHORS, COPYING:
+	  . Added ISD arXiv number
+
+	* example_isd.{cc,ref}
+	  . Added ISD arXiv number
+	  . Changing z_cut to be optimal value (with Lambda = 1 GeV)
+	  . Tweaked formatting
+
+	* IteratedSoftDrop.{hh,cc}
+	  . Added ISD arXiv number
+	  . Assert added if recluster does not return one jet.
+
+	* README
+	  . Added ISD arXiv number and tweaked wording
+
+
+2017-04-20  Kevin Zhou  <knzhou@mit.edu>
+
+	* example_isd.{cc,ref}      ** ADDED **
+	* IteratedSoftDrop.{cc,hh}  ** ADDED **
+
+	* Makefile
+	  . Added IteratedSoftDrop (ISD) as appropriate
+
+	* AUTHORS
+	  . Added myself to author list
+          . Added placeholder for ISD paper
+
+	* COPYING
+	  . Added placeholder for ISD paper
+
+	* README
+	  . Added description of ISD
+
+	* TODO
+	  . Added tasks to integrate ISD with other classes, e.g. SD, 
+	    Recluster, and the future RecursiveSoftDrop (RSD)
+
+	* NEWS
+	  . Added dummy for release of 1.1.0
+
+	* VERSION:
+	  . Switched version number to 1.1.0-dev
+
+	* example_advanced_usage.cc:
+	  . Added $Id$ tag, didn't change anything else
+
+2014-07-30  Gregory Soyez  <soyez@fastjet.fr>
+
+	* Recluster.hh: fixed the name of the #define for the header
+
 2014-07-09  Gregory Soyez  <soyez@fastjet.fr> + Jesse
 
 	* NEWS:

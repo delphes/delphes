@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: AreaDefinition.cc 3619 2014-08-13 14:17:19Z salam $
+// $Id: AreaDefinition.cc 4354 2018-04-22 07:12:37Z salam $
 //
-// Copyright (c) 2005-2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

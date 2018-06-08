@@ -68,13 +68,12 @@ private:
   TIterator *fItTrackInputArray; //!
 
   const TObjArray *fTrackInputArray; //!
-
   TObjArray *fTrackOutputArray; //!
 
+  TObjArray *fChargedHadronOutputArray; //!
+  TObjArray *fElectronOutputArray; //!
+  TObjArray *fMuonOutputArray; //!
 
-  const TObjArray *fDenseChargedInputArray;
-  TIterator *fItDenseChargedInputArray;
-  
   void FillTrack();
   ClassDef(DenseTrackFilter, 1)
 };

@@ -3,6 +3,8 @@ The RecursiveTools FastJet contrib is developed and maintained by:
    Gavin P. Salam <gavin.salam@cern.ch>
    Gregory Soyez <soyez@fastjet.fr>
    Jesse Thaler <jthaler@jthaler.net>
+   Kevin Zhou <knzhou@mit.edu>
+   Frederic Dreyer <fdreyer@mit.edu>
 
 The physics is based on:
 
@@ -15,3 +17,15 @@ The physics is based on:
    Soft Drop.
    Andrew J. Larkoski, Simone Marzani, Gregory Soyez, and Jesse Thaler.
    JHEP 1405:146 (2014), arXiv:1402.2657
+
+   [IteratedSoftDrop]
+   Casimir Meets Poisson: Improved Quark/Gluon Discrimination with Counting Observables.
+   Christopher Frye, Andrew J. Larkoski, Jesse Thaler, Kevin Zhou.
+   JHEP 1709:083 (2017), arXiv:1704.06266
+
+   [RecursiveSoftDrop]
+   [BottomUpSoftDrop]
+   Recursive Soft Drop.
+   Frederic A. Dreyer, Lina Necib, Gregory Soyez, and Jesse Thaler
+   arXiv:1804.03657
+   

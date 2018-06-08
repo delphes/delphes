@@ -1,3 +1,4 @@
+########################################
 #
 #  Main authors: Michele Selvaggi (CERN)
 #
@@ -14,6 +15,11 @@ set ExecutionPath {
 
   PileUpMerger
   ParticlePropagator
+  TrackMergerProp
+
+  DenseProp
+  DenseMergeTracks
+  DenseTrackFilter
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -23,9 +29,6 @@ set ExecutionPath {
   ElectronEnergySmearing
   MuonMomentumSmearing
 
-  DenseProp
-  DenseMergeTracks
-  TrackMergerProp
   TrackMerger
 
   ECal
@@ -158,9 +161,9 @@ module PileUpMerger PileUpMerger {
 
 
 
-#################################
-# Dense Track propagation calo
-#################################
+#####################################
+# Track propagation to calorimeters
+#####################################
 
 module ParticlePropagator ParticlePropagator {
   set InputArray PileUpMerger/stableParticles
@@ -181,6 +184,87 @@ module ParticlePropagator ParticlePropagator {
 }
 
 
+##############
+# Track merger
+##############
+
+module Merger TrackMergerProp {
+# add InputArray InputArray
+  add InputArray ParticlePropagator/chargedHadrons
+  add InputArray ParticlePropagator/electrons
+  add InputArray ParticlePropagator/muons
+  set OutputArray tracks
+}
+
+
+####################################
+# Track propagation to pseudo-pixel
+####################################
+
+module ParticlePropagator DenseProp {
+
+  set InputArray TrackMergerProp/tracks
+
+  # radius of the first pixel layer
+  set Radius 0.3
+  set RadiusMax 1.29
+  # half-length of the magnetic field coverage, in m
+  set HalfLength 0.7
+  set HalfLengthMax 3.0
+
+  # magnetic field
+  set Bz 3.8
+}
+
+
+####################
+# Dense Track merger
+###################
+
+module Merger DenseMergeTracks {
+# add InputArray InputArray
+  add InputArray DenseProp/chargedHadrons
+  add InputArray DenseProp/electrons
+  add InputArray DenseProp/muons
+  set OutputArray tracks
+}
+
+######################
+#   Dense Track Filter
+######################
+
+module DenseTrackFilter DenseTrackFilter {
+
+  set TrackInputArray DenseMergeTracks/tracks
+
+  set TrackOutputArray tracks
+  set ChargedHadronOutputArray chargedHadrons
+  set ElectronOutputArray electrons
+  set MuonOutputArray muons
+
+  set EtaPhiRes 0.003
+  set EtaMax 4.0
+
+  set pi [expr {acos(-1)}]
+
+  set nbins_phi [expr {$pi/$EtaPhiRes} ]
+  set nbins_phi [expr {int($nbins_phi)} ]
+
+  set PhiBins {}
+  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
+    add PhiBins [expr {$i * $pi/$nbins_phi}]
+  }
+
+  set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
+  set nbins_eta [expr {int($nbins_eta)} ]
+
+  for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
+    set eta [expr {$i * $EtaPhiRes}]
+    add EtaPhiBins $eta $PhiBins
+  }
+
+}
+
 
 
 ####################################
@@ -189,7 +273,7 @@ module ParticlePropagator ParticlePropagator {
 
 module Efficiency ChargedHadronTrackingEfficiency {
   ## particles after propagation
-  set InputArray  ParticlePropagator/chargedHadrons
+  set InputArray  DenseTrackFilter/chargedHadrons
   set OutputArray chargedHadrons
   # tracking efficiency formula for charged hadrons
   set EfficiencyFormula {
@@ -210,7 +294,7 @@ module Efficiency ChargedHadronTrackingEfficiency {
 ####################################
 
 module Efficiency ElectronTrackingEfficiency {
-  set InputArray  ParticlePropagator/electrons
+  set InputArray  DenseTrackFilter/electrons
   set OutputArray electrons
   # tracking efficiency formula for electrons
   set EfficiencyFormula {
@@ -233,7 +317,7 @@ module Efficiency ElectronTrackingEfficiency {
 ##########################
 
 module Efficiency MuonTrackingEfficiency {
-  set InputArray ParticlePropagator/muons
+  set InputArray DenseTrackFilter/muons
   set OutputArray muons
   # tracking efficiency formula for muons
   set EfficiencyFormula {
@@ -350,6 +434,7 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
 
 }
 
+
 #################################
 # Energy resolution for electrons
 #################################
@@ -389,86 +474,18 @@ module MomentumSmearing MuonMomentumSmearing {
   source muonMomentumResolution.tcl
 }
 
+
+
 ##############
 # Track merger
 ##############
 
-module Merger TrackMergerProp {
+module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronEnergySmearing/electrons
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
-}
-
-
-#################################
-# Dense Track propagation
-#################################
-
-module ParticlePropagator DenseProp {
-  set InputArray PileUpMerger/stableParticles
-
-  set OutputArray stableParticles
-  set NeutralOutputArray neutralParticles
-  set ChargedHadronOutputArray chargedHadrons
-  set ElectronOutputArray electrons
-  set MuonOutputArray muons
-
-  # radius of the first pixel layer
-  set Radius 0.3
-  set RadiusMax 1.29
-  # half-length of the magnetic field coverage, in m
-  set HalfLength 0.7
-  set HalfLengthMax 3.0
-
-  # magnetic field
-  set Bz 3.8
-}
-
-####################
-# Dense Track merger
-###################
-
-module Merger DenseMergeTracks {
-# add InputArray InputArray
-  add InputArray DenseProp/chargedHadrons
-  add InputArray DenseProp/electrons
-  add InputArray DenseProp/muons
-  set OutputArray tracks
-}
-
-######################
-#   Dense Track Filter
-######################
-
-module DenseTrackFilter TrackMerger {
-  set TrackInputArray TrackMergerProp/tracks
-  set DenseChargedInputArray DenseMergeTracks/tracks
-
-  set TrackOutputArray tracks
-
-  set EtaPhiRes 0.003
-  set EtaMax 4.0
-
-  set pi [expr {acos(-1)}]
-
-  set nbins_phi [expr {$pi/$EtaPhiRes} ]
-  set nbins_phi [expr {int($nbins_phi)} ]
-
-  set PhiBins {}
-  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-    add PhiBins [expr {$i * $pi/$nbins_phi}]
-  }
-
-  set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
-  set nbins_eta [expr {int($nbins_eta)} ]
-
-  for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
-    set eta [expr {$i * $EtaPhiRes}]
-    add EtaPhiBins $eta $PhiBins
-  }
-
 }
 
 
@@ -692,6 +709,7 @@ module PdgCodeFilter ElectronFilter {
   add PdgCode {11}
   add PdgCode {-11}
 }
+
 
 
 ##########################
