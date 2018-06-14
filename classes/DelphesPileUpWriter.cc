@@ -60,7 +60,7 @@ DelphesPileUpWriter::DelphesPileUpWriter(const char *fileName) :
   fIndexWriter->SetBuffer(fIndex);
   fBufferWriter->SetBuffer(fBuffer);
 
-  fPileUpFile = fopen(fileName, "w+");
+  fPileUpFile = fopen(fileName, "wb");
 
   if(fPileUpFile == NULL)
   {

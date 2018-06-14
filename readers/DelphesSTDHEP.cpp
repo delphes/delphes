@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
       else
       {
         cout << "** Reading " << argv[i] << endl;
-        inputFile = fopen(argv[i], "r");
+        inputFile = fopen(argv[i], "rb");
 
         if(inputFile == NULL)
         {

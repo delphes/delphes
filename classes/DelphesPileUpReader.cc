@@ -60,7 +60,7 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   fIndexReader->SetBuffer(fIndex);
   fBufferReader->SetBuffer(fBuffer);
 
-  fPileUpFile = fopen(fileName, "r");
+  fPileUpFile = fopen(fileName, "rb");
 
   if(fPileUpFile == NULL)
   {
