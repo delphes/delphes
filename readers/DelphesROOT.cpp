@@ -84,7 +84,6 @@ int main(int argc, char *argv[])
   HepMCEvent *element, *eve;
   Candidate *candidate;
   Int_t pdgCode;
-  Int_t maxEvents;
 
   const Double_t c_light = 2.99792458E8;
 
@@ -125,11 +124,6 @@ int main(int argc, char *argv[])
    
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
-
-    if(maxEvents < 0)
-    {
-      throw runtime_error("MaxEvents must be zero or positive");
-    }
 
     modularDelphes = new Delphes("Delphes");
     modularDelphes->SetConfReader(confReader);
