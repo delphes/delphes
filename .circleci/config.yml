@@ -4,20 +4,6 @@ shared: &shared
   steps:
     - checkout
     - run:
-        name: Setup environment
-        command: |
-          if [[ -d /opt/root ]]; then
-            echo 'export ROOTSYS=/opt/root' >> $BASH_ENV
-            echo 'export PATH=$ROOTSYS/bin:$PATH' >> $BASH_ENV
-            echo 'export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH' >> $BASH_ENV
-            echo 'export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
-          fi
-          if [[ -d /opt/pythia ]]; then
-            echo 'export PYTHIA8=/opt/pythia' >> $BASH_ENV
-          else
-            echo 'export PYTHIA8=/usr' >> $BASH_ENV
-          fi
-    - run:
         name: Build Delphes using make
         command: |
           make distclean
@@ -32,18 +18,18 @@ shared: &shared
           make -j `nproc`
 
 jobs:
-  build_1:
+  ubuntu-1710:
     <<: *shared
     docker:
       - image: delphes/docker-ubuntu-1710:latest
-  build_2:
+  fedora-28:
     <<: *shared
     docker:
       - image: delphes/docker-fedora-28:latest
 
 workflows:
   version: 2
-  build_all:
+  test:
     jobs:
-      - build_1
-      - build_2
+      - ubuntu-1710
+      - fedora-28
