@@ -22,6 +22,10 @@ jobs:
     <<: *shared
     docker:
       - image: delphes/ubuntu:17.10
+  ubuntu-1804:
+    <<: *shared
+    docker:
+      - image: delphes/ubuntu:18.04
   fedora-28:
     <<: *shared
     docker:
@@ -32,4 +36,5 @@ workflows:
   test:
     jobs:
       - ubuntu-1710
+      - ubuntu-1804
       - fedora-28
