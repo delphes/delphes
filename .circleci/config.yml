@@ -21,11 +21,11 @@ jobs:
   ubuntu-1710:
     <<: *shared
     docker:
-      - image: delphes/docker-ubuntu-1710:latest
+      - image: delphes/ubuntu:17.10
   fedora-28:
     <<: *shared
     docker:
-      - image: delphes/docker-fedora-28:latest
+      - image: delphes/fedora:28
 
 workflows:
   version: 2
