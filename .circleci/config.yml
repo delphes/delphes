@@ -18,10 +18,10 @@ shared: &shared
           make -j `nproc`
 
 jobs:
-  ubuntu-1710:
+  ubuntu-1404:
     <<: *shared
     docker:
-      - image: delphes/ubuntu:17.10
+      - image: delphes/ubuntu:14.04
   ubuntu-1804:
     <<: *shared
     docker:
@@ -35,6 +35,6 @@ workflows:
   version: 2
   test:
     jobs:
-      - ubuntu-1710
+      - ubuntu-1404
       - ubuntu-1804
       - fedora-28
