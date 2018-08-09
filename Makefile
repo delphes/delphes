@@ -31,10 +31,45 @@ endif
 OPT_LIBS += -lGenVector -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsCommon -lDataFormatsPatCandidates -lDataFormatsLuminosity -lSimDataFormatsGeneratorProducts -lCommonToolsUtils -lDataFormatsCommon
 endif
 
+
+# check consistency
+ifneq ($(PROMC),)
+  ifneq ($(PROIO),)
+  $(error Attention:  PROMC and PROIO env. variables are set simultaneously. You cannot compile ProMC and ProIO readers in one compilation process due to an inconsistency in protocol buffers libraries. The suggestion is to compile these two readers in two steps. First unset PROIO variable and then \"configure; make\". After this, unset PROMC, set PROIO,  and run \"configure; make\". During runs, make sure shared libraries are set correctly. ) 
+  endif
+endif
+
+
 ifneq ($(PROMC),)
 HAS_PROMC = true
+$(info ProMC event reader is requested)
 CXXFLAGS += -I$(PROMC)/include -I$(PROMC)/src
 OPT_LIBS += -L$(PROMC)/lib -lpromc -lprotoc -lprotobuf -lprotobuf-lite -lcbook -lz
+endif
+
+ifneq ($(PROIO),)
+HAS_PROIO = true
+$(info ProIO reader is requested)
+       ifeq ($(PROTOBUF),)
+       $(error but PROTOBUF variable is not set.) 
+       endif
+
+       PROTOBUF_FILE=$(PROTOBUF)/lib/libprotobuf.a
+       ifeq ("$(wildcard $(PROTOBUF_FILE))","")
+          $(error PROTOBUF variable is set, but it does not point to valid $(PROTOBUF_FILE))
+       endif
+
+       ifeq ($(LZ4),)
+            $(error but LZ4 variable is not set.)                        
+       endif
+       LZ4_FILE=$(LZ4)/lib/liblz4.so
+       ifeq ("$(wildcard $(LZ4_FILE))","")
+            $(error LZ4 variable is set,  but it  does not point to valid $(LZ4_FILE))
+       endif
+
+
+CXXFLAGS += -I$(PROIO)/include -I$(PROTOBUF)/include -I$(LZ4)/include -I$(PROIO)/src
+OPT_LIBS += -L$(PROTOBUF)/lib -lprotobuf -L$(PROIO)/lib -lproio -lproio.pb -lz -L$(LZ4)/lib -llz4 
 endif
 
 ifeq ($(HAS_PYTHIA8),true)
@@ -283,6 +318,27 @@ EXECUTABLE +=  \
 
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesProMC.$(ObjSuf)
+
+endif
+
+ifeq ($(HAS_PROIO),true)
+DelphesProIO$(ExeSuf): \
+	tmp/readers/DelphesProIO.$(ObjSuf)
+
+tmp/readers/DelphesProIO.$(ObjSuf): \
+	readers/DelphesProIO.cpp \
+	modules/Delphes.h \
+	classes/DelphesStream.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootProgressBar.h
+EXECUTABLE +=  \
+	DelphesProIO$(ExeSuf)
+
+EXECUTABLE_OBJ +=  \
+	tmp/readers/DelphesProIO.$(ObjSuf)
 
 endif
 
