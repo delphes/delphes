@@ -86,6 +86,8 @@ private:
   int fWeightSize;
   std::vector< double > fWeight;
 
+  double fCrossSection, fCrossSectionError;
+
   int fID1, fID2;
   double fX1, fX2, fScalePDF, fPDF1, fPDF2;
 

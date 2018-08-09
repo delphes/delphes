@@ -102,6 +102,8 @@ public:
   Int_t MPI; // number of multi parton interactions | mpi ()
 
   Float_t Weight; // weight for the event
+  Float_t CrossSection; // cross-section in pb
+  Float_t CrossSectionError; // cross-section error in pb
 
   Float_t Scale; // energy scale, see hep-ph/0109068 | event_scale()
   Float_t AlphaQED; // QED coupling, see hep-ph/0109068 | alphaQED()
@@ -117,6 +119,8 @@ public:
 
   Float_t PDF1; // PDF (id1, x1, Q) | pdf_info()->pdf1()
   Float_t PDF2; // PDF (id2, x2, Q) | pdf_info()->pdf2()
+
+
 
   ClassDef(HepMCEvent, 2)
 };

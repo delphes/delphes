@@ -198,6 +198,13 @@ bool DelphesHepMCReader::ReadBlock(DelphesFactory *factory,
       fPositionCoefficient = 10.0;
     }
   }
+  
+  else if(key == 'C')
+  {
+    rc = bufferStream.ReadDbl(fCrossSection)
+      && bufferStream.ReadDbl(fCrossSectionError);
+  }
+  
   else if(key == 'F')
   {
     rc = bufferStream.ReadInt(fID1)
@@ -314,6 +321,8 @@ void DelphesHepMCReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventN
   element->ProcessID = fProcessID;
   element->MPI = fMPI;
   element->Weight = fWeight.size() > 0 ? fWeight[0] : 1.0;
+  element->CrossSection = fCrossSection;
+  element->CrossSectionError = fCrossSectionError;
   element->Scale = fScale;
   element->AlphaQED = fAlphaQED;
   element->AlphaQCD = fAlphaQCD;
