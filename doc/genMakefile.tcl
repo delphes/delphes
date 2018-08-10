@@ -224,14 +224,12 @@ endif
 OPT_LIBS += -lGenVector -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsCommon -lDataFormatsPatCandidates -lDataFormatsLuminosity -lSimDataFormatsGeneratorProducts -lCommonToolsUtils -lDataFormatsCommon
 endif
 
-
 # check consistency
 ifneq ($(PROMC),)
-  ifneq ($(PROIO),)
-  $(error Attention:  PROMC and PROIO env. variables are set simultaneously. You cannot compile ProMC and ProIO readers in one compilation process due to an inconsistency in protocol buffers libraries. The suggestion is to compile these two readers in two steps. First unset PROIO variable and then \"configure; make\". After this, unset PROMC, set PROIO,  and run \"configure; make\". During runs, make sure shared libraries are set correctly. ) 
-  endif
+ifneq ($(PROIO),)
+$(error Attention:  PROMC and PROIO env. variables are set simultaneously. You cannot compile ProMC and ProIO readers in one compilation process due to an inconsistency in protocol buffers libraries. The suggestion is to compile these two readers in two steps. First unset PROIO variable and then \"configure; make\". After this, unset PROMC, set PROIO,  and run \"configure; make\". During runs, make sure shared libraries are set correctly.)
 endif
-
+endif
 
 ifneq ($(PROMC),)
 HAS_PROMC = true
@@ -243,26 +241,22 @@ endif
 ifneq ($(PROIO),)
 HAS_PROIO = true
 $(info ProIO reader is requested)
-       ifeq ($(PROTOBUF),)
-       $(error but PROTOBUF variable is not set.) 
-       endif
-
-       PROTOBUF_FILE=$(PROTOBUF)/lib/libprotobuf.a
-       ifeq ("$(wildcard $(PROTOBUF_FILE))","")
-          $(error PROTOBUF variable is set, but it does not point to valid $(PROTOBUF_FILE))
-       endif
-
-       ifeq ($(LZ4),)
-            $(error but LZ4 variable is not set.)                        
-       endif
-       LZ4_FILE=$(LZ4)/lib/liblz4.so
-       ifeq ("$(wildcard $(LZ4_FILE))","")
-            $(error LZ4 variable is set,  but it  does not point to valid $(LZ4_FILE))
-       endif
-
-
+ifeq ($(PROTOBUF),)
+$(error but PROTOBUF variable is not set.)
+endif
+PROTOBUF_FILE=$(PROTOBUF)/lib/libprotobuf.a
+ifeq ("$(wildcard $(PROTOBUF_FILE))","")
+$(error PROTOBUF variable is set, but it does not point to valid $(PROTOBUF_FILE))
+endif
+ifeq ($(LZ4),)
+$(error but LZ4 variable is not set.)
+endif
+LZ4_FILE=$(LZ4)/lib/liblz4.so
+ifeq ("$(wildcard $(LZ4_FILE))","")
+$(error LZ4 variable is set,  but it does not point to valid $(LZ4_FILE))
+endif
 CXXFLAGS += -I$(PROIO)/include -I$(PROTOBUF)/include -I$(LZ4)/include -I$(PROIO)/src
-OPT_LIBS += -L$(PROTOBUF)/lib -lprotobuf -L$(PROIO)/lib -lproio -lproio.pb -lz -L$(LZ4)/lib -llz4 
+OPT_LIBS += -L$(PROTOBUF)/lib -lprotobuf -L$(PROIO)/lib -lproio -lproio.pb -lz -L$(LZ4)/lib -llz4
 endif
 
 ifeq ($(HAS_PYTHIA8),true)
@@ -328,7 +322,7 @@ dictDeps {DISPLAY_DICT} {display/DisplayLinkDef.h}
 
 sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/Hector/*.cc}
 
-sourceDeps {FASTJET} {modules/FastJet*.cc} {modules/RunPUPPI.cc} {external/PUPPI/*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc} {external/fastjet/contribs/*/*.cc} 
+sourceDeps {FASTJET} {modules/FastJet*.cc} {modules/RunPUPPI.cc} {external/PUPPI/*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc} {external/fastjet/contribs/*/*.cc}
 
 sourceDeps {DISPLAY} {display/*.cc}
 
