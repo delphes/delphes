@@ -78,7 +78,7 @@ private:
   int fEventCounter;
 
   int fParticleCounter, fProcessID;
-  double fWeight, fScalePDF, fAlphaQCD, fAlphaQED;
+  double fCrossSection, fWeight, fScalePDF, fAlphaQCD, fAlphaQED;
 
   int fPID, fStatus, fM1, fM2, fC1, fC2;
   double fPx, fPy, fPz, fE, fMass;

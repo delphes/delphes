@@ -74,6 +74,7 @@ public:
   Int_t ProcessID; // subprocess code for the event | hepup.IDPRUP
 
   Float_t Weight; // weight for the event | hepup.XWGTUP
+  Float_t CrossSection; // cross-section (read from init, implemented only for Wizard evgen)
   Float_t ScalePDF; // scale in GeV used in the calculation of the PDFs in the event | hepup.SCALUP
   Float_t AlphaQED; // value of the QED coupling used in the event | hepup.AQEDUP
   Float_t AlphaQCD; // value of the QCD coupling used in the event | hepup.AQCDUP

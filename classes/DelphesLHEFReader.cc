@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include <stdio.h>
 
@@ -53,7 +54,8 @@ static const int kBufferSize = 16384;
 
 DelphesLHEFReader::DelphesLHEFReader() :
   fInputFile(0), fBuffer(0), fPDG(0),
-  fEventReady(kFALSE), fEventCounter(-1), fParticleCounter(-1)
+  fEventReady(kFALSE), fEventCounter(-1), fParticleCounter(-1),   fCrossSection(1)
+
 {
   fBuffer = new char[kBufferSize];
 
@@ -104,11 +106,30 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
   if(!fgets(fBuffer, kBufferSize, fInputFile)) return kFALSE;
 
+  // read cross section string from LHE file header (meant to work on Wizard output only)
+  if(strstr(fBuffer, "<xsecinfo ") && fEventCounter < 0)
+  {
+    DelphesStream bufferStream(fBuffer);
+
+    string buf = fBuffer;    
+    string xsecstr="totxsec";
+    
+    if (buf.find(xsecstr) != string::npos)
+    {
+        buf = buf.substr(buf.find(xsecstr) + xsecstr.length()+1);
+        unsigned first = buf.find_first_of("\"")+1;
+        unsigned last = buf.find_last_of("\"");
+        xsecstr = buf.substr(first,last-first);
+        fCrossSection = stod(xsecstr);
+    }  
+  }
+  
   if(strstr(fBuffer, "<event>"))
   {
     Clear();
     fEventCounter = 1;
   }
+  
   else if(fEventCounter > 0)
   {
     DelphesStream bufferStream(fBuffer);
@@ -205,6 +226,8 @@ void DelphesLHEFReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventNu
 
   element->ProcessID = fProcessID;
   element->Weight = fWeight;
+  element->CrossSection = fCrossSection;
+
   element->ScalePDF = fScalePDF;
   element->AlphaQED = fAlphaQED;
   element->AlphaQCD = fAlphaQCD;
