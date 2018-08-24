@@ -30,7 +30,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
-#include <string>
 
 #include <stdio.h>
 
@@ -102,34 +101,15 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 {
   int rc, id;
   char *pch;
-  double weight;
+  double weight, xsec;
 
   if(!fgets(fBuffer, kBufferSize, fInputFile)) return kFALSE;
 
-  // read cross section string from LHE file header (meant to work on Wizard output only)
-  if(strstr(fBuffer, "<xsecinfo ") && fEventCounter < 0)
-  {
-    DelphesStream bufferStream(fBuffer);
-
-    string buf = fBuffer;    
-    string xsecstr="totxsec";
-    
-    if (buf.find(xsecstr) != string::npos)
-    {
-        buf = buf.substr(buf.find(xsecstr) + xsecstr.length()+1);
-        unsigned first = buf.find_first_of("\"")+1;
-        unsigned last = buf.find_last_of("\"");
-        xsecstr = buf.substr(first,last-first);
-        fCrossSection = stod(xsecstr);
-    }  
-  }
-  
   if(strstr(fBuffer, "<event>"))
   {
     Clear();
     fEventCounter = 1;
   }
-  
   else if(fEventCounter > 0)
   {
     DelphesStream bufferStream(fBuffer);
@@ -205,6 +185,33 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
     }
 
     fWeightList.push_back(make_pair(id, weight));
+  }
+  else if(strstr(fBuffer, "<xsecinfo"))
+  {
+    pch = strstr(fBuffer, "totxsec");
+    if(!pch)
+    {
+      cerr << "** ERROR: " << "invalid cross section format" << endl;
+      return kFALSE;
+    }
+
+    pch = strpbrk(pch + 1, "\"'");
+    if(!pch)
+    {
+      cerr << "** ERROR: " << "invalid cross section format" << endl;
+      return kFALSE;
+    }
+
+    DelphesStream xsecStream(pch + 1);
+    rc = xsecStream.ReadDbl(xsec);
+
+    if(!rc)
+    {
+      cerr << "** ERROR: " << "invalid cross section format" << endl;
+      return kFALSE;
+    }
+
+    fCrossSection = xsec;
   }
   else if(strstr(fBuffer, "</event>"))
   {
