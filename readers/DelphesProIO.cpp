@@ -56,8 +56,9 @@ namespace model=proio::model::mc;
 using namespace std;
 
 //---------------------------------------------------------------------------
-
-void ConvertInput(proio::Event *event, 
+// This method dynamically checks the message type (varint or not) depending on
+// non-zero value of units momentumUnit and positionUnit.
+void ConvertInput(proio::Event *event, double momentumUnit, double positionUnit, 
   ExRootTreeBranch *branch, DelphesFactory *factory,
   TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray,
   TObjArray *partonOutputArray, TStopwatch *readStopWatch, TStopwatch *procStopWatch)
@@ -75,10 +76,8 @@ void ConvertInput(proio::Event *event,
 
   pdg = TDatabasePDG::Instance();
 
-
   // event information
   element = static_cast<HepMCEvent *>(branch->NewEntry());
-
 
  int nID=0;
  double weight=0;
@@ -98,10 +97,7 @@ void ConvertInput(proio::Event *event,
 
 /*
   // Pythia8 specific
-  element->Number = mutableEvent->number();
-  element->ProcessID = mutableEvent->process_id();
   element->MPI = mutableEvent->mpi();
-  element->Weight = mutableEvent->weight();
   element->Scale = mutableEvent->scale();
   element->AlphaQED = mutableEvent->alpha_qed();
   element->AlphaQCD = mutableEvent->alpha_qcd();
@@ -116,6 +112,61 @@ void ConvertInput(proio::Event *event,
 
   element->ReadTime = readStopWatch->RealTime();
   element->ProcTime = procStopWatch->RealTime();
+
+
+
+ if ( momentumUnit >0 && positionUnit>0) {
+
+
+  auto entries = event->TaggedEntries("VarintPackedParticles");
+
+  for (uint64_t entryID : entries) {
+
+    auto mutableParticles = dynamic_cast<model::VarintPackedParticles *>(event->GetEntry(entryID));
+
+    for(int i = 0; i < mutableParticles->pdg_size(); ++i)
+   {
+    pid = mutableParticles->pdg(i);
+    status = mutableParticles->status(i);
+    px = mutableParticles->px(i)/momentumUnit;
+    py = mutableParticles->py(i)/momentumUnit;
+    pz = mutableParticles->pz(i)/momentumUnit;
+    mass = mutableParticles->mass(i)/momentumUnit;
+    x = mutableParticles->x(i)/positionUnit;
+    y = mutableParticles->y(i)/positionUnit;
+    z = mutableParticles->z(i)/positionUnit;
+    t = mutableParticles->t(i)/positionUnit;
+    
+    candidate = factory->NewCandidate();
+    candidate->PID = pid;
+    pdgCode = TMath::Abs(candidate->PID);
+    candidate->Status = status;
+    candidate->M1 = mutableParticles->parent1(i);
+    candidate->M2 = mutableParticles->parent2(i);
+    candidate->D1 = mutableParticles->child1(i);
+    candidate->D2 = mutableParticles->child2(i);
+    pdgParticle = pdg->GetParticle(pid);
+    candidate->Charge = mutableParticles->charge(i)/3.0;
+    //candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Mass = mass;
+    candidate->Momentum.SetXYZM(px, py, pz, mass);
+    candidate->Position.SetXYZT(x, y, z, t);
+    allParticleOutputArray->Add(candidate);
+    if(!pdgParticle) continue;
+
+    if(status == 1)
+    {
+      stableParticleOutputArray->Add(candidate);
+    }
+    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    {
+      partonOutputArray->Add(candidate);
+    }
+  }
+
+  }
+
+ } else {
 
 
  auto entries = event->TaggedEntries("Particle");
@@ -197,6 +248,8 @@ void ConvertInput(proio::Event *event,
 
   }
 
+
+  } // end particle type 
 
 }
 
@@ -298,6 +351,12 @@ int main(int argc, char *argv[])
 
 
     auto event = new proio::Event();
+
+
+   double varint_energy=0;
+   double varint_length=0;
+
+
     auto max_n_events = std::numeric_limits<uint64_t>::max();
     auto nn = inputFile->Skip(max_n_events);
     cout << "** INFO: " << nn-1 << " events found in ProIO file" << endl;
@@ -319,11 +378,25 @@ int main(int argc, char *argv[])
         inputFile->Next(event); 
         if(event == 0) continue;
 
+       // get metadata
+       if (eventCounter == 0) {
+       auto metadata = event->Metadata();
+       std::cout << "** INFO: ProIO file metadata:" << std::endl;
+       for (auto element : metadata) { 
+        string key=(string)element.first;
+        string value=(string)(*element.second);
+     	std::cout << "** INFO:   " << key << " = " << value << std::endl;
+        if (key=="info:varint_energy") varint_energy=std::stod(value);
+        if (key=="info:varint_length") varint_length=std::stod(value);
+        }
+       }
+
+
         readStopWatch.Stop();
 
         procStopWatch.Start();
 
-        ConvertInput(event, 
+        ConvertInput(event, varint_energy, varint_length, 
           branchEvent, factory,
           allParticleOutputArray, stableParticleOutputArray,
           partonOutputArray, &readStopWatch, &procStopWatch);
