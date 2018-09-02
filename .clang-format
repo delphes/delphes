@@ -5,9 +5,9 @@ ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2
 ColumnLimit: 0
 ReflowComments: false
-AlignTrailingComments: false
-AlignAfterOpenBracket: false
 AlignOperands: false
+AlignTrailingComments: false
+AlignAfterOpenBracket: DontAlign
 BreakConstructorInitializers: AfterColon
 SpaceBeforeParens: Never
 BreakBeforeBinaryOperators: NonAssignment
@@ -27,3 +27,4 @@ BraceWrapping:
   IndentBraces: false
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
