@@ -124,6 +124,9 @@ void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
 
     candidate->Status = status;
 
+    candidate->IsPU=0;
+    if (mutableParticles->barcode(i)>0) candidate->IsPU=1; // pileup particle
+
     candidate->M1 = mutableParticles->mother1(i);
     candidate->M2 = mutableParticles->mother2(i);
 
@@ -230,6 +233,10 @@ int main(int argc, char *argv[])
     {
       cout << "** Reading " << argv[i] << endl;
 
+      // use 64 bit 
+      //inputFile = new ProMCBook(argv[i], "r", true);
+
+      //use 32 bit zip (faster but limitted to 64k events)
       inputFile = new ProMCBook(argv[i], "r");
 
       ProMCHeader header = inputFile->getHeader();
