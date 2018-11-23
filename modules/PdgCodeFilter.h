@@ -54,7 +54,7 @@ private:
   Int_t fStatus; //!
   Bool_t fRequireCharge; //!
   Int_t fCharge; //!
-
+  Bool_t fRequireNotPileup; //!
 
   std::vector<Int_t> fPdgCodes;
 

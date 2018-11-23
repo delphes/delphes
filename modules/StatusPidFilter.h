@@ -50,6 +50,8 @@ private:
 
   Double_t fPTMin; //!
 
+  Bool_t fRequireNotPileup; //!
+
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

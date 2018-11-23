@@ -75,6 +75,9 @@ void PdgCodeFilter::Init()
 
   fInvert = GetBool("Invert", false);
 
+  // no pileup 
+  fRequireNotPileup = GetBool("RequireNotPileup", false);
+
   fRequireStatus = GetBool("RequireStatus", false);
   fStatus = GetInt("Status", 1);
 
@@ -126,6 +129,7 @@ void PdgCodeFilter::Process()
     if(pt < fPTMin) continue;
     if(fRequireStatus && (candidate->Status != fStatus)) continue;
     if(fRequireCharge && (candidate->Charge != fCharge)) continue;
+    if(fRequireNotPileup && (candidate->IsPU   >0     )) continue;
 
     pass = kTRUE;
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;

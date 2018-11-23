@@ -152,8 +152,10 @@ StatusPidFilter::~StatusPidFilter()
 void StatusPidFilter::Init()
 {
   // PT threshold
-
   fPTMin = GetDouble("PTMin", 0.5);
+
+  // keep or remove pileup particles
+  fRequireNotPileup = GetBool("RequireNotPileup", false);
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
@@ -225,6 +227,9 @@ void StatusPidFilter::Process()
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
     if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter || is_W_daughter)) ) continue;
+
+    // not pileup particles
+    if(fRequireNotPileup && (candidate->IsPU >0)) continue;
 
     fOutputArray->Add(candidate);
   }
