@@ -29,6 +29,7 @@ void Example1(const char *inputFile)
   // Get pointers to branches used in this analysis
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
   TClonesArray *branchElectron = treeReader->UseBranch("Electron");
+  TClonesArray *branchEvent = treeReader->UseBranch("Event");
 
   // Book histograms
   TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 100, 0.0, 100.0);
@@ -39,6 +40,10 @@ void Example1(const char *inputFile)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
+    
+    //HepMCEvent *event = (HepMCEvent*) branchEvent -> At(0);
+    //LHEFEvent *event = (LHEFEvent*) branchEvent -> At(0);
+    //Float_t weight = event->Weight;
 
     // If event contains at least 1 jet
     if(branchJet->GetEntries() > 0)
@@ -47,7 +52,7 @@ void Example1(const char *inputFile)
       Jet *jet = (Jet*) branchJet->At(0);
 
       // Plot jet transverse momentum
-      histJetPT->Fill(jet->PT);
+      histJetPT->Fill(jet->PT, weight);
 
       // Print jet transverse momentum
       cout << "Jet pt: "<<jet->PT << endl;
@@ -63,7 +68,7 @@ void Example1(const char *inputFile)
       elec2 = (Electron *) branchElectron->At(1);
 
       // Plot their invariant mass
-      histMass->Fill(((elec1->P4()) + (elec2->P4())).M());
+      histMass->Fill(((elec1->P4()) + (elec2->P4())).M(), weight);
     }
   }
 
