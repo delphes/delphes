@@ -40,6 +40,7 @@ void Example1(const char *inputFile)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
+
     
     //HepMCEvent *event = (HepMCEvent*) branchEvent -> At(0);
     //LHEFEvent *event = (LHEFEvent*) branchEvent -> At(0);
@@ -52,7 +53,7 @@ void Example1(const char *inputFile)
       Jet *jet = (Jet*) branchJet->At(0);
 
       // Plot jet transverse momentum
-      histJetPT->Fill(jet->PT, weight);
+      histJetPT->Fill(jet->PT);
 
       // Print jet transverse momentum
       cout << "Jet pt: "<<jet->PT << endl;
@@ -68,7 +69,7 @@ void Example1(const char *inputFile)
       elec2 = (Electron *) branchElectron->At(1);
 
       // Plot their invariant mass
-      histMass->Fill(((elec1->P4()) + (elec2->P4())).M(), weight);
+      histMass->Fill(((elec1->P4()) + (elec2->P4())).M());
     }
   }
 
