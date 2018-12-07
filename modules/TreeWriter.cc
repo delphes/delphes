@@ -527,8 +527,13 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->T = position.T()*1.0E-3/c_light;
 
-    // Isolation variables
+    // displacement
+    entry->D0            = candidate->D0;
+    entry->ErrorD0       = candidate->ErrorD0;
+    entry->DZ            = candidate->DZ;
+    entry->ErrorDZ       = candidate->ErrorDZ;
 
+    // Isolation variables
     entry->IsolationVar = candidate->IsolationVar;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr ;
     entry->SumPtCharged = candidate->SumPtCharged ;
@@ -581,6 +586,13 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->PT = pt;
 
     entry->T = position.T()*1.0E-3/c_light;
+
+
+    // displacement
+    entry->D0            = candidate->D0;
+    entry->ErrorD0       = candidate->ErrorD0;
+    entry->DZ            = candidate->DZ;
+    entry->ErrorDZ       = candidate->ErrorDZ;
 
     // Isolation variables
 

@@ -1,4 +1,4 @@
-set MaxEvents 1
+set MaxEvents 100
 
 #######################################
 # Order of execution of various modules
@@ -45,7 +45,7 @@ module TrackEfficiency ElectronTrackingEfficiency {
 
   # tracking efficiency formula (efficiency formula as a function of  pt, eta,  phi,  energy, d0 (mm), dz (mm), ctgTheta)
   set EfficiencyFormula {
-                          (d0 < 1e-3) *                                      (pt <= 0.1)   * (0.00) +
+                          (d0 < 1e-3) *                                                     (pt <= 0.1)   * (0.00) +
                           (d0 < 1e-3) *                (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)      * (0.73) +
                           (d0 < 1e-3) *                (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e2)    * (0.95) +
                           (d0 < 1e-3) *                 (abs(eta) <= 1.5) * (pt > 1.0e2)                  * (0.99) +

@@ -314,6 +314,11 @@ public:
   Float_t SumPtChargedPU; // isolation variable
   Float_t SumPt; // isolation variable
 
+  Float_t D0; // track transverse impact parameter
+  Float_t DZ; // track longitudinal impact parameter
+  Float_t ErrorD0; // track transverse impact parameter error
+  Float_t ErrorDZ; // track longitudinal impact parameter error
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -344,6 +349,11 @@ public:
   Float_t SumPtNeutral; // isolation variable
   Float_t SumPtChargedPU; // isolation variable
   Float_t SumPt; // isolation variable
+
+  Float_t D0; // track transverse impact parameter
+  Float_t DZ; // track longitudinal impact parameter
+  Float_t ErrorD0; // track transverse impact parameter error
+  Float_t ErrorDZ; // track longitudinal impact parameter error
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
