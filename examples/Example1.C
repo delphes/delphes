@@ -52,7 +52,8 @@ void Example1(const char *inputFile)
       Jet *jet = (Jet*) branchJet->At(0);
 
       // Plot jet transverse momentum
-      histJetPT->Fill(jet->PT, weight);
+      //histJetPT->Fill(jet->PT, weight);
+      histJetPT->Fill(jet->PT);
 
       // Print jet transverse momentum
       cout << "Jet pt: "<<jet->PT << endl;
@@ -68,7 +69,8 @@ void Example1(const char *inputFile)
       elec2 = (Electron *) branchElectron->At(1);
 
       // Plot their invariant mass
-      histMass->Fill(((elec1->P4()) + (elec2->P4())).M(), weight);
+      //histMass->Fill(((elec1->P4()) + (elec2->P4())).M(), weight);
+      histMass->Fill(((elec1->P4()) + (elec2->P4())).M());
     }
   }
 
