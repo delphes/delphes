@@ -40,6 +40,7 @@
 #include "modules/SimpleCalorimeter.h"
 #include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
+#include "modules/DualReadoutCalorimeter.h"
 #include "modules/OldCalorimeter.h"
 #include "modules/Isolation.h"
 #include "modules/EnergyScale.h"
@@ -93,6 +94,7 @@
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
+#pragma link C++ class DualReadoutCalorimeter+;
 #pragma link C++ class OldCalorimeter+;
 #pragma link C++ class Isolation+;
 #pragma link C++ class EnergyScale+;
