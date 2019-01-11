@@ -24,7 +24,7 @@
  *  Fills DualReadoutCalorimeter towers, performs DualReadoutCalorimeter resolution smearing,
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi - CERN
  *
  */
 
@@ -58,6 +58,7 @@ private:
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fECalTowerEnergy, fHCalTowerEnergy;
   Double_t fECalTrackEnergy, fHCalTrackEnergy;
+  Double_t fTrackEnergy;
 
   Double_t fTimingEnergyMin;
   Bool_t fElectronsFromTrack;
@@ -74,6 +75,7 @@ private:
 
   Double_t fECalTrackSigma;
   Double_t fHCalTrackSigma;
+  Double_t fTrackSigma;
 
   Bool_t fSmearTowerCenter;
 
@@ -112,6 +114,9 @@ private:
 
   TObjArray *fHCalTowerTrackArray; //!
   TIterator *fItHCalTowerTrackArray; //!
+
+  TObjArray *fTowerTrackArray; //!
+  TIterator *fItTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

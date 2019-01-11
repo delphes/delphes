@@ -210,7 +210,7 @@ module DualReadoutCalorimeter Calorimeter {
 
   set ECalEnergyMin 0.5
   set HCalEnergyMin 1.0
-  set EnergyMin 0.0
+  set EnergyMin 0.5
 
   set ECalEnergySignificanceMin 1.0
   set HCalEnergySignificanceMin 1.0
@@ -278,7 +278,7 @@ module DualReadoutCalorimeter Calorimeter {
                              (abs(eta) > 2.5 && abs(eta) <= 5.0) * sqrt(energy^2*0.107^2 + energy*2.08^2)}
 
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-  set HCalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.050^2 + energy*1.50^2) +
+  set HCalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.050^2 + energy*0.30^2) +
                              (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.130^2 + energy*2.70^2)}
 }
 
