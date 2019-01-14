@@ -1,6 +1,6 @@
 include_directories(
   ${CMAKE_SOURCE_DIR}
-  ${DelphesExternals_INCLUDE_DIR} 
+  ${DelphesExternals_INCLUDE_DIR}
 )
 
 file(GLOB executables RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
@@ -16,3 +16,7 @@ endforeach()
 
 # take all other relevant files and put them into examples/
 install(FILES ${macros} DESTINATION examples)
+install(DIRECTORY ExternalFastJet DESTINATION examples)
+if(PYTHIA8_FOUND)
+  install(DIRECTORY Pythia8 DESTINATION examples)
+endif()
