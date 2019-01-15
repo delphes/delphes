@@ -30,4 +30,9 @@ if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
       ${PROJECT_BINARY_DIR}/modules/libModulesDict_rdict.pcm
       ${PROJECT_BINARY_DIR}/modules/libFastJetDict_rdict.pcm
       DESTINATION lib)
+  if(PYTHIA8_FOUND)
+    install(FILES
+      ${PROJECT_BINARY_DIR}/modules/libPythia8Dict_rdict.pcm
+    DESTINATION lib)
+  endif()
 endif()
