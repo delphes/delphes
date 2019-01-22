@@ -41,8 +41,8 @@ namespace fastjet {
   namespace contrib {
     class NjettinessPlugin;
     class ValenciaPlugin;
-    class AxesDefinition; 
-    class MeasureDefinition;    
+    class AxesDefinition;
+    class MeasureDefinition;
   }
 }
 
@@ -62,8 +62,8 @@ private:
   void *fPlugin; //!
   void *fRecomb; //!
 
-  fastjet::contrib::AxesDefinition *fAxesDef; 
-  fastjet::contrib::MeasureDefinition *fMeasureDef;    
+  fastjet::contrib::AxesDefinition *fAxesDef;
+  fastjet::contrib::MeasureDefinition *fMeasureDef;
 
   fastjet::contrib::NjettinessPlugin *fNjettinessPlugin; //!
   fastjet::contrib::ValenciaPlugin *fValenciaPlugin; //!
@@ -89,7 +89,7 @@ private:
 
   //-- Valencia Linear Collider algorithm
   Double_t fGamma;
-  
+
   //-- N (sub)jettiness parameters --
 
   Bool_t fComputeNsubjettiness;
@@ -99,11 +99,11 @@ private:
   Int_t fN ;
 
   //-- Trimming parameters --
-  
+
   Bool_t fComputeTrimming;
   Double_t fRTrim;
   Double_t fPtFracTrim;
-  
+
   //-- Pruning parameters --
 
   Bool_t fComputePruning;
