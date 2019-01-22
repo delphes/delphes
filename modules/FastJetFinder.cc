@@ -289,6 +289,7 @@ void FastJetFinder::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
+  fConstituentsOutputArray = ExportArray(GetString("ConstituentsOutputArray", "constituents"));
 }
 
 //------------------------------------------------------------------------------
@@ -445,6 +446,7 @@ void FastJetFinder::Process()
 
       charge += constituent->Charge;
 
+      fConstituentsOutputArray->Add(constituent);
       candidate->AddCandidate(constituent);
     }
 

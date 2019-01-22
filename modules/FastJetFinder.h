@@ -151,6 +151,7 @@ private:
 
   TObjArray *fOutputArray; //!
   TObjArray *fRhoOutputArray; //!
+  TObjArray *fConstituentsOutputArray; //!
 
   ClassDef(FastJetFinder, 1)
 };

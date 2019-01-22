@@ -66,6 +66,9 @@ UniqueObjectFinder::~UniqueObjectFinder()
 
 void UniqueObjectFinder::Init()
 {
+  // use GetUniqueID algorithm to find unique objects (faster than the default Overlaps method)
+  fUseUniqueID = GetBool("UseUniqueID", false);
+
   // import arrays with output from other modules
 
   ExRootConfParam param = GetParam("InputArray");
@@ -145,9 +148,19 @@ Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector< pair< TIterator 
     iterator.Reset();
     while((previousCandidate = static_cast<Candidate*>(iterator.Next())))
     {
-      if(candidate->Overlaps(previousCandidate))
+      if(fUseUniqueID)
       {
-        return kFALSE;
+        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID())
+        {
+          return kFALSE;
+        }
+      }
+      else
+      {
+        if(candidate->Overlaps(previousCandidate))
+        {
+          return kFALSE;
+        }
       }
     }
   }
