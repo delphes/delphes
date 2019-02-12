@@ -16,10 +16,9 @@
 class TClass;
 class TFolder;
 
-class ExRootTask : public TTask
+class ExRootTask: public TTask
 {
 public:
-
   ExRootTask();
   virtual ~ExRootTask();
 
@@ -40,7 +39,7 @@ public:
   ExRootTask *NewTask(TClass *cl, const char *name);
   ExRootTask *NewTask(const char *className, const char *taskName);
 
-  void Exec(Option_t* option);
+  void Exec(Option_t *option);
 
   int GetInt(const char *name, int defaultValue, int index = -1);
   long GetLong(const char *name, long defaultValue, int index = -1);
@@ -54,7 +53,6 @@ public:
   void SetConfReader(ExRootConfReader *conf) { fConfReader = conf; }
 
 protected:
-
   TFolder *GetFolder() const { return fFolder; }
   ExRootConfReader *GetConfReader() const { return fConfReader; }
 
@@ -62,7 +60,6 @@ protected:
   TObject *GetObject(const char *name, TClass *cl);
 
 private:
-
   TFolder *fFolder; //!
   ExRootConfReader *fConfReader; //!
 
@@ -70,4 +67,3 @@ private:
 };
 
 #endif /* ExRootTask */
-

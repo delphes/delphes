@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class IdentificationMap
  *
  *  Converts particles with some PDG code into another particle,
@@ -32,22 +31,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -78,12 +77,12 @@ void IdentificationMap::Init()
   size = param.GetSize();
 
   fEfficiencyMap.clear();
-  for(i = 0; i < size/3; ++i)
+  for(i = 0; i < size / 3; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i*3 + 2].GetString());
-    pdg = param[i*3].GetInt();
-    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i*3 + 1].GetInt(), formula)));
+    formula->Compile(param[i * 3 + 2].GetString());
+    pdg = param[i * 3].GetInt();
+    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i * 3 + 1].GetInt(), formula)));
   }
 
   // set default efficiency formula
@@ -128,14 +127,14 @@ void IdentificationMap::Process()
   Candidate *candidate;
   Double_t pt, eta, phi, e;
   TMisIDMap::iterator itEfficiencyMap;
-  pair <TMisIDMap::iterator, TMisIDMap::iterator> range;
+  pair<TMisIDMap::iterator, TMisIDMap::iterator> range;
   DelphesFormula *formula;
   Int_t pdgCodeIn, pdgCodeOut, charge;
 
   Double_t p, r, total;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -143,7 +142,7 @@ void IdentificationMap::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-   
+
     pdgCodeIn = candidate->PID;
     charge = candidate->Charge;
 
@@ -170,7 +169,7 @@ void IdentificationMap::Process()
       if(total <= r && r < total + p)
       {
         // change PID of particle
-        if(pdgCodeOut != 0) candidate->PID = charge*pdgCodeOut;
+        if(pdgCodeOut != 0) candidate->PID = charge * pdgCodeOut;
         fOutputArray->Add(candidate);
         break;
       }

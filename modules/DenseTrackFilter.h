@@ -40,7 +40,6 @@ class Candidate;
 class DenseTrackFilter: public DelphesModule
 {
 public:
-
   DenseTrackFilter();
   ~DenseTrackFilter();
 
@@ -49,8 +48,7 @@ public:
   void Finish();
 
 private:
-
-  typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
+  typedef std::map<Double_t, std::set<Double_t>> TBinMap; //!
 
   Candidate *fBestTrack;
 
@@ -60,10 +58,10 @@ private:
 
   TBinMap fBinMap; //!
 
-  std::vector < Double_t > fEtaBins;
-  std::vector < std::vector < Double_t >* > fPhiBins;
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
 
-  std::vector < Long64_t > fTowerHits;
+  std::vector<Long64_t> fTowerHits;
 
   TIterator *fItTrackInputArray; //!
 

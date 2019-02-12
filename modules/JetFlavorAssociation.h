@@ -27,8 +27,8 @@
  *
  */
 
-#include "classes/DelphesModule.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesModule.h"
 #include <map>
 
 class TObjArray;
@@ -41,7 +41,6 @@ class ParticleLHEFClassifier;
 class JetFlavorAssociation: public DelphesModule
 {
 public:
-
   JetFlavorAssociation();
   ~JetFlavorAssociation();
 
@@ -53,7 +52,6 @@ public:
   void GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
 
 private:
-
   Double_t fDeltaR;
 
   PartonClassifier *fPartonClassifier; //!

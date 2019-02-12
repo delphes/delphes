@@ -29,8 +29,8 @@
 
 #include "classes/DelphesModule.h"
 
-#include <vector>
 #include <utility>
+#include <vector>
 
 class TIterator;
 class TObjArray;
@@ -39,7 +39,6 @@ class Candidate;
 class UniqueObjectFinder: public DelphesModule
 {
 public:
-
   UniqueObjectFinder();
   ~UniqueObjectFinder();
 
@@ -48,12 +47,11 @@ public:
   void Finish();
 
 private:
-
   Bool_t fUseUniqueID;
 
-  Bool_t Unique(Candidate *candidate, std::vector< std::pair< TIterator *, TObjArray * > >::iterator itInputMap);
+  Bool_t Unique(Candidate *candidate, std::vector<std::pair<TIterator *, TObjArray *>>::iterator itInputMap);
 
-  std::vector< std::pair< TIterator *, TObjArray * > > fInputMap; //!
+  std::vector<std::pair<TIterator *, TObjArray *>> fInputMap; //!
 
   ClassDef(UniqueObjectFinder, 1)
 };

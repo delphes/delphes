@@ -25,7 +25,6 @@
 class DelphesLongFormula: public TFormula
 {
 public:
-
   DelphesLongFormula();
   DelphesLongFormula(const char *name, const char *expression);
 
@@ -33,19 +32,11 @@ public:
 
   Int_t Compile(const char *expression);
 
-  Double_t Eval(Double_t pt, 
-                Double_t eta = 0, 
-                Double_t phi = 0, 
-                Double_t energy = 0,
-                Double_t d0 = 0,
-                Double_t dz = 0,
-                Double_t ctgTheta = 0
-                );
+  Double_t Eval(Double_t pt, Double_t eta = 0, Double_t phi = 0,
+    Double_t energy = 0, Double_t d0 = 0, Double_t dz = 0, Double_t ctgTheta = 0);
 
-  typedef std::map<Int_t,TString> TVarNameMap; //!
+  typedef std::map<Int_t, TString> TVarNameMap; //!
   typedef std::map<TString, Double_t> TVarValMap; //!
-
-  
 };
 
 #endif /* DelphesLongFormula_h */

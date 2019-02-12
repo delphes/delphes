@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class AngularSmearing
  *
  *  Performs transverse angular resolution smearing.
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -76,7 +75,6 @@ void AngularSmearing::Init()
   fFormulaEta->Compile(GetString("EtaResolutionFormula", "0.0"));
   fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
 
-
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
@@ -102,7 +100,7 @@ void AngularSmearing::Process()
   Double_t pt, eta, phi, e;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -115,16 +113,16 @@ void AngularSmearing::Process()
 
     eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e));
     phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e));
-    
+
     if(pt <= 0.0) continue;
 
     mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
+    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt * TMath::CosH(eta));
     candidate->AddCandidate(mother);
-        
+
     fOutputArray->Add(candidate);
   }
 }

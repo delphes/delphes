@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class JetPileUpSubtractor
  *
  *  Subtract pile-up contribution from jets using the fastjet area method
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -55,14 +54,12 @@ using namespace std;
 JetPileUpSubtractor::JetPileUpSubtractor() :
   fItJetInputArray(0), fItRhoInputArray(0)
 {
-
 }
 
 //------------------------------------------------------------------------------
 
 JetPileUpSubtractor::~JetPileUpSubtractor()
 {
-
 }
 
 //------------------------------------------------------------------------------
@@ -82,7 +79,6 @@ void JetPileUpSubtractor::Init()
   // create output array(s)
 
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +100,7 @@ void JetPileUpSubtractor::Process()
 
   // loop over all input candidates
   fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItJetInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItJetInputArray->Next())))
   {
     momentum = candidate->Momentum;
     area = candidate->Area;
@@ -115,7 +111,7 @@ void JetPileUpSubtractor::Process()
     if(fRhoInputArray)
     {
       fItRhoInputArray->Reset();
-      while((object = static_cast<Candidate*>(fItRhoInputArray->Next())))
+      while((object = static_cast<Candidate *>(fItRhoInputArray->Next())))
       {
         if(eta >= object->Edges[0] && eta < object->Edges[1])
         {
@@ -131,7 +127,7 @@ void JetPileUpSubtractor::Process()
 
     if(momentum.Pt() <= fJetPTMin) continue;
 
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate = static_cast<Candidate *>(candidate->Clone());
     candidate->Momentum = momentum;
 
     fOutputArray->Add(candidate);

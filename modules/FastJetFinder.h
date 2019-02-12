@@ -34,22 +34,23 @@
 class TObjArray;
 class TIterator;
 
-namespace fastjet {
-  class JetDefinition;
-  class AreaDefinition;
-  class JetMedianBackgroundEstimator;
-  namespace contrib {
-    class NjettinessPlugin;
-    class ValenciaPlugin;
-    class AxesDefinition;
-    class MeasureDefinition;
-  }
-}
+namespace fastjet
+{
+class JetDefinition;
+class AreaDefinition;
+class JetMedianBackgroundEstimator;
+namespace contrib
+{
+class NjettinessPlugin;
+class ValenciaPlugin;
+class AxesDefinition;
+class MeasureDefinition;
+} // namespace contrib
+} // namespace fastjet
 
 class FastJetFinder: public DelphesModule
 {
 public:
-
   FastJetFinder();
   ~FastJetFinder();
 
@@ -58,7 +59,6 @@ public:
   void Finish();
 
 private:
-
   void *fPlugin; //!
   void *fRecomb; //!
 
@@ -96,7 +96,7 @@ private:
   Double_t fBeta;
   Int_t fAxisMode;
   Double_t fRcutOff;
-  Int_t fN ;
+  Int_t fN;
 
   //-- Trimming parameters --
 
@@ -122,7 +122,7 @@ private:
 
   fastjet::AreaDefinition *fAreaDefinition;
   Int_t fAreaAlgorithm;
-  Bool_t  fComputeRho;
+  Bool_t fComputeRho;
 
   // -- ghost based areas --
   Double_t fGhostEtaMax;
@@ -142,7 +142,7 @@ private:
     Double_t etaMin, etaMax;
   };
 
-  std::vector< TEstimatorStruct > fEstimators; //!
+  std::vector<TEstimatorStruct> fEstimators; //!
 #endif
 
   TIterator *fItInputArray; //!

@@ -36,7 +36,6 @@ class TObjArray;
 class JetPileUpSubtractor: public DelphesModule
 {
 public:
-
   JetPileUpSubtractor();
   ~JetPileUpSubtractor();
 
@@ -45,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fJetPTMin;
 
   TIterator *fItJetInputArray; //!

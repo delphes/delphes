@@ -28,27 +28,27 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesTF2.h"
 #include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesTF2.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
 #include "Pythia.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -75,7 +75,7 @@ void PileUpMergerPythia8::Init()
 
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
-  fMeanPileUp  = GetDouble("MeanPileUp", 10);
+  fMeanPileUp = GetDouble("MeanPileUp", 10);
 
   fZVertexSpread = GetDouble("ZVertexSpread", 0.15);
   fTVertexSpread = GetDouble("TVertexSpread", 1.5E-09);
@@ -132,12 +132,12 @@ void PileUpMergerPythia8::Process()
 
   fFunction->GetRandom2(dz, dt);
 
-  dt *= c_light*1.0E3; // necessary in order to make t in mm/c
+  dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
   dz *= 1.0E3; // necessary in order to make z in mm
   vx = 0.0;
   vy = 0.0;
   numberOfParticles = fInputArray->GetEntriesFast();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     vx += candidate->Position.X();
     vy += candidate->Position.Y();
@@ -164,26 +164,27 @@ void PileUpMergerPythia8::Process()
 
   switch(fPileUpDistribution)
   {
-    case 0:
-      numberOfEvents = gRandom->Poisson(fMeanPileUp);
-      break;
-    case 1:
-      numberOfEvents = gRandom->Integer(2*fMeanPileUp + 1);
-      break;
-    default:
-      numberOfEvents = gRandom->Poisson(fMeanPileUp);
-      break;
+  case 0:
+    numberOfEvents = gRandom->Poisson(fMeanPileUp);
+    break;
+  case 1:
+    numberOfEvents = gRandom->Integer(2 * fMeanPileUp + 1);
+    break;
+  default:
+    numberOfEvents = gRandom->Poisson(fMeanPileUp);
+    break;
   }
 
   for(event = 0; event < numberOfEvents; ++event)
   {
-    while(!fPythia->next());
+    while(!fPythia->next())
+      ;
 
-   // --- Pile-up vertex smearing
+    // --- Pile-up vertex smearing
 
     fFunction->GetRandom2(dz, dt);
 
-    dt *= c_light*1.0E3; // necessary in order to make t in mm/c
+    dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
     dz *= 1.0E3; // necessary in order to make z in mm
 
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
@@ -200,8 +201,14 @@ void PileUpMergerPythia8::Process()
       if(status != 1 || !particle.isVisible() || particle.pT() <= fPTMin) continue;
 
       pid = particle.id();
-      px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.e();
-      x = particle.xProd(); y = particle.yProd(); z = particle.zProd(); t = particle.tProd();
+      px = particle.px();
+      py = particle.py();
+      pz = particle.pz();
+      e = particle.e();
+      x = particle.xProd();
+      y = particle.yProd();
+      z = particle.zProd();
+      t = particle.tProd();
 
       candidate = factory->NewCandidate();
 
@@ -210,7 +217,7 @@ void PileUpMergerPythia8::Process()
       candidate->Status = 1;
 
       pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
       candidate->IsPU = 1;

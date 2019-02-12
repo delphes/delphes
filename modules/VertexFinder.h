@@ -9,12 +9,11 @@
  *
  */
 
-
 #include "classes/DelphesModule.h"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 class TObjArray;
 class TIterator;
@@ -22,7 +21,6 @@ class TIterator;
 class VertexFinder: public DelphesModule
 {
 public:
-
   VertexFinder();
   ~VertexFinder();
 
@@ -31,12 +29,11 @@ public:
   void Finish();
 
 private:
-
-  void createSeeds ();
-  void growCluster (const UInt_t);
-  Double_t weight (const UInt_t);
-  void addTrackToCluster (const UInt_t, const UInt_t);
-  void removeTrackFromCluster (const UInt_t, const UInt_t);
+  void createSeeds();
+  void growCluster(const UInt_t);
+  Double_t weight(const UInt_t);
+  void addTrackToCluster(const UInt_t, const UInt_t);
+  void removeTrackFromCluster(const UInt_t, const UInt_t);
 
   Double_t fSigma;
   Double_t fMinPT;
@@ -51,15 +48,15 @@ private:
   TObjArray *fOutputArray;
   TObjArray *fVertexOutputArray;
 
-  std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
-  std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;
-  std::map<UInt_t, std::map<std::string, Bool_t> > trackIDToBool;
+  std::map<UInt_t, std::map<std::string, Double_t>> trackIDToDouble;
+  std::map<UInt_t, std::map<std::string, Int_t>> trackIDToInt;
+  std::map<UInt_t, std::map<std::string, Bool_t>> trackIDToBool;
 
-  std::map<UInt_t, std::map<std::string, Double_t> > clusterIDToDouble;
-  std::map<UInt_t, std::map<std::string, Int_t> > clusterIDToInt;
-  std::map<UInt_t, std::map<std::string, Bool_t> > clusterIDToBool;
-  std::vector<std::pair<UInt_t, Double_t> > trackPT;
-  std::vector<std::pair<UInt_t, Double_t> > clusterSumPT2;
+  std::map<UInt_t, std::map<std::string, Double_t>> clusterIDToDouble;
+  std::map<UInt_t, std::map<std::string, Int_t>> clusterIDToInt;
+  std::map<UInt_t, std::map<std::string, Bool_t>> clusterIDToBool;
+  std::vector<std::pair<UInt_t, Double_t>> trackPT;
+  std::vector<std::pair<UInt_t, Double_t>> clusterSumPT2;
 
   ClassDef(VertexFinder, 1)
 };

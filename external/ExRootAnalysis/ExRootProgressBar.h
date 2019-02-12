@@ -6,7 +6,6 @@
 class ExRootProgressBar
 {
 public:
-
   ExRootProgressBar(Long64_t entries, Int_t width = 64);
   ~ExRootProgressBar();
 
@@ -14,7 +13,6 @@ public:
   void Finish();
 
 private:
-
   Long64_t fEntries, fEventCounter;
   Int_t fWidth;
 
@@ -22,8 +20,6 @@ private:
   Int_t fHashes;
 
   char *fBar; //!
-
 };
 
 #endif /* ExRootProgressBar */
-

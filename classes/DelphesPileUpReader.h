@@ -27,15 +27,14 @@
  *
  */
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 class DelphesXDRReader;
 
 class DelphesPileUpReader
 {
 public:
-
   DelphesPileUpReader(const char *fileName);
 
   ~DelphesPileUpReader();
@@ -49,7 +48,6 @@ public:
   int64_t GetEntries() const { return fEntries; }
 
 private:
-
   int64_t fEntries;
 
   int32_t fEntrySize;

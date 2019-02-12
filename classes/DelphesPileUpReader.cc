@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesPileUpReader
  *
  *  Reads pile-up binary file
@@ -27,12 +26,12 @@
 
 #include "classes/DelphesPileUpReader.h"
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "classes/DelphesXDRReader.h"
 
@@ -51,8 +50,8 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
 {
   stringstream message;
 
-  fIndex = new uint8_t[kIndexSize*8];
-  fBuffer = new uint8_t[kBufferSize*kRecordSize*4];
+  fIndex = new uint8_t[kIndexSize * 8];
+  fBuffer = new uint8_t[kBufferSize * kRecordSize * 4];
   fInputReader = new DelphesXDRReader;
   fIndexReader = new DelphesXDRReader;
   fBufferReader = new DelphesXDRReader;
@@ -81,8 +80,8 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   }
 
   // read index of events
-  fseeko(fPileUpFile, -8 - 8*fEntries, SEEK_END);
-  fInputReader->ReadRaw(fIndex, fEntries*8);
+  fseeko(fPileUpFile, -8 - 8 * fEntries, SEEK_END);
+  fInputReader->ReadRaw(fIndex, fEntries * 8);
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +128,7 @@ bool DelphesPileUpReader::ReadEntry(int64_t entry)
   if(entry >= fEntries) return false;
 
   // read event position
-  fIndexReader->SetOffset(8*entry);
+  fIndexReader->SetOffset(8 * entry);
   fIndexReader->ReadValue(&offset, 8);
 
   // read event
@@ -141,7 +140,7 @@ bool DelphesPileUpReader::ReadEntry(int64_t entry)
     throw runtime_error("too many particles in pile-up event");
   }
 
-  fInputReader->ReadRaw(fBuffer, fEntrySize*kRecordSize*4);
+  fInputReader->ReadRaw(fBuffer, fEntrySize * kRecordSize * 4);
   fBufferReader->SetOffset(0);
   fCounter = 0;
 

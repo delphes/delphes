@@ -9,11 +9,11 @@
 
 #include "ExRootAnalysis/ExRootTreeReader.h"
 
-#include "TH2.h"
-#include "TStyle.h"
+#include "TBranchElement.h"
 #include "TCanvas.h"
 #include "TClonesArray.h"
-#include "TBranchElement.h"
+#include "TH2.h"
+#include "TStyle.h"
 
 #include <iostream>
 
@@ -50,7 +50,7 @@ Bool_t ExRootTreeReader::ReadEntry(Long64_t entry)
 
   if(fChain->IsA() == TChain::Class())
   {
-    TChain *chain = static_cast<TChain*>(fChain);
+    TChain *chain = static_cast<TChain *>(fChain);
     if(chain->GetTreeNumber() != fCurrentTree)
     {
       fCurrentTree = chain->GetTreeNumber();
@@ -93,7 +93,7 @@ TClonesArray *ExRootTreeReader::UseBranch(const char *branchName)
     {
       if(branch->IsA() == TBranchElement::Class())
       {
-        TBranchElement *element = static_cast<TBranchElement*>(branch);
+        TBranchElement *element = static_cast<TBranchElement *>(branch);
         const char *className = element->GetClonesName();
         Int_t size = element->GetMaximum();
         TClass *cl = gROOT->GetClass(className);
@@ -144,4 +144,3 @@ Bool_t ExRootTreeReader::Notify()
 }
 
 //------------------------------------------------------------------------------
-

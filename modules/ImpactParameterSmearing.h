@@ -36,7 +36,6 @@ class DelphesFormula;
 class ImpactParameterSmearing: public DelphesModule
 {
 public:
-
   ImpactParameterSmearing();
   ~ImpactParameterSmearing();
 
@@ -45,13 +44,12 @@ public:
   void Finish();
 
 private:
-
   DelphesFormula *fFormula; //!
 
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
-  
+
   TObjArray *fOutputArray; //!
 
   ClassDef(ImpactParameterSmearing, 1)

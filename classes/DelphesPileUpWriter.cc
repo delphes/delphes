@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesPileUpWriter
  *
  *  Writes pile-up binary file
@@ -27,12 +26,12 @@
 
 #include "classes/DelphesPileUpWriter.h"
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "classes/DelphesXDRWriter.h"
 
@@ -51,8 +50,8 @@ DelphesPileUpWriter::DelphesPileUpWriter(const char *fileName) :
 {
   stringstream message;
 
-  fIndex = new uint8_t[kIndexSize*8];
-  fBuffer = new uint8_t[kBufferSize*kRecordSize*4];
+  fIndex = new uint8_t[kIndexSize * 8];
+  fBuffer = new uint8_t[kBufferSize * kRecordSize * 4];
   fOutputWriter = new DelphesXDRWriter;
   fIndexWriter = new DelphesXDRWriter;
   fBufferWriter = new DelphesXDRWriter;
@@ -117,10 +116,10 @@ void DelphesPileUpWriter::WriteEntry()
   }
 
   fOutputWriter->WriteValue(&fEntrySize, 4);
-  fOutputWriter->WriteRaw(fBuffer, fEntrySize*kRecordSize*4);
+  fOutputWriter->WriteRaw(fBuffer, fEntrySize * kRecordSize * 4);
 
   fIndexWriter->WriteValue(&fOffset, 8);
-  fOffset += fEntrySize*kRecordSize*4 + 4;
+  fOffset += fEntrySize * kRecordSize * 4 + 4;
 
   fBufferWriter->SetOffset(0);
   fEntrySize = 0;
@@ -132,7 +131,7 @@ void DelphesPileUpWriter::WriteEntry()
 
 void DelphesPileUpWriter::WriteIndex()
 {
-  fOutputWriter->WriteRaw(fIndex, fEntries*8);
+  fOutputWriter->WriteRaw(fIndex, fEntries * 8);
   fOutputWriter->WriteValue(&fEntries, 8);
 }
 

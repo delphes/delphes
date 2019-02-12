@@ -24,7 +24,6 @@
 class DelphesTF2: public TF2
 {
 public:
-
   DelphesTF2();
 
   DelphesTF2(const char *name, const char *expression);

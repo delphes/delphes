@@ -36,7 +36,6 @@ class DelphesFormula;
 class AngularSmearing: public DelphesModule
 {
 public:
-
   AngularSmearing();
   ~AngularSmearing();
 
@@ -45,14 +44,13 @@ public:
   void Finish();
 
 private:
-
   DelphesFormula *fFormulaEta; //!
   DelphesFormula *fFormulaPhi; //!
 
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
-  
+
   TObjArray *fOutputArray; //!
 
   ClassDef(AngularSmearing, 1)

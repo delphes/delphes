@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesFactory
  *
  *  Class handling creation of Candidate,
@@ -50,16 +49,16 @@ DelphesFactory::~DelphesFactory()
 {
   if(fObjArrays) delete fObjArrays;
 
-  map< const TClass*, ExRootTreeBranch* >::iterator itBranches;
+  map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
   for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
   {
-    delete (itBranches->second);
+    delete(itBranches->second);
   }
 }
 
 //------------------------------------------------------------------------------
 
-void DelphesFactory::Clear(Option_t* option)
+void DelphesFactory::Clear(Option_t *option)
 {
   set<TObject *>::iterator itPool;
   for(itPool = fPool.begin(); itPool != fPool.end(); ++itPool)
@@ -69,7 +68,7 @@ void DelphesFactory::Clear(Option_t* option)
 
   TProcessID::SetObjectCount(0);
 
-  map< const TClass*, ExRootTreeBranch* >::iterator itBranches;
+  map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
   for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
   {
     itBranches->second->Clear();
@@ -119,4 +118,3 @@ TObject *DelphesFactory::New(TClass *cl)
 }
 
 //------------------------------------------------------------------------------
-

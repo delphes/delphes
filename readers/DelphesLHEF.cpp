@@ -16,30 +16,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 #include <signal.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
-#include "modules/Delphes.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
+#include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 
   if(argc < 3)
   {
-    cout << " Usage: " << appName << " config_file" << " output_file" << " [input_file(s)]" << endl;
+    cout << " Usage: " << appName << " config_file"
+         << " output_file"
+         << " [input_file(s)]" << endl;
     cout << " config_file - configuration file in Tcl format," << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in LHEF format," << endl;
@@ -177,9 +179,7 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       reader->Clear();
       readStopWatch.Start();
-      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) &&
-        reader->ReadBlock(factory, allParticleOutputArray,
-        stableParticleOutputArray, partonOutputArray) && !interrupted)
+      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) && reader->ReadBlock(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
       {
         if(reader->EventReady())
         {
@@ -217,8 +217,7 @@ int main(int argc, char *argv[])
       if(inputFile != stdin) fclose(inputFile);
 
       ++i;
-    }
-    while(i < argc);
+    } while(i < argc);
 
     modularDelphes->FinishTask();
     treeWriter->Write();

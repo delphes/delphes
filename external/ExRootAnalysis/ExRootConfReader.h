@@ -20,7 +20,6 @@ struct Tcl_Interp;
 class ExRootConfParam
 {
 public:
-
   ExRootConfParam(const char *name = 0, Tcl_Obj *object = 0, Tcl_Interp *interp = 0);
 
   int GetInt(int defaultValue = 0);
@@ -33,7 +32,6 @@ public:
   ExRootConfParam operator[](int index);
 
 private:
-
   const char *fName; //!
   Tcl_Obj *fObject; //!
   Tcl_Interp *fTclInterp; //!
@@ -41,7 +39,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-class ExRootConfReader : public TNamed
+class ExRootConfReader: public TNamed
 {
 public:
   typedef std::map<TString, TString> ExRootTaskMap;
@@ -65,7 +63,6 @@ public:
   const char *GetTopDir() const { return fTopDir; }
 
 private:
-
   const char *fTopDir; //!
 
   Tcl_Interp *fTclInterp; //!
@@ -76,4 +73,3 @@ private:
 };
 
 #endif
-

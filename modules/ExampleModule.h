@@ -37,7 +37,6 @@ class DelphesFormula;
 class ExampleModule: public DelphesModule
 {
 public:
-
   ExampleModule();
   ~ExampleModule();
 
@@ -46,12 +45,11 @@ public:
   void Finish();
 
 private:
-
   Int_t fIntParam;
   Double_t fDoubleParam;
-  
-  std::deque <Double_t> fArrayParam;
-  
+
+  std::deque<Double_t> fArrayParam;
+
   DelphesFormula *fFormula; //!
 
   TIterator *fItInputArray; //!

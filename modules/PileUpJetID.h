@@ -9,7 +9,6 @@
  *
  */
 
-
 #include "classes/DelphesModule.h"
 
 #include <deque>
@@ -20,7 +19,6 @@ class DelphesFormula;
 class PileUpJetID: public DelphesModule
 {
 public:
-
   PileUpJetID();
   ~PileUpJetID();
 
@@ -29,7 +27,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fJetPTMin;
   Double_t fParameterR;
 
@@ -87,7 +84,7 @@ MeanSqDeltaR
   // If set to true, may have weird results for PFCHS
   // If set to false, uses everything within dR < fParameterR even if in other jets &c.
   // Results should be very similar for PF
-  Int_t fUseConstituents; 
+  Int_t fUseConstituents;
 
   Bool_t fAverageEachTower;
 
@@ -96,14 +93,13 @@ MeanSqDeltaR
   const TObjArray *fJetInputArray; //!
 
   const TObjArray *fTrackInputArray; // SCZ
-  const TObjArray *fNeutralInputArray; 
+  const TObjArray *fNeutralInputArray;
 
   TIterator *fItTrackInputArray; // SCZ
   TIterator *fItNeutralInputArray; // SCZ
 
   TObjArray *fOutputArray; //!
   TObjArray *fNeutralsInPassingJets; // SCZ
-
 
   ClassDef(PileUpJetID, 2)
 };

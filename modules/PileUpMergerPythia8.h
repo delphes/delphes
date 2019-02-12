@@ -34,13 +34,12 @@ class DelphesTF2;
 
 namespace Pythia8
 {
- class Pythia;
+class Pythia;
 };
 
 class PileUpMergerPythia8: public DelphesModule
 {
 public:
-
   PileUpMergerPythia8();
   ~PileUpMergerPythia8();
 
@@ -49,7 +48,6 @@ public:
   void Finish();
 
 private:
-
   Int_t fPileUpDistribution;
   Double_t fMeanPileUp;
 

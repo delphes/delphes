@@ -16,26 +16,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
-#include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
 #include "TClonesArray.h"
+#include "TFile.h"
 
 #include "classes/DelphesClasses.h"
 
-#include "ExRootAnalysis/ExRootTreeReader.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeReader.h"
 
 using namespace std;
 
@@ -61,7 +61,6 @@ public:
   void ProcessEvent();
 
 private:
-
   void Reset();
   void Write();
 
@@ -75,7 +74,11 @@ private:
 
   void AnalyseMissingET();
 
-  enum {kIntParamSize = 2, kDblParamSize = 9};
+  enum
+  {
+    kIntParamSize = 2,
+    kDblParamSize = 9
+  };
   Int_t fIntParam[kIntParamSize];
   Double_t fDblParam[kDblParamSize];
 
@@ -131,8 +134,7 @@ LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string je
   // missing transverse energy
   fBranchMissingET = fTreeReader->UseBranch("MissingET");
 
-  if(!fBranchEvent || !fBranchTrack || !fBranchTower || !fBranchPhoton ||
-     !fBranchElectron || !fBranchMuon || !fBranchJet || !fBranchMissingET)
+  if(!fBranchEvent || !fBranchTrack || !fBranchTower || !fBranchPhoton || !fBranchElectron || !fBranchMuon || !fBranchJet || !fBranchMissingET)
   {
     throw runtime_error("ROOT file doesn't contain all required branches");
   }
@@ -201,7 +203,7 @@ void LHCOWriter::AnalyseEvent()
 {
   Event *element;
 
-  element = static_cast<Event*>(fBranchEvent->At(0));
+  element = static_cast<Event *>(fBranchEvent->At(0));
 
   fprintf(fOutputFile, "%4d %13lld %8d\n", 0, element->Number, 0);
 
@@ -215,7 +217,7 @@ void LHCOWriter::AnalysePhotons()
   Photon *element;
 
   fItPhoton->Reset();
-  while((element = static_cast<Photon*>(fItPhoton->Next())))
+  while((element = static_cast<Photon *>(fItPhoton->Next())))
   {
     Reset();
 
@@ -238,7 +240,7 @@ void LHCOWriter::AnalyseElectrons()
   Electron *element;
 
   fItElectron->Reset();
-  while((element = static_cast<Electron*>(fItElectron->Next())))
+  while((element = static_cast<Electron *>(fItElectron->Next())))
   {
     Reset();
 
@@ -269,20 +271,20 @@ void LHCOWriter::AnalyseMuons()
 
   muonCounter = 0;
   fItMuon->Reset();
-  while((element = static_cast<Muon*>(fItMuon->Next())))
+  while((element = static_cast<Muon *>(fItMuon->Next())))
   {
     Reset();
 
     sumPT = 0.0;
     fItTrack->Reset();
-    while((track = static_cast<Track*>(fItTrack->Next())))
+    while((track = static_cast<Track *>(fItTrack->Next())))
     {
       if(element->P4().DeltaR(track->P4()) < 0.5) sumPT += track->PT;
     }
 
     sumET = 0.0;
     fItTower->Reset();
-    while((tower = static_cast<Tower*>(fItTower->Next())))
+    while((tower = static_cast<Tower *>(fItTower->Next())))
     {
       if(element->P4().DeltaR(tower->P4()) < 0.5) sumET += tower->ET;
     }
@@ -292,7 +294,7 @@ void LHCOWriter::AnalyseMuons()
     minIndex = -1;
     minDR = 1.0E9;
     fItJet->Reset();
-    while((jet = static_cast<Jet*>(fItJet->Next())))
+    while((jet = static_cast<Jet *>(fItJet->Next())))
     {
       if(jet->TauTag != 0)
       {
@@ -324,7 +326,7 @@ void LHCOWriter::AnalyseMuons()
       fDblParam[5] = fIntParam[0] + fBranchMuon->GetEntriesFast() - muonCounter + tauCounter + minIndex;
     }
 
-    ratET = sumET/element->PT;
+    ratET = sumET / element->PT;
     fDblParam[6] = Float_t(TMath::Nint(sumPT)) + (ratET < 1.0 ? ratET : 0.99);
 
     Write();
@@ -341,7 +343,7 @@ void LHCOWriter::AnalyseTauJets()
   Int_t counter;
 
   fItJet->Reset();
-  while((element = static_cast<Jet*>(fItJet->Next())))
+  while((element = static_cast<Jet *>(fItJet->Next())))
   {
     if(element->TauTag == 0) continue;
 
@@ -349,7 +351,7 @@ void LHCOWriter::AnalyseTauJets()
 
     counter = 1;
 
-   /*
+    /*
     fItTrack->Reset();
     while((track = static_cast<Track*>(fItTrack->Next())))
     {
@@ -379,7 +381,7 @@ void LHCOWriter::AnalyseJets()
   Int_t counter;
 
   fItJet->Reset();
-  while((element = static_cast<Jet*>(fItJet->Next())))
+  while((element = static_cast<Jet *>(fItJet->Next())))
   {
     if(element->TauTag != 0) continue;
 
@@ -387,7 +389,7 @@ void LHCOWriter::AnalyseJets()
 
     counter = 0;
     fItTrack->Reset();
-    while((track = static_cast<Track*>(fItTrack->Next())))
+    while((track = static_cast<Track *>(fItTrack->Next())))
     {
       if(element->P4().DeltaR(track->P4()) < 0.5) ++counter;
     }
@@ -412,7 +414,7 @@ void LHCOWriter::AnalyseMissingET()
 {
   MissingET *element;
 
-  element = static_cast<MissingET*>(fBranchMissingET->At(0));
+  element = static_cast<MissingET *>(fBranchMissingET->At(0));
 
   Reset();
 
@@ -470,7 +472,8 @@ int main(int argc, char *argv[])
 
   if(argc < 2 || argc > 4)
   {
-    cerr << " Usage: " << appName << " input_file" << " [output_file] [--jet-branch=Jet]" << endl;
+    cerr << " Usage: " << appName << " input_file"
+         << " [output_file] [--jet-branch=Jet]" << endl;
     cerr << " input_file - input file in ROOT format," << endl;
     cerr << " output_file - output file in LHCO format," << endl;
     cerr << " with no output_file, or when output_file is -, write to standard output." << endl;

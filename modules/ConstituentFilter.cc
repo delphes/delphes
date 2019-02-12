@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class ConstituentFilter
  *
  *  Drops all input objects that are not constituents of any jet.
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -87,12 +86,12 @@ void ConstituentFilter::Init()
 
   param = GetParam("ConstituentInputArray");
   size = param.GetSize();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i*2].GetString());
+    array = ImportArray(param[i * 2].GetString());
     iterator = array->MakeIterator();
 
-    fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());
+    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
   }
 }
 
@@ -100,8 +99,8 @@ void ConstituentFilter::Init()
 
 void ConstituentFilter::Finish()
 {
-  map< TIterator *, TObjArray * >::iterator itInputMap;
-  vector< TIterator * >::iterator itInputList;
+  map<TIterator *, TObjArray *>::iterator itInputMap;
+  vector<TIterator *>::iterator itInputList;
   TIterator *iterator;
 
   for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
@@ -122,8 +121,8 @@ void ConstituentFilter::Finish()
 void ConstituentFilter::Process()
 {
   Candidate *jet, *constituent;
-  map< TIterator *, TObjArray * >::iterator itInputMap;
-  vector< TIterator * >::iterator itInputList;
+  map<TIterator *, TObjArray *>::iterator itInputMap;
+  vector<TIterator *>::iterator itInputList;
   TIterator *iterator;
   TObjArray *array;
 
@@ -134,14 +133,14 @@ void ConstituentFilter::Process()
 
     // loop over all jets
     iterator->Reset();
-    while((jet = static_cast<Candidate*>(iterator->Next())))
+    while((jet = static_cast<Candidate *>(iterator->Next())))
     {
       TIter itConstituents(jet->GetCandidates());
 
       if(jet->Momentum.Pt() <= fJetPTMin) continue;
 
       // loop over all constituents
-      while((constituent = static_cast<Candidate*>(itConstituents.Next())))
+      while((constituent = static_cast<Candidate *>(itConstituents.Next())))
       {
         // set the IsConstituent flag
         constituent->IsConstituent = 1;
@@ -157,7 +156,7 @@ void ConstituentFilter::Process()
 
     // loop over all constituents
     iterator->Reset();
-    while((constituent = static_cast<Candidate*>(iterator->Next())))
+    while((constituent = static_cast<Candidate *>(iterator->Next())))
     {
       // check the IsConstituent flag
       if(constituent->IsConstituent)

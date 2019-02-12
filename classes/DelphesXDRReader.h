@@ -27,13 +27,12 @@
  *
  */
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 class DelphesXDRReader
 {
 public:
-
   DelphesXDRReader();
 
   void SetFile(FILE *file);
@@ -45,7 +44,6 @@ public:
   void ReadString(void *value, int maxSize);
 
 private:
-
   FILE *fFile;
   uint8_t *fBuffer;
 

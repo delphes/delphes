@@ -19,7 +19,6 @@
 #ifndef FastJetGridMedianEstimator_h
 #define FastJetGridMedianEstimator_h
 
-
 /** \class FastJetGridMedianEstimator
  *
  *  Computes median energy density per event using a fixed grid.
@@ -34,14 +33,14 @@
 class TObjArray;
 class TIterator;
 
-namespace fastjet {
-  class GridMedianBackgroundEstimator;
+namespace fastjet
+{
+class GridMedianBackgroundEstimator;
 }
 
 class FastJetGridMedianEstimator: public DelphesModule
 {
 public:
-
   FastJetGridMedianEstimator();
   ~FastJetGridMedianEstimator();
 
@@ -50,8 +49,7 @@ public:
   void Finish();
 
 private:
-
-  std::vector< fastjet::GridMedianBackgroundEstimator * > fEstimators; //!
+  std::vector<fastjet::GridMedianBackgroundEstimator *> fEstimators; //!
 
   TIterator *fItInputArray; //!
 

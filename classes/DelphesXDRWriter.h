@@ -27,13 +27,12 @@
  *
  */
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 class DelphesXDRWriter
 {
 public:
-
   DelphesXDRWriter();
 
   void SetFile(FILE *file);
@@ -44,7 +43,6 @@ public:
   void WriteValue(void *value, int size);
 
 private:
-
   FILE *fFile;
   uint8_t *fBuffer;
 

@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesStream
  *
  *  Provides an interface to manipulate c strings as if they were input streams
@@ -27,12 +26,12 @@
 
 #include "classes/DelphesStream.h"
 
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
-#include <stdio.h>
 #include <errno.h>
+#include <limits.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <iostream>
 
@@ -64,17 +63,17 @@ bool DelphesStream::ReadDbl(double &value)
   {
     if(fFirstHugePos && value == HUGE_VAL)
     {
-      fFirstHugePos = false; 
+      fFirstHugePos = false;
       cout << "** WARNING: too large positive value, return " << value << endl;
     }
     else if(fFirstHugeNeg && value == -HUGE_VAL)
     {
-      fFirstHugeNeg = false; 
+      fFirstHugeNeg = false;
       cout << "** WARNING: too large negative value, return " << value << endl;
     }
     else if(fFirstZero)
     {
-      fFirstZero = false; 
+      fFirstZero = false;
       value = 0.0;
       cout << "** WARNING: too small value, return " << value << endl;
     }
@@ -93,12 +92,12 @@ bool DelphesStream::ReadInt(int &value)
   {
     if(fFirstLongMin && value == LONG_MIN)
     {
-      fFirstLongMin = false; 
+      fFirstLongMin = false;
       cout << "** WARNING: too large positive value, return " << value << endl;
     }
     else if(fFirstLongMax && value == LONG_MAX)
     {
-      fFirstLongMax = false; 
+      fFirstLongMax = false;
       cout << "** WARNING: too large negative value, return " << value << endl;
     }
   }

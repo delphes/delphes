@@ -18,10 +18,9 @@ class TTree;
 class TClass;
 class ExRootTreeBranch;
 
-class ExRootTreeWriter : public TNamed
+class ExRootTreeWriter: public TNamed
 {
 public:
-
   ExRootTreeWriter(TFile *file = 0, const char *treeName = "Analysis");
   ~ExRootTreeWriter();
 
@@ -35,7 +34,6 @@ public:
   void Write();
 
 private:
-
   TTree *NewTree();
 
   TFile *fFile; //!
@@ -43,10 +41,9 @@ private:
 
   TString fTreeName; //!
 
-  std::set<ExRootTreeBranch*> fBranches; //!
+  std::set<ExRootTreeBranch *> fBranches; //!
 
   ClassDef(ExRootTreeWriter, 1)
 };
 
 #endif /* ExRootTreeWriter */
-

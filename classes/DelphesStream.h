@@ -30,16 +30,14 @@
 class DelphesStream
 {
 public:
-
   DelphesStream(char *buffer);
 
   bool ReadDbl(double &value);
   bool ReadInt(int &value);
 
 private:
-
   char *fBuffer;
-  
+
   static bool fFirstLongMin;
   static bool fFirstLongMax;
   static bool fFirstHugePos;
@@ -48,5 +46,3 @@ private:
 };
 
 #endif // DelphesStream_h
-
-

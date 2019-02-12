@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class JetFlavorAssociation
  *
  *  Find origin of jet && evaluate jet flavor
@@ -31,31 +30,30 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
-class PartonClassifier: public ExRootClassifier
+class PartonClassifier : public ExRootClassifier
 {
 public:
-
   PartonClassifier() {}
   Int_t GetCategory(TObject *object);
   Double_t fEtaMax, fPTMin;
@@ -66,7 +64,7 @@ public:
 
 Int_t PartonClassifier::GetCategory(TObject *object)
 {
- // select parton in the parton list
+  // select parton in the parton list
 
   Candidate *parton = static_cast<Candidate *>(object);
   const TLorentzVector &momentum = parton->Momentum;
@@ -86,10 +84,9 @@ Int_t PartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-class ParticleLHEFClassifier: public ExRootClassifier
+class ParticleLHEFClassifier : public ExRootClassifier
 {
 public:
-
   ParticleLHEFClassifier() {}
   Int_t GetCategory(TObject *object);
   Double_t fEtaMax, fPTMin;
@@ -189,7 +186,8 @@ void JetFlavorAssociation::Finish()
 
 //------------------------------------------------------------------------------
 
-void JetFlavorAssociation::Process(){
+void JetFlavorAssociation::Process()
+{
 
   Candidate *jet;
   TObjArray *partonArray = 0;
@@ -200,7 +198,7 @@ void JetFlavorAssociation::Process(){
   partonArray = fPartonFilter->GetSubArray(fPartonClassifier, 0); // get the filtered parton array
   if(partonArray == 0) return;
 
-  if(fParticleLHEFInputArray) 
+  if(fParticleLHEFInputArray)
   {
     fParticleLHEFFilter->Reset();
     partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier, 0); // get the filtered parton array
@@ -226,7 +224,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray,
   Candidate *parton, *partonLHEF;
   Candidate *tempParton = 0, *tempPartonHighestPt = 0;
   int pdgCode, pdgCodeMax = -1;
-  
+
   TIter itPartonArray(partonArray);
   TIter itPartonLHEFArray(partonLHEFArray);
 
@@ -240,17 +238,15 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray,
     {
       if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
     }
- 
+
     if(!fParticleLHEFInputArray) continue;
- 
+
     itPartonLHEFArray.Reset();
     while((partonLHEF = static_cast<Candidate *>(itPartonLHEFArray.Next())))
     {
-      if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 &&
-         parton->PID == partonLHEF->PID &&
-         partonLHEF->Charge == parton->Charge)
-      {      
-         break;
+      if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
+      {
+        break;
       }
 
       // check the daughter
@@ -329,9 +325,7 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArr
     isGoodCandidate = true;
     while((partonLHEF = static_cast<Candidate *>(itPartonLHEFArray.Next())))
     {
-      if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.01 &&
-         parton->PID == partonLHEF->PID &&
-         partonLHEF->Charge == parton->Charge)
+      if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.01 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
       {
         isGoodCandidate = false;
         break;

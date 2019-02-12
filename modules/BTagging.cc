@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class BTagging
  *
  *  Determines origin of jet,
@@ -33,18 +32,18 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -65,7 +64,7 @@ BTagging::~BTagging()
 
 void BTagging::Init()
 {
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   ExRootConfParam param;
   DelphesFormula *formula;
   Int_t i, size;
@@ -77,12 +76,12 @@ void BTagging::Init()
   size = param.GetSize();
 
   fEfficiencyMap.clear();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i*2 + 1].GetString());
+    formula->Compile(param[i * 2 + 1].GetString());
 
-    fEfficiencyMap[param[i*2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = formula;
   }
 
   // set default efficiency formula
@@ -105,7 +104,7 @@ void BTagging::Init()
 
 void BTagging::Finish()
 {
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
   if(fItJetInputArray) delete fItJetInputArray;
@@ -123,12 +122,12 @@ void BTagging::Process()
 {
   Candidate *jet;
   Double_t pt, eta, phi, e;
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
   // loop over all input jets
   fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate*>(fItJetInputArray->Next())))
+  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
     eta = jetMomentum.Eta();

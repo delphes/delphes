@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesXDRWriter
  *
  *  Writes XDR
@@ -27,8 +26,8 @@
 
 #include "classes/DelphesXDRWriter.h"
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 //------------------------------------------------------------------------------

@@ -39,7 +39,6 @@ class TObjArray;
 class RecoPuFilter: public DelphesModule
 {
 public:
-
   RecoPuFilter();
   ~RecoPuFilter();
 
@@ -48,7 +47,6 @@ public:
   void Finish();
 
 private:
-
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

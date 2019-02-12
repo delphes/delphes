@@ -39,7 +39,6 @@ class Candidate;
 class PhotonID: public DelphesModule
 {
 public:
-
   PhotonID();
   ~PhotonID();
 
@@ -48,11 +47,10 @@ public:
   void Finish();
 
 private:
-
   DelphesFormula *fPromptFormula;
   DelphesFormula *fNonPromptFormula;
   DelphesFormula *fFakeFormula;
-  
+
   // import input arrays
   const TObjArray *fInputPhotonArray;
   TIterator *fItInputPhotonArray;

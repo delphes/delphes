@@ -36,7 +36,6 @@ class DelphesTF2;
 class PileUpMerger: public DelphesModule
 {
 public:
-
   PileUpMerger();
   ~PileUpMerger();
 
@@ -45,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   Int_t fPileUpDistribution;
   Double_t fMeanPileUp;
 

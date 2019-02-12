@@ -34,25 +34,24 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
-
 
 //------------------------------------------------------------------------------
 
@@ -71,22 +70,20 @@ TaggingParticlesSkimmer::~TaggingParticlesSkimmer()
 
 void TaggingParticlesSkimmer::Init()
 {
- 
+
   fPTMin = GetDouble("PTMin", 15.0);
   fEtaMax = GetDouble("EtaMax", 2.5);
-   
+
   // import input array
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
   fItPartonInputArray = fPartonInputArray->MakeIterator();
-  
+
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
 
- 
   fClassifier = new TauTaggingPartonClassifier(fParticleInputArray);
   fClassifier->fPTMin = GetDouble("PTMin", 15.0);
   fClassifier->fEtaMax = GetDouble("EtaMax", 2.5);
 
- 
   fFilter = new ExRootFilter(fPartonInputArray);
 
   // output array
@@ -96,7 +93,7 @@ void TaggingParticlesSkimmer::Init()
 //------------------------------------------------------------------------------
 
 void TaggingParticlesSkimmer::Finish()
-{ 
+{
   if(fItPartonInputArray) delete fItPartonInputArray;
   if(fFilter) delete fFilter;
   if(fClassifier) delete fClassifier;
@@ -126,46 +123,40 @@ void TaggingParticlesSkimmer::Process()
   {
     if(tau->D1 < 0) continue;
 
-    if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
-       tau->D2 >= fParticleInputArray->GetEntriesFast())
+    if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
     {
       throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
     }
 
     tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-    
+
     for(i = tau->D1; i <= tau->D2; ++i)
     {
       daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
       if(TMath::Abs(daughter->PID) == 16) continue;
       tauMomentum += daughter->Momentum;
     }
-  
-   candidate = static_cast<Candidate*>(tau->Clone());
-   candidate->Momentum = tauMomentum;
 
-   
-   fOutputArray->Add(candidate);
+    candidate = static_cast<Candidate *>(tau->Clone());
+    candidate->Momentum = tauMomentum;
 
-  }
-
-  // then add all other partons (except tau's to avoid double counting)
-  
-  fItPartonInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItPartonInputArray->Next())))
-  {
-    pdgCode = TMath::Abs(candidate->PID);
-    if(pdgCode == 15) continue;
-   
-    pt = candidate->Momentum.Pt();
-    if(pt < fPTMin) continue;
-   
-    eta = TMath::Abs(candidate->Momentum.Eta());
-    if(eta > fEtaMax) continue;
-        
     fOutputArray->Add(candidate);
   }
 
+  // then add all other partons (except tau's to avoid double counting)
 
+  fItPartonInputArray->Reset();
+  while((candidate = static_cast<Candidate *>(fItPartonInputArray->Next())))
+  {
+    pdgCode = TMath::Abs(candidate->PID);
+    if(pdgCode == 15) continue;
+
+    pt = candidate->Momentum.Pt();
+    if(pt < fPTMin) continue;
+
+    eta = TMath::Abs(candidate->Momentum.Eta());
+    if(eta > fEtaMax) continue;
+
+    fOutputArray->Add(candidate);
+  }
 }
-

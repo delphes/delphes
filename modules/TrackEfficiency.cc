@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class TrackEfficiency
  *
  *  Selects candidates from the InputArray according to the Efficiency formula.
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLongFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -92,12 +91,12 @@ void TrackEfficiency::Finish()
 //------------------------------------------------------------------------------
 
 void TrackEfficiency::Process()
-{ 
+{
   Candidate *candidate;
   Double_t pt, eta, phi, e, d0, dz, ctgTheta;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -111,7 +110,7 @@ void TrackEfficiency::Process()
 
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, d0, dz, ctgTheta)) continue;
-    
+
     fOutputArray->Add(candidate);
   }
 }

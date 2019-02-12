@@ -36,7 +36,6 @@ class TObjArray;
 class Cloner: public DelphesModule
 {
 public:
-
   Cloner();
   ~Cloner();
 
@@ -45,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

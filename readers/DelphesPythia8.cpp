@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include <signal.h>
@@ -26,24 +26,24 @@
 #include "Pythia.h"
 #include "Pythia8Plugins/CombineMatchingInput.h"
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
-#include "modules/Delphes.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
+#include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -97,8 +97,15 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
     pid = particle.id();
     status = particle.statusHepMC();
-    px = particle.px(); py = particle.py(); pz = particle.pz(); e = particle.e(); mass = particle.m();
-    x = particle.xProd(); y = particle.yProd(); z = particle.zProd(); t = particle.tProd();
+    px = particle.px();
+    py = particle.py();
+    pz = particle.pz();
+    e = particle.e();
+    mass = particle.m();
+    x = particle.xProd();
+    y = particle.yProd();
+    z = particle.zProd();
+    t = particle.tProd();
 
     candidate = factory->NewCandidate();
 
@@ -114,7 +121,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     candidate->D2 = particle.daughter2() - 1;
 
     pdgParticle = pdg->GetParticle(pid);
-    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
     candidate->Mass = mass;
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
@@ -165,11 +172,11 @@ void fillParticle(int id, double pMax, double etaMax,
   double pt, eta, phi, pp, ee, mm;
 
   // pMin = 0.1 GeV for single particles
-  pp = pow(10, - 1.0 + (log10(pMax) + 1.0) * rndm.flat());
+  pp = pow(10, -1.0 + (log10(pMax) + 1.0) * rndm.flat());
   eta = (2.0 * rndm.flat() - 1.0) * etaMax;
   phi = 2.0 * M_PI * rndm.flat();
   mm = pdt.mSel(id);
-  ee = Pythia8::sqrtpos(pp*pp + mm*mm);
+  ee = Pythia8::sqrtpos(pp * pp + mm * mm);
   pt = pp / cosh(eta);
 
   // Store the particle in the event record.
@@ -192,10 +199,10 @@ void fillPartons(int id, double pMax, double etaMax,
   eta = (2.0 * rndm.flat() - 1.0) * etaMax;
   phi = 2.0 * M_PI * rndm.flat();
   mm = pdt.mSel(id);
-  ee = Pythia8::sqrtpos(pp*pp + mm*mm);
+  ee = Pythia8::sqrtpos(pp * pp + mm * mm);
   pt = pp / cosh(eta);
 
-  if( (id == 4 || id == 5) && pt < 10.0) return;
+  if((id == 4 || id == 5) && pt < 10.0) return;
 
   if(id == 21)
   {
@@ -237,11 +244,13 @@ int main(int argc, char *argv[])
 
   // for matching
   Pythia8::CombineMatchingInput *combined = 0;
-  Pythia8::UserHooks* matching = 0;
+  Pythia8::UserHooks *matching = 0;
 
   if(argc != 4)
   {
-    cout << " Usage: " << appName << " config_file" << " pythia_card" << " output_file" << endl;
+    cout << " Usage: " << appName << " config_file"
+         << " pythia_card"
+         << " output_file" << endl;
     cout << " config_file - configuration file in Tcl format," << endl;
     cout << " pythia_card - Pythia8 configuration file," << endl;
     cout << " output_file - output file in ROOT format." << endl;
@@ -292,7 +301,6 @@ int main(int argc, char *argv[])
       throw runtime_error("can't do matching");
     }
     pythia->setUserHooksPtr(matching);
-
 
     if(pythia == NULL)
     {
@@ -347,8 +355,8 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF,
-        stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
+      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady())
+        ;
 
       if(spareFlag1)
       {

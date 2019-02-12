@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesXDRReader
  *
  *  Reads XDR
@@ -27,8 +26,8 @@
 
 #include "classes/DelphesXDRReader.h"
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 //------------------------------------------------------------------------------
@@ -108,7 +107,7 @@ void DelphesXDRReader::ReadString(void *value, int maxSize)
   ReadValue(&size, 4);
 
   if(size > maxSize) size = maxSize;
-    
+
   if(fBuffer)
   {
     memcpy(value, fBuffer + fOffset, size);

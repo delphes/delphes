@@ -29,15 +29,14 @@
 
 #include "classes/DelphesModule.h"
 
-#include <set>
 #include <map>
+#include <set>
 
 class TObjArray;
 
 class Weighter: public DelphesModule
 {
 public:
-
   Weighter();
   ~Weighter();
 
@@ -46,12 +45,11 @@ public:
   void Finish();
 
 private:
-
 #if !defined(__CINT__) && !defined(__CLING__)
   struct TIndexStruct
   {
     Int_t codes[4];
-    bool operator< (const TIndexStruct &value) const;
+    bool operator<(const TIndexStruct &value) const;
   };
 
   std::set<Int_t> fWeightSet, fCodeSet;

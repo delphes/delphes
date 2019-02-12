@@ -17,28 +17,36 @@
  */
 
 #include "display/DelphesBranchElement.h"
-#include "classes/DelphesClasses.h"
+#include "TEveArrow.h"
 #include "TEveJetCone.h"
 #include "TEveTrack.h"
 #include "TEveTrackPropagator.h"
-#include "TEveArrow.h"
 #include "TEveVector.h"
+#include "classes/DelphesClasses.h"
 #include <iostream>
 
 // special case for calo towers
-template<> DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
-    data_ = new DelphesCaloData(2);
-    data_->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
-    data_->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
-    data_->IncDenyDestroy();
+template <>
+DelphesBranchElement<DelphesCaloData>::DelphesBranchElement(const char *name, TClonesArray *branch, const enum EColor color, Float_t maxPt) :
+  DelphesBranchBase(name, branch, color, maxPt)
+{
+  data_ = new DelphesCaloData(2);
+  data_->RefSliceInfo(0).Setup("ECAL", 0.1, kRed);
+  data_->RefSliceInfo(1).Setup("HCAL", 0.1, kBlue);
+  data_->IncDenyDestroy();
 }
-template<> void DelphesBranchElement<DelphesCaloData>::Reset() { data_->ClearTowers(); }
-template<> void DelphesBranchElement<DelphesCaloData>::ReadBranch() {
-  if(TString(GetType())=="Tower") {
+template <>
+void DelphesBranchElement<DelphesCaloData>::Reset() { data_->ClearTowers(); }
+template <>
+void DelphesBranchElement<DelphesCaloData>::ReadBranch()
+{
+  if(TString(GetType()) == "Tower")
+  {
     // Loop over all towers
     TIter itTower(branch_);
     Tower *tower;
-    while((tower = (Tower *) itTower.Next())) {
+    while((tower = (Tower *)itTower.Next()))
+    {
       data_->AddTower(tower->Edges[0], tower->Edges[1], tower->Edges[2], tower->Edges[3]);
       data_->FillSlice(0, tower->Eem);
       data_->FillSlice(1, tower->Ehad);
@@ -46,14 +54,18 @@ template<> void DelphesBranchElement<DelphesCaloData>::ReadBranch() {
     data_->DataChanged();
   }
 }
-template<> std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::GetVectors() {
+template <>
+std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::GetVectors()
+{
   std::vector<TLorentzVector> output;
-  if(TString(GetType())=="Tower") {
+  if(TString(GetType()) == "Tower")
+  {
     TIter itTower(branch_);
     Tower *tower;
-    while((tower = (Tower *) itTower.Next())) {
+    while((tower = (Tower *)itTower.Next()))
+    {
       TLorentzVector v;
-      v.SetPtEtaPhiM(tower->Eem+tower->Ehad,(tower->Edges[0]+tower->Edges[1])/2.,(tower->Edges[2]+tower->Edges[3])/2.,0.);
+      v.SetPtEtaPhiM(tower->Eem + tower->Ehad, (tower->Edges[0] + tower->Edges[1]) / 2., (tower->Edges[2] + tower->Edges[3]) / 2., 0.);
       output.push_back(v);
     }
   }
@@ -61,21 +73,29 @@ template<> std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::Ge
 }
 
 // special case for element lists
-template<> DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
-    data_ = new TEveElementList(name);
-    data_->SetMainColor(color_);
+template <>
+DelphesBranchElement<TEveElementList>::DelphesBranchElement(const char *name, TClonesArray *branch, const enum EColor color, Float_t maxPt) :
+  DelphesBranchBase(name, branch, color, maxPt)
+{
+  data_ = new TEveElementList(name);
+  data_->SetMainColor(color_);
 }
-template<> void DelphesBranchElement<TEveElementList>::Reset() { data_->DestroyElements(); }
-template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
-  if(TString(GetType())=="Jet") {
+template <>
+void DelphesBranchElement<TEveElementList>::Reset() { data_->DestroyElements(); }
+template <>
+void DelphesBranchElement<TEveElementList>::ReadBranch()
+{
+  if(TString(GetType()) == "Jet")
+  {
     TIter itJet(branch_);
     Jet *jet;
     TEveJetCone *eveJetCone;
     // Loop over all jets
     Int_t counter = 0;
-    while((jet = (Jet *) itJet.Next())) {
+    while((jet = (Jet *)itJet.Next()))
+    {
       eveJetCone = new TEveJetCone();
-      eveJetCone->SetTitle(Form("jet [%d]: Pt=%f, Eta=%f, \nPhi=%f, M=%f",counter,jet->PT, jet->Eta, jet->Phi, jet->Mass));
+      eveJetCone->SetTitle(Form("jet [%d]: Pt=%f, Eta=%f, \nPhi=%f, M=%f", counter, jet->PT, jet->Eta, jet->Phi, jet->Mass));
       eveJetCone->SetName(Form("jet [%d]", counter++));
       eveJetCone->SetMainTransparency(60);
       eveJetCone->SetLineColor(GetColor());
@@ -85,7 +105,9 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
       eveJetCone->AddEllipticCone(jet->Eta, jet->Phi, jet->DeltaEta, jet->DeltaPhi);
       data_->AddElement(eveJetCone);
     }
-  } else if(TString(GetType())=="MissingET") {
+  }
+  else if(TString(GetType()) == "MissingET")
+  {
     // MissingET as invisible track (like a photon)
     MissingET *MET;
     TEveTrack *eveMet;
@@ -93,12 +115,13 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
     trkProp->SetMagField(0., 0., -tk_Bz_);
     trkProp->SetMaxR(tkRadius_);
     trkProp->SetMaxZ(tkHalfLength_);
-    if(branch_->GetEntriesFast() > 0) {
-      MET = (MissingET*) branch_->At(0);
+    if(branch_->GetEntriesFast() > 0)
+    {
+      MET = (MissingET *)branch_->At(0);
       TParticle pb(13, 1, 0, 0, 0, 0,
-                   (tkRadius_ * MET->MET/maxPt_)*cos(MET->Phi),
-                   (tkRadius_ * MET->MET/maxPt_)*sin(MET->Phi),
-                   0., MET->MET, 0.0, 0.0, 0.0, 0.0);
+        (tkRadius_ * MET->MET / maxPt_) * cos(MET->Phi),
+        (tkRadius_ * MET->MET / maxPt_) * sin(MET->Phi),
+        0., MET->MET, 0.0, 0.0, 0.0, 0.0);
       eveMet = new TEveTrack(&pb, 0, trkProp);
       eveMet->SetName("Missing Et");
       eveMet->SetStdTitle();
@@ -114,24 +137,31 @@ template<> void DelphesBranchElement<TEveElementList>::ReadBranch() {
     }
   }
 }
-template<> std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors() {
+template <>
+std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors()
+{
   std::vector<TLorentzVector> output;
-  if(TString(GetType())=="Jet") {
+  if(TString(GetType()) == "Jet")
+  {
     TIter itJet(branch_);
     Jet *jet;
     // Loop over all jets
-    while((jet = (Jet *) itJet.Next())) {
+    while((jet = (Jet *)itJet.Next()))
+    {
       TLorentzVector v;
       v.SetPtEtaPhiM(jet->PT, jet->Eta, jet->Phi, jet->Mass);
       output.push_back(v);
     }
-  } else if(TString(GetType())=="MissingET") {
+  }
+  else if(TString(GetType()) == "MissingET")
+  {
     TIter itMet(branch_);
     MissingET *MET;
     // Missing Et
-    while((MET = (MissingET*) itMet.Next())) {
+    while((MET = (MissingET *)itMet.Next()))
+    {
       TLorentzVector v;
-      v.SetPtEtaPhiM(MET->MET,MET->Eta,MET->Phi,0.);
+      v.SetPtEtaPhiM(MET->MET, MET->Eta, MET->Phi, 0.);
       output.push_back(v);
     }
   }
@@ -139,15 +169,20 @@ template<> std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::Ge
 }
 
 // special case for track lists
-template<> DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char* name, TClonesArray* branch, const enum EColor color, Float_t maxPt):DelphesBranchBase(name, branch, color, maxPt) {
+template <>
+DelphesBranchElement<TEveTrackList>::DelphesBranchElement(const char *name, TClonesArray *branch, const enum EColor color, Float_t maxPt) :
+  DelphesBranchBase(name, branch, color, maxPt)
+{
   data_ = new TEveTrackList(name);
   data_->SetMainColor(color_);
   data_->SetMarkerColor(color_);
   data_->SetMarkerStyle(kCircle);
   data_->SetMarkerSize(0.5);
 }
-template<> void DelphesBranchElement<TEveTrackList>::SetTrackingVolume(Float_t r, Float_t l, Float_t Bz) {
-  tkRadius_ = r; 
+template <>
+void DelphesBranchElement<TEveTrackList>::SetTrackingVolume(Float_t r, Float_t l, Float_t Bz)
+{
+  tkRadius_ = r;
   tkHalfLength_ = l;
   tk_Bz_ = Bz;
   TEveTrackPropagator *trkProp = data_->GetPropagator();
@@ -155,8 +190,11 @@ template<> void DelphesBranchElement<TEveTrackList>::SetTrackingVolume(Float_t r
   trkProp->SetMaxR(tkRadius_);
   trkProp->SetMaxZ(tkHalfLength_);
 }
-template<> void DelphesBranchElement<TEveTrackList>::Reset() { data_->DestroyElements(); }
-template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
+template <>
+void DelphesBranchElement<TEveTrackList>::Reset() { data_->DestroyElements(); }
+template <>
+void DelphesBranchElement<TEveTrackList>::ReadBranch()
+{
   TString type = GetType();
   TIter itTrack(branch_);
   Int_t counter = 0;
@@ -166,13 +204,15 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
   trkProp->SetMaxR(tkRadius_);
   trkProp->SetMaxZ(tkHalfLength_);
   GenParticle *particle;
-  if(type=="Track") { // CASE 1: TRACKS
+  if(type == "Track")
+  { // CASE 1: TRACKS
     Track *track;
-    while((track = (Track *) itTrack.Next())) {
+    while((track = (Track *)itTrack.Next()))
+    {
       TParticle pb(track->PID, 1, 0, 0, 0, 0,
-                   track->P4().Px(), track->P4().Py(),
-                   track->P4().Pz(), track->P4().E(),
-                   track->X/10.0, track->Y/10.0, track->Z/10.0, track->T/10.0);
+        track->P4().Px(), track->P4().Py(),
+        track->P4().Pz(), track->P4().E(),
+        track->X / 10.0, track->Y / 10.0, track->Z / 10.0, track->T / 10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -181,14 +221,17 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       eveTrack->SetLineColor(GetColor());
       eveTrack->MakeTrack();
     }
-  } else if(type=="Electron") { // CASE 2: ELECTRONS
+  }
+  else if(type == "Electron")
+  { // CASE 2: ELECTRONS
     Electron *electron;
-    while((electron = (Electron *) itTrack.Next())) {
-      particle = (GenParticle*) electron->Particle.GetObject();
-      TParticle pb(electron->Charge<0?11:-11, 1, 0, 0, 0, 0,
-                   electron->P4().Px(), electron->P4().Py(),
-                   electron->P4().Pz(), electron->P4().E(),
-                   particle->X/10.0, particle->Y/10.0, particle->Z/10.0, particle->T/10.0);
+    while((electron = (Electron *)itTrack.Next()))
+    {
+      particle = (GenParticle *)electron->Particle.GetObject();
+      TParticle pb(electron->Charge < 0 ? 11 : -11, 1, 0, 0, 0, 0,
+        electron->P4().Px(), electron->P4().Py(),
+        electron->P4().Pz(), electron->P4().E(),
+        particle->X / 10.0, particle->Y / 10.0, particle->Z / 10.0, particle->T / 10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -197,14 +240,17 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       eveTrack->SetLineColor(GetColor());
       eveTrack->MakeTrack();
     }
-  } else if(type=="Muon") { // CASE 3: MUONS
+  }
+  else if(type == "Muon")
+  { // CASE 3: MUONS
     Muon *muon;
-    while((muon = (Muon *) itTrack.Next())) {
-      particle = (GenParticle*) muon->Particle.GetObject();
-      TParticle pb(muon->Charge<0?13:-13, 1, 0, 0, 0, 0,
-                   muon->P4().Px(), muon->P4().Py(),
-                   muon->P4().Pz(), muon->P4().E(),
-                   particle->X/10.0, particle->Y/10.0, particle->Z/10.0, particle->T/10.0);
+    while((muon = (Muon *)itTrack.Next()))
+    {
+      particle = (GenParticle *)muon->Particle.GetObject();
+      TParticle pb(muon->Charge < 0 ? 13 : -13, 1, 0, 0, 0, 0,
+        muon->P4().Px(), muon->P4().Py(),
+        muon->P4().Pz(), muon->P4().E(),
+        particle->X / 10.0, particle->Y / 10.0, particle->Z / 10.0, particle->T / 10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -213,13 +259,16 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       eveTrack->SetLineColor(GetColor());
       eveTrack->MakeTrack();
     }
-  } else if(type=="Photon") { // CASE 4: PHOTONS
+  }
+  else if(type == "Photon")
+  { // CASE 4: PHOTONS
     Photon *photon;
-    while((photon = (Photon *) itTrack.Next())) {
+    while((photon = (Photon *)itTrack.Next()))
+    {
       TParticle pb(22, 1, 0, 0, 0, 0,
-                   photon->P4().Px(), photon->P4().Py(),
-                   photon->P4().Pz(), photon->P4().E(),
-                   0.0, 0.0, 0.0, 0.0);
+        photon->P4().Px(), photon->P4().Py(),
+        photon->P4().Pz(), photon->P4().E(),
+        0.0, 0.0, 0.0, 0.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
@@ -229,54 +278,73 @@ template<> void DelphesBranchElement<TEveTrackList>::ReadBranch() {
       eveTrack->SetLineColor(GetColor());
       eveTrack->MakeTrack();
     }
-  } else if(type=="GenParticle") { // CASE 5: GENPARTICLES
+  }
+  else if(type == "GenParticle")
+  { // CASE 5: GENPARTICLES
     GenParticle *particle;
-    while((particle = (GenParticle *) itTrack.Next())) {
+    while((particle = (GenParticle *)itTrack.Next()))
+    {
       if(particle->Status != 1) continue;
       TParticle pb(particle->PID, particle->Status, particle->M1, particle->M2, particle->D1, particle->D2,
-                   particle->P4().Px(), particle->P4().Py(),
-                   particle->P4().Pz(), particle->P4().E(),
-                   particle->X/10.0, particle->Y/10.0, particle->Z/10.0, particle->T/10.0);
+        particle->P4().Px(), particle->P4().Py(),
+        particle->P4().Pz(), particle->P4().E(),
+        particle->X / 10.0, particle->Y / 10.0, particle->Z / 10.0, particle->T / 10.0);
       eveTrack = new TEveTrack(&pb, counter, trkProp);
       eveTrack->SetName(Form("%s [%d]", pb.GetName(), counter++));
       eveTrack->SetStdTitle();
       eveTrack->SetAttLineAttMarker(data_);
       data_->AddElement(eveTrack);
       eveTrack->SetLineColor(GetColor());
-      if(particle->Charge==0) eveTrack->SetLineStyle(7);
+      if(particle->Charge == 0) eveTrack->SetLineStyle(7);
       eveTrack->MakeTrack();
     }
   }
 }
-template<> std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors() {
+template <>
+std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors()
+{
   std::vector<TLorentzVector> output;
   TString type = GetType();
   TIter itTrack(branch_);
-  if(type=="Track") { // CASE 1: TRACKS
+  if(type == "Track")
+  { // CASE 1: TRACKS
     Track *track;
-    while((track = (Track *) itTrack.Next())) {
+    while((track = (Track *)itTrack.Next()))
+    {
       output.push_back(track->P4());
     }
-  } else if(type=="Electron") { // CASE 2: ELECTRONS
+  }
+  else if(type == "Electron")
+  { // CASE 2: ELECTRONS
     Electron *electron;
-    while((electron = (Electron *) itTrack.Next())) {
+    while((electron = (Electron *)itTrack.Next()))
+    {
       output.push_back(electron->P4());
     }
-  } else if(type=="Muon") { // CASE 3: MUONS
+  }
+  else if(type == "Muon")
+  { // CASE 3: MUONS
     Muon *muon;
-    while((muon = (Muon *) itTrack.Next())) {
+    while((muon = (Muon *)itTrack.Next()))
+    {
       output.push_back(muon->P4());
     }
-  } else if(type=="Photon") { // CASE 4: PHOTONS
+  }
+  else if(type == "Photon")
+  { // CASE 4: PHOTONS
     Photon *photon;
-    while((photon = (Photon *) itTrack.Next())) {
+    while((photon = (Photon *)itTrack.Next()))
+    {
       output.push_back(photon->P4());
     }
-  } else if(type=="GenParticle") { // CASE 5: GENPARTICLES
+  }
+  else if(type == "GenParticle")
+  { // CASE 5: GENPARTICLES
     GenParticle *particle;
-    while((particle = (GenParticle *) itTrack.Next())) {
+    while((particle = (GenParticle *)itTrack.Next()))
+    {
       if(particle->Status != 1) continue;
-        output.push_back(particle->P4());
+      output.push_back(particle->P4());
     }
   }
   return output;

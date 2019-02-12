@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class TimeSmearing
  *
  *  Performs transverse momentum resolution smearing.
@@ -31,29 +30,29 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-fItInputArray(0)
+  fItInputArray(0)
 {
 }
 
@@ -96,25 +95,25 @@ void TimeSmearing::Process()
   const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidateInitialPosition = candidate->InitialPosition;
     const TLorentzVector &candidateFinalPosition = candidate->Position;
 
-    ti = candidateInitialPosition.T()*1.0E-3/c_light;
-    tf = candidateFinalPosition.T()*1.0E-3/c_light;
+    ti = candidateInitialPosition.T() * 1.0E-3 / c_light;
+    tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
     // apply smearing formula
     tf_smeared = gRandom->Gaus(tf, fTimeResolution);
     ti = ti + tf_smeared - tf;
     tf = tf_smeared;
-    
-    mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->InitialPosition.SetT(ti*1.0E3*c_light);
-    candidate->Position.SetT(tf*1.0E3*c_light);
 
-    candidate->ErrorT = fTimeResolution*1.0E3*c_light;
+    mother = candidate;
+    candidate = static_cast<Candidate *>(candidate->Clone());
+    candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
+    candidate->Position.SetT(tf * 1.0E3 * c_light);
+
+    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
 
     candidate->AddCandidate(mother);
 

@@ -41,12 +41,11 @@ class ExRootTreeBranch;
 class DelphesFactory: public TNamed
 {
 public:
-  
   DelphesFactory(const char *name = "ObjectFactory");
   ~DelphesFactory();
 
-  virtual void Clear(Option_t* option = "");
- 
+  virtual void Clear(Option_t *option = "");
+
   TObjArray *NewPermanentArray();
 
   TObjArray *NewArray() { return New<TObjArray>(); }
@@ -55,21 +54,19 @@ public:
 
   TObject *New(TClass *cl);
 
-  template<typename T>
+  template <typename T>
   T *New() { return static_cast<T *>(New(T::Class())); }
 
 private:
-
   ExRootTreeBranch *fObjArrays; //!
 
 #if !defined(__CINT__) && !defined(__CLING__)
-  std::map< const TClass*, ExRootTreeBranch* > fBranches; //!
+  std::map<const TClass *, ExRootTreeBranch *> fBranches; //!
 #endif
 
-  std::set< TObject* > fPool; //!
-  
+  std::set<TObject *> fPool; //!
+
   ClassDef(DelphesFactory, 1)
 };
 
 #endif /* DelphesFactory */
-

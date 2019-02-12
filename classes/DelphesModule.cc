@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesModule
  *
  *  Base class for all Delphes modules
@@ -29,19 +28,19 @@
 
 #include "classes/DelphesFactory.h"
 
-#include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 #include "ExRootAnalysis/ExRootResult.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeReader.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
-#include "TROOT.h"
 #include "TClass.h"
 #include "TFolder.h"
 #include "TObjArray.h"
+#include "TROOT.h"
 
 #include <iostream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -156,5 +155,3 @@ DelphesFactory *DelphesModule::GetFactory()
   }
   return fFactory;
 }
-
-

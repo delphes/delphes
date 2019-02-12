@@ -10,17 +10,17 @@
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
 
-#include "TSeqCollection.h"
 #include "TObjArray.h"
+#include "TSeqCollection.h"
 
 #include <iostream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
-typedef map<Int_t, TObjArray*> TCategoryMap;
-typedef map<ExRootClassifier*, pair<Bool_t, TCategoryMap> > TClassifierMap;
+typedef map<Int_t, TObjArray *> TCategoryMap;
+typedef map<ExRootClassifier *, pair<Bool_t, TCategoryMap>> TClassifierMap;
 
 ExRootFilter::ExRootFilter(const TSeqCollection *collection) :
   fCollection(collection)
@@ -39,7 +39,7 @@ ExRootFilter::~ExRootFilter()
     for(itSubMap = itMap->second.second.begin();
         itSubMap != itMap->second.second.end(); ++itSubMap)
     {
-      delete (itSubMap->second);
+      delete(itSubMap->second);
     }
   }
 
@@ -131,4 +131,3 @@ TObjArray *ExRootFilter::GetSubArray(ExRootClassifier *classifier, Int_t categor
 }
 
 //------------------------------------------------------------------------------
-

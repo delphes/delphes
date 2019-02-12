@@ -16,36 +16,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
-#include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
-#include "modules/Delphes.h"
-#include "classes/DelphesStream.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesStream.h"
+#include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
-static const int kBufferSize  = 1024;
+static const int kBufferSize = 1024;
 
 /*
 LHC Olympics format discription from http://www.jthaler.net/olympicswiki/doku.php?id=lhc_olympics:data_file_format
@@ -73,7 +73,6 @@ public:
   Bool_t ReadLine(FILE *inputFile);
 
 private:
-
   void AddMissingEvents();
 
   void AnalyseEvent(ExRootTreeBranch *branch);
@@ -85,7 +84,11 @@ private:
   void AnalyseJet(ExRootTreeBranch *branch);
   void AnalyseMissingET(ExRootTreeBranch *branch);
 
-  enum {kIntParamSize = 2, kDblParamSize = 7};
+  enum
+  {
+    kIntParamSize = 2,
+    kDblParamSize = 7
+  };
   Int_t fIntParam[kIntParamSize];
   Double_t fDblParam[kDblParamSize];
 
@@ -105,7 +108,6 @@ private:
   ExRootTreeBranch *fBranchMuon;
   ExRootTreeBranch *fBranchJet;
   ExRootTreeBranch *fBranchMissingET;
-
 };
 
 //------------------------------------------------------------------------------
@@ -168,7 +170,8 @@ Bool_t LHCOConverter::ReadLine(FILE *inputFile)
 
     if(!rc)
     {
-      cerr << "** ERROR: " << "invalid event format" << endl;
+      cerr << "** ERROR: "
+           << "invalid event format" << endl;
       return kFALSE;
     }
 
@@ -194,18 +197,19 @@ Bool_t LHCOConverter::ReadLine(FILE *inputFile)
 
     if(!rc)
     {
-      cerr << "** ERROR: " << "invalid object format" << endl;
+      cerr << "** ERROR: "
+           << "invalid object format" << endl;
       return kFALSE;
     }
 
     switch(fIntParam[1])
     {
-      case 0: AnalysePhoton(fBranchPhoton); break;
-      case 1: AnalyseElectron(fBranchElectron); break;
-      case 2: AnalyseMuon(fBranchMuon); break;
-      case 3: AnalyseTau(fBranchJet); break;
-      case 4: AnalyseJet(fBranchJet); break;
-      case 6: AnalyseMissingET(fBranchMissingET); break;
+    case 0: AnalysePhoton(fBranchPhoton); break;
+    case 1: AnalyseElectron(fBranchElectron); break;
+    case 2: AnalyseMuon(fBranchMuon); break;
+    case 3: AnalyseTau(fBranchJet); break;
+    case 4: AnalyseJet(fBranchJet); break;
+    case 6: AnalyseMissingET(fBranchMissingET); break;
     }
   }
 
@@ -227,7 +231,7 @@ void LHCOConverter::AnalyseEvent(ExRootTreeBranch *branch)
 {
   LHCOEvent *element;
 
-  element = static_cast<LHCOEvent*>(branch->NewEntry());
+  element = static_cast<LHCOEvent *>(branch->NewEntry());
 
   element->Number = fEventNumber;
   element->Trigger = fTriggerWord;
@@ -239,7 +243,7 @@ void LHCOConverter::AnalysePhoton(ExRootTreeBranch *branch)
 {
   Photon *element;
 
-  element = static_cast<Photon*>(branch->NewEntry());
+  element = static_cast<Photon *>(branch->NewEntry());
 
   element->Eta = fDblParam[0];
   element->Phi = fDblParam[1];
@@ -253,14 +257,14 @@ void LHCOConverter::AnalyseElectron(ExRootTreeBranch *branch)
 {
   Electron *element;
 
-  element = static_cast<Electron*>(branch->NewEntry());
+  element = static_cast<Electron *>(branch->NewEntry());
 
   element->Eta = fDblParam[0];
   element->Phi = fDblParam[1];
   element->PT = fDblParam[2];
 
   element->Charge = fDblParam[4] < 0.0 ? -1 : 1;
-/*
+  /*
   element->Ntrk = TMath::Abs(fDblParam[4]);
 */
   element->EhadOverEem = fDblParam[6];
@@ -272,14 +276,14 @@ void LHCOConverter::AnalyseMuon(ExRootTreeBranch *branch)
 {
   Muon *element;
 
-  element = static_cast<Muon*>(branch->NewEntry());
+  element = static_cast<Muon *>(branch->NewEntry());
 
   element->Eta = fDblParam[0];
   element->Phi = fDblParam[1];
   element->PT = fDblParam[2];
 
   element->Charge = fDblParam[4] < 0.0 ? -1 : 1;
-/*
+  /*
   element->Ntrk = TMath::Abs(fDblParam[4]);
 
   element->JetIndex = Int_t(fDblParam[5]);
@@ -295,7 +299,7 @@ void LHCOConverter::AnalyseTau(ExRootTreeBranch *branch)
 {
   Jet *element;
 
-  element = static_cast<Jet*>(branch->NewEntry());
+  element = static_cast<Jet *>(branch->NewEntry());
 
   element->Eta = fDblParam[0];
   element->Phi = fDblParam[1];
@@ -307,7 +311,7 @@ void LHCOConverter::AnalyseTau(ExRootTreeBranch *branch)
   element->TauTag = 1;
 
   element->Charge = fDblParam[4] < 0 ? -1 : 1;
-/*
+  /*
   element->Ntrk = TMath::Abs(fDblParam[4]);
 */
   element->EhadOverEem = fDblParam[6];
@@ -319,14 +323,14 @@ void LHCOConverter::AnalyseJet(ExRootTreeBranch *branch)
 {
   Jet *element;
 
-  element = static_cast<Jet*>(branch->NewEntry());
+  element = static_cast<Jet *>(branch->NewEntry());
 
   element->Eta = fDblParam[0];
   element->Phi = fDblParam[1];
   element->PT = fDblParam[2];
 
   element->Mass = fDblParam[3];
-/*
+  /*
   element->Ntrk = TMath::Abs(Int_t(fDblParam[4]));
 */
   element->BTag = Int_t(fDblParam[5]);
@@ -335,7 +339,7 @@ void LHCOConverter::AnalyseJet(ExRootTreeBranch *branch)
   element->Charge = 0;
 
   element->EhadOverEem = fDblParam[6];
-/*
+  /*
   element->Index = fIntParam[0];
 */
 }
@@ -346,7 +350,7 @@ void LHCOConverter::AnalyseMissingET(ExRootTreeBranch *branch)
 {
   MissingET *element;
 
-  element = static_cast<MissingET*>(branch->NewEntry());
+  element = static_cast<MissingET *>(branch->NewEntry());
 
   element->Phi = fDblParam[1];
   element->MET = fDblParam[2];
@@ -375,7 +379,8 @@ int main(int argc, char *argv[])
 
   if(argc < 2)
   {
-    cout << " Usage: " << appName << " output_file" << " [input_file(s)]" << endl;
+    cout << " Usage: " << appName << " output_file"
+         << " [input_file(s)]" << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in LHCO format," << endl;
     cout << " with no input_file, or when input_file is -, read standard input." << endl;
@@ -455,8 +460,7 @@ int main(int argc, char *argv[])
       if(inputFile != stdin) fclose(inputFile);
 
       ++i;
-    }
-    while(i < argc);
+    } while(i < argc);
 
     cout << "** Exiting..." << endl;
 
@@ -473,5 +477,3 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
-
-

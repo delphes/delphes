@@ -8,45 +8,44 @@ class TObjArray;
 class TIterator;
 class PuppiContainer;
 
-class RunPUPPI: public DelphesModule {
+class RunPUPPI: public DelphesModule
+{
 
- public:
-
+public:
   RunPUPPI();
   ~RunPUPPI();
 
   void Init();
   void Process();
   void Finish();
-  
- private:
 
+private:
   TIterator *fItTrackInputArray;
   TIterator *fItNeutralInputArray; //!
-  TIterator *fPVItInputArray; //!                                                                                                                                                      
-  
+  TIterator *fPVItInputArray; //!
+
   const TObjArray *fTrackInputArray;
   const TObjArray *fNeutralInputArray; //!
-  const TObjArray *fPVInputArray; //!                                                                                                                                                     
-  PuppiContainer* fPuppi;
+  const TObjArray *fPVInputArray; //!
+  PuppiContainer *fPuppi;
   // puppi parameters
   bool fApplyNoLep;
   double fMinPuppiWeight;
   bool fUseExp;
-  
-  std::vector<float> fEtaMinBin ;
-  std::vector<float> fEtaMaxBin ;
-  std::vector<float> fPtMinBin ;
-  std::vector<float> fConeSizeBin ;
-  std::vector<float> fRMSPtMinBin ;
-  std::vector<float> fRMSScaleFactorBin ;
+
+  std::vector<float> fEtaMinBin;
+  std::vector<float> fEtaMaxBin;
+  std::vector<float> fPtMinBin;
+  std::vector<float> fConeSizeBin;
+  std::vector<float> fRMSPtMinBin;
+  std::vector<float> fRMSScaleFactorBin;
   std::vector<float> fNeutralMinEBin;
   std::vector<float> fNeutralPtSlope;
-  std::vector<bool>  fApplyCHS;
-  std::vector<bool>  fUseCharged;
-  std::vector<bool>  fApplyLowPUCorr;
-  std::vector<int>   fMetricId;
-  std::vector<int>   fCombId;
+  std::vector<bool> fApplyCHS;
+  std::vector<bool> fUseCharged;
+  std::vector<bool> fApplyLowPUCorr;
+  std::vector<int> fMetricId;
+  std::vector<int> fCombId;
 
   TObjArray *fOutputArray;
   TObjArray *fOutputTrackArray;

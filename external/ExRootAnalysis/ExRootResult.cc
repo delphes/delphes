@@ -11,20 +11,20 @@
 
 #include "ExRootAnalysis/ExRootUtilities.h"
 
-#include "TROOT.h"
-#include "TFile.h"
-#include "TClass.h"
-#include "TStyle.h"
 #include "TCanvas.h"
-#include "TLegend.h"
-#include "TPaveText.h"
-#include "TPaveStats.h"
-#include "TList.h"
+#include "TClass.h"
+#include "TFile.h"
+#include "TFolder.h"
 #include "TH2.h"
 #include "THStack.h"
-#include "TProfile.h"
+#include "TLegend.h"
+#include "TList.h"
 #include "TObjArray.h"
-#include "TFolder.h"
+#include "TPaveStats.h"
+#include "TPaveText.h"
+#include "TProfile.h"
+#include "TROOT.h"
+#include "TStyle.h"
 
 #include <iostream>
 
@@ -36,7 +36,8 @@ static const Color_t kExRootBackgroundColor = 10;
 
 //------------------------------------------------------------------------------
 
-ExRootResult::ExRootResult() : fCanvas(0), fFolder(0)
+ExRootResult::ExRootResult() :
+  fCanvas(0), fFolder(0)
 {
 }
 
@@ -44,7 +45,7 @@ ExRootResult::ExRootResult() : fCanvas(0), fFolder(0)
 
 ExRootResult::~ExRootResult()
 {
-  set<TObject*>::iterator itPool;
+  set<TObject *>::iterator itPool;
   for(itPool = fPool.begin(); itPool != fPool.end(); ++itPool)
   {
     delete *itPool;
@@ -67,7 +68,7 @@ void ExRootResult::Write(const char *fileName)
   TDirectory *currentDirectory = gDirectory;
   TFile *file = new TFile(fileName, "RECREATE");
   file->cd();
-  std::map<TObject*, PlotSettings>::iterator itPlotMap;
+  std::map<TObject *, PlotSettings>::iterator itPlotMap;
   for(itPlotMap = fPlotMap.begin(); itPlotMap != fPlotMap.end(); ++itPlotMap)
   {
     object = itPlotMap->first;
@@ -122,7 +123,7 @@ void ExRootResult::CreateCanvas()
   gStyle->SetOptStat(111110);
   // gStyle->SetOptFit(101);
 
-  fCanvas = static_cast<TCanvas*>(gROOT->FindObject("c1"));
+  fCanvas = static_cast<TCanvas *>(gROOT->FindObject("c1"));
   if(fCanvas)
   {
     fCanvas->Clear();
@@ -153,7 +154,7 @@ void ExRootResult::Attach(TObject *plot, TObject *object)
 {
   if(!plot) return;
 
-  std::map<TObject*, PlotSettings>::iterator itPlotMap = fPlotMap.find(plot);
+  std::map<TObject *, PlotSettings>::iterator itPlotMap = fPlotMap.find(plot);
   if(itPlotMap != fPlotMap.end())
   {
     TObjArray *attachments = itPlotMap->second.attachments;
@@ -177,10 +178,10 @@ void ExRootResult::PrintPlot(TObject *plot, const char *sufix, const char *forma
 
   if(plot->IsA()->InheritsFrom(TH1::Class()))
   {
-    histogram = static_cast<TH1*>(plot);
+    histogram = static_cast<TH1 *>(plot);
   }
 
-  map<TObject*, PlotSettings>::iterator itPlotMap = fPlotMap.find(plot);
+  map<TObject *, PlotSettings>::iterator itPlotMap = fPlotMap.find(plot);
   if(itPlotMap != fPlotMap.end())
   {
     PlotSettings settings = itPlotMap->second;
@@ -223,7 +224,7 @@ void ExRootResult::Print(const char *format)
 
   TCanvas *canvas = GetCanvas();
 
-  map<TObject*, PlotSettings>::iterator itPlotMap;
+  map<TObject *, PlotSettings>::iterator itPlotMap;
 
   for(itPlotMap = fPlotMap.begin(); itPlotMap != fPlotMap.end(); ++itPlotMap)
   {
@@ -235,12 +236,12 @@ void ExRootResult::Print(const char *format)
 
     if(object->IsA()->InheritsFrom(TH1::Class()))
     {
-      histogram = static_cast<TH1*>(object);
+      histogram = static_cast<TH1 *>(object);
     }
     else if(object->IsA()->InheritsFrom(THStack::Class()))
     {
-      stack = static_cast<THStack*>(object);
-      histogram = static_cast<TH1*>(stack->GetHists()->First());
+      stack = static_cast<THStack *>(object);
+      histogram = static_cast<TH1 *>(stack->GetHists()->First());
     }
 
     canvas->SetLogx(settings.logx);
@@ -270,7 +271,7 @@ void ExRootResult::Print(const char *format)
 
     if(histogram)
     {
-      stats = static_cast<TPaveStats*>(histogram->FindObject("stats"));
+      stats = static_cast<TPaveStats *>(histogram->FindObject("stats"));
       if(stats)
       {
         stats->SetX1NDC(0.67);
@@ -299,9 +300,9 @@ void ExRootResult::Print(const char *format)
 //------------------------------------------------------------------------------
 
 TH1 *ExRootResult::AddHist1D(const char *name, const char *title,
-                             const char *xlabel, const char *ylabel,
-                             Int_t nxbins, Axis_t xmin, Axis_t xmax,
-                             Int_t logx, Int_t logy)
+  const char *xlabel, const char *ylabel,
+  Int_t nxbins, Axis_t xmin, Axis_t xmax,
+  Int_t logx, Int_t logy)
 {
   TH1F *hist = new TH1F(name, title, nxbins, xmin, xmax);
   PlotSettings settings;
@@ -323,9 +324,9 @@ TH1 *ExRootResult::AddHist1D(const char *name, const char *title,
 //------------------------------------------------------------------------------
 
 TH1 *ExRootResult::AddHist1D(const char *name, const char *title,
-                             const char *xlabel, const char *ylabel,
-                             Int_t nxbins, const Float_t *bins,
-                             Int_t logx, Int_t logy)
+  const char *xlabel, const char *ylabel,
+  Int_t nxbins, const Float_t *bins,
+  Int_t logx, Int_t logy)
 {
   TH1F *hist = new TH1F(name, title, nxbins, bins);
   PlotSettings settings;
@@ -347,9 +348,9 @@ TH1 *ExRootResult::AddHist1D(const char *name, const char *title,
 //------------------------------------------------------------------------------
 
 TProfile *ExRootResult::AddProfile(const char *name, const char *title,
-                                   const char *xlabel, const char *ylabel,
-                                   Int_t nxbins, Axis_t xmin, Axis_t xmax,
-                                   Int_t logx, Int_t logy)
+  const char *xlabel, const char *ylabel,
+  Int_t nxbins, Axis_t xmin, Axis_t xmax,
+  Int_t logx, Int_t logy)
 {
   TProfile *profile = new TProfile(name, title, nxbins, xmin, xmax);
   PlotSettings settings;
@@ -371,10 +372,10 @@ TProfile *ExRootResult::AddProfile(const char *name, const char *title,
 //------------------------------------------------------------------------------
 
 TH2 *ExRootResult::AddHist2D(const char *name, const char *title,
-                             const char *xlabel, const char *ylabel,
-                             Int_t nxbins, Axis_t xmin, Axis_t xmax,
-                             Int_t nybins, Axis_t ymin, Axis_t ymax,
-                             Int_t logx, Int_t logy)
+  const char *xlabel, const char *ylabel,
+  Int_t nxbins, Axis_t xmin, Axis_t xmax,
+  Int_t nybins, Axis_t ymin, Axis_t ymax,
+  Int_t logx, Int_t logy)
 {
   TH2F *hist = new TH2F(name, title, nxbins, xmin, xmax, nybins, ymin, ymax);
   PlotSettings settings;

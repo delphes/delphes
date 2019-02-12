@@ -28,7 +28,6 @@ class TrackCountingTauTaggingPartonClassifier;
 class TrackCountingTauTagging: public DelphesModule
 {
 public:
-
   TrackCountingTauTagging();
   ~TrackCountingTauTagging();
 
@@ -37,23 +36,22 @@ public:
   void Finish();
 
 private:
-
   Int_t fBitNumber;
 
   Double_t fDeltaR;
   Double_t fDeltaRTrack;
   Double_t fTrackPTMin;
 
-  std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!
-  
+  std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
+
   TrackCountingTauTaggingPartonClassifier *fClassifier; //!
-  
+
   ExRootFilter *fFilter;
 
   TIterator *fItPartonInputArray; //!
-  
+
   TIterator *fItTrackInputArray; //!
-  
+
   TIterator *fItJetInputArray; //!
 
   const TObjArray *fParticleInputArray; //!
@@ -61,7 +59,7 @@ private:
   const TObjArray *fTrackInputArray; //!
 
   const TObjArray *fPartonInputArray; //!
-  
+
   const TObjArray *fJetInputArray; //!
 
   ClassDef(TrackCountingTauTagging, 1)

@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class Delphes
  *
  *  Main Delphes module.
@@ -32,29 +31,29 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootConfReader.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
-#include "TROOT.h"
-#include "TMath.h"
-#include "TFolder.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFolder.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TROOT.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 

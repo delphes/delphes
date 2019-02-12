@@ -37,7 +37,6 @@ class TF1;
 class PhotonConversions: public DelphesModule
 {
 public:
-
   PhotonConversions();
   ~PhotonConversions();
 
@@ -46,7 +45,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fRadius, fRadius2, fHalfLength;
   Double_t fEtaMin, fEtaMax;
 

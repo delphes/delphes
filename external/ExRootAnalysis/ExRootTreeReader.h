@@ -9,17 +9,16 @@
  *
  */
 
-#include "TROOT.h"
-#include "TNamed.h"
 #include "TChain.h"
 #include "TFile.h"
+#include "TNamed.h"
+#include "TROOT.h"
 
 #include <map>
 
-class ExRootTreeReader : public TNamed
+class ExRootTreeReader: public TNamed
 {
-public :
-
+public:
   ExRootTreeReader(TTree *tree = 0);
   ~ExRootTreeReader();
 
@@ -31,13 +30,12 @@ public :
   TClonesArray *UseBranch(const char *branchName);
 
 private:
-
   Bool_t Notify();
 
   TTree *fChain; //! pointer to the analyzed TTree or TChain
   Int_t fCurrentTree; //! current Tree number in a TChain
 
-  typedef std::map<TString, std::pair<TBranch*, TClonesArray*> > TBranchMap;
+  typedef std::map<TString, std::pair<TBranch *, TClonesArray *>> TBranchMap;
 
   TBranchMap fBranchMap; //!
 

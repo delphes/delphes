@@ -36,7 +36,6 @@ class TObjArray;
 class TrackCountingBTagging: public DelphesModule
 {
 public:
-
   TrackCountingBTagging();
   ~TrackCountingBTagging();
 
@@ -45,15 +44,14 @@ public:
   void Finish();
 
 private:
-
   Int_t fBitNumber;
 
   Double_t fPtMin;
   Double_t fDeltaR;
   Double_t fIPmax;
   Double_t fSigMin;
-  Int_t    fNtracks;
-  Bool_t   fUse3D;
+  Int_t fNtracks;
+  Bool_t fUse3D;
 
   TIterator *fItTrackInputArray; //!
   TIterator *fItJetInputArray; //!

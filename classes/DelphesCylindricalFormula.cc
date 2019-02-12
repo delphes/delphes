@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "classes/DelphesCylindricalFormula.h"
 
 #include "TString.h"
@@ -53,7 +52,7 @@ Int_t DelphesCylindricalFormula::Compile(const char *expression)
   const char *it;
   for(it = expression; *it; ++it)
   {
-    if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+    if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
   }
   buffer.ReplaceAll("r", "x");

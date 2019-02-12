@@ -19,7 +19,6 @@
 #ifndef IdentificationMap_h
 #define IdentificationMap_h
 
-
 /** \class IdentificationMap
  *
  *  Converts particles with some PDG code into another particle,
@@ -38,7 +37,6 @@ class DelphesFormula;
 class IdentificationMap: public DelphesModule
 {
 public:
-
   IdentificationMap();
   ~IdentificationMap();
 
@@ -47,8 +45,7 @@ public:
   void Finish();
 
 private:
-
-  typedef std::multimap< Int_t, std::pair< Int_t, DelphesFormula * > > TMisIDMap; //!
+  typedef std::multimap<Int_t, std::pair<Int_t, DelphesFormula *>> TMisIDMap; //!
 
   TMisIDMap fEfficiencyMap; //!
 

@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class Hector
  *
  *  Propagates candidates using Hector library.
@@ -31,26 +30,26 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 #include "Hector/H_BeamLine.h"
-#include "Hector/H_RecRPObject.h"
 #include "Hector/H_BeamParticle.h"
+#include "Hector/H_RecRPObject.h"
 
 using namespace std;
 
@@ -119,7 +118,7 @@ void Hector::Process()
   const Double_t c_light = 2.99792458E8;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -131,20 +130,20 @@ void Hector::Process()
     y = 1.0E3 * candidatePosition.Y();
     z = 1.0E-3 * candidatePosition.Z();
 
-//    tx = 1.0E6 * TMath::ATan(candidateMomentum.Px()/pz);
-//    ty = 1.0E6 * TMath::ATan(candidateMomentum.Py()/pz);
+    //    tx = 1.0E6 * TMath::ATan(candidateMomentum.Px()/pz);
+    //    ty = 1.0E6 * TMath::ATan(candidateMomentum.Py()/pz);
 
     tx = 0.0;
     ty = 0.0;
 
-    theta = TMath::Hypot(TMath::ATan(candidateMomentum.Px()/pz), TMath::ATan(candidateMomentum.Py()/pz));
-    distance = (fDistance - 1.0E-3 * candidatePosition.Z())/TMath::Cos(theta);
-    time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T())/c_light, fSigmaT);
+    theta = TMath::Hypot(TMath::ATan(candidateMomentum.Px() / pz), TMath::ATan(candidateMomentum.Py() / pz));
+    distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / TMath::Cos(theta);
+    time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
 
     H_BeamParticle particle(candidate->Mass, candidate->Charge);
-//    particle.set4Momentum(candidateMomentum);
-    particle.set4Momentum(candidateMomentum.Px(), candidateMomentum.Py(), 
-                          candidateMomentum.Pz(), candidateMomentum.E());
+    //    particle.set4Momentum(candidateMomentum);
+    particle.set4Momentum(candidateMomentum.Px(), candidateMomentum.Py(),
+      candidateMomentum.Pz(), candidateMomentum.E());
     particle.setPosition(x, y, tx, ty, z);
 
     particle.smearAng(fSigmaX, fSigmaY, gRandom);
@@ -157,7 +156,7 @@ void Hector::Process()
     particle.propagate(fDistance);
 
     mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate = static_cast<Candidate *>(candidate->Clone());
     candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
     candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
     candidate->AddCandidate(mother);

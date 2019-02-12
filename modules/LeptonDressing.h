@@ -33,24 +33,22 @@ class TObjArray;
 class LeptonDressing: public DelphesModule
 {
 public:
-
   LeptonDressing();
   ~LeptonDressing();
-  
+
   void Init();
   void Process();
   void Finish();
 
 private:
-
   Double_t fDeltaR;
-  
+
   TIterator *fItDressingInputArray; //!
-  
+
   TIterator *fItCandidateInputArray; //!
 
   const TObjArray *fDressingInputArray; //!
-  
+
   const TObjArray *fCandidateInputArray; //!
 
   TObjArray *fOutputArray; //!

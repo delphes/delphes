@@ -18,7 +18,6 @@ class TClonesArray;
 class ExRootTreeBranch
 {
 public:
-
   ExRootTreeBranch(const char *name, TClass *cl, TTree *tree = 0);
   ~ExRootTreeBranch();
 
@@ -26,10 +25,8 @@ public:
   void Clear();
 
 private:
-
   Int_t fSize, fCapacity; //!
   TClonesArray *fData; //!
 };
 
 #endif /* ExRootTreeBranch */
-

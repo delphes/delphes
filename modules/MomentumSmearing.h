@@ -36,7 +36,6 @@ class DelphesFormula;
 class MomentumSmearing: public DelphesModule
 {
 public:
-
   MomentumSmearing();
   ~MomentumSmearing();
 
@@ -45,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
   DelphesFormula *fFormula; //!
@@ -53,7 +51,7 @@ private:
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
-  
+
   TObjArray *fOutputArray; //!
 
   ClassDef(MomentumSmearing, 1)

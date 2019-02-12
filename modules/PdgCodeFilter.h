@@ -38,7 +38,6 @@ class TObjArray;
 class PdgCodeFilter: public DelphesModule
 {
 public:
-
   PdgCodeFilter();
   ~PdgCodeFilter();
 
@@ -47,7 +46,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fPTMin; //!
   Bool_t fInvert; //!
   Bool_t fRequireStatus; //!

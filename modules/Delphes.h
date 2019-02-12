@@ -40,12 +40,11 @@ class DelphesFactory;
 class Delphes: public DelphesModule
 {
 public:
-
   Delphes(const char *name = "Delphes");
   ~Delphes();
 
   void SetTreeWriter(ExRootTreeWriter *treeWriter);
-  
+
   DelphesFactory *GetFactory() const { return fFactory; }
 
   void Clear();
@@ -55,11 +54,9 @@ public:
   virtual void Finish();
 
 private:
-
   DelphesFactory *fFactory;
 
   ClassDef(Delphes, 1)
 };
 
 #endif /* Delphes_h */
-

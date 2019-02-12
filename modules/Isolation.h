@@ -40,7 +40,6 @@ class IsolationClassifier;
 class Isolation: public DelphesModule
 {
 public:
-
   Isolation();
   ~Isolation();
 
@@ -49,7 +48,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fDeltaRMax;
 
   Double_t fPTRatioMax;

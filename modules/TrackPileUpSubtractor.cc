@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class TrackPileUpSubtractor
  *
  *  Subtract pile-up contribution from tracks.
@@ -31,29 +30,29 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
 TrackPileUpSubtractor::TrackPileUpSubtractor() :
-fFormula(0) 
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -87,12 +86,12 @@ void TrackPileUpSubtractor::Init()
   TIterator *iterator;
 
   size = param.GetSize();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i*2].GetString());
+    array = ImportArray(param[i * 2].GetString());
     iterator = array->MakeIterator();
 
-    fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());
+    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
   }
 }
 
@@ -100,7 +99,7 @@ void TrackPileUpSubtractor::Init()
 
 void TrackPileUpSubtractor::Finish()
 {
-  map< TIterator *, TObjArray * >::iterator itInputMap;
+  map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
 
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
@@ -118,17 +117,16 @@ void TrackPileUpSubtractor::Finish()
 void TrackPileUpSubtractor::Process()
 {
   Candidate *candidate, *particle;
-  map< TIterator *, TObjArray * >::iterator itInputMap;
+  map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
-  Double_t z, zvtx=0;
+  Double_t z, zvtx = 0;
   Double_t pt, eta, phi, e;
-
 
   // find z position of primary vertex
 
   fItVertexInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItVertexInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
   {
     if(!candidate->IsPU)
     {
@@ -145,22 +143,22 @@ void TrackPileUpSubtractor::Process()
 
     // loop over all candidates
     iterator->Reset();
-    while((candidate = static_cast<Candidate*>(iterator->Next())))
+    while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
-      particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+      particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
       const TLorentzVector &candidateMomentum = particle->Momentum;
 
       eta = candidateMomentum.Eta();
       pt = candidateMomentum.Pt();
       phi = candidateMomentum.Phi();
       e = candidateMomentum.E();
-      
+
       z = particle->Position.Z();
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
 
-      if(candidate->Charge !=0 && candidate->IsPU && TMath::Abs(z-zvtx) > fFormula->Eval(pt, eta, phi, e)* 1.0e3)
+      if(candidate->Charge != 0 && candidate->IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
       {
         candidate->IsRecoPU = 1;
       }

@@ -10,14 +10,14 @@
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
-#include "TROOT.h"
-#include "TFile.h"
-#include "TTree.h"
 #include "TClonesArray.h"
+#include "TFile.h"
+#include "TROOT.h"
+#include "TTree.h"
 
 #include <iostream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -30,10 +30,10 @@ ExRootTreeWriter::ExRootTreeWriter(TFile *file, const char *treeName) :
 
 ExRootTreeWriter::~ExRootTreeWriter()
 {
-  set<ExRootTreeBranch*>::iterator itBranches;
+  set<ExRootTreeBranch *>::iterator itBranches;
   for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
   {
-    delete (*itBranches);
+    delete(*itBranches);
   }
 
   if(fTree) delete fTree;
@@ -68,7 +68,7 @@ void ExRootTreeWriter::Write()
 
 void ExRootTreeWriter::Clear()
 {
-  set<ExRootTreeBranch*>::iterator itBranches;
+  set<ExRootTreeBranch *>::iterator itBranches;
   for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
   {
     (*itBranches)->Clear();
@@ -94,7 +94,7 @@ TTree *ExRootTreeWriter::NewTree()
   }
 
   tree->SetDirectory(fFile);
-  tree->SetAutoSave(10000000);  // autosave when 10 MB written
+  tree->SetAutoSave(10000000); // autosave when 10 MB written
 
   return tree;
 }

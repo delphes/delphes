@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class MomentumSmearing
  *
  *  Performs transverse momentum resolution smearing.
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -98,7 +97,7 @@ void MomentumSmearing::Process()
   Double_t pt, eta, phi, e, res;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -107,25 +106,25 @@ void MomentumSmearing::Process()
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
     res = fFormula->Eval(pt, eta, phi, e);
- 
+
     // apply smearing formula
     //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
-    
-    res = ( res > 1.0 ) ? 1.0 : res; 
 
-    pt = LogNormal(pt, res * pt );
-    
+    res = (res > 1.0) ? 1.0 : res;
+
+    pt = LogNormal(pt, res * pt);
+
     //if(pt <= 0.0) continue;
 
     mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
+    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt * TMath::CosH(eta));
     //candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
     candidate->TrackResolution = res;
     candidate->AddCandidate(mother);
-        
+
     fOutputArray->Add(candidate);
   }
 }
@@ -137,16 +136,15 @@ Double_t MomentumSmearing::LogNormal(Double_t mean, Double_t sigma)
 
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma*sigma)/(mean*mean))));
-    a = TMath::Log(mean) - 0.5*b*b;
+    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
+    a = TMath::Log(mean) - 0.5 * b * b;
 
-    return TMath::Exp(a + b*gRandom->Gaus(0.0, 1.0));
+    return TMath::Exp(a + b * gRandom->Gaus(0.0, 1.0));
   }
   else
   {
     return 0.0;
   }
 }
-
 
 //------------------------------------------------------------------------------

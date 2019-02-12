@@ -27,7 +27,6 @@ class Candidate;
 class OldCalorimeter: public DelphesModule
 {
 public:
-
   OldCalorimeter();
   ~OldCalorimeter();
 
@@ -36,9 +35,8 @@ public:
   void Finish();
 
 private:
-
-  typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
-  typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
+  typedef std::map<Long64_t, std::pair<Double_t, Double_t>> TFractionMap; //!
+  typedef std::map<Double_t, std::set<Double_t>> TBinMap; //!
 
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
@@ -50,13 +48,13 @@ private:
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
 
-  std::vector < Double_t > fEtaBins;
-  std::vector < std::vector < Double_t >* > fPhiBins;
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
 
-  std::vector < Long64_t > fTowerHits;
+  std::vector<Long64_t> fTowerHits;
 
-  std::vector < Double_t > fECalFractions;
-  std::vector < Double_t > fHCalFractions;
+  std::vector<Double_t> fECalFractions;
+  std::vector<Double_t> fHCalFractions;
 
   DelphesFormula *fECalResolutionFormula; //!
   DelphesFormula *fHCalResolutionFormula; //!

@@ -19,7 +19,6 @@ class TObjArray;
 class BeamSpotFilter: public DelphesModule
 {
 public:
-
   BeamSpotFilter();
   ~BeamSpotFilter();
 
@@ -28,7 +27,6 @@ public:
   void Finish();
 
 private:
-
   Float_t fPassedOne;
 
   TIterator *fItInputArray; //!

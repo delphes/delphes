@@ -19,8 +19,8 @@
 #ifndef Delphes3DGeometry_h
 #define Delphes3DGeometry_h
 
-#include <set>
 #include <map>
+#include <set>
 #include <vector>
 
 #include "Rtypes.h"
@@ -32,65 +32,64 @@ class TGeoMedium;
 
 // TODO: asymmetric detector
 
-class Delphes3DGeometry {
-   public:
-     Delphes3DGeometry(TGeoManager *geom = NULL, bool transp = false);
-     ~Delphes3DGeometry() {}
+class Delphes3DGeometry
+{
+public:
+  Delphes3DGeometry(TGeoManager *geom = NULL, bool transp = false);
+  ~Delphes3DGeometry() {}
 
-     void readFile(const char *filename, const char *ParticlePropagator="ParticlePropagator",
-                                         const char *TrackingEfficiency="ChargedHadronTrackingEfficiency",
-                                         const char *MuonEfficiency="MuonEfficiency",
-                                         const char *Calorimeters="Calorimeter");
+  void readFile(const char *filename, const char *ParticlePropagator = "ParticlePropagator",
+    const char *TrackingEfficiency = "ChargedHadronTrackingEfficiency",
+    const char *MuonEfficiency = "MuonEfficiency",
+    const char *Calorimeters = "Calorimeter");
 
-     void setContingency(Double_t contingency) { contingency_ = contingency; }
-     void setCaloBarrelThickness(Double_t thickness) { calo_barrel_thickness_ = thickness; }
-     void setCaloEndcapThickness(Double_t thickness) { calo_endcap_thickness_ = thickness; }
-     void setMuonSystemThickness(Double_t thickness) { muonSystem_thickn_ = thickness; }
+  void setContingency(Double_t contingency) { contingency_ = contingency; }
+  void setCaloBarrelThickness(Double_t thickness) { calo_barrel_thickness_ = thickness; }
+  void setCaloEndcapThickness(Double_t thickness) { calo_endcap_thickness_ = thickness; }
+  void setMuonSystemThickness(Double_t thickness) { muonSystem_thickn_ = thickness; }
 
-     TGeoVolume *getDetector(bool withTowers = true);
+  TGeoVolume *getDetector(bool withTowers = true);
 
-     Double_t getTrackerRadius() const { return tk_radius_; }
-     Double_t getDetectorRadius() const { return muonSystem_radius_; }
-     Double_t getTrackerHalfLength() const { return tk_length_; }
-     Double_t getDetectorHalfLength() const { return muonSystem_length_; }
-     Double_t getBField() const { return tk_Bz_; }
-     std::pair<TAxis*, TAxis*> getCaloAxes() { return std::make_pair(etaAxis_,phiAxis_); }
+  Double_t getTrackerRadius() const { return tk_radius_; }
+  Double_t getDetectorRadius() const { return muonSystem_radius_; }
+  Double_t getTrackerHalfLength() const { return tk_length_; }
+  Double_t getDetectorHalfLength() const { return muonSystem_length_; }
+  Double_t getBField() const { return tk_Bz_; }
+  std::pair<TAxis *, TAxis *> getCaloAxes() { return std::make_pair(etaAxis_, phiAxis_); }
 
-   private:
-     std::pair<Double_t, Double_t> addTracker(TGeoVolume *top);
-     std::pair<Double_t, Double_t> addCalorimeter(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set< std::pair<Double_t, Int_t> >& caloBinning);
-     std::pair<Double_t, Double_t> addMuonDets(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength);
-     void addCaloTowers(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set< std::pair<Double_t, Int_t> >& caloBinning);
+private:
+  std::pair<Double_t, Double_t> addTracker(TGeoVolume *top);
+  std::pair<Double_t, Double_t> addCalorimeter(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set<std::pair<Double_t, Int_t>> &caloBinning);
+  std::pair<Double_t, Double_t> addMuonDets(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength);
+  void addCaloTowers(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set<std::pair<Double_t, Int_t>> &caloBinning);
 
-   private:
+private:
+  TGeoManager *geom_;
 
-     TGeoManager *geom_;
+  TGeoMedium *vacuum_;
+  TGeoMedium *tkmed_;
+  TGeoMedium *calomed_;
+  TGeoMedium *mudetmed_;
 
-     TGeoMedium *vacuum_;
-     TGeoMedium *tkmed_;
-     TGeoMedium *calomed_;
-     TGeoMedium *mudetmed_;
+  TAxis *etaAxis_;
+  TAxis *phiAxis_;
 
-     TAxis *etaAxis_;
-     TAxis *phiAxis_;
+  Double_t contingency_;
+  Double_t calo_barrel_thickness_;
+  Double_t calo_endcap_thickness_;
+  Double_t muonSystem_thickn_;
+  Double_t muonSystem_radius_;
+  Double_t muonSystem_length_;
+  Double_t tk_radius_;
+  Double_t tk_length_;
+  Double_t tk_etamax_;
+  Double_t tk_Bz_;
 
-     Double_t contingency_;
-     Double_t calo_barrel_thickness_;
-     Double_t calo_endcap_thickness_;
-     Double_t muonSystem_thickn_;
-     Double_t muonSystem_radius_;
-     Double_t muonSystem_length_;
-     Double_t tk_radius_;
-     Double_t tk_length_;
-     Double_t tk_etamax_;
-     Double_t tk_Bz_;
+  std::vector<std::string> calorimeters_;
+  std::vector<std::string> muondets_;
 
-     std::vector<std::string> calorimeters_;
-     std::vector<std::string> muondets_;
-
-     std::map<std::string, Double_t> muonSystem_etamax_;
-     std::map<std::string, std::set< std::pair<Double_t, Int_t> > > caloBinning_;
-
+  std::map<std::string, Double_t> muonSystem_etamax_;
+  std::map<std::string, std::set<std::pair<Double_t, Int_t>>> caloBinning_;
 };
 
 #endif

@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class EnergySmearing
  *
  *  Performs energy resolution smearing.
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -86,7 +85,7 @@ void EnergySmearing::Init()
 //------------------------------------------------------------------------------
 
 void EnergySmearing::Finish()
-{  
+{
   if(fItInputArray) delete fItInputArray;
 }
 
@@ -98,29 +97,29 @@ void EnergySmearing::Process()
   Double_t pt, energy, eta, phi;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    
+
     pt = candidatePosition.Pt();
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     energy = candidateMomentum.E();
- 
+
     // apply smearing formula
     energy = gRandom->Gaus(energy, fFormula->Eval(pt, eta, phi, energy));
-     
+
     if(energy <= 0.0) continue;
- 
+
     mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiE(energy/TMath::CosH(eta), eta, phi, energy);
-    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy)/candidateMomentum.E();
+    candidate->Momentum.SetPtEtaPhiE(energy / TMath::CosH(eta), eta, phi, energy);
+    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
     candidate->AddCandidate(mother);
- 
+
     fOutputArray->Add(candidate);
   }
 }

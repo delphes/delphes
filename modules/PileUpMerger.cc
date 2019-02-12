@@ -28,25 +28,25 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesTF2.h"
 #include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesTF2.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -57,7 +57,6 @@ PileUpMerger::PileUpMerger() :
 {
   fFunction = new DelphesTF2;
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -74,7 +73,7 @@ void PileUpMerger::Init()
 
   fPileUpDistribution = GetInt("PileUpDistribution", 0);
 
-  fMeanPileUp  = GetDouble("MeanPileUp", 10);
+  fMeanPileUp = GetDouble("MeanPileUp", 10);
 
   fZVertexSpread = GetDouble("ZVertexSpread", 0.15);
   fTVertexSpread = GetDouble("TVertexSpread", 1.5E-09);
@@ -134,7 +133,7 @@ void PileUpMerger::Process()
   dz0 = -1.0e6;
   dt0 = -1.0e6;
 
-  dt *= c_light*1.0E3; // necessary in order to make t in mm/c
+  dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
   dz *= 1.0E3; // necessary in order to make z in mm
 
   //cout<<dz<<","<<dt<<endl;
@@ -149,7 +148,7 @@ void PileUpMerger::Process()
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     vx += candidate->Position.X();
     vy += candidate->Position.Y();
@@ -158,9 +157,9 @@ void PileUpMerger::Process()
     pt = candidate->Momentum.Pt();
 
     // take postion and time from first stable particle
-    if (dz0 < -999999.0)
+    if(dz0 < -999999.0)
       dz0 = z;
-    if (dt0 < -999999.0)
+    if(dt0 < -999999.0)
       dt0 = t;
 
     // cancel any possible offset in position and time the input file
@@ -171,10 +170,10 @@ void PileUpMerger::Process()
 
     fParticleOutputArray->Add(candidate);
 
-    if(TMath::Abs(candidate->Charge) >  1.0E-9)
+    if(TMath::Abs(candidate->Charge) > 1.0E-9)
     {
       nch++;
-      sumpt2 += pt*pt;
+      sumpt2 += pt * pt;
       vertex->AddCandidate(candidate);
     }
   }
@@ -197,38 +196,36 @@ void PileUpMerger::Process()
 
   switch(fPileUpDistribution)
   {
-    case 0:
-      numberOfEvents = gRandom->Poisson(fMeanPileUp);
-      break;
-    case 1:
-      numberOfEvents = gRandom->Integer(2*fMeanPileUp + 1);
-      break;
-    case 2:
-      numberOfEvents = fMeanPileUp;
-      break;
-    default:
-      numberOfEvents = gRandom->Poisson(fMeanPileUp);
-      break;
+  case 0:
+    numberOfEvents = gRandom->Poisson(fMeanPileUp);
+    break;
+  case 1:
+    numberOfEvents = gRandom->Integer(2 * fMeanPileUp + 1);
+    break;
+  case 2:
+    numberOfEvents = fMeanPileUp;
+    break;
+  default:
+    numberOfEvents = gRandom->Poisson(fMeanPileUp);
+    break;
   }
 
   allEntries = fReader->GetEntries();
-
 
   for(event = 0; event < numberOfEvents; ++event)
   {
     do
     {
-      entry = TMath::Nint(gRandom->Rndm()*allEntries);
-    }
-    while(entry >= allEntries);
+      entry = TMath::Nint(gRandom->Rndm() * allEntries);
+    } while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
 
-   // --- Pile-up vertex smearing
+    // --- Pile-up vertex smearing
 
     fFunction->GetRandom2(dz, dt);
 
-    dt *= c_light*1.0E3; // necessary in order to make t in mm/c
+    dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
     dz *= 1.0E3; // necessary in order to make z in mm
 
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
@@ -251,7 +248,7 @@ void PileUpMerger::Process()
       candidate->Status = 1;
 
       pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
       candidate->IsPU = 1;
@@ -270,10 +267,10 @@ void PileUpMerger::Process()
       vy += candidate->Position.Y();
 
       ++numberOfParticles;
-      if(TMath::Abs(candidate->Charge) >  1.0E-9)
+      if(TMath::Abs(candidate->Charge) > 1.0E-9)
       {
         nch++;
-        sumpt2 += pt*pt;
+        sumpt2 += pt * pt;
         vertex->AddCandidate(candidate);
       }
 
@@ -298,7 +295,6 @@ void PileUpMerger::Process()
     vertex->IsPU = 1;
 
     fVertexOutputArray->Add(vertex);
-
   }
 }
 

@@ -40,10 +40,9 @@ class ExRootTreeWriter;
 
 class DelphesFactory;
 
-class DelphesModule: public ExRootTask 
+class DelphesModule: public ExRootTask
 {
 public:
-
   DelphesModule();
   ~DelphesModule();
 
@@ -60,12 +59,10 @@ public:
   DelphesFactory *GetFactory();
 
 protected:
-
   ExRootTreeWriter *fTreeWriter;
   DelphesFactory *fFactory;
 
 private:
-
   ExRootResult *fPlots;
 
   TFolder *fPlotFolder, *fExportFolder;
@@ -74,4 +71,3 @@ private:
 };
 
 #endif /* DelphesModule_h */
-

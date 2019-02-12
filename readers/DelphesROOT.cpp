@@ -17,45 +17,42 @@
  */
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
-#include <sstream>
 #include <memory>
+#include <sstream>
+#include <stdexcept>
 
 #include <map>
 #include <vector>
 
-#include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
 #include "TClonesArray.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
-#include "modules/Delphes.h"
-#include "classes/DelphesStream.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesStream.h"
+#include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
-
-
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeReader.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 
@@ -93,7 +90,9 @@ int main(int argc, char *argv[])
 
   if(argc < 4)
   {
-    cout << " Usage: " << appName << " config_file" << " output_file" << " input_file(s)" << endl;
+    cout << " Usage: " << appName << " config_file"
+         << " output_file"
+         << " input_file(s)" << endl;
     cout << " config_file - configuration file in Tcl format," << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in ROOT format." << endl;
@@ -121,16 +120,16 @@ int main(int argc, char *argv[])
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-   
+
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
 
     modularDelphes = new Delphes("Delphes");
     modularDelphes->SetConfReader(confReader);
     modularDelphes->SetTreeWriter(treeWriter);
-    
+
     TChain *chain = new TChain("Delphes");
-    
+
     factory = modularDelphes->GetFactory();
     allParticleOutputArray = modularDelphes->ExportArray("allParticles");
     stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
@@ -144,7 +143,7 @@ int main(int argc, char *argv[])
 
       chain->Add(argv[i]);
       ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
-      
+
       inputFile = TFile::Open(argv[i]);
 
       if(inputFile == NULL)
@@ -152,11 +151,11 @@ int main(int argc, char *argv[])
         message << "can't open " << argv[i] << endl;
         throw runtime_error(message.str());
       }
-      
+
       numberOfEvents = treeReader->GetEntries();
-      TClonesArray *branchParticle   = treeReader->UseBranch("Particle");
+      TClonesArray *branchParticle = treeReader->UseBranch("Particle");
       TClonesArray *branchHepMCEvent = treeReader->UseBranch("Event");
-     
+
       if(numberOfEvents <= 0) continue;
 
       // ExRootProgressBar progressBar(numberOfEvents - 1);
@@ -168,14 +167,14 @@ int main(int argc, char *argv[])
       treeWriter->Clear();
       for(Int_t entry = 0; entry < numberOfEvents && !interrupted; ++entry)
       {
-    
+
         treeReader->ReadEntry(entry);
 
-        // -- TBC need also to include event weights --  
-        
-        eve = (HepMCEvent*) branchHepMCEvent->At(0);
+        // -- TBC need also to include event weights --
+
+        eve = (HepMCEvent *)branchHepMCEvent->At(0);
         element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
-        
+
         element->Number = eventCounter;
 
         element->ProcessID = eve->ProcessID;
@@ -196,18 +195,18 @@ int main(int argc, char *argv[])
         element->ReadTime = eve->ReadTime;
         element->ProcTime = eve->ProcTime;
 
-        for(Int_t j=0; j < branchParticle->GetEntriesFast(); j++)
-        {     
-         
-          gen = (GenParticle*) branchParticle->At(j);     
+        for(Int_t j = 0; j < branchParticle->GetEntriesFast(); j++)
+        {
+
+          gen = (GenParticle *)branchParticle->At(j);
           candidate = factory->NewCandidate();
 
           candidate->Momentum = gen->P4();
-          candidate->Position.SetXYZT(gen->X, gen->Y, gen->Z, gen->T*1.0E3*c_light);
-          
+          candidate->Position.SetXYZT(gen->X, gen->Y, gen->Z, gen->T * 1.0E3 * c_light);
+
           candidate->PID = gen->PID;
           candidate->Status = gen->Status;
-     
+
           candidate->M1 = gen->M1;
           candidate->M2 = gen->M2;
 
@@ -215,10 +214,10 @@ int main(int argc, char *argv[])
           candidate->D2 = gen->D2;
 
           candidate->Charge = gen->Charge;
-          candidate->Mass   = gen->Mass;
-    
+          candidate->Mass = gen->Mass;
+
           allParticleOutputArray->Add(candidate);
- 
+
           pdgCode = TMath::Abs(gen->PID);
 
           if(gen->Status == 1)
@@ -230,7 +229,7 @@ int main(int argc, char *argv[])
             partonOutputArray->Add(candidate);
           }
         }
-        
+
         modularDelphes->ProcessTask();
 
         treeWriter->Fill();
@@ -241,14 +240,13 @@ int main(int argc, char *argv[])
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
       }
- 
+
       progressBar.Update(eventCounter, eventCounter, kTRUE);
       progressBar.Finish();
 
       inputFile->Close();
-    
+
       delete treeReader;
-      
     }
 
     modularDelphes->FinishTask();
@@ -261,7 +259,7 @@ int main(int argc, char *argv[])
     delete treeWriter;
     delete outputFile;
     delete chain;
-    
+
     return 0;
   }
   catch(runtime_error &e)

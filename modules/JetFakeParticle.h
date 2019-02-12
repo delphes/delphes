@@ -19,7 +19,6 @@
 #ifndef JetFakeParticle_h
 #define JetFakeParticle_h
 
-
 /** \class JetFakeParticle
  *
  *  Converts jet into particle with some PID,
@@ -38,7 +37,6 @@ class DelphesFormula;
 class JetFakeParticle: public DelphesModule
 {
 public:
-
   JetFakeParticle();
   ~JetFakeParticle();
 
@@ -47,11 +45,10 @@ public:
   void Finish();
 
 private:
-
-  #if !defined(__CINT__) && !defined(__CLING__)
-  typedef std::map< Int_t, DelphesFormula * > TFakeMap; //!
+#if !defined(__CINT__) && !defined(__CLING__)
+  typedef std::map<Int_t, DelphesFormula *> TFakeMap; //!
   TFakeMap fEfficiencyMap;
-  #endif
+#endif
 
   TIterator *fItInputArray; //!
 

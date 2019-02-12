@@ -38,7 +38,6 @@ class TObjArray;
 class Merger: public DelphesModule
 {
 public:
-
   Merger();
   ~Merger();
 
@@ -47,8 +46,7 @@ public:
   void Finish();
 
 private:
-
-  std::vector< TIterator * > fInputList; //!
+  std::vector<TIterator *> fInputList; //!
 
   TObjArray *fOutputArray; //!
   TObjArray *fMomentumOutputArray; //!

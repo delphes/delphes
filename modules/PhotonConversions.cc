@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class PhotonConversions
  *
  *
@@ -29,27 +28,27 @@
 #include "modules/PhotonConversions.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesCylindricalFormula.h"
+#include "classes/DelphesFactory.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TF1.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TF1.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 #include "TVector3.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -58,7 +57,7 @@ using namespace std;
 PhotonConversions::PhotonConversions() :
   fItInputArray(0), fConversionMap(0), fDecayXsec(0)
 {
-  fDecayXsec = new TF1("decayXsec","1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0);
+  fDecayXsec = new TF1("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0);
   fConversionMap = new DelphesCylindricalFormula;
 }
 
@@ -73,7 +72,7 @@ PhotonConversions::~PhotonConversions()
 void PhotonConversions::Init()
 {
   fRadius = GetDouble("Radius", 1.0);
-  fRadius2 = fRadius*fRadius;
+  fRadius2 = fRadius * fRadius;
 
   fHalfLength = GetDouble("HalfLength", 3.0);
 
@@ -121,7 +120,7 @@ void PhotonConversions::Process()
   Bool_t converted;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
     if(candidate->PID != 22)
@@ -132,9 +131,9 @@ void PhotonConversions::Process()
     {
       candidatePosition = candidate->Position;
       candidateMomentum = candidate->Momentum;
-      x = candidatePosition.X()*1.0E-3;
-      y = candidatePosition.Y()*1.0E-3;
-      z = candidatePosition.Z()*1.0E-3;
+      x = candidatePosition.X() * 1.0E-3;
+      y = candidatePosition.Y() * 1.0E-3;
+      z = candidatePosition.Z() * 1.0E-3;
 
       // check that particle position is inside the cylinder
       if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength) continue;
@@ -151,8 +150,8 @@ void PhotonConversions::Process()
       if(eta < fEtaMin || eta > fEtaMax) continue;
 
       // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
-      tmp = px*y - py*x;
-      discr2 = pt2*fRadius2 - tmp*tmp;
+      tmp = px * y - py * x;
+      discr2 = pt2 * fRadius2 - tmp * tmp;
 
       if(discr2 < 0.0)
       {
@@ -160,13 +159,13 @@ void PhotonConversions::Process()
         continue;
       }
 
-      tmp = px*x + py*y;
+      tmp = px * x + py * y;
       discr = TMath::Sqrt(discr2);
-      t1 = (-tmp + discr)/pt2;
-      t2 = (-tmp - discr)/pt2;
+      t1 = (-tmp + discr) / pt2;
+      t2 = (-tmp - discr) / pt2;
       t = (t1 < 0.0) ? t2 : t1;
 
-      z_t = z + pz*t;
+      z_t = z + pz * t;
       if(TMath::Abs(z_t) > fHalfLength)
       {
         t3 = (+fHalfLength - z) / pz;
@@ -175,41 +174,40 @@ void PhotonConversions::Process()
       }
 
       // final position
-      x_t = x + px*t;
-      y_t = y + py*t;
-      z_t = z + pz*t;
+      x_t = x + px * t;
+      y_t = y + py * t;
+      z_t = z + pz * t;
 
-      r_t = TMath::Sqrt(x_t*x_t + y_t*y_t + z_t*z_t);
-
+      r_t = TMath::Sqrt(x_t * x_t + y_t * y_t + z_t * z_t);
 
       // here starts conversion code
-      nsteps = Int_t(r_t/fStep);
+      nsteps = Int_t(r_t / fStep);
 
       x_i = x;
       y_i = y;
       z_i = z;
 
-      dt = t/nsteps;
+      dt = t / nsteps;
 
       converted = false;
 
       for(i = 0; i < nsteps; ++i)
       {
-        x_i += px*dt;
-        y_i += py*dt;
-        z_i += pz*dt;
-        pos_i.SetXYZ(x_i,y_i,z_i);
+        x_i += px * dt;
+        y_i += py * dt;
+        z_i += pz * dt;
+        pos_i.SetXYZ(x_i, y_i, z_i);
 
         // convert photon position into cylindrical coordinates, cylindrical r,phi,z !!
 
-        r_i = TMath::Sqrt(x_i*x_i + y_i*y_i);
+        r_i = TMath::Sqrt(x_i * x_i + y_i * y_i);
         phi_i = pos_i.Phi();
 
         // read conversion rate/meter from card
         rate = fConversionMap->Eval(r_i, phi_i, z_i);
 
         // convert into conversion probability
-        p_conv = 1 - TMath::Exp(-7.0/9.0*fStep*rate);
+        p_conv = 1 - TMath::Exp(-7.0 / 9.0 * fStep * rate);
 
         // case conversion occurs
         if(gRandom->Uniform() < p_conv)
@@ -220,14 +218,14 @@ void PhotonConversions::Process()
           x1 = fDecayXsec->GetRandom();
           x2 = 1 - x1;
 
-          ep = static_cast<Candidate*>(candidate->Clone());
-          em = static_cast<Candidate*>(candidate->Clone());
+          ep = static_cast<Candidate *>(candidate->Clone());
+          em = static_cast<Candidate *>(candidate->Clone());
 
-          ep->Position.SetXYZT(x_i*1.0E3, y_i*1.0E3, z_i*1.0E3, candidatePosition.T() + nsteps*dt*e*1.0E3);
-          em->Position.SetXYZT(x_i*1.0E3, y_i*1.0E3, z_i*1.0E3, candidatePosition.T() + nsteps*dt*e*1.0E3);
+          ep->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
+          em->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
 
-          ep->Momentum.SetPtEtaPhiE(x1*pt, eta, phi, x1*e);
-          em->Momentum.SetPtEtaPhiE(x2*pt, eta, phi, x2*e);
+          ep->Momentum.SetPtEtaPhiE(x1 * pt, eta, phi, x1 * e);
+          em->Momentum.SetPtEtaPhiE(x2 * pt, eta, phi, x2 * e);
 
           ep->PID = -11;
           em->PID = 11;
@@ -250,4 +248,3 @@ void PhotonConversions::Process()
 }
 
 //------------------------------------------------------------------------------
-

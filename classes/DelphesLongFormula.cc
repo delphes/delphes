@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "classes/DelphesLongFormula.h"
 
 #include "TString.h"
@@ -53,7 +52,7 @@ Int_t DelphesLongFormula::Compile(const char *expression)
   const char *it;
   for(it = expression; *it; ++it)
   {
-    if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\' ) continue;
+    if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
   }
 
@@ -65,10 +64,10 @@ Int_t DelphesLongFormula::Compile(const char *expression)
   buffer.ReplaceAll("dz", "[dz]");
   buffer.ReplaceAll("ctgTheta", "[ctgTheta]");
 
-  #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-    TFormula::SetMaxima(100000,1000,1000000);
-  #endif
-  
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
+  TFormula::SetMaxima(100000, 1000, 1000000);
+#endif
+
   if(TFormula::Compile(buffer) != 0)
   {
     throw runtime_error("Invalid Long Formula.");
@@ -79,48 +78,42 @@ Int_t DelphesLongFormula::Compile(const char *expression)
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesLongFormula::Eval(Double_t pt, 
-                                  Double_t eta, 
-                                  Double_t phi, 
-                                  Double_t energy,
-                                  Double_t d0,
-                                  Double_t dz,
-                                  Double_t ctgTheta
-                                 )
+Double_t DelphesLongFormula::Eval(Double_t pt, Double_t eta, Double_t phi,
+  Double_t energy, Double_t d0, Double_t dz, Double_t ctgTheta)
 {
 
   TVarNameMap fVarNameMap;
   TVarValMap fVarValMap;
 
-  fVarNameMap[this->GetParNumber("pt")]= "pt";
-  fVarNameMap[this->GetParNumber("eta")]= "eta";
-  fVarNameMap[this->GetParNumber("phi")]= "phi";
-  fVarNameMap[this->GetParNumber("energy")]= "energy";
-  fVarNameMap[this->GetParNumber("d0")]= "d0";
-  fVarNameMap[this->GetParNumber("dz")]= "dz";
-  fVarNameMap[this->GetParNumber("ctgTheta")]= "ctgTheta";
+  fVarNameMap[this->GetParNumber("pt")] = "pt";
+  fVarNameMap[this->GetParNumber("eta")] = "eta";
+  fVarNameMap[this->GetParNumber("phi")] = "phi";
+  fVarNameMap[this->GetParNumber("energy")] = "energy";
+  fVarNameMap[this->GetParNumber("d0")] = "d0";
+  fVarNameMap[this->GetParNumber("dz")] = "dz";
+  fVarNameMap[this->GetParNumber("ctgTheta")] = "ctgTheta";
 
-  fVarValMap["pt"]= pt;      
-  fVarValMap["eta"]= eta;
-  fVarValMap["phi"]= phi;
-  fVarValMap["energy"]= energy;
-  fVarValMap["d0"]= d0;
-  fVarValMap["dz"]= dz;
-  fVarValMap["ctgTheta"]= ctgTheta;
+  fVarValMap["pt"] = pt;
+  fVarValMap["eta"] = eta;
+  fVarValMap["phi"] = phi;
+  fVarValMap["energy"] = energy;
+  fVarValMap["d0"] = d0;
+  fVarValMap["dz"] = dz;
+  fVarValMap["ctgTheta"] = ctgTheta;
 
   Double_t vals[7];
 
   Int_t j = 0;
-  for (Int_t i=0; i != 7; i++)
+  for(Int_t i = 0; i != 7; i++)
   {
-     if ( fVarNameMap.find(i) != fVarNameMap.end() ) 
-     {
-        TString var_name = fVarNameMap[i];
-        vals[i] = fVarValMap[var_name];
-     }
-     else
-        vals[i] = 0.;
-  }   
+    if(fVarNameMap.find(i) != fVarNameMap.end())
+    {
+      TString var_name = fVarNameMap[i];
+      vals[i] = fVarValMap[var_name];
+    }
+    else
+      vals[i] = 0.;
+  }
   return EvalPar(nullptr, vals);
 }
 

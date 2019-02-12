@@ -20,7 +20,6 @@ class DelphesFormula;
 class TrackSmearing: public DelphesModule
 {
 public:
-
   TrackSmearing();
   ~TrackSmearing();
 
@@ -29,8 +28,7 @@ public:
   void Finish();
 
 private:
-
-  Double_t ptError (const Double_t, const Double_t, const Double_t, const Double_t);
+  Double_t ptError(const Double_t, const Double_t, const Double_t, const Double_t);
 
   Double_t fBz;
 
@@ -65,7 +63,7 @@ private:
 
   const TObjArray *fInputArray; //!
   const TObjArray *fBeamSpotInputArray; //!
- 
+
   TObjArray *fOutputArray; //!
 
   ClassDef(TrackSmearing, 1)

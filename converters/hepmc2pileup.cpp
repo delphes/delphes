@@ -16,30 +16,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 #include <signal.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesHepMCReader.h"
 #include "classes/DelphesPileUpWriter.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -70,7 +70,8 @@ int main(int argc, char *argv[])
 
   if(argc < 2)
   {
-    cout << " Usage: " << appName << " output_file" << " [input_file(s)]" << endl;
+    cout << " Usage: " << appName << " output_file"
+         << " [input_file(s)]" << endl;
     cout << " output_file - output binary pile-up file," << endl;
     cout << " input_file(s) - input file(s) in HepMC format," << endl;
     cout << " with no input_file, or when input_file is -, read standard input." << endl;
@@ -141,14 +142,15 @@ int main(int argc, char *argv[])
       factory->Clear();
       reader->Clear();
       while(reader->ReadBlock(factory, allParticleOutputArray,
-        stableParticleOutputArray, partonOutputArray) && !interrupted)
+              stableParticleOutputArray, partonOutputArray)
+        && !interrupted)
       {
         if(reader->EventReady())
         {
           ++eventCounter;
 
           itParticle->Reset();
-          while((candidate = static_cast<Candidate*>(itParticle->Next())))
+          while((candidate = static_cast<Candidate *>(itParticle->Next())))
           {
             const TLorentzVector &position = candidate->Position;
             const TLorentzVector &momentum = candidate->Momentum;
@@ -172,8 +174,7 @@ int main(int argc, char *argv[])
       if(inputFile != stdin) fclose(inputFile);
 
       ++i;
-    }
-    while(i < argc);
+    } while(i < argc);
 
     writer->WriteIndex();
 

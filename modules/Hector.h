@@ -36,7 +36,6 @@ class H_BeamLine;
 class Hector: public DelphesModule
 {
 public:
-
   Hector();
   ~Hector();
 
@@ -45,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   Int_t fDirection;
 
   Double_t fBeamLineLength, fDistance;

@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class UniqueObjectFinder
  *
  *  Finds uniquely identified photons, electrons and jets.
@@ -31,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -79,12 +78,12 @@ void UniqueObjectFinder::Init()
   fInputMap.clear();
 
   size = param.GetSize();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i*2].GetString());
+    array = ImportArray(param[i * 2].GetString());
     iterator = array->MakeIterator();
 
-    fInputMap.push_back(make_pair(iterator, ExportArray(param[i*2 + 1].GetString())));
+    fInputMap.push_back(make_pair(iterator, ExportArray(param[i * 2 + 1].GetString())));
   }
 }
 
@@ -92,7 +91,7 @@ void UniqueObjectFinder::Init()
 
 void UniqueObjectFinder::Finish()
 {
-  vector< pair< TIterator *, TObjArray * > >::iterator itInputMap;
+  vector<pair<TIterator *, TObjArray *>>::iterator itInputMap;
   TIterator *iterator;
 
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
@@ -108,7 +107,7 @@ void UniqueObjectFinder::Finish()
 void UniqueObjectFinder::Process()
 {
   Candidate *candidate;
-  vector< pair< TIterator *, TObjArray * > >::iterator itInputMap;
+  vector<pair<TIterator *, TObjArray *>>::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
 
@@ -120,7 +119,7 @@ void UniqueObjectFinder::Process()
 
     // loop over all candidates
     iterator->Reset();
-    while((candidate = static_cast<Candidate*>(iterator->Next())))
+    while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
       if(Unique(candidate, itInputMap))
       {
@@ -132,10 +131,10 @@ void UniqueObjectFinder::Process()
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector< pair< TIterator *, TObjArray * > >::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector<pair<TIterator *, TObjArray *>>::iterator itInputMap)
 {
   Candidate *previousCandidate;
-  vector< pair< TIterator *, TObjArray * > >::iterator previousItInputMap;
+  vector<pair<TIterator *, TObjArray *>>::iterator previousItInputMap;
   TObjArray *array;
 
   // loop over previous arrays
@@ -146,7 +145,7 @@ Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector< pair< TIterator 
 
     // loop over all candidates
     iterator.Reset();
-    while((previousCandidate = static_cast<Candidate*>(iterator.Next())))
+    while((previousCandidate = static_cast<Candidate *>(iterator.Next())))
     {
       if(fUseUniqueID)
       {

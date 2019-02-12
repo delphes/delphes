@@ -10,15 +10,15 @@
 #include "ExRootAnalysis/ExRootTask.h"
 #include "ExRootAnalysis/ExRootConfReader.h"
 
-#include "TROOT.h"
 #include "TClass.h"
 #include "TFolder.h"
+#include "TROOT.h"
 #include "TString.h"
 
-#include <iostream>
 #include <iomanip>
-#include <stdexcept>
+#include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 static const char *const kINIT = "0";
 static const char *const kPROCESS = "1";
@@ -143,7 +143,7 @@ ExRootTask *ExRootTask::NewTask(TClass *cl, const char *taskName)
   stringstream message;
 
   if(!cl) return 0;
- 
+
   if(!cl->InheritsFrom(ExRootTask::Class()))
   {
     message << "task '" << cl->GetName();
@@ -309,4 +309,3 @@ TObject *ExRootTask::GetObject(const char *name, TClass *cl)
   }
   return object;
 }
-

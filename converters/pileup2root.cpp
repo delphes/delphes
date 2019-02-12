@@ -16,33 +16,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
-#include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
-#include "classes/DelphesStream.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesStream.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -61,7 +60,7 @@ void ProcessEvent(DelphesPileUpReader *reader, ExRootTreeBranch *branch)
 
   while(reader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
   {
-    particle = static_cast<GenParticle*>(branch->NewEntry());
+    particle = static_cast<GenParticle *>(branch->NewEntry());
 
     particle->PID = pid;
     particle->X = x;
@@ -83,7 +82,7 @@ void ProcessEvent(DelphesPileUpReader *reader, ExRootTreeBranch *branch)
     particle->D2 = -1;
 
     pdgParticle = pdg->GetParticle(pid);
-    particle->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    particle->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
 
     particle->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
@@ -91,8 +90,8 @@ void ProcessEvent(DelphesPileUpReader *reader, ExRootTreeBranch *branch)
     pt = momentum.Pt();
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
-    eta = (cosTheta == 1.0 ? signPz*999.9 : momentum.Eta());
-    rapidity = (cosTheta == 1.0 ? signPz*999.9 : momentum.Rapidity());
+    eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
+    rapidity = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Rapidity());
 
     particle->Eta = eta;
     particle->Phi = momentum.Phi();
@@ -125,7 +124,8 @@ int main(int argc, char *argv[])
 
   if(argc != 3)
   {
-    cout << " Usage: " << appName << " output_file" << " input_file" << endl;
+    cout << " Usage: " << appName << " output_file"
+         << " input_file" << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file - input binary pile-up file." << endl;
     return 1;
@@ -198,5 +198,3 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
-
-

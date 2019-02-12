@@ -13,8 +13,8 @@
 
 #include <iostream>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -45,14 +45,14 @@ void ExRootProgressBar::Update(Long64_t entry, Long64_t eventCounter, Bool_t las
 
   if(fEntries > 0)
   {
-    Int_t hashes = Int_t(Double_t(entry)/fEntries*fWidth);
+    Int_t hashes = Int_t(Double_t(entry) / fEntries * fWidth);
     if(hashes > fWidth) hashes = fWidth;
     if(hashes != fHashes)
     {
       memset(fBar, '#', hashes);
       memset(fBar + hashes, '-', fWidth - hashes);
       fHashes = hashes;
-      fprintf(stderr, "** [%s] (%.2f%%)\r", fBar, Float_t(entry)/fEntries*100.0);
+      fprintf(stderr, "** [%s] (%.2f%%)\r", fBar, Float_t(entry) / fEntries * 100.0);
     }
   }
   else
@@ -76,4 +76,3 @@ void ExRootProgressBar::Finish()
 }
 
 //------------------------------------------------------------------------------
-

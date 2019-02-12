@@ -9,12 +9,12 @@
 
 #include "ExRootAnalysis/ExRootUtilities.h"
 
-#include "TROOT.h"
-#include "TH1.h"
 #include "TChain.h"
+#include "TH1.h"
+#include "TROOT.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
@@ -73,4 +73,3 @@ Bool_t FillChain(TChain *chain, const char *inputFileList)
 }
 
 //------------------------------------------------------------------------------
-

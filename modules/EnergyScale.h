@@ -36,7 +36,6 @@ class DelphesFormula;
 class EnergyScale: public DelphesModule
 {
 public:
-
   EnergyScale();
   ~EnergyScale();
 
@@ -45,13 +44,12 @@ public:
   void Finish();
 
 private:
-
   DelphesFormula *fFormula; //!
 
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!
-  
+
   TObjArray *fOutputArray; //!
 
   ClassDef(EnergyScale, 1)

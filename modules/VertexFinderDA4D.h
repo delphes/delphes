@@ -9,7 +9,6 @@
  *
  */
 
-
 #include "classes/DelphesModule.h"
 
 #include <vector>
@@ -21,7 +20,6 @@ class Candidate;
 class VertexFinderDA4D: public DelphesModule
 {
 public:
-
   VertexFinderDA4D();
   ~VertexFinderDA4D();
 
@@ -30,10 +28,9 @@ public:
   void Finish();
 
   void clusterize(const TObjArray &tracks, TObjArray &clusters);
-  std::vector< Candidate* > vertices();
+  std::vector<Candidate *> vertices();
 
 private:
-
   Bool_t fVerbose;
   Double_t fMinPT;
 

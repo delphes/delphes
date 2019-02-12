@@ -24,29 +24,28 @@
  *
  */
 
-
 #include "modules/ImpactParameterSmearing.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -99,11 +98,11 @@ void ImpactParameterSmearing::Process()
   Double_t pt, eta, px, py, phi, e;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
     // take momentum before smearing (otherwise apply double smearing on d0)
-    particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
 
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
@@ -111,14 +110,14 @@ void ImpactParameterSmearing::Process()
     pt = candidateMomentum.Pt();
     phi = candidateMomentum.Phi();
     e = candidateMomentum.E();
-    
+
     px = candidateMomentum.Px();
     py = candidateMomentum.Py();
 
     // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
-    xd =  candidate->Xd;
-    yd =  candidate->Yd;
-    zd =  candidate->Zd;
+    xd = candidate->Xd;
+    yd = candidate->Yd;
+    zd = candidate->Zd;
 
     // calculate smeared values
     sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
@@ -130,14 +129,14 @@ void ImpactParameterSmearing::Process()
     zd += sz;
 
     // calculate impact parameter (after-smearing)
-    d0 = (xd*py - yd*px)/pt;
+    d0 = (xd * py - yd * px) / pt;
 
     dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
     mother = candidate;
 
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate = static_cast<Candidate *>(candidate->Clone());
     candidate->Xd = xd;
     candidate->Yd = yd;
     candidate->Zd = zd;

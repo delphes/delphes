@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class JetFakeParticle
  *
  *  Converts jet into particle with some PID,
@@ -32,23 +31,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
-
+#include <stdexcept>
 
 using namespace std;
 
@@ -80,18 +78,18 @@ void JetFakeParticle::Init()
 
   fEfficiencyMap.clear();
 
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i*2 + 1].GetString());
-    pdgCode = param[i*2].GetInt();
+    formula->Compile(param[i * 2 + 1].GetString());
+    pdgCode = param[i * 2].GetInt();
 
     if(TMath::Abs(pdgCode) != 11 && TMath::Abs(pdgCode) != 13 && TMath::Abs(pdgCode) != 22)
     {
       throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
     }
 
-    fEfficiencyMap[param[i*2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = formula;
   }
 
   // set default efficiency formula
@@ -115,7 +113,6 @@ void JetFakeParticle::Init()
   fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "fakeMuons"));
   fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "fakePhotons"));
   fJetOutputArray = ExportArray(GetString("JetOutputArray", "jets"));
-
 }
 
 //------------------------------------------------------------------------------
@@ -146,7 +143,7 @@ void JetFakeParticle::Process()
   Double_t p, r, rs, total;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -169,7 +166,7 @@ void JetFakeParticle::Process()
 
       if(total <= r && r < total + p)
       {
-        fake = static_cast<Candidate*>(candidate->Clone());
+        fake = static_cast<Candidate *>(candidate->Clone());
 
         // convert jet
 
@@ -177,13 +174,12 @@ void JetFakeParticle::Process()
         {
           if(candidate->Charge != 0)
           {
-            fake->Charge = candidate->Charge/TMath::Abs(candidate->Charge);
+            fake->Charge = candidate->Charge / TMath::Abs(candidate->Charge);
           }
           else
           {
             rs = gRandom->Uniform();
             fake->Charge = (rs < 0.5) ? -1 : 1;
-            
           }
         }
 

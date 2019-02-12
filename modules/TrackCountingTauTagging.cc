@@ -19,22 +19,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -43,7 +43,6 @@ using namespace std;
 class TrackCountingTauTaggingPartonClassifier : public ExRootClassifier
 {
 public:
-
   TrackCountingTauTaggingPartonClassifier(const TObjArray *array);
 
   Int_t GetCategory(TObject *object);
@@ -66,7 +65,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
   Candidate *tau = static_cast<Candidate *>(object);
   Candidate *daughter1 = 0;
   Candidate *daughter2 = 0;
-  
+
   const TLorentzVector &momentum = tau->Momentum;
   Int_t pdgCode, i, j;
 
@@ -79,8 +78,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D2 < tau->D1) return -1;
 
-  if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
-     tau->D2 >= fParticleInputArray->GetEntriesFast())
+  if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
   {
     throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
   }
@@ -89,17 +87,17 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
   {
     daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
     pdgCode = TMath::Abs(daughter1->PID);
-    if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15) return -1;
+    if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
+      return -1;
     else if(pdgCode == 24)
     {
-     if(daughter1->D1 < 0) return -1;
-     for(j = daughter1->D1; j <= daughter1->D2; ++j)
-     {
-       daughter2 = static_cast<Candidate*>(fParticleInputArray->At(j));
-       pdgCode = TMath::Abs(daughter2->PID);
-       if(pdgCode == 11 || pdgCode == 13) return -1;
-     }
-	
+      if(daughter1->D1 < 0) return -1;
+      for(j = daughter1->D1; j <= daughter1->D2; ++j)
+      {
+        daughter2 = static_cast<Candidate *>(fParticleInputArray->At(j));
+        pdgCode = TMath::Abs(daughter2->PID);
+        if(pdgCode == 11 || pdgCode == 13) return -1;
+      }
     }
   }
 
@@ -124,7 +122,7 @@ TrackCountingTauTagging::~TrackCountingTauTagging()
 
 void TrackCountingTauTagging::Init()
 {
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   ExRootConfParam param;
   DelphesFormula *formula;
   Int_t i, size;
@@ -134,18 +132,18 @@ void TrackCountingTauTagging::Init()
   fDeltaR = GetDouble("DeltaR", 0.5);
   fDeltaRTrack = GetDouble("DeltaRTrack", 0.2);
   fTrackPTMin = GetDouble("TrackPTMin", 1.0);
-  
+
   // read efficiency formulas
   param = GetParam("EfficiencyFormula");
   size = param.GetSize();
 
   fEfficiencyMap.clear();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i*2 + 1].GetString());
+    formula->Compile(param[i * 2 + 1].GetString());
 
-    fEfficiencyMap[param[i*2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = formula;
   }
 
   // set default efficiency formula
@@ -171,7 +169,7 @@ void TrackCountingTauTagging::Init()
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMerger/tracks"));
   fItTrackInputArray = fTrackInputArray->MakeIterator();
-  
+
   fFilter = new ExRootFilter(fPartonInputArray);
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
@@ -182,7 +180,7 @@ void TrackCountingTauTagging::Init()
 
 void TrackCountingTauTagging::Finish()
 {
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
   if(fFilter) delete fFilter;
@@ -206,7 +204,7 @@ void TrackCountingTauTagging::Process()
   TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e;
   TObjArray *tauArray;
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
   Int_t pdgCode, charge, i, identifier;
 
@@ -231,18 +229,18 @@ void TrackCountingTauTagging::Process()
     pt = jetMomentum.Pt();
     e = jetMomentum.E();
 
-
-// loop over all input tracks
+    // loop over all input tracks
     fItTrackInputArray->Reset();
     while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
     {
-        if((track->Momentum).Pt() < fTrackPTMin) continue;
-        if(jetMomentum.DeltaR(track->Momentum) <= fDeltaRTrack) {
-            identifier -= 1;
-            charge += track->Charge;
-        }
+      if((track->Momentum).Pt() < fTrackPTMin) continue;
+      if(jetMomentum.DeltaR(track->Momentum) <= fDeltaRTrack)
+      {
+        identifier -= 1;
+        charge += track->Charge;
+      }
     }
-    
+
     // loop over all input taus
     itTauArray.Reset();
     bool matchedTau = false;
@@ -250,8 +248,7 @@ void TrackCountingTauTagging::Process()
     {
       if(tau->D1 < 0) continue;
 
-      if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
-         tau->D2 >= fParticleInputArray->GetEntriesFast())
+      if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
       {
         throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
       }
@@ -262,25 +259,24 @@ void TrackCountingTauTagging::Process()
       {
         daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
         if(TMath::Abs(daughter->PID) == 16) continue;
-        tauMomentum += daughter->Momentum;  
+        tauMomentum += daughter->Momentum;
       }
 
       if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
-      {        
+      {
         matchedTau = true;
         pdgCode = 15;
       }
     }
     if(matchedTau)
-	identifier *= -1;
+      identifier *= -1;
     // find an efficency formula
     // If the identifier is larger than 2, set it to 2 (multiprong requires at least 2 tracks)
-    if (identifier > 2)
-	identifier = 2;
-    else if (identifier < -2)
-	identifier = -2;
+    if(identifier > 2)
+      identifier = 2;
+    else if(identifier < -2)
+      identifier = -2;
 
-    
     itEfficiencyMap = fEfficiencyMap.find(identifier);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
@@ -292,8 +288,7 @@ void TrackCountingTauTagging::Process()
 
     // apply an efficency formula
     jet->TauTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
-   
-   
+
     // set tau charge
     jet->Charge = charge;
   }

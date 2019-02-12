@@ -29,26 +29,24 @@ class TEveScene;
 class DelphesDisplay
 {
 public:
-  
   DelphesDisplay();
 
   virtual ~DelphesDisplay();
 
-  void ImportGeomRPhi(TEveElement* el);
-  void ImportGeomRhoZ(TEveElement* el);
+  void ImportGeomRPhi(TEveElement *el);
+  void ImportGeomRhoZ(TEveElement *el);
 
   void ImportCaloRPhi(TEveCalo3D *calo);
   void ImportCaloRhoZ(TEveCalo3D *calo);
   void ImportCaloLego(TEveCaloLego *calo);
 
-  void ImportEventRPhi(TEveElement* el);
-  void ImportEventRhoZ(TEveElement* el);
+  void ImportEventRPhi(TEveElement *el);
+  void ImportEventRhoZ(TEveElement *el);
 
   void DestroyEventRPhi();
   void DestroyEventRhoZ();
 
 private:
-
   TEveProjectionManager *fRPhiMgr;
   TEveProjectionManager *fRhoZMgr;
 
@@ -69,4 +67,3 @@ private:
 };
 
 #endif /* DelphesDisplay_h */
-

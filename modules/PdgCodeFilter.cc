@@ -30,22 +30,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -75,7 +75,7 @@ void PdgCodeFilter::Init()
 
   fInvert = GetBool("Invert", false);
 
-  // no pileup 
+  // no pileup
   fRequireNotPileup = GetBool("RequireNotPileup", false);
 
   fRequireStatus = GetBool("RequireStatus", false);
@@ -120,7 +120,7 @@ void PdgCodeFilter::Process()
   Double_t pt;
 
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -129,7 +129,7 @@ void PdgCodeFilter::Process()
     if(pt < fPTMin) continue;
     if(fRequireStatus && (candidate->Status != fStatus)) continue;
     if(fRequireCharge && (candidate->Charge != fCharge)) continue;
-    if(fRequireNotPileup && (candidate->IsPU   >0     )) continue;
+    if(fRequireNotPileup && (candidate->IsPU > 0)) continue;
 
     pass = kTRUE;
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
@@ -138,4 +138,3 @@ void PdgCodeFilter::Process()
     if(pass) fOutputArray->Add(candidate);
   }
 }
-

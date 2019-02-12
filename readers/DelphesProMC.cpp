@@ -16,35 +16,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
 #include <iostream>
-#include <sstream>
 #include <memory>
+#include <sstream>
+#include <stdexcept>
 
 #include <map>
 
-#include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
-#include "modules/Delphes.h"
-#include "classes/DelphesStream.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesStream.h"
+#include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 #include "ProMC.pb.h"
 #include "ProMCBook.h"
@@ -108,14 +108,14 @@ void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
     pid = mutableParticles->pdg_id(i);
     status = mutableParticles->status(i);
 
-    px = mutableParticles->px(i)/momentumUnit;
-    py = mutableParticles->py(i)/momentumUnit;
-    pz = mutableParticles->pz(i)/momentumUnit;
-    mass = mutableParticles->mass(i)/momentumUnit;
-    x = mutableParticles->x(i)/positionUnit;
-    y = mutableParticles->y(i)/positionUnit;
-    z = mutableParticles->z(i)/positionUnit;
-    t = mutableParticles->t(i)/positionUnit;
+    px = mutableParticles->px(i) / momentumUnit;
+    py = mutableParticles->py(i) / momentumUnit;
+    pz = mutableParticles->pz(i) / momentumUnit;
+    mass = mutableParticles->mass(i) / momentumUnit;
+    x = mutableParticles->x(i) / positionUnit;
+    y = mutableParticles->y(i) / positionUnit;
+    z = mutableParticles->z(i) / positionUnit;
+    t = mutableParticles->t(i) / positionUnit;
 
     candidate = factory->NewCandidate();
 
@@ -124,8 +124,8 @@ void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
 
     candidate->Status = status;
 
-    candidate->IsPU=0;
-    if (mutableParticles->barcode(i)>0) candidate->IsPU=1; // pileup particle
+    candidate->IsPU = 0;
+    if(mutableParticles->barcode(i) > 0) candidate->IsPU = 1; // pileup particle
 
     candidate->M1 = mutableParticles->mother1(i);
     candidate->M2 = mutableParticles->mother2(i);
@@ -134,7 +134,7 @@ void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
     candidate->D2 = mutableParticles->daughter2(i);
 
     pdgParticle = pdg->GetParticle(pid);
-    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
     candidate->Mass = mass;
 
     candidate->Momentum.SetXYZM(px, py, pz, mass);
@@ -186,7 +186,9 @@ int main(int argc, char *argv[])
 
   if(argc < 4)
   {
-    cout << " Usage: " << appName << " config_file" << " output_file" << " input_file(s)" << endl;
+    cout << " Usage: " << appName << " config_file"
+         << " output_file"
+         << " input_file(s)" << endl;
     cout << " config_file - configuration file in Tcl format," << endl;
     cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in ProMC format." << endl;
@@ -233,7 +235,7 @@ int main(int argc, char *argv[])
     {
       cout << "** Reading " << argv[i] << endl;
 
-      // use 64 bit 
+      // use 64 bit
       //inputFile = new ProMCBook(argv[i], "r", true);
 
       //use 32 bit zip (faster but limitted to 64k events)
@@ -243,8 +245,6 @@ int main(int argc, char *argv[])
 
       momentumUnit = static_cast<double>(header.momentumunit());
       positionUnit = static_cast<double>(header.lengthunit());
-
-
 
       if(inputFile == NULL)
       {

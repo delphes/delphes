@@ -31,10 +31,10 @@
 
 // Dependencies (#includes)
 
-#include "TRef.h"
-#include "TObject.h"
-#include "TRefArray.h"
 #include "TLorentzVector.h"
+#include "TObject.h"
+#include "TRef.h"
+#include "TRefArray.h"
 
 #include "classes/SortableObject.h"
 
@@ -45,7 +45,6 @@ class DelphesFactory;
 class Event: public TObject
 {
 public:
-
   Long64_t Number; // event number
 
   Float_t ReadTime; // read time
@@ -59,7 +58,6 @@ public:
 class LHCOEvent: public Event
 {
 public:
-
   Int_t Trigger; // trigger word
 
   ClassDef(LHCOEvent, 1)
@@ -70,7 +68,6 @@ public:
 class LHEFEvent: public Event
 {
 public:
-
   Int_t ProcessID; // subprocess code for the event | hepup.IDPRUP
 
   Float_t Weight; // weight for the event | hepup.XWGTUP
@@ -98,7 +95,6 @@ public:
 class HepMCEvent: public Event
 {
 public:
-
   Int_t ProcessID; // unique signal process id | signal_process_id()
   Int_t MPI; // number of multi parton interactions | mpi ()
 
@@ -120,8 +116,6 @@ public:
 
   Float_t PDF1; // PDF (id1, x1, Q) | pdf_info()->pdf1()
   Float_t PDF2; // PDF (id2, x2, Q) | pdf_info()->pdf2()
-
-
 
   ClassDef(HepMCEvent, 3)
 };
@@ -180,7 +174,6 @@ public:
 class Vertex: public SortableObject
 {
 public:
-
   Float_t T; // vertex position (t component)
   Float_t X; // vertex position (x component)
   Float_t Y; // vertex position (y component)
@@ -259,7 +252,6 @@ public:
 class Photon: public SortableObject
 {
 public:
-
   Float_t PT; // photon transverse momentum
   Float_t Eta; // photon pseudorapidity
   Float_t Phi; // photon azimuthal angle
@@ -294,7 +286,6 @@ public:
 class Electron: public SortableObject
 {
 public:
-
   Float_t PT; // electron transverse momentum
   Float_t Eta; // electron pseudorapidity
   Float_t Phi; // electron azimuthal angle
@@ -332,7 +323,6 @@ public:
 class Muon: public SortableObject
 {
 public:
-
   Float_t PT; // muon transverse momentum
   Float_t Eta; // muon pseudorapidity
   Float_t Phi; // muon azimuthal angle
@@ -368,7 +358,6 @@ public:
 class Jet: public SortableObject
 {
 public:
-
   Float_t PT; // jet transverse momentum
   Float_t Eta; // jet pseudorapidity
   Float_t Phi; // jet azimuthal angle
@@ -377,8 +366,8 @@ public:
 
   Float_t Mass; // jet invariant mass
 
-  Float_t DeltaEta;  // jet radius in pseudorapidity
-  Float_t DeltaPhi;  // jet radius in azimuthal angle
+  Float_t DeltaEta; // jet radius in pseudorapidity
+  Float_t DeltaPhi; // jet radius in azimuthal angle
 
   UInt_t Flavor; // jet flavor
   UInt_t FlavorAlgo; // jet flavor
@@ -413,7 +402,6 @@ public:
   TLorentzVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
   TLorentzVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
 
-
   Int_t NSubJetsTrimmed; // number of subjets trimmed
   Int_t NSubJetsPruned; // number of subjets pruned
   Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
@@ -422,7 +410,7 @@ public:
   Double_t ExclYmerge34;
   Double_t ExclYmerge45;
   Double_t ExclYmerge56;
-  
+
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
 
@@ -625,7 +613,7 @@ public:
   // Timing information
 
   Int_t NTimeHits;
-  std::vector< std::pair< Float_t, Float_t > > ECalEnergyTimePairs;
+  std::vector<std::pair<Float_t, Float_t>> ECalEnergyTimePairs;
 
   // Isolation variables
 
@@ -669,7 +657,7 @@ public:
   Double_t ExclYmerge34;
   Double_t ExclYmerge45;
   Double_t ExclYmerge56;
-      
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -680,7 +668,7 @@ public:
 
   virtual void Copy(TObject &object) const;
   virtual TObject *Clone(const char *newname = "") const;
-  virtual void Clear(Option_t* option = "");
+  virtual void Clear(Option_t *option = "");
 
 private:
   DelphesFactory *fFactory; //!
@@ -692,5 +680,3 @@ private:
 };
 
 #endif // DelphesClasses_h
-
-

@@ -41,7 +41,6 @@ class TauTaggingPartonClassifier;
 class TaggingParticlesSkimmer: public DelphesModule
 {
 public:
-
   TaggingParticlesSkimmer();
   ~TaggingParticlesSkimmer();
 
@@ -50,16 +49,15 @@ public:
   void Finish();
 
 private:
-
   Double_t fPTMin; //!
   Double_t fEtaMax; //!
-  
+
   TauTaggingPartonClassifier *fClassifier; //!
-  
+
   ExRootFilter *fFilter;
 
   TIterator *fItPartonInputArray; //!
- 
+
   const TObjArray *fPartonInputArray; //!
   const TObjArray *fParticleInputArray; //!
 

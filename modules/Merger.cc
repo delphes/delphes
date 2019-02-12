@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class Merger
  *
  *  Merges multiple input arrays into one output array
@@ -32,22 +31,22 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
-#include <algorithm> 
-#include <stdexcept>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -88,7 +87,7 @@ void Merger::Init()
   fOutputArray = ExportArray(GetString("OutputArray", "candidates"));
 
   fMomentumOutputArray = ExportArray(GetString("MomentumOutputArray", "momentum"));
-  
+
   fEnergyOutputArray = ExportArray(GetString("EnergyOutputArray", "energy"));
 }
 
@@ -96,7 +95,7 @@ void Merger::Init()
 
 void Merger::Finish()
 {
-  vector< TIterator * >::iterator itInputList;
+  vector<TIterator *>::iterator itInputList;
   TIterator *iterator;
 
   for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
@@ -112,12 +111,12 @@ void Merger::Process()
 {
   Candidate *candidate;
   TLorentzVector momentum;
-  Double_t sumPT, sumE;  
-  vector< TIterator * >::iterator itInputList;
+  Double_t sumPT, sumE;
+  vector<TIterator *>::iterator itInputList;
   TIterator *iterator;
 
   DelphesFactory *factory = GetFactory();
-  
+
   momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
   sumPT = 0;
   sumE = 0;
@@ -129,7 +128,7 @@ void Merger::Process()
 
     // loop over all candidates
     iterator->Reset();
-    while((candidate = static_cast<Candidate*>(iterator->Next())))
+    while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
       const TLorentzVector &candidateMomentum = candidate->Momentum;
 
@@ -142,17 +141,17 @@ void Merger::Process()
   }
 
   candidate = factory->NewCandidate();
-  
+
   candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   candidate->Momentum = momentum;
-  
+
   fMomentumOutputArray->Add(candidate);
 
   candidate = factory->NewCandidate();
-  
+
   candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   candidate->Momentum.SetPtEtaPhiE(sumPT, 0.0, 0.0, sumE);
-  
+
   fEnergyOutputArray->Add(candidate);
 }
 

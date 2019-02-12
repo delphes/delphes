@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class Weighter
  *
  *  Apply a weight depending on PDG code.
@@ -31,28 +30,28 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
-bool Weighter::TIndexStruct::operator< (const Weighter::TIndexStruct &value) const
+bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) const
 {
   Int_t i;
 
@@ -89,27 +88,26 @@ void Weighter::Init()
 
   fWeightSet.clear();
 
-
   // set default weight value
   fWeightMap.clear();
-  memset(index.codes, 0, 4*sizeof(Int_t));
+  memset(index.codes, 0, 4 * sizeof(Int_t));
   fWeightMap[index] = 1.0;
 
   // read weights
   param = GetParam("Weight");
   size = param.GetSize();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
-    paramCodes = param[i*2];
+    paramCodes = param[i * 2];
     sizeCodes = paramCodes.GetSize();
-    weight = param[i*2 + 1].GetDouble();
+    weight = param[i * 2 + 1].GetDouble();
 
     if(sizeCodes < 1 || sizeCodes > 4)
     {
       throw runtime_error("only 1, 2, 3 or 4 PDG codes can be specified per weight");
     }
 
-    memset(index.codes, 0, 4*sizeof(Int_t));
+    memset(index.codes, 0, 4 * sizeof(Int_t));
 
     for(j = 0; j < sizeCodes; ++j)
     {
@@ -156,7 +154,7 @@ void Weighter::Process()
   // loop over all particles
   fCodeSet.clear();
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     if(candidate->Status != 3) continue;
 
@@ -166,7 +164,7 @@ void Weighter::Process()
   }
 
   // find default weight value
-  memset(index.codes, 0, 4*sizeof(Int_t));
+  memset(index.codes, 0, 4 * sizeof(Int_t));
   itWeightMap = fWeightMap.find(index);
   weight = itWeightMap->second;
 

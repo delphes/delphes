@@ -10,14 +10,14 @@
 
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
-#include "TFile.h"
-#include "TTree.h"
-#include "TString.h"
 #include "TClonesArray.h"
+#include "TFile.h"
+#include "TString.h"
+#include "TTree.h"
 
 #include <iostream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -27,8 +27,8 @@ ExRootTreeBranch::ExRootTreeBranch(const char *name, TClass *cl, TTree *tree) :
   fSize(0), fCapacity(1), fData(0)
 {
   stringstream message;
-//  cl->IgnoreTObjectStreamer();
-//  cl->BypassStreamer();
+  //  cl->IgnoreTObjectStreamer();
+  //  cl->BypassStreamer();
   fData = new TClonesArray(cl, fCapacity);
 
   if(fData)
@@ -64,18 +64,23 @@ TObject *ExRootTreeBranch::NewEntry()
 
   if(fSize >= fCapacity)
   {
-    if(fCapacity < 10) fCapacity = 10;
-    else if(fCapacity < 30) fCapacity = 30;
-    else if(fCapacity < 100) fCapacity = 100;
-    else if(fCapacity < 250) fCapacity = 250;
-    else fCapacity *= 2;
+    if(fCapacity < 10)
+      fCapacity = 10;
+    else if(fCapacity < 30)
+      fCapacity = 30;
+    else if(fCapacity < 100)
+      fCapacity = 100;
+    else if(fCapacity < 250)
+      fCapacity = 250;
+    else
+      fCapacity *= 2;
 
     fData->ExpandCreateFast(fCapacity);
 
     fData->Clear();
     fData->ExpandCreateFast(fSize);
   }
-  
+
   return fData->AddrAt(fSize++);
 }
 
@@ -88,4 +93,3 @@ void ExRootTreeBranch::Clear()
 }
 
 //------------------------------------------------------------------------------
-

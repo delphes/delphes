@@ -29,10 +29,10 @@
  *
  */
 
-#include "classes/DelphesModule.h"
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootClassifier.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootResult.h"
+#include "classes/DelphesModule.h"
 
 #include <map>
 
@@ -45,7 +45,6 @@ class TauTaggingPartonClassifier;
 class TauTagging: public DelphesModule
 {
 public:
-
   TauTagging();
   ~TauTagging();
 
@@ -54,39 +53,36 @@ public:
   void Finish();
 
 private:
-  
   Int_t fBitNumber;
-  
+
   Double_t fDeltaR;
 
 #if !defined(__CINT__) && !defined(__CLING__)
-  std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!
+  std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
 #endif
-  
+
   TauTaggingPartonClassifier *fClassifier; //!
-  
+
   ExRootFilter *fFilter;
 
   TIterator *fItPartonInputArray; //!
-  
+
   TIterator *fItJetInputArray; //!
 
   const TObjArray *fParticleInputArray; //!
 
   const TObjArray *fPartonInputArray; //!
-  
+
   const TObjArray *fJetInputArray; //!
 
   ClassDef(TauTagging, 1)
 };
 
-
 //------------------------------------------------------------------------------
 
-class TauTaggingPartonClassifier : public ExRootClassifier
+class TauTaggingPartonClassifier: public ExRootClassifier
 {
 public:
-
   TauTaggingPartonClassifier(const TObjArray *array);
 
   Int_t GetCategory(TObject *object);
@@ -95,6 +91,5 @@ public:
 
   const TObjArray *fParticleInputArray;
 };
-
 
 #endif

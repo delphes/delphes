@@ -36,7 +36,6 @@ class DelphesLongFormula;
 class TrackEfficiency: public DelphesModule
 {
 public:
-
   TrackEfficiency();
   ~TrackEfficiency();
 
@@ -45,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   DelphesLongFormula *fFormula; //!
 
   TIterator *fItInputArray; //!

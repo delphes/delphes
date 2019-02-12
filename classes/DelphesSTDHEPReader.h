@@ -27,8 +27,8 @@
  *
  */
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "classes/DelphesXDRReader.h"
 
@@ -71,7 +71,6 @@ public:
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
 private:
-
   void AnalyzeParticles(DelphesFactory *factory,
     TObjArray *allParticleOutputArray,
     TObjArray *stableParticleOutputArray,

@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
  *
  *  Definition of classes to be stored in the root tree.
@@ -132,13 +131,13 @@ Candidate::Candidate() :
   InitialPosition(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
   L(0),
-  D0(0), ErrorD0(0), 
-  DZ(0), ErrorDZ(0), 
-  P(0),  ErrorP(0), 
-  PT(0), ErrorPT(0), 
-  CtgTheta(0), ErrorCtgTheta(0), 
-  Phi(0), ErrorPhi(0),  
-  Xd(0), Yd(0), Zd(0), 
+  D0(0), ErrorD0(0),
+  DZ(0), ErrorDZ(0),
+  P(0), ErrorP(0),
+  PT(0), ErrorPT(0),
+  CtgTheta(0), ErrorCtgTheta(0),
+  Phi(0), ErrorPhi(0),
+  Xd(0), Yd(0), Zd(0),
   TrackResolution(0),
   NCharged(0),
   NNeutrals(0),
@@ -236,7 +235,6 @@ Bool_t Candidate::Overlaps(const Candidate *object) const
   return kFALSE;
 }
 
-
 //------------------------------------------------------------------------------
 
 TObject *Candidate::Clone(const char *newname) const
@@ -303,10 +301,10 @@ void Candidate::Copy(TObject &obj) const
   object.ErrorP = ErrorP;
   object.PT = PT;
   object.ErrorPT = ErrorPT;
-  object.CtgTheta = CtgTheta ;
+  object.CtgTheta = CtgTheta;
   object.ErrorCtgTheta = ErrorCtgTheta;
   object.Phi = Phi;
-  object.ErrorPhi = ErrorPhi;  
+  object.ErrorPhi = ErrorPhi;
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
@@ -326,9 +324,9 @@ void Candidate::Copy(TObject &obj) const
   object.SumPt = SumPt;
   object.ClusterIndex = ClusterIndex;
   object.ClusterNDF = ClusterNDF;
-  object.ClusterSigma = ClusterSigma; 
+  object.ClusterSigma = ClusterSigma;
   object.SumPT2 = SumPT2;
-  
+
   object.FracPt[0] = FracPt[0];
   object.FracPt[1] = FracPt[1];
   object.FracPt[2] = FracPt[2];
@@ -360,7 +358,7 @@ void Candidate::Copy(TObject &obj) const
   object.NSubJetsPruned = NSubJetsPruned;
   object.NSubJetsSoftDropped = NSubJetsSoftDropped;
 
-  object.SoftDroppedJet =SoftDroppedJet;
+  object.SoftDroppedJet = SoftDroppedJet;
   object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
 
@@ -383,14 +381,17 @@ void Candidate::Copy(TObject &obj) const
 
 //------------------------------------------------------------------------------
 
-void Candidate::Clear(Option_t* option)
+void Candidate::Clear(Option_t *option)
 {
   int i;
   SetUniqueID(0);
   ResetBit(kIsReferenced);
   PID = 0;
   Status = 0;
-  M1 = -1; M2 = -1; D1 = -1; D2 = -1;
+  M1 = -1;
+  M2 = -1;
+  D1 = -1;
+  D2 = -1;
   Charge = 0;
   Mass = 0.0;
   IsPU = 0;
@@ -419,12 +420,12 @@ void Candidate::Clear(Option_t* option)
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
   L = 0.0;
   ErrorT = 0.0;
-  D0 = 0.0;  
+  D0 = 0.0;
   ErrorD0 = 0.0;
   DZ = 0.0;
   ErrorDZ = 0.0;
-  P =0.0;
-  ErrorP =0.0;
+  P = 0.0;
+  ErrorP = 0.0;
   PT = 0.0;
   ErrorPT = 0.0;
   CtgTheta = 0.0;
@@ -454,12 +455,12 @@ void Candidate::Clear(Option_t* option)
 
   ClusterIndex = -1;
   ClusterNDF = -99;
-  ClusterSigma = 0.0; 
+  ClusterSigma = 0.0;
   SumPT2 = 0.0;
   BTVSumPT2 = 0.0;
   GenDeltaZ = 0.0;
-  GenSumPT2 = 0.0; 
-  
+  GenSumPT2 = 0.0;
+
   FracPt[0] = 0.0;
   FracPt[1] = 0.0;
   FracPt[2] = 0.0;
@@ -474,7 +475,6 @@ void Candidate::Clear(Option_t* option)
   SoftDroppedJet.SetXYZT(0.0, 0.0, 0.0, 0.0);
   SoftDroppedSubJet1.SetXYZT(0.0, 0.0, 0.0, 0.0);
   SoftDroppedSubJet2.SetXYZT(0.0, 0.0, 0.0, 0.0);
-
 
   for(i = 0; i < 5; ++i)
   {

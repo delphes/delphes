@@ -35,7 +35,6 @@ class TObjArray;
 class TimeSmearing: public DelphesModule
 {
 public:
-
   TimeSmearing();
   ~TimeSmearing();
 
@@ -44,7 +43,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fTimeResolution;
 
   TIterator *fItInputArray; //!

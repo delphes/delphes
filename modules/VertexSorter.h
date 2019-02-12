@@ -22,7 +22,6 @@ class Candidate;
 class VertexSorter: public DelphesModule
 {
 public:
-
   VertexSorter();
   ~VertexSorter();
 
@@ -31,7 +30,6 @@ public:
   void Finish();
 
 private:
-
   TObjArray *fInputArray;
 
   TObjArray *fTrackInputArray;

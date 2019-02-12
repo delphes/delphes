@@ -24,7 +24,6 @@
 class DelphesCylindricalFormula: public TFormula
 {
 public:
-
   DelphesCylindricalFormula();
 
   DelphesCylindricalFormula(const char *name, const char *expression);
@@ -37,4 +36,3 @@ public:
 };
 
 #endif /* DelphesCylindricalFormula_h */
-

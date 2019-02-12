@@ -25,8 +25,8 @@
  *
  */
 
-#include "TRef.h"
 #include "TObject.h"
+#include "TRef.h"
 #include "TRefArray.h"
 
 #include "TMath.h"
@@ -36,7 +36,7 @@
 class CompBase
 {
 public:
-  virtual ~CompBase() { }
+  virtual ~CompBase() {}
   virtual Bool_t IsSortable(const TObject *) const { return kTRUE; }
   virtual Int_t Compare(const TObject *obj1, const TObject *obj2) const = 0;
 };
@@ -46,7 +46,6 @@ public:
 class SortableObject: public TObject
 {
 public:
-
   Bool_t IsSortable() const { return GetCompare() ? GetCompare()->IsSortable(this) : kFALSE; }
   Int_t Compare(const TObject *obj) const { return GetCompare()->Compare(this, obj); }
 
@@ -63,6 +62,7 @@ template <typename T>
 class CompE: public CompBase
 {
   CompE() {}
+
 public:
   static CompE *Instance()
   {
@@ -72,8 +72,8 @@ public:
 
   Int_t Compare(const TObject *obj1, const TObject *obj2) const
   {
-    const T *t1 = static_cast<const T*>(obj1);
-    const T *t2 = static_cast<const T*>(obj2);
+    const T *t1 = static_cast<const T *>(obj1);
+    const T *t2 = static_cast<const T *>(obj2);
     if(t1->E > t2->E)
       return -1;
     else if(t1->E < t2->E)
@@ -89,6 +89,7 @@ template <typename T>
 class CompPT: public CompBase
 {
   CompPT() {}
+
 public:
   static CompPT *Instance()
   {
@@ -98,8 +99,8 @@ public:
 
   Int_t Compare(const TObject *obj1, const TObject *obj2) const
   {
-    const T *t1 = static_cast<const T*>(obj1);
-    const T *t2 = static_cast<const T*>(obj2);
+    const T *t1 = static_cast<const T *>(obj1);
+    const T *t2 = static_cast<const T *>(obj2);
     if(t1->PT > t2->PT)
       return -1;
     else if(t1->PT < t2->PT)
@@ -115,6 +116,7 @@ template <typename T>
 class CompMomentumPt: public CompBase
 {
   CompMomentumPt() {}
+
 public:
   static CompMomentumPt *Instance()
   {
@@ -124,8 +126,8 @@ public:
 
   Int_t Compare(const TObject *obj1, const TObject *obj2) const
   {
-    const T *t1 = static_cast<const T*>(obj1);
-    const T *t2 = static_cast<const T*>(obj2);
+    const T *t1 = static_cast<const T *>(obj1);
+    const T *t2 = static_cast<const T *>(obj2);
     if(t1->Momentum.Pt() > t2->Momentum.Pt())
       return -1;
     else if(t1->Momentum.Pt() < t2->Momentum.Pt())
@@ -141,6 +143,7 @@ template <typename T>
 class CompET: public CompBase
 {
   CompET() {}
+
 public:
   static CompET *Instance()
   {
@@ -150,8 +153,8 @@ public:
 
   Int_t Compare(const TObject *obj1, const TObject *obj2) const
   {
-    const T *t1 = static_cast<const T*>(obj1);
-    const T *t2 = static_cast<const T*>(obj2);
+    const T *t1 = static_cast<const T *>(obj1);
+    const T *t2 = static_cast<const T *>(obj2);
     if(t1->ET > t2->ET)
       return -1;
     else if(t1->ET < t2->ET)
@@ -167,6 +170,7 @@ template <typename T>
 class CompSumPT2: public CompBase
 {
   CompSumPT2() {}
+
 public:
   static CompSumPT2 *Instance()
   {
@@ -176,8 +180,8 @@ public:
 
   Int_t Compare(const TObject *obj1, const TObject *obj2) const
   {
-    const T *t1 = static_cast<const T*>(obj1);
-    const T *t2 = static_cast<const T*>(obj2);
+    const T *t1 = static_cast<const T *>(obj1);
+    const T *t2 = static_cast<const T *>(obj2);
     if(t1->SumPT2 > t2->SumPT2)
       return -1;
     else if(t1->SumPT2 < t2->SumPT2)
@@ -192,31 +196,34 @@ public:
 template <typename T1, typename T2>
 class CompDeltaR: public CompBase
 {
-  CompDeltaR(const T2 *obj = 0) : fObj(obj) {}
+  CompDeltaR(const T2 *obj = 0) :
+    fObj(obj) {}
 
   Double_t DeltaPhi(Double_t phi1, Double_t phi2)
   {
     Double_t phi = TMath::Abs(phi1 - phi2);
-    return (phi <= TMath::Pi()) ? phi : (2.0*TMath::Pi()) - phi;
+    return (phi <= TMath::Pi()) ? phi : (2.0 * TMath::Pi()) - phi;
   }
 
-  Double_t Sqr(Double_t x) { return x*x; }
+  Double_t Sqr(Double_t x) { return x * x; }
 
   Double_t SumSqr(Double_t a, Double_t b)
   {
     Double_t aAbs = TMath::Abs(a);
     Double_t bAbs = TMath::Abs(b);
-    if(aAbs > bAbs) return aAbs * TMath::Sqrt(1.0 + Sqr(bAbs / aAbs));
-    else return (bAbs == 0) ? 0.0 : bAbs * TMath::Sqrt(1.0 + Sqr(aAbs / bAbs));
+    if(aAbs > bAbs)
+      return aAbs * TMath::Sqrt(1.0 + Sqr(bAbs / aAbs));
+    else
+      return (bAbs == 0) ? 0.0 : bAbs * TMath::Sqrt(1.0 + Sqr(aAbs / bAbs));
   };
 
   const T2 *fObj;
 
 public:
-    static CompDeltaR *Instance(const T2 *obj = 0)
+  static CompDeltaR *Instance(const T2 *obj = 0)
   {
-      static CompDeltaR single(obj);
-      return &single;
+    static CompDeltaR single(obj);
+    return &single;
   }
 
   void SetObject(const T2 *obj) { fObj = obj; }
@@ -224,8 +231,8 @@ public:
   Int_t Compare(const TObject *obj1, const TObject *obj2) const
   {
     Double_t eta[3], phi[3], deltaR[2];
-    const T1 *t1 = static_cast<const T1*>(obj1);
-    const T1 *t2 = static_cast<const T1*>(obj2);
+    const T1 *t1 = static_cast<const T1 *>(obj1);
+    const T1 *t2 = static_cast<const T1 *>(obj2);
 
     eta[0] = fObj->Eta;
     phi[0] = fObj->Phi;
@@ -249,5 +256,3 @@ public:
 };
 
 #endif // SortableObject_h
-
-

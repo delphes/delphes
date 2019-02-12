@@ -39,7 +39,6 @@ class TLorentzVector;
 class ParticlePropagator: public DelphesModule
 {
 public:
-
   ParticlePropagator();
   ~ParticlePropagator();
 
@@ -48,7 +47,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
   Double_t fBz;
 

@@ -16,24 +16,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include <signal.h>
 
-#include "TROOT.h"
 #include "TApplication.h"
+#include "TROOT.h"
 
-#include "TFile.h"
 #include "TClonesArray.h"
+#include "TFile.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesPileUpWriter.h"
 
-#include "ExRootAnalysis/ExRootTreeReader.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTreeReader.h"
 
 using namespace std;
 
@@ -63,7 +63,8 @@ int main(int argc, char *argv[])
 
   if(argc < 3)
   {
-    cout << " Usage: " << appName << " output_file" << " input_file(s)" << endl;
+    cout << " Usage: " << appName << " output_file"
+         << " input_file(s)" << endl;
     cout << " output_file - output binary pile-up file," << endl;
     cout << " input_file(s) - input file(s) in ROOT format." << endl;
     return 1;
@@ -107,13 +108,13 @@ int main(int argc, char *argv[])
         }
 
         itParticle->Reset();
-        while((particle = static_cast<GenParticle*>(itParticle->Next())))
+        while((particle = static_cast<GenParticle *>(itParticle->Next())))
         {
           writer->WriteParticle(particle->PID,
             particle->X, particle->Y, particle->Z, particle->T,
             particle->Px, particle->Py, particle->Pz, particle->E);
         }
-        
+
         writer->WriteEntry();
 
         progressBar.Update(entry);

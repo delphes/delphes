@@ -16,20 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
+#include "TEveBrowser.h"
 #include "TEveManager.h"
+#include "TEveProjectionAxes.h"
+#include "TEveProjectionManager.h"
+#include "TEveScene.h"
 #include "TEveViewer.h"
+#include "TEveWindow.h"
 #include "TGLViewer.h"
 #include "TGLWidget.h"
-#include "TEveScene.h"
-#include "TEveProjectionManager.h"
-#include "TEveProjectionAxes.h"
-#include "TEveBrowser.h"
-#include "TEveWindow.h"
 #include "TGTab.h"
 
 #include "TEveCalo2DGL.h"
-#include "TEveCalo3DGL.h"  
+#include "TEveCalo3DGL.h"
 #include "TEveCaloLegoGL.h"
 #include "TEveCaloLegoOverlay.h"
 #include "TEveLegoEventHandler.h"
@@ -47,16 +46,16 @@ DelphesDisplay::DelphesDisplay()
   fRPhiMgr = new TEveProjectionManager(TEveProjection::kPT_RPhi);
   fRhoZMgr = new TEveProjectionManager(TEveProjection::kPT_RhoZ);
 
-	fRPhiGeomScene = gEve->SpawnNewScene("RPhi Geometry");
-	fRhoZGeomScene = gEve->SpawnNewScene("RhoZ Geometry");
+  fRPhiGeomScene = gEve->SpawnNewScene("RPhi Geometry");
+  fRhoZGeomScene = gEve->SpawnNewScene("RhoZ Geometry");
 
-	fRPhiCaloScene = gEve->SpawnNewScene("RPhi Calorimeter");
-	fRhoZCaloScene = gEve->SpawnNewScene("RhoZ Calorimeter");
-	fLegoCaloScene = gEve->SpawnNewScene("Lego Calorimeter");
+  fRPhiCaloScene = gEve->SpawnNewScene("RPhi Calorimeter");
+  fRhoZCaloScene = gEve->SpawnNewScene("RhoZ Calorimeter");
+  fLegoCaloScene = gEve->SpawnNewScene("Lego Calorimeter");
 
-	fRPhiEventScene = gEve->SpawnNewScene("RPhi Event Data");
-	fRhoZEventScene = gEve->SpawnNewScene("RhoZ Event Data");
-  
+  fRPhiEventScene = gEve->SpawnNewScene("RPhi Event Data");
+  fRhoZEventScene = gEve->SpawnNewScene("RhoZ Event Data");
+
   axes = new TEveProjectionAxes(fRPhiMgr);
   fRPhiGeomScene->AddElement(axes);
 
@@ -84,19 +83,19 @@ DelphesDisplay::DelphesDisplay()
   f3DimView = gEve->SpawnNewViewer("3D View", "");
   f3DimView->AddScene(gEve->GetGlobalScene());
   f3DimView->AddScene(gEve->GetEventScene());
-  
+
   pack1->NewSlot()->MakeCurrent();
   fLegoView = gEve->SpawnNewViewer("Lego View", "");
   fLegoView->GetGLViewer()->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
   fLegoView->AddScene(fLegoCaloScene);
-  
+
   pack0->NewSlot()->MakeCurrent();
   fRPhiView = gEve->SpawnNewViewer("RPhi View", "");
   fRPhiView->GetGLViewer()->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
   fRPhiView->AddScene(fRPhiGeomScene);
   fRPhiView->AddScene(fRPhiCaloScene);
   fRPhiView->AddScene(fRPhiEventScene);
-        
+
   pack0->NewSlot()->MakeCurrent();
   fRhoZView = gEve->SpawnNewViewer("RhoZ View", "");
   fRhoZView->GetGLViewer()->SetCurrentCamera(TGLViewer::kCameraOrthoXOY);
@@ -113,13 +112,13 @@ DelphesDisplay::~DelphesDisplay()
 
 //------------------------------------------------------------------------------
 
-void DelphesDisplay::ImportGeomRPhi(TEveElement* el)
-{ 
+void DelphesDisplay::ImportGeomRPhi(TEveElement *el)
+{
   fRPhiMgr->ImportElements(el, fRPhiGeomScene);
 }
 
-void DelphesDisplay::ImportGeomRhoZ(TEveElement* el)
-{ 
+void DelphesDisplay::ImportGeomRhoZ(TEveElement *el)
+{
   fRhoZMgr->ImportElements(el, fRhoZGeomScene);
 }
 
@@ -136,20 +135,20 @@ void DelphesDisplay::ImportCaloRhoZ(TEveCalo3D *calo)
 void DelphesDisplay::ImportCaloLego(TEveCaloLego *calo)
 {
   TEveCaloLegoOverlay *overlay = new TEveCaloLegoOverlay();
- 
+
   overlay->SetCaloLego(calo);
   fLegoView->GetGLViewer()->AddOverlayElement(overlay);
 
   fLegoCaloScene->AddElement(calo);
 }
 
-void DelphesDisplay::ImportEventRPhi(TEveElement* el)
-{ 
+void DelphesDisplay::ImportEventRPhi(TEveElement *el)
+{
   fRPhiMgr->ImportElements(el, fRPhiEventScene);
 }
 
-void DelphesDisplay::ImportEventRhoZ(TEveElement* el)
-{ 
+void DelphesDisplay::ImportEventRhoZ(TEveElement *el)
+{
   fRhoZMgr->ImportElements(el, fRhoZEventScene);
 }
 
@@ -165,4 +164,3 @@ void DelphesDisplay::DestroyEventRhoZ()
   fRhoZEventScene->DestroyElements();
 }
 //------------------------------------------------------------------------------
-

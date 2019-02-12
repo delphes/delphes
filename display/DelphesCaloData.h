@@ -21,10 +21,9 @@
 
 #include "TEveCaloData.h"
 
-class DelphesCaloData: public TEveCaloDataVec 
+class DelphesCaloData: public TEveCaloDataVec
 {
 public:
-  
   DelphesCaloData(Int_t nslices);
 
   ~DelphesCaloData();
@@ -35,4 +34,3 @@ public:
 };
 
 #endif /* DelphesCaloData_h */
-

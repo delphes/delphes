@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class TauTagging
  *
  *  Determines origin of jet,
@@ -33,21 +32,20 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "TMath.h"
-#include "TString.h"
-#include "TFormula.h"
-#include "TRandom3.h"
-#include "TObjArray.h"
 #include "TDatabasePDG.h"
+#include "TFormula.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
+#include "TObjArray.h"
+#include "TRandom3.h"
+#include "TString.h"
 
 #include <algorithm>
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
-
 
 //------------------------------------------------------------------------------
 TauTaggingPartonClassifier::TauTaggingPartonClassifier(const TObjArray *array) :
@@ -62,7 +60,7 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
   Candidate *tau = static_cast<Candidate *>(object);
   Candidate *daughter1 = 0;
   Candidate *daughter2 = 0;
-  
+
   const TLorentzVector &momentum = tau->Momentum;
   Int_t pdgCode, i, j;
 
@@ -75,8 +73,7 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D2 < tau->D1) return -1;
 
-  if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
-     tau->D2 >= fParticleInputArray->GetEntriesFast())
+  if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
   {
     throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
   }
@@ -85,17 +82,17 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
   {
     daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
     pdgCode = TMath::Abs(daughter1->PID);
-    if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15) return -1;
+    if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
+      return -1;
     else if(pdgCode == 24)
     {
-     if(daughter1->D1 < 0) return -1;
-     for(j = daughter1->D1; j <= daughter1->D2; ++j)
-     {
-       daughter2 = static_cast<Candidate*>(fParticleInputArray->At(j));
-       pdgCode = TMath::Abs(daughter2->PID);
-       if(pdgCode == 11 || pdgCode == 13) return -1;
-     }
-	
+      if(daughter1->D1 < 0) return -1;
+      for(j = daughter1->D1; j <= daughter1->D2; ++j)
+      {
+        daughter2 = static_cast<Candidate *>(fParticleInputArray->At(j));
+        pdgCode = TMath::Abs(daughter2->PID);
+        if(pdgCode == 11 || pdgCode == 13) return -1;
+      }
     }
   }
 
@@ -120,7 +117,7 @@ TauTagging::~TauTagging()
 
 void TauTagging::Init()
 {
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   ExRootConfParam param;
   DelphesFormula *formula;
   Int_t i, size;
@@ -134,12 +131,12 @@ void TauTagging::Init()
   size = param.GetSize();
 
   fEfficiencyMap.clear();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i*2 + 1].GetString());
+    formula->Compile(param[i * 2 + 1].GetString());
 
-    fEfficiencyMap[param[i*2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = formula;
   }
 
   // set default efficiency formula
@@ -173,7 +170,7 @@ void TauTagging::Init()
 
 void TauTagging::Finish()
 {
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
   if(fFilter) delete fFilter;
@@ -196,7 +193,7 @@ void TauTagging::Process()
   TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e, eff;
   TObjArray *tauArray;
-  map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
+  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
   Int_t pdgCode, charge, i;
 
@@ -217,14 +214,14 @@ void TauTagging::Process()
     e = jetMomentum.E();
 
     // loop over all input taus
-    if(tauArray){
+    if(tauArray)
+    {
       TIter itTauArray(tauArray);
       while((tau = static_cast<Candidate *>(itTauArray.Next())))
       {
         if(tau->D1 < 0) continue;
 
-        if(tau->D1 >= fParticleInputArray->GetEntriesFast() ||
-           tau->D2 >= fParticleInputArray->GetEntriesFast())
+        if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
         {
           throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
         }
@@ -256,7 +253,7 @@ void TauTagging::Process()
     // apply an efficency formula
     eff = formula->Eval(pt, eta, phi, e);
     jet->TauTag |= (gRandom->Uniform() <= eff) << fBitNumber;
-    jet->TauWeight = eff;     
+    jet->TauWeight = eff;
 
     // set tau charge
     jet->Charge = charge;

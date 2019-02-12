@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /** \class DelphesSTDHEPReader
  *
  *  Reads STDHEP file
@@ -27,20 +26,20 @@
 
 #include "classes/DelphesSTDHEPReader.h"
 
-#include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
-#include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
-#include "TObjArray.h"
-#include "TStopwatch.h"
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
 #include "TLorentzVector.h"
+#include "TObjArray.h"
+#include "TParticlePDG.h"
+#include "TStopwatch.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -50,14 +49,14 @@
 
 using namespace std;
 
-static const int kBufferSize  = 1000000;
+static const int kBufferSize = 1000000;
 
 //---------------------------------------------------------------------------
 
 DelphesSTDHEPReader::DelphesSTDHEPReader() :
   fInputFile(0), fBuffer(0), fPDG(0), fBlockType(-1)
 {
-  fBuffer = new uint8_t[kBufferSize*96 + 24];
+  fBuffer = new uint8_t[kBufferSize * 96 + 24];
 
   fPDG = TDatabasePDG::Instance();
 }
@@ -116,8 +115,7 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   {
     ReadEventHeader();
   }
-  else if(fBlockType == MCFIO_STDHEPBEG ||
-          fBlockType == MCFIO_STDHEPEND)
+  else if(fBlockType == MCFIO_STDHEPBEG || fBlockType == MCFIO_STDHEPEND)
   {
     ReadSTDCM1();
   }
@@ -169,7 +167,7 @@ void DelphesSTDHEPReader::SkipArray(int elsize)
 {
   uint32_t size;
   fReader[0].ReadValue(&size, 4);
-  SkipBytes(size*elsize);
+  SkipBytes(size * elsize);
 }
 
 //---------------------------------------------------------------------------
@@ -177,15 +175,26 @@ void DelphesSTDHEPReader::SkipArray(int elsize)
 void DelphesSTDHEPReader::ReadFileHeader()
 {
   uint32_t i;
-  enum STDHEPVersion {UNKNOWN, V1, V2, V21} version;
+  enum STDHEPVersion
+  {
+    UNKNOWN,
+    V1,
+    V2,
+    V21
+  } version;
 
   // version
   fReader[0].ReadString(fBuffer, 100);
-  if(fBuffer[0] == '\0' || fBuffer[1] == '\0') version = UNKNOWN;
-  else if(fBuffer[0] == '1') version = V1;
-  else if(strncmp((char *)fBuffer, "2.01", 4) == 0) version = V21;
-  else if(fBuffer[0] == '2') version = V2;
-  else version = UNKNOWN;
+  if(fBuffer[0] == '\0' || fBuffer[1] == '\0')
+    version = UNKNOWN;
+  else if(fBuffer[0] == '1')
+    version = V1;
+  else if(strncmp((char *)fBuffer, "2.01", 4) == 0)
+    version = V21;
+  else if(fBuffer[0] == '2')
+    version = V2;
+  else
+    version = UNKNOWN;
 
   if(version == UNKNOWN)
   {
@@ -362,14 +371,14 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   // 4*n + 4*n + 8*n + 8*n + 40*n + 32*n +
   // 4 + 4 + 4 + 4 + 4 + 4 = 96*n + 24
 
-  fReader[0].ReadRaw(fBuffer, 96*fEventSize + 24);
+  fReader[0].ReadRaw(fBuffer, 96 * fEventSize + 24);
 
   fReader[1].SetBuffer(fBuffer);
-  fReader[2].SetBuffer(fBuffer + 4*1 + 4*1*fEventSize);
-  fReader[3].SetBuffer(fBuffer + 4*2 + 4*2*fEventSize);
-  fReader[4].SetBuffer(fBuffer + 4*3 + 4*4*fEventSize);
-  fReader[5].SetBuffer(fBuffer + 4*4 + 4*6*fEventSize);
-  fReader[6].SetBuffer(fBuffer + 4*5 + 4*16*fEventSize);
+  fReader[2].SetBuffer(fBuffer + 4 * 1 + 4 * 1 * fEventSize);
+  fReader[3].SetBuffer(fBuffer + 4 * 2 + 4 * 2 * fEventSize);
+  fReader[4].SetBuffer(fBuffer + 4 * 3 + 4 * 4 * fEventSize);
+  fReader[5].SetBuffer(fBuffer + 4 * 4 + 4 * 6 * fEventSize);
+  fReader[6].SetBuffer(fBuffer + 4 * 5 + 4 * 16 * fEventSize);
 
   fReader[1].ReadValue(&idhepSize, 4);
   fReader[2].ReadValue(&isthepSize, 4);
@@ -390,7 +399,7 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   fAlphaQED = 0.0;
   fAlphaQCD = 0.0;
   fScaleSize = 0;
-  memset(fScale, 0, 10*sizeof(double));
+  memset(fScale, 0, 10 * sizeof(double));
 }
 
 //---------------------------------------------------------------------------
@@ -493,7 +502,7 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
     candidate->D2 = d2 - 1;
 
     pdgParticle = fPDG->GetParticle(pid);
-    candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
+    candidate->Charge = pdgParticle ? int(pdgParticle->Charge() / 3.0) : -999;
     candidate->Mass = mass;
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);

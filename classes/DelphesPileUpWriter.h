@@ -27,15 +27,14 @@
  *
  */
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 class DelphesXDRWriter;
 
 class DelphesPileUpWriter
 {
 public:
-
   DelphesPileUpWriter(const char *fileName);
 
   ~DelphesPileUpWriter();
@@ -49,7 +48,6 @@ public:
   void WriteIndex();
 
 private:
-
   int64_t fEntries;
   int32_t fEntrySize;
   int64_t fOffset;

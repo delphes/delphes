@@ -29,8 +29,8 @@
 
 #include "classes/DelphesModule.h"
 
-#include <vector>
 #include <map>
+#include <vector>
 
 class TIterator;
 class TObjArray;
@@ -38,7 +38,6 @@ class TObjArray;
 class ConstituentFilter: public DelphesModule
 {
 public:
-
   ConstituentFilter();
   ~ConstituentFilter();
 
@@ -47,12 +46,11 @@ public:
   void Finish();
 
 private:
-
   Double_t fJetPTMin;
 
-  std::vector< TIterator * > fInputList; //!
+  std::vector<TIterator *> fInputList; //!
 
-  std::map< TIterator *, TObjArray * > fInputMap; //!
+  std::map<TIterator *, TObjArray *> fInputMap; //!
 
   TObjArray *fOutputArray; //!
 
