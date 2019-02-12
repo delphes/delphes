@@ -79,7 +79,7 @@ public:
   Float_t AlphaQED; // value of the QED coupling used in the event | hepup.AQEDUP
   Float_t AlphaQCD; // value of the QCD coupling used in the event | hepup.AQCDUP
 
-  ClassDef(LHEFEvent, 2)
+  ClassDef(LHEFEvent, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -123,7 +123,7 @@ public:
 
 
 
-  ClassDef(HepMCEvent, 2)
+  ClassDef(HepMCEvent, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -286,7 +286,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Photon, 3)
+  ClassDef(Photon, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -324,7 +324,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Electron, 3)
+  ClassDef(Electron, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -360,7 +360,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Muon, 3)
+  ClassDef(Muon, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -432,7 +432,7 @@ public:
   TLorentzVector P4() const;
   TLorentzVector Area;
 
-  ClassDef(Jet, 3)
+  ClassDef(Jet, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -688,7 +688,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 5)
+  ClassDef(Candidate, 6)
 };
 
 #endif // DelphesClasses_h
