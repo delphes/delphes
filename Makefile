@@ -412,6 +412,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/SimpleCalorimeter.h \
 	modules/DenseTrackFilter.h \
 	modules/Calorimeter.h \
+	modules/DualReadoutCalorimeter.h \
 	modules/OldCalorimeter.h \
 	modules/Isolation.h \
 	modules/EnergyScale.h \
@@ -707,6 +708,15 @@ tmp/modules/Delphes.$(ObjSuf): \
 tmp/modules/DenseTrackFilter.$(ObjSuf): \
 	modules/DenseTrackFilter.$(SrcSuf) \
 	modules/DenseTrackFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
+tmp/modules/DualReadoutCalorimeter.$(ObjSuf): \
+	modules/DualReadoutCalorimeter.$(SrcSuf) \
+	modules/DualReadoutCalorimeter.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -1118,6 +1128,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
 	tmp/modules/DenseTrackFilter.$(ObjSuf) \
+	tmp/modules/DualReadoutCalorimeter.$(ObjSuf) \
 	tmp/modules/Efficiency.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
 	tmp/modules/EnergySmearing.$(ObjSuf) \
@@ -2257,6 +2268,10 @@ modules/FastJetFinder.h: \
 	@touch $@
 
 modules/BeamSpotFilter.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/DualReadoutCalorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
