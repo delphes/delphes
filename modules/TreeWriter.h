@@ -69,7 +69,7 @@ private:
 #if !defined(__CINT__) && !defined(__CLING__)
   typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, TObjArray *); //!
 
-  typedef std::map<ExRootTreeBranch *, std::pair<TProcessMethod, TObjArray *>> TBranchMap; //!
+  typedef std::map<ExRootTreeBranch *, std::pair<TProcessMethod, TObjArray *> > TBranchMap; //!
 
   TBranchMap fBranchMap; //!
 

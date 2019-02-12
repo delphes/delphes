@@ -44,10 +44,10 @@ public:
 private:
   TEveWindowTab *tab_;
   std::map<TString, TCanvas *> canvases_;
-  std::map<TString, std::vector<TH1F *>> histograms_;
+  std::map<TString, std::vector<TH1F *> > histograms_;
   std::vector<DelphesBranchBase *> *elements_;
-  std::map<TString, std::vector<TMarker *>> eventMarkers_;
-  std::map<TString, std::vector<TH1F *>> eventProfiles_;
+  std::map<TString, std::vector<TMarker *> > eventMarkers_;
+  std::map<TString, std::vector<TH1F *> > eventProfiles_;
 };
 
 #endif // DelphesPlotSummary_h

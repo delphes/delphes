@@ -109,8 +109,8 @@ bool DelphesHepMCReader::ReadBlock(DelphesFactory *factory,
   TObjArray *stableParticleOutputArray,
   TObjArray *partonOutputArray)
 {
-  map<int, pair<int, int>>::iterator itMotherMap;
-  map<int, pair<int, int>>::iterator itDaughterMap;
+  map<int, pair<int, int> >::iterator itMotherMap;
+  map<int, pair<int, int> >::iterator itDaughterMap;
   char key, momentumUnit[4], positionUnit[3];
   int i, rc, state;
   double weight;
@@ -432,8 +432,8 @@ void DelphesHepMCReader::AnalyzeParticle(DelphesFactory *factory,
 void DelphesHepMCReader::FinalizeParticles(TObjArray *allParticleOutputArray)
 {
   Candidate *candidate;
-  map<int, pair<int, int>>::iterator itMotherMap;
-  map<int, pair<int, int>>::iterator itDaughterMap;
+  map<int, pair<int, int> >::iterator itMotherMap;
+  map<int, pair<int, int> >::iterator itDaughterMap;
   int i;
 
   for(i = 0; i < allParticleOutputArray->GetEntriesFast(); ++i)

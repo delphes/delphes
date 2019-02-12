@@ -49,9 +49,9 @@ public:
 private:
   Bool_t fUseUniqueID;
 
-  Bool_t Unique(Candidate *candidate, std::vector<std::pair<TIterator *, TObjArray *>>::iterator itInputMap);
+  Bool_t Unique(Candidate *candidate, std::vector<std::pair<TIterator *, TObjArray *> >::iterator itInputMap);
 
-  std::vector<std::pair<TIterator *, TObjArray *>> fInputMap; //!
+  std::vector<std::pair<TIterator *, TObjArray *> > fInputMap; //!
 
   ClassDef(UniqueObjectFinder, 1)
 };

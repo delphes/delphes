@@ -91,7 +91,7 @@ void UniqueObjectFinder::Init()
 
 void UniqueObjectFinder::Finish()
 {
-  vector<pair<TIterator *, TObjArray *>>::iterator itInputMap;
+  vector<pair<TIterator *, TObjArray *> >::iterator itInputMap;
   TIterator *iterator;
 
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
@@ -107,7 +107,7 @@ void UniqueObjectFinder::Finish()
 void UniqueObjectFinder::Process()
 {
   Candidate *candidate;
-  vector<pair<TIterator *, TObjArray *>>::iterator itInputMap;
+  vector<pair<TIterator *, TObjArray *> >::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
 
@@ -131,10 +131,10 @@ void UniqueObjectFinder::Process()
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector<pair<TIterator *, TObjArray *>>::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector<pair<TIterator *, TObjArray *> >::iterator itInputMap)
 {
   Candidate *previousCandidate;
-  vector<pair<TIterator *, TObjArray *>>::iterator previousItInputMap;
+  vector<pair<TIterator *, TObjArray *> >::iterator previousItInputMap;
   TObjArray *array;
 
   // loop over previous arrays

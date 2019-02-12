@@ -59,9 +59,9 @@ public:
 
 private:
   std::pair<Double_t, Double_t> addTracker(TGeoVolume *top);
-  std::pair<Double_t, Double_t> addCalorimeter(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set<std::pair<Double_t, Int_t>> &caloBinning);
+  std::pair<Double_t, Double_t> addCalorimeter(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set<std::pair<Double_t, Int_t> > &caloBinning);
   std::pair<Double_t, Double_t> addMuonDets(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength);
-  void addCaloTowers(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set<std::pair<Double_t, Int_t>> &caloBinning);
+  void addCaloTowers(TGeoVolume *top, const char *name, Double_t innerBarrelRadius, Double_t innerBarrelLength, std::set<std::pair<Double_t, Int_t> > &caloBinning);
 
 private:
   TGeoManager *geom_;
@@ -89,7 +89,7 @@ private:
   std::vector<std::string> muondets_;
 
   std::map<std::string, Double_t> muonSystem_etamax_;
-  std::map<std::string, std::set<std::pair<Double_t, Int_t>>> caloBinning_;
+  std::map<std::string, std::set<std::pair<Double_t, Int_t> > > caloBinning_;
 };
 
 #endif

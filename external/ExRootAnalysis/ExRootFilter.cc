@@ -20,7 +20,7 @@
 using namespace std;
 
 typedef map<Int_t, TObjArray *> TCategoryMap;
-typedef map<ExRootClassifier *, pair<Bool_t, TCategoryMap>> TClassifierMap;
+typedef map<ExRootClassifier *, pair<Bool_t, TCategoryMap> > TClassifierMap;
 
 ExRootFilter::ExRootFilter(const TSeqCollection *collection) :
   fCollection(collection)

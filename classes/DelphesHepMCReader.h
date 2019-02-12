@@ -97,8 +97,8 @@ private:
 
   int fParticleCounter;
 
-  std::map<int, std::pair<int, int>> fMotherMap;
-  std::map<int, std::pair<int, int>> fDaughterMap;
+  std::map<int, std::pair<int, int> > fMotherMap;
+  std::map<int, std::pair<int, int> > fDaughterMap;
 };
 
 #endif // DelphesHepMCReader_h

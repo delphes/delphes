@@ -70,8 +70,8 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
   fwlite::Handle<GenEventInfoProduct> handleGenEventInfo;
   fwlite::Handle<LHEEventProduct> handleLHEEvent;
-  fwlite::Handle<vector<reco::GenParticle>> handleParticle;
-  fwlite::Handle<vector<pat::PackedGenParticle>> handlePackedParticle;
+  fwlite::Handle<vector<reco::GenParticle> > handleParticle;
+  fwlite::Handle<vector<pat::PackedGenParticle> > handlePackedParticle;
 
   vector<reco::GenParticle>::const_iterator itParticle;
   vector<pat::PackedGenParticle>::const_iterator itPackedParticle;

@@ -613,7 +613,7 @@ public:
   // Timing information
 
   Int_t NTimeHits;
-  std::vector<std::pair<Float_t, Float_t>> ECalEnergyTimePairs;
+  std::vector<std::pair<Float_t, Float_t> > ECalEnergyTimePairs;
 
   // Isolation variables
 

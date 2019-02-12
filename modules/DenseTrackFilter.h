@@ -48,7 +48,7 @@ public:
   void Finish();
 
 private:
-  typedef std::map<Double_t, std::set<Double_t>> TBinMap; //!
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
   Candidate *fBestTrack;
 

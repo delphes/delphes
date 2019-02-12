@@ -117,8 +117,8 @@ void VertexSorter::Process()
   map<Int_t, UInt_t>::const_iterator itClusterIDToIndex;
   map<Int_t, Double_t> clusterIDToSumPT2;
   map<Int_t, Double_t>::const_iterator itClusterIDToSumPT2;
-  vector<pair<Int_t, Double_t>> sortedClusterIDs;
-  vector<pair<Int_t, Double_t>>::const_iterator itSortedClusterIDs;
+  vector<pair<Int_t, Double_t> > sortedClusterIDs;
+  vector<pair<Int_t, Double_t> >::const_iterator itSortedClusterIDs;
 
   for(Int_t iCluster = 0; iCluster < fInputArray->GetEntries(); iCluster++)
   {

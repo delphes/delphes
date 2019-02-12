@@ -180,14 +180,14 @@ void DelphesPlotSummary::Draw()
 void DelphesPlotSummary::FillEvent()
 {
   // clear event histograms and markers
-  for(std::map<TString, std::vector<TH1F *>>::iterator hv = eventProfiles_.begin(); hv != eventProfiles_.end(); ++hv)
+  for(std::map<TString, std::vector<TH1F *> >::iterator hv = eventProfiles_.begin(); hv != eventProfiles_.end(); ++hv)
   {
     for(std::vector<TH1F *>::iterator h = hv->second.begin(); h < hv->second.end(); ++h)
     {
       (*h)->Reset();
     }
   }
-  for(std::map<TString, std::vector<TMarker *>>::iterator mv = eventMarkers_.begin(); mv != eventMarkers_.end(); ++mv)
+  for(std::map<TString, std::vector<TMarker *> >::iterator mv = eventMarkers_.begin(); mv != eventMarkers_.end(); ++mv)
   {
     for(std::vector<TMarker *>::iterator m = mv->second.begin(); m < mv->second.end(); ++m)
     {

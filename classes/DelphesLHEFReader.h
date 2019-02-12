@@ -81,7 +81,7 @@ private:
   int fPID, fStatus, fM1, fM2, fC1, fC2;
   double fPx, fPy, fPz, fE, fMass;
 
-  std::vector<std::pair<int, double>> fWeightList;
+  std::vector<std::pair<int, double> > fWeightList;
 };
 
 #endif // DelphesLHEFReader_h

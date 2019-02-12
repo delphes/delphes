@@ -1,5 +1,6 @@
 BasedOnStyle: LLVM
 Language: Cpp
+Standard: Cpp03
 IndentWidth: 2
 ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2

@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   confReader->ReadFile(card);
 
   std::vector<std::string> calorimeters_;
-  std::map<std::string, std::set<std::pair<Double_t, Int_t>>> caloBinning_;
+  std::map<std::string, std::set<std::pair<Double_t, Int_t> > > caloBinning_;
 
   std::string s(argv[2]);
   std::replace(s.begin(), s.end(), ',', ' ');
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
   {
 
     //first entry is eta bin, second is number of phi bins
-    set<pair<Double_t, Int_t>> caloBinning;
+    set<pair<Double_t, Int_t> > caloBinning;
     ExRootConfParam paramEtaBins, paramPhiBins;
     ExRootConfParam param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
     Int_t size = param.GetSize();
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     TLine *linex;
 
     //loop over calo binning
-    std::set<std::pair<Double_t, Int_t>>::iterator it;
+    std::set<std::pair<Double_t, Int_t> >::iterator it;
 
     Int_t n = -1;
     for(it = caloBinning.begin(); it != caloBinning.end(); ++it)
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
       liney->SetLineColor(kRed + 3);
       liney->Draw();
 
-      set<std::pair<Double_t, Int_t>>::iterator it2 = it;
+      set<std::pair<Double_t, Int_t> >::iterator it2 = it;
       it2--;
 
       for(int j = 0; j <= it->second; j++)

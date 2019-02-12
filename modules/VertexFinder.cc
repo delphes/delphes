@@ -114,7 +114,7 @@ void VertexFinder::Process()
   // In order of descending seed pt, grow each cluster. If a cluster ends up with
   // fewer than MinNDF tracks, release the tracks for other clusters to claim.
   sort(clusterSumPT2.begin(), clusterSumPT2.end(), secondDescending);
-  for(vector<pair<UInt_t, Double_t>>::const_iterator cluster = clusterSumPT2.begin(); cluster != clusterSumPT2.end(); cluster++)
+  for(vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin(); cluster != clusterSumPT2.end(); cluster++)
   {
     // Skip the cluster if it no longer has any tracks
     if(!clusterIDToInt.at(cluster->first).at("ndf"))
@@ -129,7 +129,7 @@ void VertexFinder::Process()
 
     if((Int_t)clusterIDToInt.at(cluster->first).at("ndf") < fMinNDF)
     {
-      for(map<UInt_t, map<string, Int_t>>::iterator track = trackIDToInt.begin(); track != trackIDToInt.end(); track++)
+      for(map<UInt_t, map<string, Int_t> >::iterator track = trackIDToInt.begin(); track != trackIDToInt.end(); track++)
       {
         if(track->second.at("clusterIndex") != (Int_t)cluster->first)
           continue;
@@ -154,7 +154,7 @@ void VertexFinder::Process()
   // Add clusters with at least MinNDF tracks to the output array in order of
   // descending sum(pt**2).
   clusterSumPT2.clear();
-  for(map<UInt_t, map<string, Int_t>>::const_iterator cluster = clusterIDToInt.begin(); cluster != clusterIDToInt.end(); cluster++)
+  for(map<UInt_t, map<string, Int_t> >::const_iterator cluster = clusterIDToInt.begin(); cluster != clusterIDToInt.end(); cluster++)
   {
 
     if(cluster->second.at("ndf") < fMinNDF)
@@ -163,7 +163,7 @@ void VertexFinder::Process()
   }
   sort(clusterSumPT2.begin(), clusterSumPT2.end(), secondDescending);
 
-  for(vector<pair<UInt_t, Double_t>>::const_iterator cluster = clusterSumPT2.begin(); cluster != clusterSumPT2.end(); cluster++)
+  for(vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin(); cluster != clusterSumPT2.end(); cluster++)
   {
     DelphesFactory *factory = GetFactory();
     candidate = factory->NewCandidate();
@@ -212,7 +212,7 @@ void VertexFinder::createSeeds()
   // Sort tracks by pt and leave only the SeedMinPT highest pt ones in the
   // trackPT vector.
   sort(trackPT.begin(), trackPT.end(), secondDescending);
-  for(vector<pair<UInt_t, Double_t>>::const_iterator track = trackPT.begin(); track != trackPT.end(); track++, maxSeeds++)
+  for(vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin(); track != trackPT.end(); track++, maxSeeds++)
   {
     if(track->second < fSeedMinPT)
       break;
@@ -227,7 +227,7 @@ void VertexFinder::createSeeds()
   }
 
   // Create the seeds from the SeedMinPT highest pt tracks.
-  for(vector<pair<UInt_t, Double_t>>::const_iterator track = trackPT.begin(); track != trackPT.end(); track++, clusterIndex++)
+  for(vector<pair<UInt_t, Double_t> >::const_iterator track = trackPT.begin(); track != trackPT.end(); track++, clusterIndex++)
   {
     addTrackToCluster(track->first, clusterIndex);
     clusterSumPT2.push_back(make_pair(clusterIndex, track->second * track->second));
@@ -260,7 +260,7 @@ void VertexFinder::growCluster(const UInt_t clusterIndex)
     if(!nearTracks.size())
     {
 
-      for(map<UInt_t, map<string, Double_t>>::const_iterator track = trackIDToDouble.begin(); track != trackIDToDouble.end(); track++)
+      for(map<UInt_t, map<string, Double_t> >::const_iterator track = trackIDToDouble.begin(); track != trackIDToDouble.end(); track++)
       {
         if(trackIDToBool.at(track->first).at("claimed") || trackIDToInt.at(track->first).at("clusterIndex") == (Int_t)clusterIndex)
           continue;

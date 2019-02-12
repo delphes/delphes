@@ -35,7 +35,7 @@ private:
   TTree *fChain; //! pointer to the analyzed TTree or TChain
   Int_t fCurrentTree; //! current Tree number in a TChain
 
-  typedef std::map<TString, std::pair<TBranch *, TClonesArray *>> TBranchMap;
+  typedef std::map<TString, std::pair<TBranch *, TClonesArray *> > TBranchMap;
 
   TBranchMap fBranchMap; //!
 

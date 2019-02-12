@@ -172,7 +172,7 @@ void Delphes3DGeometry::readFile(const char *configFile,
   caloBinning_.clear(); // calo binning
   for(std::vector<std::string>::const_iterator calo = calorimeters_.begin(); calo != calorimeters_.end(); ++calo)
   {
-    set<pair<Double_t, Int_t>> caloBinning;
+    set<pair<Double_t, Int_t> > caloBinning;
     ExRootConfParam paramEtaBins, paramPhiBins;
     ExRootConfParam param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
     Int_t size = param.GetSize();
@@ -186,10 +186,10 @@ void Delphes3DGeometry::readFile(const char *configFile,
     caloBinning_[*calo] = caloBinning;
   }
 
-  set<pair<Double_t, Int_t>> caloBinning = caloBinning_[*calorimeters_.begin()];
+  set<pair<Double_t, Int_t> > caloBinning = caloBinning_[*calorimeters_.begin()];
   Double_t *etaBins = new Double_t[caloBinning.size()]; // note that this is the eta binning of the first calo
   unsigned int ii = 0;
-  for(set<pair<Double_t, Int_t>>::const_iterator itEtaSet = caloBinning.begin(); itEtaSet != caloBinning.end(); ++itEtaSet)
+  for(set<pair<Double_t, Int_t> >::const_iterator itEtaSet = caloBinning.begin(); itEtaSet != caloBinning.end(); ++itEtaSet)
   {
     etaBins[ii++] = itEtaSet->first;
   }
@@ -251,7 +251,7 @@ std::pair<Double_t, Double_t> Delphes3DGeometry::addTracker(TGeoVolume *top)
 }
 
 std::pair<Double_t, Double_t> Delphes3DGeometry::addCalorimeter(TGeoVolume *top, const char *name,
-  Double_t innerBarrelRadius, Double_t innerBarrelLength, set<pair<Double_t, Int_t>> &caloBinning)
+  Double_t innerBarrelRadius, Double_t innerBarrelLength, set<pair<Double_t, Int_t> > &caloBinning)
 {
   // parameters derived from the inputs
   Double_t calo_endcap_etamax = TMath::Max(fabs(caloBinning.begin()->first), fabs(caloBinning.rbegin()->first));
@@ -315,7 +315,7 @@ std::pair<Double_t, Double_t> Delphes3DGeometry::addMuonDets(TGeoVolume *top, co
 }
 
 void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char *name,
-  Double_t innerBarrelRadius, Double_t innerBarrelLength, set<pair<Double_t, Int_t>> &caloBinning)
+  Double_t innerBarrelRadius, Double_t innerBarrelLength, set<pair<Double_t, Int_t> > &caloBinning)
 {
 
   TGeoVolume *calo_endcap = top->GetNode(Form("%s_endcap_1", name))->GetVolume();
@@ -338,7 +338,7 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char *name,
   Int_t *nphi = new Int_t[nEtaBins];
   Int_t etaslice = 0;
   std::map<std::pair<int, int>, TGeoRotation *> phirotations;
-  for(set<pair<Double_t, Int_t>>::const_iterator bin = caloBinning.begin(); bin != caloBinning.end(); ++bin)
+  for(set<pair<Double_t, Int_t> >::const_iterator bin = caloBinning.begin(); bin != caloBinning.end(); ++bin)
   {
     if(abs(bin->first) > calo_endcap_etamin) continue; // only in the barrel
     nphi[etaslice] = bin->second;
@@ -387,7 +387,7 @@ void Delphes3DGeometry::addCaloTowers(TGeoVolume *top, const char *name,
   nphi = new Int_t[nEtaBins];
   etaslice = 0;
   phirotations.clear();
-  for(set<pair<Double_t, Int_t>>::const_iterator bin = caloBinning.begin(); bin != caloBinning.end(); ++bin)
+  for(set<pair<Double_t, Int_t> >::const_iterator bin = caloBinning.begin(); bin != caloBinning.end(); ++bin)
   {
     if(bin->first < calo_endcap_etamin) continue; // only in the + endcap
     r[etaslice] = R * 2 * exp(-bin->first) / (1 - exp(-2 * bin->first));

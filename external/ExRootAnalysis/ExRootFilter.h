@@ -24,7 +24,7 @@ private:
   const TSeqCollection *fCollection; //!
   TIterator *fIter; //!
 
-  std::map<ExRootClassifier *, std::pair<Bool_t, std::map<Int_t, TObjArray *>>> fMap; //!
+  std::map<ExRootClassifier *, std::pair<Bool_t, std::map<Int_t, TObjArray *> > > fMap; //!
 };
 
 #endif /* ExRootFilter */
