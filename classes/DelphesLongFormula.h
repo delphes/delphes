@@ -20,6 +20,7 @@
 #define DelphesLongFormula_h
 
 #include "TFormula.h"
+#include <map>
 
 class DelphesLongFormula: public TFormula
 {
