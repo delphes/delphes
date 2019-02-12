@@ -1,3 +1,26 @@
+22-12-2018: Gavin Salam <gavin.salam@cern.ch>
+        * VERSION:
+	* NEWS:
+	updated version to 2.0.2
+
+2018-12-18: Marcel Vos <marcel.vos@ific.uv.es>a
+        * ValenciaPlugin.cc:
+	Incorporates a modification suggested by
+	Filip Zarnecki (Warsaw) to make sure the behaviour for negative
+	beta is correct (added to trunk in june 2017 but left out of
+	2.0.1)
+
+2018-12-04: Marcel Vos <marcel.vos@ific.uv.es>
+	* VERSION
+	* NEWS
+	updated version to 2.0.1
+
+	* ValenciaPlugin.cc:
+	Bug fix: a bug was discovered in the plugin by Matthias Weber (CERN)
+ 	the calculation of the distance diB assumed massless constituents.
+ 	The impact on the results - jet energy and mass - is typically small,
+	but can be non-negligible
+
 24-02-2015  Marcel Vos <marcel.vos@ific.uv.es>
 
 	*VERSION 2.0.0

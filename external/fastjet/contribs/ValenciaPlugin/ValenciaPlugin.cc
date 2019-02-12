@@ -1,4 +1,4 @@
-// $Id: ValenciaPlugin.cc 776 2015-02-24 17:53:27Z vos $
+// $Id: ValenciaPlugin.cc 1209 2018-12-05 16:18:01Z vos $
 //
 // Copyright (c) 2014, Marcel Vos and Ignacio Garcia 
 //
@@ -65,7 +65,8 @@ public:
     // beam distance
     // E-to-the-2*beta times sin(polar angle)-to-the-2*gamma
     if (E==0. || jet.perp()==0.) diB=0.;
-    diB = pow(E,2*beta) * pow(jet.perp()/E,2*info->gamma());  
+    // modified diB in release 2.0.1    
+    diB = pow(E,2*beta) * pow(jet.perp()/sqrt(jet.perp2()+jet.pz()*jet.pz()),2*info->gamma());
   }
 
   double distance(const ValenciaBriefJet * jet) const {
@@ -77,7 +78,7 @@ public:
                    - ny*jet->ny
                    - nz*jet->nz;
 
-    if (jet->E < E)
+    if (pow(jet->E,2*beta) < pow(E,2*beta))
       dij *= 2 * pow(jet->E,2*beta);
     else 
       dij *= 2 * pow(E,2*beta);

@@ -1,7 +1,8 @@
-The ValenciaJetAlgorithm FastJet contrib was written and is maintained and developed by: Ignacio Garcia Garcia, Marcel Vos, IFIC (UVEG/CSIC) Valencia, Spain
+The ValenciaPlugin FastJet contrib was written and is maintained and developed by: Ignacio Garcia Garcia, Marcel Vos, IFIC (UVEG/CSIC) Valencia, Spain
 
-Acknowledging suggestions by Gavin P. Salam (CERN) and J. Thaler (MIT)
+The first incarnation of the Valencia algorithm (with two parameters R and beta) was proposed "A robust jet reconstruction algorithm for high-energy lepton colliders", PLB 750 (2015) 95-99, arXiv:1404.4294
+The authors acknowledge suggestions by Gavin P. Salam (CERN) and his help in assessing the IR safety of the algorithm
 
-A preprint motivating the algorithm and describing its performance is available on: "A new jet algorithm for lepton colliders", arXiv:1404.4294 (submitted to PLB) 
+The VLC algorithm (with three parameters R, beta and gamma) is described in "Jet reconstruction at high-energy electron-positron colliders", EPJC 78 (2018) no. 2, 144. The addition of the gamma parameter was suggested by J. Thaler (MIT). The performance of the algorithm is evaluated in detail in this paper, in collaboration with Ph. Roloff, R. Simoniello (CERN) and M. Boronat, J. Fuster (IFIC)  
 
 Please contact: marcel.vos@ific.uv.es for questions, queries and comments
