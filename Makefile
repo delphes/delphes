@@ -403,7 +403,6 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PhotonConversions.h \
 	modules/ParticlePropagator.h \
 	modules/Efficiency.h \
-	modules/TrackEfficiency.h \
 	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
 	modules/MomentumSmearing.h \
@@ -522,9 +521,6 @@ tmp/classes/DelphesLHEFReader.$(ObjSuf): \
 	classes/DelphesFactory.h \
 	classes/DelphesStream.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h
-tmp/classes/DelphesLongFormula.$(ObjSuf): \
-	classes/DelphesLongFormula.$(SrcSuf) \
-	classes/DelphesLongFormula.h
 tmp/classes/DelphesModule.$(ObjSuf): \
 	classes/DelphesModule.$(SrcSuf) \
 	classes/DelphesModule.h \
@@ -987,15 +983,6 @@ tmp/modules/TrackCountingTauTagging.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
-tmp/modules/TrackEfficiency.$(ObjSuf): \
-	modules/TrackEfficiency.$(SrcSuf) \
-	modules/TrackEfficiency.h \
-	classes/DelphesClasses.h \
-	classes/DelphesFactory.h \
-	classes/DelphesLongFormula.h \
-	external/ExRootAnalysis/ExRootClassifier.h \
-	external/ExRootAnalysis/ExRootFilter.h \
-	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \
@@ -1079,7 +1066,6 @@ DELPHES_OBJ +=  \
 	tmp/classes/DelphesFormula.$(ObjSuf) \
 	tmp/classes/DelphesHepMCReader.$(ObjSuf) \
 	tmp/classes/DelphesLHEFReader.$(ObjSuf) \
-	tmp/classes/DelphesLongFormula.$(ObjSuf) \
 	tmp/classes/DelphesModule.$(ObjSuf) \
 	tmp/classes/DelphesPileUpReader.$(ObjSuf) \
 	tmp/classes/DelphesPileUpWriter.$(ObjSuf) \
@@ -1161,7 +1147,6 @@ DELPHES_OBJ +=  \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
 	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
-	tmp/modules/TrackEfficiency.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TrackSmearing.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
@@ -1791,10 +1776,6 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclStringObj.$(ObjSuf) \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
-
-modules/TrackEfficiency.h: \
-	classes/DelphesModule.h
-	@touch $@
 
 modules/DenseTrackFilter.h: \
 	classes/DelphesModule.h
