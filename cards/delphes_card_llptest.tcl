@@ -43,17 +43,17 @@ module TrackEfficiency MuonTrackingEfficiency {
   set OutputArray muons
 
 
-  # tracking efficiency formula (efficiency formula as a function of  pt, eta,  phi,  energy, d0 (mm), dz (mm), ctgTheta)
+  # tracking efficiency formula (efficiency formula as a function of pt, eta, phi, energy, d0 (mm), dz (mm), ctgTheta)
   set EfficiencyFormula {
-                          (d0 < 1e-3) *                                                     (pt <= 0.1)   * (0.00) +
-                          (d0 < 1e-3) *                (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)      * (0.73) +
-                          (d0 < 1e-3) *                (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e2)    * (0.95) +
-                          (d0 < 1e-3) *                 (abs(eta) <= 1.5) * (pt > 1.0e2)                  * (0.99) +
-                          (d0 < 1e-3) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.50) +
-                          (d0 < 1e-3) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e2) * (0.83) +
-                          (d0 < 1e-3) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.90) +
-                          (d0 < 1e-3) * (abs(eta) > 2.5)                                                  * (0.00) +
-                          (d0 > 1e-3) *                                                                     (0.00)
+                          (d0 < 10) *                                                     (pt <= 0.1)   * (0.00) +
+                          (d0 < 10) *                (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)      * (0.73) +
+                          (d0 < 10) *                (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e2)    * (0.95) +
+                          (d0 < 10) *                 (abs(eta) <= 1.5) * (pt > 1.0e2)                  * (0.99) +
+                          (d0 < 10) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.50) +
+                          (d0 < 10) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e2) * (0.83) +
+                          (d0 < 10) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.90) +
+                          (d0 < 10) * (abs(eta) > 2.5)                                                  * (0.00) +
+                          (d0 > 10) *                                                                     (0.00)
                          }
 }
 
