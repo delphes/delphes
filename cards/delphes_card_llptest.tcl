@@ -38,7 +38,7 @@ module ParticlePropagator ParticlePropagator {
 # Muon tracking efficiency
 ##############################
 
-module TrackEfficiency MuonTrackingEfficiency {
+module Efficiency MuonTrackingEfficiency {
   set InputArray ParticlePropagator/muons
   set OutputArray muons
 

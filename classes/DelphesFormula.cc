@@ -59,6 +59,9 @@ Int_t DelphesFormula::Compile(const char *expression)
   buffer.ReplaceAll("eta", "y");
   buffer.ReplaceAll("phi", "z");
   buffer.ReplaceAll("energy", "t");
+  buffer.ReplaceAll("d0", "[0]");
+  buffer.ReplaceAll("dz", "[1]");
+  buffer.ReplaceAll("ctgTheta", "[2]");
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
   TFormula::SetMaxima(100000, 1000, 1000000);
@@ -73,10 +76,13 @@ Int_t DelphesFormula::Compile(const char *expression)
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi, Double_t energy)
+Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi,
+  Double_t energy, Double_t d0, Double_t dz,
+  Double_t ctgTheta)
 {
   Double_t x[4] = {pt, eta, phi, energy};
-  return EvalPar(x);
+  Double_t params[3] = {d0, dz, ctgTheta};
+  return EvalPar(x, params);
 }
 
 //------------------------------------------------------------------------------
