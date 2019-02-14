@@ -53,7 +53,7 @@ module TrackEfficiency MuonTrackingEfficiency {
                           (d0 < 1e-3) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e2) * (0.83) +
                           (d0 < 1e-3) * (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.90) +
                           (d0 < 1e-3) * (abs(eta) > 2.5)                                                  * (0.00) +
-                          (d0 > 1e-3) *                                                                   * (0.00)
+                          (d0 > 1e-3) *                                                                     (0.00)
                          }
 }
 
