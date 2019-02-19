@@ -31,7 +31,7 @@ DelphesTF2::DelphesTF2() :
   TF2()
 {
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 04, 00)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 3, 0)
   fFormula = new TFormula();
 #endif
 }
@@ -62,7 +62,7 @@ Int_t DelphesTF2::Compile(const char *expression)
   }
   buffer.ReplaceAll("z", "x");
   buffer.ReplaceAll("t", "y");
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 04, 00)
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 3, 0)
   if(TF2::Compile(buffer) != 0)
 #else
   if(fFormula->Compile(buffer) != 0)

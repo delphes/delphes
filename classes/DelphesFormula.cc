@@ -63,7 +63,7 @@ Int_t DelphesFormula::Compile(const char *expression)
   buffer.ReplaceAll("dz", "[1]");
   buffer.ReplaceAll("ctgTheta", "[2]");
 
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 0, 0)
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 3, 0)
   TFormula::SetMaxima(100000, 1000, 1000000);
 #endif
 
