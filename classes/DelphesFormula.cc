@@ -55,13 +55,14 @@ Int_t DelphesFormula::Compile(const char *expression)
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
   }
-  buffer.ReplaceAll("pt", "x");
-  buffer.ReplaceAll("eta", "y");
-  buffer.ReplaceAll("phi", "z");
-  buffer.ReplaceAll("energy", "t");
-  buffer.ReplaceAll("d0", "[0]");
-  buffer.ReplaceAll("dz", "[1]");
-  buffer.ReplaceAll("ctgTheta", "[2]");
+  buffer.ReplaceAll("pt", "[0]");
+  buffer.ReplaceAll("eta", "[1]");
+  buffer.ReplaceAll("phi", "[2]");
+  buffer.ReplaceAll("energy", "[3]");
+  buffer.ReplaceAll("r", "[4]");
+  buffer.ReplaceAll("d0", "[5]");
+  buffer.ReplaceAll("dz", "[6]");
+  buffer.ReplaceAll("ctgTheta", "[7]");
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 3, 0)
   TFormula::SetMaxima(100000, 1000, 1000000);
@@ -77,11 +78,11 @@ Int_t DelphesFormula::Compile(const char *expression)
 //------------------------------------------------------------------------------
 
 Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi,
-  Double_t energy, Double_t d0, Double_t dz,
-  Double_t ctgTheta)
+  Double_t energy, Double_t r, Double_t z,
+  Double_t d0, Double_t dz, Double_t ctgTheta)
 {
-  Double_t x[4] = {pt, eta, phi, energy};
-  Double_t params[3] = {d0, dz, ctgTheta};
+  Double_t x[4] = {0.0, 0.0, z, 0.0};
+  Double_t params[8] = {pt, eta, phi, energy, r, d0, dz, ctgTheta};
   return EvalPar(x, params);
 }
 
