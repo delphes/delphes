@@ -355,7 +355,7 @@ module SimpleCalorimeter ECal {
     add EtaPhiBins $eta $PhiBins
   }
 
-  # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- ECAL)
+  # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 4.175 (HGCAL- ECAL)
 
   set PhiBins {}
   for {set i -180} {$i <= 180} {incr i} {
@@ -363,28 +363,27 @@ module SimpleCalorimeter ECal {
   }
 
   # 0.02 unit in eta up to eta = 3
-  for {set i 1} {$i <= 84} {incr i} {
-    set eta [expr { -2.958 + $i * 0.0174}]
+  for {set i 1} {$i <= 154} {incr i} {
+    set eta [expr { -4.176 + $i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  for {set i 1} {$i <= 84} {incr i} {
+  for {set i 1} {$i <= 154} {incr i} {
     set eta [expr { 1.4964 + $i * 0.0174}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  # take present CMS granularity for HF
-
-  # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
+  # remaining HF part 
+  # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 4.2 < |eta| < 5.0
+  
   set PhiBins {}
   for {set i -18} {$i <= 18} {incr i} {
     add PhiBins [expr {$i * $pi/18.0}]
   }
 
-  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
+  foreach eta {-5 -4.7 -4.525 -4.35 -4.176 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }
-
 
   add EnergyFraction {0} {0.0}
   # energy fractions for e, gamma and pi0
@@ -414,7 +413,8 @@ module SimpleCalorimeter ECal {
                            (abs(eta) > 1.50 && abs(eta) <= 1.75) * sqrt(energy^2*0.006^2 + energy*0.20^2) + \
                            (abs(eta) > 1.75 && abs(eta) <= 2.15) * sqrt(energy^2*0.007^2 + energy*0.21^2) + \
                            (abs(eta) > 2.15 && abs(eta) <= 3.00) * sqrt(energy^2*0.008^2 + energy*0.24^2) + \
-                           (abs(eta) >= 3.0 && abs(eta) <= 5.0)  * sqrt(energy^2*0.10^2 + energy*1.82^2)}
+                           (abs(eta) >= 3.0 && abs(eta) <= 4.176)  * sqrt(energy^2*0.01^2 + energy*0.67^2) + \
+                           (abs(eta) >= 4.176 && abs(eta) <= 5.0)  * sqrt(energy^2*0.10^2 + energy*1.82^2)}
 
 }
 
@@ -453,7 +453,7 @@ module SimpleCalorimeter HCal {
     add EtaPhiBins $eta $PhiBins
   }
 
-  # assume 0.07 x 0.07 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- HCAL)
+  # assume 0.07 x 0.07 resolution in eta,phi in the endcaps 1.5 < |eta| < 4.2 (HGCAL- HCAL)
 
   set PhiBins {}
   for {set i -45} {$i <= 45} {incr i} {
@@ -461,12 +461,12 @@ module SimpleCalorimeter HCal {
   }
 
   # 0.07 unit in eta up to eta = 3
-  for {set i 1} {$i <= 21} {incr i} {
-    set eta [expr { -2.958 + $i * 0.0696}]
+  for {set i 1} {$i <= 39} {incr i} {
+    set eta [expr { -4.2108 + $i * 0.0696}]
     add EtaPhiBins $eta $PhiBins
   }
 
-  for {set i 1} {$i <= 21} {incr i} {
+  for {set i 1} {$i <= 39} {incr i} {
     set eta [expr { 1.4964 + $i * 0.0696}]
     add EtaPhiBins $eta $PhiBins
   }
@@ -479,7 +479,7 @@ module SimpleCalorimeter HCal {
     add PhiBins [expr {$i * $pi/18.0}]
   }
 
-  foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
+  foreach eta {-5 -4.7 -4.525 -4.35 -4.2108 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }
 
@@ -507,7 +507,8 @@ module SimpleCalorimeter HCal {
 # set ResolutionFormula {resolution formula as a function of eta and energy}
   set ResolutionFormula {                    (abs(eta) <= 1.5) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
                                                    (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.05^2 + energy*1.00^2) + \
-                                                   (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*2.40^2)}
+                                                   (abs(eta) > 3.0 && abs(eta) <= 4.2108) * sqrt(energy^2*0.05^2 + energy*1.96^2) + \
+                                                   (abs(eta) > 4.2108 && abs(eta) <= 5.0) * sqrt(energy^2*0.11^2 + energy*2.40^2)}
 
 }
 
@@ -690,8 +691,14 @@ module Efficiency ElectronEfficiency {
                           (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 20.0 && pt <= 35.0) * (0.778) +
                           (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 35.0 && pt <= 50.0) * (0.830) +
                           (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 50.0 && pt <= 14000.0) * (0.919) +
-                          (abs(eta) > 3.0) * (0.00)
-      }
+                          
+                          (abs(eta) > 3.0 && abs(eta) <= 4.0) * (pt > 4.0 && pt <= 6.0) * (0.049) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 6.0 && pt <= 8.0) * (0.152) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 8.0 && pt <= 10.0) * (0.436) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 10.0 && pt <= 20.0) * (0.679) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 20.0 && pt <= 35.0) * (0.778) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 35.0 && pt <= 50.0) * (0.830) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 50.0 && pt <= 14000.0) * (0.919)}
 }
 
 ####################
@@ -1112,7 +1119,6 @@ module BTagging BTagging {
                                   (abs(eta) > 2.50 && abs(eta) <= 3.50) * (pt > 2000.00 && pt <= 3000.00) * (0.014) +
                                   (abs(eta) > 2.50 && abs(eta) <= 3.50) * (pt > 3000.00) * (0.014)
                                   }
-
 }
 
 #############
