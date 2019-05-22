@@ -38,7 +38,7 @@
 #define ENABLE_PLUGIN_TRACKJET /**/
 
 /* compile the deprecated parts of the interface using auto-ptr */
-#define HAVE_AUTO_PTR_INTERFACE /**/
+/* #undef HAVE_AUTO_PTR_INTERFACE */
 
 /* compiler supports c++14 deprecated keyword */
 /* #undef HAVE_CXX14_DEPRECATED */

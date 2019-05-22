@@ -8,7 +8,7 @@ mkdir -p fastjet/internal
 mkdir -p fastjet/tools
 
 cd fastjet-${version}
-./configure --enable-allcxxplugins
+./configure --enable-allcxxplugins --disable-auto-ptr
 cd -
 
 echo ${version} > fastjet/VERSION
