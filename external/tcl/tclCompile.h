@@ -769,6 +769,8 @@ EXTERN void		TclInitJumpFixupArray _ANSI_ARGS_((
 EXTERN int		TclObjIndexForString _ANSI_ARGS_((char *start,
 			    int length, int allocStrRep, int inHeap,
 			    CompileEnv *envPtr));
+EXTERN void		TclPrintSource _ANSI_ARGS_((FILE *outFile,
+			    char *string, int maxChars));
 EXTERN void		TclRegisterAuxDataType _ANSI_ARGS_((AuxDataType *typePtr));
 
 /*
