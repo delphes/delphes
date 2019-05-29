@@ -32,15 +32,6 @@ extern int errno;			/* Use errno from tclExecute.c. */
 #endif
 
 /*
- * Boolean variable that controls whether expression compilation tracing
- * is enabled.
- */
-
-#ifdef TCL_COMPILE_DEBUG
-static int traceCompileExpr = 0;
-#endif /* TCL_COMPILE_DEBUG */
-
-/*
  * The ExprInfo structure describes the state of compiling an expression.
  * A pointer to an ExprInfo record is passed among the routines in
  * this module.
@@ -133,22 +124,6 @@ typedef struct ExprInfo {
 #define BIT_NOT		(NOT + 1)
 
 /*
- * Mapping from tokens to strings; used for debugging messages. These
- * entries must match the order and number of the token definitions above.
- */
-
-#ifdef TCL_COMPILE_DEBUG
-static char *tokenStrings[] = {
-    "LITERAL", "FUNCNAME",
-    "[", "]", "(", ")", "$", "\"", ",", "END", "UNKNOWN",
-    "*", "/", "%", "+", "-",
-    "<<", ">>", "<", ">", "<=", ">=", "==", "!=",
-    "&", "^", "|", "&&", "||", "?", ":",
-    "!", "~"
-};
-#endif /* TCL_COMPILE_DEBUG */
-
-/*
  * Declarations for local procedures to this file:
  */
 
@@ -197,21 +172,6 @@ static int		CompileUnaryExpr _ANSI_ARGS_((Tcl_Interp *interp,
 static int		GetToken _ANSI_ARGS_((Tcl_Interp *interp,
 			    ExprInfo *infoPtr, CompileEnv *envPtr));
 
-/*
- * Macro used to debug the execution of the recursive descent parser used
- * to compile expressions.
- */
-
-#ifdef TCL_COMPILE_DEBUG
-#define HERE(production, level) \
-    if (traceCompileExpr) { \
-	fprintf(stderr, "%*s%s: token=%s, next=\"%.20s\"\n", \
-		(level), " ", (production), tokenStrings[infoPtr->token], \
-		infoPtr->next); \
-    }
-#else
-#define HERE(production, level)
-#endif /* TCL_COMPILE_DEBUG */
 
 /*
  *----------------------------------------------------------------------
@@ -275,12 +235,6 @@ TclCompileExpr(interp, string, lastChar, flags, envPtr)
     int maxDepth = 0;		/* Maximum number of stack elements needed
 				 * to execute the expression. */
     int result;
-
-#ifdef TCL_COMPILE_DEBUG
-    if (traceCompileExpr) {
-	fprintf(stderr, "expr: string=\"%.30s\"\n", string);
-    }
-#endif /* TCL_COMPILE_DEBUG */
 
     /*
      * Register the builtin math functions the first time an expression is
@@ -406,7 +360,6 @@ CompileCondExpr(interp, infoPtr, flags, envPtr)
 				 * their target PCs are determined. */
     int elseCodeOffset, currCodeOffset, jumpDist, result;
     
-    HERE("condExpr", 1);
     result = CompileLorExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -567,7 +520,6 @@ CompileLorExpr(interp, infoPtr, flags, envPtr)
     int fixupIndex, jumpDist, currCodeOffset, objIndex, j, result;
     Tcl_Obj *objPtr;
     
-    HERE("lorExpr", 2);
     result = CompileLandExpr(interp, infoPtr, flags, envPtr);
     if ((result != TCL_OK) || (infoPtr->token != OR)) {
 	return result;		/* envPtr->maxStackDepth is already set */
@@ -734,7 +686,6 @@ CompileLandExpr(interp, infoPtr, flags, envPtr)
     int fixupIndex, jumpDist, currCodeOffset, objIndex, j, result;
     Tcl_Obj *objPtr;
 
-    HERE("landExpr", 3);
     result = CompileBitOrExpr(interp, infoPtr, flags, envPtr);
     if ((result != TCL_OK) || (infoPtr->token != AND)) {
 	return result;		/* envPtr->maxStackDepth is already set */
@@ -893,7 +844,6 @@ CompileBitOrExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int result;
 
-    HERE("bitOrExpr", 4);
     result = CompileBitXorExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -963,7 +913,6 @@ CompileBitXorExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int result;
 
-    HERE("bitXorExpr", 5);
     result = CompileBitAndExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1033,7 +982,6 @@ CompileBitAndExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int result;
 
-    HERE("bitAndExpr", 6);
     result = CompileEqualityExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1103,7 +1051,6 @@ CompileEqualityExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int op, result;
 
-    HERE("equalityExpr", 7);
     result = CompileRelationalExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1180,7 +1127,6 @@ CompileRelationalExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int op, result;
 
-    HERE("relationalExpr", 8);
     result = CompileShiftExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1266,7 +1212,6 @@ CompileShiftExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int op, result;
 
-    HERE("shiftExpr", 9);
     result = CompileAddExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1343,7 +1288,6 @@ CompileAddExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int op, result;
 
-    HERE("addExpr", 10);
     result = CompileMultiplyExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1420,7 +1364,6 @@ CompileMultiplyExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int op, result;
 
-    HERE("multiplyExpr", 11);
     result = CompileUnaryExpr(interp, infoPtr, flags, envPtr);
     if (result != TCL_OK) {
 	goto done;
@@ -1499,7 +1442,6 @@ CompileUnaryExpr(interp, infoPtr, flags, envPtr)
 				 * to execute the expression. */
     int op, result;
 
-    HERE("unaryExpr", 12);
     op = infoPtr->token;
     if ((op == PLUS) || (op == MINUS) || (op == BIT_NOT) || (op == NOT)) {
 	infoPtr->hasOperators = 1;
@@ -1593,7 +1535,6 @@ CompilePrimaryExpr(interp, infoPtr, flags, envPtr)
      * possible.
      */
 
-    HERE("primaryExpr", 13);
     theToken = infoPtr->token;
 
     if ((theToken != DOLLAR) && (theToken != OPEN_PAREN)) {

@@ -37,16 +37,6 @@ Tcl_Obj *tclFreeObjList = NULL;
 char *tclEmptyStringRep = NULL;
 
 /*
- * Count of the number of Tcl objects every allocated (by Tcl_NewObj) and
- * freed (by TclFreeObj).
- */
-
-#ifdef TCL_COMPILE_STATS
-long tclObjsAlloced = 0;
-long tclObjsFreed = 0;
-#endif /* TCL_COMPILE_STATS */
-
-/*
  * Prototypes for procedures defined later in this file:
  */
 
@@ -407,37 +397,18 @@ Tcl_ConvertToType(interp, objPtr, typePtr)
  *
  * Tcl_NewObj --
  *
- *	This procedure is normally called when not debugging: i.e., when
- *	TCL_MEM_DEBUG is not defined. It creates new Tcl objects that denote
- *	the empty string. These objects have a NULL object type and NULL
- *	string representation byte pointer. Type managers call this routine
- *	to allocate new objects that they further initialize.
- *
- *	When TCL_MEM_DEBUG is defined, this procedure just returns the
- *	result of calling the debugging version Tcl_DbNewObj.
+ *	This procedure creates new Tcl objects that denote the empty string.
+ *	These objects have a NULL object type and NULL string representation
+ *	byte pointer. Type managers call this routine to allocate new objects
+ *	that they further initialize.
  *
  * Results:
  *	The result is a newly allocated object that represents the empty
  *	string. The new object's typePtr is set NULL and its ref count
  *	is set to 0.
  *
- * Side effects:
- *	If compiling with TCL_COMPILE_STATS, this procedure increments
- *	the global count of allocated objects (tclObjsAlloced).
- *
  *----------------------------------------------------------------------
  */
-
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewObj
-
-Tcl_Obj *
-Tcl_NewObj()
-{
-    return Tcl_DbNewObj("unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
 
 Tcl_Obj *
 Tcl_NewObj()
@@ -458,79 +429,8 @@ Tcl_NewObj()
     objPtr->bytes    = tclEmptyStringRep;
     objPtr->length   = 0;
     objPtr->typePtr  = NULL;
-#ifdef TCL_COMPILE_STATS
-    tclObjsAlloced++;
-#endif /* TCL_COMPILE_STATS */
     return objPtr;
 }
-#endif /* TCL_MEM_DEBUG */
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbNewObj --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. It creates new Tcl objects that denote the
- *	empty string. It is the same as the Tcl_NewObj procedure above
- *	except that it calls Tcl_DbCkalloc directly with the file name and
- *	line number from its caller. This simplifies debugging since then
- *	the checkmem command will report the correct file name and line
- *	number when reporting objects that haven't been freed.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just returns the
- *	result of calling Tcl_NewObj.
- *
- * Results:
- *	The result is a newly allocated that represents the empty string.
- *	The new object's typePtr is set NULL and its ref count is set to 0.
- *
- * Side effects:
- *	If compiling with TCL_COMPILE_STATS, this procedure increments
- *	the global count of allocated objects (tclObjsAlloced).
- *
- *----------------------------------------------------------------------
- */
-
-#ifdef TCL_MEM_DEBUG
-
-Tcl_Obj *
-Tcl_DbNewObj(file, line)
-    register char *file;	/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    register int line;		/* Line number in the source file; used
-				 * for debugging. */
-{
-    register Tcl_Obj *objPtr;
-
-    /*
-     * If debugging Tcl's memory usage, allocate the object using ckalloc.
-     * Otherwise, allocate it using the list of free Tcl_Objs we maintain.
-     */
-
-    objPtr = (Tcl_Obj *) Tcl_DbCkalloc(sizeof(Tcl_Obj), file, line);
-    objPtr->refCount = 0;
-    objPtr->bytes    = tclEmptyStringRep;
-    objPtr->length   = 0;
-    objPtr->typePtr  = NULL;
-#ifdef TCL_COMPILE_STATS
-    tclObjsAlloced++;
-#endif /* TCL_COMPILE_STATS */
-    return objPtr;
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
-Tcl_Obj *
-Tcl_DbNewObj(file, line)
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    return Tcl_NewObj();
-}
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------
@@ -596,9 +496,7 @@ TclAllocateFreeObjects()
  *	Deallocates the storage for the object's Tcl_Obj structure
  *	after deallocating the string representation and calling the
  *	type-specific Tcl_FreeInternalRepProc to deallocate the object's
- *	internal representation. If compiling with TCL_COMPILE_STATS,
- *	this procedure increments the global count of freed objects
- *	(tclObjsFreed).
+ *	internal representation.
  *
  *----------------------------------------------------------------------
  */
@@ -609,33 +507,18 @@ TclFreeObj(objPtr)
 {
     register Tcl_ObjType *typePtr = objPtr->typePtr;
     
-#ifdef TCL_MEM_DEBUG
-    if ((objPtr)->refCount < -1) {
-	panic("Reference count for %lx was negative", objPtr);
-    }
-#endif /* TCL_MEM_DEBUG */
-
     Tcl_InvalidateStringRep(objPtr);
     if ((typePtr != NULL) && (typePtr->freeIntRepProc != NULL)) {
 	typePtr->freeIntRepProc(objPtr);
     }
 
     /*
-     * If debugging Tcl's memory usage, deallocate the object using ckfree.
-     * Otherwise, deallocate it by adding it onto the list of free
+     * Deallocate the object by adding it onto the list of free
      * Tcl_Objs we maintain.
      */
     
-#ifdef TCL_MEM_DEBUG
-    ckfree((char *) objPtr);
-#else
     objPtr->internalRep.otherValuePtr = (VOID *) tclFreeObjList;
     tclFreeObjList = objPtr;
-#endif /* TCL_MEM_DEBUG */
-
-#ifdef TCL_COMPILE_STATS    
-    tclObjsFreed++;
-#endif /* TCL_COMPILE_STATS */    
 }
 
 /*
@@ -777,13 +660,8 @@ Tcl_InvalidateStringRep(objPtr)
  *
  * Tcl_NewBooleanObj --
  *
- *	This procedure is normally called when not debugging: i.e., when
- *	TCL_MEM_DEBUG is not defined. It creates a new boolean object and
- *	initializes it from the argument boolean value. A nonzero
- *	"boolValue" is coerced to 1.
- *
- *	When TCL_MEM_DEBUG is defined, this procedure just returns the
- *	result of calling the debugging version Tcl_DbNewBooleanObj.
+ *	This procedure creates a new boolean object and	initializes it from
+ *	the argument boolean value. A nonzero "boolValue" is coerced to 1.
  *
  * Results:
  *	The newly created object is returned. This object will have an
@@ -794,18 +672,6 @@ Tcl_InvalidateStringRep(objPtr)
  *
  *----------------------------------------------------------------------
  */
-
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewBooleanObj
-
-Tcl_Obj *
-Tcl_NewBooleanObj(boolValue)
-    register int boolValue;	/* Boolean used to initialize new object. */
-{
-    return Tcl_DbNewBooleanObj(boolValue, "unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
 
 Tcl_Obj *
 Tcl_NewBooleanObj(boolValue)
@@ -820,67 +686,6 @@ Tcl_NewBooleanObj(boolValue)
     objPtr->typePtr = &tclBooleanType;
     return objPtr;
 }
-#endif /* TCL_MEM_DEBUG */
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbNewBooleanObj --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. It creates new boolean objects. It is the
- *	same as the Tcl_NewBooleanObj procedure above except that it calls
- *	Tcl_DbCkalloc directly with the file name and line number from its
- *	caller. This simplifies debugging since then the checkmem command
- *	will report the correct file name and line number when reporting
- *	objects that haven't been freed.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just returns the
- *	result of calling Tcl_NewBooleanObj.
- *
- * Results:
- *	The newly created object is returned. This object will have an
- *	invalid string representation. The returned object has ref count 0.
- *
- * Side effects:
- *	None.
- *
- *----------------------------------------------------------------------
- */
-
-#ifdef TCL_MEM_DEBUG
-
-Tcl_Obj *
-Tcl_DbNewBooleanObj(boolValue, file, line)
-    register int boolValue;	/* Boolean used to initialize new object. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    register Tcl_Obj *objPtr;
-
-    TclDbNewObj(objPtr, file, line);
-    objPtr->bytes = NULL;
-    
-    objPtr->internalRep.longValue = (boolValue? 1 : 0);
-    objPtr->typePtr = &tclBooleanType;
-    return objPtr;
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
-Tcl_Obj *
-Tcl_DbNewBooleanObj(boolValue, file, line)
-    register int boolValue;	/* Boolean used to initialize new object. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    return Tcl_NewBooleanObj(boolValue);
-}
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------
@@ -1154,12 +959,8 @@ UpdateStringOfBoolean(objPtr)
  *
  * Tcl_NewDoubleObj --
  *
- *	This procedure is normally called when not debugging: i.e., when
- *	TCL_MEM_DEBUG is not defined. It creates a new double object and
- *	initializes it from the argument double value.
- *
- *	When TCL_MEM_DEBUG is defined, this procedure just returns the
- *	result of calling the debugging version Tcl_DbNewDoubleObj.
+ *	This procedure creates a new double object and initializes it from
+ *	the argument double value.
  *
  * Results:
  *	The newly created object is returned. This object will have an
@@ -1170,18 +971,6 @@ UpdateStringOfBoolean(objPtr)
  *
  *----------------------------------------------------------------------
  */
-
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewDoubleObj
-
-Tcl_Obj *
-Tcl_NewDoubleObj(dblValue)
-    register double dblValue;	/* Double used to initialize the object. */
-{
-    return Tcl_DbNewDoubleObj(dblValue, "unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
 
 Tcl_Obj *
 Tcl_NewDoubleObj(dblValue)
@@ -1196,67 +985,6 @@ Tcl_NewDoubleObj(dblValue)
     objPtr->typePtr = &tclDoubleType;
     return objPtr;
 }
-#endif /* if TCL_MEM_DEBUG */
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbNewDoubleObj --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. It creates new double objects. It is the
- *	same as the Tcl_NewDoubleObj procedure above except that it calls
- *	Tcl_DbCkalloc directly with the file name and line number from its
- *	caller. This simplifies debugging since then the checkmem command
- *	will report the correct file name and line number when reporting
- *	objects that haven't been freed.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just returns the
- *	result of calling Tcl_NewDoubleObj.
- *
- * Results:
- *	The newly created object is returned. This object will have an
- *	invalid string representation. The returned object has ref count 0.
- *
- * Side effects:
- *	None.
- *
- *----------------------------------------------------------------------
- */
-
-#ifdef TCL_MEM_DEBUG
-
-Tcl_Obj *
-Tcl_DbNewDoubleObj(dblValue, file, line)
-    register double dblValue;	/* Double used to initialize the object. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    register Tcl_Obj *objPtr;
-
-    TclDbNewObj(objPtr, file, line);
-    objPtr->bytes = NULL;
-    
-    objPtr->internalRep.doubleValue = dblValue;
-    objPtr->typePtr = &tclDoubleType;
-    return objPtr;
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
-Tcl_Obj *
-Tcl_DbNewDoubleObj(dblValue, file, line)
-    register double dblValue;	/* Double used to initialize the object. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    return Tcl_NewDoubleObj(dblValue);
-}
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------
@@ -1500,12 +1228,7 @@ UpdateStringOfDouble(objPtr)
  *
  * Tcl_NewIntObj --
  *
- *	If a client is compiled with TCL_MEM_DEBUG defined, calls to
- *	Tcl_NewIntObj to create a new integer object end up calling the
- *	debugging procedure Tcl_DbNewLongObj instead.
- *
- *	Otherwise, if the client is compiled without TCL_MEM_DEBUG defined,
- *	calls to Tcl_NewIntObj result in a call to one of the two
+ *	Calls to Tcl_NewIntObj result in a call to one of the two
  *	Tcl_NewIntObj implementations below. We provide two implementations
  *	so that the Tcl core can be compiled to do memory debugging of the 
  *	core even if a client does not request it for itself.
@@ -1525,18 +1248,6 @@ UpdateStringOfDouble(objPtr)
  *----------------------------------------------------------------------
  */
 
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewIntObj
-
-Tcl_Obj *
-Tcl_NewIntObj(intValue)
-    register int intValue;	/* Int used to initialize the new object. */
-{
-    return Tcl_DbNewLongObj((long)intValue, "unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
 Tcl_Obj *
 Tcl_NewIntObj(intValue)
     register int intValue;	/* Int used to initialize the new object. */
@@ -1550,7 +1261,6 @@ Tcl_NewIntObj(intValue)
     objPtr->typePtr = &tclIntType;
     return objPtr;
 }
-#endif /* if TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------
@@ -1819,12 +1529,7 @@ UpdateStringOfInt(objPtr)
  *
  * Tcl_NewLongObj --
  *
- *	If a client is compiled with TCL_MEM_DEBUG defined, calls to
- *	Tcl_NewLongObj to create a new long integer object end up calling
- *	the debugging procedure Tcl_DbNewLongObj instead.
- *
- *	Otherwise, if the client is compiled without TCL_MEM_DEBUG defined,
- *	calls to Tcl_NewLongObj result in a call to one of the two
+ *	Calls to Tcl_NewLongObj result in a call to one of the two
  *	Tcl_NewLongObj implementations below. We provide two implementations
  *	so that the Tcl core can be compiled to do memory debugging of the 
  *	core even if a client does not request it for itself.
@@ -1844,19 +1549,6 @@ UpdateStringOfInt(objPtr)
  *----------------------------------------------------------------------
  */
 
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewLongObj
-
-Tcl_Obj *
-Tcl_NewLongObj(longValue)
-    register long longValue;	/* Long integer used to initialize the
-				 * new object. */
-{
-    return Tcl_DbNewLongObj(longValue, "unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
 Tcl_Obj *
 Tcl_NewLongObj(longValue)
     register long longValue;	/* Long integer used to initialize the
@@ -1871,29 +1563,13 @@ Tcl_NewLongObj(longValue)
     objPtr->typePtr = &tclIntType;
     return objPtr;
 }
-#endif /* if TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------
  *
  * Tcl_DbNewLongObj --
  *
- *	If a client is compiled with TCL_MEM_DEBUG defined, calls to
- *	Tcl_NewIntObj and Tcl_NewLongObj to create new integer or
- *	long integer objects end up calling the debugging procedure
- *	Tcl_DbNewLongObj instead. We provide two implementations of
- *	Tcl_DbNewLongObj so that whether the Tcl core is compiled to do
- *	memory debugging of the core is independent of whether a client
- *	requests debugging for itself.
- *
- *	When the core is compiled with TCL_MEM_DEBUG defined,
- *	Tcl_DbNewLongObj calls Tcl_DbCkalloc directly with the file name and
- *	line number from its caller. This simplifies debugging since then
- *	the checkmem command will report the caller's file name and line
- *	number when reporting objects that haven't been freed.
- *
- *	Otherwise, when the core is compiled without TCL_MEM_DEBUG defined,
- *	this procedure just returns the result of calling Tcl_NewLongObj.
+ *	This procedure just returns the result of calling Tcl_NewLongObj.
  *
  * Results:
  *	The newly created long integer object is returned. This object
@@ -1906,29 +1582,6 @@ Tcl_NewLongObj(longValue)
  *----------------------------------------------------------------------
  */
 
-#ifdef TCL_MEM_DEBUG
-
-Tcl_Obj *
-Tcl_DbNewLongObj(longValue, file, line)
-    register long longValue;	/* Long integer used to initialize the
-				 * new object. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    register Tcl_Obj *objPtr;
-
-    TclDbNewObj(objPtr, file, line);
-    objPtr->bytes = NULL;
-    
-    objPtr->internalRep.longValue = longValue;
-    objPtr->typePtr = &tclIntType;
-    return objPtr;
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
 Tcl_Obj *
 Tcl_DbNewLongObj(longValue, file, line)
     register long longValue;	/* Long integer used to initialize the
@@ -1940,7 +1593,6 @@ Tcl_DbNewLongObj(longValue, file, line)
 {
     return Tcl_NewLongObj(longValue);
 }
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------
@@ -2019,124 +1671,4 @@ Tcl_GetLongFromObj(interp, objPtr, longPtr)
 	*longPtr = objPtr->internalRep.longValue;
     }
     return result;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbIncrRefCount --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. This checks to see whether or not
- *	the memory has been freed before incrementing the ref count.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just increments
- *	the reference count of the object.
- *
- * Results:
- *	None.
- *
- * Side effects:
- *	The object's ref count is incremented.
- *
- *----------------------------------------------------------------------
- */
-
-void
-Tcl_DbIncrRefCount(objPtr, file, line)
-    register Tcl_Obj *objPtr;	/* The object we are adding a reference to. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-#ifdef TCL_MEM_DEBUG
-    if (objPtr->refCount == 0x61616161) {
-	fprintf(stderr, "file = %s, line = %d\n", file, line);
-	fflush(stderr);
-	panic("Trying to increment refCount of previously disposed object.");
-    }
-#endif
-    ++(objPtr)->refCount;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbDecrRefCount --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. This checks to see whether or not
- *	the memory has been freed before incrementing the ref count.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just increments
- *	the reference count of the object.
- *
- * Results:
- *	None.
- *
- * Side effects:
- *	The object's ref count is incremented.
- *
- *----------------------------------------------------------------------
- */
-
-void
-Tcl_DbDecrRefCount(objPtr, file, line)
-    register Tcl_Obj *objPtr;	/* The object we are adding a reference to. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-#ifdef TCL_MEM_DEBUG
-    if (objPtr->refCount == 0x61616161) {
-	fprintf(stderr, "file = %s, line = %d\n", file, line);
-	fflush(stderr);
-	panic("Trying to decrement refCount of previously disposed object.");
-    }
-#endif
-    if (--(objPtr)->refCount <= 0) {
-	TclFreeObj(objPtr);
-    }
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbIsShared --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. This checks to see whether or not
- *	the memory has been freed before incrementing the ref count.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just decrements
- *	the reference count of the object and throws it away if the count
- *	is 0 or less.
- *
- * Results:
- *	None.
- *
- * Side effects:
- *	The object's ref count is incremented.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Tcl_DbIsShared(objPtr, file, line)
-    register Tcl_Obj *objPtr;	/* The object we are adding a reference to. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-#ifdef TCL_MEM_DEBUG
-    if (objPtr->refCount == 0x61616161) {
-	fprintf(stderr, "file = %s, line = %d\n", file, line);
-	fflush(stderr);
-	panic("Trying to check whether previously disposed object is shared.");
-    }
-#endif
-    return ((objPtr)->refCount > 1);
 }

@@ -44,13 +44,9 @@ Tcl_ObjType tclListType = {
  *
  * Tcl_NewListObj --
  *
- *	This procedure is normally called when not debugging: i.e., when
- *	TCL_MEM_DEBUG is not defined. It creates a new list object from an
- *	(objc,objv) array: that is, each of the objc elements of the array
- *	referenced by objv is inserted as an element into a new Tcl object.
- *
- *	When TCL_MEM_DEBUG is defined, this procedure just returns the
- *	result of calling the debugging version Tcl_DbNewListObj.
+ *	This procedure creates a new list object from an (objc,objv) array:
+ *	that is, each of the objc elements of the array	referenced by objv
+ *	is inserted as an element into a new Tcl object.
  *
  * Results:
  *	A new list object is returned that is initialized from the object
@@ -64,19 +60,6 @@ Tcl_ObjType tclListType = {
  *
  *----------------------------------------------------------------------
  */
-
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewListObj
-
-Tcl_Obj *
-Tcl_NewListObj(objc, objv)
-    int objc;			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[];	/* An array of pointers to Tcl objects. */
-{
-    return Tcl_DbNewListObj(objc, objv, "unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
 
 Tcl_Obj *
 Tcl_NewListObj(objc, objv)
@@ -110,90 +93,6 @@ Tcl_NewListObj(objc, objv)
     }
     return listPtr;
 }
-#endif /* if TCL_MEM_DEBUG */
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbNewListObj --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. It creates new list objects. It is the
- *	same as the Tcl_NewListObj procedure above except that it calls
- *	Tcl_DbCkalloc directly with the file name and line number from its
- *	caller. This simplifies debugging since then the checkmem command
- *	will report the correct file name and line number when reporting
- *	objects that haven't been freed.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just returns the
- *	result of calling Tcl_NewListObj.
- *
- * Results:
- *	A new list object is returned that is initialized from the object
- *	pointers in objv. If objc is less than or equal to zero, an empty
- *	object is returned. The new object's string representation
- *	is left NULL. The new list object has ref count 0.
- *
- * Side effects:
- *	The ref counts of the elements in objv are incremented since the
- *	resulting list now refers to them.
- *
- *----------------------------------------------------------------------
- */
-
-#ifdef TCL_MEM_DEBUG
-
-Tcl_Obj *
-Tcl_DbNewListObj(objc, objv, file, line)
-    int objc;			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[];	/* An array of pointers to Tcl objects. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    register Tcl_Obj *listPtr;
-    register Tcl_Obj **elemPtrs;
-    register List *listRepPtr;
-    int i;
-    
-    TclDbNewObj(listPtr, file, line);
-    
-    if (objc > 0) {
-	Tcl_InvalidateStringRep(listPtr);
-	
-	elemPtrs = (Tcl_Obj **)
-	    ckalloc((unsigned) (objc * sizeof(Tcl_Obj *)));
-	for (i = 0;  i < objc;  i++) {
-	    elemPtrs[i] = objv[i];
-	    Tcl_IncrRefCount(elemPtrs[i]);
-	}
-	
-	listRepPtr = (List *) ckalloc(sizeof(List));
-	listRepPtr->maxElemCount = objc;
-	listRepPtr->elemCount    = objc;
-	listRepPtr->elements     = elemPtrs;
-	
-	listPtr->internalRep.otherValuePtr = (VOID *) listRepPtr;
-	listPtr->typePtr = &tclListType;
-    }
-    return listPtr;
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
-Tcl_Obj *
-Tcl_DbNewListObj(objc, objv, file, line)
-    int objc;			/* Count of objects referenced by objv. */
-    Tcl_Obj *CONST objv[];	/* An array of pointers to Tcl objects. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    return Tcl_NewListObj(objc, objv);
-}
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------

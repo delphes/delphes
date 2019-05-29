@@ -18,41 +18,6 @@
 #include "tclCompile.h"
 
 /*
- * Variable that controls whether compilation tracing is enabled and, if so,
- * what level of tracing is desired:
- *    0: no compilation tracing
- *    1: summarize compilation of top level cmds and proc bodies
- *    2: display all instructions of each ByteCode compiled
- * This variable is linked to the Tcl variable "tcl_traceCompile".
- */
-
-int tclTraceCompile = 0;
-static int traceInitialized = 0;
-
-/*
- * Count of the number of compilations and various other compilation-
- * related statistics.
- */
-
-#ifdef TCL_COMPILE_STATS
-long tclNumCompilations = 0;
-double tclTotalSourceBytes = 0.0;
-double tclTotalCodeBytes = 0.0;
-
-double tclTotalInstBytes = 0.0;
-double tclTotalObjBytes = 0.0;
-double tclTotalExceptBytes = 0.0;
-double tclTotalAuxBytes = 0.0;
-double tclTotalCmdMapBytes = 0.0;
-
-double tclCurrentSourceBytes = 0.0;
-double tclCurrentCodeBytes = 0.0;
-
-int tclSourceCount[32];
-int tclByteCodeCount[32];
-#endif /* TCL_COMPILE_STATS */
-
-/*
  * A table describing the Tcl bytecode instructions. The entries in this
  * table must correspond to the list of instructions in tclInt.h. The names
  * "op1" and "op4" refer to an instruction's one or four byte first operand.
@@ -441,404 +406,6 @@ AuxDataType tclForeachInfoType = {
 /*
  *----------------------------------------------------------------------
  *
- * TclPrintByteCodeObj --
- *
- *	This procedure prints ("disassembles") the instructions of a
- *	bytecode object to stdout.
- *
- * Results:
- *	None.
- *
- * Side effects:
- *	None.
- *
- *----------------------------------------------------------------------
- */
-
-void
-TclPrintByteCodeObj(interp, objPtr)
-    Tcl_Interp *interp;		/* Used only for Tcl_GetStringFromObj. */
-    Tcl_Obj *objPtr;		/* The bytecode object to disassemble. */
-{
-    ByteCode* codePtr = (ByteCode *) objPtr->internalRep.otherValuePtr;
-    unsigned char *codeStart, *codeLimit, *pc;
-    unsigned char *codeDeltaNext, *codeLengthNext;
-    unsigned char *srcDeltaNext, *srcLengthNext;
-    int codeOffset, codeLen, srcOffset, srcLen;
-    int numCmds, numObjs, delta, objBytes, i;
-
-    if (codePtr->refCount <= 0) {
-	return;			/* already freed */
-    }
-
-    codeStart = codePtr->codeStart;
-    codeLimit = (codeStart + codePtr->numCodeBytes);
-    numCmds = codePtr->numCommands;
-    numObjs = codePtr->numObjects;
-
-    objBytes = (numObjs * sizeof(Tcl_Obj));
-    for (i = 0;  i < numObjs;  i++) {
-	Tcl_Obj *litObjPtr = codePtr->objArrayPtr[i];
-	if (litObjPtr->bytes != NULL) {
-	    objBytes += litObjPtr->length;
-	}
-    }
-
-    /*
-     * Print header lines describing the ByteCode.
-     */
-
-    fprintf(stdout, "\nByteCode 0x%x, ref ct %u, epoch %u, interp 0x%x(epoch %u)\n",
-	    (unsigned int) codePtr, codePtr->refCount,
-	    codePtr->compileEpoch, (unsigned int) codePtr->iPtr,
-	    codePtr->iPtr->compileEpoch);
-    fprintf(stdout, "  Source ");
-    TclPrintSource(stdout, codePtr->source,
-	    TclMin(codePtr->numSrcChars, 70));
-    fprintf(stdout, "\n  Cmds %d, chars %d, inst %d, objs %u, aux %d, stk depth %u, code/src %.2f\n",
-	    numCmds, codePtr->numSrcChars, codePtr->numCodeBytes, numObjs,
-	    codePtr->numAuxDataItems, codePtr->maxStackDepth,
-	    (codePtr->numSrcChars?
-	            ((float)codePtr->totalSize)/((float)codePtr->numSrcChars) : 0.0));
-    fprintf(stdout, "  Code %zu = %u(header)+%d(inst)+%d(objs)+%u(exc)+%u(aux)+%d(cmd map)\n",
-	    codePtr->totalSize, sizeof(ByteCode), codePtr->numCodeBytes,
-	    objBytes, (codePtr->numExcRanges * sizeof(ExceptionRange)),
-	    (codePtr->numAuxDataItems * sizeof(AuxData)),
-	    codePtr->numCmdLocBytes);
-
-    /*
-     * If the ByteCode is the compiled body of a Tcl procedure, print
-     * information about that procedure. Note that we don't know the
-     * procedure's name since ByteCode's can be shared among procedures.
-     */
-    
-    if (codePtr->procPtr != NULL) {
-	Proc *procPtr = codePtr->procPtr;
-	int numCompiledLocals = procPtr->numCompiledLocals;
-	fprintf(stdout,
-	        "  Proc 0x%x, ref ct %d, args %d, compiled locals %d\n",
-		(unsigned int) procPtr, procPtr->refCount, procPtr->numArgs,
-		numCompiledLocals);
-	if (numCompiledLocals > 0) {
-	    CompiledLocal *localPtr = procPtr->firstLocalPtr;
-	    for (i = 0;  i < numCompiledLocals;  i++) {
-		fprintf(stdout, "      %d: slot %d%s%s%s%s%s%s",
-			i, localPtr->frameIndex,
-			((localPtr->flags & VAR_SCALAR)?  ", scalar"  : ""),
-			((localPtr->flags & VAR_ARRAY)?  ", array"  : ""),
-			((localPtr->flags & VAR_LINK)?  ", link"  : ""),
-			((localPtr->flags & VAR_ARGUMENT)?  ", arg"  : ""),
-			((localPtr->flags & VAR_TEMPORARY)? ", temp" : ""),
-			((localPtr->flags & VAR_RESOLVED)? ", resolved" : ""));
-		if (TclIsVarTemporary(localPtr)) {
-		    fprintf(stdout,	"\n");
-		} else {
-		    fprintf(stdout,	", name=\"%s\"\n", localPtr->name);
-		}
-		localPtr = localPtr->nextPtr;
-	    }
-	}
-    }
-
-    /*
-     * Print the ExceptionRange array.
-     */
-
-    if (codePtr->numExcRanges > 0) {
-	fprintf(stdout, "  Exception ranges %d, depth %d:\n",
-	        codePtr->numExcRanges, codePtr->maxExcRangeDepth);
-	for (i = 0;  i < codePtr->numExcRanges;  i++) {
-	    ExceptionRange *rangePtr = &(codePtr->excRangeArrayPtr[i]);
-	    fprintf(stdout, "      %d: level %d, %s, pc %d-%d, ",
-		    i, rangePtr->nestingLevel,
-		    ((rangePtr->type == LOOP_EXCEPTION_RANGE)? "loop":"catch"),
-		    rangePtr->codeOffset,
-		    (rangePtr->codeOffset + rangePtr->numCodeBytes - 1));
-	    switch (rangePtr->type) {
-	    case LOOP_EXCEPTION_RANGE:
-		fprintf(stdout,	"continue %d, break %d\n",
-		        rangePtr->continueOffset, rangePtr->breakOffset);
-		break;
-	    case CATCH_EXCEPTION_RANGE:
-		fprintf(stdout,	"catch %d\n", rangePtr->catchOffset);
-		break;
-	    default:
-		panic("TclPrintSource: unrecognized ExceptionRange type %d\n",
-		        rangePtr->type);
-	    }
-	}
-    }
-    
-    /*
-     * If there were no commands (e.g., an expression or an empty string
-     * was compiled), just print all instructions and return.
-     */
-
-    if (numCmds == 0) {
-	pc = codeStart;
-	while (pc < codeLimit) {
-	    fprintf(stdout, "    ");
-	    pc += TclPrintInstruction(codePtr, pc);
-	}
-	return;
-    }
-    
-    /*
-     * Print table showing the code offset, source offset, and source
-     * length for each command. These are encoded as a sequence of bytes.
-     */
-
-    fprintf(stdout, "  Commands %d:", numCmds);
-    codeDeltaNext = codePtr->codeDeltaStart;
-    codeLengthNext = codePtr->codeLengthStart;
-    srcDeltaNext  = codePtr->srcDeltaStart;
-    srcLengthNext = codePtr->srcLengthStart;
-    codeOffset = srcOffset = 0;
-    for (i = 0;  i < numCmds;  i++) {
-	if ((unsigned int) (*codeDeltaNext) == (unsigned int) 0xFF) {
-	    codeDeltaNext++;
-	    delta = TclGetInt4AtPtr(codeDeltaNext);
-	    codeDeltaNext += 4;
-	} else {
-	    delta = TclGetInt1AtPtr(codeDeltaNext);
-	    codeDeltaNext++;
-	}
-	codeOffset += delta;
-
-	if ((unsigned int) (*codeLengthNext) == (unsigned int) 0xFF) {
-	    codeLengthNext++;
-	    codeLen = TclGetInt4AtPtr(codeLengthNext);
-	    codeLengthNext += 4;
-	} else {
-	    codeLen = TclGetInt1AtPtr(codeLengthNext);
-	    codeLengthNext++;
-	}
-	
-	if ((unsigned int) (*srcDeltaNext) == (unsigned int) 0xFF) {
-	    srcDeltaNext++;
-	    delta = TclGetInt4AtPtr(srcDeltaNext);
-	    srcDeltaNext += 4;
-	} else {
-	    delta = TclGetInt1AtPtr(srcDeltaNext);
-	    srcDeltaNext++;
-	}
-	srcOffset += delta;
-
-	if ((unsigned int) (*srcLengthNext) == (unsigned int) 0xFF) {
-	    srcLengthNext++;
-	    srcLen = TclGetInt4AtPtr(srcLengthNext);
-	    srcLengthNext += 4;
-	} else {
-	    srcLen = TclGetInt1AtPtr(srcLengthNext);
-	    srcLengthNext++;
-	}
-	
-	fprintf(stdout,	"%s%4d: pc %d-%d, source %d-%d",
-		((i % 2)? "	" : "\n   "),
-		(i+1), codeOffset, (codeOffset + codeLen - 1),
-		srcOffset, (srcOffset + srcLen - 1));
-    }
-    if ((numCmds > 0) && ((numCmds % 2) != 0)) {
-	fprintf(stdout,	"\n");
-    }
-    
-    /*
-     * Print each instruction. If the instruction corresponds to the start
-     * of a command, print the command's source. Note that we don't need
-     * the code length here.
-     */
-
-    codeDeltaNext = codePtr->codeDeltaStart;
-    srcDeltaNext  = codePtr->srcDeltaStart;
-    srcLengthNext = codePtr->srcLengthStart;
-    codeOffset = srcOffset = 0;
-    pc = codeStart;
-    for (i = 0;  i < numCmds;  i++) {
-	if ((unsigned int) (*codeDeltaNext) == (unsigned int) 0xFF) {
-	    codeDeltaNext++;
-	    delta = TclGetInt4AtPtr(codeDeltaNext);
-	    codeDeltaNext += 4;
-	} else {
-	    delta = TclGetInt1AtPtr(codeDeltaNext);
-	    codeDeltaNext++;
-	}
-	codeOffset += delta;
-
-	if ((unsigned int) (*srcDeltaNext) == (unsigned int) 0xFF) {
-	    srcDeltaNext++;
-	    delta = TclGetInt4AtPtr(srcDeltaNext);
-	    srcDeltaNext += 4;
-	} else {
-	    delta = TclGetInt1AtPtr(srcDeltaNext);
-	    srcDeltaNext++;
-	}
-	srcOffset += delta;
-
-	if ((unsigned int) (*srcLengthNext) == (unsigned int) 0xFF) {
-	    srcLengthNext++;
-	    srcLen = TclGetInt4AtPtr(srcLengthNext);
-	    srcLengthNext += 4;
-	} else {
-	    srcLen = TclGetInt1AtPtr(srcLengthNext);
-	    srcLengthNext++;
-	}
-
-	/*
-	 * Print instructions before command i.
-	 */
-	
-	while ((pc-codeStart) < codeOffset) {
-	    fprintf(stdout, "    ");
-	    pc += TclPrintInstruction(codePtr, pc);
-	}
-
-	fprintf(stdout, "  Command %d: ", (i+1));
-	TclPrintSource(stdout, (codePtr->source + srcOffset),
-	        TclMin(srcLen, 70));
-	fprintf(stdout, "\n");
-    }
-    if (pc < codeLimit) {
-	/*
-	 * Print instructions after the last command.
-	 */
-
-	while (pc < codeLimit) {
-	    fprintf(stdout, "    ");
-	    pc += TclPrintInstruction(codePtr, pc);
-	}
-    }
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * TclPrintInstruction --
- *
- *	This procedure prints ("disassembles") one instruction from a
- *	bytecode object to stdout.
- *
- * Results:
- *	Returns the length in bytes of the current instruiction.
- *
- * Side effects:
- *	None.
- *
- *----------------------------------------------------------------------
- */
-
-int
-TclPrintInstruction(codePtr, pc)
-    ByteCode* codePtr;		/* Bytecode containing the instruction. */
-    unsigned char *pc;		/* Points to first byte of instruction. */
-{
-    Proc *procPtr = codePtr->procPtr;
-    unsigned char opCode = *pc;
-    register InstructionDesc *instDesc = &instructionTable[opCode];
-    unsigned char *codeStart = codePtr->codeStart;
-    unsigned int pcOffset = (pc - codeStart);
-    int opnd, elemLen, i, j;
-    Tcl_Obj *elemPtr;
-    char *string;
-    
-    fprintf(stdout, "(%u) %s ", pcOffset, instDesc->name);
-    for (i = 0;  i < instDesc->numOperands;  i++) {
-	switch (instDesc->opTypes[i]) {
-	case OPERAND_INT1:
-	    opnd = TclGetInt1AtPtr(pc+1+i);
-	    if ((i == 0) && ((opCode == INST_JUMP1)
-			     || (opCode == INST_JUMP_TRUE1)
-		             || (opCode == INST_JUMP_FALSE1))) {
-		fprintf(stdout, "%d  	# pc %u", opnd, (pcOffset + opnd));
-	    } else {
-		fprintf(stdout, "%d", opnd);
-	    }
-	    break;
-	case OPERAND_INT4:
-	    opnd = TclGetInt4AtPtr(pc+1+i);
-	    if ((i == 0) && ((opCode == INST_JUMP4)
-			     || (opCode == INST_JUMP_TRUE4)
-		             || (opCode == INST_JUMP_FALSE4))) {
-		fprintf(stdout, "%d  	# pc %u", opnd, (pcOffset + opnd));
-	    } else {
-		fprintf(stdout, "%d", opnd);
-	    }
-	    break;
-	case OPERAND_UINT1:
-	    opnd = TclGetUInt1AtPtr(pc+1+i);
-	    if ((i == 0) && (opCode == INST_PUSH1)) {
-		elemPtr = codePtr->objArrayPtr[opnd];
-		string = Tcl_GetStringFromObj(elemPtr, &elemLen);
-		fprintf(stdout, "%u  	# ", (unsigned int) opnd);
-		TclPrintSource(stdout, string, TclMin(elemLen, 40));
-	    } else if ((i == 0) && ((opCode == INST_LOAD_SCALAR1)
-				    || (opCode == INST_LOAD_ARRAY1)
-				    || (opCode == INST_STORE_SCALAR1)
-				    || (opCode == INST_STORE_ARRAY1))) {
-		int localCt = procPtr->numCompiledLocals;
-		CompiledLocal *localPtr = procPtr->firstLocalPtr;
-		if (opnd >= localCt) {
-		    panic("TclPrintInstruction: bad local var index %u (%u locals)\n",
-			     (unsigned int) opnd, localCt);
-		    return instDesc->numBytes;
-		}
-		for (j = 0;  j < opnd;  j++) {
-		    localPtr = localPtr->nextPtr;
-		}
-		if (TclIsVarTemporary(localPtr)) {
-		    fprintf(stdout, "%u	# temp var %u",
-			    (unsigned int) opnd, (unsigned int) opnd);
-		} else {
-		    fprintf(stdout, "%u	# var ", (unsigned int) opnd);
-		    TclPrintSource(stdout, localPtr->name, 40);
-		}
-	    } else {
-		fprintf(stdout, "%u ", (unsigned int) opnd);
-	    }
-	    break;
-	case OPERAND_UINT4:
-	    opnd = TclGetUInt4AtPtr(pc+1+i);
-	    if (opCode == INST_PUSH4) {
-		elemPtr = codePtr->objArrayPtr[opnd];
-		string = Tcl_GetStringFromObj(elemPtr, &elemLen);
-		fprintf(stdout, "%u  	# ", opnd);
-		TclPrintSource(stdout, string, TclMin(elemLen, 40));
-	    } else if ((i == 0) && ((opCode == INST_LOAD_SCALAR4)
-				    || (opCode == INST_LOAD_ARRAY4)
-				    || (opCode == INST_STORE_SCALAR4)
-				    || (opCode == INST_STORE_ARRAY4))) {
-		int localCt = procPtr->numCompiledLocals;
-		CompiledLocal *localPtr = procPtr->firstLocalPtr;
-		if (opnd >= localCt) {
-		    panic("TclPrintInstruction: bad local var index %u (%u locals)\n",
-			     (unsigned int) opnd, localCt);
-		    return instDesc->numBytes;
-		}
-		for (j = 0;  j < opnd;  j++) {
-		    localPtr = localPtr->nextPtr;
-		}
-		if (TclIsVarTemporary(localPtr)) {
-		    fprintf(stdout, "%u	# temp var %u",
-			    (unsigned int) opnd, (unsigned int) opnd);
-		} else {
-		    fprintf(stdout, "%u	# var ", (unsigned int) opnd);
-		    TclPrintSource(stdout, localPtr->name, 40);
-		}
-	    } else {
-		fprintf(stdout, "%u ", (unsigned int) opnd);
-	    }
-	    break;
-	case OPERAND_NONE:
-	default:
-	    break;
-	}
-    }
-    fprintf(stdout, "\n");
-    return instDesc->numBytes;
-}
-
-/*
- *----------------------------------------------------------------------
- *
  * TclPrintSource --
  *
  *	This procedure prints up to a specified number of characters from
@@ -966,11 +533,6 @@ TclCleanupByteCode(codePtr)
     register Tcl_Obj *elemPtr;
     register int i;
 
-#ifdef TCL_COMPILE_STATS    
-    tclCurrentSourceBytes -= (double) codePtr->numSrcChars;
-    tclCurrentCodeBytes -= (double) codePtr->totalSize;
-#endif /* TCL_COMPILE_STATS */
-
     /*
      * A single heap object holds the ByteCode structure and its code,
      * object, command location, and auxiliary data arrays. This means we
@@ -1059,14 +621,6 @@ SetByteCodeFromAny(interp, objPtr)
     register int i;
     int length, result;
 
-    if (!traceInitialized) {
-        if (Tcl_LinkVar(interp, "tcl_traceCompile",
-	            (char *) &tclTraceCompile,  TCL_LINK_INT) != TCL_OK) {
-            panic("SetByteCodeFromAny: unable to create link for tcl_traceCompile variable");
-        }
-        traceInitialized = 1;
-    }
-    
     string = Tcl_GetStringFromObj(objPtr, &length);
     TclInitCompileEnv(interp, &compEnv, string);
     result = TclCompileString(interp, string, string+length,
@@ -1105,11 +659,6 @@ SetByteCodeFromAny(interp, objPtr)
     }
     TclFreeCompileEnv(&compEnv);
 
-    if (result == TCL_OK) {
-	if (tclTraceCompile == 2) {
-	    TclPrintByteCodeObj(interp, objPtr);
-	}
-    }
     return result;
 }
 
@@ -1299,9 +848,6 @@ TclInitByteCodeObj(objPtr, envPtr)
     int srcLen = envPtr->termOffset;
     int numObjects, i;
     Namespace *namespacePtr;
-#ifdef TCL_COMPILE_STATS
-    int srcLenLog2, sizeLog2;
-#endif /*TCL_COMPILE_STATS*/
 
     codeBytes = (envPtr->codeNext - envPtr->codeStart);
     numObjects = envPtr->objArrayNext;
@@ -1330,29 +876,6 @@ TclInitByteCodeObj(objPtr, envPtr)
 	}
     }
     totalSize = (size + objBytes);
-
-#ifdef TCL_COMPILE_STATS
-    tclNumCompilations++;
-    tclTotalSourceBytes += (double) srcLen;
-    tclTotalCodeBytes += (double) totalSize;
-    
-    tclTotalInstBytes += (double) codeBytes;
-    tclTotalObjBytes += (double) objBytes;
-    tclTotalExceptBytes += exceptArrayBytes;
-    tclTotalAuxBytes += (double) auxDataArrayBytes;
-    tclTotalCmdMapBytes += (double) cmdLocBytes;
-
-    tclCurrentSourceBytes += (double) srcLen;
-    tclCurrentCodeBytes += (double) totalSize;
-
-    srcLenLog2 = TclLog2(srcLen);
-    sizeLog2 = TclLog2((int) totalSize);
-    if ((srcLenLog2 > 31) || (sizeLog2 > 31)) {
-	panic("TclInitByteCodeObj: bad source or code sizes\n");
-    }
-    tclSourceCount[srcLenLog2]++;
-    tclByteCodeCount[sizeLog2]++;
-#endif /* TCL_COMPILE_STATS */    
 
     if (envPtr->iPtr->varFramePtr != NULL) {
         namespacePtr = envPtr->iPtr->varFramePtr->nsPtr;
@@ -1805,32 +1328,6 @@ TclCompileString(interp, string, lastChar, flags, envPtr)
 	EnterCmdStartData(envPtr, cmdIndex, src-envPtr->source,
 		cmdCodeOffset);
 	    
-	if ((!(flags & TCL_BRACKET_TERM))
-	        && (tclTraceCompile >= 1) && (envPtr->procPtr == NULL)) {
-	    /*
-	     * Display a line summarizing the top level command we are about
-	     * to compile.
-	     */
-	    
-	    char *p = cmdSrcStart;
-	    int numChars, complete;
-	    
-	    while ((CHAR_TYPE(p, lastChar) != TCL_COMMAND_END)
-		   || ((*p == ']') && !(flags & TCL_BRACKET_TERM))) {
-		p++;
-	    }
-	    numChars = (p - cmdSrcStart);
-	    complete = 1;
-	    if (numChars > 60) {
-		numChars = 60;
-		complete = 0;
-	    } else if ((numChars >= 2) && (*p == '\n') && (*(p-1) == '{')) {
-		complete = 0;
-	    }
-	    fprintf(stdout, "Compiling: %.*s%s\n",
-		    numChars, cmdSrcStart, (complete? "" : " ..."));
-	}
-	
 	while ((type != TCL_COMMAND_END)
 	        || ((c == ']') && !(flags & TCL_BRACKET_TERM))) {
 	    /*
