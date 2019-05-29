@@ -30,6 +30,10 @@ jobs:
     <<: *shared
     docker:
       - image: delphes/fedora:28
+  fedora-30:
+    <<: *shared
+    docker:
+      - image: delphes/fedora:30
 
 workflows:
   version: 2
@@ -38,3 +42,4 @@ workflows:
       - ubuntu-1404
       - ubuntu-1804
       - fedora-28
+      - fedora-30
