@@ -56,7 +56,8 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TaggingParticlesSkimmer::TaggingParticlesSkimmer() :
-  fItPartonInputArray(0), fFilter(0), fClassifier(0)
+  fClassifier(0), fFilter(0), fItPartonInputArray(0),
+  fPartonInputArray(0), fParticleInputArray(0), fOutputArray(0)
 {
 }
 
