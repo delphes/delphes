@@ -1,6 +1,8 @@
 #######################################
 # CLICdet model
-# based on CLICdp-Note-2017-001
+# based on arXiv:1812.07337 and
+# CLICdp-Note-2017-001
+#
 # Ulrike Schnoor ulrike.schnoor@cern.ch
 # 
 # For the intermediate energy stage of
@@ -10,6 +12,11 @@
 # use exclusive clustering with njets
 # according to final state
 # 
+# c-tagging capabilities of CLICdet are
+# not yet implemented here. Please
+# contact us if you want to use it.
+#######################################
+
 #######################################
 # Order of execution of various modules
 #######################################
@@ -738,11 +745,11 @@ module Isolation PhotonIsolation {
 
     set OutputArray photons
 
-    set DeltaRMax 0.5
+    set DeltaRMax 0.1
 
     set PTMin 0.5
 
-    set PTRatioMax 0.12
+    set PTRatioMax 0.2
 }
 
 #####################
@@ -836,11 +843,11 @@ module Isolation ElectronIsolation {
 
     set OutputArray electrons
 
-    set DeltaRMax 0.5
+    set DeltaRMax 0.1
 
     set PTMin 0.5
 
-    set PTRatioMax 0.12
+    set PTRatioMax 0.2
 }
 
 #################
@@ -874,11 +881,11 @@ module Isolation MuonIsolation {
 
     set OutputArray muons
 
-    set DeltaRMax 0.5
+    set DeltaRMax 0.1
 
     set PTMin 0.5
 
-    set PTRatioMax 0.25
+    set PTRatioMax 0.2
 }
 
 
