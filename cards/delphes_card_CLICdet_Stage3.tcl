@@ -760,7 +760,6 @@ module Isolation PhotonIsolation {
 
 module Efficiency ElectronEfficiency {
     set InputArray ElectronFilter/electrons
-    #set InputArray ElectronDressing/electrons
     set OutputArray electrons
 
     # set EfficiencyFormula {efficiency formula as a function of eta and pt}
