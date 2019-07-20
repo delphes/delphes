@@ -1,6 +1,8 @@
 #######################################
 # CLICdet model
-# based on CLICdp-Note-2017-001
+# based on arXiv:1812.07337 and
+# CLICdp-Note-2017-001
+#
 # Ulrike Schnoor ulrike.schnoor@cern.ch
 # 
 # For the intermediate energy stage of
@@ -10,6 +12,11 @@
 # use exclusive clustering with njets
 # according to final state
 # 
+# c-tagging capabilities of CLICdet are
+# not yet implemented here. Please
+# contact us if you want to use it.
+#######################################
+
 #######################################
 # Order of execution of various modules
 #######################################
@@ -123,117 +130,154 @@ set ExecutionPath {
        
 
     JetFlavorAssociation_R05N2
-	JetFlavorAssociation_R05N3
-	JetFlavorAssociation_R05N4
-	JetFlavorAssociation_R05N5
-	JetFlavorAssociation_R05N6
-	
-	JetFlavorAssociation_R07N2
-	JetFlavorAssociation_R07N3
-	JetFlavorAssociation_R07N4
-	JetFlavorAssociation_R07N5
-	JetFlavorAssociation_R07N6
-
-	JetFlavorAssociation_R10N2
-	JetFlavorAssociation_R10N3
-	JetFlavorAssociation_R10N4
-	JetFlavorAssociation_R10N5
-	JetFlavorAssociation_R10N6
-
-	JetFlavorAssociation_R12N2
-	JetFlavorAssociation_R12N3
-	JetFlavorAssociation_R12N4
-	JetFlavorAssociation_R12N5
-	JetFlavorAssociation_R12N6
-
-	JetFlavorAssociation_R15N2
-	JetFlavorAssociation_R15N3
-	JetFlavorAssociation_R15N4
-	JetFlavorAssociation_R15N5
-        JetFlavorAssociation_R15N6
-
-        JetFlavorAssociation_R05_inclusive
-        JetFlavorAssociation_R07_inclusive
-        JetFlavorAssociation_R10_inclusive
-        JetFlavorAssociation_R12_inclusive
-        JetFlavorAssociation_R15_inclusive
-
+    JetFlavorAssociation_R05N3
+    JetFlavorAssociation_R05N4
+    JetFlavorAssociation_R05N5
+    JetFlavorAssociation_R05N6
     
-	BTaggingWP50_R05N2
-	BTaggingWP70_R05N2
-	BTaggingWP90_R05N2
-	BTaggingWP50_R05N3
-	BTaggingWP70_R05N3
-	BTaggingWP90_R05N3
-	BTaggingWP50_R05N4
-	BTaggingWP70_R05N4
-	BTaggingWP90_R05N4
-	BTaggingWP50_R05N5
-	BTaggingWP70_R05N5
-	BTaggingWP90_R05N5
-	BTaggingWP50_R05N6
-	BTaggingWP70_R05N6
-	BTaggingWP90_R05N6
-	BTaggingWP50_R07N2
-	BTaggingWP70_R07N2
-	BTaggingWP90_R07N2
-	BTaggingWP50_R07N3
-	BTaggingWP70_R07N3
-	BTaggingWP90_R07N3
-	BTaggingWP50_R07N4
-	BTaggingWP70_R07N4
-	BTaggingWP90_R07N4
-	BTaggingWP50_R07N5
-	BTaggingWP70_R07N5
-	BTaggingWP90_R07N5
-	BTaggingWP50_R07N6
-	BTaggingWP70_R07N6
-	BTaggingWP90_R07N6
-	BTaggingWP50_R10N2
-	BTaggingWP70_R10N2
-	BTaggingWP90_R10N2
-	BTaggingWP50_R10N3
-	BTaggingWP70_R10N3
-	BTaggingWP90_R10N3
-	BTaggingWP50_R10N4
-	BTaggingWP70_R10N4
-	BTaggingWP90_R10N4
-	BTaggingWP50_R10N5
-	BTaggingWP70_R10N5
-	BTaggingWP90_R10N5
-	BTaggingWP50_R10N6
-	BTaggingWP70_R10N6
-	BTaggingWP90_R10N6
-	BTaggingWP50_R12N2
-	BTaggingWP70_R12N2
-	BTaggingWP90_R12N2
-	BTaggingWP50_R12N3
-	BTaggingWP70_R12N3
-	BTaggingWP90_R12N3
-	BTaggingWP50_R12N4
-	BTaggingWP70_R12N4
-	BTaggingWP90_R12N4
-	BTaggingWP50_R12N5
-	BTaggingWP70_R12N5
-	BTaggingWP90_R12N5
-	BTaggingWP50_R12N6
-	BTaggingWP70_R12N6
-	BTaggingWP90_R12N6
-	BTaggingWP50_R15N2
-	BTaggingWP70_R15N2
-	BTaggingWP90_R15N2
-	BTaggingWP50_R15N3
-	BTaggingWP70_R15N3
-	BTaggingWP90_R15N3
-	BTaggingWP50_R15N4
-	BTaggingWP70_R15N4
-	BTaggingWP90_R15N4
-	BTaggingWP50_R15N5
-	BTaggingWP70_R15N5
-	BTaggingWP90_R15N5
-	BTaggingWP50_R15N6
-	BTaggingWP70_R15N6
-	BTaggingWP90_R15N6
+    JetFlavorAssociation_R07N2
+    JetFlavorAssociation_R07N3
+    JetFlavorAssociation_R07N4
+    JetFlavorAssociation_R07N5
+    JetFlavorAssociation_R07N6
+    
+    JetFlavorAssociation_R10N2
+    JetFlavorAssociation_R10N3
+    JetFlavorAssociation_R10N4
+    JetFlavorAssociation_R10N5
+    JetFlavorAssociation_R10N6
+    
+    JetFlavorAssociation_R12N2
+    JetFlavorAssociation_R12N3
+    JetFlavorAssociation_R12N4
+    JetFlavorAssociation_R12N5
+    JetFlavorAssociation_R12N6
+    
+    JetFlavorAssociation_R15N2
+    JetFlavorAssociation_R15N3
+    JetFlavorAssociation_R15N4
+    JetFlavorAssociation_R15N5
+    JetFlavorAssociation_R15N6
+    
+    JetFlavorAssociation_R05_inclusive
+    JetFlavorAssociation_R07_inclusive
+    JetFlavorAssociation_R10_inclusive
+    JetFlavorAssociation_R12_inclusive
+    JetFlavorAssociation_R15_inclusive
+
+
+    JetFlavorAssociation_JER_R05N2
+    JetFlavorAssociation_JER_R05N3
+    JetFlavorAssociation_JER_R05N4
+    JetFlavorAssociation_JER_R05N5
+    JetFlavorAssociation_JER_R05N6
+    
+    JetFlavorAssociation_JER_R07N2
+    JetFlavorAssociation_JER_R07N3
+    JetFlavorAssociation_JER_R07N4
+    JetFlavorAssociation_JER_R07N5
+    JetFlavorAssociation_JER_R07N6
+    
+    JetFlavorAssociation_JER_R10N2
+    JetFlavorAssociation_JER_R10N3
+    JetFlavorAssociation_JER_R10N4
+    JetFlavorAssociation_JER_R10N5
+    JetFlavorAssociation_JER_R10N6
+    
+    JetFlavorAssociation_JER_R12N2
+    JetFlavorAssociation_JER_R12N3
+    JetFlavorAssociation_JER_R12N4
+    JetFlavorAssociation_JER_R12N5
+    JetFlavorAssociation_JER_R12N6
+    
+    JetFlavorAssociation_JER_R15N2
+    JetFlavorAssociation_JER_R15N3
+    JetFlavorAssociation_JER_R15N4
+    JetFlavorAssociation_JER_R15N5
+    JetFlavorAssociation_JER_R15N6
+    
+    JetFlavorAssociation_JER_R05_inclusive
+    JetFlavorAssociation_JER_R07_inclusive
+    JetFlavorAssociation_JER_R10_inclusive
+    JetFlavorAssociation_JER_R12_inclusive
+    JetFlavorAssociation_JER_R15_inclusive
+    
+    
+    BTaggingWP50_R05N2
+    BTaggingWP70_R05N2
+    BTaggingWP90_R05N2
+    BTaggingWP50_R05N3
+    BTaggingWP70_R05N3
+    BTaggingWP90_R05N3
+    BTaggingWP50_R05N4
+    BTaggingWP70_R05N4
+    BTaggingWP90_R05N4
+    BTaggingWP50_R05N5
+    BTaggingWP70_R05N5
+    BTaggingWP90_R05N5
+    BTaggingWP50_R05N6
+    BTaggingWP70_R05N6
+    BTaggingWP90_R05N6
+    BTaggingWP50_R07N2
+    BTaggingWP70_R07N2
+    BTaggingWP90_R07N2
+    BTaggingWP50_R07N3
+    BTaggingWP70_R07N3
+    BTaggingWP90_R07N3
+    BTaggingWP50_R07N4
+    BTaggingWP70_R07N4
+    BTaggingWP90_R07N4
+    BTaggingWP50_R07N5
+    BTaggingWP70_R07N5
+    BTaggingWP90_R07N5
+    BTaggingWP50_R07N6
+    BTaggingWP70_R07N6
+    BTaggingWP90_R07N6
+    BTaggingWP50_R10N2
+    BTaggingWP70_R10N2
+    BTaggingWP90_R10N2
+    BTaggingWP50_R10N3
+    BTaggingWP70_R10N3
+    BTaggingWP90_R10N3
+    BTaggingWP50_R10N4
+    BTaggingWP70_R10N4
+    BTaggingWP90_R10N4
+    BTaggingWP50_R10N5
+    BTaggingWP70_R10N5
+    BTaggingWP90_R10N5
+    BTaggingWP50_R10N6
+    BTaggingWP70_R10N6
+    BTaggingWP90_R10N6
+    BTaggingWP50_R12N2
+    BTaggingWP70_R12N2
+    BTaggingWP90_R12N2
+    BTaggingWP50_R12N3
+    BTaggingWP70_R12N3
+    BTaggingWP90_R12N3
+    BTaggingWP50_R12N4
+    BTaggingWP70_R12N4
+    BTaggingWP90_R12N4
+    BTaggingWP50_R12N5
+    BTaggingWP70_R12N5
+    BTaggingWP90_R12N5
+    BTaggingWP50_R12N6
+    BTaggingWP70_R12N6
+    BTaggingWP90_R12N6
+    BTaggingWP50_R15N2
+    BTaggingWP70_R15N2
+    BTaggingWP90_R15N2
+    BTaggingWP50_R15N3
+    BTaggingWP70_R15N3
+    BTaggingWP90_R15N3
+    BTaggingWP50_R15N4
+    BTaggingWP70_R15N4
+    BTaggingWP90_R15N4
+    BTaggingWP50_R15N5
+    BTaggingWP70_R15N5
+    BTaggingWP90_R15N5
+    BTaggingWP50_R15N6
+    BTaggingWP70_R15N6
+    BTaggingWP90_R15N6
     BTaggingWP50_R05_inclusive
     BTaggingWP70_R05_inclusive
     BTaggingWP90_R05_inclusive
@@ -250,6 +294,99 @@ set ExecutionPath {
     BTaggingWP70_R15_inclusive
     BTaggingWP90_R15_inclusive
 
+
+
+    BTagging_JER_WP50_R05N2
+    BTagging_JER_WP70_R05N2
+    BTagging_JER_WP90_R05N2
+    BTagging_JER_WP50_R05N3
+    BTagging_JER_WP70_R05N3
+    BTagging_JER_WP90_R05N3
+    BTagging_JER_WP50_R05N4
+    BTagging_JER_WP70_R05N4
+    BTagging_JER_WP90_R05N4
+    BTagging_JER_WP50_R05N5
+    BTagging_JER_WP70_R05N5
+    BTagging_JER_WP90_R05N5
+    BTagging_JER_WP50_R05N6
+    BTagging_JER_WP70_R05N6
+    BTagging_JER_WP90_R05N6
+    BTagging_JER_WP50_R07N2
+    BTagging_JER_WP70_R07N2
+    BTagging_JER_WP90_R07N2
+    BTagging_JER_WP50_R07N3
+    BTagging_JER_WP70_R07N3
+    BTagging_JER_WP90_R07N3
+    BTagging_JER_WP50_R07N4
+    BTagging_JER_WP70_R07N4
+    BTagging_JER_WP90_R07N4
+    BTagging_JER_WP50_R07N5
+    BTagging_JER_WP70_R07N5
+    BTagging_JER_WP90_R07N5
+    BTagging_JER_WP50_R07N6
+    BTagging_JER_WP70_R07N6
+    BTagging_JER_WP90_R07N6
+    BTagging_JER_WP50_R10N2
+    BTagging_JER_WP70_R10N2
+    BTagging_JER_WP90_R10N2
+    BTagging_JER_WP50_R10N3
+    BTagging_JER_WP70_R10N3
+    BTagging_JER_WP90_R10N3
+    BTagging_JER_WP50_R10N4
+    BTagging_JER_WP70_R10N4
+    BTagging_JER_WP90_R10N4
+    BTagging_JER_WP50_R10N5
+    BTagging_JER_WP70_R10N5
+    BTagging_JER_WP90_R10N5
+    BTagging_JER_WP50_R10N6
+    BTagging_JER_WP70_R10N6
+    BTagging_JER_WP90_R10N6
+    BTagging_JER_WP50_R12N2
+    BTagging_JER_WP70_R12N2
+    BTagging_JER_WP90_R12N2
+    BTagging_JER_WP50_R12N3
+    BTagging_JER_WP70_R12N3
+    BTagging_JER_WP90_R12N3
+    BTagging_JER_WP50_R12N4
+    BTagging_JER_WP70_R12N4
+    BTagging_JER_WP90_R12N4
+    BTagging_JER_WP50_R12N5
+    BTagging_JER_WP70_R12N5
+    BTagging_JER_WP90_R12N5
+    BTagging_JER_WP50_R12N6
+    BTagging_JER_WP70_R12N6
+    BTagging_JER_WP90_R12N6
+    BTagging_JER_WP50_R15N2
+    BTagging_JER_WP70_R15N2
+    BTagging_JER_WP90_R15N2
+    BTagging_JER_WP50_R15N3
+    BTagging_JER_WP70_R15N3
+    BTagging_JER_WP90_R15N3
+    BTagging_JER_WP50_R15N4
+    BTagging_JER_WP70_R15N4
+    BTagging_JER_WP90_R15N4
+    BTagging_JER_WP50_R15N5
+    BTagging_JER_WP70_R15N5
+    BTagging_JER_WP90_R15N5
+    BTagging_JER_WP50_R15N6
+    BTagging_JER_WP70_R15N6
+    BTagging_JER_WP90_R15N6
+    BTagging_JER_WP50_R05_inclusive
+    BTagging_JER_WP70_R05_inclusive
+    BTagging_JER_WP90_R05_inclusive
+    BTagging_JER_WP50_R07_inclusive
+    BTagging_JER_WP70_R07_inclusive
+    BTagging_JER_WP90_R07_inclusive
+    BTagging_JER_WP50_R10_inclusive
+    BTagging_JER_WP70_R10_inclusive
+    BTagging_JER_WP90_R10_inclusive
+    BTagging_JER_WP50_R12_inclusive
+    BTagging_JER_WP70_R12_inclusive
+    BTagging_JER_WP90_R12_inclusive
+    BTagging_JER_WP50_R15_inclusive
+    BTagging_JER_WP70_R15_inclusive
+    BTagging_JER_WP90_R15_inclusive
+    
     
     TauTagging_R05N2
     TauTagging_R05N3
@@ -276,12 +413,42 @@ set ExecutionPath {
     TauTagging_R15N4
     TauTagging_R15N5
     TauTagging_R15N6
-
     TauTagging_R05_inclusive
     TauTagging_R07_inclusive
     TauTagging_R10_inclusive
     TauTagging_R12_inclusive
     TauTagging_R15_inclusive
+
+    TauTagging_JER_R05N2
+    TauTagging_JER_R05N3
+    TauTagging_JER_R05N4
+    TauTagging_JER_R05N5
+    TauTagging_JER_R05N6
+    TauTagging_JER_R07N2
+    TauTagging_JER_R07N3
+    TauTagging_JER_R07N4
+    TauTagging_JER_R07N5
+    TauTagging_JER_R07N6
+    TauTagging_JER_R10N2
+    TauTagging_JER_R10N3
+    TauTagging_JER_R10N4
+    TauTagging_JER_R10N5
+    TauTagging_JER_R10N6
+    TauTagging_JER_R12N2
+    TauTagging_JER_R12N3
+    TauTagging_JER_R12N4
+    TauTagging_JER_R12N5
+    TauTagging_JER_R12N6
+    TauTagging_JER_R15N2
+    TauTagging_JER_R15N3
+    TauTagging_JER_R15N4
+    TauTagging_JER_R15N5
+    TauTagging_JER_R15N6
+    TauTagging_JER_R05_inclusive
+    TauTagging_JER_R07_inclusive
+    TauTagging_JER_R10_inclusive
+    TauTagging_JER_R12_inclusive
+    TauTagging_JER_R15_inclusive
 
 
 
@@ -738,11 +905,11 @@ module Isolation PhotonIsolation {
 
     set OutputArray photons
 
-    set DeltaRMax 0.5
+    set DeltaRMax 0.1
 
     set PTMin 0.5
 
-    set PTRatioMax 0.12
+    set PTRatioMax 0.2
 }
 
 #####################
@@ -836,11 +1003,11 @@ module Isolation ElectronIsolation {
 
     set OutputArray electrons
 
-    set DeltaRMax 0.5
+    set DeltaRMax 0.1
 
     set PTMin 0.5
 
-    set PTRatioMax 0.12
+    set PTRatioMax 0.2
 }
 
 #################
@@ -874,11 +1041,11 @@ module Isolation MuonIsolation {
 
     set OutputArray muons
 
-    set DeltaRMax 0.5
+    set DeltaRMax 0.1
 
     set PTMin 0.5
 
-    set PTRatioMax 0.25
+    set PTRatioMax 0.2
 }
 
 
@@ -999,6 +1166,7 @@ source CLIC/CLICdet_JetSmearing_1500.tcl
 ########################
 
 source  CLIC/CLICdet_JetFlavorAssociation.tcl
+source  CLIC/CLICdet_JetFlavorAssociation_JER.tcl
 
 ###########
 # b-tagging
@@ -1006,6 +1174,7 @@ source  CLIC/CLICdet_JetFlavorAssociation.tcl
 # based on CLICdp-Note-2014-002    
 
 source  CLIC/CLICdet_BTagging.tcl
+source  CLIC/CLICdet_BTagging_JER.tcl
 
 
 #############
@@ -1014,6 +1183,7 @@ source  CLIC/CLICdet_BTagging.tcl
 # based on LCD-2010-009
 
 source CLIC/CLICdet_TauTagging.tcl
+source CLIC/CLICdet_TauTagging_JER.tcl
 
 
 
