@@ -68,6 +68,7 @@ set ExecutionPath {
   TauTagging
 
   UniqueObjectFinder
+  GenParticleFilter
 
   ScalarHT
 
@@ -927,7 +928,7 @@ module EnergyScale JetEnergyScale {
   set OutputArray jets
 
   # scale formula for jets
-  set ScaleFormula {sqrt( (2.5 - 0.15*(abs(eta)))^2 / pt + 1.0 )}
+  set ScaleFormula {1.0}
 }
 
 ########################
@@ -1159,6 +1160,19 @@ module UniqueObjectFinder UniqueObjectFinder {
   add InputArray JetEnergyScale/jets jets
 }
 
+###############################################################################################################
+# StatusPidFilter: this module removes all generated particles except electrons, muons, taus, and status == 3 #
+###############################################################################################################
+
+module StatusPidFilter GenParticleFilter {
+
+    set InputArray Delphes/allParticles
+    set OutputArray filteredParticles
+    set PTMin 0.0
+
+}
+
+
 ##################
 # ROOT tree writer
 ##################
@@ -1169,14 +1183,16 @@ module UniqueObjectFinder UniqueObjectFinder {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-  add Branch Delphes/allParticles Particle GenParticle
+ # add Branch Delphes/allParticles Particle GenParticle
+  add Branch GenParticleFilter/filteredParticles Particle GenParticle
 
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
 
-  add Branch HCal/eflowTracks EFlowTrack Track
-  add Branch PhotonEnergySmearing/eflowPhotons EFlowPhoton Tower
-  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
+
+#  add Branch HCal/eflowTracks EFlowTrack Track
+#  add Branch PhotonEnergySmearing/eflowPhotons EFlowPhoton Tower
+#  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET

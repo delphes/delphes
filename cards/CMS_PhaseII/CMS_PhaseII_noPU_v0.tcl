@@ -68,6 +68,7 @@ set ExecutionPath {
   TauTagging
 
   UniqueObjectFinder
+  GenParticleFilter
 
   ScalarHT
 
@@ -690,8 +691,15 @@ module Efficiency ElectronEfficiency {
                           (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 20.0 && pt <= 35.0) * (0.778) +
                           (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 35.0 && pt <= 50.0) * (0.830) +
                           (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 50.0 && pt <= 14000.0) * (0.919) +
-                          (abs(eta) > 3.0) * (0.00)
-      }
+                          (abs(eta) > 3.0 && abs(eta) <= 4.0) * (pt > 4.0 && pt <= 6.0) * (0.049) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 6.0 && pt <= 8.0) * (0.152) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 8.0 && pt <= 10.0) * (0.436) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 10.0 && pt <= 20.0) * (0.679) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 20.0 && pt <= 35.0) * (0.778) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 35.0 && pt <= 50.0) * (0.830) +
+                          (abs(eta) > 3.0  && abs(eta) <= 4.0) * (pt > 50.0 && pt <= 14000.0) * (0.919)
+                          }
+
 }
 
 ####################
@@ -920,7 +928,7 @@ module EnergyScale JetEnergyScale {
   set OutputArray jets
 
   # scale formula for jets
-  set ScaleFormula {sqrt( (2.5 - 0.15*(abs(eta)))^2 / pt + 1.0 )}
+  set ScaleFormula {1.0}
 }
 
 ########################
@@ -1153,6 +1161,19 @@ module UniqueObjectFinder UniqueObjectFinder {
   add InputArray JetEnergyScale/jets jets
 }
 
+###############################################################################################################
+# StatusPidFilter: this module removes all generated particles except electrons, muons, taus, and status == 3 #
+###############################################################################################################
+
+module StatusPidFilter GenParticleFilter {
+
+    set InputArray Delphes/allParticles
+    set OutputArray filteredParticles
+    set PTMin 0.0
+
+}
+
+
 ##################
 # ROOT tree writer
 ##################
@@ -1163,14 +1184,15 @@ module UniqueObjectFinder UniqueObjectFinder {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-  add Branch Delphes/allParticles Particle GenParticle
+#  add Branch Delphes/allParticles Particle GenParticle
+  add Branch GenParticleFilter/filteredParticles Particle GenParticle
 
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
 
-  add Branch HCal/eflowTracks EFlowTrack Track
-  add Branch PhotonEnergySmearing/eflowPhotons EFlowPhoton Tower
-  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+#  add Branch HCal/eflowTracks EFlowTrack Track
+#  add Branch PhotonEnergySmearing/eflowPhotons EFlowPhoton Tower
+#  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
