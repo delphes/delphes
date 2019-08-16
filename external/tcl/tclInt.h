@@ -1326,11 +1326,6 @@ extern Tcl_ObjType	tclStringType;
 
 extern Tcl_Obj *	tclFreeObjList;
 
-#ifdef TCL_COMPILE_STATS
-extern long		tclObjsAlloced;
-extern long		tclObjsFreed;
-#endif /* TCL_COMPILE_STATS */
-
 /*
  * Pointer to a heap-allocated string of length zero that the Tcl core uses
  * as the value of an empty string representation for an object. This value
@@ -1444,7 +1439,7 @@ EXTERN int		TclObjInvoke _ANSI_ARGS_((Tcl_Interp *interp,
 EXTERN int		TclObjInvokeGlobal _ANSI_ARGS_((Tcl_Interp *interp,
 		            int objc, Tcl_Obj *CONST objv[], int flags));
 EXTERN char *		TclpAlloc _ANSI_ARGS_((unsigned int size));
-
+EXTERN void		TclpFree(char *cp);
 EXTERN char *		TclpRealloc _ANSI_ARGS_((char *ptr,
 			    unsigned int size));
 #ifndef TclpSysAlloc
@@ -1471,8 +1466,6 @@ EXTERN char *		TclPrecTraceProc _ANSI_ARGS_((ClientData clientData,
 			    int flags));
 EXTERN int		TclPreventAliasLoop _ANSI_ARGS_((Tcl_Interp *interp,
 		            Tcl_Interp *cmdInterp, Tcl_Command cmd));
-EXTERN void		TclPrintByteCodeObj _ANSI_ARGS_((Tcl_Interp *interp,
-		            Tcl_Obj *objPtr));
 EXTERN void		TclProcCleanupProc _ANSI_ARGS_((Proc *procPtr));
 EXTERN int		TclProcCompileProc _ANSI_ARGS_((Tcl_Interp *interp,
  			    Proc *procPtr, Tcl_Obj *bodyPtr, Namespace *nsPtr,
@@ -1687,48 +1680,6 @@ EXTERN int	TclCompileWhileCmd _ANSI_ARGS_((Tcl_Interp *interp,
  *----------------------------------------------------------------
  */
 
-#ifdef TCL_COMPILE_STATS
-#  define TclIncrObjsAllocated() \
-    tclObjsAlloced++
-#  define TclIncrObjsFreed() \
-    tclObjsFreed++
-#else
-#  define TclIncrObjsAllocated()
-#  define TclIncrObjsFreed()
-#endif /* TCL_COMPILE_STATS */
-
-#ifdef TCL_MEM_DEBUG
-#  define TclNewObj(objPtr) \
-    (objPtr) = (Tcl_Obj *) Tcl_DbCkalloc(sizeof(Tcl_Obj), __FILE__, __LINE__); \
-    (objPtr)->refCount = 0; \
-    (objPtr)->bytes    = tclEmptyStringRep; \
-    (objPtr)->length   = 0; \
-    (objPtr)->typePtr  = NULL; \
-    TclIncrObjsAllocated()
-#  define TclDbNewObj(objPtr, file, line) \
-    (objPtr) = (Tcl_Obj *) Tcl_DbCkalloc(sizeof(Tcl_Obj), (file), (line)); \
-    (objPtr)->refCount = 0; \
-    (objPtr)->bytes    = tclEmptyStringRep; \
-    (objPtr)->length   = 0; \
-    (objPtr)->typePtr  = NULL; \
-    TclIncrObjsAllocated()
-#  define TclDecrRefCount(objPtr) \
-    if (--(objPtr)->refCount <= 0) { \
- 	if ((objPtr)->refCount < -1) \
-            panic("Reference count for %lx was negative: %s line %d", \
-		  (objPtr), __FILE__, __LINE__); \
-        if (((objPtr)->bytes != NULL) \
-	        && ((objPtr)->bytes != tclEmptyStringRep)) { \
-	    ckfree((char *) (objPtr)->bytes); \
-        } \
-        if (((objPtr)->typePtr != NULL) \
-	        && ((objPtr)->typePtr->freeIntRepProc != NULL)) { \
-	    (objPtr)->typePtr->freeIntRepProc(objPtr); \
-        } \
-        ckfree((char *) (objPtr)); \
-        TclIncrObjsFreed(); \
-    }
-#else /* not TCL_MEM_DEBUG */
 #  define TclNewObj(objPtr) \
     if (tclFreeObjList == NULL) { \
 	TclAllocateFreeObjects(); \
@@ -1739,8 +1690,7 @@ EXTERN int	TclCompileWhileCmd _ANSI_ARGS_((Tcl_Interp *interp,
     (objPtr)->refCount = 0; \
     (objPtr)->bytes    = tclEmptyStringRep; \
     (objPtr)->length   = 0; \
-    (objPtr)->typePtr  = NULL; \
-    TclIncrObjsAllocated()
+    (objPtr)->typePtr  = NULL;
 #  define TclDecrRefCount(objPtr) \
     if (--(objPtr)->refCount <= 0) { \
         if (((objPtr)->bytes != NULL) \
@@ -1753,9 +1703,7 @@ EXTERN int	TclCompileWhileCmd _ANSI_ARGS_((Tcl_Interp *interp,
         } \
         (objPtr)->internalRep.otherValuePtr = (VOID *) tclFreeObjList; \
         tclFreeObjList = (objPtr); \
-        TclIncrObjsFreed(); \
     }
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------

@@ -37,55 +37,6 @@
 extern Tcl_ObjType	tclCmdNameType;
 
 /*
- * Variable that controls whether compilation tracing is enabled and, if so,
- * what level of tracing is desired:
- *    0: no compilation tracing
- *    1: summarize compilation of top level cmds and proc bodies
- *    2: display all instructions of each ByteCode compiled
- * This variable is linked to the Tcl variable "tcl_traceCompile".
- */
-
-extern int 		tclTraceCompile;
-
-/*
- * Variable that controls whether execution tracing is enabled and, if so,
- * what level of tracing is desired:
- *    0: no execution tracing
- *    1: trace invocations of Tcl procs only
- *    2: trace invocations of all (not compiled away) commands
- *    3: display each instruction executed
- * This variable is linked to the Tcl variable "tcl_traceExec".
- */
-
-extern int 		tclTraceExec;
-
-/*
- * The number of bytecode compilations and various other compilation-related
- * statistics. The tclByteCodeCount and tclSourceCount arrays are used to
- * hold the count of ByteCodes and sources whose sizes fall into various
- * binary decades; e.g., tclByteCodeCount[5] is a count of the ByteCodes
- * with size larger than 2**4 and less than or equal to 2**5.
- */
-
-#ifdef TCL_COMPILE_STATS
-extern long		tclNumCompilations;
-extern double		tclTotalSourceBytes;
-extern double		tclTotalCodeBytes;
-
-extern double		tclTotalInstBytes;
-extern double		tclTotalObjBytes;
-extern double		tclTotalExceptBytes;
-extern double		tclTotalAuxBytes;
-extern double		tclTotalCmdMapBytes;
-
-extern double		tclCurrentSourceBytes;
-extern double		tclCurrentCodeBytes;
-
-extern int		tclSourceCount[32];
-extern int		tclByteCodeCount[32];
-#endif /* TCL_COMPILE_STATS */
-
-/*
  *------------------------------------------------------------------------
  * Data structures related to compilation.
  *------------------------------------------------------------------------
@@ -815,14 +766,9 @@ EXTERN void		TclInitCompileEnv _ANSI_ARGS_((Tcl_Interp *interp,
 			    CompileEnv *envPtr, char *string));
 EXTERN void		TclInitJumpFixupArray _ANSI_ARGS_((
 			    JumpFixupArray *fixupArrayPtr));
-#ifdef TCL_COMPILE_STATS
-EXTERN int		TclLog2 _ANSI_ARGS_((int value));
-#endif /*TCL_COMPILE_STATS*/
 EXTERN int		TclObjIndexForString _ANSI_ARGS_((char *start,
 			    int length, int allocStrRep, int inHeap,
 			    CompileEnv *envPtr));
-EXTERN int		TclPrintInstruction _ANSI_ARGS_((ByteCode* codePtr,
-			    unsigned char *pc));
 EXTERN void		TclPrintSource _ANSI_ARGS_((FILE *outFile,
 			    char *string, int maxChars));
 EXTERN void		TclRegisterAuxDataType _ANSI_ARGS_((AuxDataType *typePtr));

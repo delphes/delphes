@@ -705,24 +705,6 @@ TclGetIndexedScalar(interp, localIndex, leaveErrorMsg)
     char *varName;		/* Name of the local variable. */
     char *msg;
 
-#ifdef TCL_COMPILE_DEBUG
-    Proc *procPtr = varFramePtr->procPtr;
-    int localCt = procPtr->numCompiledLocals;
-
-    if (compiledLocals == NULL) {
-	fprintf(stderr, "\nTclGetIndexedScalar: can't get local %i in frame 0x%x, no compiled locals\n",
-		localIndex, (unsigned int) varFramePtr);
-	panic("TclGetIndexedScalar: no compiled locals in frame 0x%x",
-		(unsigned int) varFramePtr);
-    }
-    if ((localIndex < 0) || (localIndex >= localCt)) {
-	fprintf(stderr, "\nTclGetIndexedScalar: can't get local %i in frame 0x%x with %i locals\n",
-		localIndex, (unsigned int) varFramePtr, localCt);
-	panic("TclGetIndexedScalar: bad local index %i in frame 0x%x",
-		localIndex, (unsigned int) varFramePtr);
-    }
-#endif /* TCL_COMPILE_DEBUG */
-    
     varPtr = &(compiledLocals[localIndex]);
     varName = varPtr->name;
 
@@ -824,24 +806,6 @@ TclGetElementOfIndexedArray(interp, localIndex, elemPtr, leaveErrorMsg)
 				 * compiler warning. */
     char *elem, *msg;
     int new;
-
-#ifdef TCL_COMPILE_DEBUG
-    Proc *procPtr = varFramePtr->procPtr;
-    int localCt = procPtr->numCompiledLocals;
-
-    if (compiledLocals == NULL) {
-	fprintf(stderr, "\nTclGetElementOfIndexedArray: can't get element of local %i in frame 0x%x, no compiled locals\n",
-		localIndex, (unsigned int) varFramePtr);
-	panic("TclGetIndexedScalar: no compiled locals in frame 0x%x",
-		(unsigned int) varFramePtr);
-    }
-    if ((localIndex < 0) || (localIndex >= localCt)) {
-	fprintf(stderr, "\nTclGetIndexedScalar: can't get element of local %i in frame 0x%x with %i locals\n",
-		localIndex, (unsigned int) varFramePtr, localCt);
-	panic("TclGetElementOfIndexedArray: bad local index %i in frame 0x%x",
-		localIndex, (unsigned int) varFramePtr);
-    }
-#endif /* TCL_COMPILE_DEBUG */
 
     /*
      * THIS FAILS IF THE ELEMENT NAME OBJECT'S STRING REP HAS A NULL BYTE.
@@ -1437,24 +1401,6 @@ TclSetIndexedScalar(interp, localIndex, newValuePtr, leaveErrorMsg)
     Tcl_Obj *oldValuePtr;
     Tcl_Obj *resultPtr = NULL;
 
-#ifdef TCL_COMPILE_DEBUG
-    Proc *procPtr = varFramePtr->procPtr;
-    int localCt = procPtr->numCompiledLocals;
-
-    if (compiledLocals == NULL) {
-	fprintf(stderr, "\nTclSetIndexedScalar: can't set local %i in frame 0x%x, no compiled locals\n",
-		localIndex, (unsigned int) varFramePtr);
-	panic("TclSetIndexedScalar: no compiled locals in frame 0x%x",
-		(unsigned int) varFramePtr);
-    }
-    if ((localIndex < 0) || (localIndex >= localCt)) {
-	fprintf(stderr, "\nTclSetIndexedScalar: can't set local %i in frame 0x%x with %i locals\n",
-		localIndex, (unsigned int) varFramePtr, localCt);
-	panic("TclSetIndexedScalar: bad local index %i in frame 0x%x",
-		localIndex, (unsigned int) varFramePtr);
-    }
-#endif /* TCL_COMPILE_DEBUG */
-    
     varPtr = &(compiledLocals[localIndex]);
     varName = varPtr->name;
 
@@ -1622,24 +1568,6 @@ TclSetElementOfIndexedArray(interp, localIndex, elemPtr, newValuePtr,
     Tcl_Obj *oldValuePtr;
     int new;
     
-#ifdef TCL_COMPILE_DEBUG
-    Proc *procPtr = varFramePtr->procPtr;
-    int localCt = procPtr->numCompiledLocals;
-
-    if (compiledLocals == NULL) {
-	fprintf(stderr, "\nTclSetElementOfIndexedArray: can't set element of local %i in frame 0x%x, no compiled locals\n",
-		localIndex, (unsigned int) varFramePtr);
-	panic("TclSetIndexedScalar: no compiled locals in frame 0x%x",
-		(unsigned int) varFramePtr);
-    }
-    if ((localIndex < 0) || (localIndex >= localCt)) {
-	fprintf(stderr, "\nTclSetIndexedScalar: can't set elememt of local %i in frame 0x%x with %i locals\n",
-		localIndex, (unsigned int) varFramePtr, localCt);
-	panic("TclSetElementOfIndexedArray: bad local index %i in frame 0x%x",
-		localIndex, (unsigned int) varFramePtr);
-    }
-#endif /* TCL_COMPILE_DEBUG */
-
     /*
      * THIS FAILS IF THE ELEMENT NAME OBJECT'S STRING REP HAS A NULL BYTE.
      */

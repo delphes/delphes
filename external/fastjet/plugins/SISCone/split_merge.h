@@ -445,10 +445,10 @@ class Csplit_merge{
 
   // jet information
   /// list of jet candidates
-#ifdef SISCONE_USES_UNIQUE_PTR_AS_AUTO_PTR
-  std::unique_ptr<std::multiset<Cjet,Csplit_merge_ptcomparison> > candidates;
-#else
+#if __cplusplus < 201103L
   std::auto_ptr<std::multiset<Cjet,Csplit_merge_ptcomparison> > candidates;
+#else
+  std::unique_ptr<std::multiset<Cjet,Csplit_merge_ptcomparison> > candidates;
 #endif
   
   /// minimal pt2

@@ -106,11 +106,11 @@ class H_Beam {
 	/// Returns the emittance \f$ \epsilon \f$ of the beam in x and y
 	//@{
 		inline const float getEmittanceX() const {
-		    if(!x_disp*tx_disp) cout<<"Warning : Degenerate Beam : x-emittance = 0"<<endl; 	
+		    if(x_disp * tx_disp == 0) cout<<"Warning : Degenerate Beam : x-emittance = 0"<<endl; 	
 			return x_disp * tan(tx_disp/URAD)/URAD;
 		}
         inline const float getEmittanceY() const { 
-			if(!y_disp*ty_disp) cout<<"Warning : Degenerate Beam : y-emittance = 0"<<endl;
+		    if(y_disp * ty_disp == 0) cout<<"Warning : Degenerate Beam : y-emittance = 0"<<endl;
 			return y_disp * tan(ty_disp/URAD)/URAD;
 		}
 	//@}

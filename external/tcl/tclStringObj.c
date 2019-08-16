@@ -48,12 +48,8 @@ Tcl_ObjType tclStringType = {
  *
  * Tcl_NewStringObj --
  *
- *	This procedure is normally called when not debugging: i.e., when
- *	TCL_MEM_DEBUG is not defined. It creates a new string object and
- *	initializes it from the byte pointer and length arguments.
- *
- *	When TCL_MEM_DEBUG is defined, this procedure just returns the
- *	result of calling the debugging version Tcl_DbNewStringObj.
+ *	This procedure creates a new string object and initializes it from
+ *	the byte pointer and length arguments.
  *
  * Results:
  *	A newly created string object is returned that has ref count zero.
@@ -68,23 +64,6 @@ Tcl_ObjType tclStringType = {
  *
  *----------------------------------------------------------------------
  */
-
-#ifdef TCL_MEM_DEBUG
-#undef Tcl_NewStringObj
-
-Tcl_Obj *
-Tcl_NewStringObj(bytes, length)
-    register char *bytes;	/* Points to the first of the length bytes
-				 * used to initialize the new object. */
-    register int length;	/* The number of bytes to copy from "bytes"
-				 * when initializing the new object. If 
-				 * negative, use bytes up to the first
-				 * NULL byte. */
-{
-    return Tcl_DbNewStringObj(bytes, length, "unknown", 0);
-}
-
-#else /* if not TCL_MEM_DEBUG */
 
 Tcl_Obj *
 Tcl_NewStringObj(bytes, length)
@@ -104,81 +83,6 @@ Tcl_NewStringObj(bytes, length)
     TclInitStringRep(objPtr, bytes, length);
     return objPtr;
 }
-#endif /* TCL_MEM_DEBUG */
-
-/*
- *----------------------------------------------------------------------
- *
- * Tcl_DbNewStringObj --
- *
- *	This procedure is normally called when debugging: i.e., when
- *	TCL_MEM_DEBUG is defined. It creates new string objects. It is the
- *	same as the Tcl_NewStringObj procedure above except that it calls
- *	Tcl_DbCkalloc directly with the file name and line number from its
- *	caller. This simplifies debugging since then the checkmem command
- *	will report the correct file name and line number when reporting
- *	objects that haven't been freed.
- *
- *	When TCL_MEM_DEBUG is not defined, this procedure just returns the
- *	result of calling Tcl_NewStringObj.
- *
- * Results:
- *	A newly created string object is returned that has ref count zero.
- *
- * Side effects:
- *	The new object's internal string representation will be set to a
- *	copy of the length bytes starting at "bytes". If "length" is
- *	negative, use bytes up to the first NULL byte; i.e., assume "bytes"
- *	points to a C-style NULL-terminated string. The object's type is set
- *	to NULL. An extra NULL is added to the end of the new object's byte
- *	array.
- *
- *----------------------------------------------------------------------
- */
-
-#ifdef TCL_MEM_DEBUG
-
-Tcl_Obj *
-Tcl_DbNewStringObj(bytes, length, file, line)
-    register char *bytes;	/* Points to the first of the length bytes
-				 * used to initialize the new object. */
-    register int length;	/* The number of bytes to copy from "bytes"
-				 * when initializing the new object. If 
-				 * negative, use bytes up to the first
-				 * NULL byte. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    register Tcl_Obj *objPtr;
-
-    if (length < 0) {
-	length = (bytes? strlen(bytes) : 0);
-    }
-    TclDbNewObj(objPtr, file, line);
-    TclInitStringRep(objPtr, bytes, length);
-    return objPtr;
-}
-
-#else /* if not TCL_MEM_DEBUG */
-
-Tcl_Obj *
-Tcl_DbNewStringObj(bytes, length, file, line)
-    register char *bytes;	/* Points to the first of the length bytes
-				 * used to initialize the new object. */
-    register int length;	/* The number of bytes to copy from "bytes"
-				 * when initializing the new object. If 
-				 * negative, use bytes up to the first
-				 * NULL byte. */
-    char *file;			/* The name of the source file calling this
-				 * procedure; used for debugging. */
-    int line;			/* Line number in the source file; used
-				 * for debugging. */
-{
-    return Tcl_NewStringObj(bytes, length);
-}
-#endif /* TCL_MEM_DEBUG */
 
 /*
  *----------------------------------------------------------------------

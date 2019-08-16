@@ -487,26 +487,15 @@ EXTERN void		Tcl_IncrRefCount _ANSI_ARGS_((Tcl_Obj *objPtr));
 EXTERN void		Tcl_DecrRefCount _ANSI_ARGS_((Tcl_Obj *objPtr));
 EXTERN int		Tcl_IsShared _ANSI_ARGS_((Tcl_Obj *objPtr));
 
-#ifdef TCL_MEM_DEBUG
-#   define Tcl_IncrRefCount(objPtr) \
-	Tcl_DbIncrRefCount(objPtr, __FILE__, __LINE__)
-#   define Tcl_DecrRefCount(objPtr) \
-	Tcl_DbDecrRefCount(objPtr, __FILE__, __LINE__)
-#   define Tcl_IsShared(objPtr) \
-	Tcl_DbIsShared(objPtr, __FILE__, __LINE__)
-#else
 #   define Tcl_IncrRefCount(objPtr) \
 	++(objPtr)->refCount
 #   define Tcl_DecrRefCount(objPtr) \
 	if (--(objPtr)->refCount <= 0) TclFreeObj(objPtr)
 #   define Tcl_IsShared(objPtr) \
 	((objPtr)->refCount > 1)
-#endif
 
 /*
  * Macros and definitions that help to debug the use of Tcl objects.
- * When TCL_MEM_DEBUG is defined, the Tcl_New* declarations are 
- * overridden to call debugging versions of the object creation procedures.
  */
 
 EXTERN Tcl_Obj *	Tcl_NewBooleanObj _ANSI_ARGS_((int boolValue));
@@ -518,23 +507,6 @@ EXTERN Tcl_Obj *	Tcl_NewLongObj _ANSI_ARGS_((long longValue));
 EXTERN Tcl_Obj *	Tcl_NewObj _ANSI_ARGS_((void));
 EXTERN Tcl_Obj *	Tcl_NewStringObj _ANSI_ARGS_((char *bytes,
 			    int length));
-
-#ifdef TCL_MEM_DEBUG
-#  define Tcl_NewBooleanObj(val) \
-     Tcl_DbNewBooleanObj(val, __FILE__, __LINE__)
-#  define Tcl_NewDoubleObj(val) \
-     Tcl_DbNewDoubleObj(val, __FILE__, __LINE__)
-#  define Tcl_NewIntObj(val) \
-     Tcl_DbNewLongObj(val, __FILE__, __LINE__)
-#  define Tcl_NewListObj(objc, objv) \
-     Tcl_DbNewListObj(objc, objv, __FILE__, __LINE__)
-#  define Tcl_NewLongObj(val) \
-     Tcl_DbNewLongObj(val, __FILE__, __LINE__)
-#  define Tcl_NewObj() \
-     Tcl_DbNewObj(__FILE__, __LINE__)
-#  define Tcl_NewStringObj(bytes, len) \
-     Tcl_DbNewStringObj(bytes, len, __FILE__, __LINE__)
-#endif /* TCL_MEM_DEBUG */
 
 /*
  * The following definitions support Tcl's namespace facility.
@@ -725,21 +697,6 @@ EXTERN void		Tcl_Free _ANSI_ARGS_((char *ptr));
 EXTERN char *		Tcl_Realloc _ANSI_ARGS_((char *ptr,
 			    unsigned int size));
 
-#ifdef TCL_MEM_DEBUG
-
-#  define Tcl_Alloc(x) Tcl_DbCkalloc(x, __FILE__, __LINE__)
-#  define Tcl_Free(x)  Tcl_DbCkfree(x, __FILE__, __LINE__)
-#  define Tcl_Realloc(x,y) Tcl_DbCkrealloc((x), (y),__FILE__, __LINE__)
-#  define ckalloc(x) Tcl_DbCkalloc(x, __FILE__, __LINE__)
-#  define ckfree(x)  Tcl_DbCkfree(x, __FILE__, __LINE__)
-#  define ckrealloc(x,y) Tcl_DbCkrealloc((x), (y),__FILE__, __LINE__)
-
-EXTERN int		Tcl_DumpActiveMemory _ANSI_ARGS_((char *fileName));
-EXTERN void		Tcl_ValidateAllMemory _ANSI_ARGS_((char *file,
-			    int line));
-
-#else
-
 /*
  * If USE_TCLALLOC is true, then we need to call Tcl_Alloc instead of
  * the native malloc/free.  The only time USE_TCLALLOC should not be
@@ -759,8 +716,6 @@ EXTERN void		Tcl_ValidateAllMemory _ANSI_ARGS_((char *file,
 #  endif
 #  define Tcl_DumpActiveMemory(x)
 #  define Tcl_ValidateAllMemory(x,y)
-
-#endif /* TCL_MEM_DEBUG */
 
 /*
  * Forward declaration of Tcl_HashTable.  Needed by some C++ compilers

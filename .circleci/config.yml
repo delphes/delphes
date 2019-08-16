@@ -7,7 +7,7 @@ shared: &shared
         name: Build Delphes using make
         command: |
           make distclean
-          make -j `nproc` HAS_PYTHIA8=true
+          make -j 8 HAS_PYTHIA8=true
     - run:
         name: Build Delphes using cmake
         command: |
@@ -15,7 +15,7 @@ shared: &shared
           mkdir -p build
           cd build
           cmake ..
-          make -j `nproc`
+          make -j 8
 
 jobs:
   ubuntu-1404:
@@ -26,10 +26,10 @@ jobs:
     <<: *shared
     docker:
       - image: delphes/ubuntu:18.04
-  fedora-28:
+  fedora-30:
     <<: *shared
     docker:
-      - image: delphes/fedora:28
+      - image: delphes/fedora:30
 
 workflows:
   version: 2
@@ -37,4 +37,4 @@ workflows:
     jobs:
       - ubuntu-1404
       - ubuntu-1804
-      - fedora-28
+      - fedora-30

@@ -64,9 +64,7 @@
 #endif
 
 /* compile the deprecated parts of the interface using auto-ptr */
-#ifndef FASTJET_HAVE_AUTO_PTR_INTERFACE 
-#define FASTJET_HAVE_AUTO_PTR_INTERFACE  /**/ 
-#endif
+/* #undef HAVE_AUTO_PTR_INTERFACE */
 
 /* compiler supports c++14 deprecated keyword */
 /* #undef HAVE_CXX14_DEPRECATED */

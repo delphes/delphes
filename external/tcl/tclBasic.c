@@ -3254,9 +3254,6 @@ Tcl_ExprObj(interp, objPtr, resultPtrPtr)
 	    
 	    TclInitByteCodeObj(objPtr, &compEnv);
 	    codePtr = (ByteCode *) objPtr->internalRep.otherValuePtr;
-	    if (tclTraceCompile == 2) {
-		TclPrintByteCodeObj(interp, objPtr);
-	    }
 	    TclFreeCompileEnv(&compEnv);
 	} else {
 	    /*

@@ -976,17 +976,6 @@ TclObjInterpProc(clientData, interp, objc, objv)
      * Invoke the commands in the procedure's body.
      */
 
-    if (tclTraceExec >= 1) {
-	fprintf(stdout, "Calling proc ");
-	for (i = 0;  i < objc;  i++) {
-	    bytes = Tcl_GetStringFromObj(objv[i], &length);
-	    TclPrintSource(stdout, bytes, TclMin(length, 15));
-	    fprintf(stdout, " ");
-	}
-	fprintf(stdout, "\n");
-	fflush(stdout);
-    }
-
     iPtr->returnCode = TCL_OK;
     procPtr->refCount++;
     result = Tcl_EvalObj(interp, procPtr->bodyPtr);
@@ -1109,22 +1098,6 @@ TclProcCompileProc(interp, procPtr, bodyPtr, nsPtr, description, procName)
  	char buf[100];
  	int numChars;
  	char *ellipsis;
- 	
- 	if (tclTraceCompile >= 1) {
- 	    /*
- 	     * Display a line summarizing the top level command we
- 	     * are about to compile.
- 	     */
- 
- 	    numChars = strlen(procName);
- 	    ellipsis = "";
- 	    if (numChars > 50) {
- 		numChars = 50;
- 		ellipsis = "...";
- 	    }
- 	    fprintf(stdout, "Compiling %s \"%.*s%s\"\n",
- 		    description, numChars, procName, ellipsis);
- 	}
  	
  	/*
  	 * Plug the current procPtr into the interpreter and coerce
