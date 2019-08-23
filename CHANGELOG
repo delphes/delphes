@@ -1,6 +1,6 @@
 3.4.2:
 - added DenseTrackFilter for modelling tracking inefficiencies in boosted, dense environments
-- added detector cards for CLIC and HL-LHC detectors
+- added detector cards for CLIC, HL-LHC and IDEA detectors
 - added muons to Tower collection used for jets reconstruction and MET calculation in the ATLAS card (#1118)
 - added Weight branch to HepMC
 - added Jet constituent output to FastJetFinder (allows more complex schemes of MET calculation) (#1349)
