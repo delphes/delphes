@@ -88,8 +88,8 @@ Start ROOT and load Delphes shared library:
 Open ROOT file and do some basic analysis using Draw or TBrowser:
 
 ```
-   TFile::Open("delphes_output.root");
-   Delphes->Draw("Electron.PT");
+   TFile *f = TFile::Open("delphes_output.root");
+   f->Get("Delphes")->Draw("Electron.PT");
    TBrowser browser;
 ```
 
