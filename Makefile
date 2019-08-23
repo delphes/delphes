@@ -443,6 +443,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/VertexSorter.h \
 	modules/VertexFinder.h \
 	modules/VertexFinderDA4D.h \
+	modules/DecayFilter.h \
 	modules/ExampleModule.h
 tmp/modules/ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict.$(SrcSuf)
@@ -688,6 +689,15 @@ tmp/modules/Cloner.$(ObjSuf): \
 tmp/modules/ConstituentFilter.$(ObjSuf): \
 	modules/ConstituentFilter.$(SrcSuf) \
 	modules/ConstituentFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/DecayFilter.$(ObjSuf): \
+	modules/DecayFilter.$(SrcSuf) \
+	modules/DecayFilter.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -1126,6 +1136,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
+	tmp/modules/DecayFilter.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
 	tmp/modules/DenseTrackFilter.$(ObjSuf) \
 	tmp/modules/DualReadoutCalorimeter.$(ObjSuf) \
@@ -1919,6 +1930,10 @@ external/fastjet/Error.hh: \
 	external/fastjet/internal/base.hh \
 	external/fastjet/config.h \
 	external/fastjet/LimitedWarning.hh
+	@touch $@
+
+modules/DecayFilter.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 external/fastjet/internal/TilingExtent.hh: \
