@@ -150,6 +150,8 @@ Candidate::Candidate() :
   TrackResolution(0),
   NCharged(0),
   NNeutrals(0),
+  NeutralEnergyFraction(0),  // charged energy fraction
+  ChargedEnergyFraction(0),  // neutral energy fraction 
   Beta(0),
   BetaStar(0),
   MeanSqDeltaR(0),
@@ -321,6 +323,8 @@ void Candidate::Copy(TObject &obj) const
   object.TrackResolution = TrackResolution;
   object.NCharged = NCharged;
   object.NNeutrals = NNeutrals;
+  object.NeutralEnergyFraction = NeutralEnergyFraction;
+  object.ChargedEnergyFraction = ChargedEnergyFraction;
   object.Beta = Beta;
   object.BetaStar = BetaStar;
   object.MeanSqDeltaR = MeanSqDeltaR;

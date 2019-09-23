@@ -315,6 +315,8 @@ void FastJetFinder::Process()
 
   Double_t deta, dphi, detaMax, dphiMax;
   Double_t time, timeWeight;
+  Double_t neutralEnergyFraction, chargedEnergyFraction;
+
   Int_t number, ncharged, nneutrals;
   Int_t charge;
   Double_t rho = 0.0;
@@ -417,6 +419,9 @@ void FastJetFinder::Process()
     ncharged = 0;
     nneutrals = 0;
 
+    neutralEnergyFraction =0.;
+    chargedEnergyFraction =0.;
+
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
 
@@ -431,10 +436,16 @@ void FastJetFinder::Process()
       if(dphi > dphiMax) dphiMax = dphi;
 
       if(constituent->Charge == 0)
+      {
         nneutrals++;
+        neutralEnergyFraction += constituent->Momentum.E();
+      }
       else
+      {
         ncharged++;
-
+        chargedEnergyFraction += constituent->Momentum.E();
+      }
+      
       time += TMath::Sqrt(constituent->Momentum.E()) * (constituent->Position.T());
       timeWeight += TMath::Sqrt(constituent->Momentum.E());
 
@@ -453,6 +464,9 @@ void FastJetFinder::Process()
     candidate->Charge = charge;
     candidate->NNeutrals = nneutrals;
     candidate->NCharged = ncharged;
+
+    candidate->NeutralEnergyFraction = (momentum.E() > 0 ) ? neutralEnergyFraction/momentum.E() : 0.0;
+    candidate->ChargedEnergyFraction = (momentum.E() > 0 ) ? chargedEnergyFraction/momentum.E() : 0.0;
 
     //for exclusive clustering, access y_n,n+1 as exclusive_ymerge (fNJets);
     candidate->ExclYmerge23 = excl_ymerge23;

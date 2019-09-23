@@ -386,6 +386,10 @@ public:
 
   Int_t NCharged; // number of charged constituents
   Int_t NNeutrals; // number of neutral constituents
+
+  Float_t NeutralEnergyFraction;  // charged energy fraction
+  Float_t ChargedEnergyFraction;  // neutral energy fraction 
+
   Float_t Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents)
   Float_t BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)
   Float_t MeanSqDeltaR; // average distance (squared) between constituent and jet weighted by pt (squared) of constituent
@@ -676,6 +680,9 @@ public:
   Float_t MeanSqDeltaR;
   Float_t PTD;
   Float_t FracPt[5];
+  Float_t NeutralEnergyFraction;  // charged energy fraction
+  Float_t ChargedEnergyFraction;  // neutral energy fraction 
+
 
   // Timing information
 

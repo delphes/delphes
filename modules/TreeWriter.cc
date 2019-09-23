@@ -774,6 +774,9 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->NCharged = candidate->NCharged;
     entry->NNeutrals = candidate->NNeutrals;
+
+    entry->NeutralEnergyFraction = candidate->NeutralEnergyFraction;
+    entry->ChargedEnergyFraction = candidate->ChargedEnergyFraction;
     entry->Beta = candidate->Beta;
     entry->BetaStar = candidate->BetaStar;
     entry->MeanSqDeltaR = candidate->MeanSqDeltaR;
