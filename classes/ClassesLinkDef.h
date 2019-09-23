@@ -59,6 +59,7 @@
 #pragma link C++ class Jet+;
 #pragma link C++ class Track+;
 #pragma link C++ class Tower+;
+#pragma link C++ class ParticleFlowCandidate+;
 #pragma link C++ class HectorHit+;
 
 #pragma link C++ class Candidate+;

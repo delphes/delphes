@@ -55,6 +55,7 @@ private:
   void ProcessVertices(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessTracks(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessTowers(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessMuons(ExRootTreeBranch *branch, TObjArray *array);
@@ -76,7 +77,7 @@ private:
   std::map<TClass *, TProcessMethod> fClassMap; //!
 #endif
 
-  ClassDef(TreeWriter, 1)
+  ClassDef(TreeWriter, 2)
 };
 
 #endif

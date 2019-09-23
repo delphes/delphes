@@ -71,6 +71,7 @@ void TreeWriter::Init()
   fClassMap[Vertex::Class()] = &TreeWriter::ProcessVertices;
   fClassMap[Track::Class()] = &TreeWriter::ProcessTracks;
   fClassMap[Tower::Class()] = &TreeWriter::ProcessTowers;
+  fClassMap[ParticleFlowCandidate::Class()] = &TreeWriter::ProcessParticleFlowCandidates;
   fClassMap[Photon::Class()] = &TreeWriter::ProcessPhotons;
   fClassMap[Electron::Class()] = &TreeWriter::ProcessElectrons;
   fClassMap[Muon::Class()] = &TreeWriter::ProcessMuons;
@@ -136,6 +137,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
   TIter it1(candidate->GetCandidates());
   it1.Reset();
   array->Clear();
+  
   while((candidate = static_cast<Candidate *>(it1.Next())))
   {
     TIter it2(candidate->GetCandidates());
@@ -433,6 +435,102 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->NTimeHits = candidate->NTimeHits;
 
     FillParticles(candidate, &entry->Particles);
+  }
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArray *array)
+{
+
+  TIter iterator(array);
+  Candidate *candidate = 0;
+  Candidate *particle = 0;
+  ParticleFlowCandidate *entry = 0;
+  Double_t e, pt, signz, cosTheta, eta, rapidity, p, ctgTheta, phi;
+  const Double_t c_light = 2.99792458E8;
+
+  // loop over all tracks
+  iterator.Reset();
+  while((candidate = static_cast<Candidate *>(iterator.Next())))
+  {
+    const TLorentzVector &position = candidate->Position;
+
+    cosTheta = TMath::Abs(position.CosTheta());
+    signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
+    eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
+    rapidity = (cosTheta == 1.0 ? signz * 999.9 : position.Rapidity());
+
+    entry = static_cast<ParticleFlowCandidate *>(branch->NewEntry());
+
+    entry->SetBit(kIsReferenced);
+    entry->SetUniqueID(candidate->GetUniqueID());
+
+    entry->PID = candidate->PID;
+
+    entry->Charge = candidate->Charge;
+
+    entry->EtaOuter = eta;
+    entry->PhiOuter = position.Phi();
+
+    entry->XOuter = position.X();
+    entry->YOuter = position.Y();
+    entry->ZOuter = position.Z();
+    entry->TOuter = position.T() * 1.0E-3 / c_light;
+
+    entry->L = candidate->L;
+
+    entry->D0 = candidate->D0;
+    entry->ErrorD0 = candidate->ErrorD0;
+    entry->DZ = candidate->DZ;
+    entry->ErrorDZ = candidate->ErrorDZ;
+
+    entry->ErrorP = candidate->ErrorP;
+    entry->ErrorPT = candidate->ErrorPT;
+    entry->ErrorCtgTheta = candidate->ErrorCtgTheta;
+    entry->ErrorPhi = candidate->ErrorPhi;
+
+    entry->Xd = candidate->Xd;
+    entry->Yd = candidate->Yd;
+    entry->Zd = candidate->Zd;
+
+    const TLorentzVector &momentum = candidate->Momentum;
+
+    e = momentum.E();
+    pt = momentum.Pt();
+    p = momentum.P();
+    phi = momentum.Phi();
+    ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
+
+    entry->E = e;
+    entry->P = p;
+    entry->PT = pt;
+    entry->Eta = eta;
+    entry->Phi = phi;
+    entry->CtgTheta = ctgTheta;
+
+    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    const TLorentzVector &initialPosition = particle->Position;
+
+    entry->X = initialPosition.X();
+    entry->Y = initialPosition.Y();
+    entry->Z = initialPosition.Z();
+    entry->T = initialPosition.T() * 1.0E-3 / c_light;
+
+    entry->VertexIndex = candidate->ClusterIndex;
+
+    entry->Eem = candidate->Eem;
+    entry->Ehad = candidate->Ehad;
+    entry->Edges[0] = candidate->Edges[0];
+    entry->Edges[1] = candidate->Edges[1];
+    entry->Edges[2] = candidate->Edges[2];
+    entry->Edges[3] = candidate->Edges[3];
+
+    entry->T = position.T() * 1.0E-3 / c_light;
+    entry->NTimeHits = candidate->NTimeHits;
+
+    FillParticles(candidate, &entry->Particles);
+
   }
 }
 

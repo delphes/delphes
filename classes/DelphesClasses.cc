@@ -38,6 +38,7 @@ CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
 CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
 CompBase *Track::fgCompare = CompPT<Track>::Instance();
 CompBase *Tower::fgCompare = CompE<Tower>::Instance();
+CompBase *ParticleFlowCandidate::fgCompare = CompE<ParticleFlowCandidate>::Instance();
 CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
 CompBase *Vertex::fgCompare = CompSumPT2<Vertex>::Instance();
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
@@ -111,6 +112,15 @@ TLorentzVector Tower::P4() const
 {
   TLorentzVector vec;
   vec.SetPtEtaPhiM(ET, Eta, Phi, 0.0);
+  return vec;
+}
+
+//------------------------------------------------------------------------------
+
+TLorentzVector ParticleFlowCandidate::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
   return vec;
 }
 
