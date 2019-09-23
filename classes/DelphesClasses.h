@@ -511,6 +511,73 @@ public:
 
 //---------------------------------------------------------------------------
 
+class ParticleFlowCandidate: public SortableObject
+{
+
+public:
+  Int_t PID; // HEP ID number
+
+  Int_t Charge; // track charge
+
+  Float_t E; // reconstructed energy [GeV]
+  Float_t P; // track momentum
+  Float_t PT; // track transverse momentum
+  Float_t Eta; // track pseudorapidity
+  Float_t Phi; // track azimuthal angle
+  Float_t CtgTheta; // track cotangent of theta
+
+  Float_t EtaOuter; // track pseudorapidity at the tracker edge
+  Float_t PhiOuter; // track azimuthal angle at the tracker edge
+
+  Float_t T; // track vertex position (t component)
+  Float_t X; // track vertex position (x component)
+  Float_t Y; // track vertex position (y component)
+  Float_t Z; // track vertex position (z component)
+
+  Float_t TOuter; // track position (t component) at the tracker edge
+  Float_t XOuter; // track position (x component) at the tracker edge
+  Float_t YOuter; // track position (y component) at the tracker edge
+  Float_t ZOuter; // track position (z component) at the tracker edge
+
+  Float_t Xd; // X coordinate of point of closest approach to vertex
+  Float_t Yd; // Y coordinate of point of closest approach to vertex
+  Float_t Zd; // Z coordinate of point of closest approach to vertex
+
+  Float_t L; // track path length
+  Float_t D0; // track transverse impact parameter
+  Float_t DZ; // track longitudinal impact parameter
+
+  Float_t ErrorP; // track momentum error
+  Float_t ErrorPT; // track transverse momentum error
+  Float_t ErrorPhi; // track azimuthal angle error
+  Float_t ErrorCtgTheta; // track cotangent of theta error
+
+  Float_t ErrorT; // time measurement error
+  Float_t ErrorD0; // track transverse impact parameter error
+  Float_t ErrorDZ; // track longitudinal impact parameter error
+
+  Int_t VertexIndex; // reference to vertex
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  TLorentzVector P4() const;
+
+  Int_t NTimeHits; // number of hits contributing to time measurement
+
+  Float_t Eem; // calorimeter tower electromagnetic energy
+  Float_t Ehad; // calorimeter tower hadronic energy
+
+  Float_t Edges[4]; // calorimeter tower edges
+
+  TRefArray Particles; // references to generated particles
+
+  ClassDef(ParticleFlowCandidate, 1)
+
+};
+
+//---------------------------------------------------------------------------
+
 class HectorHit: public SortableObject
 {
 public:
