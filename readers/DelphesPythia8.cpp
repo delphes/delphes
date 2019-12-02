@@ -121,7 +121,30 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     candidate->D2 = particle.daughter2() - 1;
 
     pdgParticle = pdg->GetParticle(pid);
-    candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
+
+    if(pdgParticle)
+    {
+      candidate->Charge = int(pdgParticle->Charge()/3.0);
+    }
+    else if(abs(pid) == 1000612) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1000622) candidate->Charge = 0;
+    else if(abs(pid) == 1000632) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1000642) candidate->Charge = 0;
+    else if(abs(pid) == 1000652) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1006113) candidate->Charge = 0;
+    else if(abs(pid) == 1006211) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1006213) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1006223) candidate->Charge = TMath::Sign(2, pid);
+    else if(abs(pid) == 1006311) candidate->Charge = 0;
+    else if(abs(pid) == 1006313) candidate->Charge = 0;
+    else if(abs(pid) == 1006321) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1006323) candidate->Charge = TMath::Sign(1, pid);
+    else if(abs(pid) == 1006333) candidate->Charge = 0;
+    else {
+      candidate->Charge = -999;
+      cout << "[WARNING] Unrecognised particle. PID: " << pid << endl;
+    }
+
     candidate->Mass = mass;
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);

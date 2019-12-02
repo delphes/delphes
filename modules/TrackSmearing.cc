@@ -157,7 +157,7 @@ void TrackSmearing::Process()
   Int_t iCandidate = 0;
   TLorentzVector beamSpotPosition;
   Candidate *candidate, *mother;
-  Double_t pt, eta, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
+  Double_t pt, eta, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi, m;
   Double_t x, y, z, t, px, py, pz, theta;
   Double_t q, r;
   Double_t x_c, y_c, r_c, phi_0;
@@ -327,10 +327,13 @@ void TrackSmearing::Process()
     candidate->Phi = phi;
 
     theta = TMath::ACos(ctgTheta / TMath::Sqrt(1.0 + ctgTheta * ctgTheta));
+    m = candidate->Momentum.M();
+    
     candidate->Momentum.SetPx(p * TMath::Cos(phi) * TMath::Sin(theta));
     candidate->Momentum.SetPy(p * TMath::Sin(phi) * TMath::Sin(theta));
     candidate->Momentum.SetPz(p * TMath::Cos(theta));
-    candidate->Momentum.SetE(candidate->Momentum.Pt() * TMath::CosH(eta));
+    //candidate->Momentum.SetE(candidate->Momentum.Pt() * TMath::CosH(eta));
+    candidate->Momentum.SetE( TMath::Sqrt(m*m + p*p) );
     candidate->PT = candidate->Momentum.Pt();
 
     x = position.X();
@@ -381,7 +384,8 @@ void TrackSmearing::Process()
     candidate->Xd = xd * 1.0E3;
     candidate->Yd = yd * 1.0E3;
     candidate->Zd = zd * 1.0E3;
-
+    candidate->Td = -9999*c_light*1E-3;
+    
     if(fApplyToPileUp || !candidate->IsPU)
     {
       candidate->ErrorD0 = d0Error;

@@ -455,9 +455,13 @@ public:
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
 
+  Float_t Td; // T coordinate of point of closest approach to vertex
   Float_t Xd; // X coordinate of point of closest approach to vertex
   Float_t Yd; // Y coordinate of point of closest approach to vertex
   Float_t Zd; // Z coordinate of point of closest approach to vertex
+
+  Float_t TOFreco; // reconstructed time of flight
+  Float_t TOFgen; // gen time of flight
 
   Float_t L; // track path length
   Float_t D0; // track transverse impact parameter
@@ -481,7 +485,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Track, 3)
+  ClassDef(Track, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -543,6 +547,7 @@ public:
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
 
+  Float_t Td; // X coordinate of point of closest approach to vertex
   Float_t Xd; // X coordinate of point of closest approach to vertex
   Float_t Yd; // Y coordinate of point of closest approach to vertex
   Float_t Zd; // Z coordinate of point of closest approach to vertex
@@ -663,12 +668,15 @@ public:
   Float_t Phi;
   Float_t ErrorPhi;
 
+  Float_t Td;
   Float_t Xd;
   Float_t Yd;
   Float_t Zd;
 
-  // tracking resolution
+  // Vertexing variables
+  Float_t VertexingWeight;
 
+  // tracking resolution
   Float_t TrackResolution;
 
   // PileUpJetID variables

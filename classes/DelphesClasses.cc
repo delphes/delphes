@@ -146,7 +146,8 @@ Candidate::Candidate() :
   PT(0), ErrorPT(0),
   CtgTheta(0), ErrorCtgTheta(0),
   Phi(0), ErrorPhi(0),
-  Xd(0), Yd(0), Zd(0),
+  Xd(0), Yd(0), Zd(0), Td(0),
+  VertexingWeight(0),
   TrackResolution(0),
   NCharged(0),
   NNeutrals(0),
@@ -317,9 +318,11 @@ void Candidate::Copy(TObject &obj) const
   object.ErrorCtgTheta = ErrorCtgTheta;
   object.Phi = Phi;
   object.ErrorPhi = ErrorPhi;
+  object.Td = Td;
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
+  object.VertexingWeight = Zd;
   object.TrackResolution = TrackResolution;
   object.NCharged = NCharged;
   object.NNeutrals = NNeutrals;
@@ -446,9 +449,11 @@ void Candidate::Clear(Option_t *option)
   ErrorCtgTheta = 0.0;
   Phi = 0.0;
   ErrorPhi = 0.0;
+  Td = 0.0;
   Xd = 0.0;
   Yd = 0.0;
   Zd = 0.0;
+  VertexingWeight = 0.0;
   TrackResolution = 0.0;
   NCharged = 0;
   NNeutrals = 0;

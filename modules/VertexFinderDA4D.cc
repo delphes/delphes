@@ -2,9 +2,10 @@
  *
  *  Cluster vertices from tracks using deterministic annealing and timing information
  *
- *  \authors M. Selvaggi, L. Gray
+ *  \authors O. Cerri
  *
  */
+
 
 #include "modules/VertexFinderDA4D.h"
 #include "classes/DelphesClasses.h"
@@ -12,90 +13,64 @@
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesPileUpReader.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
+#include "ExRootAnalysis/ExRootFilter.h"
+#include "ExRootAnalysis/ExRootClassifier.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TMatrixT.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
 #include "TString.h"
+#include "TFormula.h"
+#include "TRandom3.h"
+#include "TObjArray.h"
+#include "TDatabasePDG.h"
+#include "TLorentzVector.h"
+#include "TMatrixT.h"
+#include "TLatex.h"
 #include "TVector3.h"
 
-#include <algorithm>
-#include <iostream>
-#include <stdexcept>
+#include "TAxis.h"
+#include "TGraphErrors.h"
+#include "TCanvas.h"
+#include "TString.h"
+#include "TLegend.h"
+#include "TFile.h"
+#include "TColor.h"
+#include "TLegend.h"
+
 #include <utility>
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
 #include <vector>
 
 using namespace std;
 
-static const Double_t mm = 1.;
-static const Double_t m = 1000. * mm;
-static const Double_t ns = 1.;
-static const Double_t s = 1.e+9 * ns;
-static const Double_t c_light = 2.99792458e+8 * m / s;
-
-struct track_t
+namespace vtx_DAZT
 {
-  double z; // z-coordinate at point of closest approach to the beamline
-  double t; // t-coordinate at point of closest approach to the beamline
-  double dz2; // square of the error of z(pca)
-  double dtz; // covariance of z-t
-  double dt2; // square of the error of t(pca)
-  Candidate *tt; // a pointer to the Candidate Track
-  double Z; // Z[i]   for DA clustering
-  double pi; // track weight
-  double pt;
-  double eta;
-  double phi;
-};
-
-struct vertex_t
-{
-  double z;
-  double t;
-  double pk; // vertex weight for "constrained" clustering
-  // --- temporary numbers, used during update
-  double ei;
-  double sw;
-  double swz;
-  double swt;
-  double se;
-  // ---for Tc
-  double swE;
-  double Tc;
-};
-
-static bool split(double beta, std::vector<track_t> &tks, std::vector<vertex_t> &y);
-static double update1(double beta, std::vector<track_t> &tks, std::vector<vertex_t> &y);
-static double update2(double beta, std::vector<track_t> &tks, std::vector<vertex_t> &y, double &rho0, const double dzCutOff);
-static void dump(const double beta, const std::vector<vertex_t> &y, const std::vector<track_t> &tks);
-static bool merge(std::vector<vertex_t> &);
-static bool merge(std::vector<vertex_t> &, double &);
-static bool purge(std::vector<vertex_t> &, std::vector<track_t> &, double &, const double, const double);
-static void splitAll(std::vector<vertex_t> &y);
-static double beta0(const double betamax, std::vector<track_t> &tks, std::vector<vertex_t> &y, const double coolingFactor);
-static double Eik(const track_t &t, const vertex_t &k);
-
-static bool recTrackLessZ1(const track_t &tk1, const track_t &tk2)
-{
-  return tk1.z < tk2.z;
+  static const Double_t c_light = 2.99792458e+8; // [m/s]
 }
-
-using namespace std;
+using namespace vtx_DAZT;
 
 //------------------------------------------------------------------------------
 
-VertexFinderDA4D::VertexFinderDA4D() :
-  fVerbose(0), fMinPT(0), fVertexSpaceSize(0), fVertexTimeSize(0),
-  fUseTc(0), fBetaMax(0), fBetaStop(0), fCoolingFactor(0),
-  fMaxIterations(0), fDzCutOff(0), fD0CutOff(0), fDtCutOff(0)
+VertexFinderDA4D::VertexFinderDA4D()
 {
+  fVerbose = 0;
+  fMaxIterations = 0;
+  fBetaMax = 0;
+  fBetaStop = 0;
+  fBetaPurge = 0;
+  fVertexZSize = 0;
+  fVertexTSize = 0;
+  fCoolingFactor = 0;
+  fDzCutOff = 0;
+  fD0CutOff = 0;
+  fDtCutOff = 0;
+  fPtMin = 0;
+  fPtMax = 0;
+  fD2Merge = 0;
+  fMuOutlayer = 0;
+  fMinTrackProb = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -108,31 +83,61 @@ VertexFinderDA4D::~VertexFinderDA4D()
 
 void VertexFinderDA4D::Init()
 {
+  fVerbose         = GetInt("Verbose", 0);
 
-  fVerbose = GetBool("Verbose", 1);
-  fMinPT = GetDouble("MinPT", 0.1);
-  fVertexSpaceSize = GetDouble("VertexSpaceSize", 0.5); //in mm
-  fVertexTimeSize = GetDouble("VertexTimeSize", 10E-12); //in s
-  fUseTc = GetBool("UseTc", 1);
-  fBetaMax = GetDouble("BetaMax ", 0.1);
-  fBetaStop = GetDouble("BetaStop", 1.0);
-  fCoolingFactor = GetDouble("CoolingFactor", 0.8);
-  fMaxIterations = GetInt("MaxIterations", 100);
-  fDzCutOff = GetDouble("DzCutOff", 40); // Adaptive Fitter uses 30 mm but that appears to be a bit tight here sometimes
-  fD0CutOff = GetDouble("D0CutOff", 30);
-  fDtCutOff = GetDouble("DtCutOff", 100E-12); // dummy
+  fMaxIterations   = GetInt("MaxIterations", 100);
+  fMaxVertexNumber = GetInt("MaxVertexNumber", 500);
 
-  // convert stuff in cm, ns
-  fVertexSpaceSize /= 10.0;
-  fVertexTimeSize *= 1E9;
-  fDzCutOff /= 10.0; // Adaptive Fitter uses 3.0 but that appears to be a bit tight here sometimes
-  fD0CutOff /= 10.0;
+  fBetaMax         = GetDouble("BetaMax", 1.5);
+  fBetaPurge       = GetDouble("BetaPurge", 1.);
+  fBetaStop        = GetDouble("BetaStop", 0.2);
+
+  fVertexZSize     = GetDouble("VertexZSize", 0.1); //in mm
+  fVertexTSize     = 1E12*GetDouble("VertexTimeSize", 15E-12); //Convert from [s] to [ps]
+
+  fCoolingFactor   = GetDouble("CoolingFactor", 0.8); // Multiply T so to cooldown must be <1
+
+  fDzCutOff        = GetDouble("DzCutOff", 40);      // For the moment 3*DzCutOff is hard cut off for the considered tracks
+  fD0CutOff        = GetDouble("D0CutOff", .5);       // d0/sigma_d0, used to compute the pi (weight) of the track
+  fDtCutOff        = GetDouble("DtCutOff", 160);     // [ps], 3*DtCutOff is hard cut off for tracks
+  fPtMin           = GetDouble("PtMin", 0.5);        // Minimum pt accepted for tracks
+  fPtMax           = GetDouble("PtMax", 50);        // Maximum pt accepted for tracks
+
+
+  fD2UpdateLim     = GetDouble("D2UpdateLim", .5);   // ((dz/ZSize)^2+(dt/TSize)^2)/nv limit for merging vertices
+  fD2Merge         = GetDouble("D2Merge", 4.0);      // (dz/ZSize)^2+(dt/TSize)^2 limit for merging vertices
+  fMuOutlayer      = GetDouble("MuOutlayer", 4);     // Outlayer rejection exponent
+  fMinTrackProb    = GetDouble("MinTrackProb", 0.6); // Minimum probability to be assigned at a vertex
+  fMinNTrack       = GetInt("MinNTrack", 10);        // Minimum number of tracks per vertex
+
+  fFigFolderPath   = GetString("DebugFigPath", ".");
 
   fInputArray = ImportArray(GetString("InputArray", "TrackSmearing/tracks"));
   fItInputArray = fInputArray->MakeIterator();
 
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  fTrackOutputArray = ExportArray(GetString("TrackOutputArray", "tracks"));
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
+
+  fInputGenVtx = ImportArray(GetString("InputGenVtx", "PileUpMerger/vertices"));
+  fItInputGenVtx = fInputGenVtx->MakeIterator();
+
+  if (fBetaMax < fBetaPurge)
+  {
+    fBetaPurge = fBetaMax;
+    if (fVerbose)
+    {
+      cout << "BetaPurge set to " << fBetaPurge << endl;
+    }
+  }
+
+  if (fBetaPurge < fBetaStop)
+  {
+    fBetaStop = fBetaPurge;
+    if (fVerbose)
+    {
+      cout << "BetaPurge set to " << fBetaPurge << endl;
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -146,1076 +151,1162 @@ void VertexFinderDA4D::Finish()
 
 void VertexFinderDA4D::Process()
 {
-  Candidate *candidate, *track;
-  TObjArray *ClusterArray;
-  ClusterArray = new TObjArray;
-  TIterator *ItClusterArray;
-  Int_t ivtx = 0;
-
   fInputArray->Sort();
 
-  TLorentzVector pos, mom;
-  if(fVerbose)
+  if (fVerbose)
   {
-    cout << " start processing vertices ..." << endl;
-    cout << " Found " << fInputArray->GetEntriesFast() << " input tracks" << endl;
-    //loop over input tracks
-    fItInputArray->Reset();
-    while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
-    {
-      pos = candidate->InitialPosition;
-      mom = candidate->Momentum;
-
-      cout << "pt: " << mom.Pt() << ", eta: " << mom.Eta() << ", phi: " << mom.Phi() << ", z: " << candidate->DZ / 10 << endl;
-    }
+     cout<< endl << "      Start processing vertices with VertexFinderDA4D" << endl;
+     cout<<" Found "<<fInputArray->GetEntriesFast()<<" input tracks"<<endl;
   }
 
-  // clusterize tracks in Z
-  clusterize(*fInputArray, *ClusterArray);
+  // clusterize tracks
+  TObjArray *ClusterArray = new TObjArray;
+  clusterize(*ClusterArray);
 
-  if(fVerbose)
+  if(fVerbose>10)
   {
-    std::cout << " clustering returned  " << ClusterArray->GetEntriesFast() << " clusters  from " << fInputArray->GetEntriesFast() << " selected tracks" << std::endl;
+    unsigned int N = fEnergy_rec.size();
+    TGraph* gr1 = new TGraph(N, &fBeta_rec[0], &fNvtx_rec[0]);
+    gr1->SetName("gr1");
+    gr1->GetXaxis()->SetTitle("beta");
+    gr1->GetYaxis()->SetTitle("# Vtx");
+    TGraph* gr2 = new TGraph(N, &fBeta_rec[0], &fEnergy_rec[0]);
+    gr2->SetName("gr2");
+    gr2->GetXaxis()->SetTitle("beta");
+    gr2->GetYaxis()->SetTitle("Total Energy");
+    TGraph* gr3 = new TGraph(N, &fNvtx_rec[0], &fEnergy_rec[0]);
+    gr3->SetName("gr3");
+    gr3->GetXaxis()->SetTitle("# Vtx");
+    gr3->GetYaxis()->SetTitle("Total Energy");
+
+    auto f = new TFile("~/Desktop/debug/EnergyStat.root", "recreate");
+    gr1->Write("gr1");
+    gr2->Write("gr2");
+    gr3->Write("gr3");
+
+    f->Close();
   }
 
-  //loop over vertex candidates
-  ItClusterArray = ClusterArray->MakeIterator();
+  if (fVerbose){std::cout <<  " clustering returned  "<< ClusterArray->GetEntriesFast() << " clusters  from " << fInputArray->GetEntriesFast() << " input tracks" <<std::endl;}
+
+  // //loop over vertex candidates
+  TIterator * ItClusterArray = ClusterArray->MakeIterator();
   ItClusterArray->Reset();
-  while((candidate = static_cast<Candidate *>(ItClusterArray->Next())))
+  Candidate *candidate;
+  unsigned int k = 0;
+  while((candidate = static_cast<Candidate*>(ItClusterArray->Next())))
   {
-
-    double meantime = 0.;
-    double expv_x2 = 0.;
-    double normw = 0.;
-    double errtime = 0;
-
-    double meanpos = 0.;
-    double meanerr2 = 0.;
-    double normpos = 0.;
-    double errpos = 0.;
-
-    double sumpt2 = 0.;
-
-    int itr = 0;
-
-    if(fVerbose) cout << "this vertex has: " << candidate->GetCandidates()->GetEntriesFast() << " tracks" << endl;
-
-    // loop over tracks belonging to this vertex
-    TIter it1(candidate->GetCandidates());
-    it1.Reset();
-
-    while((track = static_cast<Candidate *>(it1.Next())))
-    {
-
-      itr++;
-      // TBC: the time is in ns for now TBC
-      double t = track->InitialPosition.T() / c_light;
-      double dt = track->ErrorT / c_light;
-      const double time = t;
-      const double inverr = 1.0 / dt;
-      meantime += time * inverr;
-      expv_x2 += time * time * inverr;
-      normw += inverr;
-
-      // compute error position TBC
-      const double pt = track->Momentum.Pt();
-      const double z = track->DZ / 10.0;
-      const double err_pt = track->ErrorPT;
-      const double err_z = track->ErrorDZ;
-
-      const double wi = (pt / (err_pt * err_z)) * (pt / (err_pt * err_z));
-      meanpos += z * wi;
-
-      meanerr2 += err_z * err_z * wi;
-      normpos += wi;
-      sumpt2 += pt * pt;
-
-      // while we are here store cluster index in tracks
-      track->ClusterIndex = ivtx;
-    }
-
-    meantime = meantime / normw;
-    expv_x2 = expv_x2 / normw;
-    errtime = TMath::Sqrt((expv_x2 - meantime * meantime) / itr);
-    meanpos = meanpos / normpos;
-    meanerr2 = meanerr2 / normpos;
-    errpos = TMath::Sqrt(meanerr2 / itr);
-
-    candidate->Position.SetXYZT(0.0, 0.0, meanpos * 10.0, meantime * c_light);
-    candidate->PositionError.SetXYZT(0.0, 0.0, errpos * 10.0, errtime * c_light);
-    candidate->SumPT2 = sumpt2;
-    candidate->ClusterNDF = itr;
-    candidate->ClusterIndex = ivtx;
-
-    fVertexOutputArray->Add(candidate);
-
-    ivtx++;
-
     if(fVerbose)
     {
-      std::cout << "x,y,z";
-      std::cout << ",t";
-      std::cout << "=" << candidate->Position.X() / 10.0 << " " << candidate->Position.Y() / 10.0 << " " << candidate->Position.Z() / 10.0;
-      std::cout << " " << candidate->Position.T() / c_light;
-
-      std::cout << std::endl;
-      std::cout << "sumpt2 " << candidate->SumPT2 << endl;
-
-      std::cout << "ex,ey,ez";
-      std::cout << ",et";
-      std::cout << "=" << candidate->PositionError.X() / 10.0 << " " << candidate->PositionError.Y() / 10.0 << " " << candidate->PositionError.Z() / 10.0;
-      std::cout << " " << candidate->PositionError.T() / c_light;
-      std::cout << std::endl;
+     cout << Form("Cluster %d has %d tracks ", k, candidate->GetCandidates()->GetEntriesFast()) << endl;
     }
-  } // end of cluster loop
+    if(candidate->ClusterNDF>0)
+    {
+      // Estimate the vertex resolution
+      // loop over tracks belonging to this vertex
+      TIter it1(candidate->GetCandidates());
+      it1.Reset();
 
-  if(fVerbose)
-  {
-    std::cout << "PrimaryVertexProducerAlgorithm::vertices candidates =" << ClusterArray->GetEntriesFast() << std::endl;
-  }
+      Candidate *track;
+      double sum_Dt_2 = 0;
+      double sum_Dz_2 = 0;
+      double sum_wt = 0;
+      double sum_wz = 0;
+      while((track = static_cast<Candidate*>(it1.Next())))
+      {
+        double dz = candidate->Position.Z() - track->Zd;
+        double dt = candidate->Position.T() - track->Td;
 
-  //TBC maybe this can be done later
-  // sort vertices by pt**2  vertex (aka signal vertex tagging)
-  /*if(pvs.size()>1){
-      sort(pvs.begin(), pvs.end(), VertexHigherPtSquared());
+        double wz = track->VertexingWeight/(track->ErrorDZ*track->ErrorDZ);
+        double wt = track->VertexingWeight/(track->ErrorT*track->ErrorT);
+
+        sum_Dt_2 += wt*dt*dt;
+        sum_Dz_2 += wz*dz*dz;
+        sum_wt += wt;
+        sum_wz += wz;
+      }
+
+      double sigma_z = sqrt(sum_Dz_2/sum_wz);
+      double sigma_t = sqrt(sum_Dt_2/sum_wt);
+      candidate->PositionError.SetXYZT(0.0, 0.0, sigma_z , sigma_t);
+      if(fVerbose > 3)
+      {
+        cout << "k: " << k << endl;
+        cout << "Sigma z: " << sigma_z*1E3 << " um" << endl;
+        cout << "Sigma t: " << sigma_t*1E9/c_light << " ps" << endl;
+      }
+
+      fVertexOutputArray->Add(candidate);
+      k++;
     }
-     */
+   }// end of cluster loop
 
   delete ClusterArray;
 }
 
 //------------------------------------------------------------------------------
 
-void VertexFinderDA4D::clusterize(const TObjArray &tracks, TObjArray &clusters)
+void VertexFinderDA4D::clusterize(TObjArray &clusters)
 {
+  tracks_t tks;
+  fill(tks);
+  unsigned int nt=tks.getSize();
   if(fVerbose)
   {
-    cout << "###################################################" << endl;
-    cout << "# VertexFinderDA4D::clusterize   nt=" << tracks.GetEntriesFast() << endl;
-    cout << "###################################################" << endl;
+    cout << "Tracks added: " << nt << endl;
+  }
+  if (nt == 0) return;
+
+
+
+  vertex_t vtx; // the vertex prototypes
+  vtx.ZSize = fVertexZSize;
+  vtx.TSize = fVertexTSize;
+  // initialize:single vertex at infinite temperature
+  vtx.addItem(0, 0, 1);
+
+  // Fit the vertex at T=inf and return the starting temperature
+  double beta=beta0(tks, vtx);
+
+  if( fVerbose > 1 )
+  {
+    cout << "Cluster position at T=inf: z = " << vtx.z[0] << " mm , t = " << vtx.t[0] << " ps" << "  pk = " << vtx.pk[0] << endl;
+    cout << Form("Beta Start = %2.1e", beta) << endl;
   }
 
-  vector<Candidate *> pv = vertices();
+  if( fVerbose > 10 ) plot_status(beta, vtx, tks, 0, "Ast");
 
-  if(fVerbose)
+  if( fVerbose > 2){cout << "Cool down untill reaching the temperature to finish increasing the number of vertexes" << endl;}
+
+  double rho0=0.0;  // start with no outlier rejection
+
+  unsigned int last_round = 0;
+  while(last_round < 2)
   {
-    cout << "# VertexFinderDA4D::clusterize   pv.size=" << pv.size() << endl;
-  }
-  if(pv.size() == 0)
-  {
-    return;
-  }
 
-  // convert into vector of candidates
-  //TObjArray *ClusterArray = pv.begin()->GetCandidates();
-  //Candidate *aCluster = static_cast<Candidate*>(&(pv.at(0)));
-  Candidate *aCluster = pv.at(0);
+    unsigned int niter=0;
+    double delta2 = 0;
+    do  {
+      delta2 = update(beta, tks, vtx, rho0);
 
-  // fill into clusters and merge
+      if( fVerbose > 10 ) plot_status(beta, vtx, tks, niter, "Bup");
+      if (fVerbose > 3)
+      {
+        cout << "Update " << niter << " : " << delta2 << endl;
+      }
+      niter++;
+    }
+    while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
 
-  if(fVerbose)
-  {
-    std::cout << '\t' << 0;
-    std::cout << ' ' << (*pv.begin())->Position.Z() / 10.0 << ' ' << (*pv.begin())->Position.T() / c_light << std::endl;
-  }
 
-  for(vector<Candidate *>::iterator k = pv.begin() + 1; k != pv.end(); k++)
-  {
-    if(fVerbose)
+    unsigned int n_it = 0;
+    while(merge(vtx, fD2Merge) && n_it < fMaxIterations)
     {
-      std::cout << '\t' << std::distance(pv.begin(), k);
-      std::cout << ' ' << (*k)->Position.Z() << ' ' << (*k)->Position.T() << std::endl;
+      unsigned int niter=0;
+      double delta2 = 0;
+      do  {
+        delta2 = update(beta, tks, vtx, rho0);
+        niter++;
+      }
+      while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
+      n_it++;
+
+      if( fVerbose > 10 ) plot_status(beta, vtx, tks, n_it, "Cme");
     }
 
-    // TBC - check units here
-    if(std::abs((*k)->Position.Z() - (*(k - 1))->Position.Z()) / 10.0 > (2 * fVertexSpaceSize) || std::abs((*k)->Position.T() - (*(k - 1))->Position.Z()) / c_light > 2 * 0.010)
-    {
-      // close a cluster
-      clusters.Add(aCluster);
-      //aCluster.clear();
-    }
-    //for(unsigned int i=0; i<k->GetCandidates().GetEntriesFast(); i++){
-    aCluster = *k;
-    //}
-  }
-  clusters.Add(aCluster);
+    beta /= fCoolingFactor;
 
-  if(fVerbose)
-  {
-    std::cout << "# VertexFinderDA4D::clusterize clusters.size=" << clusters.GetEntriesFast() << std::endl;
+    if( beta < fBetaStop )
+    {
+      split(beta, vtx, tks);
+      if( fVerbose > 10 ) plot_status(beta, vtx, tks, 0, "Asp");
+    }
+    else
+    {
+      beta = fBetaStop;
+      last_round++;
+    }
+
+    if(fVerbose > 3)
+    {
+      cout << endl << endl << " ----- Beta = " << beta << " --------" << endl;
+      cout << "Nv: " << vtx.getSize() << endl;
+    }
   }
+
+  if( fVerbose > 4)
+  {
+    for(unsigned int k = 0; k < vtx.getSize(); k++)
+    {
+      cout << Form("Vertex %d next beta_c = %.3f", k, vtx.beta_c[k]) << endl;
+    }
+  }
+
+  if(fVerbose > 2)  {cout << "Adiabatic switch on of outlayr rejection" << endl;}
+  rho0 = 1./nt;
+  const double N_cycles = 10;
+  for(unsigned int f = 1; f <= N_cycles; f++)
+  {
+    unsigned int niter=0;
+    double delta2 = 0;
+    do  {
+      delta2 = update(beta, tks, vtx, rho0 * f/N_cycles);
+      niter++;
+    }
+    while (delta2 > 0.3*fD2UpdateLim &&  niter < fMaxIterations);
+    if( fVerbose > 10 ) plot_status(beta, vtx, tks, f, "Dadout");
+  }
+
+  do {
+    beta /= fCoolingFactor;
+    if(beta > fBetaPurge) beta = fBetaPurge;
+    unsigned int i_pu = 0;
+    for(int min_trk = 2; min_trk<=fMinNTrack; min_trk++)
+    {
+      while( purge(vtx, tks, rho0, beta, fMinTrackProb, min_trk) )
+      {
+        unsigned int niter=0;
+        double delta2 = 0;
+        do  {
+          delta2 = update(beta, tks, vtx, rho0);
+          niter++;
+        }
+        while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
+        if( fVerbose > 10 ) plot_status(beta, vtx, tks, i_pu, Form("Eprg%d",min_trk));
+        i_pu++;
+      }
+    }
+
+    unsigned int n_it = 0;
+    while(merge(vtx, fD2Merge) && n_it < fMaxIterations)
+    {
+      unsigned int niter=0;
+      double delta2 = 0;
+      do  {
+        delta2 = update(beta, tks, vtx, rho0);
+        niter++;
+      }
+      while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
+      n_it++;
+
+      if( fVerbose > 10 ) plot_status(beta, vtx, tks, n_it, "Cme");
+    }
+  } while( beta < fBetaPurge );
+
+
+  if(fVerbose > 2){cout << "Cooldown untill the limit before assigning track to vertices" << endl;}
+  last_round = 0;
+  while(last_round < 2)
+  {
+    unsigned int niter=0;
+    double delta2 = 0;
+    do  {
+      delta2 = update(beta, tks, vtx, rho0);
+      niter++;
+      if( fVerbose > 10 ) plot_status(beta, vtx, tks, 0, "Bup");
+    }
+    while (delta2 > 0.3*fD2UpdateLim &&  niter < fMaxIterations);
+
+    beta /= fCoolingFactor;
+    if ( beta >= fBetaMax )
+    {
+      beta = fBetaMax;
+      last_round++;
+    }
+  }
+
+
+  // Build the cluster candidates
+  for(unsigned int k = 0; k < vtx.getSize(); k++)
+  {
+    DelphesFactory *factory = GetFactory();
+    Candidate * candidate = factory->NewCandidate();
+
+    candidate->ClusterIndex = k;
+    candidate->Position.SetXYZT(0.0, 0.0, vtx.z[k] , vtx.t[k]*1E-9*c_light);
+    candidate->PositionError.SetXYZT(0.0, 0.0, fVertexZSize , fVertexTSize*1E-9*c_light);
+    candidate->SumPT2 = 0;
+    candidate->SumPt = 0;
+    candidate->ClusterNDF = 0;
+
+    clusters.Add(candidate);
+  }
+
+
+  // Assign each track to the most probable vertex
+  double Z_init = rho0 * exp(-beta * fMuOutlayer * fMuOutlayer); // Add fDtCutOff here toghether  with this
+  vector<double> pk_exp_mBetaE = Compute_pk_exp_mBetaE(beta, vtx, tks, Z_init);
+  for(unsigned int i = 0; i< tks.getSize(); i++)
+  {
+    if(tks.w[i] <= 0) continue;
+
+    double p_max = 0;
+    unsigned int k_max = 0;
+
+    for(unsigned int k = 0; k < vtx.getSize(); k++)
+    {
+      unsigned int idx = k*nt + i;
+      if(pk_exp_mBetaE[idx] == 0 || tks.Z[i] == 0 || vtx.pk[k] == 0)
+      {
+        continue;
+      }
+
+      double pv_max = vtx.pk[k] / (vtx.pk[k] + rho0 * exp(-beta * fMuOutlayer* fMuOutlayer));
+      double p = pk_exp_mBetaE[idx] / tks.Z[i];
+
+      p /= pv_max;
+
+      if(p > p_max)
+      {
+        p_max = p;
+        k_max = k;
+      }
+    }
+
+    if(p_max > fMinTrackProb)
+    {
+      tks.tt[i]->ClusterIndex = k_max;
+      tks.tt[i]->InitialPosition.SetT(1E-9*vtx.t[k_max]*c_light);
+      tks.tt[i]->InitialPosition.SetZ(vtx.z[k_max]);
+
+      ((Candidate *) clusters.At(k_max))->AddCandidate(tks.tt[i]);
+      ((Candidate *) clusters.At(k_max))->SumPT2 += tks.tt[i]->Momentum.Pt()*tks.tt[i]->Momentum.Pt();
+      ((Candidate *) clusters.At(k_max))->SumPt += tks.tt[i]->Momentum.Pt();
+      ((Candidate *) clusters.At(k_max))->ClusterNDF += 1;
+    }
+    else
+    {
+      tks.tt[i]->ClusterIndex = -1;
+      tks.tt[i]->InitialPosition.SetT(1E3*1000000*c_light);
+      tks.tt[i]->InitialPosition.SetZ(1E8);
+    }
+    fTrackOutputArray->Add(tks.tt[i]);
+  }
+
+  if(fVerbose > 10) plot_status_end(vtx, tks);
+
 }
 
 //------------------------------------------------------------------------------
-
-vector<Candidate *> VertexFinderDA4D::vertices()
+// Definition of the distance metrci between track and vertex
+double VertexFinderDA4D::Energy(double t_z, double v_z, double dz2_o, double t_t, double v_t, double dt2_o)
 {
+  return (t_z - v_z)*(t_z - v_z)* dz2_o + (t_t - v_t)*(t_t - v_t)*dt2_o;
+}
+
+//------------------------------------------------------------------------------
+// Fill tks with the input candidates array
+void VertexFinderDA4D::fill(tracks_t &tks)
+{
+  tks.sum_w_o_dt2 = 0;
+  tks.sum_w_o_dz2 = 0;
+  tks.sum_w = 0;
+
   Candidate *candidate;
-  UInt_t clusterIndex = 0;
-  vector<Candidate *> clusters;
 
-  vector<track_t> tks;
-  track_t tr;
-  Double_t z, dz, t, l, dt, d0, d0error;
-
-  // loop over input tracks
   fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    //TBC everything in cm
-    z = candidate->DZ / 10;
-    tr.z = z;
-    dz = candidate->ErrorDZ / 10;
-    tr.dz2 = dz * dz // track error
-      //TBC: beamspot size induced error, take 0 for now.
-      // + (std::pow(beamspot.BeamWidthX()*cos(phi),2.)+std::pow(beamspot.BeamWidthY()*sin(phi),2.))/std::pow(tantheta,2.) // beam-width induced
-      + fVertexSpaceSize * fVertexSpaceSize; // intrinsic vertex size, safer for outliers and short lived decays
+    unsigned int discard = 0;
 
-    // TBC: the time is in ns for now TBC
-    //t = candidate->Position.T()/c_light;
-    t = candidate->InitialPosition.T() / c_light;
-    l = candidate->L / c_light;
     double pt = candidate->Momentum.Pt();
-    double eta = candidate->Momentum.Eta();
-    double phi = candidate->Momentum.Phi();
+    if(pt<fPtMin || pt>fPtMax) discard = 1;
 
-    tr.pt = pt;
-    tr.eta = eta;
-    tr.phi = phi;
-    tr.t = t; //
-    tr.dtz = 0.;
-    dt = candidate->ErrorT / c_light;
-    tr.dt2 = dt * dt + fVertexTimeSize * fVertexTimeSize; // the ~injected~ timing error plus a small minimum vertex size in time
-    if(fD0CutOff > 0)
+    // ------------- Compute cloasest approach Z ----------------
+    double z = candidate->DZ; // [mm]
+
+    candidate->Zd = candidate->DZ; //Set the cloasest approach z
+    if(fabs(z) > 3*fDzCutOff) discard = 1;
+
+    // ------------- Compute cloasest approach T ----------------
+    //Asumme pion mass which is the most common particle
+    double M = 0.139570;
+    candidate->Mass = M;
+    double p = pt * sqrt(1 + candidate->CtgTheta*candidate->CtgTheta);
+    double e = sqrt(p*p + M*M);
+
+    double t = candidate->Position.T()*1.E9/c_light; // from [mm] to [ps]
+    if(t <= -9999) discard = 1;                    // Means that the time information has not been added
+
+    // DEBUG Here backpropagete for the whole length and not noly for z. Could improve resolution
+    // double bz = pt * candidate->CtgTheta/e;
+    // t += (z - candidate->Position.Z())*1E9/(c_light*bz);
+
+    // Use full path Length
+    t -= candidate->L*1E9/(c_light*p/e);
+
+    candidate->Td = t*1E-9*c_light;
+    if(fabs(t) > 3*fDtCutOff) discard = 1;
+
+    // auto genp = (Candidate*) candidate->GetCandidates()->At(0);
+    // cout << "Eta: " << candidate->Position.Eta() << endl;
+    // cout << genp->Momentum.Pt() << " -- " << candidate->Momentum.Pt() << endl;
+    // cout << genp->Momentum.Pz() << " -- " << candidate->Momentum.Pz() << endl;
+    // cout << genp->Momentum.P() << " -- " << p << endl;
+    // cout << genp->Momentum.E() << " -- " << e << endl;
+    // cout << Form("bz_true: %.4f -- bz_gen: %.4f", genp->Momentum.Pz()/genp->Momentum.E(), bz) << endl;
+
+    double dz2_o = candidate->ErrorDZ*candidate->ErrorDZ;
+    dz2_o += fVertexZSize*fVertexZSize;
+    // when needed add beam spot width (x-y)?? mha?
+    dz2_o = 1/dz2_o; //Multipling is faster than dividing all the times
+
+    double dt2_o = candidate->ErrorT*1.E9/c_light; // [ps]
+    dt2_o *= dt2_o;
+    dt2_o += fVertexTSize*fVertexTSize; // [ps^2]
+    // Ideally we should also add the induced uncertantiy from dz, z_out, pt, ctgthetaand all the other thing used above (total around 5ps). For the moment we compensae using a high value for vertex time.
+    dt2_o = 1/dt2_o;
+
+    double w;
+    if(fD0CutOff > 0 && candidate->ErrorD0 > 0)
     {
-
-      d0 = TMath::Abs(candidate->D0) / 10.0;
-      d0error = candidate->ErrorD0 / 10.0;
-
-      tr.pi = 1. / (1. + exp((d0 * d0) / (d0error * d0error) - fD0CutOff * fD0CutOff)); // reduce weight for high ip tracks
+      double d0_sig = fabs(candidate->D0/candidate->ErrorD0);
+      w = exp(d0_sig*d0_sig - fD0CutOff*fD0CutOff);
+      w = 1./(1. + w);
+      if (w < 1E-4) discard = 1;
     }
     else
     {
-      tr.pi = 1.;
+      w = 1;
     }
-    tr.tt = &(*candidate);
-    tr.Z = 1.;
+    candidate->VertexingWeight = w;
 
-    // TBC now putting track selection here (> fPTMin)
-    if(tr.pi > 1e-3 && tr.pt > fMinPT)
+
+    if(discard)
     {
-      tks.push_back(tr);
-    }
-  }
-
-  //print out input tracks
-
-  if(fVerbose)
-  {
-    std::cout << " start processing vertices ..." << std::endl;
-    std::cout << " Found " << tks.size() << " input tracks" << std::endl;
-    //loop over input tracks
-
-    for(std::vector<track_t>::const_iterator it = tks.begin(); it != tks.end(); it++)
-    {
-      double z = it->z;
-      double pt = it->pt;
-      double eta = it->eta;
-      double phi = it->phi;
-      double t = it->t;
-
-      std::cout << "pt: " << pt << ", eta: " << eta << ", phi: " << phi << ", z: " << z << ", t: " << t << std::endl;
-    }
-  }
-
-  unsigned int nt = tks.size();
-  double rho0 = 0.0; // start with no outlier rejection
-
-  if(tks.empty()) return clusters;
-
-  vector<vertex_t> y; // the vertex prototypes
-
-  // initialize:single vertex at infinite temperature
-  vertex_t vstart;
-  vstart.z = 0.;
-  vstart.t = 0.;
-  vstart.pk = 1.;
-  y.push_back(vstart);
-  int niter = 0; // number of iterations
-
-  // estimate first critical temperature
-  double beta = beta0(fBetaMax, tks, y, fCoolingFactor);
-  niter = 0;
-  while((update1(beta, tks, y) > 1.e-6) && (niter++ < fMaxIterations))
-  {
-  }
-
-  // annealing loop, stop when T<Tmin  (i.e. beta>1/Tmin)
-  while(beta < fBetaMax)
-  {
-
-    if(fUseTc)
-    {
-      update1(beta, tks, y);
-      while(merge(y, beta))
-      {
-        update1(beta, tks, y);
-      }
-      split(beta, tks, y);
-      beta = beta / fCoolingFactor;
+      candidate->ClusterIndex = -1;
+      candidate->InitialPosition.SetT(1E3*1000000*c_light);
+      candidate->InitialPosition.SetZ(1E8);
+      fTrackOutputArray->Add(candidate);
     }
     else
     {
-      beta = beta / fCoolingFactor;
-      splitAll(y);
+      tks.sum_w_o_dt2 += w * dt2_o;
+      tks.sum_w_o_dz2 += w * dz2_o;
+      tks.sum_w += w;
+      tks.addItem(z, t, dz2_o, dt2_o, &(*candidate), w, candidate->PID); //PROVA: rimuovi &(*---)
     }
 
-    // make sure we are not too far from equilibrium before cooling further
-    niter = 0;
-    while((update1(beta, tks, y) > 1.e-6) && (niter++ < fMaxIterations))
+  }
+
+  if(fVerbose > 1)
+  {
+    cout << "----->Filled tracks" << endl;
+    cout << "M        z           dz        t            dt        w" << endl;
+    for(unsigned int i = 0; i < tks.getSize(); i++)
     {
+      cout << Form("%d\t%1.1e\t%1.1e\t%1.1e\t%1.1e\t%1.1e", tks.PID[i], tks.z[i], 1/sqrt(tks.dz2_o[i]), tks.t[i], 1/sqrt(tks.dt2_o[i]), tks.w[i]) << endl;
     }
   }
 
-  if(fUseTc)
+  return;
+}
+
+//------------------------------------------------------------------------------
+// Compute higher phase transition temperature
+double VertexFinderDA4D::beta0(tracks_t & tks, vertex_t &vtx)
+{
+  if(vtx.getSize() != 1)
   {
-    // last round of splitting, make sure no critical clusters are left
-    update1(beta, tks, y);
-    while(merge(y, beta))
-    {
-      update1(beta, tks, y);
-    }
-    unsigned int ntry = 0;
-    while(split(beta, tks, y) && (ntry++ < 10))
-    {
-      niter = 0;
-      while((update1(beta, tks, y) > 1.e-6) && (niter++ < fMaxIterations))
-      {
-      }
-      merge(y, beta);
-      update1(beta, tks, y);
-    }
+    throw std::invalid_argument( "Unexpected number of vertices" );
+  }
+
+  unsigned int nt = tks.getSize();
+
+  //Set vertex position at T=inf as the weighted average of the tracks
+  double sum_wz = 0, sum_wt = 0;
+  for(unsigned int i = 0; i < nt; i++)
+  {
+    sum_wz += tks.w[i] * tks.z[i] * tks.dz2_o[i];
+    sum_wt += tks.w[i] * tks.t[i] * tks.dt2_o[i];
+  }
+  vtx.t[0] = sum_wt / tks.sum_w_o_dt2;
+  vtx.z[0] = sum_wz / tks.sum_w_o_dz2;
+
+  // Compute the posterior distribution covariance matrix elements
+  double s_zz = 0, s_tt = 0, s_tz = 0;
+  for(unsigned int i = 0; i < nt; i++)
+  {
+    double dz = (tks.z[i] - vtx.z[0]) * tks.dz_o[i];
+    double dt = (tks.t[i] - vtx.t[0]) * tks.dt_o[i];
+
+    s_zz += tks.w[i] * dz * dz;
+    s_tt += tks.w[i] * dt * dt;
+    s_tz += tks.w[i] * dt * dz;
+  }
+  s_tt /= tks.sum_w;
+  s_zz /= tks.sum_w;
+  s_tz /= tks.sum_w;
+
+  // Copute the max eighenvalue
+  double beta_c = (s_tt - s_zz)*(s_tt - s_zz) + 4*s_tz*s_tz;
+  beta_c = 1. / (s_tt + s_zz + sqrt(beta_c));
+
+  double out;
+  if (beta_c < fBetaMax)
+  {
+    // Cool down up to a step before the phase transition
+    out = beta_c * sqrt(fCoolingFactor);
   }
   else
   {
-    // merge collapsed clusters
-    while(merge(y, beta))
-    {
-      update1(beta, tks, y);
-    }
-    if(fVerbose)
-    {
-      cout << "dump after 1st merging " << endl;
-      dump(beta, y, tks);
-    }
+    out = fBetaMax * fCoolingFactor;
   }
 
-  // switch on outlier rejection
-  rho0 = 1. / nt;
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-  {
-    k->pk = 1.;
-  } // democratic
-  niter = 0;
-  while((update2(beta, tks, y, rho0, fDzCutOff) > 1.e-8) && (niter++ < fMaxIterations))
-  {
-  }
-  if(fVerbose)
-  {
-    cout << "rho0=" << rho0 << " niter=" << niter << endl;
-    dump(beta, y, tks);
-  }
+  return out;
+}
 
-  // merge again  (some cluster split by outliers collapse here)
-  while(merge(y))
-  {
-  }
-  if(fVerbose)
-  {
-    cout << "dump after 2nd merging " << endl;
-    dump(beta, y, tks);
-  }
+//------------------------------------------------------------------------------
+// Compute the new vertexes position and mass (probability) -- mass constrained annealing without noise
+// Compute and store the posterior covariance matrix elements
+// Returns the squared sum of changes of vertexex position normalized by the vertex size declared in the init
+double VertexFinderDA4D::update(double beta, tracks_t &tks, vertex_t &vtx, double rho0)
+{
+  unsigned int nt = tks.getSize();
+  unsigned int nv = vtx.getSize();
 
-  // continue from freeze-out to Tstop (=1) without splitting, eliminate insignificant vertices
-  while(beta <= fBetaStop)
+  //initialize sums
+  double Z_init = rho0 * exp(-beta * fMuOutlayer * fMuOutlayer);
+
+  // Compute all the energies (aka distances) and normalization partition function
+  vector<double> pk_exp_mBetaE = Compute_pk_exp_mBetaE(beta, vtx, tks, Z_init);
+
+  double sum_pk = 0;
+  double delta2_max = 0;
+  for (unsigned int k = 0; k < nv; k++)
   {
-    while(purge(y, tks, rho0, beta, fDzCutOff))
+    // Compute the new vertex positions and masses
+    double pk_new = 0;
+    double sw_z = 0, sw_t = 0;
+    // Compute the posterior covariance matrix Elements
+    double szz = 0, stt = 0, stz = 0;
+    double sum_wt = 0, sum_wz = 0;
+    double sum_ptt = 0, sum_pzz = 0, sum_ptz = 0;
+
+
+    for (unsigned int i = 0; i < nt; i++)
     {
-      niter = 0;
-      while((update2(beta, tks, y, rho0, fDzCutOff) > 1.e-6) && (niter++ < fMaxIterations))
+      unsigned int idx = k*nt + i;
+
+      if(pk_exp_mBetaE[idx] == 0 || tks.Z[i] == 0)
       {
+        continue;
       }
+
+      double p_ygx = pk_exp_mBetaE[idx] / tks.Z[i];      //p(y|x), Gibbs distribution
+      if(std::isnan(p_ygx) || std::isinf(p_ygx) || p_ygx > 1)
+      {
+        cout << Form("%1.6e    %1.6e", pk_exp_mBetaE[idx], tks.Z[i]);
+        throw std::invalid_argument(Form("p_ygx is %.8f", p_ygx));
+      }
+      pk_new += tks.w[i] * p_ygx;
+
+      double wt = tks.w[i] * p_ygx * tks.dt2_o[i];
+      sw_t += wt * tks.t[i];
+      sum_wt += wt;
+
+      double wz = tks.w[i] * p_ygx * tks.dz2_o[i];
+      sw_z += wz * tks.z[i];
+      sum_wz += wz;
+
+      // Add the track contribution to the covariance matrix
+      double p_xgy = p_ygx * tks.w[i] / vtx.pk[k];
+      double dt = (tks.t[i] - vtx.t[k]) * tks.dt_o[i];
+      double dz = (tks.z[i] - vtx.z[k]) * tks.dz_o[i];
+
+      double wtt = p_xgy * tks.dt2_o[i];
+      double wzz = p_xgy * tks.dz2_o[i];
+      double wtz = p_xgy * tks.dt_o[i] * tks.dz_o[i];
+
+      stt += wtt * dt * dt;
+      szz += wzz * dz * dz;
+      stz += wtz * dt * dz;
+
+      sum_ptt += wtt;
+      sum_pzz += wzz;
+      sum_ptz += wtz;
     }
-    beta /= fCoolingFactor;
-    niter = 0;
-    while((update2(beta, tks, y, rho0, fDzCutOff) > 1.e-6) && (niter++ < fMaxIterations))
+    if(pk_new == 0)
     {
+      vtx.removeItem(k);
+      k--;
+      // throw std::invalid_argument(Form("pk_new is %.8f", pk_new));
+    }
+    else
+    {
+      pk_new /= tks.sum_w;
+      sum_pk += pk_new;
+
+      stt /= sum_ptt;
+      szz /= sum_pzz;
+      stz /= sum_ptz;
+
+      double new_t = sw_t/sum_wt;
+      double new_z = sw_z/sum_wz;
+      if(std::isnan(new_z) || std::isnan(new_t))
+      {
+        cout << endl << endl;
+        cout << Form("t: %.3e   /   %.3e", sw_t, sum_wt) << endl;
+        cout << Form("z: %.3e   /   %.3e", sw_z, sum_wz) << endl;
+        cout << "pk " << k << "  " << vtx.pk[k] << endl;
+        throw std::invalid_argument("new_z is nan");
+      }
+
+      double z_displ = (new_z - vtx.z[k])/fVertexZSize;
+      double t_displ = (new_t - vtx.t[k])/fVertexTSize;
+      double delta2 = z_displ*z_displ + t_displ*t_displ;
+
+      if (delta2 > delta2_max) delta2_max =  delta2;
+
+      vtx.z[k] = new_z;
+      vtx.t[k] = new_t;
+      vtx.pk[k] = pk_new;
+      vtx.szz[k] = szz;
+      vtx.stt[k] = stt;
+      vtx.stz[k] = stz;
     }
   }
 
-  //   // new, one last round of cleaning at T=Tstop
-  //   while(purge(y,tks,rho0, beta)){
-  //     niter=0; while((update2(beta, tks,y,rho0, fDzCutOff) > 1.e-6)  && (niter++ < fMaxIterations)){  }
+  if(fabs((sum_pk - 1.) > 1E-4))
+  {
+    cout << "sum_pk " << sum_pk << endl;
+    for (unsigned int k = 0; k < nv; k++)
+    {
+      cout << Form("%d: %1.4e", k, vtx.pk[k]) << endl;
+    }
+    throw std::invalid_argument("Sum of masses not unitary");
+  }
+  // if(fVerbose > 3)
+  // {
+  //   cout << "===Update over" << endl;
+  //   for (unsigned int k = 0; k < nv; k++)
+  //   {
+  //     cout << k << endl;
+  //     cout << "z: " << vtx.z[k] << " , t: " << vtx.t[k] << " , p: " << vtx.pk[k] << endl;
+  //     cout << " | " << vtx.szz[k] << "   " << vtx.stz[k] << "|" << endl;
+  //     cout << " | " << vtx.stz[k] << "   " << vtx.stt[k] << "|" << endl << endl;
   //   }
+  //   cout << "=======" << endl;
+  // }
 
-  if(fVerbose)
+  return delta2_max;
+}
+
+//------------------------------------------------------------------------------
+// Split critical vertices (beta_c < beta)
+// Returns true if at least one cluster was split
+bool VertexFinderDA4D::split(double &beta, vertex_t &vtx, tracks_t & tks)
+{
+  bool split = false;
+
+  auto pair_bc_k = vtx.ComputeAllBeta_c(fVerbose);
+
+  // If minimum beta_c is higher than beta, no split is necessaire
+  if( pair_bc_k.first > beta )
   {
-    cout << "Final result, rho0=" << rho0 << endl;
-    dump(beta, y, tks);
+    split = false;
   }
-
-  // select significant tracks and use a TransientVertex as a container
-  //GlobalError dummyError;
-
-  // ensure correct normalization of probabilities, should make double assginment reasonably impossible
-  for(unsigned int i = 0; i < nt; i++)
+  else
   {
-    tks[i].Z = rho0 * exp(-beta * (fDzCutOff * fDzCutOff));
-    for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
+    const unsigned int nv = vtx.getSize();
+    for(unsigned int k = 0; k < nv; k++)
     {
-      tks[i].Z += k->pk * exp(-beta * Eik(tks[i], *k));
-    }
-  }
-
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-  {
-
-    DelphesFactory *factory = GetFactory();
-    candidate = factory->NewCandidate();
-
-    //cout<<"new vertex"<<endl;
-    //GlobalPoint pos(0, 0, k->z);
-    double time = k->t;
-    double z = k->z;
-    //vector< reco::TransientTrack > vertexTracks;
-    //double max_track_time_err2 = 0;
-    double mean = 0.;
-    double expv_x2 = 0.;
-    double normw = 0.;
-    for(unsigned int i = 0; i < nt; i++)
-    {
-      const double invdt = 1.0 / std::sqrt(tks[i].dt2);
-      if(tks[i].Z > 0)
+      if( fVerbose > 3 )
       {
-        double p = k->pk * exp(-beta * Eik(tks[i], *k)) / tks[i].Z;
-        if((tks[i].pi > 0) && (p > 0.5))
-        {
-          //std::cout << "pushing back " << i << ' ' << tks[i].tt << std::endl;
-          //vertexTracks.push_back(*(tks[i].tt)); tks[i].Z=0;
-
-          candidate->AddCandidate(tks[i].tt);
-          tks[i].Z = 0;
-
-          mean += tks[i].t * invdt * p;
-          expv_x2 += tks[i].t * tks[i].t * invdt * p;
-          normw += invdt * p;
-        } // setting Z=0 excludes double assignment
+        cout << "vtx " << k << "  beta_c = " << vtx.beta_c[k] << endl;
       }
-    }
-
-    mean = mean / normw;
-    expv_x2 = expv_x2 / normw;
-    const double time_var = expv_x2 - mean * mean;
-    const double crappy_error_guess = std::sqrt(time_var);
-    /*GlobalError dummyErrorWithTime(0,
-                                   0,0,
-                                   0,0,0,
-                                   0,0,0,crappy_error_guess);*/
-    //TransientVertex v(pos, time, dummyErrorWithTime, vertexTracks, 5);
-
-    candidate->ClusterIndex = clusterIndex++;
-    ;
-    candidate->Position.SetXYZT(0.0, 0.0, z * 10.0, time * c_light);
-
-    // TBC - fill error later ...
-    candidate->PositionError.SetXYZT(0.0, 0.0, 0.0, crappy_error_guess * c_light);
-
-    clusterIndex++;
-    clusters.push_back(candidate);
-  }
-
-  return clusters;
-}
-
-//------------------------------------------------------------------------------
-
-static double Eik(const track_t &t, const vertex_t &k)
-{
-  return std::pow(t.z - k.z, 2.) / t.dz2 + std::pow(t.t - k.t, 2.) / t.dt2;
-}
-
-//------------------------------------------------------------------------------
-
-static void dump(const double beta, const vector<vertex_t> &y, const vector<track_t> &tks0)
-{
-  // copy and sort for nicer printout
-  vector<track_t> tks;
-  for(vector<track_t>::const_iterator t = tks0.begin(); t != tks0.end(); t++)
-  {
-    tks.push_back(*t);
-  }
-  std::stable_sort(tks.begin(), tks.end(), recTrackLessZ1);
-
-  cout << "-----DAClusterizerInZT::dump ----" << endl;
-  cout << " beta=" << beta << endl;
-  cout << "                                                               z= ";
-  cout.precision(4);
-  for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
-  {
-    //cout  <<  setw(8) << fixed << k->z;
-  }
-  cout << endl
-       << "                                                               t= ";
-  for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
-  {
-    //cout  <<  setw(8) << fixed << k->t;
-  }
-  //cout << endl << "T=" << setw(15) << 1./beta <<"                                             Tc= ";
-  for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
-  {
-    //cout  <<  setw(8) << fixed << k->Tc ;
-  }
-
-  cout << endl
-       << "                                                              pk=";
-  double sumpk = 0;
-  for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
-  {
-    //cout <<  setw(8) <<  setprecision(3) <<  fixed << k->pk;
-    sumpk += k->pk;
-  }
-  cout << endl;
-
-  double E = 0, F = 0;
-  cout << endl;
-  cout << "----       z +/- dz        t +/- dt        ip +/-dip       pt    phi  eta    weights  ----" << endl;
-  cout.precision(4);
-  for(unsigned int i = 0; i < tks.size(); i++)
-  {
-    if(tks[i].Z > 0)
-    {
-      F -= log(tks[i].Z) / beta;
-    }
-    double tz = tks[i].z;
-    double tt = tks[i].t;
-    //cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2)
-    //     << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
-
-    double sump = 0.;
-    for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
-    {
-      if((tks[i].pi > 0) && (tks[i].Z > 0))
+      if(vtx.beta_c[k] <= beta)
       {
-        //double p=pik(beta,tks[i],*k);
-        double p = k->pk * std::exp(-beta * Eik(tks[i], *k)) / tks[i].Z;
-        if(p > 0.0001)
+        double z_old = vtx.z[k];
+        double t_old = vtx.t[k];
+        double pk_old = vtx.pk[k];
+
+        // Compute splitting direction: given by the max eighenvalue eighenvector
+        double zn = (vtx.szz[k] - vtx.stt[k])*(vtx.szz[k] - vtx.stt[k]) + 4*vtx.stz[k]*vtx.stz[k];
+        zn = vtx.szz[k] - vtx.stt[k] + sqrt(zn);
+        double tn = 2*vtx.stz[k];
+        double norm = hypot(zn, tn);
+        tn /= norm;
+        zn /= norm;
+
+        // Estimate subcluster positions and weight
+        double p1=0, z1=0, t1=0, wz1=0, wt1=0;
+        double p2=0, z2=0, t2=0, wz2=0, wt2=0;
+        const unsigned int nt = tks.getSize();
+        for(unsigned int i=0; i<nt; ++i)
         {
-          //cout <<  setw (8) <<  setprecision(3) << p;
+          if (tks.Z[i] > 0)
+          {
+            double lr = (tks.t[i] - vtx.t[k]) * tn + (tks.z[i]-vtx.z[k]) * zn;
+            // winner-takes-all, usually overestimates splitting
+            double tl = lr < 0 ? 1.: 0.;
+            double tr = 1. - tl;
+
+            // soften it, especially at low T
+            // double arg = lr * sqrt(beta * ( zn*zn*tks.dz2_o[i] + tn*tn*tks.dt2_o[i] ) );
+            // if(abs(arg) < 20)
+            // {
+            //   double t = exp(-arg);
+            //   tl = t/(t+1.);
+            //   tr = 1/(t+1.);
+            // }
+
+            double p = vtx.pk[k] * tks.w[i];
+            p *= exp(-beta * Energy(tks.z[i], vtx.z[k], tks.dz2_o[i], tks.t[i], vtx.t[k], tks.dt2_o[i])) / tks.Z[i];
+            double wt = p*tks.dt2_o[i];
+            double wz = p*tks.dz2_o[i];
+            p1 += p*tl;  z1 += wz*tl*tks.z[i]; t1 += wt*tl*tks.t[i]; wz1 += wz*tl; wt1 += wt*tl;
+            p2 += p*tr;  z2 += wz*tr*tks.z[i]; t2 += wt*tr*tks.t[i]; wz2 += wz*tr; wt2 += wt*tr;
+          }
+        }
+
+        if(wz1 > 0  && wt1 > 0 && wz2 > 0 && wt2 > 0)
+        {
+          t1 /= wt1;
+          z1 /= wz1;
+          t2 /= wt2;
+          z2 /= wz2;
+
+          if( fVerbose > 3 )
+          {
+            double aux = (z1-z2)*(z1-z2)/(fVertexZSize*fVertexZSize) + (t1-t2)*(t1-t2)/(fVertexTSize*fVertexTSize);
+            cout << "weighted split:  delta = " << sqrt(aux) << endl;
+          }
         }
         else
         {
-          cout << "    .   ";
+          continue;
+          // plot_split_crush(zn, tn, vtx, tks, k);
+          // throw std::invalid_argument( "0 division" );
         }
-        E += p * Eik(tks[i], *k);
-        sump += p;
-      }
-      else
-      {
-        cout << "        ";
-      }
-    }
-    cout << endl;
-  }
-  cout << endl
-       << "T=" << 1 / beta << " E=" << E << " n=" << y.size() << "  F= " << F << endl
-       << "----------" << endl;
-}
 
-//------------------------------------------------------------------------------
-
-static double update1(double beta, vector<track_t> &tks, vector<vertex_t> &y)
-{
-  //update weights and vertex positions
-  // mass constrained annealing without noise
-  // returns the squared sum of changes of vertex positions
-
-  unsigned int nt = tks.size();
-
-  //initialize sums
-  double sumpi = 0;
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); ++k)
-  {
-    k->sw = 0.;
-    k->swz = 0.;
-    k->swt = 0.;
-    k->se = 0.;
-    k->swE = 0.;
-    k->Tc = 0.;
-  }
-
-  // loop over tracks
-  for(unsigned int i = 0; i < nt; i++)
-  {
-
-    // update pik and Zi
-    double Zi = 0.;
-    for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); ++k)
-    {
-      k->ei = std::exp(-beta * Eik(tks[i], *k)); // cache exponential for one track at a time
-      Zi += k->pk * k->ei;
-    }
-    tks[i].Z = Zi;
-
-    // normalization for pk
-    if(tks[i].Z > 0)
-    {
-      sumpi += tks[i].pi;
-      // accumulate weighted z and weights for vertex update
-      for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); ++k)
-      {
-        k->se += tks[i].pi * k->ei / Zi;
-        const double w = k->pk * tks[i].pi * k->ei / (Zi * (tks[i].dz2 * tks[i].dt2));
-        k->sw += w;
-        k->swz += w * tks[i].z;
-        k->swt += w * tks[i].t;
-        k->swE += w * Eik(tks[i], *k);
-      }
-    }
-    else
-    {
-      sumpi += tks[i].pi;
-    }
-
-  } // end of track loop
-
-  // now update z and pk
-  double delta = 0;
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-  {
-    if(k->sw > 0)
-    {
-      const double znew = k->swz / k->sw;
-      const double tnew = k->swt / k->sw;
-      delta += std::pow(k->z - znew, 2.) + std::pow(k->t - tnew, 2.);
-      k->z = znew;
-      k->t = tnew;
-      k->Tc = 2. * k->swE / k->sw;
-    }
-    else
-    {
-      // cout << " a cluster melted away ?  pk=" << k->pk <<  " sumw=" << k->sw <<  endl
-      k->Tc = -1;
-    }
-
-    k->pk = k->pk * k->se / sumpi;
-  }
-
-  // return how much the prototypes moved
-  return delta;
-}
-
-//------------------------------------------------------------------------------
-
-static double update2(double beta, vector<track_t> &tks, vector<vertex_t> &y, double &rho0, double dzCutOff)
-{
-  // MVF style, no more vertex weights, update tracks weights and vertex positions, with noise
-  // returns the squared sum of changes of vertex positions
-
-  unsigned int nt = tks.size();
-
-  //initialize sums
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-  {
-    k->sw = 0.;
-    k->swz = 0.;
-    k->swt = 0.;
-    k->se = 0.;
-    k->swE = 0.;
-    k->Tc = 0.;
-  }
-
-  // loop over tracks
-  for(unsigned int i = 0; i < nt; i++)
-  {
-
-    // update pik and Zi and Ti
-    double Zi = rho0 * std::exp(-beta * (dzCutOff * dzCutOff)); // cut-off (eventually add finite size in time)
-    //double Ti = 0.; // dt0*std::exp(-beta*fDtCutOff);
-    for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-    {
-      k->ei = std::exp(-beta * Eik(tks[i], *k)); // cache exponential for one track at a time
-      Zi += k->pk * k->ei;
-    }
-    tks[i].Z = Zi;
-
-    // normalization
-    if(tks[i].Z > 0)
-    {
-      // accumulate weighted z and weights for vertex update
-      for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-      {
-        k->se += tks[i].pi * k->ei / Zi;
-        double w = k->pk * tks[i].pi * k->ei / (Zi * (tks[i].dz2 * tks[i].dt2));
-        k->sw += w;
-        k->swz += w * tks[i].z;
-        k->swt += w * tks[i].t;
-        k->swE += w * Eik(tks[i], *k);
-      }
-    }
-
-  } // end of track loop
-
-  // now update z
-  double delta = 0;
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-  {
-    if(k->sw > 0)
-    {
-      const double znew = k->swz / k->sw;
-      const double tnew = k->swt / k->sw;
-      delta += std::pow(k->z - znew, 2.) + std::pow(k->t - tnew, 2.);
-      k->z = znew;
-      k->t = tnew;
-      k->Tc = 2 * k->swE / k->sw;
-    }
-    else
-    {
-      // cout << " a cluster melted away ?  pk=" << k->pk <<  " sumw=" << k->sw <<  endl;
-      k->Tc = 0;
-    }
-  }
-
-  // return how much the prototypes moved
-  return delta;
-}
-
-//------------------------------------------------------------------------------
-
-static bool merge(vector<vertex_t> &y)
-{
-  // merge clusters that collapsed or never separated, return true if vertices were merged, false otherwise
-
-  if(y.size() < 2) return false;
-
-  for(vector<vertex_t>::iterator k = y.begin(); (k + 1) != y.end(); k++)
-  {
-    if(std::abs((k + 1)->z - k->z) < 1.e-3 && std::abs((k + 1)->t - k->t) < 1.e-3)
-    { // with fabs if only called after freeze-out (splitAll() at highter T)
-      double rho = k->pk + (k + 1)->pk;
-      if(rho > 0)
-      {
-        k->z = (k->pk * k->z + (k + 1)->z * (k + 1)->pk) / rho;
-        k->t = (k->pk * k->t + (k + 1)->t * (k + 1)->pk) / rho;
-      }
-      else
-      {
-        k->z = 0.5 * (k->z + (k + 1)->z);
-        k->t = 0.5 * (k->t + (k + 1)->t);
-      }
-      k->pk = rho;
-
-      y.erase(k + 1);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-//------------------------------------------------------------------------------
-
-static bool merge(vector<vertex_t> &y, double &beta)
-{
-  // merge clusters that collapsed or never separated,
-  // only merge if the estimated critical temperature of the merged vertex is below the current temperature
-  // return true if vertices were merged, false otherwise
-  if(y.size() < 2) return false;
-
-  for(vector<vertex_t>::iterator k = y.begin(); (k + 1) != y.end(); k++)
-  {
-    if(std::abs((k + 1)->z - k->z) < 2.e-3 && std::abs((k + 1)->t - k->t) < 2.e-3)
-    {
-      double rho = k->pk + (k + 1)->pk;
-      double swE = k->swE + (k + 1)->swE - k->pk * (k + 1)->pk / rho * (std::pow((k + 1)->z - k->z, 2.) + std::pow((k + 1)->t - k->t, 2.));
-      double Tc = 2 * swE / (k->sw + (k + 1)->sw);
-
-      if(Tc * beta < 1)
-      {
-        if(rho > 0)
+        while(vtx.NearestCluster(t1, z1) != k || vtx.NearestCluster(t2, z2) != k)
         {
-          k->z = (k->pk * k->z + (k + 1)->z * (k + 1)->pk) / rho;
-          k->t = (k->pk * k->t + (k + 1)->t * (k + 1)->pk) / rho;
+          t1 = 0.5 * (t1 + t_old);
+          z1 = 0.5 * (z1 + z_old);
+          t2 = 0.5 * (t2 + t_old);
+          z2 = 0.5 * (z2 + z_old);
         }
-        else
+
+        // Compute final distance and split if the distance is enough
+        double delta2 = (z1-z2)*(z1-z2)/(fVertexZSize*fVertexZSize) + (t1-t2)*(t1-t2)/(fVertexTSize*fVertexTSize);
+        if(delta2 > fD2Merge)
         {
-          k->z = 0.5 * (k->z + (k + 1)->z);
-          k->t = 0.5 * (k->t + (k + 1)->t);
+          split = true;
+          vtx.t[k] = t1;
+          vtx.z[k] = z1;
+          vtx.pk[k] = p1 * pk_old/(p1+p2);
+
+          double new_t = t2;
+          double new_z = z2;
+          double new_pk = p2 * pk_old/(p1+p2);
+
+          vtx.addItem(new_z, new_t, new_pk);
+
+          if( fVerbose > 3 )
+          {
+            cout << "===Split happened on vtx " << k << endl;
+            cout << "OLD     z: " << z_old << " , t: " << t_old << " , pk: " << pk_old << endl;
+            cout << "NEW+    z: " << vtx.z[k] << " , t: " << vtx.t[k] << " , pk: " << vtx.pk[k] << endl;
+            cout << "NEW-    z: " << new_z << " , t: " << new_t << " , pk: " << new_pk <<  endl;
+          }
         }
-        k->pk = rho;
-        k->sw += (k + 1)->sw;
-        k->swE = swE;
-        k->Tc = Tc;
-        y.erase(k + 1);
-        return true;
       }
     }
   }
+  return split;
+}
 
-  return false;
+
+//------------------------------------------------------------------------------
+// Merge vertexes closer than declared dimensions
+bool VertexFinderDA4D::merge(vertex_t & vtx, double d2_merge = 2)
+{
+  bool merged = false;
+
+  if(vtx.getSize() < 2) return merged;
+
+  bool last_merge = false;
+  do {
+    double min_d2 = d2_merge;
+    unsigned int k1_min, k2_min;
+    for(unsigned int k1 = 0; k1 < vtx.getSize(); k1++)
+    {
+      for(unsigned int k2 = k1+1; k2 < vtx.getSize();k2++)
+      {
+        double d2_tmp = vtx.DistanceSquare(k1, k2);
+        if(d2_tmp < min_d2)
+        {
+          min_d2 = d2_tmp;
+          k1_min = k1;
+          k2_min = k2;
+        }
+      }
+    }
+
+    if(min_d2 < d2_merge)
+    {
+      vtx.mergeItems(k1_min, k2_min);
+      last_merge = true;
+      merged = true;
+    }
+    else last_merge = false;
+  } while(last_merge);
+
+  return merged;
+}
+
+// -----------------------------------------------------------------------------
+// Compute all the energies and set the partition function normalization for each track
+vector<double> VertexFinderDA4D::Compute_pk_exp_mBetaE(double beta, vertex_t &vtx, tracks_t &tks, double Z_init)
+{
+  unsigned int nt = tks.getSize();
+  unsigned int nv = vtx.getSize();
+
+  vector<double> pk_exp_mBetaE(nt * nv);
+  for (unsigned int k = 0; k < nv; k++)
+  {
+    for (unsigned int i = 0; i < nt; i++)
+    {
+      if(k == 0) tks.Z[i] = Z_init;
+
+      double aux = Energy(tks.z[i], vtx.z[k], tks.dz2_o[i], tks.t[i], vtx.t[k], tks.dt2_o[i]);
+      aux = vtx.pk[k] * exp(-beta * aux);
+      // if(aux < 1E-10) continue;
+      tks.Z[i] += aux;
+
+      unsigned int idx = k*nt + i;
+      pk_exp_mBetaE[idx] = aux;
+    }
+  }
+  return pk_exp_mBetaE;
 }
 
 //------------------------------------------------------------------------------
-
-static bool purge(vector<vertex_t> &y, vector<track_t> &tks, double &rho0, const double beta, const double dzCutOff)
+// Eliminate clusters with only one significant/unique track
+bool VertexFinderDA4D::purge(vertex_t & vtx, tracks_t & tks, double & rho0, const double beta, double min_prob, double min_trk)
 {
-  // eliminate clusters with only one significant/unique track
-  if(y.size() < 2) return false;
+  const unsigned int nv = vtx.getSize();
+  const unsigned int nt = tks.getSize();
 
-  unsigned int nt = tks.size();
+  if (nv < 2)
+    return false;
+
   double sumpmin = nt;
-  vector<vertex_t>::iterator k0 = y.end();
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
-  {
-    int nUnique = 0;
-    double sump = 0;
-    double pmax = k->pk / (k->pk + rho0 * exp(-beta * dzCutOff * dzCutOff));
-    for(unsigned int i = 0; i < nt; i++)
-    {
-      if(tks[i].Z > 0)
+  unsigned int k0 = nv;
+
+  int nUnique = 0;
+  double sump = 0;
+
+  double Z_init = rho0 * exp(-beta * fMuOutlayer * fMuOutlayer); // Add fDtCutOff here toghether  with this
+  vector<double> pk_exp_mBetaE = Compute_pk_exp_mBetaE(beta, vtx, tks, Z_init);
+
+  for (unsigned int k = 0; k < nv; ++k) {
+
+    nUnique = 0;
+    sump = 0;
+
+    double pmax = vtx.pk[k] / (vtx.pk[k] + rho0 * exp(-beta * fMuOutlayer* fMuOutlayer));
+    double pcut = min_prob * pmax;
+
+    for (unsigned int i = 0; i < nt; ++i) {
+      unsigned int idx = k*nt + i;
+
+      if(pk_exp_mBetaE[idx] == 0 || tks.Z[i] == 0)
       {
-        double p = k->pk * std::exp(-beta * Eik(tks[i], *k)) / tks[i].Z;
-        sump += p;
-        if((p > 0.9 * pmax) && (tks[i].pi > 0))
-        {
-          nUnique++;
-        }
+        continue;
       }
+
+      double p = pk_exp_mBetaE[idx] / tks.Z[i];
+      sump += p;
+      if( ( p > pcut ) & ( tks.w[i] > 0 ) ) nUnique++;
     }
 
-    if((nUnique < 2) && (sump < sumpmin))
-    {
+    if ((nUnique < min_trk) && (sump < sumpmin)) {
       sumpmin = sump;
       k0 = k;
     }
+
   }
 
-  if(k0 != y.end())
-  {
-    //cout << "eliminating prototype at " << k0->z << "," << k0->t << " with sump=" << sumpmin << endl;
-    //rho0+=k0->pk;
-    y.erase(k0);
+  if (k0 != nv) {
+    if (fVerbose > 5) {
+      std::cout  << Form("eliminating prototype at z = %.3f mm, t = %.0f ps", vtx.z[k0], vtx.t[k0]) << " with sump=" << sumpmin
+		 << "  rho*nt =" << vtx.pk[k0]*nt
+		 << endl;
+    }
+    vtx.removeItem(k0);
     return true;
-  }
-  else
-  {
+  } else {
     return false;
   }
 }
 
-//------------------------------------------------------------------------------
 
-static double beta0(double betamax, vector<track_t> &tks, vector<vertex_t> &y, const double coolingFactor)
+// -----------------------------------------------------------------------------
+// Plot status
+void VertexFinderDA4D::plot_status(double beta, vertex_t &vtx, tracks_t &tks, int n_it, const char* flag)
 {
+  vector<int> vtx_color = {2,4,8,1,5,6,9,14,46,3};
+  while(vtx.getSize() > vtx_color.size()) vtx_color.push_back(40);
 
-  double T0 = 0; // max Tc for beta=0
-  // estimate critical temperature from beta=0 (T=inf)
-  unsigned int nt = tks.size();
+  vector<double> t_PV, dt_PV, z_PV, dz_PV;
+  vector<double> t_PU, dt_PU, z_PU, dz_PU;
 
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
+  double ETot = 0;
+  vector<double> pk_exp_mBetaE = Compute_pk_exp_mBetaE(beta, vtx, tks, 0);
+
+  for(unsigned int i = 0; i < tks.getSize(); i++)
   {
-
-    // vertex fit at T=inf
-    double sumwz = 0.;
-    double sumwt = 0.;
-    double sumw = 0.;
-    for(unsigned int i = 0; i < nt; i++)
+    for(unsigned int k = 0; k < vtx.getSize(); k++)
     {
-      double w = tks[i].pi / (tks[i].dz2 * tks[i].dt2);
-      sumwz += w * tks[i].z;
-      sumwt += w * tks[i].t;
-      sumw += w;
-    }
-    k->z = sumwz / sumw;
-    k->t = sumwt / sumw;
+      unsigned int idx = k*tks.getSize() + i;
+      if(pk_exp_mBetaE[idx] == 0) continue;
 
-    // estimate Tcrit, eventually do this in the same loop
-    double a = 0, b = 0;
-    for(unsigned int i = 0; i < nt; i++)
+      double p_ygx = pk_exp_mBetaE[idx] / tks.Z[i];
+
+      ETot += tks.w[i] * p_ygx * Energy(tks.z[i], vtx.z[k], tks.dz2_o[i], tks.t[i], vtx.t[k], tks.dt2_o[i]);
+    }
+
+    if(tks.tt[i]->IsPU)
     {
-      double dx = tks[i].z - (k->z);
-      double dt = tks[i].t - (k->t);
-      double w = tks[i].pi / (tks[i].dz2 * tks[i].dt2);
-      a += w * (std::pow(dx, 2.) / tks[i].dz2 + std::pow(dt, 2.) / tks[i].dt2);
-      b += w;
+      t_PU.push_back(tks.t[i]);
+      dt_PU.push_back(1./tks.dt_o[i]);
+      z_PU.push_back(tks.z[i]);
+      dz_PU.push_back(1./tks.dz_o[i]);
     }
-    double Tc = 2. * a / b; // the critical temperature of this vertex
-    if(Tc > T0) T0 = Tc;
-  } // vertex loop (normally there should be only one vertex at beta=0)
+    else
+    {
+      t_PV.push_back(tks.t[i]);
+      dt_PV.push_back(1./tks.dt_o[i]);
+      z_PV.push_back(tks.z[i]);
+      dz_PV.push_back(1./tks.dz_o[i]);
+    }
+  }
 
-  if(T0 > 1. / betamax)
+
+  ETot /= tks.sum_w;
+  fEnergy_rec.push_back(ETot);
+  fBeta_rec.push_back(beta);
+  fNvtx_rec.push_back(vtx.getSize());
+
+  double t_min = TMath::Min(  TMath::MinElement(t_PV.size(), &t_PV[0]), TMath::MinElement(t_PU.size(), &t_PU[0])  );
+  t_min = TMath::Min(t_min, TMath::MinElement(vtx.getSize(), &(vtx.t[0]))  ) - fVertexTSize;
+  double t_max = TMath::Max(  TMath::MaxElement(t_PV.size(), &t_PV[0]), TMath::MaxElement(t_PU.size(), &t_PU[0])  );
+  t_max = TMath::Max(t_max, TMath::MaxElement(vtx.getSize(), &(vtx.t[0]))  ) + fVertexTSize;
+
+  double z_min = TMath::Min(  TMath::MinElement(z_PV.size(), &z_PV[0]), TMath::MinElement(z_PU.size(), &z_PU[0])  );
+  z_min = TMath::Min(z_min, TMath::MinElement(vtx.getSize(), &(vtx.z[0]))  ) - 5;
+  double z_max = TMath::Max(  TMath::MaxElement(z_PV.size(), &z_PV[0]), TMath::MaxElement(z_PU.size(), &z_PU[0])  );
+  z_max = TMath::Max(z_max, TMath::MaxElement(vtx.getSize(), &(vtx.z[0]))  ) + 5;
+
+  auto c_2Dspace = new TCanvas("c_2Dspace", "c_2Dspace", 800, 600);
+
+  TGraphErrors* gr_PVtks = new TGraphErrors(t_PV.size(), &t_PV[0], &z_PV[0], &dt_PV[0], &dz_PV[0]);
+  gr_PVtks->SetTitle(Form("Clustering space - #beta = %.6f", beta));
+  gr_PVtks->GetXaxis()->SetTitle("t CA [ps]");
+  gr_PVtks->GetXaxis()->SetLimits(t_min, t_max);
+  gr_PVtks->GetYaxis()->SetTitle("z CA [mm]");
+  gr_PVtks->GetYaxis()->SetRangeUser(z_min, z_max);
+  gr_PVtks->SetMarkerStyle(4);
+  gr_PVtks->SetMarkerColor(8);
+  gr_PVtks->SetLineColor(8);
+  gr_PVtks->Draw("APE1");
+
+  TGraphErrors* gr_PUtks = new TGraphErrors(t_PU.size(), &t_PU[0], &z_PU[0], &dt_PU[0], &dz_PU[0]);
+  gr_PUtks->SetMarkerStyle(3);
+  gr_PUtks->Draw("PE1");
+
+  TGraph* gr_vtx = new TGraph(vtx.getSize(), &(vtx.t[0]), &(vtx.z[0]));
+  gr_vtx->SetMarkerStyle(28);
+  gr_vtx->SetMarkerColor(2);
+  gr_vtx->SetMarkerSize(2.);
+  gr_vtx->Draw("PE1");
+
+  fItInputGenVtx->Reset();
+  TGraph* gr_genvtx = new TGraph(fInputGenVtx->GetEntriesFast());
+  Candidate *candidate;
+  unsigned int k = 0;
+  while((candidate = static_cast<Candidate*>(fItInputGenVtx->Next())))
   {
-    return betamax / pow(coolingFactor, int(std::log(T0 * betamax) / std::log(coolingFactor)) - 1);
+    gr_genvtx->SetPoint(k, candidate->Position.T()*1E9/c_light, candidate->Position.Z());
+    k++;
   }
-  else
-  {
-    // ensure at least one annealing step
-    return betamax / coolingFactor;
-  }
+  gr_genvtx->SetMarkerStyle(33);
+  gr_genvtx->SetMarkerColor(6);
+  gr_genvtx->SetMarkerSize(2.);
+  gr_genvtx->Draw("PE1");
+
+  // auto leg = new TLegend(0.1, 0.1);
+  // leg->AddEntry(gr_PVtks, "PV tks", "ep");
+  // leg->AddEntry(gr_PUtks, "PU tks", "ep");
+  // leg->AddEntry(gr_vtx, "Cluster center", "p");
+  // leg->Draw();
+
+  c_2Dspace->SetGrid();
+  c_2Dspace->SaveAs(fFigFolderPath + Form("/c_2Dspace_beta%010.0f-%s%d.png", 1E7*beta, flag, n_it));
+
+  delete c_2Dspace;
 }
 
-//------------------------------------------------------------------------------
-
-static bool split(double beta, vector<track_t> &tks, vector<vertex_t> &y)
+// -----------------------------------------------------------------------------
+// Plot status at the end
+void VertexFinderDA4D::plot_status_end(vertex_t &vtx, tracks_t &tks)
 {
-  // split only critical vertices (Tc >~ T=1/beta   <==>   beta*Tc>~1)
-  // an update must have been made just before doing this (same beta, no merging)
-  // returns true if at least one cluster was split
+  unsigned int nv = vtx.getSize();
 
-  const double epsilon = 1e-3; // split all single vertices by 10 um
-  bool split = false;
+  // Define colors in a meaningfull way
+  vector<int> MyPalette(nv);
 
-  // avoid left-right biases by splitting highest Tc first
+  const int Number = 3;
+  double Red[Number]    = { 1.00, 0.00, 0.00};
+  double Green[Number]  = { 0.00, 1.00, 0.00};
+  double Blue[Number]   = { 1.00, 0.00, 1.00};
+  double Length[Number] = { 0.00, 0.50, 1.00 };
+  int FI = TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nv);
+  for (unsigned int i=0;i<nv;i++) MyPalette[i] = FI+i;
 
-  std::vector<std::pair<double, unsigned int> > critical;
-  for(unsigned int ik = 0; ik < y.size(); ik++)
+  TCanvas * c_out = new TCanvas("c_out", "c_out", 800, 600);
+  double t_min = TMath::Min( TMath::MinElement(tks.getSize(), &tks.t[0]), TMath::MinElement(vtx.getSize(), &(vtx.t[0]))  ) - 2*fVertexTSize;
+  double t_max = TMath::Max(TMath::MaxElement(tks.getSize(), &tks.t[0]), TMath::MaxElement(vtx.getSize(), &(vtx.t[0]))  ) + 2*fVertexTSize;
+
+  double z_min = TMath::Min( TMath::MinElement(tks.getSize(), &tks.z[0]), TMath::MinElement(vtx.getSize(), &(vtx.z[0]))  ) - 15;
+  double z_max = TMath::Max( TMath::MaxElement(tks.getSize(), &tks.z[0]), TMath::MaxElement(vtx.getSize(), &(vtx.z[0]))  ) + 15;
+
+  // Draw tracks
+  for(unsigned int i = 0; i < tks.getSize(); i++)
   {
-    if(beta * y[ik].Tc > 1.)
-    {
-      critical.push_back(make_pair(y[ik].Tc, ik));
-    }
-  }
-  std::stable_sort(critical.begin(), critical.end(), std::greater<std::pair<double, unsigned int> >());
+    double dt[] = {1./tks.dt_o[i]};
+    double dz[] = {1./tks.dz_o[i]};
+    TGraphErrors* gr = new TGraphErrors(1, &(tks.t[i]), &(tks.z[i]), dt, dz);
 
-  for(unsigned int ic = 0; ic < critical.size(); ic++)
-  {
-    unsigned int ik = critical[ic].second;
-    // estimate subcluster positions and weight
-    double p1 = 0, z1 = 0, t1 = 0, w1 = 0;
-    double p2 = 0, z2 = 0, t2 = 0, w2 = 0;
-    //double sumpi=0;
-    for(unsigned int i = 0; i < tks.size(); i++)
-    {
-      if(tks[i].Z > 0)
-      {
-        //sumpi+=tks[i].pi;
-        double p = y[ik].pk * exp(-beta * Eik(tks[i], y[ik])) / tks[i].Z * tks[i].pi;
-        double w = p / (tks[i].dz2 * tks[i].dt2);
-        if(tks[i].z < y[ik].z)
-        {
-          p1 += p;
-          z1 += w * tks[i].z;
-          t1 += w * tks[i].t;
-          w1 += w;
-        }
-        else
-        {
-          p2 += p;
-          z2 += w * tks[i].z;
-          t2 += w * tks[i].t;
-          w2 += w;
-        }
-      }
-    }
-    if(w1 > 0)
-    {
-      z1 = z1 / w1;
-      t1 = t1 / w1;
-    }
-    else
-    {
-      z1 = y[ik].z - epsilon;
-      t1 = y[ik].t - epsilon;
-    }
-    if(w2 > 0)
-    {
-      z2 = z2 / w2;
-      t2 = t2 / w2;
-    }
-    else
-    {
-      z2 = y[ik].z + epsilon;
-      t2 = y[ik].t + epsilon;
-    }
+    gr->SetNameTitle(Form("gr%d",i), Form("gr%d",i));
 
-    // reduce split size if there is not enough room
-    if((ik > 0) && (y[ik - 1].z >= z1))
-    {
-      z1 = 0.5 * (y[ik].z + y[ik - 1].z);
-      t1 = 0.5 * (y[ik].t + y[ik - 1].t);
-    }
-    if((ik + 1 < y.size()) && (y[ik + 1].z <= z2))
-    {
-      z2 = 0.5 * (y[ik].z + y[ik + 1].z);
-      t2 = 0.5 * (y[ik].t + y[ik + 1].t);
-    }
+    int marker = tks.tt[i]->IsPU? 1 : 4;
+    gr->SetMarkerStyle(marker);
 
-    // split if the new subclusters are significantly separated
-    if((z2 - z1) > epsilon || std::abs(t2 - t1) > epsilon)
-    {
-      split = true;
-      vertex_t vnew;
-      vnew.pk = p1 * y[ik].pk / (p1 + p2);
-      y[ik].pk = p2 * y[ik].pk / (p1 + p2);
-      vnew.z = z1;
-      vnew.t = t1;
-      y[ik].z = z2;
-      y[ik].t = t2;
-      y.insert(y.begin() + ik, vnew);
+    int idx = tks.tt[i]->ClusterIndex;
+    int color = idx>=0 ? MyPalette[idx] : 13;
+    gr->SetMarkerColor(color);
+    gr->SetLineColor(color);
 
-      // adjust remaining pointers
-      for(unsigned int jc = ic; jc < critical.size(); jc++)
-      {
-        if(critical[jc].second > ik)
-        {
-          critical[jc].second++;
-        }
-      }
+    int line_style = idx>=0 ? 1 : 3;
+    gr->SetLineStyle(line_style);
+
+    if(i==0)
+    {
+      gr->SetTitle(Form("Clustering space - Tot Vertexes = %d", nv));
+      gr->GetXaxis()->SetTitle("t CA [ps]");
+      gr->GetXaxis()->SetLimits(t_min, t_max);
+      gr->GetYaxis()->SetTitle("z CA [mm]");
+      gr->GetYaxis()->SetRangeUser(z_min, z_max);
+      gr->Draw("APE1");
     }
+    else gr->Draw("PE1");
   }
 
-  //  stable_sort(y.begin(), y.end(), clusterLessZ);
-  return split;
+  // Draw vertices
+  for(unsigned int k = 0; k < vtx.getSize(); k++)
+  {
+    TGraph* gr = new TGraph(1, &(vtx.t[k]), &(vtx.z[k]));
+
+    gr->SetNameTitle(Form("grv%d",k), Form("grv%d",k));
+
+    gr->SetMarkerStyle(41);
+    gr->SetMarkerSize(2.);
+    gr->SetMarkerColor(MyPalette[k]);
+
+    gr->Draw("P");
+  }
+
+  fItInputGenVtx->Reset();
+  TGraph* gr_genvtx = new TGraph(fInputGenVtx->GetEntriesFast());
+  TGraph* gr_genPV = new TGraph(1);
+  Candidate *candidate;
+  unsigned int k = 0;
+  while((candidate = static_cast<Candidate*>(fItInputGenVtx->Next())))
+  {
+    if(k == 0 ) {
+      gr_genPV->SetPoint(k, candidate->Position.T()*1E9/c_light, candidate->Position.Z());
+    }
+    else gr_genvtx->SetPoint(k, candidate->Position.T()*1E9/c_light, candidate->Position.Z());
+
+    k++;
+  }
+  gr_genvtx->SetMarkerStyle(20);
+  gr_genvtx->SetMarkerColorAlpha(kBlack, 0.8);
+  gr_genvtx->SetMarkerSize(.8);
+  gr_genvtx->Draw("PE1");
+  gr_genPV->SetMarkerStyle(33);
+  gr_genPV->SetMarkerColorAlpha(kBlack, 1);
+  gr_genPV->SetMarkerSize(2.5);
+  gr_genPV->Draw("PE1");
+
+  // auto note =  new TLatex();
+  // note->DrawLatexNDC(0.5, 0.8, Form("#splitline{Vertexes Reco = %d }{Vertexes gen = %d}", vtx.getSize(), k) );
+
+  c_out->SetGrid();
+  c_out->SaveAs(fFigFolderPath + Form("/c_final.root"));
+  delete c_out;
 }
 
-//------------------------------------------------------------------------------
-
-void splitAll(vector<vertex_t> &y)
+// -----------------------------------------------------------------------------
+// Plot splitting
+void VertexFinderDA4D::plot_split_crush(double zn, double tn, vertex_t &vtx, tracks_t &tks, int i_vtx)
 {
+  vector<double> t, dt, z, dz;
 
-  const double epsilon = 1e-3; // split all single vertices by 10 um
-  const double zsep = 2 * epsilon; // split vertices that are isolated by at least zsep (vertices that haven't collapsed)
-  const double tsep = 2 * epsilon; // check t as well
-
-  vector<vertex_t> y1;
-
-  for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
+  for(unsigned int i = 0; i < tks.getSize(); i++)
   {
-    if(((k == y.begin()) || (k - 1)->z < k->z - zsep) && (((k + 1) == y.end()) || (k + 1)->z > k->z + zsep))
-    {
-      // isolated prototype, split
-      vertex_t vnew;
-      vnew.z = k->z - epsilon;
-      vnew.t = k->t - epsilon;
-      (*k).z = k->z + epsilon;
-      (*k).t = k->t + epsilon;
-      vnew.pk = 0.5 * (*k).pk;
-      (*k).pk = 0.5 * (*k).pk;
-      y1.push_back(vnew);
-      y1.push_back(*k);
-    }
-    else if(y1.empty() || (y1.back().z < k->z - zsep) || (y1.back().t < k->t - tsep))
-    {
-      y1.push_back(*k);
-    }
-    else
-    {
-      y1.back().z -= epsilon;
-      y1.back().t -= epsilon;
-      k->z += epsilon;
-      k->t += epsilon;
-      y1.push_back(*k);
-    }
-  } // vertex loop
+      t.push_back(tks.t[i]);
+      dt.push_back(1./tks.dt_o[i]);
+      z.push_back(tks.z[i]);
+      dz.push_back(1./tks.dz_o[i]);
+  }
 
-  y = y1;
+
+  double t_min = TMath::Min(TMath::MinElement(t.size(), &t[0]), TMath::MinElement(vtx.getSize(), &(vtx.t[0]))  ) - 50;
+  double t_max = TMath::Max(TMath::MaxElement(t.size(), &t[0]), TMath::MaxElement(vtx.getSize(), &(vtx.t[0]))  ) + 50;
+
+  double z_min = TMath::Min(TMath::MinElement(z.size(), &z[0]), TMath::MinElement(vtx.getSize(), &(vtx.z[0]))  ) - 5;
+  double z_max = TMath::Max(TMath::MaxElement(z.size(), &z[0]), TMath::MaxElement(vtx.getSize(), &(vtx.z[0]))  ) + 5;
+
+  auto c_2Dspace = new TCanvas("c_2Dspace", "c_2Dspace", 800, 600);
+
+  TGraphErrors* gr_PVtks = new TGraphErrors(t.size(), &t[0], &z[0], &dt[0], &dz[0]);
+  gr_PVtks->SetTitle(Form("Clustering space"));
+  gr_PVtks->GetXaxis()->SetTitle("t CA [ps]");
+  gr_PVtks->GetXaxis()->SetLimits(t_min, t_max);
+  gr_PVtks->GetYaxis()->SetTitle("z CA [mm]");
+  gr_PVtks->GetYaxis()->SetRangeUser(z_min, z_max);
+  gr_PVtks->SetMarkerStyle(4);
+  gr_PVtks->SetMarkerColor(1);
+  gr_PVtks->SetLineColor(1);
+  gr_PVtks->Draw("APE1");
+
+  TGraph* gr_vtx = new TGraph(1, &(vtx.t[i_vtx]), &(vtx.z[i_vtx]));
+  gr_vtx->SetMarkerStyle(28);
+  gr_vtx->SetMarkerColor(2);
+  gr_vtx->SetMarkerSize(2.);
+  gr_vtx->Draw("PE1");
+
+  double t_pos[] = {vtx.t[i_vtx], vtx.t[i_vtx]+100};
+  double t_neg[] = {vtx.t[i_vtx], vtx.t[i_vtx]-100};
+  double z_pos[] = {vtx.z[i_vtx], vtx.z[i_vtx]+(zn/tn)*100};
+  double z_neg[] = {vtx.z[i_vtx], vtx.z[i_vtx]-(zn/tn)*100};
+
+  TGraph* gr_pos = new TGraph(2, &t_pos[0], &z_pos[0]);
+  gr_pos->SetLineColor(8);
+  gr_pos->SetMarkerColor(8);
+  gr_pos->Draw("PL");
+  TGraph* gr_neg = new TGraph(2, &t_neg[0], &z_neg[0]);
+  gr_neg->SetLineColor(4);
+  gr_neg->SetMarkerColor(4);
+  gr_neg->Draw("PL");
+
+
+  c_2Dspace->SetGrid();
+  c_2Dspace->SaveAs(fFigFolderPath + Form("/crush_splitting.png"));
+
+  delete c_2Dspace;
 }
