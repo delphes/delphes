@@ -13,6 +13,8 @@
 
 set ExecutionPath {
 
+  RHadronFilter
+  RHadronMerger
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -67,12 +69,37 @@ set ExecutionPath {
   TreeWriter
 }
 
-#####################################
-# Track propagation to calorimeters
-#####################################
+#################################
+# Get stable R-Hadrons
+#################################
+
+module PdgCodeFilter RHadronFilter {
+  set InputArray Delphes/allParticles
+  set OutputArray stableRHadrons
+  set Invert false
+
+  set RequireStatus true
+  set Status 104
+}
+
+#################################
+# Merge R-Hadrons with other sable
+#################################
+
+module Merger RHadronMerger {
+  add InputArray RHadronFilter/stableRHadrons
+  add InputArray Delphes/stableParticles
+  set OutputArray stableParticles
+}
+
+
+#################################
+# Propagate particles in cylinder
+#################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray Delphes/stableParticles
+  #set InputArray Delphes/stableParticles
+  set InputArray RHadronMerger/stableParticles
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
   set ElectronOutputArray electrons
