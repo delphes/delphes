@@ -26,7 +26,7 @@ Beams:eCM = 100000                  ! CM energy of collision
 ! 5) Settings for the hard-process generation
 SUSY:all = off                     ! Switches off ALL (~400) SUSY processes
 !SLHA:file = cards/split_stop.slha  ! SLHA file
-SLHA:file = hscp/pythiaCards/split_stop.slha  ! SLHA file
+SLHA:file = examples/Pythia8/split_stop.slha  ! SLHA file
 SLHA:useDecayTable = on            ! Read in SLHA DECAY tables [change for full scan]
 SLHA:readFrom = 2
 SLHA:verbose = 0                   ! verbosity
