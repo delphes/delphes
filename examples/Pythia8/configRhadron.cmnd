@@ -1,0 +1,47 @@
+! This file contains commands to be read in for a Pythia8 run.
+! Lines not beginning with a letter or digit are comments.
+
+! 1) Settings parameters used in a main program
+!Main:numberOfEvents = 10000       ! number of events to generate
+Main:numberOfEvents = 10       ! number of events to generate
+Main:timesAllowErrors = 30         ! max number of allowed errors
+
+! 2) Settings related to output in init(), next() and stat().
+Init:showChangedSettings = on      ! list changed settings
+Init:showAllSettings = off         ! list all settings
+Init:showChangedParticleData = on  ! list changed particle data
+Init:showAllParticleData = off     ! list all particle data
+Next:numberCount = 1000            ! print message every n events
+Next:numberShowLHA = 1             ! print LHA information n times
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 1         ! print process record n times
+Next:numberShowEvent = 1           ! print event record n times
+Stat:showPartonLevel = on          ! additional statistics on MPI
+
+! 3) LHC beams parameter settings.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212, e = 11
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 100000                  ! CM energy of collision
+
+! 5) Settings for the hard-process generation
+SUSY:all = off                     ! Switches off ALL (~400) SUSY processes
+!SLHA:file = cards/split_stop.slha  ! SLHA file
+SLHA:file = hscp/pythiaCards/split_stop.slha  ! SLHA file
+SLHA:useDecayTable = on            ! Read in SLHA DECAY tables [change for full scan]
+SLHA:readFrom = 2
+SLHA:verbose = 0                   ! verbosity
+# set process
+SUSY:gg2squarkantisquark = on      ! stop pair production
+SUSY:qqbar2squarkantisquark = on   ! stop pair production
+SUSY:qq2squarksquark = on          ! stop pair production
+RHadrons:allow = on                ! Allow stop-hadronization
+
+
+! 5) Settings for the event generation process in the Pythia8 library.
+PartonLevel:MPI = on               ! multiple interactions
+PartonLevel:ISR = on               ! initial-state radiation
+PartonLevel:FSR = on               ! final-state radiation
+HadronLevel:Hadronize = on         ! hadronization
+ParticleDecays:xyMax = 129.        ! radius of the cylinder in mm (CMS detector proportions)
+ParticleDecays:zMax = 300.         ! half-high of the cylinder in mm
+ParticleDecays:limitCylinder = on  ! Acticate max limit cyliner defined above
