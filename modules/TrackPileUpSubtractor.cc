@@ -116,23 +116,45 @@ void TrackPileUpSubtractor::Finish()
 
 void TrackPileUpSubtractor::Process()
 {
-  Candidate *candidate, *particle;
+  Candidate *candidate, *particle, *particleTest;
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
   Double_t z, zvtx = 0;
   Double_t pt, eta, phi, e;
-
+  Double_t sumPT2 = 0;
+  Double_t sumSquare = 0;
+  int counter = 0;
+  Double_t tempPTSquare = 0;
+  Double_t tempZVertex = 0; 
   // find z position of primary vertex
 
+  cout << " ---------- NEW EVENT --------- " << endl; 
+
   fItVertexInputArray->Reset();
+  cout << " NUMBER OF VERTICES : " << fVertexInputArray->GetEntriesFast() << endl;
   while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
   {
-    if(!candidate->IsPU)
-    {
-      zvtx = candidate->Position.Z();
-      // break;
-    }
+      cout << " ---------- NEW VERTEX --------- " << candidate->IsPU << endl; 
+      tempZVertex = candidate->Position.Z();
+      tempPTSquare = candidate->SumPT2;
+      if(tempPTSquare > sumSquare)
+      {
+        sumSquare = tempPTSquare;
+        zvtx = tempZVertex;
+        cout << " Sum Square : " << sumSquare << " Z of Vertex : " << zvtx << "  Is PileUp : " << candidate->IsPU << endl;
+      } 
+      
+      /*
+      for(int i = 0; i < candidate->GetCandidates()->GetEntriesFast(); i++)
+      {
+        particleTest = static_cast<Candidate *>(candidate->GetCandidates()->At(i));
+        TLorentzVector &candidateMomentumNew = particleTest->Momentum;
+        if(candidateMomentumNew.Pt() > 1.0)
+          sumSquare += (candidateMomentumNew.Pt()*candidateMomentumNew.Pt());
+        cout << candidateMomentumNew.Pt() << "  " << candidate->SumPT2 << " counter : " << candidate->GetCandidates()->GetEntriesFast() << endl;
+      }  
+      */
   }
 
   // loop over all input arrays
@@ -146,21 +168,29 @@ void TrackPileUpSubtractor::Process()
     while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
       particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
-      const TLorentzVector &candidateMomentum = particle->Momentum;
+      const TLorentzVector &candidateMomentum = candidate->Momentum;
 
       eta = candidateMomentum.Eta();
       pt = candidateMomentum.Pt();
       phi = candidateMomentum.Phi();
       e = candidateMomentum.E();
 
-      z = particle->Position.Z();
+      z = candidate->Position.Z();
+      counter ++; 
+      //sum = pt*pt;
+      if(pt > 1.0)
+        sumPT2 += pt*pt;
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
+      // cout << particle->IsRecoPU << " ParticleSumSquare : " << sumPT2 << " VertexResult : " << sumSquare << " Added SumSquare : " << zvtx << endl;
+      //cout << pt << "  " << candidate->IsPU << "  " <<  TMath::Abs(z - zvtx) << "   " << sumPT2 << "   " << sumPT2 << endl;
 
-      if(candidate->Charge != 0 && candidate->IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
+      
+      if(particle->Charge != 0 && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
       {
         candidate->IsRecoPU = 1;
+        //cout <<  TMath::Abs(z - zvtx) << "   " << fFormula->Eval(pt, eta, phi, e) * 1.0e3 << endl;
       }
       else
       {
