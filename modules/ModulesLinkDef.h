@@ -72,6 +72,7 @@
 #include "modules/VertexSorter.h"
 #include "modules/VertexFinder.h"
 #include "modules/VertexFinderDA4D.h"
+#include "modules/HighMassVertexRecover.h"
 #include "modules/DecayFilter.h"
 #include "modules/ExampleModule.h"
 
@@ -128,6 +129,7 @@
 #pragma link C++ class VertexSorter+;
 #pragma link C++ class VertexFinder+;
 #pragma link C++ class VertexFinderDA4D+;
+#pragma link C++ class HighMassVertexRecover+;
 #pragma link C++ class DecayFilter+;
 #pragma link C++ class ExampleModule+;
 
