@@ -35,7 +35,7 @@ set ExecutionPath {
 
   VertexFinderDA4D  
 
-  TrackPileUpSubtractor  
+  TrackTimingPileUpSubtractor  
 
   ECal
   HCal
@@ -326,7 +326,7 @@ module VertexFinderDA4D VertexFinderDA4D {
 # Track pile-up subtractor
 ##########################
 
-module TrackPileUpSubtractor TrackPileUpSubtractor {
+module TrackTimingPileUpSubtractor TrackTimingPileUpSubtractor {
 # add InputArray InputArray OutputArray
 
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
@@ -348,7 +348,7 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
 
 module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray TrackSmearing/tracks
+  set TrackInputArray TimeSmearing/tracks
 
   set TowerOutputArray ecalTowers
   set EFlowTrackOutputArray eflowTracks
@@ -626,8 +626,6 @@ module Merger GenMissingET {
   add InputArray NeutrinoFilter/filteredParticles
   set MomentumOutputArray momentum
 }
-
-
 
 
 #####################
@@ -1005,7 +1003,7 @@ module TreeWriter TreeWriter {
 
   add Branch GenMissingET/momentum GenMissingET MissingET
 
-  add Branch TrackMerger/tracks Track Track
+  add Branch TimeSmearing/tracks Track Track
   add Branch Calorimeter/towers Tower Tower
 
   add Branch HCal/eflowTracks EFlowTrack Track
