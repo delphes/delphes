@@ -142,6 +142,7 @@ void TrackTimingPileUpSubtractor::Process()
       zvtx_err = candidate->PositionError.Z();
       tvtx = candidate->Position.T();
       tvtx_err = candidate->PositionError.T();
+      cout << " initial : " << candidate->InitialPosition.T() << " final : " << candidate->Position.T() << endl;
     } 
   }
 
@@ -170,6 +171,7 @@ void TrackTimingPileUpSubtractor::Process()
 
       // apply pile-up subtraction
       distance = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
+      //cout << " t : " << tvtx << "  t(particle)" << t << endl;
       // here I calculated distance using Z and T of selected vertex (highest sum Pt square) and particles
       // however z_err of vertices is gives 0 because of using CMS trackResolutionCMS.tcl (in that formula, there is limitation on |eta| < 2.5)
       // thats why I used TMath::Abs(z - zvtx) < 0.005 && TMath::Abs(t - tvtx) < 5.0

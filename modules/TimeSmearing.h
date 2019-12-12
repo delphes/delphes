@@ -31,6 +31,7 @@
 
 class TIterator;
 class TObjArray;
+class DelphesFormula;
 
 class TimeSmearing: public DelphesModule
 {
@@ -43,7 +44,8 @@ public:
   void Finish();
 
 private:
-  Double_t fTimeResolution;
+  DelphesFormula *fFormula; //!
+  Double_t fEtaMax;
 
   TIterator *fItInputArray; //!
 

@@ -129,9 +129,9 @@ module PileUpMerger PileUpMerger {
 
 }
 
-#####################################
-# Track propagation to calorimeters
-#####################################
+#################################
+# Propagate particles in cylinder
+#################################
 
 module ParticlePropagator ParticlePropagator {
   set InputArray PileUpMerger/stableParticles
