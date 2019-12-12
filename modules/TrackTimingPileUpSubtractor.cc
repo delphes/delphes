@@ -24,7 +24,7 @@
  *
  */
 
-#include "modules/TrackPileUpSubtractor.h"
+#include "modules/TrackTimingPileUpSubtractor.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -51,7 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::TrackPileUpSubtractor() :
+TrackTimingPileUpSubtractor::TrackTimingPileUpSubtractor() :
   fFormula(0)
 {
   fFormula = new DelphesFormula;
@@ -59,14 +59,14 @@ TrackPileUpSubtractor::TrackPileUpSubtractor() :
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::~TrackPileUpSubtractor()
+TrackTimingPileUpSubtractor::~TrackTimingPileUpSubtractor()
 {
   if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
 
-void TrackPileUpSubtractor::Init()
+void TrackTimingPileUpSubtractor::Init()
 {
   // import input array
 
@@ -97,7 +97,7 @@ void TrackPileUpSubtractor::Init()
 
 //------------------------------------------------------------------------------
 
-void TrackPileUpSubtractor::Finish()
+void TrackTimingPileUpSubtractor::Finish()
 {
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
@@ -114,47 +114,36 @@ void TrackPileUpSubtractor::Finish()
 
 //------------------------------------------------------------------------------
 
-void TrackPileUpSubtractor::Process()
+void TrackTimingPileUpSubtractor::Process()
 {
-  Candidate *candidate, *particle, *particleTest;
+  Candidate *candidate, *particle;
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
   Double_t z, zvtx = 0;
-  Double_t pt, eta, phi, e;
-  Double_t sumPT2 = 0;
-  Double_t sumSquare = 0;
-  int counter = 0;
+  Double_t z_err, zvtx_err = 0;
+  Double_t t, tvtx = 0;
+  Double_t t_err, tvtx_err = 0;
+  Double_t sumPTSquare = 0;
   Double_t tempPTSquare = 0;
-  Double_t tempZVertex = 0; 
+  Double_t pt, eta, phi, e;
+  Double_t distance = 0;
+
   // find z position of primary vertex
 
-  cout << " ---------- NEW EVENT --------- " << endl; 
-
   fItVertexInputArray->Reset();
-  cout << " NUMBER OF VERTICES : " << fVertexInputArray->GetEntriesFast() << endl;
   while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
   {
-      cout << " ---------- NEW VERTEX --------- " << candidate->IsPU << endl; 
-      tempZVertex = candidate->Position.Z();
-      tempPTSquare = candidate->SumPT2;
-      if(tempPTSquare > sumSquare)
-      {
-        sumSquare = tempPTSquare;
-        zvtx = tempZVertex;
-        cout << " Sum Square : " << sumSquare << " Z of Vertex : " << zvtx << "  Is PileUp : " << candidate->IsPU << endl;
-      } 
-      
-      /*
-      for(int i = 0; i < candidate->GetCandidates()->GetEntriesFast(); i++)
-      {
-        particleTest = static_cast<Candidate *>(candidate->GetCandidates()->At(i));
-        TLorentzVector &candidateMomentumNew = particleTest->Momentum;
-        if(candidateMomentumNew.Pt() > 1.0)
-          sumSquare += (candidateMomentumNew.Pt()*candidateMomentumNew.Pt());
-        cout << candidateMomentumNew.Pt() << "  " << candidate->SumPT2 << " counter : " << candidate->GetCandidates()->GetEntriesFast() << endl;
-      }  
-      */
+    tempPTSquare = candidate->SumPT2;
+    if(tempPTSquare > sumPTSquare)
+    {
+      sumPTSquare = tempPTSquare;
+      zvtx = candidate->Position.Z();
+      zvtx_err = candidate->PositionError.Z();
+      tvtx = candidate->Position.T();
+      tvtx_err = candidate->PositionError.T();
+      cout << " initial : " << candidate->InitialPosition.T() << " final : " << candidate->Position.T() << endl;
+    } 
   }
 
   // loop over all input arrays
@@ -168,29 +157,28 @@ void TrackPileUpSubtractor::Process()
     while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
       particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
-      const TLorentzVector &candidateMomentum = candidate->Momentum;
+      const TLorentzVector &candidateMomentum = particle->Momentum;
 
       eta = candidateMomentum.Eta();
       pt = candidateMomentum.Pt();
       phi = candidateMomentum.Phi();
       e = candidateMomentum.E();
 
-      z = candidate->Position.Z();
-      counter ++; 
-      //sum = pt*pt;
-      if(pt > 1.0)
-        sumPT2 += pt*pt;
+      z = particle->Position.Z();
+      z_err = particle->PositionError.Z();
+      t = particle->Position.T();
+      t_err = particle->PositionError.T();
 
       // apply pile-up subtraction
-      // assume perfect pile-up subtraction for tracks outside fZVertexResolution
-      // cout << particle->IsRecoPU << " ParticleSumSquare : " << sumPT2 << " VertexResult : " << sumSquare << " Added SumSquare : " << zvtx << endl;
-      //cout << pt << "  " << candidate->IsPU << "  " <<  TMath::Abs(z - zvtx) << "   " << sumPT2 << "   " << sumPT2 << endl;
+      distance = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
+      //cout << " t : " << tvtx << "  t(particle)" << t << endl;
+      // here I calculated distance using Z and T of selected vertex (highest sum Pt square) and particles
+      // however z_err of vertices is gives 0 because of using CMS trackResolutionCMS.tcl (in that formula, there is limitation on |eta| < 2.5)
+      // thats why I used TMath::Abs(z - zvtx) < 0.005 && TMath::Abs(t - tvtx) < 5.0
 
-      
-      if(particle->Charge != 0 && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
+      if(candidate->Charge != 0 && TMath::Abs(z - zvtx) < 0.005 && TMath::Abs(t - tvtx) < 5.0)
       {
         candidate->IsRecoPU = 1;
-        //cout <<  TMath::Abs(z - zvtx) << "   " << fFormula->Eval(pt, eta, phi, e) * 1.0e3 << endl;
       }
       else
       {

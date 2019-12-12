@@ -427,6 +427,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PileUpMerger.h \
 	modules/JetPileUpSubtractor.h \
 	modules/TrackPileUpSubtractor.h \
+	modules/TrackTimingPileUpSubtractor.h \
 	modules/TaggingParticlesSkimmer.h \
 	modules/PileUpJetID.h \
 	modules/PhotonID.h \
@@ -443,6 +444,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/VertexSorter.h \
 	modules/VertexFinder.h \
 	modules/VertexFinderDA4D.h \
+	modules/HighMassVertexRecover.h \
 	modules/DecayFilter.h \
 	modules/ExampleModule.h
 tmp/modules/ModulesDict$(PcmSuf): \
@@ -781,6 +783,15 @@ tmp/modules/Hector.$(ObjSuf): \
 	external/Hector/H_BeamLine.h \
 	external/Hector/H_BeamParticle.h \
 	external/Hector/H_RecRPObject.h
+tmp/modules/HighMassVertexRecover.$(ObjSuf): \
+	modules/HighMassVertexRecover.$(SrcSuf) \
+	modules/HighMassVertexRecover.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/IdentificationMap.$(ObjSuf): \
 	modules/IdentificationMap.$(SrcSuf) \
 	modules/IdentificationMap.h \
@@ -1021,6 +1032,15 @@ tmp/modules/TrackSmearing.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/TrackTimingPileUpSubtractor.$(ObjSuf): \
+	modules/TrackTimingPileUpSubtractor.$(SrcSuf) \
+	modules/TrackTimingPileUpSubtractor.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/TreeWriter.$(ObjSuf): \
 	modules/TreeWriter.$(SrcSuf) \
 	modules/TreeWriter.h \
@@ -1057,9 +1077,9 @@ tmp/modules/VertexFinderDA4D.$(ObjSuf): \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
 	classes/DelphesPileUpReader.h \
-	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootResult.h \
 	external/ExRootAnalysis/ExRootFilter.h \
-	external/ExRootAnalysis/ExRootResult.h
+	external/ExRootAnalysis/ExRootClassifier.h
 tmp/modules/VertexSorter.$(ObjSuf): \
 	modules/VertexSorter.$(SrcSuf) \
 	modules/VertexSorter.h \
@@ -1145,6 +1165,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/EnergySmearing.$(ObjSuf) \
 	tmp/modules/ExampleModule.$(ObjSuf) \
 	tmp/modules/Hector.$(ObjSuf) \
+	tmp/modules/HighMassVertexRecover.$(ObjSuf) \
 	tmp/modules/IdentificationMap.$(ObjSuf) \
 	tmp/modules/ImpactParameterSmearing.$(ObjSuf) \
 	tmp/modules/Isolation.$(ObjSuf) \
@@ -1171,6 +1192,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TrackSmearing.$(ObjSuf) \
+	tmp/modules/TrackTimingPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
 	tmp/modules/VertexFinder.$(ObjSuf) \
@@ -2092,6 +2114,10 @@ modules/VertexSorter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/TrackTimingPileUpSubtractor.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 modules/Delphes.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -2266,6 +2292,11 @@ external/fastjet/LimitedWarning.hh: \
 
 external/fastjet/config.h: \
 	external/fastjet/config_win.h
+	@touch $@
+
+modules/HighMassVertexRecover.h: \
+	classes/DelphesModule.h \
+	classes/DelphesClasses.h
 	@touch $@
 
 classes/DelphesClasses.h: \

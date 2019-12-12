@@ -33,6 +33,9 @@ set ExecutionPath {
   TimeSmearing
 
   VertexFinderDA4D
+  HighMassVertexRecover
+
+  CandidateFilter
 
   TreeWriter  
 }
@@ -235,6 +238,34 @@ module VertexFinderDA4D VertexFinderDA4D {
 
 }
 
+######################################
+# Heavy(slow) particles vertex recover
+######################################
+
+module HighMassVertexRecover HighMassVertexRecover {
+  set TrackInputArray VertexFinderDAClusterizerZT/tracks
+  set VertexInputArray VertexFinderDAClusterizerZT/vertices
+
+  set TrackOutputArray tracks
+  set VertexOutputArray vertices
+
+  set Verbose 0
+}
+
+
+########################################
+# Remove uninteresting tracks          #
+########################################
+
+module CandidateFilter CandidateFilter {
+  set InputArray HighMassVertexRecover/tracks
+  set OutputArray tracks
+
+  set PtMin 10
+  set MassMin 0.2
+}
+
+
 ##################
 # ROOT tree writer
 ##################
@@ -242,7 +273,9 @@ module VertexFinderDA4D VertexFinderDA4D {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch PileUpMerger/stableParticles Particle GenParticle
+  add Branch PileUpMerger/vertices GenVertex Vertex  
   add Branch TimeSmearing/tracks Track Track
   add Branch VertexFinderDA4D/vertices Vertex4D Vertex
-  add Branch PileUpMerger/vertices GenVertex Vertex
+  add Branch HighMassVertexRecover/vertices Vertex4D Vertex
+  add Branch CandidateFilter/tracks Track Track  
 }

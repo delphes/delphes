@@ -55,6 +55,7 @@
 #include "modules/PileUpMerger.h"
 #include "modules/JetPileUpSubtractor.h"
 #include "modules/TrackPileUpSubtractor.h"
+#include "modules/TrackTimingPileUpSubtractor.h"
 #include "modules/TaggingParticlesSkimmer.h"
 #include "modules/PileUpJetID.h"
 #include "modules/PhotonID.h"
@@ -71,6 +72,7 @@
 #include "modules/VertexSorter.h"
 #include "modules/VertexFinder.h"
 #include "modules/VertexFinderDA4D.h"
+#include "modules/HighMassVertexRecover.h"
 #include "modules/DecayFilter.h"
 #include "modules/ExampleModule.h"
 
@@ -110,6 +112,7 @@
 #pragma link C++ class PileUpMerger+;
 #pragma link C++ class JetPileUpSubtractor+;
 #pragma link C++ class TrackPileUpSubtractor+;
+#pragma link C++ class TrackTimingPileUpSubtractor+;
 #pragma link C++ class TaggingParticlesSkimmer+;
 #pragma link C++ class PileUpJetID+;
 #pragma link C++ class PhotonID+;
@@ -126,6 +129,7 @@
 #pragma link C++ class VertexSorter+;
 #pragma link C++ class VertexFinder+;
 #pragma link C++ class VertexFinderDA4D+;
+#pragma link C++ class HighMassVertexRecover+;
 #pragma link C++ class DecayFilter+;
 #pragma link C++ class ExampleModule+;
 
