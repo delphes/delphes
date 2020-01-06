@@ -424,6 +424,7 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
 
     candidate->ClusterIndex = k;
     candidate->Position.SetXYZT(0.0, 0.0, vtx.z[k] , vtx.t[k]*1E-9*c_light);
+    candidate->InitialPosition.SetXYZT(0.0, 0.0, vtx.z[k] , vtx.t[k]*1E-9*c_light);    
     candidate->PositionError.SetXYZT(0.0, 0.0, fVertexZSize , fVertexTSize*1E-9*c_light);
     candidate->SumPT2 = 0;
     candidate->SumPt = 0;

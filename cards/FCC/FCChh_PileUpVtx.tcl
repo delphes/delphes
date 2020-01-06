@@ -16,7 +16,6 @@ set RandomSeed 123
 
 set ExecutionPath {
 
-  BeamSpotFilter
   PileUpMerger
   ParticlePropagator
 
@@ -31,18 +30,23 @@ set ExecutionPath {
   TrackMerger
 
   TrackSmearing
-  TimeSmearing  
-
-  VertexFinderDA4D  
-
-  TrackTimingPileUpSubtractor  
+  TimeSmearing      
 
   ECal
   HCal
 
+  TimeSmearingMIP
+  TimeSmearingPhotons
+  TimeSmearingNH  
+
   Calorimeter
   EFlowMerger
   EFlowFilter
+
+  VertexFinderDA4D
+  TrackTimingPileUpSubtractor
+
+  HighMassVertexRecover    
 
   PhotonEfficiency
   PhotonIsolation
@@ -77,17 +81,6 @@ set ExecutionPath {
   UniqueObjectFinder
 
   TreeWriter
-}
-
-#######################
-# GenBeamSpotFilter
-# Saves a particle intended to represent the beamspot
-#######################
-
-module BeamSpotFilter BeamSpotFilter {
-    set InputArray Delphes/stableParticles
-    set OutputArray beamSpotParticle
-
 }
 
 ###############
@@ -287,56 +280,7 @@ module TimeSmearing TimeSmearing {
   set OutputArray tracks
 
   # assume 20 ps resolution for now
-  set TimeResolution 20E-12
-}
-
-##################################
-# Primary vertex reconstruction
-##################################
-
-
-module VertexFinderDA4D VertexFinderDA4D {
-  set InputArray TimeSmearing/tracks
-
-  set OutputArray tracks
-  set VertexOutputArray vertices
-
-  set Verbose 0
-  set MinPT 1.0
-
-  # in mm
-  set VertexSpaceSize 0.5
-
-  # in s
-  set VertexTimeSize 10E-12
-
-  set UseTc 1
-  set BetaMax 0.1
-  set BetaStop 1.0
-  set CoolingFactor 0.8
-  set MaxIterations 100
-
-  # in mm
-  set DzCutOff 40
-  set D0CutOff 30
-
-}
-
-##########################
-# Track pile-up subtractor
-##########################
-
-module TrackTimingPileUpSubtractor TrackTimingPileUpSubtractor {
-# add InputArray InputArray OutputArray
-
-  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronMomentumSmearing/electrons
-  add InputArray MuonMomentumSmearing/muons
-  
-  set VertexInputArray VertexFinderDA4D/vertices
-  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
-  # Z vertex resolution in m
-  set ZVertexResolution {0.0001}
+  set TimeResolution {20E-12}
 }
 
 
@@ -505,6 +449,39 @@ module SimpleCalorimeter HCal {
                             (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.10^2 + energy*1.00^2)}
 }
 
+########################################
+#   Time Smearing Neutral MIP
+########################################
+
+module TimeSmearingNeutral TimeSmearingMIP {
+  set InputArray HCal/eflowTracks
+  set OutputArray timeSmearingMIP
+
+  # assume 20 ps resolution for now
+  set TimeResolution {30E-12}
+}
+
+########################################
+#   Time Smearing Neutral Photons
+########################################
+
+module TimeSmearingNeutral TimeSmearingPhotons {
+  set InputArray HCal/eflowTracks
+  set OutputArray timeSmearingPhotons
+}
+
+########################################
+#   Time Smearing Neutral NeutralHadrons
+########################################
+
+module TimeSmearingNeutral TimeSmearingNH {
+  set InputArray HCal/eflowTracks
+  set OutputArray timeSmearingNH
+
+  # assume 20 ps resolution for now
+  set TimeResolution {30E-12}
+}
+
 
 #################
 # Electron filter
@@ -572,6 +549,70 @@ module PdgCodeFilter EFlowFilter {
   add PdgCode {-13}
 }
 
+##################################
+# Primary vertex reconstruction
+##################################
+
+
+module VertexFinderDA4D VertexFinderDA4D {
+  set InputArray TimeSmearing/tracks
+
+  set OutputArray tracks
+  set VertexOutputArray vertices
+
+  set Verbose 0
+  set MinPT 1.0
+
+  # in mm
+  set VertexSpaceSize 0.5
+
+  # in s
+  set VertexTimeSize 10E-12
+
+  set UseTc 1
+  set BetaMax 0.1
+  set BetaStop 1.0
+  set CoolingFactor 0.8
+  set MaxIterations 100
+
+  # in mm
+  set DzCutOff 40
+  set D0CutOff 30
+
+}
+
+##########################
+# Track pile-up subtractor
+##########################
+
+module TrackTimingPileUpSubtractor TrackTimingPileUpSubtractor {
+# add InputArray InputArray OutputArray
+
+  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
+  add InputArray ElectronMomentumSmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
+  add InputArray EFlowMerger/eflow
+
+  set VertexInputArray VertexFinderDA4D/vertices
+
+  set ZVertexResolution {3}
+  set TVertexResolution {3}
+}
+
+######################################
+# Heavy(slow) particles vertex recover
+######################################
+
+module HighMassVertexRecover HighMassVertexRecover {
+  set TrackInputArray VertexFinderDA4D/tracks
+  set VertexInputArray VertexFinderDA4D/vertices
+
+  set TrackOutputArray tracks
+  set VertexOutputArray vertices
+
+  set Verbose 0
+
+}
 
 ###################
 # Missing ET merger
@@ -1023,5 +1064,7 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch VertexFinderDA4D/vertices Vertex4D Vertex
+
+  add Branch HighMassVertexRecover/tracks Track Track
 }
 

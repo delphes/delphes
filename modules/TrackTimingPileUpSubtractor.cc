@@ -74,7 +74,8 @@ void TrackTimingPileUpSubtractor::Init()
   fItVertexInputArray = fVertexInputArray->MakeIterator();
 
   // read resolution formula in m
-  fFormula->Compile(GetString("ZVertexResolution", "0.001"));
+  fZVertexResolution = GetDouble("ZVertexResolution", 3);
+  fTVertexResolution = GetDouble("TVertexResolution", 3);
 
   fPTMin = GetDouble("PTMin", 0.);
 
@@ -127,7 +128,7 @@ void TrackTimingPileUpSubtractor::Process()
   Double_t sumPTSquare = 0;
   Double_t tempPTSquare = 0;
   Double_t pt, eta, phi, e;
-  Double_t distance = 0;
+  Double_t distanceCharged, distanceNeutral = 0;
 
   // find z position of primary vertex
 
@@ -142,7 +143,6 @@ void TrackTimingPileUpSubtractor::Process()
       zvtx_err = candidate->PositionError.Z();
       tvtx = candidate->Position.T();
       tvtx_err = candidate->PositionError.T();
-      cout << " initial : " << candidate->InitialPosition.T() << " final : " << candidate->Position.T() << endl;
     } 
   }
 
@@ -166,20 +166,20 @@ void TrackTimingPileUpSubtractor::Process()
 
       z = particle->Position.Z();
       z_err = particle->PositionError.Z();
-      t = particle->Position.T();
+      t = particle->InitialPosition.T();
       t_err = particle->PositionError.T();
 
-      // apply pile-up subtraction
-      distance = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
-      //cout << " t : " << tvtx << "  t(particle)" << t << endl;
-      // here I calculated distance using Z and T of selected vertex (highest sum Pt square) and particles
-      // however z_err of vertices is gives 0 because of using CMS trackResolutionCMS.tcl (in that formula, there is limitation on |eta| < 2.5)
-      // thats why I used TMath::Abs(z - zvtx) < 0.005 && TMath::Abs(t - tvtx) < 5.0
+      distanceCharged = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
+      distanceNeutral = pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
 
-      if(candidate->Charge != 0 && TMath::Abs(z - zvtx) < 0.005 && TMath::Abs(t - tvtx) < 5.0)
+      if(candidate->Charge != 0 && distanceCharged < fZVertexResolution)
       {
         candidate->IsRecoPU = 1;
       }
+      else if(candidate->Charge == 0 && distanceNeutral < fTVertexResolution)
+      {
+        candidate->IsRecoPU = 1;
+      }  
       else
       {
         candidate->IsRecoPU = 0;

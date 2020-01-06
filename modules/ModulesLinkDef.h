@@ -37,6 +37,7 @@
 #include "modules/TrackSmearing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
+#include "modules/TimeSmearingNeutral.h"
 #include "modules/SimpleCalorimeter.h"
 #include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
@@ -54,7 +55,6 @@
 #include "modules/LeptonDressing.h"
 #include "modules/PileUpMerger.h"
 #include "modules/JetPileUpSubtractor.h"
-#include "modules/TrackPileUpSubtractor.h"
 #include "modules/TrackTimingPileUpSubtractor.h"
 #include "modules/TaggingParticlesSkimmer.h"
 #include "modules/PileUpJetID.h"
@@ -94,6 +94,7 @@
 #pragma link C++ class TrackSmearing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
+#pragma link C++ class TimeSmearingNeutral+;
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
@@ -111,7 +112,6 @@
 #pragma link C++ class LeptonDressing+;
 #pragma link C++ class PileUpMerger+;
 #pragma link C++ class JetPileUpSubtractor+;
-#pragma link C++ class TrackPileUpSubtractor+;
 #pragma link C++ class TrackTimingPileUpSubtractor+;
 #pragma link C++ class TaggingParticlesSkimmer+;
 #pragma link C++ class PileUpJetID+;
