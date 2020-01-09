@@ -52,16 +52,14 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fFormula(0), fItInputArray(0)
+  fItInputArray(0)
 {
-  fFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TimeSmearing::~TimeSmearing()
-{
-  if(fFormula) delete fFormula;
+{  
 }
 
 //------------------------------------------------------------------------------
@@ -70,13 +68,12 @@ void TimeSmearing::Init()
 {
   // read resolution formula
 
-  fFormula->Compile(GetString("TimeResolution", "1.0"));
+  fTimeResolution = GetDouble("TimeResolution", 1.);
 
   // import input array
   fEtaMax = GetDouble("EtaMax", 6.);
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
   fItInputArray = fInputArray->MakeIterator();
-
   // create output array
 
   fOutputArray = ExportArray(GetString("OutputArray", "muons"));
@@ -94,11 +91,14 @@ void TimeSmearing::Finish()
 void TimeSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t ti, tf_smeared, tf, timeResolution;
-  Double_t pt, eta, phi, e, d0, dz, ctgTheta;
+  Double_t ti, tf_smeared, tf;
+  Double_t pt, eta, phi, e, p, l;
+  Double_t sigma_t, beta_particle;
 
 
   const Double_t c_light = 2.99792458E8;
+
+  cout << " STARTINNNGG ---------->" << endl;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -113,30 +113,31 @@ void TimeSmearing::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-    d0 = candidate->D0;
-    dz = candidate->DZ;
-    ctgTheta = candidate->CtgTheta;
-
+    p = candidateMomentum.P();
+    beta_particle = p/e;
+    l = candidate->L;
     // apply smearing formula
-    
-    timeResolution = fFormula->Eval(pt, eta, phi, e, d0, dz, ctgTheta);
-    if(fabs(candidate->Position.Eta())<fEtaMax)
+
+    if(candidate->Charge != 0)
     { 
-      tf_smeared = tf + timeResolution*gRandom->Gaus(0, 1);
+      tf_smeared = tf + fTimeResolution*gRandom->Gaus(0, 1);
+      //mother = candidate;
+      //candidate = static_cast<Candidate*>(candidate->Clone());  // I am not sure that we need these lines !!!
+      //candidate->AddCandidate(mother);
+      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
+      candidate->Position.SetT(tf_smeared*1.0E3*c_light);
+      candidate->ErrorT = fTimeResolution*1.0E3*c_light;
+      fOutputArray->Add(candidate);
     }
-    else continue;
-
-    // double beta_particle = candidate->Momentum.P()/candidate->Momentum.E();
-    // ti = tf_smeared - candidate->Ld*1.0E-3/(c_light*beta_particle);
-
-    mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->AddCandidate(mother);
-    candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
-    candidate->Position.SetT(tf_smeared*1.0E3*c_light);
-    candidate->ErrorT = timeResolution*1.0E3*c_light;
-
-    fOutputArray->Add(candidate);
+    else
+    {
+    	sigma_t = sqrt(pow(20,2) + pow(150,2)/e);
+    	ti = sigma_t - l*1.0E3/(c_light*beta_particle);   
+    	candidate->InitialPosition.SetT(ti);
+    	candidate->ErrorT = sigma_t*1.0E3*c_light;		// Do we need to sum with 100 like in upside ?
+    	fOutputArray->Add(candidate);
+    }
+   
   }
 }
 

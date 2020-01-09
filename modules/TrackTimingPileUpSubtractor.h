@@ -48,8 +48,8 @@ public:
 private:
   DelphesFormula *fFormula; //!
 
-  Double_t fZVertexResolution;
-  Double_t fTVertexResolution;
+  Double_t fChargedMinSignificance;
+  Double_t fNeutralMinSignificance;
 
   Double_t fPTMin;
 

@@ -74,8 +74,8 @@ void TrackTimingPileUpSubtractor::Init()
   fItVertexInputArray = fVertexInputArray->MakeIterator();
 
   // read resolution formula in m
-  fZVertexResolution = GetDouble("ZVertexResolution", 3);
-  fTVertexResolution = GetDouble("TVertexResolution", 3);
+  fChargedMinSignificance = GetDouble("ChargedMinSignificance", 3);
+  fNeutralMinSignificance = GetDouble("NeutralMinSignificance", 3);
 
   fPTMin = GetDouble("PTMin", 0.);
 
@@ -172,11 +172,11 @@ void TrackTimingPileUpSubtractor::Process()
       distanceCharged = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
       distanceNeutral = pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
 
-      if(candidate->Charge != 0 && distanceCharged < fZVertexResolution)
+      if(candidate->Charge != 0 && distanceCharged < fChargedMinSignificance)
       {
         candidate->IsRecoPU = 1;
       }
-      else if(candidate->Charge == 0 && distanceNeutral < fTVertexResolution)
+      else if(candidate->Charge == 0 && distanceNeutral < fNeutralMinSignificance)
       {
         candidate->IsRecoPU = 1;
       }  
