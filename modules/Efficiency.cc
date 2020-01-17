@@ -94,15 +94,13 @@ void Efficiency::Finish()
 void Efficiency::Process()
 {
   Candidate *candidate;
-  Double_t pt, eta, phi, e, r, z, d0, dz, ctgTheta;
+  Double_t pt, eta, phi, e, d0, dz, ctgTheta;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    r = candidatePosition.Perp();
-    z = candidatePosition.Z();
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
@@ -112,7 +110,7 @@ void Efficiency::Process()
     ctgTheta = candidate->CtgTheta;
 
     // apply an efficency formula
-    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, r, z, d0, dz, ctgTheta)) continue;
+    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, d0, dz, ctgTheta)) continue;
 
     fOutputArray->Add(candidate);
   }
