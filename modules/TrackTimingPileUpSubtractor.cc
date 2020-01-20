@@ -142,7 +142,7 @@ void TrackTimingPileUpSubtractor::Process()
       zvtx_err = candidate->PositionError.Z();
       tvtx = candidate->Position.T();
       tvtx_err = candidate->PositionError.T();
-      cout << " initial : " << candidate->InitialPosition.T() << " final : " << candidate->Position.T() << endl;
+      //cout << " initial : " << candidate->InitialPosition.T() << " final : " << candidate->Position.T() << endl;
     } 
   }
 
