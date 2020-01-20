@@ -147,6 +147,7 @@ Candidate::Candidate() :
   CtgTheta(0), ErrorCtgTheta(0),
   Phi(0), ErrorPhi(0),
   Xd(0), Yd(0), Zd(0), Td(0),
+  DeDx(0),
   VertexingWeight(0),
   TrackResolution(0),
   NCharged(0),
@@ -305,6 +306,7 @@ void Candidate::Copy(TObject &obj) const
   object.PositionError = PositionError;
   object.Area = Area;
   object.L = L;
+  object.DeDx = DeDx;
   object.ErrorT = ErrorT;
   object.D0 = D0;
   object.ErrorD0 = ErrorD0;
@@ -436,6 +438,7 @@ void Candidate::Clear(Option_t *option)
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
   L = 0.0;
+  DeDx = 0.0;
   ErrorT = 0.0;
   D0 = 0.0;
   ErrorD0 = 0.0;

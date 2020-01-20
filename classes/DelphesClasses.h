@@ -476,6 +476,8 @@ public:
   Float_t ErrorD0; // track transverse impact parameter error
   Float_t ErrorDZ; // track longitudinal impact parameter error
 
+  Float_t DeDx; // track charged energy loss in MeV/cm
+
   TRef Particle; // reference to generated particle
 
   Int_t VertexIndex; // reference to vertex
@@ -566,6 +568,8 @@ public:
   Float_t ErrorDZ; // track longitudinal impact parameter error
 
   Int_t VertexIndex; // reference to vertex
+
+  Float_t DeDx; // track charged energy loss in MeV/cm
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -672,6 +676,10 @@ public:
   Float_t Xd;
   Float_t Yd;
   Float_t Zd;
+
+  // PID variables
+  Float_t DeDx; // track charged energy loss in MeV/cm
+
 
   // Vertexing variables
   Float_t VertexingWeight;
