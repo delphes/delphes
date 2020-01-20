@@ -11,7 +11,7 @@
 # Order of execution of various modules
 #######################################
 
-set MaxEvents 100
+set MaxEvents 1000
 set RandomSeed 123
 
 set ExecutionPath {
@@ -254,6 +254,26 @@ module EnergyLoss EnergyLoss {
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronMomentumSmearing/electrons
   add InputArray MuonMomentumSmearing/muons
+
+  set ActiveFraction 0.013
+  set ChargeCollectionEfficiency 0.75
+  
+  # fixme: this number should probably be charge/energy dependent, or absolute number in MeV/cm?
+  set Resolution 0.15
+
+  # active material properties (cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat)
+  set Z 14.
+  set A 28.0855 
+  set rho 2.329 
+  
+  # material polarisation correction parameters
+  set a 0.1492
+  set m 3.2546
+  set x0 0.2015
+  set x1 2.8716
+  set I 173.0 
+  set c0 4.4355
+
 }
 
 ##############
