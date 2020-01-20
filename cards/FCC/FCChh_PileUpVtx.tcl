@@ -28,7 +28,10 @@ set ExecutionPath {
   ElectronMomentumSmearing
   MuonMomentumSmearing
 
+  EnergyLoss
+
   TrackMerger
+
 
   TrackSmearing
   TimeSmearing  
@@ -150,7 +153,6 @@ module ParticlePropagator ParticlePropagator {
 }
 
 
-
 ####################################
 # Charged hadron tracking efficiency
 ####################################
@@ -251,6 +253,16 @@ module MomentumSmearing MuonMomentumSmearing {
   source muonMomentumResolutionVsP.tcl
 }
 
+#################################
+# Charged Energy Loss (dE/dx)
+#################################
+
+module EnergyLoss EnergyLoss {
+  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
+  add InputArray ElectronMomentumSmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
+}
+
 ##############
 # Track merger
 ##############
@@ -262,6 +274,7 @@ module Merger TrackMerger {
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
+
 
 
 ########################################

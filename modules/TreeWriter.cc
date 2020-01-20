@@ -345,6 +345,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->TOuter = position.T() * 1.0E-3 / c_light;
 
     entry->L = candidate->L;
+    entry->DeDx = candidate->DeDx; // in MeV/cm
 
     entry->D0 = candidate->D0;
     entry->ErrorD0 = candidate->ErrorD0;
@@ -491,6 +492,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->TOuter = position.T() * 1.0E-3 / c_light;
 
     entry->L = candidate->L;
+    entry->DeDx = candidate->DeDx;
 
     entry->D0 = candidate->D0;
     entry->ErrorD0 = candidate->ErrorD0;

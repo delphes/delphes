@@ -31,6 +31,7 @@
 #include "modules/PhotonConversions.h"
 #include "modules/ParticlePropagator.h"
 #include "modules/Efficiency.h"
+#include "modules/EnergyLoss.h"
 #include "modules/IdentificationMap.h"
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
@@ -88,6 +89,7 @@
 #pragma link C++ class PhotonConversions+;
 #pragma link C++ class ParticlePropagator+;
 #pragma link C++ class Efficiency+;
+#pragma link C++ class EnergyLoss+;
 #pragma link C++ class IdentificationMap+;
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
