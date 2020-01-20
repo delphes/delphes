@@ -589,8 +589,8 @@ module TrackTimingPileUpSubtractor TrackTimingPileUpSubtractor {
 # add InputArray InputArray OutputArray
 
   add InputArray TimeSmearing/tracks
-  add InputArray TimeSmearing/timeSmearingPhotons
-  add InputArray TimeSmearing/timeSmearingNH
+  add InputArray TimeSmearingPhotons/timeSmearingPhotons
+  add InputArray TimeSmearingNH/timeSmearingNH
 
   set VertexInputArray VertexFinderDA4D/vertices
 
