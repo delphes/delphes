@@ -52,23 +52,24 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fItInputArray(0)
+  fItInputArray(0), fFormula(0)
 {
+	fFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TimeSmearing::~TimeSmearing()
 {  
+	if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Init()
 {
-  // read resolution formula
-
-  fTimeResolution = GetDouble("TimeResolution", 1.);
+  // read resolution formula	
+  fFormula->Compile(GetString("TimeResolution", "0.001"));
 
   // import input array
   fEtaMax = GetDouble("EtaMax", 6.);
@@ -93,12 +94,11 @@ void TimeSmearing::Process()
   Candidate *candidate, *mother;
   Double_t ti, tf_smeared, tf;
   Double_t pt, eta, phi, e, p, l;
-  Double_t sigma_t, beta_particle;
+  Double_t beta_particle;
+  Double_t timeResolution;
 
 
   const Double_t c_light = 2.99792458E8;
-
-  cout << " STARTINNNGG ---------->" << endl;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -116,26 +116,25 @@ void TimeSmearing::Process()
     p = candidateMomentum.P();
     beta_particle = p/e;
     l = candidate->L;
-    // apply smearing formula
-
+    timeResolution = fFormula->Eval(e);
+    
     if(candidate->Charge != 0)
     { 
-      tf_smeared = tf + fTimeResolution*gRandom->Gaus(0, 1);
-      //mother = candidate;
-      //candidate = static_cast<Candidate*>(candidate->Clone());  // I am not sure that we need these lines !!!
-      //candidate->AddCandidate(mother);
+      tf_smeared = tf + timeResolution*gRandom->Gaus(0, 1);
+      mother = candidate;
+      candidate = static_cast<Candidate*>(candidate->Clone());  // I am not sure that we need these lines !!!
+      candidate->AddCandidate(mother);
       candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
       candidate->Position.SetT(tf_smeared*1.0E3*c_light);
-      candidate->ErrorT = fTimeResolution*1.0E3*c_light;
+      candidate->ErrorT = timeResolution*1.0E3*c_light;
       fOutputArray->Add(candidate);
     }
     else
     {
-    	sigma_t = sqrt(pow(20,2) + pow(150,2)/e);
-    	ti = sigma_t - l*1.0E3/(c_light*beta_particle);   
-    	candidate->InitialPosition.SetT(ti);
-    	candidate->ErrorT = sigma_t*1.0E3*c_light;		// Do we need to sum with 100 like in upside ?
-    	fOutputArray->Add(candidate);
+      ti = timeResolution - l*1.0E3/(c_light*beta_particle);   
+      candidate->InitialPosition.SetT(ti);
+      candidate->ErrorT = timeResolution*1.0E3*c_light;		// Do we need to sum with 100 like in upside ?
+      fOutputArray->Add(candidate);
     }
    
   }

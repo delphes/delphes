@@ -24,7 +24,7 @@
  *
  */
 
-#include "modules/TrackPileUpSubtractor.h"
+#include "modules/PileUpSubtractor4D.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -51,7 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::TrackPileUpSubtractor() :
+PileUpSubtractor4D::PileUpSubtractor4D() :
   fFormula(0)
 {
   fFormula = new DelphesFormula;
@@ -59,14 +59,14 @@ TrackPileUpSubtractor::TrackPileUpSubtractor() :
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::~TrackPileUpSubtractor()
+PileUpSubtractor4D::~PileUpSubtractor4D()
 {
   if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
 
-void TrackPileUpSubtractor::Init()
+void PileUpSubtractor4D::Init()
 {
   // import input array
 
@@ -74,7 +74,8 @@ void TrackPileUpSubtractor::Init()
   fItVertexInputArray = fVertexInputArray->MakeIterator();
 
   // read resolution formula in m
-  fFormula->Compile(GetString("ZVertexResolution", "0.001"));
+  fChargedMinSignificance = GetDouble("ChargedMinSignificance", 3);
+  fNeutralMinSignificance = GetDouble("NeutralMinSignificance", 3);
 
   fPTMin = GetDouble("PTMin", 0.);
 
@@ -97,7 +98,7 @@ void TrackPileUpSubtractor::Init()
 
 //------------------------------------------------------------------------------
 
-void TrackPileUpSubtractor::Finish()
+void PileUpSubtractor4D::Finish()
 {
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
@@ -114,24 +115,35 @@ void TrackPileUpSubtractor::Finish()
 
 //------------------------------------------------------------------------------
 
-void TrackPileUpSubtractor::Process()
+void PileUpSubtractor4D::Process()
 {
   Candidate *candidate, *particle;
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
   Double_t z, zvtx = 0;
+  Double_t z_err, zvtx_err = 0;
+  Double_t t, tvtx = 0;
+  Double_t t_err, tvtx_err = 0;
+  Double_t sumPTSquare = 0;
+  Double_t tempPTSquare = 0;
   Double_t pt, eta, phi, e;
+  Double_t distanceCharged, distanceNeutral = 0;
 
   // find z position of primary vertex
 
   fItVertexInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
   {
-    if(!candidate->IsPU)
+    tempPTSquare = candidate->SumPT2;
+    if(tempPTSquare > sumPTSquare)
     {
+      sumPTSquare = tempPTSquare;
       zvtx = candidate->Position.Z();
-    }
+      zvtx_err = candidate->PositionError.Z();
+      tvtx = candidate->Position.T();
+      tvtx_err = candidate->PositionError.T();
+    } 
   }
 
   // loop over all input arrays
@@ -153,14 +165,21 @@ void TrackPileUpSubtractor::Process()
       e = candidateMomentum.E();
 
       z = particle->Position.Z();
+      z_err = particle->PositionError.Z();
+      t = particle->InitialPosition.T();
+      t_err = particle->PositionError.T();
 
-      // apply pile-up subtraction
-      // assume perfect pile-up subtraction for tracks outside fZVertexResolution
+      distanceCharged = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
+      distanceNeutral = pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
 
-      if(candidate->Charge != 0 && candidate->IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
+      if(candidate->Charge != 0 && distanceCharged < fChargedMinSignificance)
       {
         candidate->IsRecoPU = 1;
       }
+      else if(candidate->Charge == 0 && distanceNeutral < fNeutralMinSignificance)
+      {
+        candidate->IsRecoPU = 1;
+      }  
       else
       {
         candidate->IsRecoPU = 0;

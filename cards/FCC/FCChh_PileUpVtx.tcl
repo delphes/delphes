@@ -47,7 +47,7 @@ set ExecutionPath {
   TimeSmearingNH    
 
   VertexFinderDA4D
-  TrackTimingPileUpSubtractor
+  PileUpSubtractor4D
 
   HighMassVertexRecover    
 
@@ -567,6 +567,7 @@ module TimeSmearing TimeSmearingMIP {
 module TimeSmearing TimeSmearingPhotons {
   set InputArray ECal/eflowPhotons
   set OutputArray timeSmearingPhotons
+  set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
 }
 
 ########################################
@@ -578,7 +579,7 @@ module TimeSmearing TimeSmearingNH {
   set OutputArray timeSmearingNH
 
   # assume 30 ps resolution for now
-  set TimeResolution {30E-12}
+  set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
 }
 
 
@@ -618,7 +619,7 @@ module VertexFinderDA4D VertexFinderDA4D {
 # Track pile-up subtractor
 ##########################
 
-module TrackTimingPileUpSubtractor TrackTimingPileUpSubtractor {
+module PileUpSubtractor4D PileUpSubtractor4D {
 # add InputArray InputArray OutputArray
 
   add InputArray TimeSmearing/tracks

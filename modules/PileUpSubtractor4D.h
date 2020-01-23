@@ -16,44 +16,50 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TimeSmearing_h
-#define TimeSmearing_h
+#ifndef PileUpSubtractor4D_h
+#define PileUpSubtractor4D_h
 
-/** \class TimeSmearing
+/** \class TrackPileUpSubtractor
  *
- *  Performs transverse time smearing.
+ *  Subtract pile-up contribution from tracks.
  *
- *  \author Michele Selvaggi - UCL, Louvain-la-Neuve
+ *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
 #include "classes/DelphesModule.h"
 
+#include <map>
+
 class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class TimeSmearing: public DelphesModule
+class PileUpSubtractor4D: public DelphesModule
 {
 public:
-  TimeSmearing();
-  ~TimeSmearing();
+  PileUpSubtractor4D();
+  ~PileUpSubtractor4D();
 
   void Init();
   void Process();
   void Finish();
 
 private:
-  DelphesFormula *fFormula;
-  Double_t fEtaMax;
+  DelphesFormula *fFormula; //!
 
-  TIterator *fItInputArray; //!
+  Double_t fChargedMinSignificance;
+  Double_t fNeutralMinSignificance;
 
-  const TObjArray *fInputArray; //!
+  Double_t fPTMin;
 
-  TObjArray *fOutputArray; //!
+  std::map<TIterator *, TObjArray *> fInputMap; //!
 
-  ClassDef(TimeSmearing, 1)
+  ClassDef(PileUpSubtractor4D, 1)
+
+    TIterator *fItVertexInputArray; //!
+
+  const TObjArray *fVertexInputArray; //!
 };
 
 #endif
