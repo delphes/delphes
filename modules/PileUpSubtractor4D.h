@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TrackTimingPileUpSubtractor_h
-#define TrackTimingPileUpSubtractor_h
+#ifndef PileUpSubtractor4D_h
+#define PileUpSubtractor4D_h
 
 /** \class TrackPileUpSubtractor
  *
@@ -35,11 +35,11 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class TrackTimingPileUpSubtractor: public DelphesModule
+class PileUpSubtractor4D: public DelphesModule
 {
 public:
-  TrackTimingPileUpSubtractor();
-  ~TrackTimingPileUpSubtractor();
+  PileUpSubtractor4D();
+  ~PileUpSubtractor4D();
 
   void Init();
   void Process();
@@ -55,7 +55,7 @@ private:
 
   std::map<TIterator *, TObjArray *> fInputMap; //!
 
-  ClassDef(TrackTimingPileUpSubtractor, 1)
+  ClassDef(PileUpSubtractor4D, 1)
 
     TIterator *fItVertexInputArray; //!
 

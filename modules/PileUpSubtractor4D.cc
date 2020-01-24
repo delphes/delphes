@@ -24,7 +24,7 @@
  *
  */
 
-#include "modules/TrackTimingPileUpSubtractor.h"
+#include "modules/PileUpSubtractor4D.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -51,7 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackTimingPileUpSubtractor::TrackTimingPileUpSubtractor() :
+PileUpSubtractor4D::PileUpSubtractor4D() :
   fFormula(0)
 {
   fFormula = new DelphesFormula;
@@ -59,14 +59,14 @@ TrackTimingPileUpSubtractor::TrackTimingPileUpSubtractor() :
 
 //------------------------------------------------------------------------------
 
-TrackTimingPileUpSubtractor::~TrackTimingPileUpSubtractor()
+PileUpSubtractor4D::~PileUpSubtractor4D()
 {
   if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
 
-void TrackTimingPileUpSubtractor::Init()
+void PileUpSubtractor4D::Init()
 {
   // import input array
 
@@ -98,7 +98,7 @@ void TrackTimingPileUpSubtractor::Init()
 
 //------------------------------------------------------------------------------
 
-void TrackTimingPileUpSubtractor::Finish()
+void PileUpSubtractor4D::Finish()
 {
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
@@ -115,7 +115,7 @@ void TrackTimingPileUpSubtractor::Finish()
 
 //------------------------------------------------------------------------------
 
-void TrackTimingPileUpSubtractor::Process()
+void PileUpSubtractor4D::Process()
 {
   Candidate *candidate, *particle;
   map<TIterator *, TObjArray *>::iterator itInputMap;
@@ -169,20 +169,20 @@ void TrackTimingPileUpSubtractor::Process()
       t = particle->InitialPosition.T();
       t_err = particle->PositionError.T();
 
-      distanceCharged = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
-      distanceNeutral = pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
+      distanceCharged = TMath::Sqrt(pow((zvtx - z),2)/pow((zvtx_err),2) + pow((tvtx - t),2)/pow((tvtx_err),2));
+      distanceNeutral = TMath::Sqrt(pow((tvtx - t),2)/pow((tvtx_err),2));
 
       if(candidate->Charge != 0 && distanceCharged < fChargedMinSignificance)
       {
-        candidate->IsRecoPU = 1;
+        candidate->IsRecoPU = 0;
       }
       else if(candidate->Charge == 0 && distanceNeutral < fNeutralMinSignificance)
       {
-        candidate->IsRecoPU = 1;
+        candidate->IsRecoPU = 0;
       }  
       else
       {
-        candidate->IsRecoPU = 0;
+        candidate->IsRecoPU = 1;
         if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
       }
     }

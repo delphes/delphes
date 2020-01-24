@@ -44,7 +44,7 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  DelphesFormula *fFormula;
   Double_t fEtaMax;
 
   TIterator *fItInputArray; //!

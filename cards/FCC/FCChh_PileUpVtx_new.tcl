@@ -11,7 +11,7 @@
 # Order of execution of various modules
 #######################################
 
-set MaxEvents 1000
+set MaxEvents 100
 set RandomSeed 123
 
 set ExecutionPath {
@@ -27,11 +27,14 @@ set ExecutionPath {
   ElectronMomentumSmearing
   MuonMomentumSmearing
 
-  EnergyLoss
-
   TrackMerger
 
   TrackSmearing
+  TimeSmearing  
+
+  VertexFinderDA4D  
+
+  TrackTimingPileUpSubtractor  
 
   ECal
   HCal
@@ -39,15 +42,6 @@ set ExecutionPath {
   Calorimeter
   EFlowMerger
   EFlowFilter
-
-  TimeSmearingMIP
-  TimeSmearingPhotons
-  TimeSmearingNH    
-
-  VertexFinderDA4D
-  PileUpSubtractor4D
-
-  HighMassVertexRecover    
 
   PhotonEfficiency
   PhotonIsolation
@@ -142,6 +136,7 @@ module ParticlePropagator ParticlePropagator {
   # magnetic field
   set Bz 4.0
 }
+
 
 
 ####################################
@@ -244,36 +239,6 @@ module MomentumSmearing MuonMomentumSmearing {
   source muonMomentumResolutionVsP.tcl
 }
 
-#################################
-# Charged Energy Loss (dE/dx)
-#################################
-
-module EnergyLoss EnergyLoss {
-  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronMomentumSmearing/electrons
-  add InputArray MuonMomentumSmearing/muons
-
-  set ActiveFraction 0.013
-  set ChargeCollectionEfficiency 0.75
-  
-  # fixme: this number should probably be charge/energy dependent, or absolute number in MeV/cm?
-  set Resolution 0.15
-
-  # active material properties (cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat)
-  set Z 14.
-  set A 28.0855 
-  set rho 2.329 
-  
-  # material polarisation correction parameters
-  set a 0.1492
-  set m 3.2546
-  set x0 0.2015
-  set x1 2.8716
-  set I 173.0 
-  set c0 4.4355
-
-}
-
 ##############
 # Track merger
 ##############
@@ -287,7 +252,6 @@ module Merger TrackMerger {
 }
 
 
-
 ########################################
 #   Smear tracks
 ########################################
@@ -298,8 +262,69 @@ module TrackSmearing TrackSmearing {
   set ApplyToPileUp true
 
   # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source trackResolutionFCChh.tcl 
+  source trackResolutionCMS.tcl 
   # FIXME !!!! we need to add track resolution of FCC-hh baseline detector !!!!!
+}
+
+########################################
+#   Time Smearing
+########################################
+
+module TimeSmearing TimeSmearing {
+  set InputArray TrackSmearing/tracks
+  set OutputArray tracks
+
+  # assume 20 ps resolution for now
+  set TimeResolution {20E-12}
+}
+
+##################################
+# Primary vertex reconstruction
+##################################
+
+
+module VertexFinderDA4D VertexFinderDA4D {
+  set InputArray TimeSmearing/tracks
+
+  set OutputArray tracks
+  set VertexOutputArray vertices
+
+  set Verbose 0
+  set MinPT 1.0
+
+  # in mm
+  set VertexSpaceSize 0.5
+
+  # in s
+  set VertexTimeSize 10E-12
+
+  set UseTc 1
+  set BetaMax 0.1
+  set BetaStop 1.0
+  set CoolingFactor 0.8
+  set MaxIterations 100
+
+  # in mm
+  set DzCutOff 40
+  set D0CutOff 30
+
+}
+
+##########################
+# Track pile-up subtractor
+##########################
+
+module TrackTimingPileUpSubtractor TrackTimingPileUpSubtractor {
+# add InputArray InputArray OutputArray
+
+  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
+  add InputArray ElectronMomentumSmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
+  
+  set VertexInputArray VertexFinderDA4D/vertices
+  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
+  # Z vertex resolution in m
+  set ZVertexResolution {0.0001}
 }
 
 
@@ -468,6 +493,7 @@ module SimpleCalorimeter HCal {
                             (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.10^2 + energy*1.00^2)}
 }
 
+
 #################
 # Electron filter
 #################
@@ -534,105 +560,6 @@ module PdgCodeFilter EFlowFilter {
   add PdgCode {-13}
 }
 
-########################################
-#   Time Smearing Neutral MIP
-########################################
-
-module TimeSmearing TimeSmearingMIP {
-  set InputArray HCal/eflowTracks
-  set OutputArray tracks
-
-  # assume 30 ps resolution for now
-  set TimeResolution {30E-12}
-}
-
-########################################
-#   Time Smearing Neutral Photons
-########################################
-
-module TimeSmearing TimeSmearingPhotons {
-  set InputArray ECal/eflowPhotons
-  set OutputArray photons
-  set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
-}
-
-########################################
-#   Time Smearing Neutral NeutralHadrons
-########################################
-#
-module TimeSmearing TimeSmearingNH {
-  set InputArray HCal/eflowNeutralHadrons
-  set OutputArray neutralhadrons
-
-  # assume 30 ps resolution for now
-  set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
-}
-
-
-##################################
-# Primary vertex reconstruction
-##################################
-
-
-module VertexFinderDA4D VertexFinderDA4D {
-  set InputArray TimeSmearingMIP/tracks
-
-  set OutputArray tracks
-  set VertexOutputArray vertices
-
-  set Verbose 0
-  set MinPT 1.0
-
-  # in mm
-  set VertexSpaceSize 0.5
-
-  # in s
-  set VertexTimeSize 10E-12
-
-  set UseTc 1
-  set BetaMax 0.1
-  set BetaStop 1.0
-  set CoolingFactor 0.8
-  set MaxIterations 100
-
-  # in mm
-  set DzCutOff 40
-  set D0CutOff 30
-
-}
-
-##########################
-# Track pile-up subtractor
-##########################
-
-module PileUpSubtractor4D PileUpSubtractor4D {
-# add InputArray InputArray OutputArray
-
-  add InputArray TimeSmearingMIP/tracks
-  add InputArray TimeSmearingPhotons/photons
-  add InputArray TimeSmearingNH/neutralhadrons
-
-  set VertexInputArray VertexFinderDA4D/vertices
-
-  set fChargedMinSignificance {3}
-  set fNeutralMinSignificance {3}
-}
-
-######################################
-# Heavy(slow) particles vertex recover
-######################################
-
-module HighMassVertexRecover HighMassVertexRecover {
-
-  set TrackInputArray VertexFinderDA4D/tracks
-  set VertexInputArray VertexFinderDA4D/vertices
-
-  set TrackOutputArray tracks
-  set VertexOutputArray vertices
-
-  set Verbose 0
-
-}
 
 ###################
 # Missing ET merger
@@ -1084,7 +1011,5 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch VertexFinderDA4D/vertices Vertex4D Vertex
-
-  add Branch HighMassVertexRecover/tracks Track Track
 }
 

@@ -274,8 +274,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
     cout << Form("Beta Start = %2.1e", beta) << endl;
   }
 
-  if( fVerbose > 10 ) plot_status(beta, vtx, tks, 0, "Ast");
-
   if( fVerbose > 2){cout << "Cool down untill reaching the temperature to finish increasing the number of vertexes" << endl;}
 
   double rho0=0.0;  // start with no outlier rejection
@@ -289,7 +287,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
     do  {
       delta2 = update(beta, tks, vtx, rho0);
 
-      if( fVerbose > 10 ) plot_status(beta, vtx, tks, niter, "Bup");
       if (fVerbose > 3)
       {
         cout << "Update " << niter << " : " << delta2 << endl;
@@ -311,7 +308,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
       while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
       n_it++;
 
-      if( fVerbose > 10 ) plot_status(beta, vtx, tks, n_it, "Cme");
     }
 
     beta /= fCoolingFactor;
@@ -319,7 +315,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
     if( beta < fBetaStop )
     {
       split(beta, vtx, tks);
-      if( fVerbose > 10 ) plot_status(beta, vtx, tks, 0, "Asp");
     }
     else
     {
@@ -354,7 +349,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
       niter++;
     }
     while (delta2 > 0.3*fD2UpdateLim &&  niter < fMaxIterations);
-    if( fVerbose > 10 ) plot_status(beta, vtx, tks, f, "Dadout");
   }
 
   do {
@@ -372,7 +366,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
           niter++;
         }
         while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
-        if( fVerbose > 10 ) plot_status(beta, vtx, tks, i_pu, Form("Eprg%d",min_trk));
         i_pu++;
       }
     }
@@ -389,7 +382,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
       while (delta2 > fD2UpdateLim &&  niter < fMaxIterations);
       n_it++;
 
-      if( fVerbose > 10 ) plot_status(beta, vtx, tks, n_it, "Cme");
     }
   } while( beta < fBetaPurge );
 
@@ -403,7 +395,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
     do  {
       delta2 = update(beta, tks, vtx, rho0);
       niter++;
-      if( fVerbose > 10 ) plot_status(beta, vtx, tks, 0, "Bup");
     }
     while (delta2 > 0.3*fD2UpdateLim &&  niter < fMaxIterations);
 
@@ -424,6 +415,7 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
 
     candidate->ClusterIndex = k;
     candidate->Position.SetXYZT(0.0, 0.0, vtx.z[k] , vtx.t[k]*1E-9*c_light);
+    candidate->InitialPosition.SetXYZT(0.0, 0.0, vtx.z[k] , vtx.t[k]*1E-9*c_light);    
     candidate->PositionError.SetXYZT(0.0, 0.0, fVertexZSize , fVertexTSize*1E-9*c_light);
     candidate->SumPT2 = 0;
     candidate->SumPt = 0;
@@ -482,8 +474,6 @@ void VertexFinderDA4D::clusterize(TObjArray &clusters)
     }
     fTrackOutputArray->Add(tks.tt[i]);
   }
-
-  if(fVerbose > 10) plot_status_end(vtx, tks);
 
 }
 
@@ -876,7 +866,6 @@ bool VertexFinderDA4D::split(double &beta, vertex_t &vtx, tracks_t & tks)
         else
         {
           continue;
-          // plot_split_crush(zn, tn, vtx, tks, k);
           // throw std::invalid_argument( "0 division" );
         }
 
@@ -1040,273 +1029,4 @@ bool VertexFinderDA4D::purge(vertex_t & vtx, tracks_t & tks, double & rho0, cons
   } else {
     return false;
   }
-}
-
-
-// -----------------------------------------------------------------------------
-// Plot status
-void VertexFinderDA4D::plot_status(double beta, vertex_t &vtx, tracks_t &tks, int n_it, const char* flag)
-{
-  vector<int> vtx_color = {2,4,8,1,5,6,9,14,46,3};
-  while(vtx.getSize() > vtx_color.size()) vtx_color.push_back(40);
-
-  vector<double> t_PV, dt_PV, z_PV, dz_PV;
-  vector<double> t_PU, dt_PU, z_PU, dz_PU;
-
-  double ETot = 0;
-  vector<double> pk_exp_mBetaE = Compute_pk_exp_mBetaE(beta, vtx, tks, 0);
-
-  for(unsigned int i = 0; i < tks.getSize(); i++)
-  {
-    for(unsigned int k = 0; k < vtx.getSize(); k++)
-    {
-      unsigned int idx = k*tks.getSize() + i;
-      if(pk_exp_mBetaE[idx] == 0) continue;
-
-      double p_ygx = pk_exp_mBetaE[idx] / tks.Z[i];
-
-      ETot += tks.w[i] * p_ygx * Energy(tks.z[i], vtx.z[k], tks.dz2_o[i], tks.t[i], vtx.t[k], tks.dt2_o[i]);
-    }
-
-    if(tks.tt[i]->IsPU)
-    {
-      t_PU.push_back(tks.t[i]);
-      dt_PU.push_back(1./tks.dt_o[i]);
-      z_PU.push_back(tks.z[i]);
-      dz_PU.push_back(1./tks.dz_o[i]);
-    }
-    else
-    {
-      t_PV.push_back(tks.t[i]);
-      dt_PV.push_back(1./tks.dt_o[i]);
-      z_PV.push_back(tks.z[i]);
-      dz_PV.push_back(1./tks.dz_o[i]);
-    }
-  }
-
-
-  ETot /= tks.sum_w;
-  fEnergy_rec.push_back(ETot);
-  fBeta_rec.push_back(beta);
-  fNvtx_rec.push_back(vtx.getSize());
-
-  double t_min = TMath::Min(  TMath::MinElement(t_PV.size(), &t_PV[0]), TMath::MinElement(t_PU.size(), &t_PU[0])  );
-  t_min = TMath::Min(t_min, TMath::MinElement(vtx.getSize(), &(vtx.t[0]))  ) - fVertexTSize;
-  double t_max = TMath::Max(  TMath::MaxElement(t_PV.size(), &t_PV[0]), TMath::MaxElement(t_PU.size(), &t_PU[0])  );
-  t_max = TMath::Max(t_max, TMath::MaxElement(vtx.getSize(), &(vtx.t[0]))  ) + fVertexTSize;
-
-  double z_min = TMath::Min(  TMath::MinElement(z_PV.size(), &z_PV[0]), TMath::MinElement(z_PU.size(), &z_PU[0])  );
-  z_min = TMath::Min(z_min, TMath::MinElement(vtx.getSize(), &(vtx.z[0]))  ) - 5;
-  double z_max = TMath::Max(  TMath::MaxElement(z_PV.size(), &z_PV[0]), TMath::MaxElement(z_PU.size(), &z_PU[0])  );
-  z_max = TMath::Max(z_max, TMath::MaxElement(vtx.getSize(), &(vtx.z[0]))  ) + 5;
-
-  auto c_2Dspace = new TCanvas("c_2Dspace", "c_2Dspace", 800, 600);
-
-  TGraphErrors* gr_PVtks = new TGraphErrors(t_PV.size(), &t_PV[0], &z_PV[0], &dt_PV[0], &dz_PV[0]);
-  gr_PVtks->SetTitle(Form("Clustering space - #beta = %.6f", beta));
-  gr_PVtks->GetXaxis()->SetTitle("t CA [ps]");
-  gr_PVtks->GetXaxis()->SetLimits(t_min, t_max);
-  gr_PVtks->GetYaxis()->SetTitle("z CA [mm]");
-  gr_PVtks->GetYaxis()->SetRangeUser(z_min, z_max);
-  gr_PVtks->SetMarkerStyle(4);
-  gr_PVtks->SetMarkerColor(8);
-  gr_PVtks->SetLineColor(8);
-  gr_PVtks->Draw("APE1");
-
-  TGraphErrors* gr_PUtks = new TGraphErrors(t_PU.size(), &t_PU[0], &z_PU[0], &dt_PU[0], &dz_PU[0]);
-  gr_PUtks->SetMarkerStyle(3);
-  gr_PUtks->Draw("PE1");
-
-  TGraph* gr_vtx = new TGraph(vtx.getSize(), &(vtx.t[0]), &(vtx.z[0]));
-  gr_vtx->SetMarkerStyle(28);
-  gr_vtx->SetMarkerColor(2);
-  gr_vtx->SetMarkerSize(2.);
-  gr_vtx->Draw("PE1");
-
-  fItInputGenVtx->Reset();
-  TGraph* gr_genvtx = new TGraph(fInputGenVtx->GetEntriesFast());
-  Candidate *candidate;
-  unsigned int k = 0;
-  while((candidate = static_cast<Candidate*>(fItInputGenVtx->Next())))
-  {
-    gr_genvtx->SetPoint(k, candidate->Position.T()*1E9/c_light, candidate->Position.Z());
-    k++;
-  }
-  gr_genvtx->SetMarkerStyle(33);
-  gr_genvtx->SetMarkerColor(6);
-  gr_genvtx->SetMarkerSize(2.);
-  gr_genvtx->Draw("PE1");
-
-  // auto leg = new TLegend(0.1, 0.1);
-  // leg->AddEntry(gr_PVtks, "PV tks", "ep");
-  // leg->AddEntry(gr_PUtks, "PU tks", "ep");
-  // leg->AddEntry(gr_vtx, "Cluster center", "p");
-  // leg->Draw();
-
-  c_2Dspace->SetGrid();
-  c_2Dspace->SaveAs(fFigFolderPath + Form("/c_2Dspace_beta%010.0f-%s%d.png", 1E7*beta, flag, n_it));
-
-  delete c_2Dspace;
-}
-
-// -----------------------------------------------------------------------------
-// Plot status at the end
-void VertexFinderDA4D::plot_status_end(vertex_t &vtx, tracks_t &tks)
-{
-  unsigned int nv = vtx.getSize();
-
-  // Define colors in a meaningfull way
-  vector<int> MyPalette(nv);
-
-  const int Number = 3;
-  double Red[Number]    = { 1.00, 0.00, 0.00};
-  double Green[Number]  = { 0.00, 1.00, 0.00};
-  double Blue[Number]   = { 1.00, 0.00, 1.00};
-  double Length[Number] = { 0.00, 0.50, 1.00 };
-  int FI = TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nv);
-  for (unsigned int i=0;i<nv;i++) MyPalette[i] = FI+i;
-
-  TCanvas * c_out = new TCanvas("c_out", "c_out", 800, 600);
-  double t_min = TMath::Min( TMath::MinElement(tks.getSize(), &tks.t[0]), TMath::MinElement(vtx.getSize(), &(vtx.t[0]))  ) - 2*fVertexTSize;
-  double t_max = TMath::Max(TMath::MaxElement(tks.getSize(), &tks.t[0]), TMath::MaxElement(vtx.getSize(), &(vtx.t[0]))  ) + 2*fVertexTSize;
-
-  double z_min = TMath::Min( TMath::MinElement(tks.getSize(), &tks.z[0]), TMath::MinElement(vtx.getSize(), &(vtx.z[0]))  ) - 15;
-  double z_max = TMath::Max( TMath::MaxElement(tks.getSize(), &tks.z[0]), TMath::MaxElement(vtx.getSize(), &(vtx.z[0]))  ) + 15;
-
-  // Draw tracks
-  for(unsigned int i = 0; i < tks.getSize(); i++)
-  {
-    double dt[] = {1./tks.dt_o[i]};
-    double dz[] = {1./tks.dz_o[i]};
-    TGraphErrors* gr = new TGraphErrors(1, &(tks.t[i]), &(tks.z[i]), dt, dz);
-
-    gr->SetNameTitle(Form("gr%d",i), Form("gr%d",i));
-
-    int marker = tks.tt[i]->IsPU? 1 : 4;
-    gr->SetMarkerStyle(marker);
-
-    int idx = tks.tt[i]->ClusterIndex;
-    int color = idx>=0 ? MyPalette[idx] : 13;
-    gr->SetMarkerColor(color);
-    gr->SetLineColor(color);
-
-    int line_style = idx>=0 ? 1 : 3;
-    gr->SetLineStyle(line_style);
-
-    if(i==0)
-    {
-      gr->SetTitle(Form("Clustering space - Tot Vertexes = %d", nv));
-      gr->GetXaxis()->SetTitle("t CA [ps]");
-      gr->GetXaxis()->SetLimits(t_min, t_max);
-      gr->GetYaxis()->SetTitle("z CA [mm]");
-      gr->GetYaxis()->SetRangeUser(z_min, z_max);
-      gr->Draw("APE1");
-    }
-    else gr->Draw("PE1");
-  }
-
-  // Draw vertices
-  for(unsigned int k = 0; k < vtx.getSize(); k++)
-  {
-    TGraph* gr = new TGraph(1, &(vtx.t[k]), &(vtx.z[k]));
-
-    gr->SetNameTitle(Form("grv%d",k), Form("grv%d",k));
-
-    gr->SetMarkerStyle(41);
-    gr->SetMarkerSize(2.);
-    gr->SetMarkerColor(MyPalette[k]);
-
-    gr->Draw("P");
-  }
-
-  fItInputGenVtx->Reset();
-  TGraph* gr_genvtx = new TGraph(fInputGenVtx->GetEntriesFast());
-  TGraph* gr_genPV = new TGraph(1);
-  Candidate *candidate;
-  unsigned int k = 0;
-  while((candidate = static_cast<Candidate*>(fItInputGenVtx->Next())))
-  {
-    if(k == 0 ) {
-      gr_genPV->SetPoint(k, candidate->Position.T()*1E9/c_light, candidate->Position.Z());
-    }
-    else gr_genvtx->SetPoint(k, candidate->Position.T()*1E9/c_light, candidate->Position.Z());
-
-    k++;
-  }
-  gr_genvtx->SetMarkerStyle(20);
-  gr_genvtx->SetMarkerColorAlpha(kBlack, 0.8);
-  gr_genvtx->SetMarkerSize(.8);
-  gr_genvtx->Draw("PE1");
-  gr_genPV->SetMarkerStyle(33);
-  gr_genPV->SetMarkerColorAlpha(kBlack, 1);
-  gr_genPV->SetMarkerSize(2.5);
-  gr_genPV->Draw("PE1");
-
-  // auto note =  new TLatex();
-  // note->DrawLatexNDC(0.5, 0.8, Form("#splitline{Vertexes Reco = %d }{Vertexes gen = %d}", vtx.getSize(), k) );
-
-  c_out->SetGrid();
-  c_out->SaveAs(fFigFolderPath + Form("/c_final.root"));
-  delete c_out;
-}
-
-// -----------------------------------------------------------------------------
-// Plot splitting
-void VertexFinderDA4D::plot_split_crush(double zn, double tn, vertex_t &vtx, tracks_t &tks, int i_vtx)
-{
-  vector<double> t, dt, z, dz;
-
-  for(unsigned int i = 0; i < tks.getSize(); i++)
-  {
-      t.push_back(tks.t[i]);
-      dt.push_back(1./tks.dt_o[i]);
-      z.push_back(tks.z[i]);
-      dz.push_back(1./tks.dz_o[i]);
-  }
-
-
-  double t_min = TMath::Min(TMath::MinElement(t.size(), &t[0]), TMath::MinElement(vtx.getSize(), &(vtx.t[0]))  ) - 50;
-  double t_max = TMath::Max(TMath::MaxElement(t.size(), &t[0]), TMath::MaxElement(vtx.getSize(), &(vtx.t[0]))  ) + 50;
-
-  double z_min = TMath::Min(TMath::MinElement(z.size(), &z[0]), TMath::MinElement(vtx.getSize(), &(vtx.z[0]))  ) - 5;
-  double z_max = TMath::Max(TMath::MaxElement(z.size(), &z[0]), TMath::MaxElement(vtx.getSize(), &(vtx.z[0]))  ) + 5;
-
-  auto c_2Dspace = new TCanvas("c_2Dspace", "c_2Dspace", 800, 600);
-
-  TGraphErrors* gr_PVtks = new TGraphErrors(t.size(), &t[0], &z[0], &dt[0], &dz[0]);
-  gr_PVtks->SetTitle(Form("Clustering space"));
-  gr_PVtks->GetXaxis()->SetTitle("t CA [ps]");
-  gr_PVtks->GetXaxis()->SetLimits(t_min, t_max);
-  gr_PVtks->GetYaxis()->SetTitle("z CA [mm]");
-  gr_PVtks->GetYaxis()->SetRangeUser(z_min, z_max);
-  gr_PVtks->SetMarkerStyle(4);
-  gr_PVtks->SetMarkerColor(1);
-  gr_PVtks->SetLineColor(1);
-  gr_PVtks->Draw("APE1");
-
-  TGraph* gr_vtx = new TGraph(1, &(vtx.t[i_vtx]), &(vtx.z[i_vtx]));
-  gr_vtx->SetMarkerStyle(28);
-  gr_vtx->SetMarkerColor(2);
-  gr_vtx->SetMarkerSize(2.);
-  gr_vtx->Draw("PE1");
-
-  double t_pos[] = {vtx.t[i_vtx], vtx.t[i_vtx]+100};
-  double t_neg[] = {vtx.t[i_vtx], vtx.t[i_vtx]-100};
-  double z_pos[] = {vtx.z[i_vtx], vtx.z[i_vtx]+(zn/tn)*100};
-  double z_neg[] = {vtx.z[i_vtx], vtx.z[i_vtx]-(zn/tn)*100};
-
-  TGraph* gr_pos = new TGraph(2, &t_pos[0], &z_pos[0]);
-  gr_pos->SetLineColor(8);
-  gr_pos->SetMarkerColor(8);
-  gr_pos->Draw("PL");
-  TGraph* gr_neg = new TGraph(2, &t_neg[0], &z_neg[0]);
-  gr_neg->SetLineColor(4);
-  gr_neg->SetMarkerColor(4);
-  gr_neg->Draw("PL");
-
-
-  c_2Dspace->SetGrid();
-  c_2Dspace->SaveAs(fFigFolderPath + Form("/crush_splitting.png"));
-
-  delete c_2Dspace;
 }

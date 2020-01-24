@@ -16,30 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TrackTimingPileUpSubtractor_h
-#define TrackTimingPileUpSubtractor_h
+#ifndef TimeSmearingNeutral_h
+#define TimeSmearingNeutral_h
 
-/** \class TrackPileUpSubtractor
+/** \class TimeSmearingNeutral
  *
- *  Subtract pile-up contribution from tracks.
+ *  Performs transverse time smearing.
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author Michele Selvaggi - UCL, Louvain-la-Neuve
  *
  */
 
 #include "classes/DelphesModule.h"
 
-#include <map>
-
 class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class TrackTimingPileUpSubtractor: public DelphesModule
+class TimeSmearingNeutral: public DelphesModule
 {
 public:
-  TrackTimingPileUpSubtractor();
-  ~TrackTimingPileUpSubtractor();
+  TimeSmearingNeutral();
+  ~TimeSmearingNeutral();
 
   void Init();
   void Process();
@@ -47,19 +45,16 @@ public:
 
 private:
   DelphesFormula *fFormula; //!
+  Double_t fEtaMax;
+  Double_t fTimeResolution;
 
-  Double_t fChargedMinSignificance;
-  Double_t fNeutralMinSignificance;
+  TIterator *fItInputArray; //!
 
-  Double_t fPTMin;
+  const TObjArray *fInputArray; //!
 
-  std::map<TIterator *, TObjArray *> fInputMap; //!
+  TObjArray *fOutputArray; //!
 
-  ClassDef(TrackTimingPileUpSubtractor, 1)
-
-    TIterator *fItVertexInputArray; //!
-
-  const TObjArray *fVertexInputArray; //!
+  ClassDef(TimeSmearingNeutral, 1)
 };
 
 #endif

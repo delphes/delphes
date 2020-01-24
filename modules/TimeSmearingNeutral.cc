@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \class TimeSmearing
+/** \class TimeSmearingNeutral
  *
  *  Performs transverse momentum resolution smearing.
  *
@@ -24,7 +24,7 @@
  *
  */
 
-#include "modules/TimeSmearing.h"
+#include "modules/TimeSmearingNeutral.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -51,30 +51,32 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TimeSmearing::TimeSmearing() :
-  fItInputArray(0), fFormula(0)
+TimeSmearingNeutral::TimeSmearingNeutral() :
+  fFormula(0), fItInputArray(0)
 {
-	fFormula = new DelphesFormula;
+  fFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
-TimeSmearing::~TimeSmearing()
-{  
-	if(fFormula) delete fFormula;
+TimeSmearingNeutral::~TimeSmearingNeutral()
+{
+  if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Init()
+void TimeSmearingNeutral::Init()
 {
-  // read resolution formula	
-  fFormula->Compile(GetString("TimeResolution", "0.001"));
+  // read resolution formula
 
+  //fFormula->Compile(GetString("TimeResolution", "1.0"));
+  fTimeResolution = GetDouble("TimeResolution", 1.);
   // import input array
   fEtaMax = GetDouble("EtaMax", 6.);
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
   fItInputArray = fInputArray->MakeIterator();
+
   // create output array
 
   fOutputArray = ExportArray(GetString("OutputArray", "muons"));
@@ -82,21 +84,21 @@ void TimeSmearing::Init()
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Finish()
+void TimeSmearingNeutral::Finish()
 {
   if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Process()
+void TimeSmearingNeutral::Process()
 {
   Candidate *candidate, *mother;
-  Double_t ti, tf_smeared, tf;
-  Double_t pt, eta, phi, e, p, l;
+  Double_t ti, tf_smeared, tf, timeResolution;
+  Double_t pt, eta, phi, e, p, d0, dz, ctgTheta;
   Double_t beta_particle;
-  Double_t timeResolution;
-
+  Double_t l;
+  Double_t sigma_t;
 
   const Double_t c_light = 2.99792458E8;
 
@@ -105,38 +107,23 @@ void TimeSmearing::Process()
   {
     ti = candidate->InitialPosition.T()*1.0E-3/c_light;
     tf = candidate->Position.T()*1.0E-3/c_light;
-    
-    // dummy, only need to properly call TFormula
-    const TLorentzVector &candidatePosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
-    p = candidateMomentum.P();
+    e = candidate->Momentum.E();
+    p = candidate->Momentum.P();
     beta_particle = p/e;
     l = candidate->L;
-    timeResolution = fFormula->Eval(e);
-    
-    if(candidate->Charge != 0)
-    { 
-      tf_smeared = tf + timeResolution*gRandom->Gaus(0, 1);
-      mother = candidate;
-      candidate = static_cast<Candidate*>(candidate->Clone());  // I am not sure that we need these lines !!!
-      candidate->AddCandidate(mother);
-      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);  // Dummy Value, correct value will be computed by VertexFinderDA4D
-      candidate->Position.SetT(tf_smeared*1.0E3*c_light);
-      candidate->ErrorT = timeResolution*1.0E3*c_light;
-      fOutputArray->Add(candidate);
-    }
-    else
+
+    if(candidate->Charge == 0)
     {
-      ti = timeResolution - l*1.0E3/(c_light*beta_particle);   
-      candidate->InitialPosition.SetT(ti);
-      candidate->ErrorT = timeResolution*1.0E3*c_light;		// Do we need to sum with 100 like in upside ?
-      fOutputArray->Add(candidate);
-    }
-   
+      sigma_t = sqrt(pow(20,2) + pow(150,2)/e)*1.0E-12;
+    }else
+      sigma_t = fTimeResolution*gRandom->Gaus(0, 1);;
+
+    ti = sigma_t - l*1.0E3/(c_light*beta_particle);
+
+
+    candidate->InitialPosition.SetT(ti);
+    candidate->ErrorT = sigma_t*1.0E3*c_light;
+    fOutputArray->Add(candidate);
   }
 }
 
