@@ -124,7 +124,7 @@ void TimeSmearing::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());  // I am not sure that we need these lines !!!
       candidate->AddCandidate(mother);
-      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
+      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);  // Dummy Value, correct value will be computed by VertexFinderDA4D
       candidate->Position.SetT(tf_smeared*1.0E3*c_light);
       candidate->ErrorT = timeResolution*1.0E3*c_light;
       fOutputArray->Add(candidate);

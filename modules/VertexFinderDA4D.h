@@ -233,15 +233,6 @@ class VertexFinderDA4D: public DelphesModule
     // Compute all the energies and set the partition function normalization for each track
     std::vector<double> Compute_pk_exp_mBetaE(double beta, vertex_t &vtx, tracks_t &tks, double Z_init);
 
-    // Plot status of tracks and Vertices
-    void plot_status(double beta, vertex_t &vtx, tracks_t &tks, int n_it = 0, const char* flag ="");
-
-    // Plot status at the end of the fitting
-    void plot_status_end(vertex_t &vtx, tracks_t &tks);
-
-    // Plot Crush
-    void plot_split_crush(double zn, double tn, vertex_t &vtx, tracks_t &tks, int i_vtx);
-
 
   private:
 

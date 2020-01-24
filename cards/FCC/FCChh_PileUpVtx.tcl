@@ -31,9 +31,7 @@ set ExecutionPath {
 
   TrackMerger
 
-
   TrackSmearing
-  TimeSmearing      
 
   ECal
   HCal
@@ -300,20 +298,8 @@ module TrackSmearing TrackSmearing {
   set ApplyToPileUp true
 
   # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source trackResolutionCMS.tcl 
+  source trackResolutionFCChh.tcl 
   # FIXME !!!! we need to add track resolution of FCC-hh baseline detector !!!!!
-}
-
-########################################
-#   Time Smearing
-########################################
-
-module TimeSmearing TimeSmearing {
-  set InputArray TrackSmearing/tracks
-  set OutputArray tracks
-
-  # assume 20 ps resolution for now
-  set TimeResolution {20E-12}
 }
 
 
@@ -554,7 +540,7 @@ module PdgCodeFilter EFlowFilter {
 
 module TimeSmearing TimeSmearingMIP {
   set InputArray HCal/eflowTracks
-  set OutputArray timeSmearingMIP
+  set OutputArray tracks
 
   # assume 30 ps resolution for now
   set TimeResolution {30E-12}
@@ -566,7 +552,7 @@ module TimeSmearing TimeSmearingMIP {
 
 module TimeSmearing TimeSmearingPhotons {
   set InputArray ECal/eflowPhotons
-  set OutputArray timeSmearingPhotons
+  set OutputArray photons
   set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
 }
 
@@ -576,7 +562,7 @@ module TimeSmearing TimeSmearingPhotons {
 #
 module TimeSmearing TimeSmearingNH {
   set InputArray HCal/eflowNeutralHadrons
-  set OutputArray timeSmearingNH
+  set OutputArray neutralhadrons
 
   # assume 30 ps resolution for now
   set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
@@ -589,7 +575,7 @@ module TimeSmearing TimeSmearingNH {
 
 
 module VertexFinderDA4D VertexFinderDA4D {
-  set InputArray TimeSmearing/tracks
+  set InputArray TimeSmearingMIP/tracks
 
   set OutputArray tracks
   set VertexOutputArray vertices
@@ -622,9 +608,9 @@ module VertexFinderDA4D VertexFinderDA4D {
 module PileUpSubtractor4D PileUpSubtractor4D {
 # add InputArray InputArray OutputArray
 
-  add InputArray TimeSmearing/tracks
-  add InputArray TimeSmearingPhotons/timeSmearingPhotons
-  add InputArray TimeSmearingNH/timeSmearingNH
+  add InputArray TimeSmearingMIP/tracks
+  add InputArray TimeSmearingPhotons/photons
+  add InputArray TimeSmearingNH/neutralhadrons
 
   set VertexInputArray VertexFinderDA4D/vertices
 
@@ -637,6 +623,7 @@ module PileUpSubtractor4D PileUpSubtractor4D {
 ######################################
 
 module HighMassVertexRecover HighMassVertexRecover {
+
   set TrackInputArray VertexFinderDA4D/tracks
   set VertexInputArray VertexFinderDA4D/vertices
 

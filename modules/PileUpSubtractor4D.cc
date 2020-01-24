@@ -169,20 +169,20 @@ void PileUpSubtractor4D::Process()
       t = particle->InitialPosition.T();
       t_err = particle->PositionError.T();
 
-      distanceCharged = pow((zvtx - z),2)/pow((zvtx_err - z_err),2) + pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
-      distanceNeutral = pow((tvtx - t),2)/pow((tvtx_err - t_err),2);
+      distanceCharged = TMath::Sqrt(pow((zvtx - z),2)/pow((zvtx_err),2) + pow((tvtx - t),2)/pow((tvtx_err),2));
+      distanceNeutral = TMath::Sqrt(pow((tvtx - t),2)/pow((tvtx_err),2));
 
       if(candidate->Charge != 0 && distanceCharged < fChargedMinSignificance)
       {
-        candidate->IsRecoPU = 1;
+        candidate->IsRecoPU = 0;
       }
       else if(candidate->Charge == 0 && distanceNeutral < fNeutralMinSignificance)
       {
-        candidate->IsRecoPU = 1;
+        candidate->IsRecoPU = 0;
       }  
       else
       {
-        candidate->IsRecoPU = 0;
+        candidate->IsRecoPU = 1;
         if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
       }
     }
