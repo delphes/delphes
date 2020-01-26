@@ -21,7 +21,7 @@
 
 /** \class TimeSmearing
  *
- *  Performs transverse time smearing.
+ *  Performs time of flight smearing.
  *
  *  \author Michele Selvaggi - UCL, Louvain-la-Neuve
  *
@@ -44,9 +44,9 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula;
-  Double_t fEtaMax;
 
+  DelphesFormula *fResolutionFormula;
+  
   TIterator *fItInputArray; //!
 
   const TObjArray *fInputArray; //!

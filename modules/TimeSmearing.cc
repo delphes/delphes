@@ -52,32 +52,31 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fItInputArray(0), fFormula(0)
+  fItInputArray(0), fResolutionFormula(0)
 {
-	fFormula = new DelphesFormula;
+	fResolutionFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TimeSmearing::~TimeSmearing()
-{  
-	if(fFormula) delete fFormula;
+{
+	if(fResolutionFormula) delete fResolutionFormula;
 }
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Init()
 {
-  // read resolution formula	
-  fFormula->Compile(GetString("TimeResolution", "0.001"));
+  // read time resolution formula in seconds
+  fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
 
   // import input array
-  fEtaMax = GetDouble("EtaMax", 6.);
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
+  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
   fItInputArray = fInputArray->MakeIterator();
-  // create output array
 
-  fOutputArray = ExportArray(GetString("OutputArray", "muons"));
+  // create output array
+  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
@@ -92,9 +91,8 @@ void TimeSmearing::Finish()
 void TimeSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t ti, tf_smeared, tf;
-  Double_t pt, eta, phi, e, p, l;
-  Double_t beta_particle;
+  Double_t ti,ti_smeared, tf, tf_smeared, dt;
+  Double_t eta, energy;
   Double_t timeResolution;
 
 
@@ -103,40 +101,38 @@ void TimeSmearing::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    ti = candidate->InitialPosition.T()*1.0E-3/c_light;
-    tf = candidate->Position.T()*1.0E-3/c_light;
-    
-    // dummy, only need to properly call TFormula
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
+
+    // convert mm in seconds
+    ti = candidate->InitialPosition.T()*1.0E-3/c_light;
+    tf = candidate->Position.T()*1.0E-3/c_light;
+
     eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
-    p = candidateMomentum.P();
-    beta_particle = p/e;
-    l = candidate->L;
-    timeResolution = fFormula->Eval(e);
-    
+    energy = candidateMomentum.E();
+    timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
+
+    dt = timeResolution*gRandom->Gaus(0, 1);
+    tf_smeared = tf + dt;
+    ti_smeared = ti + dt;
+    mother = candidate;
+    candidate = static_cast<Candidate*>(candidate->Clone());
+    candidate->AddCandidate(mother);
+
+    candidate->Position.SetT(tf_smeared*1.0E3*c_light);
+    candidate->ErrorT = timeResolution*1.0E3*c_light;
+
+    // treating charged and neutral differently:
+    // for charged we smear the time after propagation, and put a dummy value for time at Vertex
+    // since the correct value will be computed after Vertexing4D
     if(candidate->Charge != 0)
-    { 
-      tf_smeared = tf + timeResolution*gRandom->Gaus(0, 1);
-      mother = candidate;
-      candidate = static_cast<Candidate*>(candidate->Clone());  // I am not sure that we need these lines !!!
-      candidate->AddCandidate(mother);
-      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);  // Dummy Value, correct value will be computed by VertexFinderDA4D
-      candidate->Position.SetT(tf_smeared*1.0E3*c_light);
-      candidate->ErrorT = timeResolution*1.0E3*c_light;
-      fOutputArray->Add(candidate);
-    }
+      // Dummy Value, correct value will be computed by VertexFinderDA4D
+      candidate->InitialPosition.SetT((100+ti)*1.0E3*c_light);
     else
-    {
-      ti = timeResolution - l*1.0E3/(c_light*beta_particle);   
-      candidate->InitialPosition.SetT(ti);
-      candidate->ErrorT = timeResolution*1.0E3*c_light;		// Do we need to sum with 100 like in upside ?
-      fOutputArray->Add(candidate);
-    }
-   
+      candidate->InitialPosition.SetT(ti_smeared*1.0E3*c_light);
+
+    fOutputArray->Add(candidate);
+
   }
 }
 
