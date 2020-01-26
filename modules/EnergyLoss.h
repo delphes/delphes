@@ -21,9 +21,10 @@
 
 /** \class EnergyLoss
  *
- *  Subtract pile-up contribution from tracks.
+ *  This module computes the charged energy loss according to the active material properties.
+ *  The energy loss is simulated with a Landau convoluted by a Gaussian.
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi - CERN
  *
  */
 
@@ -46,24 +47,30 @@ public:
   void Finish();
 
 private:
-  Double_t fActiveFraction;
-  Double_t fChargeCollectionEfficiency;
-  Double_t fResolution;  
+
+  Double_t   fActiveFraction;
+  Double_t   fThickness;
+
+  Double_t   fResolution;
+  Double_t   fTruncatedMeanFraction;
 
   // material parameters
-  Double_t   fZ;   
-  Double_t   fA;   
-  Double_t   frho; 
+  Double_t   fZ;
+  Double_t   fA;
+  Double_t   fRho;
 
-  Double_t   fa;   
-  Double_t   fm;   
-  Double_t   fx0;  
-  Double_t   fx1;  
-  Double_t   fI;  
-  Double_t   fc0;  
+  Double_t   fAa;
+  Double_t   fM;
+  Double_t   fX0;
+  Double_t   fX1;
+  Double_t   fI;
+  Double_t   fC0;
 
   // this function computes corrections due to polarisation of the material
   Double_t Deltaf(Double_t c0, Double_t a, Double_t m, Double_t x0, Double_t x1, Double_t beta, Double_t gamma);
+
+  // this function computes truncated of dEdx measurements
+  Double_t TruncatedMean(std::vector<Double_t> elosses, Double_t truncFrac);
 
   std::vector<TIterator *> fInputList; //!
 

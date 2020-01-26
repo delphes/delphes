@@ -16,18 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \class EnergyLoss
- *
- *  This module computes the charged energy loss according to the active material properties.
- *  The energy loss is simulated with a Landau convoluted by a Gaussian. The active material 
- *  is assumed to be uniformly distributed in the detector volume. The actual active volume
- *  get normalized by multiplying the path length by the parameter ActiveFraction. 
- *
- *
- *  \author M. Selvaggi - CERN
- *
- */
-
+ /** \class EnergyLoss
+  *
+  *  This module computes the charged energy loss according to the active material properties.
+  *  The energy loss is simulated with a Landau convoluted by a Gaussian.
+  *
+  *  \author M. Selvaggi - CERN
+  *
+  */
 #include "modules/EnergyLoss.h"
 
 #include "classes/DelphesClasses.h"
@@ -55,7 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-EnergyLoss::EnergyLoss() 
+EnergyLoss::EnergyLoss()
 {
 }
 
@@ -70,22 +66,21 @@ EnergyLoss::~EnergyLoss()
 void EnergyLoss::Init()
 {
 
-  fActiveFraction              = GetDouble("ActiveFraction", 0.013); // fraction of active material that measures the deposited charge
-  fChargeCollectionEfficiency  = GetDouble("ChargeCollectionEfficiency", 0.75); // this number shifts Landau to the left
-  
-  // fixme: this number should probably be charge/energy dependent
-  fResolution                  = GetDouble("Resolution", 0.15); // 0 - perfect Landau energy loss (0.15 gives good agreement with CMS pixel detector)
+  fActiveFraction              = GetDouble("ActiveFraction", 0.002); // active fraction of the detector
+  fThickness                   = GetDouble("Thickness", 200E-6); // active detector thickness
+  fResolution                  = GetDouble("Resolution", 0.4); // 0 - perfect Landau energy loss (0.15 gives good agreement with CMS pixel detector)
+  fTruncatedMeanFraction       = GetDouble("TruncatedMeanFraction", 0.5); // fraction of measurements to ignore when computing mean
 
   // active material properties (cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat)
-  fZ   =  GetDouble("Z", 14.); 
-  fA   =  GetDouble("A",  28.0855); // in g/mol
-  frho =  GetDouble("rho", 2.329); // in g/cm3
-  fa   =  GetDouble("a", 0.1492);
-  fm   =  GetDouble("m", 3.2546);
-  fx0  =  GetDouble("x0", 0.2015);
-  fx1  =  GetDouble("x1", 2.8716);
-  fI   =  GetDouble("I", 173.0); // mean excitation potential in (eV)
-  fc0  =  GetDouble("c0", 4.4355);
+  fZ    =  GetDouble("Z", 14.);
+  fA    =  GetDouble("A",  28.0855); // in g/mol
+  fRho  =  GetDouble("rho", 2.329); // in g/cm3
+  fAa   =  GetDouble("a", 0.1492);
+  fM    =  GetDouble("m", 3.2546);
+  fX0   =  GetDouble("x0", 0.2015);
+  fX1   =  GetDouble("x1", 2.8716);
+  fI    =  GetDouble("I", 173.0); // mean excitation potential in (eV)
+  fX0   =  GetDouble("c0", 4.4355);
 
   // import arrays with output from other modules
 
@@ -124,15 +119,18 @@ void EnergyLoss::Finish()
 
 void EnergyLoss::Process()
 {
-  Candidate *candidate, *particle, *particleTest;
+  Candidate *candidate, *particle;
   vector<TIterator *>::iterator itInputList;
   TIterator *iterator;
-  TObjArray *array;
 
-  Double_t beta, gamma, charge, x;
-  Double_t kappa, chi, me, I, Wmax, delta, avdE, dP, dx, dE, dEdx;
+  Double_t beta, gamma, charge;
+  Double_t kappa, chi, me, I, Wmax, delta, avdE, dP, dx, L, dE, dEdx, res;
+  Double_t eloss_truncmean;
 
-  //cout<<"---------------- new event -------------------"<<endl;
+  Int_t nhits;
+  vector<Double_t> elosses;
+
+  cout<<"---------------- new event -------------------"<<endl;
 
 
   // loop over all input arrays
@@ -144,62 +142,82 @@ void EnergyLoss::Process()
     iterator->Reset();
     while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
-      //cout<<"    ---------------- new candidate -------------------"<<endl;
+      cout<<"    ---------------- new candidate -------------------"<<endl;
       const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-      beta         = candidateMomentum.Beta();
-      gamma        = candidateMomentum.Gamma();
-
+      beta      = candidateMomentum.Beta();
+      gamma     = candidateMomentum.Gamma();
       charge    = TMath::Abs(candidate->Charge);
 
       // length of the track normalized by the fraction of active material and the charge collection efficiency in the tracker (in cm)
-      dx = candidate->L * fActiveFraction * 0.1;
-      x = dx * fChargeCollectionEfficiency;
+      //dx = candidate->L * fActiveFraction * 0.1;
+      // amount of material in one sensor (converted in cm)
+      dx = fThickness * 100.;
+      // path length in cm
+      L  = candidate->L * 0.1;
 
-      kappa = 2*0.1535*TMath::Abs(charge)*TMath::Abs(charge)*fZ*frho*x/(fA*beta*beta); //energy loss in MeV
+
+     // compute number of hits as path length over active length
+      nhits = Int_t(L*fActiveFraction/dx);
+
+      //cout<<L<<","<<fActiveFraction<<","<<dx<<","<<nhits<<endl;
+
+      kappa = 2*0.1535*TMath::Abs(charge)*TMath::Abs(charge)*fZ*fRho*dx/(fA*beta*beta); //energy loss in MeV
 
       chi = 0.5*kappa;
-      me = 0.510998; // electron mass in MeV, need  
+      me = 0.510998; // electron mass in MeV, need
       I = fI*1e-6; // convert I in MeV
 
       // fixme: max energy transfer wrong for electrons
       Wmax = 2*me*beta*beta*gamma*gamma; // this is not valid for electrons
 
-      delta = Deltaf(fc0, fa, fm, fx0, fx1, beta, gamma);
+      delta = Deltaf(fC0, fAa, fM, fX0, fX1, beta, gamma);
 
       // Bethe-Bloch energy loss in MeV (not used here)
       avdE  = kappa*( TMath::Log(Wmax/I) - beta*beta - delta/2);
 
-      // most probable energy (MPV) loss for Landau
+      // most probable energy (MPV) loss for Landau in a single layer
       dP = chi*( TMath::Log(Wmax/I) + TMath::Log(chi/I) + 0.2 - beta*beta - delta);
 
-      //cout<<"x: "<<x<<", Beta: "<< beta<<", Gamma: "<<gamma <<", Charge: "<<charge<<endl;
-
+      if (candidateMomentum.Pt() > 5) {
+        cout<<"Nhits: "<<nhits<<", dx: "<<dx<<", Charge: "<<charge<<", Beta: "<< beta<<", Gamma: "<<gamma<<", PT: "<<candidateMomentum.Pt()<<endl;
       //cout<<x<<","<<kappa<<endl;
-      //cout<<"    Wmax: "<<Wmax<<", Chi: "<<chi<<", delta: "<<delta<<", DeDx: "<<avdE<<", DeltaP: "<<dP<<endl;
+        cout<<"    Wmax: "<<Wmax<<", Chi: "<<chi<<", delta: "<<delta<<", DeDx: "<<avdE<<", DeltaP: "<<dP<<endl;
+      }
 
-      // compute total energy loss in MeV predicted by a Landau
-      dE = gRandom->Landau(dP,chi); // this is the total energy loss in MeV predicted by a Landau
-  
-      // apply additionnal gaussian smearing to simulate finite resolution in charge measurement
-      dE = gRandom->Gaus(dE,fResolution*dP);
+      // simulate Nhits energy loss measurements
+      elosses.clear();
+      for (Int_t j=0; j<nhits; j++){
+        // compute total energy loss in MeV predicted by a Landau
+        dE = gRandom->Landau(dP,chi); // this is the total energy loss in MeV predicted by a Landau
 
-      dEdx = dx > 0 ? dE/dx : -1. ;
+        // convert resolution given in Mev/cm into absolute for this sensor
+        res = fResolution*dx;
+
+        // apply additionnal gaussian smearing
+        dE = gRandom->Gaus(dE,res);
+        elosses.push_back(dE);
+      }
+
+      sort (elosses.begin(), elosses.end());
+      eloss_truncmean = TruncatedMean(elosses, fTruncatedMeanFraction);
+
+
+      dEdx = dx > 0 ? eloss_truncmean/dx : -1. ;
 
       // store computed dEdx in MeV/cm
-      candidate->DeDx = dEdx; 
- 
+      candidate->DeDx = dEdx;
+
       // add dedx also in Muons in electrons classes in treeWriter
       // fix electrons here
       // think whether any relevance for hits
 
- 
+
       //cout<<"    eloss: "<<dE<<", dx: "<<dx<<", dEdx: "<<dEdx<<endl;
     }
   }
 
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -208,15 +226,25 @@ Double_t EnergyLoss::Deltaf(Double_t c0, Double_t a, Double_t m, Double_t x0, Do
 {
    Double_t x= TMath::Log10(beta*gamma);
    Double_t delta = 0.;
-   
+
    //cout<<x<<","<<x0<<","<<x1<<","<<endl;
-   
+
    if (x < x0)
        delta = 0.;
    if (x >= x0 && x< x1)
        delta = 4.6052*x - c0 + a*TMath::Power(x1 - x,m);
    if  (x> x1)
        delta = 4.6052*x - c0;
-       
+
    return delta;
+}
+
+//------------------------------------------------------------------------------
+Double_t EnergyLoss::TruncatedMean(std::vector<Double_t> elosses, Double_t truncFrac)
+{
+     Int_t new_size = Int_t( elosses.size() * (1 - truncFrac));
+
+     // remove outliers and re-compute mean
+     elosses.resize(new_size);
+     return accumulate( elosses.begin(), elosses.end(), 0.0)/elosses.size();
 }

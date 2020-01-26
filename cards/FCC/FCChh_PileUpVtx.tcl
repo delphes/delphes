@@ -255,13 +255,20 @@ module EnergyLoss EnergyLoss {
   add InputArray ElectronMomentumSmearing/electrons
   add InputArray MuonMomentumSmearing/muons
 
-  set ActiveFraction 0.013
-  set ChargeCollectionEfficiency 0.75
 
-  # fixme: this number should probably be charge/energy dependent, or absolute number in MeV/cm?
-  set Resolution 0.15
+  # absolute resolution per measurement (normalized in MeV/cm)
+  set Resolution 0.4
 
-  # active material properties (cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat)
+  # fraction of measurements to ignore when computing truncated mean
+  set TruncatedMeanFraction 0.5
+
+  # detector properties (active fraction = nhits*thickness/L)
+  set Thickness 200E-6
+  set ActiveFraction 0.00133
+
+  # Silicon properties, for other materials:
+  # cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat
+
   set Z 14.
   set A 28.0855
   set rho 2.329
