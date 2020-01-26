@@ -30,32 +30,34 @@ set ExecutionPath {
   EnergyLoss
 
   TrackMerger
-
   TrackSmearing
 
   ECal
   HCal
 
+  TimeSmearingMIP
+  TimeSmearingPhotons
+  TimeSmearingNH
+
+  TimeSmearingEcal
+  TimeSmearingHcal
+
+  VertexFinderDA4D
+  HighMassVertexRecover
+  PileUpSubtractor4D
+
+  ElectronFilter
+  MuonFilter
+  ChargedHadronFilter
+
   Calorimeter
   EFlowMerger
   EFlowFilter
 
-  TimeSmearingMIP
-  TimeSmearingPhotons
-  TimeSmearingNH    
-
-  VertexFinderDA4D
-  PileUpSubtractor4D
-
-  HighMassVertexRecover    
-
   PhotonEfficiency
   PhotonIsolation
 
-  ElectronFilter
   ElectronIsolation
-
-  ChargedHadronFilter
 
   MuonIsolation
 
@@ -255,21 +257,21 @@ module EnergyLoss EnergyLoss {
 
   set ActiveFraction 0.013
   set ChargeCollectionEfficiency 0.75
-  
+
   # fixme: this number should probably be charge/energy dependent, or absolute number in MeV/cm?
   set Resolution 0.15
 
   # active material properties (cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat)
   set Z 14.
-  set A 28.0855 
-  set rho 2.329 
-  
+  set A 28.0855
+  set rho 2.329
+
   # material polarisation correction parameters
   set a 0.1492
   set m 3.2546
   set x0 0.2015
   set x1 2.8716
-  set I 173.0 
+  set I 173.0
   set c0 4.4355
 
 }
@@ -297,8 +299,8 @@ module TrackSmearing TrackSmearing {
   set OutputArray tracks
   set ApplyToPileUp true
 
-  # from http://mersi.web.cern.ch/mersi/layouts/.private/Baseline_tilted_200_Pixel_1_1_1/index.html
-  source trackResolutionFCChh.tcl 
+  # this is CMS resolution is d0 , dZ on top of the smearing in P applied before
+  source trackResolutionFCChh.tcl
   # FIXME !!!! we need to add track resolution of FCC-hh baseline detector !!!!!
 }
 
@@ -311,7 +313,7 @@ module TrackSmearing TrackSmearing {
 
 module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray TimeSmearing/tracks
+  set TrackInputArray TrackSmearing/tracks
 
   set TowerOutputArray ecalTowers
   set EFlowTrackOutputArray eflowTracks
@@ -468,71 +470,6 @@ module SimpleCalorimeter HCal {
                             (abs(eta) > 4.0 && abs(eta) <= 6.0) * sqrt(energy^2*0.10^2 + energy*1.00^2)}
 }
 
-#################
-# Electron filter
-#################
-
-module PdgCodeFilter ElectronFilter {
-  set InputArray HCal/eflowTracks
-  set OutputArray electrons
-  set Invert true
-  add PdgCode {11}
-  add PdgCode {-11}
-}
-
-
-######################
-# ChargedHadronFilter
-######################
-
-module PdgCodeFilter ChargedHadronFilter {
-  set InputArray HCal/eflowTracks
-  set OutputArray chargedHadrons
-
-  add PdgCode {11}
-  add PdgCode {-11}
-  add PdgCode {13}
-  add PdgCode {-13}
-}
-
-
-###################################################
-# Tower Merger (in case not using e-flow algorithm)
-###################################################
-
-module Merger Calorimeter {
-# add InputArray InputArray
-  add InputArray ECal/ecalTowers
-  add InputArray HCal/hcalTowers
-  add InputArray MuonMomentumSmearing/muons
-  set OutputArray towers
-}
-
-####################
-# Energy flow merger
-####################
-
-module Merger EFlowMerger {
-# add InputArray InputArray
-  add InputArray HCal/eflowTracks
-  add InputArray ECal/eflowPhotons
-  add InputArray HCal/eflowNeutralHadrons
-  set OutputArray eflow
-}
-
-######################
-# EFlowFilter
-######################
-
-module PdgCodeFilter EFlowFilter {
-  set InputArray EFlowMerger/eflow
-  set OutputArray eflow
-
-  add PdgCode {11}
-  add PdgCode {-11}
-  add PdgCode {13}
-  add PdgCode {-13}
-}
 
 ########################################
 #   Time Smearing Neutral MIP
@@ -542,8 +479,10 @@ module TimeSmearing TimeSmearingMIP {
   set InputArray HCal/eflowTracks
   set OutputArray tracks
 
-  # assume 30 ps resolution for now
-  set TimeResolution {30E-12}
+  # assume constant 30 ps resolution for now
+  set TimeResolution {
+                       (abs(eta) > 0.0 && abs(eta) <= 6.0)* 30E-12
+                     }
 }
 
 ########################################
@@ -553,7 +492,9 @@ module TimeSmearing TimeSmearingMIP {
 module TimeSmearing TimeSmearingPhotons {
   set InputArray ECal/eflowPhotons
   set OutputArray photons
-  set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
+  set TimeResolution {
+                        (abs(eta) > 0.0 && abs(eta) <= 6.0) * sqrt(20e-12^2 + 150e-12^2)/energy^2
+                     }
 }
 
 ########################################
@@ -564,15 +505,43 @@ module TimeSmearing TimeSmearingNH {
   set InputArray HCal/eflowNeutralHadrons
   set OutputArray neutralhadrons
 
-  # assume 30 ps resolution for now
-  set TimeResolution {sqrt(20^2 + 150^2)/energy^2}
+  # assume resolution for now
+  set TimeResolution {
+                        (abs(eta) > 0.0 && abs(eta) <= 6.0) * sqrt(20e-12^2 + 150e-12^2)/energy^2
+                     }
 }
+
+########################################
+#   Time Smearing Neutral Ecal
+########################################
+
+module TimeSmearing TimeSmearingEcal {
+  set InputArray ECal/ecalTowers
+  set OutputArray towers
+  set TimeResolution {
+                        (abs(eta) > 0.0 && abs(eta) <= 6.0) * sqrt(20e-12^2 + 150e-12^2)/energy^2
+                     }
+}
+
+
+########################################
+#   Time Smearing Neutral Hcal
+########################################
+
+module TimeSmearing TimeSmearingHcal {
+  set InputArray HCal/hcalTowers
+  set OutputArray towers
+  set TimeResolution {
+                        (abs(eta) > 0.0 && abs(eta) <= 6.0) * sqrt(20e-12^2 + 150e-12^2)/energy^2
+                     }
+}
+
+
 
 
 ##################################
 # Primary vertex reconstruction
 ##################################
-
 
 module VertexFinderDA4D VertexFinderDA4D {
   set InputArray TimeSmearingMIP/tracks
@@ -601,23 +570,6 @@ module VertexFinderDA4D VertexFinderDA4D {
 
 }
 
-##########################
-# Track pile-up subtractor
-##########################
-
-module PileUpSubtractor4D PileUpSubtractor4D {
-# add InputArray InputArray OutputArray
-
-  add InputArray TimeSmearingMIP/tracks
-  add InputArray TimeSmearingPhotons/photons
-  add InputArray TimeSmearingNH/neutralhadrons
-
-  set VertexInputArray VertexFinderDA4D/vertices
-
-  set fChargedMinSignificance {3}
-  set fNeutralMinSignificance {3}
-}
-
 ######################################
 # Heavy(slow) particles vertex recover
 ######################################
@@ -634,6 +586,106 @@ module HighMassVertexRecover HighMassVertexRecover {
 
 }
 
+##########################
+# PileUpSubtractor4D
+##########################
+
+module PileUpSubtractor4D PileUpSubtractor4D {
+# add InputArray InputArray OutputArray
+
+  add InputArray TimeSmearingMIP/tracks tracks
+  add InputArray TimeSmearingPhotons/photons photons
+  add InputArray TimeSmearingNH/neutralhadrons neutralhadrons
+  add InputArray TimeSmearingEcal/towers towers
+  add InputArray TimeSmearingHcal/towers towers
+
+  set VertexInputArray VertexFinderDA4D/vertices
+
+  set fChargedMinSignificance 3.0
+  set fNeutralMinSignificance 3.0
+}
+
+
+#################
+# Electron filter
+#################
+
+module PdgCodeFilter ElectronFilter {
+  set InputArray PileUpSubtractor4D/tracks
+  set OutputArray electrons
+  set Invert true
+  add PdgCode {11}
+  add PdgCode {-11}
+}
+
+#################
+# Muon filter
+#################
+
+module PdgCodeFilter MuonFilter {
+  set InputArray PileUpSubtractor4D/tracks
+  set OutputArray muons
+  set Invert true
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+
+######################
+# ChargedHadronFilter
+######################
+
+module PdgCodeFilter ChargedHadronFilter {
+  set InputArray PileUpSubtractor4D/tracks
+  set OutputArray chargedHadrons
+
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+
+###################################################
+# Tower Merger (in case not using e-flow algorithm)
+###################################################
+
+module Merger Calorimeter {
+# add InputArray InputArray
+  add InputArray PileUpSubtractor4D/towers
+  add InputArray PileUpSubtractor4D/towers
+  add InputArray MuonFilter/muons
+  set OutputArray towers
+}
+
+####################
+# Energy flow merger
+####################
+
+module Merger EFlowMerger {
+# add InputArray InputArray
+  add InputArray PileUpSubtractor4D/tracks
+  add InputArray PileUpSubtractor4D/photons
+  add InputArray PileUpSubtractor4D/neutralhadrons
+  set OutputArray eflow
+}
+
+##############
+# EFlowFilter
+##############
+
+module PdgCodeFilter EFlowFilter {
+  set InputArray EFlowMerger/eflow
+  set OutputArray eflow
+
+  add PdgCode {11}
+  add PdgCode {-11}
+  add PdgCode {13}
+  add PdgCode {-13}
+}
+
+
+
 ###################
 # Missing ET merger
 ###################
@@ -643,8 +695,6 @@ module Merger MissingET {
   add InputArray EFlowMerger/eflow
   set MomentumOutputArray momentum
 }
-
-
 
 ##################
 # Scalar HT merger
@@ -1064,12 +1114,12 @@ module TreeWriter TreeWriter {
 
   add Branch GenMissingET/momentum GenMissingET MissingET
 
-  add Branch TimeSmearing/tracks Track Track
+  add Branch TrackSmearing/tracks Track Track
   add Branch Calorimeter/towers Tower Tower
 
-  add Branch HCal/eflowTracks EFlowTrack Track
-  add Branch ECal/eflowPhotons EFlowPhoton Tower
-  add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
+  add Branch PileUpSubtractor4D/tracks EFlowTrack Track
+  add Branch PileUpSubtractor4D/photons EFlowPhoton Tower
+  add Branch PileUpSubtractor4D/neutralhadrons EFlowNeutralHadron Tower
 
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/electrons Electron Electron
@@ -1087,4 +1137,3 @@ module TreeWriter TreeWriter {
 
   add Branch HighMassVertexRecover/tracks Track Track
 }
-
