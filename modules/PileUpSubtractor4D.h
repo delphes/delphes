@@ -33,7 +33,6 @@
 
 class TIterator;
 class TObjArray;
-class DelphesFormula;
 
 class PileUpSubtractor4D: public DelphesModule
 {
@@ -46,20 +45,19 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
 
   Double_t fChargedMinSignificance;
   Double_t fNeutralMinSignificance;
-
   Double_t fPTMin;
 
   std::map<TIterator *, TObjArray *> fInputMap; //!
 
-  ClassDef(PileUpSubtractor4D, 1)
-
-    TIterator *fItVertexInputArray; //!
+  TIterator *fItVertexInputArray; //!
 
   const TObjArray *fVertexInputArray; //!
+
+  ClassDef(PileUpSubtractor4D, 1)
+
 };
 
 #endif

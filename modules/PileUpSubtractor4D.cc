@@ -16,11 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \class TrackPileUpSubtractor
+/** \class PileUpSubtractor4D
  *
- *  Subtract pile-up contribution from tracks.
+ *  Subtract pile-up contribution from tracks using both spatial and timing
+ *  information
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi - CERN
  *
  */
 
@@ -51,17 +52,14 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PileUpSubtractor4D::PileUpSubtractor4D() :
-  fFormula(0)
+PileUpSubtractor4D::PileUpSubtractor4D()
 {
-  fFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 PileUpSubtractor4D::~PileUpSubtractor4D()
 {
-  if(fFormula) delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -106,7 +104,6 @@ void PileUpSubtractor4D::Finish()
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
   {
     iterator = itInputMap->first;
-
     if(iterator) delete iterator;
   }
 
@@ -117,17 +114,16 @@ void PileUpSubtractor4D::Finish()
 
 void PileUpSubtractor4D::Process()
 {
-  Candidate *candidate, *particle;
+  Candidate *candidate;
   map<TIterator *, TObjArray *>::iterator itInputMap;
   TIterator *iterator;
   TObjArray *array;
   Double_t z, zvtx = 0;
-  Double_t z_err, zvtx_err = 0;
+  Double_t zvtx_err = 0;
   Double_t t, tvtx = 0;
-  Double_t t_err, tvtx_err = 0;
+  Double_t tvtx_err = 0;
   Double_t sumPTSquare = 0;
   Double_t tempPTSquare = 0;
-  Double_t pt, eta, phi, e;
   Double_t distanceCharged, distanceNeutral = 0;
 
   // find z position of primary vertex
@@ -143,7 +139,7 @@ void PileUpSubtractor4D::Process()
       zvtx_err = candidate->PositionError.Z();
       tvtx = candidate->Position.T();
       tvtx_err = candidate->PositionError.T();
-    } 
+    }
   }
 
   // loop over all input arrays
@@ -156,18 +152,9 @@ void PileUpSubtractor4D::Process()
     iterator->Reset();
     while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
-      particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
-      const TLorentzVector &candidateMomentum = particle->Momentum;
 
-      eta = candidateMomentum.Eta();
-      pt = candidateMomentum.Pt();
-      phi = candidateMomentum.Phi();
-      e = candidateMomentum.E();
-
-      z = particle->Position.Z();
-      z_err = particle->PositionError.Z();
-      t = particle->InitialPosition.T();
-      t_err = particle->PositionError.T();
+      z = candidate->Position.Z();
+      t = candidate->InitialPosition.T();
 
       distanceCharged = TMath::Sqrt(pow((zvtx - z),2)/pow((zvtx_err),2) + pow((tvtx - t),2)/pow((tvtx_err),2));
       distanceNeutral = TMath::Sqrt(pow((tvtx - t),2)/pow((tvtx_err),2));
@@ -175,15 +162,16 @@ void PileUpSubtractor4D::Process()
       if(candidate->Charge != 0 && distanceCharged < fChargedMinSignificance)
       {
         candidate->IsRecoPU = 0;
+        if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
       }
       else if(candidate->Charge == 0 && distanceNeutral < fNeutralMinSignificance)
       {
         candidate->IsRecoPU = 0;
-      }  
+        if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
+      }
       else
       {
         candidate->IsRecoPU = 1;
-        if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
       }
     }
   }
