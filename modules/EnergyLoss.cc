@@ -80,7 +80,7 @@ void EnergyLoss::Init()
   fX0   =  GetDouble("x0", 0.2015);
   fX1   =  GetDouble("x1", 2.8716);
   fI    =  GetDouble("I", 173.0); // mean excitation potential in (eV)
-  fX0   =  GetDouble("c0", 4.4355);
+  fC0   =  GetDouble("c0", 4.4355);
 
   // import arrays with output from other modules
 
@@ -119,7 +119,7 @@ void EnergyLoss::Finish()
 
 void EnergyLoss::Process()
 {
-  Candidate *candidate, *particle;
+  Candidate *candidate;
   vector<TIterator *>::iterator itInputList;
   TIterator *iterator;
 
@@ -130,7 +130,7 @@ void EnergyLoss::Process()
   Int_t nhits;
   vector<Double_t> elosses;
 
-  cout<<"---------------- new event -------------------"<<endl;
+  //cout<<"---------------- new event -------------------"<<endl;
 
 
   // loop over all input arrays
@@ -142,12 +142,13 @@ void EnergyLoss::Process()
     iterator->Reset();
     while((candidate = static_cast<Candidate *>(iterator->Next())))
     {
-      cout<<"    ---------------- new candidate -------------------"<<endl;
+      //cout<<"    ---------------- new candidate -------------------"<<endl;
       const TLorentzVector &candidateMomentum = candidate->Momentum;
 
       beta      = candidateMomentum.Beta();
       gamma     = candidateMomentum.Gamma();
       charge    = TMath::Abs(candidate->Charge);
+
 
       // length of the track normalized by the fraction of active material and the charge collection efficiency in the tracker (in cm)
       //dx = candidate->L * fActiveFraction * 0.1;
@@ -159,6 +160,12 @@ void EnergyLoss::Process()
 
      // compute number of hits as path length over active length
       nhits = Int_t(L*fActiveFraction/dx);
+
+
+      //beta = 0.999945;
+      //gamma = 95.6446;
+      //charge = 1.;
+      //nhits = 100;      
 
       //cout<<L<<","<<fActiveFraction<<","<<dx<<","<<nhits<<endl;
 
@@ -179,11 +186,10 @@ void EnergyLoss::Process()
       // most probable energy (MPV) loss for Landau in a single layer
       dP = chi*( TMath::Log(Wmax/I) + TMath::Log(chi/I) + 0.2 - beta*beta - delta);
 
-      if (candidateMomentum.Pt() > 5) {
-        cout<<"Nhits: "<<nhits<<", dx: "<<dx<<", Charge: "<<charge<<", Beta: "<< beta<<", Gamma: "<<gamma<<", PT: "<<candidateMomentum.Pt()<<endl;
+      //cout<<"L: "<<L<<", PT: "<<candidateMomentum.Pt()<<", Eta: "<<candidateMomentum.Eta()<<", Phi: "<< candidateMomentum.Phi()<<endl;
+      //cout<<"Nhits: "<<nhits<<", dx: "<<dx<<", Charge: "<<charge<<", Beta: "<< beta<<", Gamma: "<<gamma<<", PT: "<<candidateMomentum.Pt()<<endl;
       //cout<<x<<","<<kappa<<endl;
-        cout<<"    Wmax: "<<Wmax<<", Chi: "<<chi<<", delta: "<<delta<<", DeDx: "<<avdE<<", DeltaP: "<<dP<<endl;
-      }
+      //cout<<"    Wmax: "<<Wmax<<", Chi: "<<chi<<", delta: "<<delta<<", DeDx: "<<avdE<<", DeltaP: "<<dP<<endl;
 
       // simulate Nhits energy loss measurements
       elosses.clear();

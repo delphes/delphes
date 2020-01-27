@@ -119,7 +119,7 @@ void MomentumSmearing::Process()
     candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
     candidate->ErrorPT = res*pt;
     candidate->PT = pt;
-    
+        
     candidate->TrackResolution = res;
     candidate->AddCandidate(mother);
 

@@ -257,14 +257,20 @@ module EnergyLoss EnergyLoss {
 
 
   # absolute resolution per measurement (normalized in MeV/cm)
-  set Resolution 0.4
+  # CMS pixel detector performance is reproduceable with r = 0.4
+  # dedicated dEdX detector can achieve r = 0.0 or below (i.e better than Landau)
+  
+  #set Resolution 0.4
+  set Resolution 0.2
 
   # fraction of measurements to ignore when computing truncated mean
+  # suggested range [0.4-0.6]
+  
   set TruncatedMeanFraction 0.5
 
   # detector properties (active fraction = nhits*thickness/L)
-  set Thickness 200E-6
-  set ActiveFraction 0.00133
+  set Thickness 100E-6
+  set ActiveFraction 0.0006666
 
   # Silicon properties, for other materials:
   # cf. http://pdg.lbl.gov/2014/AtomicNuclearProperties/properties8.dat
