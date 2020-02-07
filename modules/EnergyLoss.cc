@@ -46,6 +46,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <numeric>
 
 using namespace std;
 
