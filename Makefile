@@ -407,6 +407,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/EnergySmearing.h \
 	modules/MomentumSmearing.h \
 	modules/TrackSmearing.h \
+	modules/TrackCovariance.h \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
 	modules/SimpleCalorimeter.h \
@@ -644,6 +645,14 @@ tmp/external/Hector/H_VerticalKicker.$(ObjSuf): \
 	external/Hector/H_VerticalKicker.$(SrcSuf)
 tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf): \
 	external/Hector/H_VerticalQuadrupole.$(SrcSuf)
+tmp/external/TrackCovariance/ObsTrk.$(ObjSuf): \
+	external/TrackCovariance/ObsTrk.$(SrcSuf)
+tmp/external/TrackCovariance/SolGeom.$(ObjSuf): \
+	external/TrackCovariance/SolGeom.$(SrcSuf)
+tmp/external/TrackCovariance/SolGridCov.$(ObjSuf): \
+	external/TrackCovariance/SolGridCov.$(SrcSuf)
+tmp/external/TrackCovariance/SolTrack.$(ObjSuf): \
+	external/TrackCovariance/SolTrack.$(SrcSuf)
 tmp/modules/AngularSmearing.$(ObjSuf): \
 	modules/AngularSmearing.$(SrcSuf) \
 	modules/AngularSmearing.h \
@@ -1003,6 +1012,11 @@ tmp/modules/TrackCountingTauTagging.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/TrackCovariance.$(ObjSuf): \
+	modules/TrackCovariance.$(SrcSuf) \
+	modules/TrackCovariance.h \
+	classes/DelphesClasses.h \
+	external/TrackCovariance/SolGeom.h
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \
@@ -1130,6 +1144,10 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_TransportMatrices.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalKicker.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
+	tmp/external/TrackCovariance/ObsTrk.$(ObjSuf) \
+	tmp/external/TrackCovariance/SolGeom.$(ObjSuf) \
+	tmp/external/TrackCovariance/SolGridCov.$(ObjSuf) \
+	tmp/external/TrackCovariance/SolTrack.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
@@ -1169,6 +1187,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
 	tmp/modules/TrackCountingBTagging.$(ObjSuf) \
 	tmp/modules/TrackCountingTauTagging.$(ObjSuf) \
+	tmp/modules/TrackCovariance.$(ObjSuf) \
 	tmp/modules/TrackPileUpSubtractor.$(ObjSuf) \
 	tmp/modules/TrackSmearing.$(ObjSuf) \
 	tmp/modules/TreeWriter.$(ObjSuf) \
@@ -1880,6 +1899,10 @@ modules/AngularSmearing.h: \
 	@touch $@
 
 modules/IdentificationMap.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/TrackCovariance.h: \
 	classes/DelphesModule.h
 	@touch $@
 

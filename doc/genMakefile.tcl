@@ -320,7 +320,7 @@ dictDeps {FASTJET_DICT} {modules/FastJetLinkDef.h}
 
 dictDeps {DISPLAY_DICT} {display/DisplayLinkDef.h}
 
-sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/Hector/*.cc}
+sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/Hector/*.cc} {external/TrackCovariance/*.cc}
 
 sourceDeps {FASTJET} {modules/FastJet*.cc} {modules/RunPUPPI.cc} {external/PUPPI/*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc} {external/fastjet/contribs/*/*.cc}
 

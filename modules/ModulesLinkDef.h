@@ -35,6 +35,7 @@
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
 #include "modules/TrackSmearing.h"
+#include "modules/TrackCovariance.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/SimpleCalorimeter.h"
@@ -90,6 +91,7 @@
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
 #pragma link C++ class TrackSmearing+;
+#pragma link C++ class TrackCovariance+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class SimpleCalorimeter+;
