@@ -69,6 +69,7 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:tcl>
   $<TARGET_OBJECTS:Hector>
   $<TARGET_OBJECTS:PUPPI>
+  $<TARGET_OBJECTS:TrackCovariance>
 )
 
 add_library(DelphesDisplay SHARED
@@ -80,6 +81,7 @@ add_library(DelphesDisplay SHARED
   $<TARGET_OBJECTS:tcl>
   $<TARGET_OBJECTS:Hector>
   $<TARGET_OBJECTS:PUPPI>
+  $<TARGET_OBJECTS:TrackCovariance>
 )
 
 target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
