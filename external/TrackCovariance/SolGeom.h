@@ -1,7 +1,7 @@
 #ifndef G__SOLGEOM_H
 #define G__SOLGEOM_H
 
-#include <RtypesCore.h>
+#include <Rtypes.h>
 #include <TString.h>
 
 // Class to create geometry for solenoid geometry
