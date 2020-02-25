@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <sstream>
 
 #include <TString.h>
 
@@ -40,35 +41,32 @@ SolGeom::SolGeom()
 
 void SolGeom::Read(const char *data)
 {
-  char strng[200];
-  int nbytes = 200;
-  FILE *fdata = fopen(data, "r");
-  if (!fdata)
-  {
-    cout << "SolGeom::GeoRead - can't open input file" << endl;
-    return;
-  }
   Int_t tyLay;
-  char LyLabl[20];
-  float xMin;
-  float xMax;
-  float rPos;
-  float thLay;
-  float rlLay;
+  string LyLabl;
+  Double_t xMin;
+  Double_t xMax;
+  Double_t rPos;
+  Double_t thLay;
+  Double_t rlLay;
   Int_t nmLay;
-  float stLayU;
-  float stLayL;
-  float sgLayU;
-  float sgLayL;
+  Double_t stLayU;
+  Double_t stLayL;
+  Double_t sgLayU;
+  Double_t sgLayL;
   Int_t flLay;
 
+  stringstream data_stream(data);
+  string line;
+
   fNlay = 0;
-  while (fgets(strng, nbytes, fdata) != NULL)
+  while(getline(data_stream, line))
   {
-    cout << strng;
-    int status = sscanf(strng, "%d %s %g %g %g %g %g %d %g %g %g %g %d",
-      &tyLay, LyLabl, &xMin, &xMax, &rPos, &thLay,
-      &rlLay, &nmLay, &stLayU, &stLayL, &sgLayU, &sgLayL, &flLay);
+    stringstream line_stream(line);
+
+    line_stream >> tyLay >> LyLabl >> xMin >> xMax >> rPos >> thLay >> rlLay >> nmLay >> stLayU >> stLayL >> sgLayU >> sgLayL >> flLay;
+
+    if(line_stream.fail()) continue;
+
     ftyLay[fNlay] = tyLay;
     fLyLabl[fNlay] = LyLabl;
     fxMin[fNlay] = xMin;
@@ -87,10 +85,7 @@ void SolGeom::Read(const char *data)
     if (tyLay == 1) fBlay++;
     if (tyLay == 2) fFlay++;
     if (flLay == 1) fNm++;
-
   }
-
-  cout << "SolGeom::GeoRead completed with " << fNlay << " layers input" << endl;
 }
 
 SolGeom::~SolGeom()
