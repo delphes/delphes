@@ -24,6 +24,10 @@
  *
  */
 
+//FIXME add reference to Bedeschi-code
+//FIXME add smearing of impact parameter as well 
+
+
 #include "modules/TrackCovariance.h"
 
 #include "classes/DelphesClasses.h"
