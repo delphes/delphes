@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <sstream>
 
 #include <TString.h>
