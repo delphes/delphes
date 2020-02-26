@@ -20,13 +20,14 @@
  *
  *  Smears track parameters according to appropriate covariance matrix.
  *
- *  \author P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors P. Demin - UCLouvain, Louvain-la-Neuve
+ *           M. Selvaggi - CERN
  *
  */
 
 //FIXME add reference to Bedeschi-code
-//FIXME add smearing of impact parameter as well 
-
+//FIXME make sure about units of P, X
+//FIXME fix pt > 200 GeV issue and angle > 6.41
 
 #include "modules/TrackCovariance.h"
 
@@ -39,6 +40,11 @@
 #include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
+
+#include <iostream>
+#include <sstream>
+
+using namespace std;
 
 //------------------------------------------------------------------------------
 
@@ -88,12 +94,14 @@ void TrackCovariance::Finish()
 void TrackCovariance::Process()
 {
   Candidate *candidate, *mother;
-  Double_t mass;
+  Double_t mass, p, pt, q, ct;
+  Double_t dd0, ddz, dphi, dct, dp, dpt;
+  
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
+    const TLorentzVector &candidatePosition = candidate->InitialPosition;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
     mass = candidateMomentum.M();
@@ -102,7 +110,39 @@ void TrackCovariance::Process()
 
     mother = candidate;
     candidate = static_cast<Candidate *>(candidate->Clone());
+
     candidate->Momentum.SetVectM(track.GetObsP(), mass);
+    candidate->InitialPosition.SetXYZT(track.GetObsX().X(),track.GetObsX().Y(),track.GetObsX().Z(),candidatePosition.T());
+
+    pt = candidate->Momentum.Pt();
+    p  = candidate->Momentum.P();
+    q  = track.GetObsQ();
+    ct = track.GetObsPar()[4];
+
+    candidate->D0 = track.GetObsPar()[0];
+    candidate->DZ = track.GetObsPar()[3];
+    candidate->P  = track.GetObsP().Mag();
+    candidate->CtgTheta = track.GetObsPar()[4];
+    candidate->Phi = track.GetObsPar()[1];
+
+    candidate->PT = pt;
+    candidate->Charge = q;
+
+    dd0       = TMath::Sqrt(track.GetCov()(0, 0)); 
+    ddz       = TMath::Sqrt(track.GetCov()(3, 3)); 
+    dphi      = TMath::Sqrt(track.GetCov()(1, 1)); 
+    dct       = TMath::Sqrt(track.GetCov()(4, 4)); 
+    dpt       = 2 * TMath::Sqrt( track.GetCov()(2, 2))*pt*pt / (0.2998*fBz);
+    dp        = TMath::Sqrt((1.+ct*ct)*dpt*dpt + 4*pt*pt*ct*ct*dct*dct/(1.+ct*ct)/(1.+ct*ct));
+
+    candidate->ErrorD0 = dd0;
+    candidate->ErrorDZ = ddz;
+    candidate->ErrorP = dp;
+    candidate->ErrorCtgTheta = dct;
+    candidate->ErrorPhi = dphi;
+    candidate->ErrorPT = dpt;
+    //candidate->TrackResolution = dpt / pt;
+    candidate->TrackResolution = dp / p;
 
     candidate->AddCandidate(mother);
 

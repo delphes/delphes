@@ -23,7 +23,8 @@
  *
  *  Smears track parameters according to appropriate covariance matrix.
  *
- *  \author P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors P. Demin - UCLouvain, Louvain-la-Neuve
+ *           M. Selvaggi - CERN
  *
  */
 
