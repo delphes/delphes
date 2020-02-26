@@ -88,7 +88,7 @@ void TrackCovariance::Finish()
 void TrackCovariance::Process()
 {
   Candidate *candidate, *mother;
-  Double_t energy;
+  Double_t mass;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -96,14 +96,13 @@ void TrackCovariance::Process()
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-    energy = candidateMomentum.E();
+    mass = candidateMomentum.M();
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz, fCovariance);
 
     mother = candidate;
     candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum.SetVect(track.GetObsP());
-    candidate->Momentum.SetE(energy);
+    candidate->Momentum.SetVectM(track.GetObsP(), mass);
 
     candidate->AddCandidate(mother);
 
