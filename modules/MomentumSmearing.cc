@@ -105,7 +105,7 @@ void MomentumSmearing::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-    res = fFormula->Eval(pt, eta, phi, e);
+    res = fFormula->Eval(pt, eta, phi, e, candidate);
 
     // apply smearing formula
     //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);

@@ -111,8 +111,8 @@ void AngularSmearing::Process()
 
     // apply smearing formula for eta,phi
 
-    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e));
-    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e));
+    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, candidate));
+    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, candidate));
 
     if(pt <= 0.0) continue;
 
