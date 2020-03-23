@@ -73,6 +73,7 @@
 #include "modules/VertexFinder.h"
 #include "modules/VertexFinderDA4D.h"
 #include "modules/DecayFilter.h"
+#include "modules/ParticleDensity.h"
 #include "modules/ExampleModule.h"
 
 #ifdef __CINT__
@@ -129,6 +130,7 @@
 #pragma link C++ class VertexFinder+;
 #pragma link C++ class VertexFinderDA4D+;
 #pragma link C++ class DecayFilter+;
+#pragma link C++ class ParticleDensity+;
 #pragma link C++ class ExampleModule+;
 
 #endif

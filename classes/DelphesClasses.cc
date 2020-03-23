@@ -171,6 +171,7 @@ Candidate::Candidate() :
   ExclYmerge34(0),
   ExclYmerge45(0),
   ExclYmerge56(0),
+  ParticleDensity(0),
   fFactory(0),
   fArray(0)
 {

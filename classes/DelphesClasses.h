@@ -732,6 +732,9 @@ public:
   Double_t ExclYmerge45;
   Double_t ExclYmerge56;
 
+  // event characteristics variables
+  Double_t ParticleDensity; // particle multiplicity density in the proximity of the particle
+  
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
