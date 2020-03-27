@@ -16,25 +16,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DelphesFormula_h
-#define DelphesFormula_h
+#ifndef ParticleDensity_h
+#define ParticleDensity_h
 
-#include "TFormula.h"
+/** \class ParticleDensity
+ *
+ *  This module calculates the particle multiplicity density in eta-phi bins.
+ *  It then assigns the value to the candidates according to the candidate eta.
+ *
+ *  \author R. Preghenella - INFN, Bologna
+ *
+ */
 
-class Candidate;
+#include "classes/DelphesModule.h"
 
-class DelphesFormula: public TFormula
+#include <deque>
+
+class TObjArray;
+class TH2F;
+
+class ParticleDensity: public DelphesModule
 {
 public:
-  DelphesFormula();
+  ParticleDensity();
+  ~ParticleDensity();
 
-  DelphesFormula(const char *name, const char *expression);
+  void Init();
+  void Process();
+  void Finish();
 
-  ~DelphesFormula();
+private:
 
-  Int_t Compile(const char *expression);
+  TIterator *fItInputArray; //!
 
-  Double_t Eval(Double_t pt, Double_t eta = 0, Double_t phi = 0, Double_t energy = 0, Candidate *candidate = nullptr);
+  const TObjArray *fInputArray; //!
+
+  TObjArray *fOutputArray; //!
+
+  Bool_t fUseMomentumVector; // !
+  TH2F *fHisto; //!
+  
+  ClassDef(ParticleDensity, 1)
 };
 
-#endif /* DelphesFormula_h */
+#endif

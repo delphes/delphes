@@ -157,7 +157,7 @@ void TrackSmearing::Process()
   Int_t iCandidate = 0;
   TLorentzVector beamSpotPosition;
   Candidate *candidate, *mother;
-  Double_t pt, eta, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
+  Double_t pt, eta, e, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
   Double_t x, y, z, t, px, py, pz, theta;
   Double_t q, r;
   Double_t x_c, y_c, r_c, phi_0;
@@ -222,7 +222,8 @@ void TrackSmearing::Process()
 
     pt = momentum.Pt();
     eta = momentum.Eta();
-
+    e = momentum.E();
+    
     d0 = trueD0 = candidate->D0;
     dz = trueDZ = candidate->DZ;
 
@@ -231,7 +232,7 @@ void TrackSmearing::Process()
     phi = truePhi = candidate->Phi;
 
     if(fUseD0Formula)
-      d0Error = fD0Formula->Eval(pt, eta);
+      d0Error = fD0Formula->Eval(pt, eta, phi, e, candidate);
     else
     {
       Int_t xbin, ybin;
@@ -246,7 +247,7 @@ void TrackSmearing::Process()
       continue;
 
     if(fUseDZFormula)
-      dzError = fDZFormula->Eval(pt, eta);
+      dzError = fDZFormula->Eval(pt, eta, phi, e, candidate);
     else
     {
       Int_t xbin, ybin;
@@ -261,7 +262,7 @@ void TrackSmearing::Process()
       continue;
 
     if(fUsePFormula)
-      pError = fPFormula->Eval(pt, eta) * p;
+      pError = fPFormula->Eval(pt, eta, phi, e, candidate) * p;
     else
     {
       Int_t xbin, ybin;
@@ -276,7 +277,7 @@ void TrackSmearing::Process()
       continue;
 
     if(fUseCtgThetaFormula)
-      ctgThetaError = fCtgThetaFormula->Eval(pt, eta);
+      ctgThetaError = fCtgThetaFormula->Eval(pt, eta, phi, e, candidate);
     else
     {
       Int_t xbin, ybin;
@@ -291,7 +292,7 @@ void TrackSmearing::Process()
       continue;
 
     if(fUsePhiFormula)
-      phiError = fPhiFormula->Eval(pt, eta);
+      phiError = fPhiFormula->Eval(pt, eta, phi, e, candidate);
     else
     {
       Int_t xbin, ybin;

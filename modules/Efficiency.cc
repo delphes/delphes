@@ -94,7 +94,7 @@ void Efficiency::Finish()
 void Efficiency::Process()
 {
   Candidate *candidate;
-  Double_t pt, eta, phi, e, d0, dz, ctgTheta;
+  Double_t pt, eta, phi, e;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -105,12 +105,9 @@ void Efficiency::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
-    d0 = candidate->D0;
-    dz = candidate->DZ;
-    ctgTheta = candidate->CtgTheta;
-
+    
     // apply an efficency formula
-    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, d0, dz, ctgTheta)) continue;
+    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, candidate)) continue;
 
     fOutputArray->Add(candidate);
   }

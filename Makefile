@@ -445,6 +445,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/VertexFinder.h \
 	modules/VertexFinderDA4D.h \
 	modules/DecayFilter.h \
+	modules/ParticleDensity.h \
 	modules/ExampleModule.h
 tmp/modules/ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict.$(SrcSuf)
@@ -509,7 +510,8 @@ tmp/classes/DelphesFactory.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h
 tmp/classes/DelphesFormula.$(ObjSuf): \
 	classes/DelphesFormula.$(SrcSuf) \
-	classes/DelphesFormula.h
+	classes/DelphesFormula.h \
+	classes/DelphesClasses.h
 tmp/classes/DelphesHepMCReader.$(ObjSuf): \
 	classes/DelphesHepMCReader.$(SrcSuf) \
 	classes/DelphesHepMCReader.h \
@@ -880,6 +882,15 @@ tmp/modules/OldCalorimeter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/ParticleDensity.$(ObjSuf): \
+	modules/ParticleDensity.$(SrcSuf) \
+	modules/ParticleDensity.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/ParticlePropagator.$(ObjSuf): \
 	modules/ParticlePropagator.$(SrcSuf) \
 	modules/ParticlePropagator.h \
@@ -1016,7 +1027,9 @@ tmp/modules/TrackCovariance.$(ObjSuf): \
 	modules/TrackCovariance.$(SrcSuf) \
 	modules/TrackCovariance.h \
 	classes/DelphesClasses.h \
-	external/TrackCovariance/SolGeom.h
+	external/TrackCovariance/SolGeom.h \
+	external/TrackCovariance/SolGridCov.h \
+	external/TrackCovariance/ObsTrk.h
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \
@@ -1173,6 +1186,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/MomentumSmearing.$(ObjSuf) \
 	tmp/modules/OldCalorimeter.$(ObjSuf) \
+	tmp/modules/ParticleDensity.$(ObjSuf) \
 	tmp/modules/ParticlePropagator.$(ObjSuf) \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
 	tmp/modules/PhotonConversions.$(ObjSuf) \
@@ -2259,6 +2273,10 @@ external/fastjet/internal/Dnn3piCylinder.hh: \
 
 external/fastjet/AreaDefinition.hh: \
 	external/fastjet/GhostedAreaSpec.hh
+	@touch $@
+
+modules/ParticleDensity.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 modules/TimeSmearing.h: \
