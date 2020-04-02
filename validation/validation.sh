@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ################################################################################
 #
 # This code produces at set of validation plots for a given detector card.
