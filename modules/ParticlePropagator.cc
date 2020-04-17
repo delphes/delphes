@@ -134,7 +134,8 @@ void ParticlePropagator::Process()
   Double_t rcu, rc2, xd, yd, zd;
   Double_t l, d0, dz, p, ctgTheta, phip, etap, alpha;
   Double_t bsx, bsy, bsz;
-
+  Double_t s0, s1, sd;
+  
   const Double_t c_light = 2.99792458E8;
 
   if(!fBeamSpotInputArray || fBeamSpotInputArray->GetSize() == 0)
@@ -296,6 +297,15 @@ void ParticlePropagator::Process()
       yd = (rc2 > 0.0) ? yd / rc2 : -999;
       zd = z + (TMath::Sqrt(xd * xd + yd * yd) - TMath::Sqrt(x * x + y * y)) * pz / pt;
 
+      // proper calculation of the DCAz coordinate
+      // s0: track circle parameter at the track origin
+      // s1: track circle parameter at the closest approach to beam pipe
+      // sd: s1-s0 signed angular difference
+      s0 = atan2(y - y_c, x - x_c);
+      s1 = atan2(yd - y_c, xd - x_c);
+      sd = atan2(sin(s1 - s0), cos(s1 - s0));
+      zd = z - r * pz / pt * sd;
+      
       // use perigee momentum rather than original particle
       // momentum, since the orignal particle momentum isn't known
 
