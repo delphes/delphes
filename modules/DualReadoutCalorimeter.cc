@@ -171,9 +171,11 @@ void DualReadoutCalorimeter::Init()
   // read min E value for towers to be saved
   fECalEnergyMin = GetDouble("ECalEnergyMin", 0.0);
   fHCalEnergyMin = GetDouble("HCalEnergyMin", 0.0);
+  fEnergyMin = GetDouble("EnergyMin", 0.0);
 
   fECalEnergySignificanceMin = GetDouble("ECalEnergySignificanceMin", 0.0);
   fHCalEnergySignificanceMin = GetDouble("HCalEnergySignificanceMin", 0.0);
+  fEnergySignificanceMin = GetDouble("EnergySignificanceMin", 0.0);
 
   // switch on or off the dithering of the center of DualReadoutCalorimeter towers
   fSmearTowerCenter = GetBool("SmearTowerCenter", true);
@@ -630,7 +632,7 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   //cout<<"trackEnergy: "<<fTrackEnergy<<", trackSigma: "<<fTrackSigma<<", Ntracks: "<<fTowerTrackArray->GetEntries()<<endl;
 
-  //cout<<"neutralEnergy: "<<neutralEnergy<<", neutralSigma: "<<neutralSigma<<endl;
+  //cout<<"neutralEnergy: "<<neutralEnergy<<", neutralSigma: "<<neutralSigma<<", :fEnergyMin "<<fEnergyMin<<", fEnergySignificanceMin: "<<fEnergySignificanceMin<<endl;
 
    // For now, if neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack !!! -> Creating only photons !! EFlowNeutralHadron collection will be empy!!! TO BE FIXED
   if(neutralEnergy > fEnergyMin && neutralSigma > fEnergySignificanceMin)
@@ -645,6 +647,8 @@ void DualReadoutCalorimeter::FinalizeTower()
     tower->Eem = neutralEnergy;
     tower->Ehad = 0.0;
     tower->PID = 22;
+
+    
 
     fEFlowPhotonOutputArray->Add(tower);
 
@@ -687,119 +691,6 @@ void DualReadoutCalorimeter::FinalizeTower()
   }
   
 
-  /*
-  // fill energy flow candidates
-  fECalTrackSigma = TMath::Sqrt(fECalTrackSigma);
-  fHCalTrackSigma = TMath::Sqrt(fHCalTrackSigma);
-
-  //compute neutral excesses
-  ecalNeutralEnergy = max( (ecalEnergy - fECalTrackEnergy) , 0.0);
-  hcalNeutralEnergy = max( (hcalEnergy - fHCalTrackEnergy) , 0.0);
-  
-  ecalNeutralSigma = ecalNeutralEnergy / TMath::Sqrt(fECalTrackSigma*fECalTrackSigma + ecalSigma*ecalSigma);
-  hcalNeutralSigma = hcalNeutralEnergy / TMath::Sqrt(fHCalTrackSigma*fHCalTrackSigma + hcalSigma*hcalSigma);
-  
-   // if ecal neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack
-  if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
-  {
-    // create new photon tower
-    tower = static_cast<Candidate*>(fTower->Clone());
-    pt =  ecalNeutralEnergy / TMath::CosH(eta);
-    
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalNeutralEnergy);
-    tower->Eem = ecalNeutralEnergy;
-    tower->Ehad = 0.0;
-    tower->PID = 22;
-    
-    fEFlowPhotonOutputArray->Add(tower);
-   
-    //clone tracks
-    fItECalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate*>(fItECalTowerTrackArray->Next())))
-    {
-      mother = track;
-      track = static_cast<Candidate*>(track->Clone());
-      track->AddCandidate(mother);
-
-      fEFlowTrackOutputArray->Add(track);
-    }
-  
-  }
- 
-  // if neutral excess is not significant, rescale eflow tracks, such that the total charged equals the best measurement given by the DualReadoutCalorimeter and tracking
-  else if(fECalTrackEnergy > 0.0)
-  {
-    weightTrack = (fECalTrackSigma > 0.0) ? 1 / (fECalTrackSigma*fECalTrackSigma) : 0.0;
-    weightCalo  = (ecalSigma > 0.0) ? 1 / (ecalSigma*ecalSigma) : 0.0;
-  
-    bestEnergyEstimate = (weightTrack*fECalTrackEnergy + weightCalo*ecalEnergy) / (weightTrack + weightCalo); 
-    rescaleFactor = bestEnergyEstimate/fECalTrackEnergy;
-
-    //rescale tracks
-    fItECalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate*>(fItECalTowerTrackArray->Next())))
-    {  
-      mother = track;
-      track = static_cast<Candidate*>(track->Clone());
-      track->AddCandidate(mother);
-
-      track->Momentum *= rescaleFactor;
-
-      fEFlowTrackOutputArray->Add(track);
-    }
-  }
-
-
-  // if hcal neutral excess is significant, simply create neutral EflowNeutralHadron tower and clone each track into eflowtrack
-  if(hcalNeutralEnergy > fHCalEnergyMin && hcalNeutralSigma > fHCalEnergySignificanceMin)
-  {
-    // create new photon tower
-    tower = static_cast<Candidate*>(fTower->Clone());
-    pt =  hcalNeutralEnergy / TMath::CosH(eta);
-    
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalNeutralEnergy);
-    tower->Ehad = hcalNeutralEnergy;
-    tower->Eem = 0.0;
-    
-    fEFlowNeutralHadronOutputArray->Add(tower);
-   
-    //clone tracks
-    fItHCalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate*>(fItHCalTowerTrackArray->Next())))
-    {
-      mother = track;
-      track = static_cast<Candidate*>(track->Clone());
-      track->AddCandidate(mother);
-
-      fEFlowTrackOutputArray->Add(track);
-    }
-  
-  }
- 
-  // if neutral excess is not significant, rescale eflow tracks, such that the total charged equals the best measurement given by the DualReadoutCalorimeter and tracking
-  else if(fHCalTrackEnergy > 0.0)
-  {
-    weightTrack = (fHCalTrackSigma > 0.0) ? 1 / (fHCalTrackSigma*fHCalTrackSigma) : 0.0;
-    weightCalo  = (hcalSigma > 0.0) ? 1 / (hcalSigma*hcalSigma) : 0.0;
-  
-    bestEnergyEstimate = (weightTrack*fHCalTrackEnergy + weightCalo*hcalEnergy) / (weightTrack + weightCalo); 
-    rescaleFactor = bestEnergyEstimate / fHCalTrackEnergy;
-
-    //rescale tracks
-    fItHCalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate*>(fItHCalTowerTrackArray->Next())))
-    {  
-      mother = track;
-      track = static_cast<Candidate*>(track->Clone());
-      track->AddCandidate(mother);
-
-      track->Momentum *= rescaleFactor;
-
-      fEFlowTrackOutputArray->Add(track);
-    }
-  }
-
-  */
 }
 
 //------------------------------------------------------------------------------
