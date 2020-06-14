@@ -71,6 +71,7 @@ private:
 
   Int_t fJetAlgorithm;
   Double_t fParameterR;
+  Double_t fParameterP;
 
   Double_t fJetPTMin;
   Double_t fConeRadius;

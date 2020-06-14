@@ -103,6 +103,7 @@ void FastJetFinder::Init()
 
   fJetAlgorithm = GetInt("JetAlgorithm", 6);
   fParameterR = GetDouble("ParameterR", 0.5);
+  fParameterP = GetDouble("ParameterP", -1.0);
 
   fConeRadius = GetDouble("ConeRadius", 0.5);
   fSeedThreshold = GetDouble("SeedThreshold", 1.0);
@@ -246,6 +247,10 @@ void FastJetFinder::Init()
     fValenciaPlugin = new ValenciaPlugin(fParameterR, fBeta, fGamma);
     fDefinition = new JetDefinition(fValenciaPlugin);
     break;
+  case 10:
+    fDefinition = new JetDefinition(ee_genkt_algorithm,fParameterR,fParameterP);
+    break;
+
   }
 
   fPlugin = plugin;
