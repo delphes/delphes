@@ -108,7 +108,7 @@ void TrackCovariance::Process()
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz, fCovariance);
 
-    mother = candidate;
+    mother    = candidate;
     candidate = static_cast<Candidate *>(candidate->Clone());
 
     candidate->Momentum.SetVectM(track.GetObsP(), mass);
@@ -119,6 +119,10 @@ void TrackCovariance::Process()
     q  = track.GetObsQ();
     ct = track.GetObsPar()[4];
 
+    candidate->Xd = track.GetObsX().X();
+    candidate->Yd = track.GetObsX().Y();
+    candidate->Zd = track.GetObsX().Z();
+    
     candidate->D0 = track.GetObsPar()[0];
     candidate->DZ = track.GetObsPar()[3];
     candidate->P  = track.GetObsP().Mag();
