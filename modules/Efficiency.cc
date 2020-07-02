@@ -77,6 +77,9 @@ void Efficiency::Init()
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
+  // switch to compute efficiency based on momentum vector eta, phi
+  fUseMomentumVector = GetBool("UseMomentumVector", false);
+
   // create output array
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -103,6 +106,12 @@ void Efficiency::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
+
+    if (fUseMomentumVector){
+      eta = candidateMomentum.Eta();
+      phi = candidateMomentum.Phi();
+    }
+
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
     
