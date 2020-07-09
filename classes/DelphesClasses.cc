@@ -27,7 +27,6 @@
  */
 
 #include "classes/DelphesClasses.h"
-
 #include "classes/DelphesFactory.h"
 #include "classes/SortableObject.h"
 
@@ -139,6 +138,7 @@ Candidate::Candidate() :
   InitialPosition(0.0, 0.0, 0.0, 0.0),
   PositionError(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
+  TrackCovarianceACTS(6),
   L(0),
   D0(0), ErrorD0(0),
   DZ(0), ErrorDZ(0),
@@ -376,7 +376,7 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedJet = SoftDroppedJet;
   object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
-
+  object.TrackCovarianceACTS = TrackCovarianceACTS;
   object.fFactory = fFactory;
   object.fArray = 0;
 
@@ -433,6 +433,7 @@ void Candidate::Clear(Option_t *option)
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  TrackCovarianceACTS.Zero();
   L = 0.0;
   ErrorT = 0.0;
   D0 = 0.0;

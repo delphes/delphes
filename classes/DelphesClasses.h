@@ -32,6 +32,7 @@
 // Dependencies (#includes)
 
 #include "TLorentzVector.h"
+#include "TMatrixDSym.h"
 #include "TObject.h"
 #include "TRef.h"
 #include "TRefArray.h"
@@ -697,6 +698,10 @@ public:
   Float_t SumPtNeutral;
   Float_t SumPtChargedPU;
   Float_t SumPt;
+
+  // ACTS compliant 6x6 track covariance (D, z0, phi0, theta, q/p, time)
+
+  TMatrixDSym TrackCovarianceACTS;
 
   // vertex variables
 

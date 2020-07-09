@@ -113,6 +113,9 @@ void TrackCovariance::Process()
 
     candidate->Momentum.SetVectM(track.GetObsP(), mass);
     candidate->InitialPosition.SetXYZT(track.GetObsX().X(),track.GetObsX().Y(),track.GetObsX().Z(),candidatePosition.T());
+    
+    // save full ACTS friendly covariance matrix internally (6x6: D, z0, phi0, theta, q/p, time)
+    candidate->TrackCovarianceACTS = track.GetCovACTS();
 
     pt = candidate->Momentum.Pt();
     p  = candidate->Momentum.P();
@@ -147,6 +150,7 @@ void TrackCovariance::Process()
     candidate->ErrorPT = dpt;
     //candidate->TrackResolution = dpt / pt;
     candidate->TrackResolution = dp / p;
+
 
     candidate->AddCandidate(mother);
 
