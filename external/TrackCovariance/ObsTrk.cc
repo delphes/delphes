@@ -19,12 +19,16 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 	fB = B;
 	fGenPar.ResizeTo(5);
 	fGenParACTS.ResizeTo(6);
+	fGenParILC.ResizeTo(5);
 	fObsPar.ResizeTo(5);
 	fObsParACTS.ResizeTo(6);
+	fObsParILC.ResizeTo(5);
 	fCov.ResizeTo(5, 5);
 	fCovACTS.ResizeTo(6, 6);
+	fCovILC.ResizeTo(5, 5);
 	fGenPar = XPtoPar(x,p,Q);
 	fGenParACTS = ParToACTS(fGenPar);
+	fGenParILC = ParToILC(fGenPar);
 	/*
 	std::cout << "ObsTrk::ObsTrk: fGenPar";
 	for (Int_t i = 0; i < 5; i++)std::cout << fGenPar(i) << ", ";
@@ -32,10 +36,12 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 	*/
 	fObsPar = GenToObsPar(fGenPar, fGC);
 	fObsParACTS = ParToACTS(fObsPar);
+	fObsParILC = ParToILC(fObsPar);
 	fObsX = ParToX(fObsPar);
 	fObsP = ParToP(fObsPar);
 	fObsQ = ParToQ(fObsPar);
 	fCovACTS = CovToACTS(fCov);
+	fCovILC = CovToILC(fCov);
 }
 //
 // Destructor
@@ -203,6 +209,42 @@ TMatrixDSym ObsTrk::CovToACTS(TMatrixDSym Cov)
 	cACTS(5, 5) = 0.1;	// Currently undefined: set to arbitrary value to avoid crashes
 	//
 	return cACTS;
+}
+
+// Parameter conversion to ILC format
+TVectorD ObsTrk::ParToILC(TVectorD Par)
+{
+	TVectorD pILC(5);	// Return vector
+	//
+	pILC(0) = Par(0)*1.0e3;			// d0 in mm
+	pILC(1) = Par(1);				// phi0 is unchanged
+	pILC(2) = -2 * Par(2)*1.0e-3;	// w in mm^-1
+	pILC(3) = Par(3)*1.0e3;			// z0 in mm
+	pILC(4) = Par(4);				// tan(lambda) = cot(theta)
+	//
+	return pILC;
+}
+// Covariance conversion to ILC format
+TMatrixDSym ObsTrk::CovToILC(TMatrixDSym Cov)
+{
+	TMatrixDSym cILC(5); cILC.Zero();
+	//
+	// Fill derivative matrix
+	TMatrixD A(5, 5);	A.Zero();
+	//
+	A(0, 0) = 1.0e3;		// D-d0 in mm
+	A(1, 1) = 1.0;		// phi0-phi0
+	A(2, 2) = -2.0e-3;	// w-C
+	A(3, 3) = 1.0e3;		// z0-z0 conversion to mm
+	A(4, 4) = 1.0;		// tan(lambda) - cot(theta)
+	//
+	TMatrixDSym Cv = Cov;
+	TMatrixD At(5, 5);
+	At.Transpose(A);
+	Cv.Similarity(At);
+	cILC = Cv;
+	//
+	return cILC;
 }
 
 

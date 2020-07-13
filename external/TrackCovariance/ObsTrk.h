@@ -28,17 +28,26 @@ private:
 	TVector3 fGenP;					// Generated track momentum at track origin
 	TVector3 fObsP;					// Observed  track momentum @ track minimum approach
 	TVectorD fGenPar;				// Generated helix track parameters (D, phi0, C, z0, cot(th))
-	TVectorD fGenParACTS;			// Generated helix track parameters (D, z0, phi0, th, q/p, time)
+	TVectorD fGenParACTS;			// Generated helix track parameters (D, z0, phi0, th, q/p, time
+	TVectorD fGenParILC;				// Generated helix track parameters (w, phi0, d0, z0, tan(lambda))
 	TVectorD fObsPar;				// Observed  helix track parameters (D, phi0, C, z0, cot(th))
-	TVectorD fObsParACTS;			// Observed  helix track parameters (D, z0, phi0, th, q/p, time)
+	TVectorD fObsParACTS;			// Observed  helix track parameters (D, z0, phi0, th, q/p, time
+	TVectorD fObsParILC;				// Observed  helix track parameters (d0, phi0, w, z0, tan(lambda))
 	TMatrixDSym fCov;				// INterpolated covariance of track parameters
 	TMatrixDSym fCovACTS;			// Covariance of track parameters in ACTS format
 									// (D, z0, phi0, theta, q/p, time)
+	TMatrixDSym fCovILC;				// Covariance of track parameters in ILC format
+									// (d0, phi0, w, z0, tan(lambda))
 	//
 	// Conversion to ACTS parametrization
 	//
 	TVectorD ParToACTS(TVectorD Par);		// Parameter conversion
-	TMatrixDSym CovToACTS(TMatrixDSym Cov);	// Covariance conversion
+	TMatrixDSym CovToACTS(TMatrixDSym Cov);	// Covariance 
+	//
+	// Conversion to ILC parametrization
+	//
+	TVectorD ParToILC(TVectorD Par);		// Parameter conversion
+	TMatrixDSym CovToILC(TMatrixDSym Cov);	// Covariance conversion
 	//
 public:
 	//
@@ -67,6 +76,8 @@ public:
 	TVectorD GetGenPar()	{ return fGenPar; }
 	// D, z0, phi0, theta, q/p, time
 	TVectorD GetGenParACTS()	{ return fGenParACTS; }
+	// d0, phi0, w, z0, tan(lambda)
+	TVectorD GetGenParILC()	{ return fGenParILC; }
 	// Observed level X, P, Q
 	Double_t GetObsQ()	{ return fObsQ; }
 	TVector3 GetObsX()	{ return fObsX; }
@@ -75,9 +86,12 @@ public:
 	TVectorD GetObsPar()	{ return fObsPar; }
 	// D, z0, phi0, theta, q/p, time
 	TVectorD GetObsParACTS()	{ return fObsParACTS; }
+	// d0, phi0, w, z0, tan(lambda)
+	TVectorD GetObsParILC()	{ return fObsParILC; }
 	// Covariances
 	TMatrixDSym GetCov(){ return fCov; }
-	TMatrixDSym GetCovACTS(){ return fCovACTS; };
+	TMatrixDSym GetCovACTS(){ return fCovACTS; }
+	TMatrixDSym GetCovILC(){ return fCovILC; }
 };
 
 #endif
