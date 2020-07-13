@@ -650,11 +650,13 @@ public:
   TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
 
   Float_t L; // path length
+  Float_t DZ;
+  Float_t ErrorDZ;
   Float_t ErrorT; // path length
   Float_t D0;
   Float_t ErrorD0;
-  Float_t DZ;
-  Float_t ErrorDZ;
+  Float_t C;
+  Float_t ErrorC;
   Float_t P;
   Float_t ErrorP;
   Float_t PT;
@@ -699,9 +701,9 @@ public:
   Float_t SumPtChargedPU;
   Float_t SumPt;
 
-  // ACTS compliant 6x6 track covariance (D, z0, phi0, theta, q/p, time)
+  // ACTS compliant 6x6 track covariance (D0, phi, Curvature, dz, ctg(theta))
 
-  TMatrixDSym TrackCovarianceACTS;
+  TMatrixDSym TrackCovariance;
 
   // vertex variables
 

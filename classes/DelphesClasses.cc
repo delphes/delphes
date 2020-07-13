@@ -138,11 +138,12 @@ Candidate::Candidate() :
   InitialPosition(0.0, 0.0, 0.0, 0.0),
   PositionError(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
-  TrackCovarianceACTS(6),
+  TrackCovariance(5),
   L(0),
   D0(0), ErrorD0(0),
   DZ(0), ErrorDZ(0),
   P(0), ErrorP(0),
+  C(0), ErrorC(0),
   PT(0), ErrorPT(0),
   CtgTheta(0), ErrorCtgTheta(0),
   Phi(0), ErrorPhi(0),
@@ -312,6 +313,8 @@ void Candidate::Copy(TObject &obj) const
   object.ErrorDZ = ErrorDZ;
   object.P = P;
   object.ErrorP = ErrorP;
+  object.C = C;
+  object.ErrorC = ErrorC;
   object.PT = PT;
   object.ErrorPT = ErrorPT;
   object.CtgTheta = CtgTheta;
@@ -376,7 +379,7 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedJet = SoftDroppedJet;
   object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
-  object.TrackCovarianceACTS = TrackCovarianceACTS;
+  object.TrackCovariance = TrackCovariance;
   object.fFactory = fFactory;
   object.fArray = 0;
 
@@ -433,7 +436,7 @@ void Candidate::Clear(Option_t *option)
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  TrackCovarianceACTS.Zero();
+  TrackCovariance.Zero();
   L = 0.0;
   ErrorT = 0.0;
   D0 = 0.0;
@@ -442,6 +445,8 @@ void Candidate::Clear(Option_t *option)
   ErrorDZ = 0.0;
   P = 0.0;
   ErrorP = 0.0;
+  C = 0.0;
+  ErrorC = 0.0;
   PT = 0.0;
   ErrorPT = 0.0;
   CtgTheta = 0.0;
