@@ -488,14 +488,6 @@ void FastJetFinder::Process()
 
       fastjet::Filter trimmer(fastjet::JetDefinition(fastjet::kt_algorithm, fRTrim), fastjet::SelectorPtFractionMin(fPtFracTrim));
       fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
-
-      //trimmed_jet = join(trimmed_jet.constituents());
-      
-      //The previous line generates a trimmed_jet where each piece (subjet) has a single constituent only
-      //This isn't necessarily correct, a subjet could have multiple constituents, according to defining trimming paper
-      //Removing this line retains the trimmed_jet P4 but also allows subjets to be formed with multiple constituents
-      //based on the R-parameter requirements, and is consistent with the ATLAS/ATHENA code from their github respository
-      //Jared Burleson, Undergraduate Student at Southern Methodist University
       
       candidate->TrimmedP4[0].SetPtEtaPhiM(trimmed_jet.pt(), trimmed_jet.eta(), trimmed_jet.phi(), trimmed_jet.m());
 
