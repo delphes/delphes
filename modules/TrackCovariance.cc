@@ -95,7 +95,7 @@ void TrackCovariance::Process()
 {
   Candidate *candidate, *mother;
   Double_t mass, p, pt, q, ct;
-  Double_t dd0, ddz, dphi, dct, dp, dpt;
+  Double_t dd0, ddz, dphi, dct, dp, dpt, dC;
   
 
   fItInputArray->Reset();
@@ -114,8 +114,8 @@ void TrackCovariance::Process()
     candidate->Momentum.SetVectM(track.GetObsP(), mass);
     candidate->InitialPosition.SetXYZT(track.GetObsX().X(),track.GetObsX().Y(),track.GetObsX().Z(),candidatePosition.T());
     
-    // save full ACTS friendly covariance matrix internally (6x6: D, z0, phi0, theta, q/p, time)
-    candidate->TrackCovarianceACTS = track.GetCovACTS();
+    // save full covariance 5x5 matrix internally (D0, phi, Curvature, dz, ctg(theta))
+    candidate->TrackCovariance = track.GetCov();
 
     pt = candidate->Momentum.Pt();
     p  = candidate->Momentum.P();
@@ -127,11 +127,11 @@ void TrackCovariance::Process()
     candidate->Zd = track.GetObsX().Z();
     
     candidate->D0 = track.GetObsPar()[0];
-    candidate->DZ = track.GetObsPar()[3];
-    candidate->P  = track.GetObsP().Mag();
-    candidate->CtgTheta = track.GetObsPar()[4];
     candidate->Phi = track.GetObsPar()[1];
-
+    candidate->C = track.GetObsPar()[2];
+    candidate->DZ = track.GetObsPar()[3];
+    candidate->CtgTheta = track.GetObsPar()[4];
+    candidate->P  = track.GetObsP().Mag();
     candidate->PT = pt;
     candidate->Charge = q;
 
@@ -141,10 +141,12 @@ void TrackCovariance::Process()
     dct       = TMath::Sqrt(track.GetCov()(4, 4)); 
     dpt       = 2 * TMath::Sqrt( track.GetCov()(2, 2))*pt*pt / (0.2998*fBz);
     dp        = TMath::Sqrt((1.+ct*ct)*dpt*dpt + 4*pt*pt*ct*ct*dct*dct/(1.+ct*ct)/(1.+ct*ct));
+    dC        = TMath::Sqrt(track.GetCov()(2, 2));
 
     candidate->ErrorD0 = dd0;
     candidate->ErrorDZ = ddz;
     candidate->ErrorP = dp;
+    candidate->ErrorC = dC;
     candidate->ErrorCtgTheta = dct;
     candidate->ErrorPhi = dphi;
     candidate->ErrorPT = dpt;
