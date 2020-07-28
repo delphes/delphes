@@ -289,7 +289,7 @@ all:
 
 }
 
-executableDeps {converters/*.cpp} {examples/*.cpp} {validation/*.cpp}
+executableDeps {converters/*.cpp} {examples/*.cpp}
 
 executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp} {readers/DelphesROOT.cpp}
 
