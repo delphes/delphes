@@ -81,11 +81,6 @@ module BTagging BTagging_WP90_R02N6 {
 	set BitNumber 2
 	source MuonCollider/MuonColliderDet_BTag_90.tcl
 }
-module BTagging BTagging_WP50_R07N2 {
-	set JetInputArray JetMomentumSmearing_VLCR07N2/JER_VLCjetsR07N2
-	set BitNumber 0
-	source MuonCollider/MuonColliderDet_BTag_50.tcl
-}
 
 module BTagging BTagging_WP50_R05N2 {
 	set JetInputArray JetMomentumSmearing_VLCR05N2/JER_VLCjetsR05N2
@@ -170,6 +165,7 @@ module BTagging BTagging_WP90_R05N6 {
 	set BitNumber 2
 	source MuonCollider/MuonColliderDet_BTag_90.tcl
 }
+
 module BTagging BTagging_WP50_R07N2 {
 	set JetInputArray JetMomentumSmearing_VLCR07N2/JER_VLCjetsR07N2
 	set BitNumber 0
