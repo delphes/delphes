@@ -295,12 +295,14 @@ int main(int argc, char *argv[])
     pythia = new Pythia8::Pythia;
 
     // jet matching
+#if PYTHIA_VERSION_INTEGER < 8300
     matching = combined->getHook(*pythia);
     if(!matching)
     {
       throw runtime_error("can't do matching");
     }
     pythia->setUserHooksPtr(matching);
+#endif
 
     if(pythia == NULL)
     {
