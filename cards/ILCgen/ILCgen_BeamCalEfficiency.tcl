@@ -2,8 +2,6 @@
 # Based on IDR Figure 8.8a and Moritz Hebermehl PhD Thesis Figure 4.10
 # A.F.Zarnecki,  June 2020
 
-# set EfficiencyFormula {efficiency formula as a function of eta and pt}
-
 set EfficiencyFormula {
     (energy <= 10 ) *                                                      (0.00) +
     (energy > 10 ) * (abs(eta)  > 5.88 )                                 * (0.00) +
