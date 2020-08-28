@@ -88,7 +88,7 @@ DELPHESLIB = libDelphes.lib
 DISPLAY = libDelphesDisplay.$(DllSuf)
 DISPLAYLIB = libDelphesDisplay.lib
 
-VERSION = $(shell cat VERSION)
+VERSION = x.y.z
 DISTDIR = Delphes-$(VERSION)
 DISTTAR = $(DISTDIR).tar.gz
 
@@ -179,17 +179,6 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeReader.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h \
 	external/ExRootAnalysis/ExRootUtilities.h
-DelphesValidation$(ExeSuf): \
-	tmp/validation/DelphesValidation.$(ObjSuf)
-
-tmp/validation/DelphesValidation.$(ObjSuf): \
-	validation/DelphesValidation.cpp \
-	classes/DelphesClasses.h \
-	external/ExRootAnalysis/ExRootResult.h \
-	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeReader.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/ExRootAnalysis/ExRootUtilities.h
 EXECUTABLE +=  \
 	hepmc2pileup$(ExeSuf) \
 	lhco2root$(ExeSuf) \
@@ -198,8 +187,7 @@ EXECUTABLE +=  \
 	root2pileup$(ExeSuf) \
 	stdhep2pileup$(ExeSuf) \
 	CaloGrid$(ExeSuf) \
-	Example1$(ExeSuf) \
-	DelphesValidation$(ExeSuf)
+	Example1$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
@@ -209,8 +197,7 @@ EXECUTABLE_OBJ +=  \
 	tmp/converters/root2pileup.$(ObjSuf) \
 	tmp/converters/stdhep2pileup.$(ObjSuf) \
 	tmp/examples/CaloGrid.$(ObjSuf) \
-	tmp/examples/Example1.$(ObjSuf) \
-	tmp/validation/DelphesValidation.$(ObjSuf)
+	tmp/examples/Example1.$(ObjSuf)
 
 DelphesHepMC$(ExeSuf): \
 	tmp/readers/DelphesHepMC.$(ObjSuf)
@@ -2433,7 +2420,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a AUTHORS CHANGELOG CMakeLists.txt COPYING DelphesEnv.sh LICENSE NOTICE README README_4LHCb VERSION Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
+	@cp -a AUTHORS CHANGELOG CMakeLists.txt COPYING DelphesEnv.sh LICENSE NOTICE README README_4LHCb Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)

@@ -488,9 +488,7 @@ void FastJetFinder::Process()
 
       fastjet::Filter trimmer(fastjet::JetDefinition(fastjet::kt_algorithm, fRTrim), fastjet::SelectorPtFractionMin(fPtFracTrim));
       fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
-
-      trimmed_jet = join(trimmed_jet.constituents());
-
+      
       candidate->TrimmedP4[0].SetPtEtaPhiM(trimmed_jet.pt(), trimmed_jet.eta(), trimmed_jet.phi(), trimmed_jet.m());
 
       // four hardest subjets

@@ -281,7 +281,7 @@ DELPHESLIB = libDelphes.lib
 DISPLAY = libDelphesDisplay.$(DllSuf)
 DISPLAYLIB = libDelphesDisplay.lib
 
-VERSION = $(shell cat VERSION)
+VERSION = x.y.z
 DISTDIR = Delphes-$(VERSION)
 DISTTAR = $(DISTDIR).tar.gz
 
@@ -289,7 +289,7 @@ all:
 
 }
 
-executableDeps {converters/*.cpp} {examples/*.cpp} {validation/*.cpp}
+executableDeps {converters/*.cpp} {examples/*.cpp}
 
 executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp} {readers/DelphesROOT.cpp}
 
@@ -433,7 +433,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a AUTHORS CHANGELOG CMakeLists.txt COPYING DelphesEnv.sh LICENSE NOTICE README README_4LHCb VERSION Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
+	@cp -a AUTHORS CHANGELOG CMakeLists.txt COPYING DelphesEnv.sh LICENSE NOTICE README README_4LHCb Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)

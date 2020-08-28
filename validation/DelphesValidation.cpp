@@ -31,6 +31,7 @@
 #include "TClonesArray.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
+#include "TF1.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "THStack.h"
