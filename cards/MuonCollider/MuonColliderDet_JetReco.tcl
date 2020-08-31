@@ -389,7 +389,21 @@ module FastJetFinder FastJetFinderVLC_R02_inclusive {
     set ParameterR 0.2
     set Beta 1.0
     set Gamma 1.0
+
+    set ComputeNsubjettiness 1
+    set AxisMode 4
+
+    set ComputeSoftDrop 1
+    set BetaSoftDrop 0.0
+    set SymmetryCutSoftDrop 0.1
+    set R0SoftDrop 0.2
+
     set JetPTMin 20.0
+
+
+
+
+
 }
 #R05
 module FastJetFinder FastJetFinderVLC_R05_inclusive {
@@ -400,6 +414,13 @@ module FastJetFinder FastJetFinderVLC_R05_inclusive {
     set ParameterR 0.5
     set Beta 1.0
     set Gamma 1.0
+    set ComputeNsubjettiness 1
+    set AxisMode 4
+
+    set ComputeSoftDrop 1
+    set BetaSoftDrop 0.0
+    set SymmetryCutSoftDrop 0.1
+    set R0SoftDrop 0.5
     set JetPTMin 20.0
 }
 #R07
@@ -411,6 +432,13 @@ module FastJetFinder FastJetFinderVLC_R07_inclusive {
     set ParameterR 0.7
     set Beta 1.0
     set Gamma 1.0
+    set ComputeNsubjettiness 1
+    set AxisMode 4
+
+    set ComputeSoftDrop 1
+    set BetaSoftDrop 0.0
+    set SymmetryCutSoftDrop 0.1
+    set R0SoftDrop 0.7
     set JetPTMin 20.0
 }
 #R10
@@ -422,6 +450,13 @@ module FastJetFinder FastJetFinderVLC_R10_inclusive {
     set ParameterR 1.0
     set Beta 1.0
     set Gamma 1.0
+    set ComputeNsubjettiness 1
+    set AxisMode 4
+
+    set ComputeSoftDrop 1
+    set BetaSoftDrop 0.0
+    set SymmetryCutSoftDrop 0.1
+    set R0SoftDrop 1.0
     set JetPTMin 20.0
 }
 #R12
@@ -433,6 +468,13 @@ module FastJetFinder FastJetFinderVLC_R12_inclusive {
     set ParameterR 1.2
     set Beta 1.0
     set Gamma 1.0
+    set ComputeNsubjettiness 1
+    set AxisMode 4
+
+    set ComputeSoftDrop 1
+    set BetaSoftDrop 0.0
+    set SymmetryCutSoftDrop 0.1
+    set R0SoftDrop 1.2
     set JetPTMin 20.0
 }
 #R15
@@ -444,5 +486,13 @@ module FastJetFinder FastJetFinderVLC_R15_inclusive {
     set ParameterR 1.5
     set Beta 1.0
     set Gamma 1.0
+    set ComputeNsubjettiness 1
+    set AxisMode 4
+
+    set ComputeSoftDrop 1
+    set BetaSoftDrop 0.0
+    set SymmetryCutSoftDrop 0.1
+    set R0SoftDrop 1.5
+
     set JetPTMin 20.0
 }
