@@ -1,5 +1,4 @@
 #P.Sopicki
-  # default energy fractions {abs(PDG code)} {fraction of energy deposited in BeamCal}
 
   add EnergyFraction {0} {0.0}
   # energy fractions for e, gamma and pi0
@@ -19,4 +18,3 @@
   # energy fractions for K0short and Lambda
   add EnergyFraction {310} {0.3}
   add EnergyFraction {3122} {0.3}
-

@@ -103,4 +103,3 @@ module BTagging CTagging20_N6 {
 
     source ILCgen/ILCgen_CTagging_20.tcl
 }
-

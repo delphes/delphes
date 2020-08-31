@@ -1,8 +1,8 @@
 #P.Sopicki: based on plots from D.Jeans:
 # corrected by A.F.Zarnecki
 
-set pi [expr {acos(-1)}]
-    
+set pi [expr {acos(-1)} ]
+
 # BeamCal eta range 4.0 - 5.8 -> 2.099-0.347 =1.752deg
 #
 # Inner part (4.6-5.8):  1.152-0.347 = 0.805 deg
