@@ -1,5 +1,5 @@
 #P.Sopicki
-# default energy fractions {abs(PDG code)} {fraction in HCAL or LHCAL}
+
   add EnergyFraction {0} {1.0}
   # energy fractions for e, gamma and pi0
   add EnergyFraction {11} {0.0}
