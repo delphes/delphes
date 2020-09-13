@@ -429,7 +429,7 @@ module DenseTrackFilter DenseTrackFilter {
   set ElectronOutputArray electrons
   set MuonOutputArray muons
 
-  set EtaPhiRes 0.01
+  set EtaPhiRes 0.003
   set EtaMax 2.5
 
   set pi [expr {acos(-1)}]
