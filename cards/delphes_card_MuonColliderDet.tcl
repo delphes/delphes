@@ -10,17 +10,8 @@
 # The parameterisation of the Muon Collider
 # has to be intended as a target performance.
 # This has not been validated by full simulation.
-# Very similar to CLIC performance, added DenseTrackFilter
+# Hybrid between FCC-hh and CLIC performance.
 #
-# Comments:
-#   - fix: replace momentum resolution by FCC-hh
-#   - fix: angle param in DenseTrackFilter
-#   - fix: add FWD muon collection
-#   - what to do with Eta acceptance?
-#       - for now everything reduced at 2.5
-#   - add jet substructure to valencia jets ?
-#   - added R02 jets
-#   - added electron misId for taus, and make flat eff
 #
 #######################################
 
@@ -963,13 +954,13 @@ module MomentumSmearing MuonMomentumSmearing {
     ( abs(eta) < 1.35 ) *
 
     (sqrt(0.0000364164 + (
-       9.06262e-8 *pt^2* cosh(
+			  3*9.06262e-8 *pt^2* cosh(
          eta)^2 *(2.82074e-7/sin(2*atan(exp(-abs(eta))))^2 + (
           504.525 *(1/400000000 + (0.117945* 1/cosh(eta)^2)/(
              pt^2 *sin(2*atan(exp(-abs(eta))))^2)))/
           sin(2*atan(exp(-abs(eta))))^2) *sin(2*atan(exp(-abs(eta))))^2)/(
        0.00516429/sin(2*atan(exp(-abs(eta))))^2 + (
-        96868.8 *(1/400000000 + (0.117945 * 1/cosh(eta)^2)/(
+        96868.8 *(1/400000000 + 5*(0.117945 * 1/cosh(eta)^2)/(
            pt^2 *sin(2*atan(exp(-abs(eta))))^2)))/
         sin(2*atan(exp(-abs(eta))))^2))
 
