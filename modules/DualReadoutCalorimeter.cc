@@ -644,14 +644,25 @@ void DualReadoutCalorimeter::FinalizeTower()
     pt =  neutralEnergy / TMath::CosH(eta);
     //cout<<"Creating tower with Pt, Eta, Phi, Energy: "<<pt<<","<<eta<<","<<phi<<","<<neutralEnergy<<endl;
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
-    tower->Eem = neutralEnergy;
-    tower->Ehad = 0.0;
-    tower->PID = 22;
 
-    
+    // if no hadronic energy, use ECAL resolution 
+    if (fHCalTowerEnergy <= fHCalEnergyMin)
+    {
+      tower->Eem = neutralEnergy;
+      tower->Ehad = 0.0;
+      tower->PID = 22;
+    }
+
+    // if hadronic fraction > 0, use HCAL resolution 
+    else
+    {
+      tower->Eem = 0;
+      tower->Ehad = neutralEnergy;
+      tower->PID = 130;
+    }
 
     fEFlowPhotonOutputArray->Add(tower);
-
+    
 
     //clone tracks
     fItTowerTrackArray->Reset();
