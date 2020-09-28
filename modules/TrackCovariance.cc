@@ -101,7 +101,9 @@ void TrackCovariance::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidatePosition = candidate->InitialPosition;
+
+    // converting to meters
+    const TLorentzVector &candidatePosition = candidate->InitialPosition*1e-03;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
     mass = candidateMomentum.M();
@@ -112,8 +114,10 @@ void TrackCovariance::Process()
     candidate = static_cast<Candidate *>(candidate->Clone());
 
     candidate->Momentum.SetVectM(track.GetObsP(), mass);
-    candidate->InitialPosition.SetXYZT(track.GetObsX().X(),track.GetObsX().Y(),track.GetObsX().Z(),candidatePosition.T());
     
+    // converting back to mm
+    candidate->InitialPosition.SetXYZT(track.GetObsX().X()*1e03,track.GetObsX().Y()*1e03,track.GetObsX().Z()*1e03,candidatePosition.T()*1e03);
+
     // save full covariance 5x5 matrix internally (D0, phi, Curvature, dz, ctg(theta))
     candidate->TrackCovariance = track.GetCov();
 
@@ -122,26 +126,26 @@ void TrackCovariance::Process()
     q  = track.GetObsQ();
     ct = track.GetObsPar()[4];
 
-    candidate->Xd = track.GetObsX().X();
-    candidate->Yd = track.GetObsX().Y();
-    candidate->Zd = track.GetObsX().Z();
+    candidate->Xd = track.GetObsX().X()*1e03;
+    candidate->Yd = track.GetObsX().Y()*1e03;
+    candidate->Zd = track.GetObsX().Z()*1e03;
     
-    candidate->D0 = track.GetObsPar()[0];
-    candidate->Phi = track.GetObsPar()[1];
-    candidate->C = track.GetObsPar()[2];
-    candidate->DZ = track.GetObsPar()[3];
+    candidate->D0       = track.GetObsPar()[0]*1e03;
+    candidate->Phi      = track.GetObsPar()[1];
+    candidate->C        = track.GetObsPar()[2]*1e03;
+    candidate->DZ       = track.GetObsPar()[3]*1e03;
     candidate->CtgTheta = track.GetObsPar()[4];
-    candidate->P  = track.GetObsP().Mag();
-    candidate->PT = pt;
-    candidate->Charge = q;
+    candidate->P        = track.GetObsP().Mag();
+    candidate->PT       = pt;
+    candidate->Charge   = q;
 
-    dd0       = TMath::Sqrt(track.GetCov()(0, 0)); 
-    ddz       = TMath::Sqrt(track.GetCov()(3, 3)); 
+    dd0       = TMath::Sqrt(track.GetCov()(0, 0))*1e03; 
+    ddz       = TMath::Sqrt(track.GetCov()(3, 3))*1e03; 
     dphi      = TMath::Sqrt(track.GetCov()(1, 1)); 
     dct       = TMath::Sqrt(track.GetCov()(4, 4)); 
     dpt       = 2 * TMath::Sqrt( track.GetCov()(2, 2))*pt*pt / (0.2998*fBz);
     dp        = TMath::Sqrt((1.+ct*ct)*dpt*dpt + 4*pt*pt*ct*ct*dct*dct/(1.+ct*ct)/(1.+ct*ct));
-    dC        = TMath::Sqrt(track.GetCov()(2, 2));
+    dC        = TMath::Sqrt(track.GetCov()(2, 2))*1e03;
 
     candidate->ErrorD0 = dd0;
     candidate->ErrorDZ = ddz;
