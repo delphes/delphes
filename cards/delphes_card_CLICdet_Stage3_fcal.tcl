@@ -1,20 +1,14 @@
 #######################################
-# CLICdet model
-# based on arXiv:1812.07337 and
-# CLICdp-Note-2017-001
+# CLICdet_fcal model for 3TeV CLIC stage
 #
-# Ulrike Schnoor ulrike.schnoor@cern.ch
-# 
-# For the high energy stage of
-# CLIC: 3 TeV
+# Based on CLICdet model
+# by Ulrike Schnoor ulrike.schnoor@cern.ch
 #
-# Jet finding with Valencia algorithm:
-# use exclusive clustering with njets
-# according to final state
-#
-# c-tagging capabilities of CLICdet are
-# not yet implemented here. Please
-# contact us if you want to use it.
+# Forward calorimeters implemented
+# by Aleksander Filip Zarnecki zarnecki@fuw.edu.pl
+# based on ILCDelphes model and 
+# full simulation results for CLICdet
+# described in arXiv:1812.07337 
 #######################################
 
 #######################################
