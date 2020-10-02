@@ -1,16 +1,9 @@
 module BTagging BTagging_WP50_R02N2 {
 	set JetInputArray JetMomentumSmearing_VLCR02N2/JER_VLCjetsR02N2
 	set BitNumber 0
-
-	# 50% efficiency working point
-    # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
-    # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
-    # gluon's PDG code has the lowest priority
-
-	# based on CLICdp-Note-2014-002
-
 	source MuonCollider/MuonColliderDet_BTag_50.tcl
 }
+
 module BTagging BTagging_WP70_R02N2 {
 	set JetInputArray JetMomentumSmearing_VLCR02N2/JER_VLCjetsR02N2
 	set BitNumber 1
@@ -85,14 +78,6 @@ module BTagging BTagging_WP90_R02N6 {
 module BTagging BTagging_WP50_R05N2 {
 	set JetInputArray JetMomentumSmearing_VLCR05N2/JER_VLCjetsR05N2
 	set BitNumber 0
-
-	# 50% efficiency working point
-    # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
-    # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
-    # gluon's PDG code has the lowest priority
-
-	# based on CLICdp-Note-2014-002
-
 	source MuonCollider/MuonColliderDet_BTag_50.tcl
 }
 module BTagging BTagging_WP70_R05N2 {
@@ -165,14 +150,11 @@ module BTagging BTagging_WP90_R05N6 {
 	set BitNumber 2
 	source MuonCollider/MuonColliderDet_BTag_90.tcl
 }
-
 module BTagging BTagging_WP50_R07N2 {
 	set JetInputArray JetMomentumSmearing_VLCR07N2/JER_VLCjetsR07N2
 	set BitNumber 0
 	source MuonCollider/MuonColliderDet_BTag_50.tcl
 }
-
-
 module BTagging BTagging_WP70_R07N2 {
 	set JetInputArray JetMomentumSmearing_VLCR07N2/JER_VLCjetsR07N2
 	set BitNumber 1
