@@ -51,7 +51,8 @@ set ExecutionPath {
 
   BTagging
   CTagging
-  TauTagging
+  TauTaggingTight
+  TauTaggingLoose
 
   BTaggingExclusive_N2
   BTaggingExclusive_N4
@@ -61,9 +62,13 @@ set ExecutionPath {
   CTaggingExclusive_N4
   CTaggingExclusive_N6
 
-  TauTaggingExclusive_N2
-  TauTaggingExclusive_N4
-  TauTaggingExclusive_N6
+  TauTaggingTightExclusive_N2
+  TauTaggingTightExclusive_N4
+  TauTaggingTightExclusive_N6
+
+  TauTaggingLooseExclusive_N2
+  TauTaggingLooseExclusive_N4
+  TauTaggingLooseExclusive_N6
 
   ScalarHT
 
@@ -718,10 +723,12 @@ module BTagging CTagging {
 #############
 
 
-module TauTagging TauTagging {
+module TauTagging TauTaggingTight {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
   set JetInputArray JetEnergyScale/jets
+
+  set BitNumber 0
 
   set DeltaR 0.5
 
@@ -735,6 +742,34 @@ module TauTagging TauTagging {
   add EfficiencyFormula {0} {0.001}
   # efficiency formula for tau-jets
   add EfficiencyFormula {15} {0.4}
+}
+
+
+
+#############
+# tau-tagging
+#############
+
+
+module TauTagging TauTaggingLoose {
+  set ParticleInputArray Delphes/allParticles
+  set PartonInputArray Delphes/partons
+  set JetInputArray JetEnergyScale/jets
+
+  set BitNumber 1
+
+  set DeltaR 0.5
+
+  set TauPTMin 1.0
+
+  set TauEtaMax 3.0
+
+  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+
+  # default efficiency formula (misidentification rate)
+  add EfficiencyFormula {0} {0.1}
+  # efficiency formula for tau-jets
+  add EfficiencyFormula {15} {0.85}
 }
 
 
@@ -783,10 +818,12 @@ module BTagging CTaggingExclusive_N2 {
 #############
 
 
-module TauTagging TauTaggingExclusive_N2 {
+module TauTagging TauTaggingTightExclusive_N2 {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
   set JetInputArray ExclusiveFastJetFinder_N2/jets
+
+  set BitNumber 0
 
   set DeltaR 0.5
 
@@ -801,6 +838,36 @@ module TauTagging TauTaggingExclusive_N2 {
   # efficiency formula for tau-jets
   add EfficiencyFormula {15} {0.4}
 }
+
+
+#############
+# tau-tagging
+#############
+
+
+module TauTagging TauTaggingLooseExclusive_N2 {
+  set ParticleInputArray Delphes/allParticles
+  set PartonInputArray Delphes/partons
+  set JetInputArray ExclusiveFastJetFinder_N2/jets
+
+  set BitNumber 1
+
+  set DeltaR 0.5
+
+  set TauPTMin 1.0
+
+  set TauEtaMax 3.0
+
+  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+
+  # default efficiency formula (misidentification rate)
+  add EfficiencyFormula {0} {0.1}
+  # efficiency formula for tau-jets
+  add EfficiencyFormula {15} {0.85}
+}
+
+
+
 
 
 ###########
@@ -847,10 +914,12 @@ module BTagging CTaggingExclusive_N4 {
 #############
 
 
-module TauTagging TauTaggingExclusive_N4 {
+module TauTagging TauTaggingTightExclusive_N4 {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
   set JetInputArray ExclusiveFastJetFinder_N4/jets
+  
+  set BitNumber 0
 
   set DeltaR 0.5
 
@@ -865,6 +934,37 @@ module TauTagging TauTaggingExclusive_N4 {
   # efficiency formula for tau-jets
   add EfficiencyFormula {15} {0.4}
 }
+
+
+
+#############
+# tau-tagging
+#############
+
+
+module TauTagging TauTaggingLooseExclusive_N4 {
+  set ParticleInputArray Delphes/allParticles
+  set PartonInputArray Delphes/partons
+  set JetInputArray ExclusiveFastJetFinder_N4/jets
+  
+  set BitNumber 1
+
+  set DeltaR 0.5
+
+  set TauPTMin 1.0
+
+  set TauEtaMax 3.0
+
+  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+
+  # default efficiency formula (misidentification rate)
+  add EfficiencyFormula {0} {0.1}
+  # efficiency formula for tau-jets
+  add EfficiencyFormula {15} {0.85}
+}
+
+
+
 ###########
 # b-tagging
 ###########
@@ -909,10 +1009,12 @@ module BTagging CTaggingExclusive_N6 {
 #############
 
 
-module TauTagging TauTaggingExclusive_N6 {
+module TauTagging TauTaggingTightExclusive_N6 {
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
   set JetInputArray ExclusiveFastJetFinder_N6/jets
+
+  set BitNumber 0
 
   set DeltaR 0.5
 
@@ -926,6 +1028,33 @@ module TauTagging TauTaggingExclusive_N6 {
   add EfficiencyFormula {0} {0.001}
   # efficiency formula for tau-jets
   add EfficiencyFormula {15} {0.4}
+}
+
+
+#############
+# tau-tagging
+#############
+
+
+module TauTagging TauTaggingLooseExclusive_N6 {
+  set ParticleInputArray Delphes/allParticles
+  set PartonInputArray Delphes/partons
+  set JetInputArray ExclusiveFastJetFinder_N6/jets
+
+  set BitNumber 1
+
+  set DeltaR 0.5
+
+  set TauPTMin 1.0
+
+  set TauEtaMax 3.0
+
+  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+
+  # default efficiency formula (misidentification rate)
+  add EfficiencyFormula {0} {0.1}
+  # efficiency formula for tau-jets
+  add EfficiencyFormula {15} {0.85}
 }
 
 
