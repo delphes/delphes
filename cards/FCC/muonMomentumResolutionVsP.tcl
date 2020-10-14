@@ -11,20 +11,21 @@
 
 set ResolutionFormula { 
  
-( abs(eta) < 1.35 ) * 
 
-(sqrt(0.0000364164 + (
-   9.06262e-8 *pt^2* cosh(
-     eta)^2 *(2.82074e-7/sin(2*atan(exp(-abs(eta))))^2 + (
-      504.525 *(1/400000000 + (0.117945* 1/cosh(eta)^2)/(
-         pt^2 *sin(2*atan(exp(-abs(eta))))^2)))/
-      sin(2*atan(exp(-abs(eta))))^2) *sin(2*atan(exp(-abs(eta))))^2)/(
-   0.00516429/sin(2*atan(exp(-abs(eta))))^2 + (
-    96868.8 *(1/400000000 + (0.117945 * 1/cosh(eta)^2)/(
-       pt^2 *sin(2*atan(exp(-abs(eta))))^2)))/
-    sin(2*atan(exp(-abs(eta))))^2))
+( abs(eta) < 1.35 ) *
 
-) +
+    (sqrt(0.0000364164 + (
+                          3*9.06262e-8 *pt^2* cosh(
+         eta)^2 *(2.82074e-7/sin(2*atan(exp(-abs(eta))))^2 + (
+          504.525 *(1/400000000 + (0.117945* 1/cosh(eta)^2)/(
+             pt^2 *sin(2*atan(exp(-abs(eta))))^2)))/
+          sin(2*atan(exp(-abs(eta))))^2) *sin(2*atan(exp(-abs(eta))))^2)/(
+       0.00516429/sin(2*atan(exp(-abs(eta))))^2 + (
+        96868.8 *(1/400000000 + 5*(0.117945 * 1/cosh(eta)^2)/(
+           pt^2 *sin(2*atan(exp(-abs(eta))))^2)))/
+        sin(2*atan(exp(-abs(eta))))^2))
+
+    ) +
   
 ( abs(eta) > 1.35 && abs(eta) < 2.00) * 
 

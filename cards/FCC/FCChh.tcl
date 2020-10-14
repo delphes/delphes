@@ -3,7 +3,11 @@
 #
 #  Main authors:  Michele Selvaggi (CERN)
 #
-#  Released on: Dec. 1st, 2017
+#  Released on: October 14th, 2020
+#
+#  - fix muon resolution at high pT
+#  - updated btagging, tau tagging and photon ID
+#
 #
 #  Configuration: FCC-hh baseline detector
 #
@@ -1048,7 +1052,7 @@ module Efficiency PhotonEfficiency {
   (pt <= 1.0) * (0.00) + \
   (abs(eta) <= 2.5) * (pt > 1.0 && pt < 5.0)  * (0.70) +
   (abs(eta) <= 2.5) * (pt > 5.0 && pt < 10.0) * (0.85) +
-  (abs(eta) <= 2.5) * (pt > 10.0)             * (0.95) +
+  (abs(eta) <= 2.5) * (pt > 10.0)             * (0.90) +
     
   (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt < 5.0)  * (0.60) + 
   (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 5.0 && pt < 10.0) * (0.80) + 
@@ -1137,27 +1141,27 @@ module BTagging BTagging {
   (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500)      * (0.01) + \
   (abs(eta) < 2.5)                   * (pt > 500.0 && pt < 15000.0) * (0.01)*(1.0 - pt/15000.) + \
   (abs(eta) < 2.5)                   * (pt > 15000.0)               * (0.00) + \
-  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500)      * (0.0075) + \
-  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0 && pt < 15000.0) * (0.0075)*(1.0 - pt/15000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500)      * (0.01) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0 && pt < 15000.0) * (0.01)*(1.0 - pt/15000.) + \
   (abs(eta) < 2.5 && abs(eta) < 4.0) * (pt > 15000.0)               * (0.000) + \
   (abs(eta) > 4.0) * (0.00)}
 
   add EfficiencyFormula {4} {
 
   (pt <= 10.0)                       * (0.00) +
-  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500)      * (0.05) + \
-  (abs(eta) < 2.5)                   * (pt > 500.0 && pt < 15000.0) * (0.05)*(1.0 - pt/15000.) + \
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 500)      * (0.15) + \
+  (abs(eta) < 2.5)                   * (pt > 500.0 && pt < 15000.0) * (0.15)*(1.0 - pt/15000.) + \
   (abs(eta) < 2.5)                   * (pt > 15000.0)               * (0.000) + \
-  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500)      * (0.03) + \
-  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0 && pt < 15000.0) * (0.03)*(1.0 - pt/15000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500)      * (0.10) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 500.0 && pt < 15000.0) * (0.10)*(1.0 - pt/15000.) + \
   (abs(eta) < 2.5 && abs(eta) < 4.0) * (pt > 15000.0)               * (0.000) + \
   (abs(eta) > 4.0) * (0.00)}
 
   add EfficiencyFormula {5} {
 
   (pt <= 10.0)                                                       * (0.00) +
-  (abs(eta) < 2.5)                    * (pt > 10.0 && pt < 500)      * (0.85) + 
-  (abs(eta) < 2.5)                    * (pt > 500.0 && pt < 15000.0) * (0.85)*(1.0 - pt/15000.) + 
+  (abs(eta) < 2.5)                    * (pt > 10.0 && pt < 500)      * (0.82) + 
+  (abs(eta) < 2.5)                    * (pt > 500.0 && pt < 15000.0) * (0.82)*(1.0 - pt/15000.) + 
   (abs(eta) < 2.5)                    * (pt > 15000.0)               * (0.000) + 
   (abs(eta) >= 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 500)      * (0.64) + 
   (abs(eta) >= 2.5 && abs(eta) < 4.0) * (pt > 500.0 && pt < 15000.0) * (0.64)*(1.0 - pt/15000.) + 
@@ -1216,8 +1220,8 @@ module TauTagging TauTagging {
   add EfficiencyFormula {0} {
 
   (pt <= 10.0)                                                       * (0.00) +
-  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 5000.0)    * (0.01) + \
-  (abs(eta) < 2.5)                   * (pt > 5000.0 && pt < 34000.0) * (0.01)  *(8./9. - pt/30000.) + \
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 5000.0)    * (0.02) + \
+  (abs(eta) < 2.5)                   * (pt > 5000.0 && pt < 34000.0) * (0.02)  *(8./9. - pt/30000.) + \
   (abs(eta) < 2.5)                   * (pt > 34000.0)                * (0.000) + \
   (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 5000.0)    * (0.0075) + \
   (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 5000.0 && pt < 34000.0) * (0.0075)*(8./9. - pt/30000.) + \
@@ -1227,11 +1231,11 @@ module TauTagging TauTagging {
   add EfficiencyFormula {11} {
 
   (pt <= 10.0)                                                       * (0.00) +
-  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 5000.0)    * (0.005) + \
-  (abs(eta) < 2.5)                   * (pt > 5000.0 && pt < 34000.0) * (0.005)  *(8./9. - pt/30000.) + \
+  (abs(eta) < 2.5)                   * (pt > 10.0 && pt < 5000.0)    * (0.001) + \
+  (abs(eta) < 2.5)                   * (pt > 5000.0 && pt < 34000.0) * (0.001)  *(8./9. - pt/30000.) + \
   (abs(eta) < 2.5)                   * (pt > 34000.0)                * (0.000) + \
-  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 5000.0)    * (0.00375) + \
-  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 5000.0 && pt < 34000.0) * (0.00375)*(8./9. - pt/30000.) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 10.0 && pt < 5000.0)    * (0.001) + \
+  (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 5000.0 && pt < 34000.0) * (0.001)*(8./9. - pt/30000.) + \
   (abs(eta) > 2.5 && abs(eta) < 4.0) * (pt > 34000.0)                * (0.00) + \
   (abs(eta) > 4.0)                   * (0.00)}
 
