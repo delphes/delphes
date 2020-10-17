@@ -1,7 +1,5 @@
-
-  # set EfficiencyFormula {efficiency formula as a function of eta and pt}
-
-  # efficiency formula for photons (ECAL + LumiCal)
+# set EfficiencyFormula (efficiency formula as a function of eta and pt)
+# efficiency formula for photons (ECAL + LumiCal)
 
   set EfficiencyFormula {
         (energy <= 2 )                                      * (0.00) +
