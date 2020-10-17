@@ -166,9 +166,11 @@ void IdentificationMap::Process()
 
       p = formula->Eval(pt, eta, phi, e);
 
+
       if(total <= r && r < total + p)
       {
         // change PID of particle
+	candidate = static_cast<Candidate *>(candidate->Clone());
         if(pdgCodeOut != 0) candidate->PID = charge * pdgCodeOut;
         fOutputArray->Add(candidate);
         break;
