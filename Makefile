@@ -418,6 +418,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TaggingParticlesSkimmer.h \
 	modules/PileUpJetID.h \
 	modules/PhotonID.h \
+	modules/EICPIDDetector.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
 	modules/PdgCodeFilter.h \
@@ -914,6 +915,15 @@ tmp/modules/PhotonID.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/EICPIDDetector.$(ObjSuf): \
+	modules/EICPIDDetector.$(SrcSuf) \
+	modules/EICPIDDetector.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/PileUpJetID.$(ObjSuf): \
 	modules/PileUpJetID.$(SrcSuf) \
 	modules/PileUpJetID.h \
@@ -1178,6 +1188,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/PdgCodeFilter.$(ObjSuf) \
 	tmp/modules/PhotonConversions.$(ObjSuf) \
 	tmp/modules/PhotonID.$(ObjSuf) \
+	tmp/modules/EICPIDDetector.$(ObjSuf) \
 	tmp/modules/PileUpJetID.$(ObjSuf) \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
 	tmp/modules/RecoPuFilter.$(ObjSuf) \
@@ -2067,6 +2078,10 @@ modules/PhotonID.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/EICPIDDetector.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 external/fastjet/tools/Pruner.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/WrappedStructure.hh \
@@ -2317,6 +2332,42 @@ modules/DualReadoutCalorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+PID_OBJ +=  \
+	tmp/external/pid/barrelDIRC/src/barrelDirc.$(ObjSuf) \
+	tmp/external/pid/barrelDIRC/src/DrcPidFast.$(ObjSuf) \
+	tmp/external/pid/mRICH/src/mRICH.$(ObjSuf) \
+	tmp/external/pid/tofBarrel/src/tofBarrel.$(ObjSuf) \
+	tmp/external/pid/quintRICH/src/CF4rich.$(ObjSuf)
+
+
+tmp/external/pid/barrelDIRC/src/barrelDirc.$(ObjSuf): \
+	external/pid/barrelDIRC/src/PID.h \
+	external/pid/barrelDIRC/src/DrcPidFast.h \
+	external/pid/barrelDIRC/src/DrcPidFast.C \
+	external/pid/barrelDIRC/src/barrelDirc.h \
+	external/pid/barrelDIRC/src/barrelDirc.C
+
+tmp/external/pid/barrelDIRC/src/DrcPidFast.$(ObjSuf): \
+	external/pid/barrelDIRC/src/PID.h \
+	external/pid/barrelDIRC/src/DrcPidFast.h \
+	external/pid/barrelDIRC/src/DrcPidFast.C
+
+tmp/external/pid/mRICH/src/mRICH.$(ObjSuf): \
+	external/pid/mRICH/src/PID.h \
+	external/pid/mRICH/src/mRICH.h \
+	external/pid/mRICH/src/mRICH.C
+
+tmp/external/pid/quintRICH/src/CF4rich.$(ObjSuf): \
+	external/pid/quintRICH/src/PID.h \
+	external/pid/quintRICH/src/CF4rich.h \
+	external/pid/quintRICH/src/CF4rich.C
+
+tmp/external/pid/tofBarrel/src/tofBarrel.$(ObjSuf): \
+	external/pid/tofBarrel/src/PID.h \
+	external/pid/tofBarrel/src/tofBarrel.h \
+	external/pid/tofBarrel/src/tofBarrel.C
+
+
 
 
 ###
@@ -2329,7 +2380,7 @@ all: $(NOFASTJET) $(DELPHES) $(EXECUTABLE)
 display: $(DISPLAY)
 endif
 
-$(NOFASTJET): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
+$(NOFASTJET): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ) $(PID_OBJ)
 	@mkdir -p $(@D)
 	@echo ">> Building $@"
 ifeq ($(ARCH),aix5)
@@ -2356,7 +2407,7 @@ endif
 endif
 endif
 
-$(DELPHES): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(TCL_OBJ)
+$(DELPHES): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(TCL_OBJ) $(PID_OBJ)
 	@mkdir -p $(@D)
 	@echo ">> Building $@"
 ifeq ($(ARCH),aix5)
@@ -2383,7 +2434,7 @@ endif
 endif
 endif
 
-$(DISPLAY): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DISPLAY_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(DISPLAY_OBJ) $(TCL_OBJ)
+$(DISPLAY): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DISPLAY_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(DISPLAY_OBJ) $(TCL_OBJ) $(PID_OBJ)
 	@mkdir -p $(@D)
 	@echo ">> Building $@"
 ifeq ($(ARCH),aix5)
@@ -2411,7 +2462,7 @@ endif
 endif
 
 clean:
-	@rm -f $(DELPHES_DICT_OBJ) $(DISPLAY_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(DISPLAY_OBJ) $(TCL_OBJ) core
+	@rm -f $(DELPHES_DICT_OBJ) $(DISPLAY_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(DISPLAY_OBJ) $(TCL_OBJ) $(PID_OBJ) core
 	@rm -rf tmp
 
 distclean: clean
@@ -2484,12 +2535,17 @@ $(TCL_OBJ): tmp/%.$(ObjSuf): %.c
 	@echo ">> Compiling $<"
 	@$(CC) $(patsubst -std=%,,$(CXXFLAGS)) -c $< $(OutPutOpt)$@
 
+$(PID_OBJ): tmp/%.$(ObjSuf): %.C
+	@mkdir -p $(@D)
+	@echo ">> Compiling $<"
+	@$(CC) $(patsubst -std=%,,$(CXXFLAGS)) -std=c++17 -c $< $(OutPutOpt)$@
+
 $(EXECUTABLE_OBJ): tmp/%.$(ObjSuf): %.cpp
 	@mkdir -p $(@D)
 	@echo ">> Compiling $<"
 	@$(CXX) $(CXXFLAGS) -c $< $(OutPutOpt)$@
 
-$(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(TCL_OBJ)
+$(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ) $(FASTJET_OBJ) $(TCL_OBJ) $(PID_OBJ)
 	@echo ">> Building $@"
 	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
 
