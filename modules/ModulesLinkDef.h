@@ -59,6 +59,7 @@
 #include "modules/TaggingParticlesSkimmer.h"
 #include "modules/PileUpJetID.h"
 #include "modules/PhotonID.h"
+#include "modules/EICPIDDetector.h"
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
@@ -116,6 +117,7 @@
 #pragma link C++ class TaggingParticlesSkimmer+;
 #pragma link C++ class PileUpJetID+;
 #pragma link C++ class PhotonID+;
+#pragma link C++ class EICPIDDetector+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
