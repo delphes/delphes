@@ -9,10 +9,10 @@ file(GLOB headers *.h)
 list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/ClassesLinkDef.h)
 
 DELPHES_GENERATE_DICTIONARY(ClassesDict 
-  ${CMAKE_CURRENT_SOURCE_DIR}/DelphesModule.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/DelphesFactory.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/SortableObject.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/DelphesClasses.h
+  classes/DelphesModule.h
+  classes/DelphesFactory.h
+  classes/SortableObject.h
+  classes/DelphesClasses.h
   LINKDEF ClassesLinkDef.h
 )
 

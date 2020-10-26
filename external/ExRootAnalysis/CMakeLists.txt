@@ -5,9 +5,21 @@ include_directories(
 
 file(GLOB sources *.cc)
 file(GLOB headers *.h)
+
 list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/ExRootAnalysisLinkDef.h)
 
-DELPHES_GENERATE_DICTIONARY(ExRootAnalysisDict ${headers} LINKDEF ExRootAnalysisLinkDef.h)
+DELPHES_GENERATE_DICTIONARY(ExRootAnalysisDict
+  ExRootAnalysis/ExRootClassifier.h
+  ExRootAnalysis/ExRootConfReader.h
+  ExRootAnalysis/ExRootFilter.h
+  ExRootAnalysis/ExRootProgressBar.h
+  ExRootAnalysis/ExRootResult.h
+  ExRootAnalysis/ExRootTask.h
+  ExRootAnalysis/ExRootTreeBranch.h
+  ExRootAnalysis/ExRootTreeReader.h
+  ExRootAnalysis/ExRootTreeWriter.h
+  ExRootAnalysis/ExRootUtilities.h
+  LINKDEF ExRootAnalysisLinkDef.h)
 
 add_library(ExRootAnalysis OBJECT ${sources} ExRootAnalysisDict.cxx)
 
