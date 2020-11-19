@@ -2337,7 +2337,8 @@ PID_OBJ +=  \
 	tmp/external/pid/barrelDIRC/src/DrcPidFast.$(ObjSuf) \
 	tmp/external/pid/mRICH/src/mRICH.$(ObjSuf) \
 	tmp/external/pid/tofBarrel/src/tofBarrel.$(ObjSuf) \
-	tmp/external/pid/quintRICH/src/CF4rich.$(ObjSuf)
+	tmp/external/pid/quintRICH/src/CF4rich.$(ObjSuf) \
+	tmp/external/pid/dRICH/dualRICH.$(ObjSuf)
 
 
 tmp/external/pid/barrelDIRC/src/barrelDirc.$(ObjSuf): \
@@ -2367,6 +2368,12 @@ tmp/external/pid/tofBarrel/src/tofBarrel.$(ObjSuf): \
 	external/pid/tofBarrel/src/tofBarrel.h \
 	external/pid/tofBarrel/src/tofBarrel.C
 
+tmp/external/pid/dRICH/dualRICH.$(ObjSuf): \
+	external/pid/dRICH/PID.h \
+	external/pid/dRICH/genericDetector.h \
+	external/pid/dRICH/genericRICH.h \
+	external/pid/dRICH/dualRICH.h \
+	external/pid/dRICH/dualRICH.C
 
 
 

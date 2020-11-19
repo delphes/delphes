@@ -50,6 +50,7 @@
 #include "pid/quintRICH/src/CF4rich.h"
 #include "pid/mRICH/src/mRICH.h"
 #include "pid/tofBarrel/src/tofBarrel.h"
+#include "pid/dRICH/dualRICH.h"
 
 #include <algorithm>
 #include <iostream>
@@ -128,7 +129,7 @@ void EICPIDDetector::Init()
     fPIDDetector = new barrelDirc(fTrackResolution,fTimeResolution,fQE,fetaLow,fetaHigh);
   } 
   else if (fDetectorName == "mRICH") {
-    fPIDDetector = new mRICH(fTrackResolution,fTimeResolution, fPixelSize);
+    fPIDDetector = new mRICH(fTrackResolution,fTimeResolution, fPixelSize, fetaLow, fetaHigh);
     //fPIDDetector = new mRICH(0.00175, 1, 3);
   }
   else if (fDetectorName == "CF4rich") {
@@ -136,6 +137,12 @@ void EICPIDDetector::Init()
   }
   else if (fDetectorName == "tofBarrel") {
     fPIDDetector = new tofBarrel(100, fetaLow, fetaHigh, 10);
+  }
+  else if (fDetectorName == "dualRICH_aerogel") {
+    fPIDDetector = new dualRICH_aerogel();
+  }
+  else if (fDetectorName == "dualRICH_C2F6") {
+    fPIDDetector = new dualRICH_C2F6();
   } else {
     std::cout << "No valid EIC PID Detector technology was specified!" << std::endl;
     assert(1==0);
