@@ -1283,7 +1283,7 @@ module Merger GenMissingET {
 
 module FastJetFinder FastJetFinderKt {
     #  set InputArray Calorimeter/towers
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
 
     set OutputArray KTjets
 
