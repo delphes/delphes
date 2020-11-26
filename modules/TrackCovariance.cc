@@ -132,7 +132,9 @@ void TrackCovariance::Process()
     
     candidate->D0       = track.GetObsPar()[0]*1e03;
     candidate->Phi      = track.GetObsPar()[1];
-    candidate->C        = track.GetObsPar()[2]*1e03;
+
+    // inverse of curvature
+    candidate->C        = track.GetObsPar()[2]*1e-03;
     candidate->DZ       = track.GetObsPar()[3]*1e03;
     candidate->CtgTheta = track.GetObsPar()[4];
     candidate->P        = track.GetObsP().Mag();
@@ -145,7 +147,7 @@ void TrackCovariance::Process()
     dct       = TMath::Sqrt(track.GetCov()(4, 4)); 
     dpt       = 2 * TMath::Sqrt( track.GetCov()(2, 2))*pt*pt / (0.2998*fBz);
     dp        = TMath::Sqrt((1.+ct*ct)*dpt*dpt + 4*pt*pt*ct*ct*dct*dct/(1.+ct*ct)/(1.+ct*ct));
-    dC        = TMath::Sqrt(track.GetCov()(2, 2))*1e03;
+    dC        = TMath::Sqrt(track.GetCov()(2, 2))*1e-03;
 
     candidate->ErrorD0 = dd0;
     candidate->ErrorDZ = ddz;
