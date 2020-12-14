@@ -35,6 +35,7 @@ class TObjArray;
 
 class SolGeom;
 class SolGridCov;
+class AcceptanceClx;
 
 class TrackCovariance: public DelphesModule
 {
@@ -48,9 +49,12 @@ public:
 
 private:
   Double_t fBz;
+  Int_t fNMinHits;
 
   SolGeom *fGeometry;
   SolGridCov *fCovariance;
+
+  AcceptanceClx *fAcx;
 
   TIterator *fItInputArray; //!
 

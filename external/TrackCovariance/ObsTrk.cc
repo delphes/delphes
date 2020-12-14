@@ -43,6 +43,43 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 	fCovACTS = CovToACTS(fCov);
 	fCovILC = CovToILC(fCov);
 }
+
+// x[3] track origin, p[3] track momentum at origin, Q charge, B magnetic field in Tesla
+ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, Double_t B, SolGridCov* GC)
+{
+	fGC = GC;
+	fGenX.SetXYZ(x[0],x[1],x[2]);
+	fGenP.SetXYZ(p[0],p[1],p[2]);
+	fGenQ = Q;
+	fB = B;
+	fGenPar.ResizeTo(5);
+	fGenParACTS.ResizeTo(6);
+	fGenParILC.ResizeTo(5);
+	fObsPar.ResizeTo(5);
+	fObsParACTS.ResizeTo(6);
+	fObsParILC.ResizeTo(5);
+	fCov.ResizeTo(5, 5);
+	fCovACTS.ResizeTo(6, 6);
+	fCovILC.ResizeTo(5, 5);
+	fGenPar = XPtoPar(fGenX, fGenP, Q);
+	fGenParACTS = ParToACTS(fGenPar);
+	fGenParILC = ParToILC(fGenPar);
+	/*
+	cout << "ObsTrk::ObsTrk: fGenPar";
+	for (Int_t i = 0; i < 5; i++)cout << fGenPar(i) << ", ";
+	cout << endl;
+	*/
+	fObsPar = GenToObsPar(fGenPar, fGC);
+	fObsParACTS = ParToACTS(fObsPar);
+	fObsParILC = ParToILC(fObsPar);
+	fObsX = ParToX(fObsPar);
+	fObsP = ParToP(fObsPar);
+	fObsQ = ParToQ(fObsPar);
+	fCovACTS = CovToACTS(fCov);
+	fCovILC = CovToILC(fCov);
+}
+
+
 //
 // Destructor
 ObsTrk::~ObsTrk()
@@ -97,8 +134,8 @@ TVector3 ObsTrk::ParToX(TVectorD Par)
 	Double_t z0   = Par(3);
 	//
 	TVector3 Xval;
-	Xval(0) = -D*TMath::Sin(phi0); 
-	Xval(1) =  D*TMath::Cos(phi0);  
+	Xval(0) = -D*TMath::Sin(phi0);
+	Xval(1) =  D*TMath::Cos(phi0);
 	Xval(2) =  z0;
 	//
 	return Xval;
@@ -134,15 +171,15 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar, SolGridCov *GC)
 	//
 	// Check ranges
 	Double_t minPt = GC->GetMinPt ();
-	if (pt < minPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is below grid range of " << minPt << std::endl;
+	//if (pt < minPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is below grid range of " << minPt << std::endl;
 	Double_t maxPt = GC->GetMaxPt();
-	if (pt > maxPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is above grid range of " << maxPt << std::endl;
+	//if (pt > maxPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is above grid range of " << maxPt << std::endl;
 	Double_t minAn = GC->GetMinAng();
-	if (angd < minAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd 
-		<< " is below grid range of " << minAn << std::endl;
+  //if (angd < minAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd
+	//	<< " is below grid range of " << minAn << std::endl;
 	Double_t maxAn = GC->GetMaxAng();
-	if (angd > maxAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd
-		<< " is above grid range of " << maxAn << std::endl;
+	//if (angd > maxAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd
+	//	<< " is above grid range of " << maxAn << std::endl;
 	//
 	TMatrixDSym Cov = GC->GetCov(pt, angd);
 	fCov = Cov;
@@ -178,7 +215,7 @@ TVectorD ObsTrk::ParToACTS(TVectorD Par)
 	pACTS(0) = 1000*Par(0);		// D from m to mm
 	pACTS(1) = 1000 * Par(3);	// z0 from m to mm
 	pACTS(2) = Par(1);			// Phi0 is unchanged
-	pACTS(3) = TMath::ATan(1.0 / Par(4)) + TMath::PiOver2();		// Theta in [0, pi] range
+	pACTS(3) = TMath::ATan2(1.0,Par(4));		// Theta in [0, pi] range
 	pACTS(4) = Par(2) / (b*TMath::Sqrt(1 + Par(4)*Par(4)));		// q/p in GeV
 	pACTS(5) = 0.0;				// Time: currently undefined
 	//
@@ -246,7 +283,3 @@ TMatrixDSym ObsTrk::CovToILC(TMatrixDSym Cov)
 	//
 	return cILC;
 }
-
-
-
-	
