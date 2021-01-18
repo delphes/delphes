@@ -2,6 +2,7 @@
 
 #include <TMath.h>
 #include <TVectorD.h>
+#include <TVector3.h>
 #include <TMatrixDSym.h>
 #include <TDecompChol.h>
 #include <TMatrixDSymEigen.h>
@@ -35,6 +36,7 @@ SolGridCov::SolGridCov()
 SolGridCov::~SolGridCov()
 {
   delete[] fCov;
+  delete fAcc;
 }
 
 void SolGridCov::Calc(SolGeom *G)
@@ -57,7 +59,51 @@ void SolGridCov::Calc(SolGeom *G)
       fCov[ip * fNang + ia] = tr->Cov(); // Get covariance
     }
   }
+
+// Now make acceptance
+fAcc = new AcceptanceClx(G);
 }
+
+
+//
+Bool_t SolGridCov::IsAccepted(Double_t pt, Double_t Theta)
+{
+	//
+	// pt in GeV, Theta in degrees
+	//
+	Bool_t Accept = kFALSE;
+	if (fAcc->HitNumber(pt, Theta) >= fNminHits)Accept = kTRUE;
+	//
+	return Accept;
+}
+//
+Bool_t SolGridCov::IsAccepted(Double_t *p)
+{
+	//
+	// pt in GeV, Theta in degrees
+	//
+	Bool_t Accept = kFALSE;
+	Double_t pt = TMath::Sqrt(p[0] * p[0] + p[1] * p[1]);
+	Double_t th = 180. * TMath::ATan2(pt, p[2])/TMath::Pi();
+	if (fAcc->HitNumber(pt,th) >= fNminHits)Accept = kTRUE;
+	//
+	return Accept;
+}
+//
+Bool_t SolGridCov::IsAccepted(TVector3 p)
+{
+	//
+	// pt in GeV, Theta in degrees
+	//
+	Bool_t Accept = kFALSE;
+	Double_t pt = p.Pt();
+	Double_t th = 180.*TMath::ACos(p.CosTheta())/TMath::Pi();
+	if (fAcc->HitNumber(pt,th) >= fNminHits)Accept = kTRUE;
+	//
+	return Accept;
+}
+
+
 // Find bin in grid
 Int_t SolGridCov::GetMinIndex(Double_t xval, Int_t N, TVectorD x)
 {

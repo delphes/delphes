@@ -18,13 +18,13 @@ class ObsTrk{
 	// Prefix Obs marks variables after resolution smearing
 	// Prefix Gen marks variables before resolution smearing
 	//
-private:	
+private:
 	Double_t fB;						// Solenoid magnetic field
 	SolGridCov *fGC;					// Covariance matrix grid
 	Double_t fGenQ;					// Generated track charge
 	Double_t fObsQ;					// Observed  track charge
 	TVector3 fGenX;					// Generated track origin (x,y,z)
-	TVector3 fObsX;					// Observed  track origin (x,y,z) @ track min. approach 
+	TVector3 fObsX;					// Observed  track origin (x,y,z) @ track min. approach
 	TVector3 fGenP;					// Generated track momentum at track origin
 	TVector3 fObsP;					// Observed  track momentum @ track minimum approach
 	TVectorD fGenPar;				// Generated helix track parameters (D, phi0, C, z0, cot(th))
@@ -42,7 +42,7 @@ private:
 	// Conversion to ACTS parametrization
 	//
 	TVectorD ParToACTS(TVectorD Par);		// Parameter conversion
-	TMatrixDSym CovToACTS(TMatrixDSym Cov);	// Covariance 
+	TMatrixDSym CovToACTS(TMatrixDSym Cov);	// Covariance
 	//
 	// Conversion to ILC parametrization
 	//
@@ -54,7 +54,8 @@ public:
 	// Constructors
 	// x(3) track origin, p(3) track momentum at origin, Q charge, B magnetic field in Tesla
 	ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC);	// Initialize and generate smeared track
-	// Destructor
+	ObsTrk(Double_t *x, Double_t *p, Double_t Q, Double_t B, SolGridCov* GC);	// Initialize and generate smeared track
+  // Destructor
 	~ObsTrk();
 	//
 	// Service routines
