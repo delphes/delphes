@@ -20,8 +20,10 @@
  *
  *  Smears track parameters according to appropriate covariance matrix.
  *
- *  \authors P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors F. Bedeschi - INFN Pisa
+*            P. Demin - UCLouvain, Louvain-la-Neuve
  *           M. Selvaggi - CERN
+ *
  *
  */
 
@@ -49,7 +51,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TrackCovariance::TrackCovariance() :
-  fGeometry(0), fCovariance(0), fItInputArray(0)
+  fGeometry(0), fCovariance(0), fAcx(0), fItInputArray(0)
 {
   fGeometry = new SolGeom();
   fCovariance = new SolGridCov();
@@ -69,11 +71,15 @@ void TrackCovariance::Init()
 {
   fBz = GetDouble("Bz", 0.0);
   fGeometry->Read(GetString("DetectorGeometry", ""));
+  fNMinHits = GetInt("NMinHits", 6);
 
+  // load geometry
   fCovariance->Calc(fGeometry);
+  fCovariance->SetMinHits(fNMinHits);
+  // load geometry
+  fAcx = fCovariance->AccPnt();
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
   fItInputArray = fInputArray->MakeIterator();
 
@@ -96,7 +102,7 @@ void TrackCovariance::Process()
   Candidate *candidate, *mother;
   Double_t mass, p, pt, q, ct;
   Double_t dd0, ddz, dphi, dct, dp, dpt, dC;
-  
+
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -106,15 +112,17 @@ void TrackCovariance::Process()
     const TLorentzVector &candidatePosition = candidate->InitialPosition*1e-03;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
+    if ( !fCovariance->IsAccepted(candidateMomentum.Vect()) ) continue;
+
     mass = candidateMomentum.M();
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz, fCovariance);
 
     mother    = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    candidate = static_cast<Candidate*>(candidate->Clone());
 
     candidate->Momentum.SetVectM(track.GetObsP(), mass);
-    
+
     // converting back to mm
     candidate->InitialPosition.SetXYZT(track.GetObsX().X()*1e03,track.GetObsX().Y()*1e03,track.GetObsX().Z()*1e03,candidatePosition.T()*1e03);
 
@@ -129,7 +137,7 @@ void TrackCovariance::Process()
     candidate->Xd = track.GetObsX().X()*1e03;
     candidate->Yd = track.GetObsX().Y()*1e03;
     candidate->Zd = track.GetObsX().Z()*1e03;
-    
+
     candidate->D0       = track.GetObsPar()[0]*1e03;
     candidate->Phi      = track.GetObsPar()[1];
 
@@ -141,10 +149,10 @@ void TrackCovariance::Process()
     candidate->PT       = pt;
     candidate->Charge   = q;
 
-    dd0       = TMath::Sqrt(track.GetCov()(0, 0))*1e03; 
-    ddz       = TMath::Sqrt(track.GetCov()(3, 3))*1e03; 
-    dphi      = TMath::Sqrt(track.GetCov()(1, 1)); 
-    dct       = TMath::Sqrt(track.GetCov()(4, 4)); 
+    dd0       = TMath::Sqrt(track.GetCov()(0, 0))*1e03;
+    ddz       = TMath::Sqrt(track.GetCov()(3, 3))*1e03;
+    dphi      = TMath::Sqrt(track.GetCov()(1, 1));
+    dct       = TMath::Sqrt(track.GetCov()(4, 4));
     dpt       = 2 * TMath::Sqrt( track.GetCov()(2, 2))*pt*pt / (0.2998*fBz);
     dp        = TMath::Sqrt((1.+ct*ct)*dpt*dpt + 4*pt*pt*ct*ct*dct*dct/(1.+ct*ct)/(1.+ct*ct));
     dC        = TMath::Sqrt(track.GetCov()(2, 2))*1e-03;
@@ -158,7 +166,6 @@ void TrackCovariance::Process()
     candidate->ErrorPT = dpt;
     //candidate->TrackResolution = dpt / pt;
     candidate->TrackResolution = dp / p;
-
 
     candidate->AddCandidate(mother);
 

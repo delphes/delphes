@@ -634,6 +634,8 @@ tmp/external/Hector/H_VerticalKicker.$(ObjSuf): \
 	external/Hector/H_VerticalKicker.$(SrcSuf)
 tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf): \
 	external/Hector/H_VerticalQuadrupole.$(SrcSuf)
+tmp/external/TrackCovariance/AcceptanceClx.$(ObjSuf): \
+	external/TrackCovariance/AcceptanceClx.$(SrcSuf)
 tmp/external/TrackCovariance/ObsTrk.$(ObjSuf): \
 	external/TrackCovariance/ObsTrk.$(SrcSuf)
 tmp/external/TrackCovariance/SolGeom.$(ObjSuf): \
@@ -1144,6 +1146,7 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_TransportMatrices.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalKicker.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
+	tmp/external/TrackCovariance/AcceptanceClx.$(ObjSuf) \
 	tmp/external/TrackCovariance/ObsTrk.$(ObjSuf) \
 	tmp/external/TrackCovariance/SolGeom.$(ObjSuf) \
 	tmp/external/TrackCovariance/SolGridCov.$(ObjSuf) \

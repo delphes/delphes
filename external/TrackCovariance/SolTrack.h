@@ -2,6 +2,7 @@
 #define G__SOLTRK_H
 
 #include <TMath.h>
+#include <TVector3.h>
 #include <TMatrixDSym.h>
 
 class SolGeom;
@@ -23,6 +24,7 @@ private:
 public:
   // Constructors
   SolTrack(Double_t *x, Double_t *p, SolGeom *G);
+	SolTrack(TVector3 x, TVector3 p, SolGeom* G);
   SolTrack(Double_t D, Double_t phi0, Double_t C, Double_t z0, Double_t ct, SolGeom *G);
   // Destructor
   ~SolTrack();
@@ -56,8 +58,11 @@ public:
   Double_t s_ct()   { return TMath::Sqrt(fCov(4, 4)); }
   // Track hit management
   Int_t nHit();
+  Int_t nmHit();
   Bool_t HitLayer(Int_t Layer, Double_t &R, Double_t &phi, Double_t &zz);
   Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh);
+  Int_t HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *&Zh);
+
   // Make normalized matrix positive definite
   TMatrixDSym MakePosDef(TMatrixDSym NormMat);
 };
