@@ -472,6 +472,19 @@ public:
   Float_t ErrorT; // time measurement error
   Float_t ErrorD0; // track transverse impact parameter error
   Float_t ErrorDZ; // track longitudinal impact parameter error
+  Float_t ErrorC; // track curvature error
+
+  // track covariance off-diagonal terms
+  Float_t ErrorD0Phi;	  
+  Float_t ErrorD0C;	  
+  Float_t ErrorD0DZ;	  
+  Float_t ErrorD0CtgTheta;   
+  Float_t ErrorPhiC;	  
+  Float_t ErrorPhiDZ;	  
+  Float_t ErrorPhiCtgTheta ; 
+  Float_t ErrorCDZ;	  
+  Float_t ErrorCCtgTheta;    
+  Float_t ErrorDZCtgTheta;   
 
   TRef Particle; // reference to generated particle
 
@@ -481,6 +494,7 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4() const;
+  TMatrixDSym CovarianceMatrix() const;
 
   ClassDef(Track, 3)
 };
@@ -560,6 +574,19 @@ public:
   Float_t ErrorT; // time measurement error
   Float_t ErrorD0; // track transverse impact parameter error
   Float_t ErrorDZ; // track longitudinal impact parameter error
+  Float_t ErrorC; // track curvature error
+
+  // track covariance off-diagonal terms
+  Float_t ErrorD0Phi;	  
+  Float_t ErrorD0C;	  
+  Float_t ErrorD0DZ;	  
+  Float_t ErrorD0CtgTheta;   
+  Float_t ErrorPhiC;	  
+  Float_t ErrorPhiDZ;	  
+  Float_t ErrorPhiCtgTheta ; 
+  Float_t ErrorCDZ;	  
+  Float_t ErrorCCtgTheta;    
+  Float_t ErrorDZCtgTheta;   
 
   Int_t VertexIndex; // reference to vertex
 
@@ -567,6 +594,7 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4() const;
+  TMatrixDSym CovarianceMatrix() const;
 
   Int_t NTimeHits; // number of hits contributing to time measurement
 
@@ -577,7 +605,7 @@ public:
 
   TRefArray Particles; // references to generated particles
 
-  ClassDef(ParticleFlowCandidate, 1)
+  ClassDef(ParticleFlowCandidate, 2)
 
 };
 

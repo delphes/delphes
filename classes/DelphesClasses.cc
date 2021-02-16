@@ -107,6 +107,47 @@ TLorentzVector Track::P4() const
 
 //------------------------------------------------------------------------------
 
+TMatrixDSym Track::CovarianceMatrix() const
+{
+  TMatrixDSym Cv;
+  Cv.ResizeTo(5, 5);
+  
+  // convert diagonal term to original units
+  Cv(0, 0)=TMath::Power(ErrorD0*1.0E-3, 2.);
+  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC*1.0E-3, 2.);
+  Cv(3, 3)=TMath::Power(ErrorDZ*1.0E-3, 2.);
+  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+
+  // off diagonal terms
+  Cv(0, 1)=ErrorD0Phi;
+  Cv(0, 2)=ErrorD0C;
+  Cv(0, 3)=ErrorD0DZ;
+  Cv(0, 4)=ErrorD0CtgTheta;
+  Cv(1, 2)=ErrorPhiC;
+  Cv(1, 3)=ErrorPhiDZ;
+  Cv(1, 4)=ErrorPhiCtgTheta;
+  Cv(2, 3)=ErrorCDZ;
+  Cv(2, 4)=ErrorCCtgTheta;
+  Cv(3, 4)=ErrorDZCtgTheta;
+
+  Cv(1, 0)=Cv(0, 1);
+  Cv(2, 0)=Cv(0, 2);
+  Cv(3, 0)=Cv(0, 3);
+  Cv(4, 0)=Cv(0, 4);
+  Cv(2, 1)=Cv(1, 2);
+  Cv(3, 1)=Cv(1, 3);
+  Cv(4, 1)=Cv(1, 4);
+  Cv(3, 2)=Cv(2, 3);
+  Cv(4, 2)=Cv(2, 4);
+  Cv(4, 3)=Cv(3, 4);
+
+  return Cv;
+}
+
+
+//------------------------------------------------------------------------------
+
 TLorentzVector Tower::P4() const
 {
   TLorentzVector vec;
@@ -121,6 +162,46 @@ TLorentzVector ParticleFlowCandidate::P4() const
   TLorentzVector vec;
   vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
   return vec;
+}
+
+//------------------------------------------------------------------------------
+
+TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
+{
+  TMatrixDSym Cv;
+  Cv.ResizeTo(5, 5);
+  
+  // convert diagonal term to original units
+  Cv(0, 0)=TMath::Power(ErrorD0*1.0E-3, 2.);
+  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC*1.0E-3, 2.);
+  Cv(3, 3)=TMath::Power(ErrorDZ*1.0E-3, 2.);
+  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+
+  // off diagonal terms
+  Cv(0, 1)=ErrorD0Phi;
+  Cv(0, 2)=ErrorD0C;
+  Cv(0, 3)=ErrorD0DZ;
+  Cv(0, 4)=ErrorD0CtgTheta;
+  Cv(1, 2)=ErrorPhiC;
+  Cv(1, 3)=ErrorPhiDZ;
+  Cv(1, 4)=ErrorPhiCtgTheta;
+  Cv(2, 3)=ErrorCDZ;
+  Cv(2, 4)=ErrorCCtgTheta;
+  Cv(3, 4)=ErrorDZCtgTheta;
+
+  Cv(1, 0)=Cv(0, 1);
+  Cv(2, 0)=Cv(0, 2);
+  Cv(3, 0)=Cv(0, 3);
+  Cv(4, 0)=Cv(0, 4);
+  Cv(2, 1)=Cv(1, 2);
+  Cv(3, 1)=Cv(1, 3);
+  Cv(4, 1)=Cv(1, 4);
+  Cv(3, 2)=Cv(2, 3);
+  Cv(4, 2)=Cv(2, 4);
+  Cv(4, 3)=Cv(3, 4);
+
+  return Cv;
 }
 
 //------------------------------------------------------------------------------
