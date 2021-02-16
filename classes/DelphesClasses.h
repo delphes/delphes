@@ -150,12 +150,7 @@ public:
   Float_t PT; // particle transverse momentum
   Float_t Eta; // particle pseudorapidity
   Float_t Phi; // particle azimuthal angle
-
   Float_t Rapidity; // particle rapidity
-  Float_t CtgTheta; // particle cotangent of theta
-
-  Float_t D0; // particle transverse impact parameter
-  Float_t DZ; // particle longitudinal impact parameter
 
   Float_t T; // particle vertex position (t component) | hepevt.vhep[number][3]
   Float_t X; // particle vertex position (x component) | hepevt.vhep[number][0]

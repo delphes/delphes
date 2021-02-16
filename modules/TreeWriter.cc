@@ -214,13 +214,6 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Py = momentum.Py();
     entry->Pz = momentum.Pz();
 
-    entry->D0 = candidate->D0;
-    entry->DZ = candidate->DZ;
-    entry->P = candidate->P;
-    entry->PT = candidate->PT;
-    entry->CtgTheta = candidate->CtgTheta;
-    entry->Phi = candidate->Phi;
-
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
     entry->PT = pt;
@@ -522,8 +515,6 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->ErrorCDZ            = candidate->TrackCovariance(2,3);
     entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4);
     entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4);
-
-    cout<<entry->ErrorPhiC<<endl;
 
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
