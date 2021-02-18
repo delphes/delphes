@@ -437,6 +437,7 @@ public:
   Float_t Eta; // track pseudorapidity
   Float_t Phi; // track azimuthal angle
   Float_t CtgTheta; // track cotangent of theta
+  Float_t C; // track curvature inverse
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
@@ -539,6 +540,7 @@ public:
   Float_t Eta; // track pseudorapidity
   Float_t Phi; // track azimuthal angle
   Float_t CtgTheta; // track cotangent of theta
+  Float_t C; // track curvature inverse
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
