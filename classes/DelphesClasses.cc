@@ -121,14 +121,14 @@ TMatrixDSym Track::CovarianceMatrix() const
 
   // off diagonal terms
   Cv(0, 1)=ErrorD0Phi;
-  Cv(0, 2)=ErrorD0C;
+  Cv(0, 2)=-ErrorD0C;
   Cv(0, 3)=ErrorD0DZ;
   Cv(0, 4)=ErrorD0CtgTheta;
-  Cv(1, 2)=ErrorPhiC;
+  Cv(1, 2)=-ErrorPhiC;
   Cv(1, 3)=ErrorPhiDZ;
   Cv(1, 4)=ErrorPhiCtgTheta;
-  Cv(2, 3)=ErrorCDZ;
-  Cv(2, 4)=ErrorCCtgTheta;
+  Cv(2, 3)=-ErrorCDZ;
+  Cv(2, 4)=-ErrorCCtgTheta;
   Cv(3, 4)=ErrorDZCtgTheta;
 
   Cv(1, 0)=Cv(0, 1);
@@ -180,14 +180,14 @@ TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
 
   // off diagonal terms
   Cv(0, 1)=ErrorD0Phi;
-  Cv(0, 2)=ErrorD0C;
+  Cv(0, 2)=-ErrorD0C;
   Cv(0, 3)=ErrorD0DZ;
   Cv(0, 4)=ErrorD0CtgTheta;
-  Cv(1, 2)=ErrorPhiC;
+  Cv(1, 2)=-ErrorPhiC;
   Cv(1, 3)=ErrorPhiDZ;
   Cv(1, 4)=ErrorPhiCtgTheta;
-  Cv(2, 3)=ErrorCDZ;
-  Cv(2, 4)=ErrorCCtgTheta;
+  Cv(2, 3)=-ErrorCDZ;
+  Cv(2, 4)=-ErrorCCtgTheta;
   Cv(3, 4)=ErrorDZCtgTheta;
 
   Cv(1, 0)=Cv(0, 1);
