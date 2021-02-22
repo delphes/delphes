@@ -115,7 +115,7 @@ TMatrixDSym Track::CovarianceMatrix() const
   // convert diagonal term to original units
   Cv(0, 0)=TMath::Power(ErrorD0*1.0E-3, 2.);
   Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC*1.0E-3, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC*1.0E3, 2.);
   Cv(3, 3)=TMath::Power(ErrorDZ*1.0E-3, 2.);
   Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
 
@@ -174,7 +174,7 @@ TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
   // convert diagonal term to original units
   Cv(0, 0)=TMath::Power(ErrorD0*1.0E-3, 2.);
   Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC*1.0E-3, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC*1.0E3, 2.);
   Cv(3, 3)=TMath::Power(ErrorDZ*1.0E-3, 2.);
   Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
 
