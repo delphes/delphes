@@ -139,38 +139,6 @@ void Example6(const char* inputFile)
 				Double_t pullZ0  = (obsZ0  - genZ0)  / trk->ErrorDZ;
 				Double_t pullCtg = (obsCtg - genCtg) / trk->ErrorCtgTheta;
 
-        if (fabs(pullZ0) > 5)
-				{
-					// Get associated generated particle
-					Int_t unique = gp->GetUniqueID();
-					//cout<<unique<<endl;
-
-					if (branchGenPart->GetEntries() > 0)
-					{
-
-					// Loop on tracks
-						for (Int_t itp = 0; itp < branchGenPart->GetEntries(); itp++)
-						{
-							GenParticle* part = (GenParticle*)branchGenPart->At(itp);
-							if (part->GetUniqueID() == unique)
-							{
-								cout<<" ------------ found:  ------------------------"<<unique<<endl;
-
-								cout<<gp->X<<","<<part->X<<","<<TMath::Power((gp->X - part->X),2)*1e6<<endl;
-								cout<<gp->Y<<","<<part->Y<<","<<TMath::Power((gp->Y - part->Y),2)*1e6<<endl;
-								cout<<gp->Z<<","<<part->Z<<","<<TMath::Power((gp->Z - part->Z),2)*1e6<<endl;
-								cout<<gp->Px<<","<<part->Px<<","<<TMath::Power((gp->Px - part->Px),2)*1e6<<endl;
-								cout<<gp->Py<<","<<part->Py<<","<<TMath::Power((gp->Py - part->Py),2)*1e6<<endl;
-								cout<<gp->Pz<<","<<part->Pz<<","<<TMath::Power((gp->Pz - part->Pz),2)*1e6<<endl;
-
-							}
-						}
-					}
-
-
-				}
-
-
 				//
 				histDpull->Fill(pullD0);
 				histP0pull->Fill(pullPhi);

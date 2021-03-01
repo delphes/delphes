@@ -108,6 +108,7 @@ void TrackCovariance::Process()
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
+    // converting to meters
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
 
     // converting to meters
