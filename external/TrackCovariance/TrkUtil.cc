@@ -29,7 +29,7 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	//cout << "ObsTrk::XPtoPar: fB = " << fB << ", a = " << a << ", pt = " << pt << ", C = " << C << endl;
 	Double_t r2 = x.Perp2();
 	Double_t cross = x(0) * p(1) - x(1) * p(0);
-	Double_t T = TMath::Sqrt(pt * pt - 2 * a * cross + a * a * r2);
+	Double_t T = sqrt(pt * pt - 2 * a * cross + a * a * r2);
 	Double_t phi0 = TMath::ATan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T);	// Phi0
 	Double_t D;							// Impact parameter D
 	if (pt < 10.0) D = (T - pt) / a;
@@ -39,7 +39,7 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Par(1) = phi0;	// Store phi0
 	Par(2) = C;		// Store C
 	//Longitudinal parameters
-	Double_t B = C * TMath::Sqrt(TMath::Max(r2 - D * D, 0.0) / (1 + 2 * C * D));
+	Double_t B = C * sqrt(TMath::Max(r2 - D * D, 0.0) / (1 + 2 * C * D));
 	Double_t st = TMath::ASin(B) / C;
 	Double_t ct = p(2) / pt;
 	Double_t z0 = x(2) - ct * st;
@@ -105,7 +105,7 @@ TVectorD TrkUtil::ParToACTS(TVectorD Par)
 	pACTS(1) = 1000 * Par(3);	// z0 from m to mm
 	pACTS(2) = Par(1);			// Phi0 is unchanged
 	pACTS(3) = TMath::ATan2(1.0, Par(4));		// Theta in [0, pi] range
-	pACTS(4) = Par(2) / (b * TMath::Sqrt(1 + Par(4) * Par(4)));		// q/p in GeV
+	pACTS(4) = Par(2) / (b * sqrt(1 + Par(4) * Par(4)));		// q/p in GeV
 	pACTS(5) = 0.0;				// Time: currently undefined
 	//
 	return pACTS;
@@ -122,7 +122,7 @@ TMatrixDSym TrkUtil::CovToACTS(TVectorD Par, TMatrixDSym Cov)
 	Double_t C = Par(2);		// half curvature
 	A(0, 0) = 1000.;		// D-D	conversion to mm
 	A(1, 2) = 1.0;		// phi0-phi0
-	A(2, 4) = 1.0 / (TMath::Sqrt(1.0 + ct * ct) * b);	// q/p-C
+	A(2, 4) = 1.0 / (sqrt(1.0 + ct * ct) * b);	// q/p-C
 	A(3, 1) = 1000.;		// z0-z0 conversion to mm
 	A(4, 3) = -1.0 / (1.0 + ct * ct); // theta - cot(theta)
 	A(4, 4) = -C * ct / (b * pow(1.0 + ct * ct, 3.0 / 2.0)); // q/p-cot(theta)
