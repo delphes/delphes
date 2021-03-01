@@ -108,12 +108,9 @@ void TrackCovariance::Process()
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
-    // converting to meters
-    //const TLorentzVector &candidatePosition = candidate->InitialPosition*1e-03;
-    //const TLorentzVector &candidateMomentum = candidate->Momentum;
-
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
 
+    // converting to meters
     const TLorentzVector &candidatePosition = particle->Position*1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
