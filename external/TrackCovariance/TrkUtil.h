@@ -19,9 +19,7 @@ protected:
 	//
 	void SetBfield(Double_t Bz) { fBz = Bz; }
 	TVectorD XPtoPar(TVector3 x, TVector3 p, Double_t Q);
-	TVector3 ParToX(TVectorD Par);
 	TVector3 ParToP(TVectorD Par);
-	Double_t ParToQ(TVectorD Par);
 	//
 	// Conversion to ACTS parametrization
 	//
@@ -45,12 +43,17 @@ public:
 	//
 	static Double_t cSpeed()
 	{
-		return TMath::C()*1.0e-9;	// Reduced speed of light
+		Double_t c = 2.99792458e8;	// speed of light m/sec
+		//return TMath::C()*1.0e-9;	// Incompatible with root5
+		return c*1.0e-9; 		// Reduced speed of light	
 	}
 	//
 	// Service routines
 	//
 	static TVectorD XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz);
+	static TVector3 ParToX(TVectorD Par);				// position of minimum distance from z axis
+	static TVector3 ParToP(TVectorD Par, Double_t Bz);	// Get Momentum from track parameters
+	static Double_t ParToQ(TVectorD Par);				// Get track charge
 	//
 	// Conversion from meters to mm
 	//
