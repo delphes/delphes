@@ -50,9 +50,9 @@ void Example6(const char* inputFile)
 	//
 	// Track parameter pulls
 	TH1* histDpull = new TH1F("h_Dpull", "Pull impact parameter", 100, -10., 10.);
-	TH1* histP0pull = new TH1F("h_P0pull", "Pull phi_{0}", 100, -10., 10.);
+	TH1* histP0pull = new TH1F("h_P0pull", "Pull #phi_{0}", 100, -10., 10.);
 	TH1* histCpull = new TH1F("h_Cpull", "Pull half curvature", 100, -10., 10.);
-	TH1* histZ0pull = new TH1F("h_Z0pull", "Pull Z0", 100, -10., 10.);
+	TH1* histZ0pull = new TH1F("h_Z0pull", "Pull Z_{0}", 100, -10., 10.);
 	TH1* histCtpull = new TH1F("h_Ctpull", "Pull cotg(#theta)", 100, -10., 10.);
 	//
 	// Accptance plots
@@ -63,19 +63,19 @@ void Example6(const char* inputFile)
 	TH1* histPtobs = new TH1F("h_Ptobs", "Reconstructed Pt", 500, 0., 50.);
 	// CEntral track over min Pt
 	TH1* histPtgenC = new TH1F("h_PtgenC", "Generated Pt - Central", 500, 0., 50.);		// pt for central tracks;
-	TH1* histPtobsC = new TH1F("h_PtobsC", "Reconstructed Pt - Central", 500, 0., 50.);	// pt for central
+	TH1* histPtobsC = new TH1F("h_PtobsC", "Reconstructed Pt - Central", 500, 0., 50.);	// pt for central 
 	TH1* histCtgenH = new TH1F("h_CtgenH", "Generateded Cotangent", 100, -10., 10.);		// cot(theta) for high pt tracks;
 	TH1* histCtobsH = new TH1F("h_CtobsH", "Reconstructed Cotangent", 100, -10., 10.);	// cot(theta) for high pt tracks
 	// All tracks
 	TH1* histAccCtg = new TH1F("h_AccCtg", "Cotangent acceptance", 100, -10., 10.);
 	TH1* histAccPt = new TH1F("h_AccPt", "Pt acceptance", 500, 0., 50.);
 	// Tracks over min pt
-	TH1* histAccCtgH = new TH1F("h_AccCtgH", "Cotangent acceptance (high pt)", 500, -10., 10.);
+	TH1* histAccCtgH = new TH1F("h_AccCtgH", "Cotangent acceptance (high pt)", 100, -10., 10.);
 	// tracks above min angle
 	TH1* histAccPtC = new TH1F("h_AccPtC", "Pt acceptance (central tracks)", 500, 0., 50.);
 
 	//
-	// Get magnetic field
+	// Get magnetifc field
 	Double_t Bz = 2.0;
 
 	// Loop over all events
@@ -105,9 +105,10 @@ void Example6(const char* inputFile)
 				histCobs ->Fill(obsC);
 				histZ0obs->Fill(obsZ0);
 				histCtobs->Fill(obsCtg);
-
+				//
+				// Get associated generated particle 
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
-
+				//
 				// Position of origin in meters
 				Double_t x = 1.0e-3 * gp->X;
 				Double_t y = 1.0e-3 * gp->Y;
@@ -138,18 +139,18 @@ void Example6(const char* inputFile)
 				Double_t pullC   = (obsC   - genC)   / trk->ErrorC;
 				Double_t pullZ0  = (obsZ0  - genZ0)  / trk->ErrorDZ;
 				Double_t pullCtg = (obsCtg - genCtg) / trk->ErrorCtgTheta;
-
 				//
-				histDpull->Fill(pullD0);
+				histDpull ->Fill(pullD0);
 				histP0pull->Fill(pullPhi);
-				histCpull->Fill(pullC);
+				histCpull ->Fill(pullC);
 				histZ0pull->Fill(pullZ0);
 				histCtpull->Fill(pullCtg);
 				//
 				// Acceptance plots
 				Double_t obsPt = trk->PT;
+				histPtobs->Fill(obsPt);
 				if (TMath::Abs(genCtg) < maxCtAcc)histPtobsC->Fill(obsPt); // pt for central tracks
-				if (genPt > minPtAcc)histCtobsH->Fill(obsCtg);				// cot(theta) for high pt tracks
+				if (obsPt > minPtAcc)histCtobsH->Fill(obsCtg);				// cot(theta) for high pt tracks
 			}		// End loop on tracks
 
 			// If event contains at least 1 generated charged
@@ -160,14 +161,14 @@ void Example6(const char* inputFile)
 				for (Int_t it = 0; it < branchGenPart->GetEntries(); it++) {
 					GenParticle* gpart = (GenParticle*)branchGenPart->At(it);
 					//
-					// Plot charged particle parameters
+					// Plot charged particle parameters 
 					// Only final state particles (Status = 1)
 					if (gpart->Status == 1 && TMath::Abs(gpart->Charge) > 0) {
 						//
-						// Position of origin
-						Double_t x = gpart->X;
-						Double_t y = gpart->Y;
-						Double_t z = gpart->Z;
+						// Position of origin in meters
+						Double_t x = 1.0e-3 * gpart->X;
+						Double_t y = 1.0e-3 * gpart->Y;
+						Double_t z = 1.0e-3 * gpart->Z;
 						TVector3 xv(x, y, z);
 						//
 						// Momentum at origin
@@ -178,23 +179,26 @@ void Example6(const char* inputFile)
 						//
 						// Original parameters
 						Double_t Q = gpart->Charge;
-						TVectorD genPar = TrkUtil::XPtoPar(xv, pv, Q, Bz);	// Get parameters from position and momentum
+						TVectorD gPar = TrkUtil::XPtoPar(xv, pv, Q, Bz);	// Get parameters from position and momentum
+						TVectorD genPar = TrkUtil::ParToMm(gPar);			// Convert to mm
 						// Unpack parameters
-						Double_t genD0 = genPar(0);
+						Double_t genD0  = genPar(0);
 						Double_t genPhi = genPar(1);
-						Double_t genC = genPar(2);
-						Double_t genZ0 = genPar(3);
+						Double_t genC   = genPar(2);
+						Double_t genZ0  = genPar(3);
 						Double_t genCtg = genPar(4);
+						Double_t genPt  = pv.Pt();
 						// Fill histograms
-						histDgen->Fill(genD0);
+						histDgen ->Fill(genD0);
 						histP0gen->Fill(genPhi);
-						histCgen->Fill(genC);
+						histCgen ->Fill(genC);
 						histZ0gen->Fill(genZ0);
 						histCtgen->Fill(genCtg);
 						//
 						// Acceptance plots
-						if (TMath::Abs(genCtg) < maxCtAcc)histPtgenC->Fill(gpart->PT);
-						if (gpart->PT > minPtAcc)histCtgenH->Fill(genCtg);
+						histPtgen->Fill(genPt);
+						if (TMath::Abs(genCtg) < maxCtAcc)histPtgenC->Fill(genPt);
+						if (genPt > minPtAcc)histCtgenH->Fill(genCtg);
 					}
 				}
 			}
@@ -221,18 +225,24 @@ void Example6(const char* inputFile)
 	//
 	TCanvas* Cnv2 = new TCanvas("Cnv2", "Delphes observed track pulls", 150, 150, 900, 500);
 	Cnv2->Divide(3, 2);
-	Cnv2->cd(1); histDpull->Draw();
-	Cnv2->cd(2); histP0pull->Draw();
-	Cnv2->cd(3); histCpull->Draw();
-	Cnv2->cd(4); histZ0pull->Draw();
-	Cnv2->cd(5); histCtpull->Draw();
+	Cnv2->cd(1); gPad->SetLogy(1);
+	histDpull->Draw();
+	Cnv2->cd(2); gPad->SetLogy(1);
+	histP0pull->Draw();
+	Cnv2->cd(3); gPad->SetLogy(1);
+	histCpull->Draw();
+	Cnv2->cd(4); gPad->SetLogy(1);
+	histZ0pull->Draw();
+	Cnv2->cd(5); gPad->SetLogy(1);
+	histCtpull->Draw();
 	//
 	// Acceptance plots
 	//
-	TCanvas* Cnv4 = new TCanvas("Cnv4", "Delphes acceptance", 350, 350, 500, 500);
+	TCanvas* Cnv4 = new TCanvas("Cnv4", "Delphes acceptance", 200, 200, 500, 500);
 	Cnv4->Divide(2, 2);
 	Cnv4->cd(1);
 	histCtgen->Draw();
+	histCtobs->SetLineColor(kRed);
 	histCtobs->Draw("SAME");
 	Cnv4->cd(2);
 	Int_t NbCt = histCtgen->GetNbinsX();
@@ -245,8 +255,9 @@ void Example6(const char* inputFile)
 		histAccCtg->SetBinContent(i, AccCtg);
 	}
 	histAccCtg->Draw();
-	Cnv4->cd(3);
+	Cnv4->cd(3); gPad->SetLogy(1);
 	histPtgen->Draw();
+	histPtobs->SetLineColor(kRed);
 	histPtobs->Draw("SAME");
 	Cnv4->cd(4);
 	Int_t NbPt = histPtgen->GetNbinsX();
@@ -260,10 +271,11 @@ void Example6(const char* inputFile)
 	}
 	histAccPt->Draw();
 	//
-	TCanvas* Cnv5 = new TCanvas("Cnv5", "Delphes acceptance (constrained)", 400, 400, 500, 500);
+	TCanvas* Cnv5 = new TCanvas("Cnv5", "Delphes acceptance (constrained)", 250, 250, 500, 500);
 	Cnv5->Divide(2, 2);
 	Cnv5->cd(1);
 	histCtgenH->Draw();
+	histCtobsH->SetLineColor(kRed);
 	histCtobsH->Draw("SAME");
 	Cnv5->cd(2);
 	NbCt = histCtgenH->GetNbinsX();
@@ -276,8 +288,9 @@ void Example6(const char* inputFile)
 		histAccCtgH->SetBinContent(i, AccCtg);
 	}
 	histAccCtgH->Draw();
-	Cnv5->cd(3);
-	histPtgenC->Draw();
+	Cnv5->cd(3); gPad->SetLogy(1);
+	histPtgenC->Draw(); 
+	histPtobsC->SetLineColor(kRed);
 	histPtobsC->Draw("SAME");
 	Cnv5->cd(4);
 	NbPt = histPtgenC->GetNbinsX();
