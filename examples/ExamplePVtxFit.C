@@ -1,0 +1,132 @@
+/*
+Example of using vertex fitter class to fit primary vertex
+assumed to be generated in (0,0,0)
+*/
+
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
+#include "modules/TrackCovariance.h"
+#include "external/TrackCovariance/TrkUtil.h"
+#include "external/TrackCovariance/VertexFit.h"
+
+#include <TClonesArray.h>
+#include <TChain.h>
+#include <TVector3.h>
+#include <TVectorD.h>
+#include <TMatrixDSym.h>
+#include <TH1.h>
+#include <TCanvas.h>
+#include <TStyle.h>
+
+//------------------------------------------------------------------------------
+
+void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
+{
+	// Create chain of root trees
+	TChain chain("Delphes");
+	chain.Add(inputFile);
+
+	// Create object of class ExRootTreeReader
+	ExRootTreeReader* treeReader = new ExRootTreeReader(&chain);
+	Long64_t numberOfEntries = treeReader->GetEntries();
+
+	// Get pointers to branches used in this analysis
+	TClonesArray* branchGenPart = treeReader->UseBranch("Particle");
+	TClonesArray* branchTrack = treeReader->UseBranch("Track");
+
+	// Book histograms
+	Int_t Nbin = 100;
+	TH1D* hXpull = new TH1D("hXpull", "Pull X vertex component", Nbin, -10., 10.);
+	TH1D* hYpull = new TH1D("hYpull", "Pull Y vertex component", Nbin, -10., 10.);
+	TH1D* hZpull = new TH1D("hZpull", "Pull Z vertex component", Nbin, -10., 10.);
+	TH1D* hChi2 = new TH1D("hChi2", "Vertex #chi^{2}/N_{dof}", Nbin, 0., 10.);
+	//
+	// Loop over all events
+	Int_t Nev = TMath::Min(Nevent, (Int_t) numberOfEntries);
+	for (Int_t entry = 0; entry < Nev; ++entry)
+	{
+		// Load selected branches with data from specified event
+		treeReader->ReadEntry(entry);
+		Int_t Ntr = 0;	// # of tracks from primary vertex
+		Int_t NtrG = branchTrack->GetEntries();
+		TVectorD** pr = new TVectorD * [NtrG];
+		TMatrixDSym** cv = new TMatrixDSym * [NtrG];
+		// If event contains at least 1 track
+		//
+		if (branchTrack->GetEntries() > 0)
+		{
+			// Loop on tracks
+			for (Int_t it = 0; it < branchTrack->GetEntries(); it++)
+			{
+				Track* trk = (Track*)branchTrack->At(it);
+				//
+				// Get associated generated particle 
+				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
+				//
+				// Position of origin in meters
+				Double_t x = 1.0e-3 * gp->X;
+				Double_t y = 1.0e-3 * gp->Y;
+				Double_t z = 1.0e-3 * gp->Z;
+				//
+				// group tracks originating from the primary vertex
+				if (x == 0.0 && y == 0.0)
+				{
+					//
+					// Reconstructed track parameters
+					Double_t obsD0 = trk->D0;
+					Double_t obsPhi = trk->Phi;
+					Double_t obsC = trk->C;
+					Double_t obsZ0 = trk->DZ;
+					Double_t obsCtg = trk->CtgTheta;
+					Double_t oPar[5] = { obsD0, obsPhi, obsC, obsZ0, obsCtg };
+					TVectorD obsPar(5, oPar);	// Fill observed parameters
+					TVector3 xv(x, y, z);
+					//
+					pr[Ntr] = new TVectorD(obsPar);
+					cv[Ntr] = new TMatrixDSym(TrkUtil::CovToMm(trk->CovarianceMatrix()));
+					Ntr++;
+				}
+			}		// End loop on tracks
+			//std::cout << "Total of " << Ntr << " primary tracks out of " << NtrG << " tracks" << std::endl;
+		}
+		//
+		// Fit primary vertex
+		Int_t MinTrk = 2;	// Minumum # tracks for vertex fit
+		if (Ntr >= MinTrk) {
+			VertexFit* Vtx = new VertexFit(Ntr, pr, cv);
+			TVectorD xvtx = Vtx->GetVtx();
+			TMatrixDSym covX = Vtx->GetVtxCov();
+			Double_t Chi2 = Vtx->GetVtxChi2();
+			Double_t Ndof = 2 * (Double_t)Ntr - 3;
+			Double_t PullX = xvtx(0) / TMath::Sqrt(covX(0, 0));
+			Double_t PullY = xvtx(1) / TMath::Sqrt(covX(1, 1));
+			Double_t PullZ = xvtx(2) / TMath::Sqrt(covX(2, 2));
+			//
+			// Fill histograms
+			hXpull->Fill(PullX);
+			hYpull->Fill(PullY);
+			hZpull->Fill(PullZ);
+			hChi2->Fill(Chi2 / Ndof);
+		}
+
+		//std::cout << "Vertex chi2/Ndof = " << Chi2 / Ndof << std::endl;
+		//
+		// Cleanup
+		for (Int_t i = 0; i < Ntr; i++) delete pr[i];
+		for (Int_t i = 0; i < Ntr; i++) delete cv[i];
+		delete[] pr;
+		delete[] cv;
+	}
+	//
+	// Show resulting histograms
+	//
+	TCanvas* Cnv = new TCanvas("Cnv", "Delphes generated track plots", 50, 50, 900, 500);
+	Cnv->Divide(2, 2);
+	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);	
+	hXpull->Fit("gaus"); hXpull->Draw();
+	Cnv->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111);	
+	hYpull->Fit("gaus"); hYpull->Draw();
+	Cnv->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111);
+	hZpull->Fit("gaus"); hZpull->Draw();
+	Cnv->cd(4); hChi2->Draw();
+}
