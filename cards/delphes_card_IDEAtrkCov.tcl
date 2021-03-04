@@ -7,7 +7,9 @@
 #        m.antonello@uninsubria.it,
 #        michele.selvaggi@cern.ch
 #####################################################################
-#
+
+set B 2.0
+
 #######################################
 # Order of execution of various modules
 #######################################
@@ -59,7 +61,6 @@ set ExecutionPath {
   TreeWriter
 }
 
-
 #################################
 # Propagate particles in cylinder
 #################################
@@ -79,7 +80,7 @@ module ParticlePropagator ParticlePropagator {
   set HalfLength 2.5
 
   # magnetic field, in T
-  set Bz 2.0
+  set Bz $B
 }
 
 ####################################
@@ -309,9 +310,8 @@ module TrackCovariance TrackSmearing {
       2 FPRESH 0.39 2.43 2.55 0.02 1 2 0 1.5708 7e-005 0.01 1
     }
 
-    set Bz 2.0
+    set Bz $B
 }
-
 
 ##############
 # Track merger
@@ -766,4 +766,7 @@ module TreeWriter TreeWriter {
 
     add Branch MissingET/momentum MissingET MissingET
     add Branch ScalarHT/energy ScalarHT ScalarHT
+
+    # add Info InfoName InfoValue
+    add Info Bz $B
 }

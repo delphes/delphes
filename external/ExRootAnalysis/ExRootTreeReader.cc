@@ -11,6 +11,7 @@
 
 #include "TBranchElement.h"
 #include "TCanvas.h"
+#include "TParameter.h"
 #include "TClonesArray.h"
 #include "TH2.h"
 #include "TStyle.h"
@@ -114,6 +115,19 @@ TClonesArray *ExRootTreeReader::UseBranch(const char *branchName)
   }
 
   return array;
+}
+
+//------------------------------------------------------------------------------
+
+Double_t ExRootTreeReader::GetInfo(const char *name)
+{
+  TTree *tree = NULL;
+  TParameter<Double_t> *param = NULL;
+  Double_t result = -999.9;
+  if(fChain) tree = fChain->GetTree();
+  if(tree) param = static_cast<TParameter<Double_t> *>(tree->GetUserInfo()->FindObject(name));
+  if(param) result = param->GetVal();
+  return result;
 }
 
 //------------------------------------------------------------------------------

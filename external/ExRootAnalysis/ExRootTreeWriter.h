@@ -28,6 +28,7 @@ public:
   void SetTreeName(const char *name) { fTreeName = name; }
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
+  void AddInfo(const char *name, Double_t value);
 
   void Clear();
   void Fill();

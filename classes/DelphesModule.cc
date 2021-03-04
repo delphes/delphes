@@ -129,6 +129,23 @@ ExRootTreeBranch *DelphesModule::NewBranch(const char *name, TClass *cl)
 
 //------------------------------------------------------------------------------
 
+void DelphesModule::AddInfo(const char *name, Double_t value)
+{
+  stringstream message;
+  if(!fTreeWriter)
+  {
+    fTreeWriter = static_cast<ExRootTreeWriter *>(GetObject("TreeWriter", ExRootTreeWriter::Class()));
+    if(!fTreeWriter)
+    {
+      message << "can't access access tree writer";
+      throw runtime_error(message.str());
+    }
+  }
+  fTreeWriter->AddInfo(name, value);
+}
+
+//------------------------------------------------------------------------------
+
 ExRootResult *DelphesModule::GetPlots()
 {
   if(!fPlots)

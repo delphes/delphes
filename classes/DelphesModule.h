@@ -54,6 +54,7 @@ public:
   TObjArray *ExportArray(const char *name);
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
+  void AddInfo(const char *name, Double_t value);
 
   ExRootResult *GetPlots();
   DelphesFactory *GetFactory();
