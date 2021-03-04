@@ -111,12 +111,12 @@ TMatrixDSym Track::CovarianceMatrix() const
 {
   TMatrixDSym Cv;
   Cv.ResizeTo(5, 5);
-  
+
   // convert diagonal term to original units
-  Cv(0, 0)=TMath::Power(ErrorD0*1.0E-3, 2.);
+  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
   Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC*1.0E3, 2.);
-  Cv(3, 3)=TMath::Power(ErrorDZ*1.0E-3, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC, 2.);
+  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
   Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
 
   // off diagonal terms
@@ -170,12 +170,12 @@ TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
 {
   TMatrixDSym Cv;
   Cv.ResizeTo(5, 5);
-  
+
   // convert diagonal term to original units
-  Cv(0, 0)=TMath::Power(ErrorD0*1.0E-3, 2.);
+  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
   Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC*1.0E3, 2.);
-  Cv(3, 3)=TMath::Power(ErrorDZ*1.0E-3, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC, 2.);
+  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
   Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
 
   // off diagonal terms
@@ -233,7 +233,7 @@ Candidate::Candidate() :
   NCharged(0),
   NNeutrals(0),
   NeutralEnergyFraction(0),  // charged energy fraction
-  ChargedEnergyFraction(0),  // neutral energy fraction 
+  ChargedEnergyFraction(0),  // neutral energy fraction
   Beta(0),
   BetaStar(0),
   MeanSqDeltaR(0),
