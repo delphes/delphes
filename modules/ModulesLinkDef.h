@@ -38,6 +38,7 @@
 #include "modules/TrackCovariance.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
+#include "modules/TimeSmearingTail.h"
 #include "modules/SimpleCalorimeter.h"
 #include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
@@ -95,6 +96,7 @@
 #pragma link C++ class TrackCovariance+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
+#pragma link C++ class TimeSmearingTail+;
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
