@@ -1,6 +1,14 @@
 /*
 Example of using vertex fitter class to fit primary vertex
-assumed to be generated in (0,0,0)
+assumed to be generated in (0,0,0).
+To run compiled version:
+root
+root> .L examples/LoadPvtxFit.C+
+root> LoadPVtxFit()
+root> ExamplePVtxFit("infile.root", Nevents)
+
+March 4, 2021
+F. Bedeschi, INFN-Pisa, Italy
 */
 
 #include "classes/DelphesClasses.h"
@@ -11,7 +19,6 @@ assumed to be generated in (0,0,0)
 
 #include <TClonesArray.h>
 #include <TChain.h>
-#include <TVector3.h>
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
 #include <TH1.h>
@@ -48,7 +55,7 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 		Int_t Ntr = 0;	// # of tracks from primary vertex
-		Int_t NtrG = branchTrack->GetEntries();
+		Int_t NtrG = branchTrack->GetEntries();	// Total # of tracks
 		TVectorD** pr = new TVectorD * [NtrG];
 		TMatrixDSym** cv = new TMatrixDSym * [NtrG];
 		// If event contains at least 1 track
@@ -63,12 +70,12 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 				// Get associated generated particle 
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
 				//
-				// Position of origin in meters
-				Double_t x = 1.0e-3 * gp->X;
-				Double_t y = 1.0e-3 * gp->Y;
-				Double_t z = 1.0e-3 * gp->Z;
+				// Position of origin (mm)
+				Double_t x = gp->X;
+				Double_t y = gp->Y;
+				Double_t z = gp->Z;
 				//
-				// group tracks originating from the primary vertex
+				// Select group of tracks originating from the primary vertex
 				if (x == 0.0 && y == 0.0)
 				{
 					//
@@ -80,14 +87,12 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 					Double_t obsCtg = trk->CtgTheta;
 					Double_t oPar[5] = { obsD0, obsPhi, obsC, obsZ0, obsCtg };
 					TVectorD obsPar(5, oPar);	// Fill observed parameters
-					TVector3 xv(x, y, z);
 					//
 					pr[Ntr] = new TVectorD(obsPar);
 					cv[Ntr] = new TMatrixDSym(TrkUtil::CovToMm(trk->CovarianceMatrix()));
 					Ntr++;
 				}
 			}		// End loop on tracks
-			//std::cout << "Total of " << Ntr << " primary tracks out of " << NtrG << " tracks" << std::endl;
 		}
 		//
 		// Fit primary vertex
@@ -109,7 +114,6 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 			hChi2->Fill(Chi2 / Ndof);
 		}
 
-		//std::cout << "Vertex chi2/Ndof = " << Chi2 / Ndof << std::endl;
 		//
 		// Cleanup
 		for (Int_t i = 0; i < Ntr; i++) delete pr[i];
