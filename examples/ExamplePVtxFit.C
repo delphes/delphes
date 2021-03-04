@@ -124,7 +124,7 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 	//
 	// Show resulting histograms
 	//
-	TCanvas* Cnv = new TCanvas("Cnv", "Delphes generated track plots", 50, 50, 900, 500);
+	TCanvas* Cnv = new TCanvas("Cnv", "Delphes primary vertex fit pulls", 50, 50, 900, 500);
 	Cnv->Divide(2, 2);
 	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);	
 	hXpull->Fit("gaus"); hXpull->Draw();
