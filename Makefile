@@ -659,6 +659,8 @@ tmp/external/TrackCovariance/SolTrack.$(ObjSuf): \
 	external/TrackCovariance/SolTrack.$(SrcSuf)
 tmp/external/TrackCovariance/TrkUtil.$(ObjSuf): \
 	external/TrackCovariance/TrkUtil.$(SrcSuf)
+tmp/external/TrackCovariance/VertexFit.$(ObjSuf): \
+	external/TrackCovariance/VertexFit.$(SrcSuf)
 tmp/modules/AngularSmearing.$(ObjSuf): \
 	modules/AngularSmearing.$(SrcSuf) \
 	modules/AngularSmearing.h \
@@ -1167,6 +1169,7 @@ DELPHES_OBJ +=  \
 	tmp/external/TrackCovariance/SolGridCov.$(ObjSuf) \
 	tmp/external/TrackCovariance/SolTrack.$(ObjSuf) \
 	tmp/external/TrackCovariance/TrkUtil.$(ObjSuf) \
+	tmp/external/TrackCovariance/VertexFit.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
