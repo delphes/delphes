@@ -1,0 +1,31 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        container: ["delphes/ubuntu:14.04", "delphes/ubuntu:18.04", "delphes/fedora:30"]
+
+    container:
+      image: ${{ matrix.container }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Delphes using make
+        run: |
+          make distclean
+          make -j 8 HAS_PYTHIA8=true
+
+      - name: Build Delphes using cmake
+        run: |
+          rm -rf build
+          mkdir -p build
+          cd build
+          cmake ..
+          make -j 8

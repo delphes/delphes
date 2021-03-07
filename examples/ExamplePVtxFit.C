@@ -1,15 +1,10 @@
 /*
 Example of using vertex fitter class to fit primary vertex
-assumed to be generated in (0,0,0).
-To run compiled version:
-root
-root> .L examples/LoadPvtxFit.C+
-root> LoadPVtxFit()
-root> ExamplePVtxFit("infile.root", Nevents)
-
-March 4, 2021
-F. Bedeschi, INFN-Pisa, Italy
+assumed to be generated in (0,0,0)
 */
+
+#ifdef __CLING__
+R__LOAD_LIBRARY(libDelphes)
 
 #include "classes/DelphesClasses.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
@@ -17,13 +12,8 @@ F. Bedeschi, INFN-Pisa, Italy
 #include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
 
-#include <TClonesArray.h>
-#include <TChain.h>
-#include <TVectorD.h>
-#include <TMatrixDSym.h>
-#include <TH1.h>
-#include <TCanvas.h>
-#include <TStyle.h>
+#endif
+
 
 //------------------------------------------------------------------------------
 
@@ -49,13 +39,13 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 	TH1D* hChi2 = new TH1D("hChi2", "Vertex #chi^{2}/N_{dof}", Nbin, 0., 10.);
 	//
 	// Loop over all events
-	Int_t Nev = TMath::Min(Nevent, (Int_t) numberOfEntries);
+	Int_t Nev = TMath::Min(Nevent, (Int_t)numberOfEntries);
 	for (Int_t entry = 0; entry < Nev; ++entry)
 	{
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 		Int_t Ntr = 0;	// # of tracks from primary vertex
-		Int_t NtrG = branchTrack->GetEntries();	// Total # of tracks
+		Int_t NtrG = branchTrack->GetEntries();
 		TVectorD** pr = new TVectorD * [NtrG];
 		TMatrixDSym** cv = new TMatrixDSym * [NtrG];
 		// If event contains at least 1 track
@@ -67,15 +57,15 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 			{
 				Track* trk = (Track*)branchTrack->At(it);
 				//
-				// Get associated generated particle 
+				// Get associated generated particle
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
 				//
-				// Position of origin (mm)
+				// Position of origin in mm
 				Double_t x = gp->X;
 				Double_t y = gp->Y;
 				Double_t z = gp->Z;
 				//
-				// Select group of tracks originating from the primary vertex
+				// group tracks originating from the primary vertex
 				if (x == 0.0 && y == 0.0)
 				{
 					//
@@ -89,7 +79,9 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 					TVectorD obsPar(5, oPar);	// Fill observed parameters
 					//
 					pr[Ntr] = new TVectorD(obsPar);
-					cv[Ntr] = new TMatrixDSym(TrkUtil::CovToMm(trk->CovarianceMatrix()));
+					//std::cout<<"Cov Matrix:"<<std::endl;
+					//trk->CovarianceMatrix().Print();
+					cv[Ntr] = new TMatrixDSym(trk->CovarianceMatrix());
 					Ntr++;
 				}
 			}		// End loop on tracks
@@ -114,6 +106,7 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 			hChi2->Fill(Chi2 / Ndof);
 		}
 
+		//std::cout << "Vertex chi2/Ndof = " << Chi2 / Ndof << std::endl;
 		//
 		// Cleanup
 		for (Int_t i = 0; i < Ntr; i++) delete pr[i];
@@ -124,11 +117,11 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 	//
 	// Show resulting histograms
 	//
-	TCanvas* Cnv = new TCanvas("Cnv", "Delphes primary vertex fit pulls", 50, 50, 900, 500);
+	TCanvas* Cnv = new TCanvas("Cnv", "Delphes primary vertex pulls", 50, 50, 900, 500);
 	Cnv->Divide(2, 2);
-	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);	
+	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);
 	hXpull->Fit("gaus"); hXpull->Draw();
-	Cnv->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111);	
+	Cnv->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111);
 	hYpull->Fit("gaus"); hYpull->Draw();
 	Cnv->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111);
 	hZpull->Fit("gaus"); hZpull->Draw();

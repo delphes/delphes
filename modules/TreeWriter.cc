@@ -122,6 +122,19 @@ void TreeWriter::Init()
 
     fBranchMap.insert(make_pair(branch, make_pair(itClassMap->second, array)));
   }
+
+  param = GetParam("Info");
+  TString infoName;
+  Double_t infoValue;
+
+  size = param.GetSize();
+  for(i = 0; i < size / 2; ++i)
+  {
+    infoName = param[i * 2].GetString();
+    infoValue = param[i * 2 + 1].GetDouble();
+
+    AddInfo(infoName, infoValue);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -137,7 +150,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
   TIter it1(candidate->GetCandidates());
   it1.Reset();
   array->Clear();
-  
+
   while((candidate = static_cast<Candidate *>(it1.Next())))
   {
     TIter it2(candidate->GetCandidates());
@@ -536,7 +549,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Phi = phi;
     entry->CtgTheta = ctgTheta;
     entry->C = candidate->C;
-    
+
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     const TLorentzVector &initialPosition = particle->Position;
 

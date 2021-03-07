@@ -63,7 +63,7 @@ void Example6(const char* inputFile)
 	TH1* histPtobs = new TH1F("h_Ptobs", "Reconstructed Pt", 500, 0., 50.);
 	// CEntral track over min Pt
 	TH1* histPtgenC = new TH1F("h_PtgenC", "Generated Pt - Central", 500, 0., 50.);		// pt for central tracks;
-	TH1* histPtobsC = new TH1F("h_PtobsC", "Reconstructed Pt - Central", 500, 0., 50.);	// pt for central 
+	TH1* histPtobsC = new TH1F("h_PtobsC", "Reconstructed Pt - Central", 500, 0., 50.);	// pt for central
 	TH1* histCtgenH = new TH1F("h_CtgenH", "Generateded Cotangent", 100, -10., 10.);		// cot(theta) for high pt tracks;
 	TH1* histCtobsH = new TH1F("h_CtobsH", "Reconstructed Cotangent", 100, -10., 10.);	// cot(theta) for high pt tracks
 	// All tracks
@@ -76,7 +76,7 @@ void Example6(const char* inputFile)
 
 	//
 	// Get magnetifc field
-	Double_t Bz = 2.0;
+	Double_t Bz = treeReader->GetInfo("Bz");
 
 	// Loop over all events
 	for (Int_t entry = 0; entry < numberOfEntries; ++entry)
@@ -106,7 +106,7 @@ void Example6(const char* inputFile)
 				histZ0obs->Fill(obsZ0);
 				histCtobs->Fill(obsCtg);
 				//
-				// Get associated generated particle 
+				// Get associated generated particle
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
 				//
 				// Position of origin in meters
@@ -161,7 +161,7 @@ void Example6(const char* inputFile)
 				for (Int_t it = 0; it < branchGenPart->GetEntries(); it++) {
 					GenParticle* gpart = (GenParticle*)branchGenPart->At(it);
 					//
-					// Plot charged particle parameters 
+					// Plot charged particle parameters
 					// Only final state particles (Status = 1)
 					if (gpart->Status == 1 && TMath::Abs(gpart->Charge) > 0) {
 						//
@@ -289,7 +289,7 @@ void Example6(const char* inputFile)
 	}
 	histAccCtgH->Draw();
 	Cnv5->cd(3); gPad->SetLogy(1);
-	histPtgenC->Draw(); 
+	histPtgenC->Draw();
 	histPtobsC->SetLineColor(kRed);
 	histPtobsC->Draw("SAME");
 	Cnv5->cd(4);
