@@ -39,7 +39,7 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 	TH1D* hChi2 = new TH1D("hChi2", "Vertex #chi^{2}/N_{dof}", Nbin, 0., 10.);
 	//
 	// Loop over all events
-	Int_t Nev = TMath::Min(Nevent, (Int_t) numberOfEntries);
+	Int_t Nev = TMath::Min(Nevent, (Int_t)numberOfEntries);
 	for (Int_t entry = 0; entry < Nev; ++entry)
 	{
 		// Load selected branches with data from specified event
@@ -60,10 +60,10 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 				// Get associated generated particle
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
 				//
-				// Position of origin in meters
-				Double_t x = 1.0e-3 * gp->X;
-				Double_t y = 1.0e-3 * gp->Y;
-				Double_t z = 1.0e-3 * gp->Z;
+				// Position of origin in mm
+				Double_t x = gp->X;
+				Double_t y = gp->Y;
+				Double_t z = gp->Z;
 				//
 				// group tracks originating from the primary vertex
 				if (x == 0.0 && y == 0.0)
@@ -77,14 +77,14 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 					Double_t obsCtg = trk->CtgTheta;
 					Double_t oPar[5] = { obsD0, obsPhi, obsC, obsZ0, obsCtg };
 					TVectorD obsPar(5, oPar);	// Fill observed parameters
-					TVector3 xv(x, y, z);
 					//
 					pr[Ntr] = new TVectorD(obsPar);
-					cv[Ntr] = new TMatrixDSym(TrkUtil::CovToMm(trk->CovarianceMatrix()));
+					//std::cout<<"Cov Matrix:"<<std::endl;
+					//trk->CovarianceMatrix().Print();
+					cv[Ntr] = new TMatrixDSym(trk->CovarianceMatrix());
 					Ntr++;
 				}
 			}		// End loop on tracks
-			//std::cout << "Total of " << Ntr << " primary tracks out of " << NtrG << " tracks" << std::endl;
 		}
 		//
 		// Fit primary vertex
@@ -117,7 +117,7 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 	//
 	// Show resulting histograms
 	//
-	TCanvas* Cnv = new TCanvas("Cnv", "Delphes generated track plots", 50, 50, 900, 500);
+	TCanvas* Cnv = new TCanvas("Cnv", "Delphes primary vertex pulls", 50, 50, 900, 500);
 	Cnv->Divide(2, 2);
 	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);
 	hXpull->Fit("gaus"); hXpull->Draw();
