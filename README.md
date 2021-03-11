@@ -1,4 +1,4 @@
-[![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3735069.svg)](https://doi.org/10.5281/zenodo.3735069)
+[![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.821635.svg)](https://doi.org/10.5281/zenodo.821635)
 
 Delphes
 =======
