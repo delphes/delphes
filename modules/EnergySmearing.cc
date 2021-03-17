@@ -94,7 +94,7 @@ void EnergySmearing::Finish()
 void EnergySmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t pt, energy, eta, phi;
+  Double_t pt, energy, eta, phi, m;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -106,6 +106,7 @@ void EnergySmearing::Process()
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     energy = candidateMomentum.E();
+    m = candidateMomentum.M();
 
     // apply smearing formula
     energy = gRandom->Gaus(energy, fFormula->Eval(pt, eta, phi, energy));
@@ -116,7 +117,8 @@ void EnergySmearing::Process()
     candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiE(energy / TMath::CosH(eta), eta, phi, energy);
+    pt = (energy > m) ? TMath::Sqrt(energy*energy - m*m)/TMath::CosH(eta) : 0;
+    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
     candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
     candidate->AddCandidate(mother);
 

@@ -558,7 +558,7 @@ void Calorimeter::FinalizeTower()
   // if ecal neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack
   if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
-    // create new photon tower
+    // create new photon tower assuming null mass
     tower = static_cast<Candidate *>(fTower->Clone());
     pt = ecalNeutralEnergy / TMath::CosH(eta);
 
@@ -645,8 +645,8 @@ void Calorimeter::FinalizeTower()
       mother = track;
       track = static_cast<Candidate *>(track->Clone());
       track->AddCandidate(mother);
-
       track->Momentum *= rescaleFactor;
+      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt()*rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
 
       fEFlowTrackOutputArray->Add(track);
     }

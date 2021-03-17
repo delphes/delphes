@@ -1,4 +1,4 @@
-/*
+  /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2020  Universite catholique de Louvain (UCLouvain), Belgium
  *

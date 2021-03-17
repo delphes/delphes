@@ -319,7 +319,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
   Candidate *candidate = 0;
   Candidate *particle = 0;
   Track *entry = 0;
-  Double_t pt, signz, cosTheta, eta, rapidity, p, ctgTheta, phi;
+  Double_t pt, signz, cosTheta, eta, rapidity, p, ctgTheta, phi, m;
   const Double_t c_light = 2.99792458E8;
 
   // loop over all tracks
@@ -386,6 +386,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     pt = momentum.Pt();
     p = momentum.P();
     phi = momentum.Phi();
+    m = momentum.M();
     ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
 
     cosTheta = TMath::Abs(momentum.CosTheta());
@@ -399,6 +400,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = phi;
     entry->CtgTheta = ctgTheta;
     entry->C = candidate->C;
+    entry->Mass = m;
 
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     const TLorentzVector &initialPosition = particle->Position;
@@ -469,7 +471,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
   Candidate *candidate = 0;
   Candidate *particle = 0;
   ParticleFlowCandidate *entry = 0;
-  Double_t e, pt, signz, cosTheta, eta, rapidity, p, ctgTheta, phi;
+  Double_t e, pt, signz, cosTheta, eta, rapidity, p, ctgTheta, phi, m;
   const Double_t c_light = 2.99792458E8;
 
   // loop over all tracks
@@ -540,6 +542,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     pt = momentum.Pt();
     p = momentum.P();
     phi = momentum.Phi();
+    m = momentum.M();
     ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
 
     entry->E = e;
@@ -549,6 +552,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Phi = phi;
     entry->CtgTheta = ctgTheta;
     entry->C = candidate->C;
+    entry->Mass = m;
 
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     const TLorentzVector &initialPosition = particle->Position;

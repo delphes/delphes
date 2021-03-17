@@ -94,7 +94,7 @@ void MomentumSmearing::Finish()
 void MomentumSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t pt, eta, phi, e, res;
+  Double_t pt, eta, phi, e, m, res;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -105,6 +105,7 @@ void MomentumSmearing::Process()
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
+    m = candidateMomentum.M();
     res = fFormula->Eval(pt, eta, phi, e, candidate);
 
     // apply smearing formula
@@ -120,7 +121,7 @@ void MomentumSmearing::Process()
     candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt * TMath::CosH(eta));
+    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
     //candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
     candidate->TrackResolution = res;
     candidate->AddCandidate(mother);

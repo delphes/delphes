@@ -97,20 +97,19 @@ void AngularSmearing::Finish()
 void AngularSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t pt, eta, phi, e;
+  Double_t pt, eta, phi, e, m;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
+    eta = candidateMomentum.Eta();
+    phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
+    m = candidateMomentum.M();
 
     // apply smearing formula for eta,phi
-
     eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, candidate));
     phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, candidate));
 
@@ -118,9 +117,7 @@ void AngularSmearing::Process()
 
     mother = candidate;
     candidate = static_cast<Candidate *>(candidate->Clone());
-    eta = candidateMomentum.Eta();
-    phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt * TMath::CosH(eta));
+    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
     candidate->AddCandidate(mother);
 
     fOutputArray->Add(candidate);

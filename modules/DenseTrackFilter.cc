@@ -236,7 +236,7 @@ void DenseTrackFilter::FillTrack()
 {
 
   Candidate *candidate, *track;
-  Double_t pt, eta, phi;
+  Double_t pt, eta, phi, m;
   Int_t numberOfCandidates;
 
   // saving track with highest pT that hit the tower
@@ -250,9 +250,11 @@ void DenseTrackFilter::FillTrack()
   pt = candidate->Momentum.Pt();
   eta = candidate->Momentum.Eta();
   phi = candidate->Momentum.Phi();
+  m = candidate->Momentum.M();
+
   eta = gRandom->Gaus(eta, fEtaPhiRes);
   phi = gRandom->Gaus(phi, fEtaPhiRes);
-  candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt * TMath::CosH(eta));
+  candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
   candidate->AddCandidate(track);
 
   fTrackOutputArray->Add(candidate);

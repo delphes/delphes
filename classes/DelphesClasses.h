@@ -384,7 +384,7 @@ public:
   Int_t NNeutrals; // number of neutral constituents
 
   Float_t NeutralEnergyFraction;  // charged energy fraction
-  Float_t ChargedEnergyFraction;  // neutral energy fraction 
+  Float_t ChargedEnergyFraction;  // neutral energy fraction
 
   Float_t Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents)
   Float_t BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)
@@ -438,6 +438,7 @@ public:
   Float_t Phi; // track azimuthal angle
   Float_t CtgTheta; // track cotangent of theta
   Float_t C; // track curvature inverse
+  Float_t Mass; // particle mass
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
@@ -471,16 +472,16 @@ public:
   Float_t ErrorC; // track curvature error
 
   // track covariance off-diagonal terms
-  Float_t ErrorD0Phi;	  
-  Float_t ErrorD0C;	  
-  Float_t ErrorD0DZ;	  
-  Float_t ErrorD0CtgTheta;   
-  Float_t ErrorPhiC;	  
-  Float_t ErrorPhiDZ;	  
-  Float_t ErrorPhiCtgTheta ; 
-  Float_t ErrorCDZ;	  
-  Float_t ErrorCCtgTheta;    
-  Float_t ErrorDZCtgTheta;   
+  Float_t ErrorD0Phi;
+  Float_t ErrorD0C;
+  Float_t ErrorD0DZ;
+  Float_t ErrorD0CtgTheta;
+  Float_t ErrorPhiC;
+  Float_t ErrorPhiDZ;
+  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorCDZ;
+  Float_t ErrorCCtgTheta;
+  Float_t ErrorDZCtgTheta;
 
   TRef Particle; // reference to generated particle
 
@@ -541,6 +542,7 @@ public:
   Float_t Phi; // track azimuthal angle
   Float_t CtgTheta; // track cotangent of theta
   Float_t C; // track curvature inverse
+  Float_t Mass; // particle mass
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
@@ -574,16 +576,16 @@ public:
   Float_t ErrorC; // track curvature error
 
   // track covariance off-diagonal terms
-  Float_t ErrorD0Phi;	  
-  Float_t ErrorD0C;	  
-  Float_t ErrorD0DZ;	  
-  Float_t ErrorD0CtgTheta;   
-  Float_t ErrorPhiC;	  
-  Float_t ErrorPhiDZ;	  
-  Float_t ErrorPhiCtgTheta ; 
-  Float_t ErrorCDZ;	  
-  Float_t ErrorCCtgTheta;    
-  Float_t ErrorDZCtgTheta;   
+  Float_t ErrorD0Phi;
+  Float_t ErrorD0C;
+  Float_t ErrorD0DZ;
+  Float_t ErrorD0CtgTheta;
+  Float_t ErrorPhiC;
+  Float_t ErrorPhiDZ;
+  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorCDZ;
+  Float_t ErrorCCtgTheta;
+  Float_t ErrorDZCtgTheta;
 
   Int_t VertexIndex; // reference to vertex
 
@@ -709,7 +711,7 @@ public:
   Float_t PTD;
   Float_t FracPt[5];
   Float_t NeutralEnergyFraction;  // charged energy fraction
-  Float_t ChargedEnergyFraction;  // neutral energy fraction 
+  Float_t ChargedEnergyFraction;  // neutral energy fraction
 
 
   // Timing information
@@ -766,7 +768,7 @@ public:
 
   // event characteristics variables
   Double_t ParticleDensity; // particle multiplicity density in the proximity of the particle
-  
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
