@@ -101,7 +101,7 @@ TLorentzVector Jet::P4() const
 TLorentzVector Track::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
   return vec;
 }
 
@@ -160,7 +160,7 @@ TLorentzVector Tower::P4() const
 TLorentzVector ParticleFlowCandidate::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
   return vec;
 }
 
