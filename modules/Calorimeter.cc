@@ -449,6 +449,7 @@ void Calorimeter::Process()
     }
 
     fTower->AddCandidate(particle);
+    fTower->Position = position;
   }
 
   // finalize last tower
@@ -460,7 +461,7 @@ void Calorimeter::Process()
 void Calorimeter::FinalizeTower()
 {
   Candidate *track, *tower, *mother;
-  Double_t energy, pt, eta, phi;
+  Double_t energy, pt, eta, phi, r;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalNeutralEnergy, hcalNeutralEnergy;
 
@@ -510,19 +511,21 @@ void Calorimeter::FinalizeTower()
 
   for(size_t i = 0; i < fTower->ECalEnergyTimePairs.size(); ++i)
   {
-    weight = TMath::Sqrt(fTower->ECalEnergyTimePairs[i].first);
+    weight = TMath::Power((fTower->ECalEnergyTimePairs[i].first),2);
     sumWeightedTime += weight * fTower->ECalEnergyTimePairs[i].second;
     sumWeight += weight;
     fTower->NTimeHits++;
   }
 
+  r = TMath::Sqrt(fTower->Position.X()*fTower->Position.X()+fTower->Position.Y()*fTower->Position.Y());
+
   if(sumWeight > 0.0)
   {
-    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, sumWeightedTime / sumWeight);
+    fTower->Position.SetPtEtaPhiE(r, eta, phi, sumWeightedTime / sumWeight);
   }
   else
   {
-    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 999999.9);
+    fTower->Position.SetPtEtaPhiE(r, eta, phi, 999999.9);
   }
 
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);

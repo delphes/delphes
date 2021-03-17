@@ -465,6 +465,7 @@ void DualReadoutCalorimeter::Process()
     }
 
     fTower->AddCandidate(particle);
+    fTower->Position = position;
   }
 
   // finalize last tower
@@ -477,7 +478,7 @@ void DualReadoutCalorimeter::FinalizeTower()
 {
 
   Candidate *track, *tower, *mother;
-  Double_t energy, pt, eta, phi;
+  Double_t energy, pt, eta, phi, r;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalNeutralEnergy, hcalNeutralEnergy, neutralEnergy;
 
@@ -493,17 +494,6 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   if(!fTower) return;
 
-
-  //if (fHCalTowerEnergy < 30 && fECalTowerEnergy < 30) return;
-  //cout<<"----------- New tower ---------"<<endl;
-
-
-  // here we change behaviour w.r.t to standard calorimeter. Start with worse case scenario. If fHCalTowerEnergy > 0, assume total energy smeared by HCAL resolution.
-  // For example, if overlapping charged pions and photons take hadronic resolution as combined measurement
-
-  // if no hadronic fraction at all, then use ECAL resolution
-
-  //cout<<"fECalTowerEnergy: "<<fECalTowerEnergy<<", fHCalTowerEnergy: "<<fHCalTowerEnergy<<", Eta: "<<fTowerEta<<endl;
 
   // if no hadronic energy, use ECAL resolution
   if (fHCalTowerEnergy <= fHCalEnergyMin)
@@ -561,19 +551,21 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   for(size_t i = 0; i < fTower->ECalEnergyTimePairs.size(); ++i)
   {
-    weight = TMath::Sqrt(fTower->ECalEnergyTimePairs[i].first);
+    weight = TMath::Power((fTower->ECalEnergyTimePairs[i].first),2);
     sumWeightedTime += weight * fTower->ECalEnergyTimePairs[i].second;
     sumWeight += weight;
     fTower->NTimeHits++;
   }
 
+  r = TMath::Sqrt(fTower->Position.X()*fTower->Position.X()+fTower->Position.Y()*fTower->Position.Y());
+
   if(sumWeight > 0.0)
   {
-    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, sumWeightedTime/sumWeight);
+    fTower->Position.SetPtEtaPhiE(r, eta, phi, sumWeightedTime/sumWeight);
   }
   else
   {
-    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 999999.9);
+    fTower->Position.SetPtEtaPhiE(r, eta, phi, 999999.9);
   }
 
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
