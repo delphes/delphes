@@ -1,12 +1,15 @@
 ####################################################################                                l
 # FCC-ee IDEA detector model
 #
-# Authors: Elisa Fontanesi, Lorenzo Pezzotti, Massimiliano Antonello
+# Authors: Elisa Fontanesi, Lorenzo Pezzotti, Massimiliano Antonello, Michele Selvaggi
 # email: efontane@bo.infn.it,
 #        lorenzo.pezzotti01@universitadipavia.it,
 #        m.antonello@uninsubria.it,
+#        michele.selvaggi@cern.ch
 #####################################################################
-#
+
+set B 2.0
+
 #######################################
 # Order of execution of various modules
 #######################################
@@ -28,11 +31,12 @@ set ExecutionPath {
   PhotonEfficiency
   PhotonIsolation
 
+  MuonFilter
+
   ElectronFilter
   ElectronEfficiency
   ElectronIsolation
 
-  MuonFilter
   MuonEfficiency
   MuonIsolation
 
@@ -57,7 +61,6 @@ set ExecutionPath {
   TreeWriter
 }
 
-
 #################################
 # Propagate particles in cylinder
 #################################
@@ -77,7 +80,7 @@ module ParticlePropagator ParticlePropagator {
   set HalfLength 2.5
 
   # magnetic field, in T
-  set Bz 2.0
+  set Bz $B
 }
 
 ####################################
@@ -160,6 +163,10 @@ module TrackCovariance TrackSmearing {
     set InputArray TrackMergerPre/tracks
     set OutputArray tracks
 
+
+    set InputArray TrackMergerPre/tracks
+    set OutputArray tracks
+
     set Bz 2.0
 
     ## minimum number of hits to accept a track
@@ -183,10 +190,11 @@ module TrackCovariance TrackSmearing {
       # Resolution Lower side (meters) - 0 = no measurement
       # measurement flag = T, scattering only = F
 
+      # barrel  name       zmin   zmax   r        w (m)      X0        n_meas  th_up (rad) th_down (rad)    reso_up (m)   reso_down (m)  flag
 
       # barrel  name       zmin   zmax   r        w (m)      X0        n_meas  th_up (rad) th_down (rad)    reso_up (m)   reso_down (m)  flag
 
-      1        PIPE       -100    100    0.015    0.0012    0.35276    0        0          0                0             0              0
+      1        PIPE       -100    100    0.015    0.001655  0.2805     0        0          0                0             0              0
       1        VTXLOW     -0.12   0.12   0.017    0.00028   0.0937     2        0          1.5708           3e-006        3e-006         1
       1        VTXLOW     -0.16   0.16   0.023    0.00028   0.0937     2        0          1.5708           3e-006        3e-006         1
       1        VTXLOW     -0.16   0.16   0.031    0.00028   0.0937     2        0          1.5708           3e-006        3e-006         1
@@ -322,8 +330,6 @@ module TrackCovariance TrackSmearing {
       1 BSILWRP -2.35 2.35 2.06 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
       1 MAG -2.5 2.5 2.25 0.05 0.0658 0 0 0 0 0 0
       1 BPRESH -2.55 2.55 2.45 0.02 1 2 0 1.5708 7e-005 0.01 1
-
-
       2 DCHWALL 0.345 2.02 2.125 0.25 5.55 0 0 0 0 0 0
       2 DCHWALL 0.345 2.02 -2.125 0.25 5.55 0 0 0 0 0 0
       2 FSILWRP 0.354 2.02 -2.32 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
@@ -336,8 +342,8 @@ module TrackCovariance TrackSmearing {
       2 FPRESH 0.39 2.43 2.55 0.02 1 2 0 1.5708 7e-005 0.01 1
     }
 
+    set Bz $B
 }
-
 
 ##############
 # Track merger
@@ -502,7 +508,6 @@ module PdgCodeFilter ElectronFilter {
   add PdgCode {-11}
 }
 
-
 #################
 # Muon filter
 #################
@@ -551,7 +556,6 @@ module Isolation ElectronIsolation {
 
   set PTRatioMax 0.12
 }
-
 
 #################
 # Muon efficiency
@@ -794,4 +798,7 @@ module TreeWriter TreeWriter {
 
     add Branch MissingET/momentum MissingET MissingET
     add Branch ScalarHT/energy ScalarHT ScalarHT
+
+    # add Info InfoName InfoValue
+    add Info Bz $B
 }
