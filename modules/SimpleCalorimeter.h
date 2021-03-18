@@ -61,6 +61,8 @@ private:
   Double_t fTowerTime;
   Double_t fTrackTime;
 
+  Double_t fTowerRmax;
+
   Double_t fTowerTimeWeight;
   Double_t fTrackTimeWeight;
 

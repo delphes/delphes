@@ -59,6 +59,7 @@ private:
   Double_t fECalTowerEnergy, fHCalTowerEnergy;
   Double_t fECalTrackEnergy, fHCalTrackEnergy;
   Double_t fTrackEnergy;
+  Double_t fTowerRmax;
 
   Double_t fTimingEnergyMin;
   Bool_t fElectronsFromTrack;

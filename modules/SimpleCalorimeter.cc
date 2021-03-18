@@ -207,10 +207,15 @@ void SimpleCalorimeter::Process()
   // loop over all particles
   fItParticleInputArray->Reset();
   number = -1;
+  fTowerRmax=0.;
   while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
+
+    // compute maximum radius (needed in FinalizeTower to assess whether barrel or endcap tower)
+    if (particlePosition.Perp() > fTowerRmax)
+      fTowerRmax=particlePosition.Perp();
 
     pdgCode = TMath::Abs(particle->PID);
 
@@ -443,8 +448,13 @@ void SimpleCalorimeter::FinalizeTower()
   }
 
   pt = energy / TMath::CosH(eta);
-  r = TMath::Sqrt(fTower->Position.X()*fTower->Position.X()+fTower->Position.Y()*fTower->Position.Y());
-  
+
+  // check whether barrel or endcap tower
+  if (fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
+    r = fTower->Position.Z()/TMath::SinH(eta);
+  else
+    r = fTower->Position.Pt();
+
   fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
 
