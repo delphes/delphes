@@ -56,6 +56,9 @@
 /* compiler supports the "explicit" keyword for operators */
 /* #undef HAVE_EXPLICIT_FOR_OPERATORS */
 
+/* Define to 1 if you have the <gmp.h> header file. */
+/* #undef HAVE_GMP_H */
+
 /* compiler supports GNU c++ deprecated attribute */
 #define HAVE_GNUCXX_DEPRECATED /**/
 
@@ -67,6 +70,9 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the <mpfr.h> header file. */
+/* #undef HAVE_MPFR_H */
 
 /* compiler supports the "override" keyword */
 /* #undef HAVE_OVERRIDE */
@@ -105,7 +111,7 @@
 #define PACKAGE_NAME "FastJet"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "FastJet 3.3.2"
+#define PACKAGE_STRING "FastJet 3.3.4"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fastjet"
@@ -114,13 +120,13 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.3.2"
+#define PACKAGE_VERSION "3.3.4"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.3.2"
+#define VERSION "3.3.4"
 
 /* Major version of this package */
 #define VERSION_MAJOR 3
@@ -129,10 +135,10 @@
 #define VERSION_MINOR 3
 
 /* Version of the package under the form XYYZZ (instead of X.Y.Z) */
-#define VERSION_NUMBER 30302
+#define VERSION_NUMBER 30304
 
 /* Patch version of this package */
-#define VERSION_PATCHLEVEL 2
+#define VERSION_PATCHLEVEL 4
 
 /* Pre-release version of this package */
 /* #undef VERSION_PRERELEASE */

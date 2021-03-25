@@ -82,7 +82,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef SISCONE_PACKAGE_STRING 
-#define SISCONE_PACKAGE_STRING  "SISCone 3.0.4" 
+#define SISCONE_PACKAGE_STRING  "SISCone 3.0.5" 
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -97,7 +97,7 @@
 
 /* Define to the version of this package. */
 #ifndef SISCONE_PACKAGE_VERSION 
-#define SISCONE_PACKAGE_VERSION  "3.0.4" 
+#define SISCONE_PACKAGE_VERSION  "3.0.5" 
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
@@ -110,7 +110,7 @@
 
 /* Version number of package */
 #ifndef SISCONE_VERSION 
-#define SISCONE_VERSION  "3.0.4" 
+#define SISCONE_VERSION  "3.0.5" 
 #endif
  
 /* once: _SISCONE_CONFIG_H */

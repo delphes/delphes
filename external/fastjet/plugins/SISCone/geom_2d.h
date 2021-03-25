@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 268                                                          $//
-// $Date:: 2009-03-12 21:24:16 +0100 (Thu, 12 Mar 2009)                     $//
+// $Revision:: 422                                                          $//
+// $Date:: 2020-04-22 11:51:09 +0200 (Wed, 22 Apr 2020)                     $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __GEOM_2D_H__
@@ -152,12 +152,12 @@ public:
 private:
   /// return the cell index corrsponding to an eta value
   inline unsigned int get_eta_cell(double eta){
-    return (unsigned int) (1 << ((int) (32*((eta-eta_min)/(eta_max-eta_min)))));
+    return (unsigned int) (1u << ((int) (32*((eta-eta_min)/(eta_max-eta_min)))));
   }
 
   /// return the cell index corrsponding to a phi value
   inline unsigned int get_phi_cell(double phi){
-    return (unsigned int) (1 << ((int) (32*phi/twopi+16)%32));
+    return (unsigned int) (1u << ((int) (32*phi/twopi+16)%32));
   }
 };
 

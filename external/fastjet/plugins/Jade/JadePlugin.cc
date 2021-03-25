@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: JadePlugin.cc 4354 2018-04-22 07:12:37Z salam $
+// $Id: JadePlugin.cc 4442 2020-05-05 07:50:11Z soyez $
 //
-// Copyright (c) 2007-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -107,9 +107,12 @@ public:
   double geometrical_beam_distance() const {
     // get a number that is almost the same as max(), just a little
     // smaller so as to ensure that when we divide it by rt2E and then
-    // multiply it again, we won't get an overflow
+    // multiply it again, we won't get an overflow.
+    // Watch out for cases where rt2E < 1.0 (cf. bug fix from
+    // andrii.verbytskyi@mpp.mpg.de on 2019-02-14)
     const double almost_max = numeric_limits<double>::max() * (1 - 1e-13);
-    return almost_max / rt2E;
+    if (rt2E>1.0) return almost_max / rt2E;
+    else          return almost_max; 
   }
   
 private:

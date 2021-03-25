@@ -1,4 +1,4 @@
-// $Id: RecursiveSoftDrop.cc 1111 2018-04-04 10:06:11Z gsoyez $
+// $Id: RecursiveSoftDrop.cc 1192 2018-10-30 16:08:36Z gsoyez $
 //
 // Copyright (c) 2017-, Gavin P. Salam, Gregory Soyez, Jesse Thaler,
 // Kevin Zhou, Frederic Dreyer
@@ -147,7 +147,7 @@ PseudoJet RecursiveSoftDrop::result_fixed_tags(const PseudoJet &jet) const {
   const vector<ClusterSequence::history_element> &cs_history = cs->history();
   const vector<PseudoJet> &cs_jets = cs->jets();
 
-  // initialize counter to 1 subjet (i.e. the full ca_jet)
+  // initialise counter to 1 subjet (i.e. the full ca_jet)
   int n_tagged = 0;
   int max_njet = ca_jet.constituents().size();
 
@@ -162,20 +162,15 @@ PseudoJet RecursiveSoftDrop::result_fixed_tags(const PseudoJet &jet) const {
   history.push_back(internal_recursive_softdrop::RSDHistoryElement(ca_jet, this, _R0sqr));
   
   // create a priority queue containing the subjets and a comparison definition
-  // initialise to the full ca_jet
   priority_queue<internal_recursive_softdrop::RSDHistoryElement*, vector<internal_recursive_softdrop::RSDHistoryElement*>, internal_recursive_softdrop::OrderRSDHistoryElements> active_branches;
   active_branches.push(& (history[0]));
 
   PseudoJet parent, piece1, piece2;
   double sym, mu2;
-
-  // which R0 to use
-  //double R0sqr = _R0sqr;
   
   // loop over C/A tree until we reach the appropriate number of subjets
   while ((continue_grooming(n_tagged)) && (active_branches.size())) {
-    // get the element corresponding to the max dR
-    // and the associated PJ
+    // get the element corresponding to the max dR and the associated PJ
     internal_recursive_softdrop::RSDHistoryElement * elm = active_branches.top();
     PseudoJet parent = cs_jets[cs_history[elm->current_in_ca_tree].jetp_index];
     
@@ -216,13 +211,13 @@ PseudoJet RecursiveSoftDrop::result_fixed_tags(const PseudoJet &jet) const {
 
       active_branches.pop();
       // tagging failed and the softest branch should be dropped
-      // keep track of what has een groomed away
+      // keep track of what has been groomed away
       max_njet -= piece2.constituents().size();
       elm->dropped_delta_R .push_back((elm->theta_squared >= 0) ? sqrt(elm->theta_squared) : -sqrt(elm->theta_squared));
       elm->dropped_symmetry.push_back(sym);
       elm->dropped_mu      .push_back((mu2>=0) ? sqrt(mu2) : -sqrt(mu2));
       
-      // keep the hardest bhanch in the recursion
+      // keep the hardest branch in the recursion
       elm->reset(piece1, this);
       active_branches.push(elm);
     } else if (status==recursion_no_parents){
@@ -255,10 +250,10 @@ PseudoJet RecursiveSoftDrop::result_fixed_tags(const PseudoJet &jet) const {
     --history_index;
     const internal_recursive_softdrop::RSDHistoryElement & elm = history[history_index];
 
-    // two kinds of events: either just a final leave, poteitially  with grooming
+    // two kinds of events: either just a final leave, potentially with grooming
     // or a brandhing (also with potential grooming at the end)
     if (elm.child1_in_history<0){
-      // this is a leaf, i.e. with no further sustructure
+      // this is a leaf, i.e. with no further substructure
       PseudoJet & subjet = mapped_to_history[history_index]
         = cs_jets[cs_history[elm.current_in_ca_tree].jetp_index];
 
@@ -302,7 +297,7 @@ PseudoJet RecursiveSoftDrop::result_fixed_depth(const PseudoJet &jet) const {
   const vector<ClusterSequence::history_element> &cs_history = cs->history();
   const vector<PseudoJet> &cs_jets = cs->jets();
 
-  // initialize counter to 1 subjet (i.e. the full ca_jet)
+  // initialise counter to 1 subjet (i.e. the full ca_jet)
   int n_depth = 0;
   int max_njet = ca_jet.constituents().size();
 
@@ -318,7 +313,6 @@ PseudoJet RecursiveSoftDrop::result_fixed_depth(const PseudoJet &jet) const {
   history.back().theta_squared = _R0sqr;
   
   // create a priority queue containing the subjets and a comparison definition
-  // initialize counter to 1 subjet (i.e. the full ca_jet)
   list<internal_recursive_softdrop::RSDHistoryElement*> active_branches;
   active_branches.push_back(& (history[0]));
 
@@ -328,8 +322,7 @@ PseudoJet RecursiveSoftDrop::result_fixed_depth(const PseudoJet &jet) const {
     // loop over all the branches and look for substructure
     list<internal_recursive_softdrop::RSDHistoryElement*>::iterator hist_it=active_branches.begin();
     while (hist_it!=active_branches.end()){
-      // get the element corresponding to the max dR
-      // and the associated PJ
+      // get the element corresponding to the max dR and the associated PJ
       internal_recursive_softdrop::RSDHistoryElement * elm = (*hist_it);
       PseudoJet parent = cs_jets[cs_history[elm->current_in_ca_tree].jetp_index];
 

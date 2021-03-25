@@ -99,10 +99,10 @@ the same as mMDT.
 
 A default SoftDrop groomer can be created via:
 
-   double z_cut = 0.10;
    double beta  = 2.0;
+   double z_cut = 0.10;
    double R0    = 1.0; // this is the default value
-   SoftDrop sd(z_cut,beta,R0);
+   SoftDrop sd(beta,z_cut,R0);
 
 and acts on a desired jet as
 
@@ -136,11 +136,11 @@ specifying the number of times the SoftDrop procedure is recursively
 applied. Negative N means that the procedure is applied until no
 further substructure is found (i.e. corresponds to taking N=infinity).
 
-   double z_cut = 0.10;
    double beta  = 2.0;
+   double z_cut = 0.10;
    double R0    = 1.0; // this is the default value
    int N        = -1;  
-   RecursiveSoftDrop rsd(z_cut, beta, N, R0);
+   RecursiveSoftDrop rsd(beta, z_cut, N, R0);
 
 One then acts on a jet as
 
@@ -216,6 +216,18 @@ one checks the SoftDrop condition
 If the condition is met, the pair is recombined. If the condition is
 not met, only the hardest of the two objects is kept for further
 clustering and the softest is rejected.
+
+BottomUpSoftDrop takes the same arguments as SoftDrop, and a groomer
+can be created with:
+
+   double beta  = 2.0;
+   double z_cut = 0.10;
+   double R0    = 1.0; // this is the default value
+   BottomUpSoftDrop busd(beta,z_cut,R0);
+
+One then acts on a jet as
+
+   PseudoJet groomed_jet = busd(jet)
 
 ------------------------------------------------------------------------
 Recluster
