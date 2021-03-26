@@ -66,9 +66,9 @@ git clone git://github.com/delphes/delphes.git Delphes
 
 cd Delphes
 
-source  /afs/cern.ch/sw/lcg/external/gcc/4.9.3/x86_64-slc6/setup.sh
+source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.06.00/x86_64-centos7-gcc49-opt/root/bin/thisroot.sh
 
-source /afs/cern.ch/sw/lcg/app/releases/ROOT/6.06.00/x86_64-slc6-gcc49-opt/root/bin/thisroot.sh
+source /cvmfs/sft.cern.ch/lcg/contrib/gcc/4.9.3/x86_64-centos7/setup.sh
 
 make 
 ```
