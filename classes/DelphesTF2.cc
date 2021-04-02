@@ -31,7 +31,7 @@ DelphesTF2::DelphesTF2() :
   TF2()
 {
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 22, 7)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 22, 99)
   fFormula = std::unique_ptr<TFormula>(new TFormula());
 #elif ROOT_VERSION_CODE >= ROOT_VERSION(6, 3, 0)
   fFormula = new TFormula();
