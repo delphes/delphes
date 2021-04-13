@@ -1,5 +1,6 @@
 #include "TrkUtil.h"
 #include <iostream>
+#include <algorithm>
 
 // Constructor
 TrkUtil::TrkUtil(Double_t Bz)
@@ -45,8 +46,8 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	//std::cout << "ObsTrk::XPtoPar: fB = " << fB << ", a = " << a << ", pt = " << pt << ", C = " << C << std::endl;
 	Double_t r2 = x.Perp2();
 	Double_t cross = x(0) * p(1) - x(1) * p(0);
-	Double_t T = TMath::Sqrt(pt * pt - 2 * a * cross + a * a * r2);
-	Double_t phi0 = TMath::ATan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T);	// Phi0
+	Double_t T = sqrt(pt * pt - 2 * a * cross + a * a * r2);
+	Double_t phi0 = atan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T);	// Phi0
 	Double_t D;							// Impact parameter D
 	if (pt < 10.0) D = (T - pt) / a;
 	else D = (-2 * cross + a * r2) / (T + pt);
@@ -55,8 +56,8 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Par(1) = phi0;	// Store phi0
 	Par(2) = C;		// Store C
 	//Longitudinal parameters
-	Double_t B = C * TMath::Sqrt(TMath::Max(r2 - D * D, 0.0) / (1 + 2 * C * D));
-	Double_t st = TMath::ASin(B) / C;
+	Double_t B = C * sqrt(TMath::Max(r2 - D * D, 0.0) / (1 + 2 * C * D));
+	Double_t st = asin(B) / C;
 	Double_t ct = p(2) / pt;
 	Double_t z0 = x(2) - ct * st;
 	//
@@ -83,8 +84,8 @@ TVector3 TrkUtil::ParToX(TVectorD Par)
 	Double_t z0 = Par(3);
 	//
 	TVector3 Xval;
-	Xval(0) = -D * TMath::Sin(phi0);
-	Xval(1) = D * TMath::Cos(phi0);
+	Xval(0) = -D * sin(phi0);
+	Xval(1) = D * cos(phi0);
 	Xval(2) = z0;
 	//
 	return Xval;
@@ -105,8 +106,8 @@ TVector3 TrkUtil::ParToP(TVectorD Par, Double_t Bz)
 	//
 	TVector3 Pval;
 	Double_t pt = Bz * cSpeed() / TMath::Abs(2 * C);
-	Pval(0) = pt * TMath::Cos(phi0);
-	Pval(1) = pt * TMath::Sin(phi0);
+	Pval(0) = pt * cos(phi0);
+	Pval(1) = pt * sin(phi0);
 	Pval(2) = pt * ct;
 	//
 	return Pval;
@@ -127,8 +128,8 @@ TVectorD TrkUtil::ParToACTS(TVectorD Par)
 	pACTS(0) = 1000 * Par(0);		// D from m to mm
 	pACTS(1) = 1000 * Par(3);	// z0 from m to mm
 	pACTS(2) = Par(1);			// Phi0 is unchanged
-	pACTS(3) = TMath::ATan2(1.0, Par(4));		// Theta in [0, pi] range
-	pACTS(4) = Par(2) / (b * TMath::Sqrt(1 + Par(4) * Par(4)));		// q/p in GeV
+	pACTS(3) = atan2(1.0, Par(4));		// Theta in [0, pi] range
+	pACTS(4) = Par(2) / (b * sqrt(1 + Par(4) * Par(4)));		// q/p in GeV
 	pACTS(5) = 0.0;				// Time: currently undefined
 	//
 	return pACTS;
@@ -145,7 +146,7 @@ TMatrixDSym TrkUtil::CovToACTS(TVectorD Par, TMatrixDSym Cov)
 	Double_t C = Par(2);		// half curvature
 	A(0, 0) = 1000.;		// D-D	conversion to mm
 	A(1, 2) = 1.0;		// phi0-phi0
-	A(2, 4) = 1.0 / (TMath::Sqrt(1.0 + ct * ct) * b);	// q/p-C
+	A(2, 4) = 1.0 / (sqrt(1.0 + ct * ct) * b);	// q/p-C
 	A(3, 1) = 1000.;		// z0-z0 conversion to mm
 	A(4, 3) = -1.0 / (1.0 + ct * ct); // theta - cot(theta)
 	A(4, 4) = -C * ct / (b * pow(1.0 + ct * ct, 3.0 / 2.0)); // q/p-cot(theta)
@@ -266,7 +267,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		//	<< ", C= " << C << ", z0= " << z0 << ", ct= " << ct << std::endl;
 		//
 		// Track length per unit phase change 
-		Double_t Scale = TMath::Sqrt(1.0 + ct*ct) / (2.0*TMath::Abs(C));
+		Double_t Scale = sqrt(1.0 + ct*ct) / (2.0*TMath::Abs(C));
 		//
 		// Find intersections with chamber boundaries
 		//
@@ -280,7 +281,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 
 		if (Rtop > fRmin && TMath::Abs(D) < fRmin) // *** don't treat large D tracks for the moment ***
 		{
-			Double_t ph = 2 * TMath::ASin(C*TMath::Sqrt((fRmin*fRmin - D*D) / (1.0 + 2.0*C*D)));
+			Double_t ph = 2 * asin(C*sqrt((fRmin*fRmin - D*D) / (1.0 + 2.0*C*D)));
 			Double_t z = z0 + ct*ph / (2.0*C);
 
 			//std::cout << "Rin intersection: ph = " << ph<<", z= "<<z << std::endl;
@@ -288,7 +289,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 			if (z < fZmax && z > fZmin)	phRin = TMath::Abs(ph);	// Intersection inside chamber volume	
 			//
 			// Include second branch of loopers
-			Double_t ph2 = TMath::TwoPi() - TMath::Abs(ph);
+			Double_t ph2 = 2*TMath::Pi() - TMath::Abs(ph);
 			if (ph < 0)ph2 = -ph2;
 			z = z0 + ct * ph2 / (2.0 * C);
 			if (z < fZmax && z > fZmin)	phRin2 = TMath::Abs(ph2);	// Intersection inside chamber volume
@@ -296,7 +297,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		//  ... with outer cylinder
 		if (Rtop > fRmax && TMath::Abs(D) < fRmax) // *** don't treat large D tracks for the moment ***
 		{
-			Double_t ph = 2 * TMath::ASin(C*TMath::Sqrt((fRmax*fRmax - D*D) / (1.0 + 2.0*C*D)));
+			Double_t ph = 2 * asin(C*sqrt((fRmax*fRmax - D*D) / (1.0 + 2.0*C*D)));
 			Double_t z = z0 + ct*ph / (2.0*C);
 			if (z < fZmax && z > fZmin)	phRhi = TMath::Abs(ph);	// Intersection inside chamber volume	
 		}
@@ -305,7 +306,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		if (Zdir > 0.0)
 		{
 			Double_t ph = 2.0*C*Zdir;
-			Double_t Rint = TMath::Sqrt(D*D + (1.0 + 2.0*C*D)*pow(TMath::Sin(ph / 2), 2) / (C*C));
+			Double_t Rint = sqrt(D*D + (1.0 + 2.0*C*D)*pow(sin(ph / 2), 2) / (C*C));
 			if (Rint < fRmax && Rint > fRmin)	phZmn = TMath::Abs(ph);	// Intersection inside chamber volume	
 		}
 		//  ... with right wall
@@ -313,7 +314,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		if (Zdir > 0.0)
 		{
 			Double_t ph = 2.0*C*Zdir;
-			Double_t Rint = TMath::Sqrt(D*D + (1.0 + 2.0*C*D)*pow(TMath::Sin(ph / 2), 2) / (C*C));
+			Double_t Rint = sqrt(D*D + (1.0 + 2.0*C*D)*pow(sin(ph / 2), 2) / (C*C));
 			if (Rint < fRmax && Rint > fRmin)	phZmx = TMath::Abs(ph);	// Intersection inside chamber volume	
 		}
 		//
@@ -323,7 +324,9 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		Double_t dPhase = 0.0;	// Phase difference between two close intersections
 		Double_t ph_arr[Nint] = { phRin, phRin2, phRhi, phZmn, phZmx };
 		Int_t srtind[Nint];
-		TMath::Sort(Nint, ph_arr, srtind, kFALSE);
+		//TMath::Sort(Nint, ph_arr, srtind, kFALSE);
+		for (Int_t i = 0; i < Nint; i++) { srtind[i] = i; }
+		std::sort(srtind, srtind + Nint, CompareAsc<const Double_t*>(ph_arr));
 		Int_t iPos = -1;		// First element > 0
 		for (Int_t i = 0; i < Nint; i++)
 		{
@@ -461,7 +464,7 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	//	<<x(2)<<", "<< y(2)
 	//	<< "), result= (" <<begam<<", "<< interp<<")" << std::endl;
 	//
-	if (TMath::IsNaN(interp))std::cout << "NaN found: bg= " << begam << ", Opt= " << Opt << std::endl;
+	//if (TMath::IsNaN(interp))std::cout << "NaN found: bg= " << begam << ", Opt= " << Opt << std::endl;
 	if (begam < bg[0]) interp = 0.0;
 	//std::cout << "bg= " << begam << ", Opt= " << Opt <<", interp = "<<interp<< std::endl;
 	return 100*interp;
