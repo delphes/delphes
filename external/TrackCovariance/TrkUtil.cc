@@ -405,6 +405,7 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	//     = 3: pure Argon
 	//
 	//
+	/*
 	std::vector<double> bg{ 0.5, 0.8, 1., 2., 3., 4., 5., 8., 10.,
 	12., 15., 20., 50., 100., 200., 500., 1000. };
 	// He 90 - Isobutane 10
@@ -438,6 +439,40 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 		break;
 	}
 	ncl.push_back(ncl[nPoints - 1]);
+	*/
+	const Int_t Npt = 18;
+	Double_t bg[Npt] = { 0.5, 0.8, 1., 2., 3., 4., 5., 8., 10.,
+	12., 15., 20., 50., 100., 200., 500., 1000., 10000. };
+	//
+	// He 90 - Isobutane 10
+	Double_t ncl_He_Iso[Npt] = { 42.94, 23.6,18.97,12.98,12.2,12.13,
+	12.24,12.73,13.03,13.29,13.63,14.08,15.56,16.43,16.8,16.95,16.98, 16.98 };
+	//
+	// pure He
+	Double_t ncl_He[Npt] = { 11.79,6.5,5.23,3.59,3.38,3.37,3.4,3.54,3.63,
+				3.7,3.8,3.92,4.33,4.61,4.78,4.87,4.89, 4.89 };
+	//
+	// Argon 50 - Ethane 50
+	Double_t ncl_Ar_Eth[Npt] = { 130.04,71.55,57.56,39.44,37.08,36.9,
+	37.25,38.76,39.68,40.49,41.53,42.91,46.8,48.09,48.59,48.85,48.93,48.93 };
+	//
+	// pure Argon
+	Double_t ncl_Ar[Npt] = { 88.69,48.93,39.41,27.09,25.51,25.43,25.69,
+	26.78,27.44,28.02,28.77,29.78,32.67,33.75,34.24,34.57,34.68, 34.68 };
+	//
+	Double_t ncl[Npt];
+    	switch (Opt)
+    	{
+		case 0: std::copy(ncl_He_Iso, ncl_He_Iso + Npt, ncl);	// He-Isobutane
+		break;							
+		case 1: std::copy(ncl_He, ncl_He + Npt, ncl);		// pure He
+		break;
+		case 2: std::copy(ncl_Ar_Eth, ncl_Ar_Eth + Npt, ncl);	// Argon - Ethane
+		break;
+		case 3: std::copy(ncl_Ar, ncl_Ar + Npt, ncl);		// pure Argon
+		break;
+    	}
+	//
 	Int_t ilow = 0;
 	while (begam > bg[ilow])ilow++;
 	ilow--;
