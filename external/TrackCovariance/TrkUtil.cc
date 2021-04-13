@@ -289,7 +289,8 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 			if (z < fZmax && z > fZmin)	phRin = TMath::Abs(ph);	// Intersection inside chamber volume	
 			//
 			// Include second branch of loopers
-			Double_t ph2 = 2*TMath::Pi() - TMath::Abs(ph);
+			Double_t Pi = 3.14159265358979323846;
+			Double_t ph2 = 2*Pi - TMath::Abs(ph);
 			if (ph < 0)ph2 = -ph2;
 			z = z0 + ct * ph2 / (2.0 * C);
 			if (z < fZmax && z > fZmin)	phRin2 = TMath::Abs(ph2);	// Intersection inside chamber volume
@@ -323,19 +324,16 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		const Int_t Nint = 5;
 		Double_t dPhase = 0.0;	// Phase difference between two close intersections
 		Double_t ph_arr[Nint] = { phRin, phRin2, phRhi, phZmn, phZmx };
-		Int_t srtind[Nint];
-		//TMath::Sort(Nint, ph_arr, srtind, kFALSE);
-		for (Int_t i = 0; i < Nint; i++) { srtind[i] = i; }
-		std::sort(srtind, srtind + Nint, CompareAsc<const Double_t*>(ph_arr));
+		std::sort(ph_arr, ph_arr + Nint);
 		Int_t iPos = -1;		// First element > 0
 		for (Int_t i = 0; i < Nint; i++)
 		{
-			if (ph_arr[srtind[i]] <= 0.0) iPos = i;
+			if (ph_arr[i] <= 0.0) iPos = i;
 		}
 
 		if (iPos < Nint - 2)
 		{
-			dPhase = ph_arr[srtind[iPos + 2]] - ph_arr[srtind[iPos + 1]];
+			dPhase = ph_arr[iPos + 2] - ph_arr[iPos + 1];
 			tLength = dPhase*Scale;
 		}
 	}
