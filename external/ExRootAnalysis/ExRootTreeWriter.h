@@ -27,6 +27,9 @@ public:
   void SetTreeFile(TFile *file) { fFile = file; }
   void SetTreeName(const char *name) { fTreeName = name; }
 
+  TTree* GetTree() { return fTree; }
+  void SetTree(TTree* t) { fTree = t; }
+
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
   void AddInfo(const char *name, Double_t value);
 
