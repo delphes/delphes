@@ -5,6 +5,7 @@
 #include <TVector3.h>
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
+#include <TRandom.h>
 //
 //
 // Class test
@@ -14,6 +15,12 @@ class TrkUtil {
 	//
 protected:
 	Double_t fBz;							// Solenoid magnetic field
+	//
+	Int_t fGasSel;							// Gas selection: 0: He-Iso, 1: He, 2:Ar-Eth, 3: Ar
+	Double_t fRmin;							// Lower		DCH radius
+	Double_t fRmax;							// Higher	DCH radius
+	Double_t fZmin;							// Lower		DCH z
+	Double_t fZmax;							// Higher	DCH z
 	//
 	// Service routines
 	//
@@ -30,6 +37,7 @@ protected:
 	//
 	TVectorD ParToILC(TVectorD Par);		// Parameter conversion
 	TMatrixDSym CovToILC(TMatrixDSym Cov);	// Covariance conversion
+	//
 
 public:
 	//
@@ -59,7 +67,19 @@ public:
 	//
 	static TVectorD ParToMm(TVectorD Par);			// Parameter conversion
 	static TMatrixDSym CovToMm(TMatrixDSym Cov);	// Covariance conversion
-
+	//
+	// Cluster counting in gas
+	//
+	// Define gas volume (units = meters) 
+	void SetDchBoundaries(Double_t Rmin, Double_t Rmax, Double_t Zmin, Double_t Zmax);
+	// Gas mixture selection
+	void SetGasMix(Int_t Opt);
+	// Get number of ionization clusters
+	Bool_t IonClusters(Double_t &Ncl, Double_t mass, TVectorD Par);
+	Double_t Nclusters(Double_t bgam);	// mean clusters/meter vs beta*gamma
+	static Double_t Nclusters(Double_t bgam, Int_t Opt);	// mean clusters/meter vs beta*gamma
+	Double_t funcNcl(Double_t *xp, Double_t *par);
+	Double_t TrkLen(TVectorD Par);					// Track length inside chamber
 };
 
 #endif
