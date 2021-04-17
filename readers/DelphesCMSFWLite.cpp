@@ -216,8 +216,10 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
     {
       // Prevent duplicated particle.
       if(!isMiniAOD) stableParticleOutputArray->Add(candidate);
+      if (pdgCode == 11 || pdgCode == 13) partonOutputArray->Add(candidate);
     }
-    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    //else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
     {
       partonOutputArray->Add(candidate);
     }

@@ -82,9 +82,9 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
   {
     daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
     pdgCode = TMath::Abs(daughter1->PID);
-    if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
-      return -1;
-    else if(pdgCode == 24)
+    //if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
+    //  return -1;
+    if(pdgCode == 24)
     {
       if(daughter1->D1 < 0) return -1;
       for(j = daughter1->D1; j <= daughter1->D2; ++j)
@@ -95,7 +95,6 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
       }
     }
   }
-
   return 0;
 }
 
@@ -189,7 +188,7 @@ void TauTagging::Finish()
 
 void TauTagging::Process()
 {
-  Candidate *jet, *tau, *daughter;
+  Candidate *jet, *tau, *daughter, *part;
   TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e, eff;
   TObjArray *tauArray;
@@ -203,8 +202,10 @@ void TauTagging::Process()
 
   // loop over all input jets
   fItJetInputArray->Reset();
+
   while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
   {
+
     const TLorentzVector &jetMomentum = jet->Momentum;
     pdgCode = 0;
     charge = gRandom->Uniform() > 0.5 ? 1 : -1;
@@ -242,6 +243,33 @@ void TauTagging::Process()
         }
       }
     }
+    
+    // fake electrons and muons
+    
+    if (pdgCode == 0)
+    {
+     
+      Double_t drMin = fDeltaR;   
+      fItPartonInputArray->Reset();
+      while((part = static_cast<Candidate *>(fItPartonInputArray->Next())))
+      {
+        if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13) 
+        {
+            tauMomentum = part->Momentum;
+            if (tauMomentum.Pt() < fClassifier->fPTMin) continue;
+            if (TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
+
+            Double_t dr = jetMomentum.DeltaR(tauMomentum);
+            if( dr < drMin)
+            {
+               drMin = dr;
+               pdgCode = TMath::Abs(part->PID);
+               charge = part->Charge;
+            }  
+        }
+      }
+    }
+
     // find an efficency formula
     itEfficiencyMap = fEfficiencyMap.find(pdgCode);
     if(itEfficiencyMap == fEfficiencyMap.end())
