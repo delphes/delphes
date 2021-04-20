@@ -77,6 +77,9 @@ void MomentumSmearing::Init()
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
+  // switch to compute momentum smearing based on momentum vector eta, phi
+  fUseMomentumVector = GetBool("UseMomentumVector", false);
+
   // create output array
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -103,6 +106,12 @@ void MomentumSmearing::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
+
+    if (fUseMomentumVector){
+      eta = candidateMomentum.Eta();
+      phi = candidateMomentum.Phi();
+    }
+
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
     m = candidateMomentum.M();
