@@ -408,6 +408,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/MomentumSmearing.h \
 	modules/TrackSmearing.h \
 	modules/TrackCovariance.h \
+	modules/ClusterCounting.h \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
 	modules/SimpleCalorimeter.h \
@@ -703,6 +704,11 @@ tmp/modules/Cloner.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/ClusterCounting.$(ObjSuf): \
+	modules/ClusterCounting.$(SrcSuf) \
+	modules/ClusterCounting.h \
+	classes/DelphesClasses.h \
+	external/TrackCovariance/TrkUtil.h
 tmp/modules/ConstituentFilter.$(ObjSuf): \
 	modules/ConstituentFilter.$(SrcSuf) \
 	modules/ConstituentFilter.h \
@@ -1175,6 +1181,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
+	tmp/modules/ClusterCounting.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
 	tmp/modules/DecayFilter.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
@@ -1933,15 +1940,15 @@ modules/ExampleModule.h: \
 	classes/DelphesModule.h
 	@touch $@
 
+modules/Merger.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
 
 modules/EnergyScale.h: \
-	classes/DelphesModule.h
-	@touch $@
-
-modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
 
@@ -2247,6 +2254,10 @@ modules/TaggingParticlesSkimmer.h: \
 
 external/fastjet/internal/BasicRandom.hh: \
 	external/fastjet/internal/base.hh
+	@touch $@
+
+modules/ClusterCounting.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 modules/SimpleCalorimeter.h: \
