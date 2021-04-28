@@ -23,6 +23,7 @@ set ExecutionPath {
 
   TrackMergerPre
   TrackSmearing
+  ClusterCounting
 
   TrackMerger
   Calorimeter
@@ -160,17 +161,15 @@ module Merger TrackMergerPre {
 ########################################
 
 module TrackCovariance TrackSmearing {
-    set InputArray TrackMergerPre/tracks
-    set OutputArray tracks
-
 
     set InputArray TrackMergerPre/tracks
     set OutputArray tracks
-
-    set Bz 2.0
 
     ## minimum number of hits to accept a track
     set NMinHits 6
+
+    ## magnetic field
+    set Bz $B
 
     ## uses https://raw.githubusercontent.com/selvaggi/FastTrackCovariance/master/GeoIDEA_BASE.txt
     set DetectorGeometry {
@@ -342,8 +341,35 @@ module TrackCovariance TrackSmearing {
       2 FPRESH 0.39 2.43 2.55 0.02 1 2 0 1.5708 7e-005 0.01 1
     }
 
-    set Bz $B
 }
+
+###################
+# Cluster Counting
+###################
+
+module ClusterCounting ClusterCounting {
+
+  add InputArray TrackSmearing/tracks
+  set OutputArray tracks
+
+  set Bz $B
+
+  set Rmin 0.35
+  set Rmax 2.0
+  set Zmin -2.0
+  set Zmax 2.0
+
+  # gas mix option: 0
+  # 0:  Helium 90% - Isobutane 10%
+  # 1:  Helium 100%
+  # 2:  Argon 50% - Ethane 50%
+  # 3:  Argon 100%
+
+  set GasOption 0
+
+}
+
+
 
 ##############
 # Track merger
@@ -351,7 +377,7 @@ module TrackCovariance TrackSmearing {
 
 module Merger TrackMerger {
 # add InputArray InputArray
-  add InputArray TrackSmearing/tracks
+  add InputArray ClusterCounting/tracks
   set OutputArray tracks
 }
 

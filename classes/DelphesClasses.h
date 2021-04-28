@@ -460,6 +460,7 @@ public:
   Float_t L; // track path length
   Float_t D0; // track transverse impact parameter
   Float_t DZ; // track longitudinal impact parameter
+  Float_t Nclusters; // Number of ionization clusters
 
   Float_t ErrorP; // track momentum error
   Float_t ErrorPT; // track transverse momentum error
@@ -564,6 +565,7 @@ public:
   Float_t L; // track path length
   Float_t D0; // track transverse impact parameter
   Float_t DZ; // track longitudinal impact parameter
+  Float_t Nclusters; // Number of ionization clusters
 
   Float_t ErrorP; // track momentum error
   Float_t ErrorPT; // track transverse momentum error
@@ -692,6 +694,8 @@ public:
   Float_t ErrorCtgTheta;
   Float_t Phi;
   Float_t ErrorPhi;
+
+  Float_t Nclusters; // Number of ionization clusters
 
   Float_t Xd;
   Float_t Yd;

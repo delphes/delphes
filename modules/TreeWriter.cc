@@ -354,6 +354,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->D0 = candidate->D0;
     entry->DZ = candidate->DZ;
+    entry->Nclusters = candidate->Nclusters;
 
     entry->ErrorP = candidate->ErrorP;
     entry->ErrorPT = candidate->ErrorPT;
@@ -506,6 +507,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
 
     entry->D0 = candidate->D0;
     entry->DZ = candidate->DZ;
+    entry->Nclusters = candidate->Nclusters;
 
     entry->ErrorP = candidate->ErrorP;
     entry->ErrorPT = candidate->ErrorPT;
