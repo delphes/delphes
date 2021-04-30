@@ -1,6 +1,7 @@
 #include "TrkUtil.h"
 #include <iostream>
 #include <algorithm>
+#include <TSpline.h>
 
 // Constructor
 TrkUtil::TrkUtil(Double_t Bz)
@@ -95,7 +96,7 @@ TVector3 TrkUtil::ParToP(TVectorD Par)
 {
 	if (fBz == 0.0)std::cout << "TrkUtil::ParToP: Warning Bz not set" << std::endl;
 	//
-	return ParToP(Par,fBz);
+	return ParToP(Par, fBz);
 }
 //
 TVector3 TrkUtil::ParToP(TVectorD Par, Double_t Bz)
@@ -232,13 +233,6 @@ TMatrixDSym TrkUtil::CovToMm(TMatrixDSym Cov)		// Covariance conversion
 	return Cmm;
 }
 //
-
-//
-void TrkUtil::SetBfield(Double_t Bz)
-{
-	fBz = Bz;
-}
-
 // Setup chamber volume
 void TrkUtil::SetDchBoundaries(Double_t Rmin, Double_t Rmax, Double_t Zmin, Double_t Zmax)
 {
@@ -273,31 +267,31 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		//std::cout << "TrkUtil:: parameters: D= " << D << ", phi0= " << phi0
 		//	<< ", C= " << C << ", z0= " << z0 << ", ct= " << ct << std::endl;
 		//
-		// Track length per unit phase change
-		Double_t Scale = sqrt(1.0 + ct*ct) / (2.0*TMath::Abs(C));
+		// Track length per unit phase change 
+		Double_t Scale = sqrt(1.0 + ct * ct) / (2.0 * TMath::Abs(C));
 		//
 		// Find intersections with chamber boundaries
 		//
-		Double_t phRin = 0.0;			// phase of inner cylinder
-		Double_t phRin2= 0.0;			// phase of inner cylinder intersection (2nd branch)
+		Double_t phRin = 0.0;			// phase of inner cylinder 
+		Double_t phRin2 = 0.0;			// phase of inner cylinder intersection (2nd branch)
 		Double_t phRhi = 0.0;			// phase of outer cylinder intersection
 		Double_t phZmn = 0.0;			// phase of left wall intersection
 		Double_t phZmx = 0.0;			// phase of right wall intersection
 		//  ... with inner cylinder
-		Double_t Rtop = TMath::Abs((1.0 + C*D) / C);
+		Double_t Rtop = TMath::Abs((1.0 + C * D) / C);
 
 		if (Rtop > fRmin && TMath::Abs(D) < fRmin) // *** don't treat large D tracks for the moment ***
 		{
-			Double_t ph = 2 * asin(C*sqrt((fRmin*fRmin - D*D) / (1.0 + 2.0*C*D)));
-			Double_t z = z0 + ct*ph / (2.0*C);
+			Double_t ph = 2 * asin(C * sqrt((fRmin * fRmin - D * D) / (1.0 + 2.0 * C * D)));
+			Double_t z = z0 + ct * ph / (2.0 * C);
 
 			//std::cout << "Rin intersection: ph = " << ph<<", z= "<<z << std::endl;
 
-			if (z < fZmax && z > fZmin)	phRin = TMath::Abs(ph);	// Intersection inside chamber volume
+			if (z < fZmax && z > fZmin)	phRin = TMath::Abs(ph);	// Intersection inside chamber volume	
 			//
 			// Include second branch of loopers
 			Double_t Pi = 3.14159265358979323846;
-			Double_t ph2 = 2*Pi - TMath::Abs(ph);
+			Double_t ph2 = 2 * Pi - TMath::Abs(ph);
 			if (ph < 0)ph2 = -ph2;
 			z = z0 + ct * ph2 / (2.0 * C);
 			if (z < fZmax && z > fZmin)	phRin2 = TMath::Abs(ph2);	// Intersection inside chamber volume
@@ -305,25 +299,25 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		//  ... with outer cylinder
 		if (Rtop > fRmax && TMath::Abs(D) < fRmax) // *** don't treat large D tracks for the moment ***
 		{
-			Double_t ph = 2 * asin(C*sqrt((fRmax*fRmax - D*D) / (1.0 + 2.0*C*D)));
-			Double_t z = z0 + ct*ph / (2.0*C);
-			if (z < fZmax && z > fZmin)	phRhi = TMath::Abs(ph);	// Intersection inside chamber volume
+			Double_t ph = 2 * asin(C * sqrt((fRmax * fRmax - D * D) / (1.0 + 2.0 * C * D)));
+			Double_t z = z0 + ct * ph / (2.0 * C);
+			if (z < fZmax && z > fZmin)	phRhi = TMath::Abs(ph);	// Intersection inside chamber volume	
 		}
 		//  ... with left wall
 		Double_t Zdir = (fZmin - z0) / ct;
 		if (Zdir > 0.0)
 		{
-			Double_t ph = 2.0*C*Zdir;
-			Double_t Rint = sqrt(D*D + (1.0 + 2.0*C*D)*pow(sin(ph / 2), 2) / (C*C));
-			if (Rint < fRmax && Rint > fRmin)	phZmn = TMath::Abs(ph);	// Intersection inside chamber volume
+			Double_t ph = 2.0 * C * Zdir;
+			Double_t Rint = sqrt(D * D + (1.0 + 2.0 * C * D) * pow(sin(ph / 2), 2) / (C * C));
+			if (Rint < fRmax && Rint > fRmin)	phZmn = TMath::Abs(ph);	// Intersection inside chamber volume	
 		}
 		//  ... with right wall
 		Zdir = (fZmax - z0) / ct;
 		if (Zdir > 0.0)
 		{
-			Double_t ph = 2.0*C*Zdir;
-			Double_t Rint = sqrt(D*D + (1.0 + 2.0*C*D)*pow(sin(ph / 2), 2) / (C*C));
-			if (Rint < fRmax && Rint > fRmin)	phZmx = TMath::Abs(ph);	// Intersection inside chamber volume
+			Double_t ph = 2.0 * C * Zdir;
+			Double_t Rint = sqrt(D * D + (1.0 + 2.0 * C * D) * pow(sin(ph / 2), 2) / (C * C));
+			if (Rint < fRmax && Rint > fRmin)	phZmx = TMath::Abs(ph);	// Intersection inside chamber volume	
 		}
 		//
 		// Order phases and keep the lowest two non-zero ones
@@ -341,14 +335,14 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		if (iPos < Nint - 2)
 		{
 			dPhase = ph_arr[iPos + 2] - ph_arr[iPos + 1];
-			tLength = dPhase*Scale;
+			tLength = dPhase * Scale;
 		}
 	}
 	return tLength;
 }
 //
 // Return number of ionization clusters
-Bool_t TrkUtil::IonClusters(Double_t &Ncl, Double_t mass, TVectorD Par)
+Bool_t TrkUtil::IonClusters(Double_t& Ncl, Double_t mass, TVectorD Par)
 {
 	//
 	// Units are meters/Tesla/GeV
@@ -385,13 +379,13 @@ Bool_t TrkUtil::IonClusters(Double_t &Ncl, Double_t mass, TVectorD Par)
 		{
 			TVector3 p = ParToP(Par);
 			bg = p.Mag() / mass;
-			muClu = Nclusters(bg)*tLen;				// Avg. number of clusters
+			muClu = Nclusters(bg) * tLen;				// Avg. number of clusters
 
 			Ncl = gRandom->PoissonD(muClu);			// Actual number of clusters
 		}
 
 	}
-//
+	//
 	return Signal;
 }
 //
@@ -412,41 +406,6 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	//     = 3: pure Argon
 	//
 	//
-	/*
-	std::vector<double> bg{ 0.5, 0.8, 1., 2., 3., 4., 5., 8., 10.,
-	12., 15., 20., 50., 100., 200., 500., 1000. };
-	// He 90 - Isobutane 10
-	std::vector<double> ncl_He_Iso{ 42.94, 23.6,18.97,12.98,12.2,12.13,
-	12.24,12.73,13.03,13.29,13.63,14.08,15.56,16.43,16.8,16.95,16.98 };
-	//
-	// pure He
-	std::vector<double> ncl_He{ 11.79,6.5,5.23,3.59,3.38,3.37,3.4,3.54,3.63,
-	3.7,3.8,3.92,4.33,4.61,4.78,4.87,4.89 };
-	//
-	// Argon 50 - Ethane 50
-	std::vector<double> ncl_Ar_Eth{ 130.04,71.55,57.56,39.44,37.08,36.9,
-	37.25,38.76,39.68,40.49,41.53,42.91,46.8,48.09,48.59,48.85,48.93 };
-	//
-	// pure Argon
-	std::vector<double> ncl_Ar{ 88.69,48.93,39.41,27.09,25.51,25.43,25.69,
-	26.78,27.44,28.02,28.77,29.78,32.67,33.75,34.24,34.57,34.68 };
-	//
-	Int_t nPoints = (Int_t)bg.size();
-	bg.push_back(10000.);
-	std::vector<double> ncl;
-	switch (Opt)
-	{
-	case 0: ncl = ncl_He_Iso;			// He-Isobutane
-		break;
-	case 1: ncl = ncl_He;				// pure He
-		break;
-	case 2: ncl = ncl_Ar_Eth;			// Argon - Ethane
-		break;
-	case 3: ncl = ncl_Ar;				// pure Argon
-		break;
-	}
-	ncl.push_back(ncl[nPoints - 1]);
-	*/
 	const Int_t Npt = 18;
 	Double_t bg[Npt] = { 0.5, 0.8, 1., 2., 3., 4., 5., 8., 10.,
 	12., 15., 20., 50., 100., 200., 500., 1000., 10000. };
@@ -468,49 +427,27 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	26.78,27.44,28.02,28.77,29.78,32.67,33.75,34.24,34.57,34.68, 34.68 };
 	//
 	Double_t ncl[Npt];
-    	switch (Opt)
-    	{
-		case 0: std::copy(ncl_He_Iso, ncl_He_Iso + Npt, ncl);	// He-Isobutane
+	switch (Opt)
+	{
+	case 0: std::copy(ncl_He_Iso, ncl_He_Iso + Npt, ncl);	// He-Isobutane
 		break;
-		case 1: std::copy(ncl_He, ncl_He + Npt, ncl);		// pure He
+	case 1: std::copy(ncl_He, ncl_He + Npt, ncl);		// pure He
 		break;
-		case 2: std::copy(ncl_Ar_Eth, ncl_Ar_Eth + Npt, ncl);	// Argon - Ethane
+	case 2: std::copy(ncl_Ar_Eth, ncl_Ar_Eth + Npt, ncl);	// Argon - Ethane
 		break;
-		case 3: std::copy(ncl_Ar, ncl_Ar + Npt, ncl);		// pure Argon
+	case 3: std::copy(ncl_Ar, ncl_Ar + Npt, ncl);		// pure Argon
 		break;
-    	}
+	}
 	//
-	Int_t ilow = 0;
-	while (begam > bg[ilow])ilow++;
-	ilow--;
-	//std::cout << "ilow= " << ilow << ", low = " << bg[ilow] << ", val = " << begam
-	//	<< ", high = " << bg[ilow + 1] << std::endl;
-	//
-	Int_t ind[3] = { ilow, ilow + 1, ilow + 2 };
-	TVectorD y(3);
-	for (Int_t i = 0; i < 3; i++)y(i) = ncl[ind[i]];
-	TVectorD x(3);
-	for (Int_t i = 0; i < 3; i++)x(i) = bg[ind[i]];
-	TMatrixD Xval(3, 3);
-	for (Int_t i = 0; i < 3; i++)Xval(i, 0) = 1.0;
-	for (Int_t i = 0; i < 3; i++)Xval(i, 1) = x(i);
-	for (Int_t i = 0; i < 3; i++)Xval(i, 2) = x(i) * x(i);
-	//std::cout << "Xval:" << std::endl; Xval.Print();
-	Xval.Invert();
-	TVectorD coeff = Xval * y;
-	Double_t interp = coeff[0] + coeff[1] * begam + coeff[2] * begam * begam;
-	//std::cout << "val1= (" <<x(0)<<", "<< y(0) << "), val2= ("
-	//	<<x(1)<<", "<< y(1) << "), val3= ("
-	//	<<x(2)<<", "<< y(2)
-	//	<< "), result= (" <<begam<<", "<< interp<<")" << std::endl;
-	//
-	//if (TMath::IsNaN(interp))std::cout << "NaN found: bg= " << begam << ", Opt= " << Opt << std::endl;
-	if (begam < bg[0]) interp = 0.0;
-	//std::cout << "bg= " << begam << ", Opt= " << Opt <<", interp = "<<interp<< std::endl;
-	return 100*interp;
+	Double_t interp = 0.0;
+	TSpline3* sp3 = new TSpline3("sp3", bg, ncl, Npt);
+	if (begam > bg[0] && begam < bg[Npt - 1]) interp = sp3->Eval(begam);
+	if(begam < bg[0]) interp = bg[0];
+	if(begam > bg[Npt-1]) interp = bg[Npt-1];
+	return 100 * interp;
 }
 //
-Double_t TrkUtil::funcNcl(Double_t *xp, Double_t *par){
+Double_t TrkUtil::funcNcl(Double_t* xp, Double_t* par) {
 	Double_t bg = xp[0];
 	return Nclusters(bg);
 }
