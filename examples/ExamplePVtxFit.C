@@ -15,6 +15,7 @@ R__LOAD_LIBRARY(libDelphes)
 #endif
 
 
+
 //------------------------------------------------------------------------------
 
 void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
@@ -44,10 +45,14 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 	{
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
+		// 
 		Int_t Ntr = 0;	// # of tracks from primary vertex
 		Int_t NtrG = branchTrack->GetEntries();
 		TVectorD** pr = new TVectorD * [NtrG];
 		TMatrixDSym** cv = new TMatrixDSym * [NtrG];
+		//
+		// True vertex
+		Double_t xpv, ypv, zpv;
 		// If event contains at least 1 track
 		//
 		if (branchTrack->GetEntries() > 0)
@@ -59,21 +64,48 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 				//
 				// Get associated generated particle
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
+				TVector3 xg(1.e-3*gp->X,1.e-3*gp->Y,1.e-3*gp->Z);
+				TVector3 pg(gp->Px,gp->Py,gp->Pz);
+				Double_t Q = (Double_t)gp->Charge;
+				Double_t Bz = 2.0;
+				TVectorD genParM =TrkUtil:: XPtoPar(xg, pg, Q, Bz);
+				TVectorD genPar = TrkUtil::ParToMm(genParM);
 				//
 				// Position of origin in mm
 				Double_t x = gp->X;
 				Double_t y = gp->Y;
 				Double_t z = gp->Z;
+				Bool_t prim = kTRUE;	// Is primary?
+				Int_t mp = gp->M1;	// Mother
+				while(mp>0){
+					GenParticle* gm = 
+					(GenParticle*)branchGenPart->At(mp);
+					Double_t xm = gm->X;
+                                	Double_t ym = gm->Y;
+                                	Double_t zm = gm->Z;
+					if(x!=xm || y!=ym || z!=zm){
+						prim = kFALSE;
+						break;
+					}else mp = gm->M1;
+				}
 				//
 				// group tracks originating from the primary vertex
-				if (x == 0.0 && y == 0.0)
+				if (prim)
 				{
+					//std::cout<<"Event: "<<entry<<", track: "<<it;
+					//std::cout<<", x = "<<x<<", y = "<<y<<", z = "<<z<<std::endl; 
+					xpv = x;
+					ypv = y;
+					zpv = z; 
 					//
 					// Reconstructed track parameters
 					Double_t obsD0 = trk->D0;
 					Double_t obsPhi = trk->Phi;
 					Double_t obsC = trk->C;
 					Double_t obsZ0 = trk->DZ;
+					//std::cout<<"Z0 track = "<< obsZ0
+					//<<", gen Z0 = "<<genPar(3)
+					//<<", gen cot = "<<genPar(4)<<std::endl;
 					Double_t obsCtg = trk->CtgTheta;
 					Double_t oPar[5] = { obsD0, obsPhi, obsC, obsZ0, obsCtg };
 					TVectorD obsPar(5, oPar);	// Fill observed parameters
@@ -95,9 +127,13 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 			TMatrixDSym covX = Vtx->GetVtxCov();
 			Double_t Chi2 = Vtx->GetVtxChi2();
 			Double_t Ndof = 2 * (Double_t)Ntr - 3;
-			Double_t PullX = xvtx(0) / TMath::Sqrt(covX(0, 0));
-			Double_t PullY = xvtx(1) / TMath::Sqrt(covX(1, 1));
-			Double_t PullZ = xvtx(2) / TMath::Sqrt(covX(2, 2));
+			Double_t PullX = (xvtx(0)-xpv) / TMath::Sqrt(covX(0, 0));
+			Double_t PullY = (xvtx(1)-ypv) / TMath::Sqrt(covX(1, 1));
+			Double_t PullZ = (xvtx(2)-zpv) / TMath::Sqrt(covX(2, 2));
+			//std::cout<<"**** True  vertex (x, y, z) "<<xpv<<", "
+			//<<ypv<<", "<<zpv<<std::endl;
+			//std::cout<<"**** Found vertex (x, y, z) "<<xvtx(0)<<", "
+                        //<<xvtx(1)<<", "<<xvtx(2)<<std::endl;
 			//
 			// Fill histograms
 			hXpull->Fill(PullX);

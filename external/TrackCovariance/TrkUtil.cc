@@ -45,7 +45,7 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Double_t pt = p.Pt();
 	Double_t C = a / (2 * pt);			// Half curvature
 	//std::cout << "ObsTrk::XPtoPar: fB = " << fB << ", a = " << a << ", pt = " << pt << ", C = " << C << std::endl;
-	Double_t r2 = x.Perp2();
+	Double_t r2 = x(0) * x(0) + x(1) * x(1);
 	Double_t cross = x(0) * p(1) - x(1) * p(0);
 	Double_t T = sqrt(pt * pt - 2 * a * cross + a * a * r2);
 	Double_t phi0 = atan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T);	// Phi0
@@ -60,7 +60,10 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Double_t B = C * sqrt(TMath::Max(r2 - D * D, 0.0) / (1 + 2 * C * D));
 	Double_t st = asin(B) / C;
 	Double_t ct = p(2) / pt;
-	Double_t z0 = x(2) - ct * st;
+	Double_t z0;
+	Double_t dot = x(0) * p(0) + x(1) * p(1);
+	if (dot > 0.0) z0 = x(2) - ct * st;
+	else z0 = x(2) + ct * st;
 	//
 	Par(3) = z0;		// Store z0
 	Par(4) = ct;		// Store cot(theta)
@@ -442,8 +445,6 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	Double_t interp = 0.0;
 	TSpline3* sp3 = new TSpline3("sp3", bg, ncl, Npt);
 	if (begam > bg[0] && begam < bg[Npt - 1]) interp = sp3->Eval(begam);
-	if(begam < bg[0]) interp = bg[0];
-	if(begam > bg[Npt-1]) interp = bg[Npt-1];
 	return 100 * interp;
 }
 //
