@@ -21,9 +21,9 @@
 
 /** \class TimeSmearing
  *
- *  Performs transverse time smearing.
+ *  Performs time smearing.
  *
- *  \author Michele Selvaggi - UCL, Louvain-la-Neuve
+ *  \author Michele Selvaggi - CERN
  *
  */
 
@@ -31,6 +31,7 @@
 
 class TIterator;
 class TObjArray;
+class DelphesFormula;
 
 class TimeSmearing: public DelphesModule
 {
@@ -41,13 +42,16 @@ public:
   void Init();
   void Process();
   void Finish();
+  void ComputeVertexMomenta();
 
 private:
-  Double_t fTimeResolution;
 
-  TIterator *fItInputArray; //!
+  DelphesFormula *fResolutionFormula;
+  Int_t fVertexTimeMode;
 
-  const TObjArray *fInputArray; //!
+  TIterator *fItTrackInputArray; //!
+
+  const TObjArray *fTrackInputArray; //!
 
   TObjArray *fOutputArray; //!
 

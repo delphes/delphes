@@ -18,9 +18,9 @@
 
 /** \class TimeSmearing
  *
- *  Performs transverse momentum resolution smearing.
+ *  Performs time smearing.
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi - CERN
  *
  */
 
@@ -48,18 +48,19 @@
 #include <stdexcept>
 
 using namespace std;
-
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fItInputArray(0)
+  fItTrackInputArray(0), fResolutionFormula(0)
 {
+	fResolutionFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TimeSmearing::~TimeSmearing()
 {
+	if(fResolutionFormula) delete fResolutionFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -68,22 +69,23 @@ void TimeSmearing::Init()
 {
   // read resolution formula
 
-  fTimeResolution = GetDouble("TimeResolution", 1.0E-10);
-  // import input array
+  // read time resolution formula in seconds
+  fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
 
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
+  // import track input array
+  fTrackInputArray = ImportArray(GetString("TrackInputArray", "MuonMomentumSmearing/muons"));
+  fItTrackInputArray = fTrackInputArray->MakeIterator();
+
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "muons"));
+  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  if(fItTrackInputArray) delete fItTrackInputArray;
 }
 
 //------------------------------------------------------------------------------
@@ -91,34 +93,34 @@ void TimeSmearing::Finish()
 void TimeSmearing::Process()
 {
   Candidate *candidate, *mother;
-  Double_t ti, tf_smeared, tf;
+  Double_t tf_smeared, tf;
+  Double_t eta, energy;
+  Double_t timeResolution;
+
   const Double_t c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
-  {
-    const TLorentzVector &candidateInitialPosition = candidate->InitialPosition;
-    const TLorentzVector &candidateFinalPosition = candidate->Position;
+  fItTrackInputArray->Reset();
+  while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  {    // converting to meters
 
-    ti = candidateInitialPosition.T() * 1.0E-3 / c_light;
+    const TLorentzVector &candidateFinalPosition = candidate->Position;
+    const TLorentzVector &candidateMomentum = candidate->Momentum;
+
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
+    eta = candidateMomentum.Eta();
+    energy = candidateMomentum.E();
 
     // apply smearing formula
-    tf_smeared = gRandom->Gaus(tf, fTimeResolution);
-    ti = ti + tf_smeared - tf;
-    tf = tf_smeared;
+    timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
+    tf_smeared = gRandom->Gaus(tf, timeResolution);
 
     mother = candidate;
     candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
-    candidate->Position.SetT(tf * 1.0E3 * c_light);
 
-    candidate->ErrorT = fTimeResolution * 1.0E3 * c_light;
+    candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
+    candidate->ErrorT = timeResolution * 1.0E3 * c_light;
 
     candidate->AddCandidate(mother);
-
     fOutputArray->Add(candidate);
   }
 }
-
-//------------------------------------------------------------------------------
