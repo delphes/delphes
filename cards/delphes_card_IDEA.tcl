@@ -15,6 +15,8 @@ set B 2.0
 #######################################
 
 set ExecutionPath {
+
+  TruthVertexFinder
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -24,6 +26,8 @@ set ExecutionPath {
   TrackMergerPre
   TrackSmearing
   ClusterCounting
+  TimeSmearing
+  TimeOfFlight
 
   TrackMerger
   Calorimeter
@@ -60,6 +64,19 @@ set ExecutionPath {
 
   ScalarHT
   TreeWriter
+}
+
+#################################
+# Truth Vertex Finder
+#################################
+
+module TruthVertexFinder TruthVertexFinder {
+
+  ## below this distance two vertices are assumed to be the same
+  set Resolution 1E-06
+
+  set InputArray Delphes/stableParticles
+  set VertexOutputArray vertices
 }
 
 #################################
@@ -100,10 +117,6 @@ module Efficiency ChargedHadronTrackingEfficiency {
         (energy < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
     }
 }
-
-#	(pt <= 0.1)                                     * (0.00) +
-#	(abs(eta) <= 3.0)               * (pt > 0.1)    * (1.00) +
-#	(abs(eta) > 3)                                  * (0.00)
 
 
 
@@ -354,12 +367,13 @@ module ClusterCounting ClusterCounting {
 
   set Bz $B
 
-  set Rmin 0.35
+  ## check that these are consistent with DCHCANI/DCHNANO parameters in TrackCovariance module
+  set Rmin 0.345
   set Rmax 2.0
   set Zmin -2.0
   set Zmax 2.0
 
-  # gas mix option: 0
+  # gas mix option:
   # 0:  Helium 90% - Isobutane 10%
   # 1:  Helium 100%
   # 2:  Argon 50% - Ethane 50%
@@ -370,6 +384,37 @@ module ClusterCounting ClusterCounting {
 }
 
 
+########################################
+#   Time Smearing MIP
+########################################
+
+module TimeSmearing TimeSmearing {
+  set TrackInputArray ClusterCounting/tracks
+  set OutputArray tracks
+
+  # assume constant 30 ps resolution for now
+  set TimeResolution {
+                       (abs(eta) > 0.0 && abs(eta) <= 3.0)* 30E-12
+                     }
+}
+
+########################################
+#   Time Of Flight Measurement
+########################################
+
+module TimeOfFlight TimeOfFlight {
+  set TrackInputArray TimeSmearing/tracks
+  set VertexInputArray TruthVertexFinder/vertices
+
+  set OutputArray tracks
+
+  # 0: assume vertex time tV from MC Truth (ideal case)
+  # 1: assume vertex time tV=0
+  # 2: calculate vertex time as vertex TOF, assuming tPV=0
+  set VertexTimeMode 2
+
+}
+
 
 ##############
 # Track merger
@@ -377,7 +422,7 @@ module ClusterCounting ClusterCounting {
 
 module Merger TrackMerger {
 # add InputArray InputArray
-  add InputArray ClusterCounting/tracks
+  add InputArray TimeOfFlight/tracks
   set OutputArray tracks
 }
 
