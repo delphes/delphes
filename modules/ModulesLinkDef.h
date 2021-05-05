@@ -39,6 +39,7 @@
 #include "modules/ClusterCounting.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
+#include "modules/TimeOfFlight.h"
 #include "modules/SimpleCalorimeter.h"
 #include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
@@ -98,6 +99,7 @@
 #pragma link C++ class ClusterCounting+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
+#pragma link C++ class TimeOfFlight+;
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
