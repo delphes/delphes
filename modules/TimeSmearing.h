@@ -42,7 +42,6 @@ public:
   void Init();
   void Process();
   void Finish();
-  void ComputeVertexMomenta();
 
 private:
 
