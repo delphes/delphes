@@ -24,6 +24,7 @@ protected:
 	//
 	// Service routines
 	//
+	void SetB(Double_t Bz) { fBz = Bz; }
 	TVectorD XPtoPar(TVector3 x, TVector3 p, Double_t Q);
 	TVector3 ParToP(TVectorD Par);
 	//
@@ -52,7 +53,7 @@ public:
 	{
 		Double_t c = 2.99792458e8;	// speed of light m/sec
 		//return TMath::C()*1.0e-9;	// Incompatible with root5
-		return c*1.0e-9; 		// Reduced speed of light
+		return c*1.0e-9; 		// Reduced speed of light	
 	}
 	//
 	// Service routines
@@ -69,8 +70,8 @@ public:
 	//
 	// Cluster counting in gas
 	//
-	void SetBfield(Double_t Bz);
-	// Define gas volume (units = meters)
+	void SetBfield(Double_t Bz) { fBz = Bz; }
+	// Define gas volume (units = meters) 
 	void SetDchBoundaries(Double_t Rmin, Double_t Rmax, Double_t Zmin, Double_t Zmax);
 	// Gas mixture selection
 	void SetGasMix(Int_t Opt);
