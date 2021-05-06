@@ -1,4 +1,4 @@
-< ####################################################################                                l
+####################################################################                                l
 # FCC-ee IDEA detector model
 #
 # Authors: Elisa Fontanesi, Lorenzo Pezzotti, Massimiliano Antonello, Michele Selvaggi
@@ -830,6 +830,8 @@ module TauTagging TauTagging {
 #####################################################
 
 module UniqueObjectFinder UniqueObjectFinder {
+
+  set UseUniqueID true
 # earlier arrays take precedence over later ones
 # add InputArray InputArray OutputArray
   add InputArray PhotonIsolation/photons photons
