@@ -1,4 +1,4 @@
-< ####################################################################                                l
+####################################################################                                l
 # FCC-ee IDEA detector model
 #
 # Authors: Elisa Fontanesi, Lorenzo Pezzotti, Massimiliano Antonello, Michele Selvaggi
@@ -375,10 +375,10 @@ module ClusterCounting ClusterCounting {
   set Bz $B
 
   ## check that these are consistent with DCHCANI/DCHNANO parameters in TrackCovariance module
-  set Rmin 0.345
-  set Rmax 2.0
-  set Zmin -2.0
-  set Zmax 2.0
+  set Rmin $DCHRMIN
+  set Rmax $DCHRMAX
+  set Zmin $DCHZMIN
+  set Zmax $DCHZMAX
 
   # gas mix option:
   # 0:  Helium 90% - Isobutane 10%
