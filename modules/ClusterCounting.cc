@@ -27,12 +27,7 @@
  *
  */
 
-//FIXME add reference to Bedeschi-code
-//FIXME make sure about units of P, X
-//FIXME fix pt > 200 GeV issue and angle > 6.41
-
 #include "modules/ClusterCounting.h"
-
 #include "classes/DelphesClasses.h"
 #include "TrackCovariance/TrkUtil.h"
 
@@ -107,7 +102,7 @@ void ClusterCounting::Finish()
 void ClusterCounting::Process()
 {
   Candidate *candidate, *mother, *particle;
-  Double_t mass, Ncl;
+  Double_t mass, trackLength, Ncl;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -123,20 +118,27 @@ void ClusterCounting::Process()
 		TVectorD Par = TrkUtil::XPtoPar(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz);
     mass = candidateMomentum.M();
 
+    trackLength = fTrackUtil->TrkLen(Par);
+
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
 
     Ncl = -999;
+
+
     // computation of Nclusters is not supported for electrons
+    /*
     if (TMath::Abs(particle->PID) == 11)
     {
       candidate->Nclusters = Ncl;
+      candidate->dNdx = -999;
     }
-    else if (fTrackUtil->IonClusters(Ncl, mass, Par))
+    */
+    if (fTrackUtil->IonClusters(Ncl, mass, Par))
     {
       candidate->Nclusters = Ncl;
+      candidate->dNdx = (trackLength > 0.) ? Ncl/trackLength : -1;
     }
-    //cout<<candidate->PID<<", "<<mass<<", "<<candidate->Nclusters<<endl;
 
     candidate->AddCandidate(mother);
 
