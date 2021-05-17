@@ -1,4 +1,4 @@
-  /*
+   /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2020  Universite catholique de Louvain (UCLouvain), Belgium
  *
@@ -123,17 +123,7 @@ void ClusterCounting::Process()
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
 
-    Ncl = -999;
-
-
-    // computation of Nclusters is not supported for electrons
-    /*
-    if (TMath::Abs(particle->PID) == 11)
-    {
-      candidate->Nclusters = Ncl;
-      candidate->dNdx = -999;
-    }
-    */
+    Ncl = 0.;
     if (fTrackUtil->IonClusters(Ncl, mass, Par))
     {
       candidate->Nclusters = Ncl;
