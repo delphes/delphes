@@ -22,11 +22,14 @@ private:
 	// Inputs
 	Int_t fNtr;					// Number of tracks
 	std::vector<TVectorD*> fPar;		// Input parameter array
-	std::vector<TMatrixDSym*> fCov;// Input parameter covariances
+	std::vector<TVectorD*> fParNew;		// Updated parameter array
+	std::vector<TMatrixDSym*> fCov;		// Input parameter covariances
+	std::vector<TMatrixDSym*> fCovNew;	// Updated parameter covariances
 	// Constraints
 	Bool_t fVtxCst;				// Vertex constraint flag
 	TVectorD fxCst;				// Constraint value
-	TMatrixDSym fCovCst;			// Constraint covariance
+	TMatrixDSym fCovCst;			// Constraint 
+	TMatrixDSym fCovCstInv;			// Inverse of constraint covariance
 	//
 	// Results
 	Bool_t fVtxDone;				// Flag vertex fit completed
@@ -38,9 +41,11 @@ private:
 	//
 	// Work arrays
 	std::vector<Double_t> ffi;				// Fit phases
-	std::vector<TVectorD*> fx0i;				// Track expansion points
+	std::vector<TVectorD*> fx0i;			// Track expansion points
 	std::vector<TVectorD*> fai;				// dx/dphi
+	std::vector<TVectorD*> fdi;				// x-shift
 	std::vector<Double_t> fa2i;				// a'Wa
+	std::vector<TMatrixD*> fAti;			// A transposed
 	std::vector<TMatrixDSym*> fDi;			// W-WBW
 	std::vector<TMatrixDSym*> fWi;			// (ACA')^-1
 	std::vector<TMatrixDSym*> fWinvi;		// ACA'

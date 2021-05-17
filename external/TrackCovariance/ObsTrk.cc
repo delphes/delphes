@@ -13,7 +13,7 @@
 // x(3) track origin, p(3) track momentum at origin, Q charge, B magnetic field in Tesla
 ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 {
-	SetBfield(B);
+	SetB(B);
 	fGC = GC;
 	fGenX = x;
 	fGenP = p;
@@ -55,7 +55,7 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 // x[3] track origin, p[3] track momentum at origin, Q charge, B magnetic field in Tesla
 ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, Double_t B, SolGridCov* GC)
 {
-	SetBfield(B);
+	SetB(B);
 	fGC = GC;
 	fGenX.SetXYZ(x[0],x[1],x[2]);
 	fGenP.SetXYZ(p[0],p[1],p[2]);

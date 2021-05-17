@@ -18,7 +18,7 @@ R__LOAD_LIBRARY(libDelphes)
 
 //------------------------------------------------------------------------------
 
-void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
+void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 {
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -119,14 +119,25 @@ void ExamplePVtxFit(const char* inputFile, Int_t Nevent = 5)
 			}		// End loop on tracks
 		}
 		//
-		// Fit primary vertex
+		// Fit primary vertex with beam constraint
+		//
+		//Beam constraint
+		TVectorD xpvc(3);
+		xpvc(0) = 1.0;
+		xpvc(1) = -2.0;
+		xpvc(2) = 10.0;
+		TMatrixDSym covpvc(3); covpvc.Zero();
+		covpvc(0, 0) = 0.0097 * 0.0097;
+		covpvc(1, 1) = 2.55e-05 * 2.55e-05;
+		covpvc(2, 2) = 0.64 * 0.64;
 		Int_t MinTrk = 2;	// Minumum # tracks for vertex fit
 		if (Ntr >= MinTrk) {
 			VertexFit* Vtx = new VertexFit(Ntr, pr, cv);
+			Vtx->AddVtxConstraint(xpvc, covpvc);
 			TVectorD xvtx = Vtx->GetVtx();
 			TMatrixDSym covX = Vtx->GetVtxCov();
 			Double_t Chi2 = Vtx->GetVtxChi2();
-			Double_t Ndof = 2 * (Double_t)Ntr - 3;
+			Double_t Ndof = 2 * (Double_t)Ntr;
 			Double_t PullX = (xvtx(0)-xpv) / TMath::Sqrt(covX(0, 0));
 			Double_t PullY = (xvtx(1)-ypv) / TMath::Sqrt(covX(1, 1));
 			Double_t PullZ = (xvtx(2)-zpv) / TMath::Sqrt(covX(2, 2));

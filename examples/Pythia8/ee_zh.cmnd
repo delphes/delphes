@@ -1,4 +1,5 @@
 
+! number of events to generate
 Main:numberOfEvents = 1000         ! number of events to generate
 
 Beams:idA = 11                   ! first beam, e- = -11
@@ -6,17 +7,16 @@ Beams:idB = -11                  ! second beam, e+ = 11
 Beams:eCM = 240.                 ! CM energy of collision
 
 ! Vertex smearing :
-!Beams:allowVertexSpread = on
-!Beams:sigmaVertexX = 9.70e-3   !  13.7 mum / sqrt2
-!Beams:sigmaVertexY = 25.5E-6   !  36.1 nm / sqrt2
-!Beams:sigmaVertexZ = 0.64      !  0.64 mm
-!Beams:sigmaTime    = 0.64      !  0.64 mm
-￼
 
+Beams:allowVertexSpread = on
+Beams:sigmaVertexX = 9.70e-3   !  13.7 mum / sqrt2
+Beams:sigmaVertexY = 25.5E-6   !  36.1 nm / sqrt2
+Beams:sigmaVertexZ = 0.64      !  0.64 mm
+Beams:sigmaTime    = 0.64      !  0.64 mm
 
 ! Higgsstrahlung process
 HiggsSM:ffbar2HZ = on
 
 ! 5) Force the Z decays to muons
 23:onMode = off
-23:onIfAny = 11 -11
+23:onIfAny = 13 -13
