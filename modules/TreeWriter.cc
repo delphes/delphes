@@ -412,6 +412,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Y = initialPosition.Y();
     entry->Z = initialPosition.Z();
     entry->T = initialPosition.T() * 1.0E-3 / c_light;
+    entry->ErrorT =candidate-> ErrorT * 1.0E-3 / c_light;
 
     entry->Particle = particle;
 
@@ -567,6 +568,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Y = initialPosition.Y();
     entry->Z = initialPosition.Z();
     entry->T = initialPosition.T() * 1.0E-3 / c_light;
+    entry->ErrorT = candidate-> ErrorT * 1.0E-3 / c_light;
 
     entry->VertexIndex = candidate->ClusterIndex;
 
