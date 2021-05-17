@@ -36,18 +36,18 @@ void Example5(const char *inputFile)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
-    
+
     if(entry>10) break;
-    
+
     cout<<"" <<endl;
     cout<<"--------- New Event ---------" <<endl;
     cout<<"" <<endl;
- 
+
     // loop over all input particles in the event
     for(Int_t i=0; i < branchParticle->GetEntriesFast(); i++)
-    {    
-     GenParticle *gen = (GenParticle*) branchParticle->At(i);     
-     cout<<"N: "<<i<<", St: "<<gen->Status<<", PID: "<<gen->PID<<", E: "<<gen->E<<", Px: "<<gen->Px<<", Py: "<<gen->Py<<", Pz: "<<gen->Pz<<", M: "<<gen->Mass<<", M1: "<<gen->M1<<", M2: "<<gen->M2<<", D1: "<<gen->D1<<", D2: "<<gen->D2<<endl;
+    {
+     GenParticle *gen = (GenParticle*) branchParticle->At(i);
+     cout<<"N: "<<i<<", St: "<<gen->Status<<", PID: "<<gen->PID<<", E: "<<gen->E<<", Px: "<<gen->Px<<", Py: "<<gen->Py<<", Pz: "<<gen->Pz<<", M: "<<gen->Mass<<", T: "<<gen->T<<", X: "<<gen->X<<", Y: "<<gen->Y<<", Z: "<<gen->Z<<", M1: "<<gen->M1<<", M2: "<<gen->M2<<", D1: "<<gen->D1<<", D2: "<<gen->D2<<endl;
     }
   }
 }
