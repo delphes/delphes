@@ -16,45 +16,46 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TimeSmearing_h
-#define TimeSmearing_h
+#ifndef TimeOfFlight_h
+#define TimeOfFlight_h
 
-/** \class TimeSmearing
+/** \class TimeOfFlight
  *
- *  Performs time smearing.
+ *  Calculates Time-Of-Flight
  *
  *  \author Michele Selvaggi - CERN
  *
- */
+*/
 
 #include "classes/DelphesModule.h"
 
 class TIterator;
 class TObjArray;
-class DelphesFormula;
 
-class TimeSmearing: public DelphesModule
+class TimeOfFlight: public DelphesModule
 {
 public:
-  TimeSmearing();
-  ~TimeSmearing();
+  TimeOfFlight();
+  ~TimeOfFlight();
 
   void Init();
   void Process();
   void Finish();
+  void ComputeVertexMomenta();
 
 private:
 
-  DelphesFormula *fResolutionFormula;
   Int_t fVertexTimeMode;
 
   TIterator *fItTrackInputArray; //!
+  TIterator *fItVertexInputArray; //!
 
   const TObjArray *fTrackInputArray; //!
+  const TObjArray *fVertexInputArray; //!
 
   TObjArray *fOutputArray; //!
 
-  ClassDef(TimeSmearing, 1)
+  ClassDef(TimeOfFlight, 1)
 };
 
 #endif

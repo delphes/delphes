@@ -103,7 +103,6 @@ void TrackCovariance::Process()
   Double_t mass, p, pt, q, ct;
   Double_t dd0, ddz, dphi, dct, dp, dpt, dC;
 
-
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {

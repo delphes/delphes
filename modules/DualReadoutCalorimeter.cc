@@ -612,7 +612,7 @@ void DualReadoutCalorimeter::FinalizeTower()
     //cout<<"significant neutral excess found:"<<endl;
     // create new photon tower
     tower = static_cast<Candidate*>(fTower->Clone());
-    pt =  neutralEnergy / TMath::CosH(eta);
+    pt = neutralEnergy / TMath::CosH(eta);
     //cout<<"Creating tower with Pt, Eta, Phi, Energy: "<<pt<<","<<eta<<","<<phi<<","<<neutralEnergy<<endl;
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
 
@@ -622,18 +622,16 @@ void DualReadoutCalorimeter::FinalizeTower()
       tower->Eem = neutralEnergy;
       tower->Ehad = 0.0;
       tower->PID = 22;
+      fEFlowPhotonOutputArray->Add(tower);
     }
-
     // if hadronic fraction > 0, use HCAL resolution
     else
     {
       tower->Eem = 0;
       tower->Ehad = neutralEnergy;
       tower->PID = 130;
+      fEFlowNeutralHadronOutputArray->Add(tower);
     }
-
-    fEFlowPhotonOutputArray->Add(tower);
-
 
     //clone tracks
     fItTowerTrackArray->Reset();

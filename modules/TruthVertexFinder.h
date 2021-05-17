@@ -16,28 +16,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TimeSmearing_h
-#define TimeSmearing_h
+#ifndef TruthVertexFinder_h
+#define TruthVertexFinder_h
 
-/** \class TimeSmearing
+/** \class TruthVertexFinder
  *
- *  Performs time smearing.
+ *  Produces list of MC truth vertices
  *
- *  \author Michele Selvaggi - CERN
+ *  \author M. Selvaggi - CERN
  *
  */
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
 class TObjArray;
-class DelphesFormula;
 
-class TimeSmearing: public DelphesModule
+class TruthVertexFinder: public DelphesModule
 {
 public:
-  TimeSmearing();
-  ~TimeSmearing();
+  TruthVertexFinder();
+  ~TruthVertexFinder();
 
   void Init();
   void Process();
@@ -45,16 +43,15 @@ public:
 
 private:
 
-  DelphesFormula *fResolutionFormula;
-  Int_t fVertexTimeMode;
+  Double_t fResolution; //!
 
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItInputArray; //!
+  TIterator *fItOutputArray; //!
 
-  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fInputArray; //!
 
-  TObjArray *fOutputArray; //!
-
-  ClassDef(TimeSmearing, 1)
+  TObjArray *fVertexOutputArray; //!
+  ClassDef(TruthVertexFinder, 1)
 };
 
 #endif

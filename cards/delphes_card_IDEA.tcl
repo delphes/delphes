@@ -10,11 +10,20 @@
 
 set B 2.0
 
+## Drift chamber coordinates
+set DCHZMIN -2.125
+set DCHZMAX 2.125
+set DCHRMIN 0.345
+set DCHRMAX 2.02
+
+
 #######################################
 # Order of execution of various modules
 #######################################
 
 set ExecutionPath {
+
+  TruthVertexFinder
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -24,6 +33,8 @@ set ExecutionPath {
   TrackMergerPre
   TrackSmearing
   ClusterCounting
+  TimeSmearing
+  TimeOfFlight
 
   TrackMerger
   Calorimeter
@@ -60,6 +71,19 @@ set ExecutionPath {
 
   ScalarHT
   TreeWriter
+}
+
+#################################
+# Truth Vertex Finder
+#################################
+
+module TruthVertexFinder TruthVertexFinder {
+
+  ## below this distance two vertices are assumed to be the same
+  set Resolution 1E-06
+
+  set InputArray Delphes/stableParticles
+  set VertexOutputArray vertices
 }
 
 #################################
@@ -100,10 +124,6 @@ module Efficiency ChargedHadronTrackingEfficiency {
         (energy < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
     }
 }
-
-#	(pt <= 0.1)                                     * (0.00) +
-#	(abs(eta) <= 3.0)               * (pt > 0.1)    * (1.00) +
-#	(abs(eta) > 3)                                  * (0.00)
 
 
 
@@ -211,7 +231,7 @@ module TrackCovariance TrackSmearing {
       2        VTXDSK      0.138  0.3    0.9      0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
       2        VTXDSK      0.141  0.3    0.92     0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
 
-      1 DCHCANI -2.125 2.125 0.345 0.0002 0.237223 0 0 0 0 0 0
+      1 DCHCANI $DCHZMIN $DCHZMAX $DCHRMIN 0.0002 0.237223 0 0 0 0 0 0
       1 DCH -2 2 0.36 0.0147748 1400 1 0.0203738 0 0.0001 0 1
       1 DCH -2 2 0.374775 0.0147748 1400 1 -0.0212097 0 0.0001 0 1
       1 DCH -2 2 0.38955 0.0147748 1400 1 0.0220456 0 0.0001 0 1
@@ -324,13 +344,13 @@ module TrackCovariance TrackSmearing {
       1 DCH -2 2 1.97045 0.0147748 1400 1 -0.111072 0 0.0001 0 1
       1 DCH -2 2 1.98523 0.0147748 1400 1 0.111898 0 0.0001 0 1
       1 DCH -2 2 2 0.0147748 1400 1 -0.112723 0 0.0001 0 1
-      1 DCHCANO -2.125 2.125 2.02 0.02 1.667 0 0 0 0 0 0
+      1 DCHCANO $DCHZMIN $DCHZMAX $DCHRMAX $DCHRMAX 0.02 1.667 0 0 0 0 0 0
       1 BSILWRP -2.35 2.35 2.04 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
       1 BSILWRP -2.35 2.35 2.06 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
       1 MAG -2.5 2.5 2.25 0.05 0.0658 0 0 0 0 0 0
       1 BPRESH -2.55 2.55 2.45 0.02 1 2 0 1.5708 7e-005 0.01 1
-      2 DCHWALL 0.345 2.02 2.125 0.25 5.55 0 0 0 0 0 0
-      2 DCHWALL 0.345 2.02 -2.125 0.25 5.55 0 0 0 0 0 0
+      2 DCHWALL $DCHRMIN $DCHRMAX $DCHZMAX 0.25 5.55 0 0 0 0 0 0
+      2 DCHWALL $DCHRMIN $DCHRMAX $DCHZMIN 0.25 5.55 0 0 0 0 0 0
       2 FSILWRP 0.354 2.02 -2.32 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
       2 FSILWRP 0.35 2.02 -2.3 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
       2 FSILWRP 0.35 2.02 2.3 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
@@ -354,12 +374,13 @@ module ClusterCounting ClusterCounting {
 
   set Bz $B
 
-  set Rmin 0.35
-  set Rmax 2.0
-  set Zmin -2.0
-  set Zmax 2.0
+  ## check that these are consistent with DCHCANI/DCHNANO parameters in TrackCovariance module
+  set Rmin $DCHRMIN
+  set Rmax $DCHRMAX
+  set Zmin $DCHZMIN
+  set Zmax $DCHZMAX
 
-  # gas mix option: 0
+  # gas mix option:
   # 0:  Helium 90% - Isobutane 10%
   # 1:  Helium 100%
   # 2:  Argon 50% - Ethane 50%
@@ -370,6 +391,37 @@ module ClusterCounting ClusterCounting {
 }
 
 
+########################################
+#   Time Smearing MIP
+########################################
+
+module TimeSmearing TimeSmearing {
+  set TrackInputArray ClusterCounting/tracks
+  set OutputArray tracks
+
+  # assume constant 30 ps resolution for now
+  set TimeResolution {
+                       (abs(eta) > 0.0 && abs(eta) <= 3.0)* 30E-12
+                     }
+}
+
+########################################
+#   Time Of Flight Measurement
+########################################
+
+module TimeOfFlight TimeOfFlight {
+  set TrackInputArray TimeSmearing/tracks
+  set VertexInputArray TruthVertexFinder/vertices
+
+  set OutputArray tracks
+
+  # 0: assume vertex time tV from MC Truth (ideal case)
+  # 1: assume vertex time tV=0
+  # 2: calculate vertex time as vertex TOF, assuming tPV=0
+  set VertexTimeMode 2
+
+}
+
 
 ##############
 # Track merger
@@ -377,7 +429,7 @@ module ClusterCounting ClusterCounting {
 
 module Merger TrackMerger {
 # add InputArray InputArray
-  add InputArray ClusterCounting/tracks
+  add InputArray TimeOfFlight/tracks
   set OutputArray tracks
 }
 
@@ -778,6 +830,8 @@ module TauTagging TauTagging {
 #####################################################
 
 module UniqueObjectFinder UniqueObjectFinder {
+
+  set UseUniqueID true
 # earlier arrays take precedence over later ones
 # add InputArray InputArray OutputArray
   add InputArray PhotonIsolation/photons photons
@@ -785,7 +839,6 @@ module UniqueObjectFinder UniqueObjectFinder {
   add InputArray MuonIsolation/muons muons
   add InputArray JetEnergyScale/jets jets
 }
-
 
 
 ##################
