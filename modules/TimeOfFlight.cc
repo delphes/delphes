@@ -109,6 +109,7 @@ void TimeOfFlight::Process()
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
 
     const TLorentzVector &candidateInitialPosition = particle->Position;
+    const TLorentzVector &candidateInitialPositionSmeared = candidate->InitialPosition;
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
@@ -157,13 +158,13 @@ void TimeOfFlight::Process()
         } // end vertex  loop
 
         // track displacement to be possibily replaced by vertex fitted position
-        ti = candidate->Position.Vect().Mag() * 1.0E-3 /(beta*c_light);
+        ti = candidateInitialPositionSmeared.Vect().Mag() * 1.0E-3 /(beta*c_light);
       }
       break;
   	}
 
 
-    ti = ti - t_truth;
+    //ti = ti - t_truth;
 
     p = candidateMomentum.P();
 
