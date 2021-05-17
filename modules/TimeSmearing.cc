@@ -101,12 +101,13 @@ void TimeSmearing::Process()
 
   fItTrackInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
-  {    // converting to meters
-
+  {
+    // converting to meters
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
+
     eta = candidateMomentum.Eta();
     energy = candidateMomentum.E();
 

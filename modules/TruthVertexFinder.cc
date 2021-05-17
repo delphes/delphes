@@ -111,6 +111,7 @@ void TruthVertexFinder::Process()
      const TLorentzVector &candidateMomentum = candidate->Momentum;
 
      pt = candidateMomentum.Pt();
+     
      // check whether vertex already included, if so add particle
      Bool_t old_vertex=false;
      fItOutputArray = fVertexOutputArray->MakeIterator();
