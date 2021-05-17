@@ -124,18 +124,18 @@ void ParticlePropagator::Process()
   Candidate *candidate, *mother, *particle;
   TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, pt2, e, q;
-  Double_t x, y, z, t, r, phi;
+  Double_t x, y, z, t, r;
   Double_t x_c, y_c, r_c, phi_c, phi_0;
   Double_t x_t, y_t, z_t, r_t;
-  Double_t t1, t2, t3, t4, t5, t6;
-  Double_t t_z, t_r, t_ra, t_rb;
-  Double_t tmp, discr, discr2;
-  Double_t delta, gammam, omega, asinrho;
-  Double_t rcu, rc2, xd, yd, zd;
-  Double_t l, d0, dz, p, ctgTheta, phip, etap, alpha;
+  Double_t t_z, t_r;
+  Double_t discr;
+  Double_t gammam, omega;
+  Double_t xd, yd, zd;
+  Double_t l, d0, dz, ctgTheta, alpha;
   Double_t bsx, bsy, bsz;
-  Double_t s0, s1, sd;
-  
+  Double_t rxp, rdp, t_R;
+  Double_t td, pio, phid, sign_pz, vz;
+
   const Double_t c_light = 2.99792458E8;
 
   if(!fBeamSpotInputArray || fBeamSpotInputArray->GetSize() == 0)
@@ -160,6 +160,9 @@ void ParticlePropagator::Process()
 
     particlePosition = particle->Position;
     particleMomentum = particle->Momentum;
+
+    // Constants
+
     x = particlePosition.X() * 1.0E-3;
     y = particlePosition.Y() * 1.0E-3;
     z = particlePosition.Z() * 1.0E-3;
@@ -204,47 +207,36 @@ void ParticlePropagator::Process()
     }
     else if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
     {
-      // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
-      tmp = px * y - py * x;
-      discr2 = pt2 * fRadius2 - tmp * tmp;
 
-      if(discr2 < 0.0)
-      {
-        // no solutions
-        continue;
-      }
+      rxp = x*py - y*px;
+      rdp = x*px + y*py;
 
-      tmp = px * x + py * y;
-      discr = TMath::Sqrt(discr2);
-      t1 = (-tmp + discr) / pt2;
-      t2 = (-tmp - discr) / pt2;
-      t = (t1 < 0.0) ? t2 : t1;
+      discr = fRadius*fRadius*pt*pt - rxp*rxp;
 
-      z_t = z + pz * t;
-      if(TMath::Abs(z_t) > fHalfLength)
-      {
-        t3 = (+fHalfLength - z) / pz;
-        t4 = (-fHalfLength - z) / pz;
-        t = (t3 < 0.0) ? t4 : t3;
-      }
+      t_R = e * (sqrt(discr) - rdp) / (c_light * pt * pt);
+      t_z = e * (TMath::Sign(fHalfLengthMax, pz) - z) / ( c_light * pz);
 
-      x_t = x + px * t;
-      y_t = y + py * t;
-      z_t = z + pz * t;
+      t = TMath::Min(t_R, t_z);
 
-      l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
+      x_t = x + px*t*c_light/e;
+      y_t = y + py*t*c_light/e;
+      z_t = z + pz*t*c_light/e;
+      r_t = TMath::Hypot(x_t, y_t);
+
+      l = TMath::Sqrt( (x_t - x)*(x_t - x) + (y_t - y)*(y_t - y) + (z_t - z)*(z_t - z));
 
       mother = candidate;
-      candidate = static_cast<Candidate *>(candidate->Clone());
+      candidate = static_cast<Candidate*>(candidate->Clone());
 
       candidate->InitialPosition = particlePosition;
-      candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
-      candidate->L = l * 1.0E3;
+      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, particlePosition.T() + t*c_light*1.0E3);
+      candidate->L = l*1.0E3;
 
       candidate->Momentum = particleMomentum;
       candidate->AddCandidate(mother);
 
       fOutputArray->Add(candidate);
+
       if(TMath::Abs(q) > 1.0E-9)
       {
         switch(TMath::Abs(candidate->PID))
@@ -273,120 +265,90 @@ void ParticlePropagator::Process()
       //     gyration frequency omega = q/(gamma m) fBz
       //     helix radius r = p_{T0} / (omega gamma m)
 
-      gammam = e * 1.0E9 / (c_light * c_light); // gammam in [eV/c^2]
-      omega = q * fBz / (gammam); // omega is here in [89875518/s]
-      r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
+      gammam = e*1.0E9 / (c_light*c_light);      // gammam in [eV/c^2]
+      omega = q * fBz / (gammam);                // omega is here in [89875518/s]
+      r = pt / (q * fBz) * 1.0E9/c_light;        // in [m]
 
       phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
 
       // 2. helix axis coordinates
-      x_c = x + r * TMath::Sin(phi_0);
-      y_c = y - r * TMath::Cos(phi_0);
+      x_c = x + r*TMath::Sin(phi_0);
+      y_c = y - r*TMath::Cos(phi_0);
       r_c = TMath::Hypot(x_c, y_c);
-      phi_c = TMath::ATan2(y_c, x_c);
-      phi = phi_c;
-      if(x_c < 0.0) phi += TMath::Pi();
+      phi_c = TMath::ATan(y_c/x_c);
+      if(x_c < 0.0) phi_c -= TMath::Sign(1., phi_c)*TMath::Pi();
 
-      rcu = TMath::Abs(r);
-      rc2 = r_c * r_c;
+      //Find the time of closest approach
+      td = (phi_0 - TMath::ATan(-x_c/y_c))/omega;
 
-      // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
-      xd = x_c * x_c * x_c - x_c * rcu * r_c + x_c * y_c * y_c;
-      xd = (rc2 > 0.0) ? xd / rc2 : -999;
-      yd = y_c * (-rcu * r_c + rc2);
-      yd = (rc2 > 0.0) ? yd / rc2 : -999;
-      zd = z + (TMath::Sqrt(xd * xd + yd * yd) - TMath::Sqrt(x * x + y * y)) * pz / pt;
+      //Remove all the modulo pi that might have come from the atan
+      pio = fabs(TMath::Pi()/omega);
+      while(fabs(td) > 0.5*pio)
+      {
+        td -= TMath::Sign(1., td)*pio;
+      }
 
-      // proper calculation of the DCAz coordinate
-      // s0: track circle parameter at the track origin
-      // s1: track circle parameter at the closest approach to beam pipe
-      // sd: s1-s0 signed angular difference
-      s0 = atan2(y - y_c, x - x_c);
-      s1 = atan2(yd - y_c, xd - x_c);
-      sd = atan2(sin(s1 - s0), cos(s1 - s0));
-      zd = z - r * pz / pt * sd;
-      
-      // use perigee momentum rather than original particle
-      // momentum, since the orignal particle momentum isn't known
+      //Compute the coordinate of closed approach to z axis
+      //if wants wtr beamline need to be changedto re-center with a traslation of the z axis
+      phid = phi_0 - omega*td;
+      xd = x_c - r*TMath::Sin(phid);
+      yd = y_c + r*TMath::Cos(phid);
+      zd = z + c_light*(pz/e)*td;
 
-      px = TMath::Sign(1.0, r) * pt * (-y_c / r_c);
-      py = TMath::Sign(1.0, r) * pt * (x_c / r_c);
-      etap = particleMomentum.Eta();
-      phip = TMath::ATan2(py, px);
+      //Compute momentum at closest approach (perigee??)
+      px = pt*TMath::Cos(phid);
+      py = pt*TMath::Sin(phid);
 
-      particleMomentum.SetPtEtaPhiE(pt, etap, phip, particleMomentum.E());
+      particleMomentum.SetPtEtaPhiE(pt, particleMomentum.Eta(), phid, particleMomentum.E());
 
       // calculate additional track parameters (correct for beamspot position)
-
-      d0 = ((x - bsx) * py - (y - bsy) * px) / pt;
-      dz = z - ((x - bsx) * px + (y - bsy) * py) / pt * (pz / pt);
-      p = particleMomentum.P();
-      ctgTheta = 1.0 / TMath::Tan(particleMomentum.Theta());
+      d0 = ((xd - bsx) * py - (yd - bsy) * px) / pt;
+      dz = zd - bsz;
+      ctgTheta  = 1.0 / TMath::Tan (particleMomentum.Theta());
 
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
-      t_r = 0.0; // in [ns]
-      int sign_pz = (pz > 0.0) ? 1 : -1;
-      if(pz == 0.0)
-        t_z = 1.0E99;
-      else
-        t_z = gammam / (pz * 1.0E9 / c_light) * (-z + fHalfLength * sign_pz);
+      t = 0;
+      t_z = 0;
+      sign_pz = (pz > 0.0) ? 1 : -1;
+      if(pz == 0.0) t_z = 1.0E99;
+      else t_z = gammam / (pz*1.0E9/c_light) * (-z + fHalfLength*sign_pz);
 
-      if(r_c + TMath::Abs(r) < fRadius)
+      if(r_c + TMath::Abs(r)  < fRadius)   // helix does not cross the cylinder sides
       {
-        // helix does not cross the cylinder sides
         t = t_z;
       }
       else
       {
-        asinrho = TMath::ASin((fRadius * fRadius - r_c * r_c - r * r) / (2 * TMath::Abs(r) * r_c));
-        delta = phi_0 - phi;
-        if(delta < -TMath::Pi()) delta += 2 * TMath::Pi();
-        if(delta > TMath::Pi()) delta -= 2 * TMath::Pi();
-        t1 = (delta + asinrho) / omega;
-        t2 = (delta + TMath::Pi() - asinrho) / omega;
-        t3 = (delta + TMath::Pi() + asinrho) / omega;
-        t4 = (delta - asinrho) / omega;
-        t5 = (delta - TMath::Pi() - asinrho) / omega;
-        t6 = (delta - TMath::Pi() + asinrho) / omega;
+        alpha = -(fRadius*fRadius - r*r - r_c*r_c)/(2*fabs(r)*r_c);
+        alpha = fabs(TMath::ACos(alpha));
+        t_r = td + alpha/fabs(omega);
 
-        if(t1 < 0.0) t1 = 1.0E99;
-        if(t2 < 0.0) t2 = 1.0E99;
-        if(t3 < 0.0) t3 = 1.0E99;
-        if(t4 < 0.0) t4 = 1.0E99;
-        if(t5 < 0.0) t5 = 1.0E99;
-        if(t6 < 0.0) t6 = 1.0E99;
-
-        t_ra = TMath::Min(t1, TMath::Min(t2, t3));
-        t_rb = TMath::Min(t4, TMath::Min(t5, t6));
-        t_r = TMath::Min(t_ra, t_rb);
         t = TMath::Min(t_r, t_z);
       }
 
-      // 4. position in terms of x(t), y(t), z(t)
-      x_t = x_c + r * TMath::Sin(omega * t - phi_0);
-      y_t = y_c + r * TMath::Cos(omega * t - phi_0);
-      z_t = z + pz * 1.0E9 / c_light / gammam * t;
-      r_t = TMath::Hypot(x_t, y_t);
+      x_t = x_c - r*TMath::Sin(phi_0 - omega*t);
+      y_t = y_c + r*TMath::Cos(phi_0 - omega*t);
+      z_t = z + c_light*t*pz/e;
+      r_t =  TMath::Hypot(x_t, y_t);
 
       // compute path length for an helix
-
-      alpha = pz * 1.0E9 / c_light / gammam;
-      l = t * TMath::Sqrt(alpha * alpha + r * r * omega * omega);
+      vz = pz*1.0E9 / c_light / gammam;
+      //lenght of the path from production to tracker
+      l = t * TMath::Sqrt(vz*vz + r*r*omega*omega);
 
       if(r_t > 0.0)
       {
-
         // store these variables before cloning
         if(particle == candidate)
         {
           particle->D0 = d0 * 1.0E3;
           particle->DZ = dz * 1.0E3;
-          particle->P = p;
+          particle->P = particleMomentum.P();
           particle->PT = pt;
           particle->CtgTheta = ctgTheta;
-          particle->Phi = phip;
+          particle->Phi = particleMomentum.Phi();
         }
 
         mother = candidate;
