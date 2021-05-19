@@ -716,13 +716,13 @@ module PdgCodeFilter NeutrinoFilter {
 
 module FastJetFinder GenJetFinder {
   set InputArray NeutrinoFilter/filteredParticles
-
   set OutputArray jets
 
-  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 6
-  set ParameterR 0.4
+  set JetAlgorithm 10
+  set ParameterR 1.5
+  set ParameterP -1.0
   set JetPTMin 1.0
+
 }
 
 
@@ -747,9 +747,12 @@ module FastJetFinder FastJetFinder {
   set OutputArray jets
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 6
-  set ParameterR 0.4
+  set JetAlgorithm 10
+  set ParameterR 1.5
+  set ParameterP -1.0
   set JetPTMin 1.0
+
+
 }
 
 ##################
@@ -761,7 +764,7 @@ module EnergyScale JetEnergyScale {
   set OutputArray jets
 
   # scale formula for jets
-  set ScaleFormula {1.08}
+  set ScaleFormula {1.00}
 }
 
 ########################
@@ -843,6 +846,8 @@ module TreeWriter TreeWriter {
     add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
     add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
 
+    add Branch EFlowMerger/eflow ParticleFlowCandidate ParticleFlowCandidate
+
     add Branch Calorimeter/photons CaloPhoton Photon
     add Branch PhotonEfficiency/photons PhotonEff Photon
     add Branch PhotonIsolation/photons PhotonIso Photon
@@ -854,8 +859,6 @@ module TreeWriter TreeWriter {
     add Branch ElectronIsolation/electrons Electron Electron
     add Branch PhotonIsolation/photons Photon Photon
     add Branch MuonIsolation/muons Muon Muon
-
-    add Branch JetEnergyScale/jets AntiKtJet Jet
 
     add Branch MissingET/momentum MissingET MissingET
 
