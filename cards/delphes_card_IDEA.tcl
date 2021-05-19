@@ -112,6 +112,8 @@ module ParticlePropagator ParticlePropagator {
 module Efficiency ChargedHadronTrackingEfficiency {
     set InputArray ParticlePropagator/chargedHadrons
     set OutputArray chargedHadrons
+    set UseMomentumVector true
+
     # We use only one efficiency, we set only 0 effincency out of eta bounds:
 
     set EfficiencyFormula {
@@ -131,7 +133,7 @@ module Efficiency ChargedHadronTrackingEfficiency {
 module Efficiency ElectronTrackingEfficiency {
     set InputArray ParticlePropagator/electrons
     set OutputArray electrons
-
+    set UseMomentumVector true
 
     # Current full simulation with CLICdet provides for electrons:
     set EfficiencyFormula {
@@ -150,6 +152,7 @@ module Efficiency ElectronTrackingEfficiency {
 module Efficiency MuonTrackingEfficiency {
     set InputArray ParticlePropagator/muons
     set OutputArray muons
+    set UseMomentumVector true
 
     # Current full simulation with CLICdet provides for muons:
     set EfficiencyFormula {
