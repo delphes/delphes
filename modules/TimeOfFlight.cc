@@ -163,9 +163,6 @@ void TimeOfFlight::Process()
       break;
   	}
 
-
-    //ti = ti - t_truth;
-
     p = candidateMomentum.P();
 
     // this quantity has already been smeared by another module
@@ -189,8 +186,8 @@ void TimeOfFlight::Process()
     // update time at vertex based on option
     candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
 
-    // update particle mass based on TOF-based PID
-    candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
+    // update particle mass based on TOF-based PID (commented for now, assume this calculation is done offline)
+    //candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
 
     candidate->AddCandidate(mother);
     fOutputArray->Add(candidate);
