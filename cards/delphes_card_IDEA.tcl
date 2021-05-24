@@ -67,9 +67,6 @@ set ExecutionPath {
   BTagging
   TauTagging
 
-  UniqueObjectFinder
-
-  ScalarHT
   TreeWriter
 }
 
@@ -79,7 +76,7 @@ set ExecutionPath {
 
 module TruthVertexFinder TruthVertexFinder {
 
-  ## below this distance two vertices are assumed to be the same
+  ## below this distance two vertices are assumed to be merged
   set Resolution 1E-06
 
   set InputArray Delphes/stableParticles
@@ -115,13 +112,15 @@ module ParticlePropagator ParticlePropagator {
 module Efficiency ChargedHadronTrackingEfficiency {
     set InputArray ParticlePropagator/chargedHadrons
     set OutputArray chargedHadrons
+    set UseMomentumVector true
+
     # We use only one efficiency, we set only 0 effincency out of eta bounds:
 
     set EfficiencyFormula {
         (abs(eta) > 3.0)                                       * (0.000) +
-        (energy >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
-        (energy < 0.5 && energy >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
-        (energy < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
+        (pt >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
+        (pt < 0.5 && pt >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
+        (pt < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
     }
 }
 
@@ -134,14 +133,14 @@ module Efficiency ChargedHadronTrackingEfficiency {
 module Efficiency ElectronTrackingEfficiency {
     set InputArray ParticlePropagator/electrons
     set OutputArray electrons
-
+    set UseMomentumVector true
 
     # Current full simulation with CLICdet provides for electrons:
     set EfficiencyFormula {
         (abs(eta) > 3.0)                                       * (0.000) +
-        (energy >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
-        (energy < 0.5 && energy >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
-        (energy < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
+        (pt >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
+        (pt < 0.5 && pt >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
+        (pt < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
     }
 }
 
@@ -153,13 +152,14 @@ module Efficiency ElectronTrackingEfficiency {
 module Efficiency MuonTrackingEfficiency {
     set InputArray ParticlePropagator/muons
     set OutputArray muons
+    set UseMomentumVector true
 
     # Current full simulation with CLICdet provides for muons:
     set EfficiencyFormula {
         (abs(eta) > 3.0)                                       * (0.000) +
-        (energy >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
-        (energy < 0.5 && energy >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
-        (energy < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
+        (pt >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
+        (pt < 0.5 && pt >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
+        (pt < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
     }
 }
 
@@ -416,12 +416,11 @@ module TimeOfFlight TimeOfFlight {
   set OutputArray tracks
 
   # 0: assume vertex time tV from MC Truth (ideal case)
-  # 1: assume vertex time tV=0
+  # 1: assume vertex time tV = 0
   # 2: calculate vertex time as vertex TOF, assuming tPV=0
+
   set VertexTimeMode 2
-
 }
-
 
 ##############
 # Track merger
@@ -720,13 +719,13 @@ module PdgCodeFilter NeutrinoFilter {
 
 module FastJetFinder GenJetFinder {
   set InputArray NeutrinoFilter/filteredParticles
-
   set OutputArray jets
 
-  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 6
-  set ParameterR 0.4
+  set JetAlgorithm 10
+  set ParameterR 1.5
+  set ParameterP -1.0
   set JetPTMin 1.0
+
 }
 
 
@@ -751,9 +750,12 @@ module FastJetFinder FastJetFinder {
   set OutputArray jets
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 6
-  set ParameterR 0.4
+  set JetAlgorithm 10
+  set ParameterR 1.5
+  set ParameterP -1.0
   set JetPTMin 1.0
+
+
 }
 
 ##################
@@ -765,7 +767,7 @@ module EnergyScale JetEnergyScale {
   set OutputArray jets
 
   # scale formula for jets
-  set ScaleFormula {1.08}
+  set ScaleFormula {1.00}
 }
 
 ########################
@@ -825,21 +827,6 @@ module TauTagging TauTagging {
 }
 
 
-#####################################################
-# Find uniquely identified photons/electrons/tau/jets
-#####################################################
-
-module UniqueObjectFinder UniqueObjectFinder {
-
-  set UseUniqueID true
-# earlier arrays take precedence over later ones
-# add InputArray InputArray OutputArray
-  add InputArray PhotonIsolation/photons photons
-  add InputArray ElectronIsolation/electrons electrons
-  add InputArray MuonIsolation/muons muons
-  add InputArray JetEnergyScale/jets jets
-}
-
 
 ##################
 # ROOT tree writer
@@ -853,6 +840,7 @@ module TreeWriter TreeWriter {
     # add Branch InputArray BranchName BranchClass
 
     add Branch Delphes/allParticles Particle GenParticle
+    add Branch TruthVertexFinder/vertices GenVertex Vertex
 
     add Branch TrackMerger/tracks Track Track
     add Branch Calorimeter/towers Tower Tower
@@ -861,6 +849,8 @@ module TreeWriter TreeWriter {
     add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
     add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
 
+    add Branch EFlowMerger/eflow ParticleFlowCandidate ParticleFlowCandidate
+
     add Branch Calorimeter/photons CaloPhoton Photon
     add Branch PhotonEfficiency/photons PhotonEff Photon
     add Branch PhotonIsolation/photons PhotonIso Photon
@@ -868,15 +858,12 @@ module TreeWriter TreeWriter {
     add Branch GenJetFinder/jets GenJet Jet
     add Branch GenMissingET/momentum GenMissingET MissingET
 
-    add Branch UniqueObjectFinder/jets Jet Jet
-    add Branch UniqueObjectFinder/electrons Electron Electron
-    add Branch UniqueObjectFinder/photons Photon Photon
-    add Branch UniqueObjectFinder/muons Muon Muon
-
-    add Branch JetEnergyScale/jets AntiKtJet Jet
+    add Branch JetEnergyScale/jets Jet Jet
+    add Branch ElectronIsolation/electrons Electron Electron
+    add Branch PhotonIsolation/photons Photon Photon
+    add Branch MuonIsolation/muons Muon Muon
 
     add Branch MissingET/momentum MissingET MissingET
-    add Branch ScalarHT/energy ScalarHT ScalarHT
 
     # add Info InfoName InfoValue
     add Info Bz $B

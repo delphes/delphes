@@ -102,7 +102,7 @@ void TimeSmearing::Process()
   fItTrackInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
   {
-    // converting to meters
+
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
