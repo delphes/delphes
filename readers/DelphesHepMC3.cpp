@@ -34,8 +34,8 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesHepMC2Reader.h"
-#include "classes/DelphesPileUpWriter.h"
+#include "classes/DelphesHepMC3Reader.h"
+#include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
@@ -56,23 +56,28 @@ void SignalHandler(int sig)
 
 int main(int argc, char *argv[])
 {
-  char appName[] = "hepmc2pileup";
+  char appName[] = "DelphesHepMC3";
   stringstream message;
   FILE *inputFile = 0;
+  TFile *outputFile = 0;
+  TStopwatch readStopWatch, procStopWatch;
+  ExRootTreeWriter *treeWriter = 0;
+  ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
+  ExRootConfReader *confReader = 0;
+  Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  TIterator *itParticle = 0;
-  Candidate *candidate = 0;
-  DelphesPileUpWriter *writer = 0;
-  DelphesHepMC2Reader *reader = 0;
-  Int_t i;
+  DelphesHepMC3Reader *reader = 0;
+  Int_t i, maxEvents, skipEvents;
   Long64_t length, eventCounter;
 
-  if(argc < 2)
+  if(argc < 3)
   {
-    cout << " Usage: " << appName << " output_file"
+    cout << " Usage: " << appName << " config_file"
+         << " output_file"
          << " [input_file(s)]" << endl;
-    cout << " output_file - output binary pile-up file," << endl;
+    cout << " config_file - configuration file in Tcl format," << endl;
+    cout << " output_file - output file in ROOT format," << endl;
     cout << " input_file(s) - input file(s) in HepMC format," << endl;
     cout << " with no input_file, or when input_file is -, read standard input." << endl;
     return 1;
@@ -88,18 +93,49 @@ int main(int argc, char *argv[])
 
   try
   {
-    writer = new DelphesPileUpWriter(argv[1]);
+    outputFile = TFile::Open(argv[2], "CREATE");
 
-    factory = new DelphesFactory("ObjectFactory");
-    allParticleOutputArray = factory->NewPermanentArray();
-    stableParticleOutputArray = factory->NewPermanentArray();
-    partonOutputArray = factory->NewPermanentArray();
+    if(outputFile == NULL)
+    {
+      message << "can't create output file " << argv[2];
+      throw runtime_error(message.str());
+    }
 
-    itParticle = stableParticleOutputArray->MakeIterator();
+    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
-    reader = new DelphesHepMC2Reader;
+    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
+    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
-    i = 2;
+    confReader = new ExRootConfReader;
+    confReader->ReadFile(argv[1]);
+
+    maxEvents = confReader->GetInt("::MaxEvents", 0);
+    skipEvents = confReader->GetInt("::SkipEvents", 0);
+
+    if(maxEvents < 0)
+    {
+      throw runtime_error("MaxEvents must be zero or positive");
+    }
+
+    if(skipEvents < 0)
+    {
+      throw runtime_error("SkipEvents must be zero or positive");
+    }
+
+    modularDelphes = new Delphes("Delphes");
+    modularDelphes->SetConfReader(confReader);
+    modularDelphes->SetTreeWriter(treeWriter);
+
+    factory = modularDelphes->GetFactory();
+    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
+    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
+    partonOutputArray = modularDelphes->ExportArray("partons");
+
+    reader = new DelphesHepMC3Reader;
+
+    modularDelphes->InitTask();
+
+    i = 3;
     do
     {
       if(interrupted) break;
@@ -139,30 +175,36 @@ int main(int argc, char *argv[])
 
       // Loop over all objects
       eventCounter = 0;
-      factory->Clear();
+      treeWriter->Clear();
+      modularDelphes->Clear();
       reader->Clear();
-      while(reader->ReadBlock(factory, allParticleOutputArray,
-              stableParticleOutputArray, partonOutputArray)
-        && !interrupted)
+      readStopWatch.Start();
+      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) && reader->ReadBlock(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
       {
         if(reader->EventReady())
         {
           ++eventCounter;
 
-          itParticle->Reset();
-          while((candidate = static_cast<Candidate *>(itParticle->Next())))
+          readStopWatch.Stop();
+
+          if(eventCounter > skipEvents)
           {
-            const TLorentzVector &position = candidate->Position;
-            const TLorentzVector &momentum = candidate->Momentum;
-            writer->WriteParticle(candidate->PID,
-              position.X(), position.Y(), position.Z(), position.T(),
-              momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
+            procStopWatch.Start();
+            modularDelphes->ProcessTask();
+            procStopWatch.Stop();
+
+            reader->AnalyzeEvent(branchEvent, eventCounter, &readStopWatch, &procStopWatch);
+            reader->AnalyzeWeight(branchWeight);
+
+            treeWriter->Fill();
+
+            treeWriter->Clear();
           }
 
-          writer->WriteEntry();
-
-          factory->Clear();
+          modularDelphes->Clear();
           reader->Clear();
+
+          readStopWatch.Start();
         }
         progressBar.Update(ftello(inputFile), eventCounter);
       }
@@ -176,19 +218,23 @@ int main(int argc, char *argv[])
       ++i;
     } while(i < argc);
 
-    writer->WriteIndex();
+    modularDelphes->FinishTask();
+    treeWriter->Write();
 
     cout << "** Exiting..." << endl;
 
     delete reader;
-    delete factory;
-    delete writer;
+    delete modularDelphes;
+    delete confReader;
+    delete treeWriter;
+    delete outputFile;
 
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(writer) delete writer;
+    if(treeWriter) delete treeWriter;
+    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }

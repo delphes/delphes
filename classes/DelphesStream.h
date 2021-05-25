@@ -34,6 +34,8 @@ public:
 
   bool ReadDbl(double &value);
   bool ReadInt(int &value);
+  bool FindChr(int value);
+  bool FindStr(const char *value);
 
 private:
   char *fBuffer;

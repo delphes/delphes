@@ -34,7 +34,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesHepMCReader.h"
+#include "classes/DelphesHepMC2Reader.h"
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
@@ -56,7 +56,7 @@ void SignalHandler(int sig)
 
 int main(int argc, char *argv[])
 {
-  char appName[] = "DelphesHepMC";
+  char appName[] = "DelphesHepMC2";
   stringstream message;
   FILE *inputFile = 0;
   TFile *outputFile = 0;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  DelphesHepMCReader *reader = 0;
+  DelphesHepMC2Reader *reader = 0;
   Int_t i, maxEvents, skipEvents;
   Long64_t length, eventCounter;
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
     partonOutputArray = modularDelphes->ExportArray("partons");
 
-    reader = new DelphesHepMCReader;
+    reader = new DelphesHepMC2Reader;
 
     modularDelphes->InitTask();
 
