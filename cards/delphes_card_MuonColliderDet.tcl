@@ -1199,7 +1199,7 @@ module SimpleCalorimeter ECal {
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
     set ResolutionFormula {
 	(abs(eta) <= 0.78 )  * sqrt(energy^2*0.01^2 + energy*0.156^2)+
-	(abs(eta) > 0.78 && abs(eta) <=0.83 ) * sqrt( energy^0.01^2 + energy*0.175^2  ) +
+	(abs(eta) > 0.78 && abs(eta) <=0.83 ) * sqrt( energy^2*0.01^2 + energy*0.175^2  ) +
 	(abs(eta) <= 2.5 && abs(eta) > 0.83) * sqrt( energy^2*0.01^2 + energy*0.151^2  )}
 }
 
