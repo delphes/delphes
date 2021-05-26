@@ -102,7 +102,7 @@ tmp/converters/hepmc2pileup.$(ObjSuf): \
 	converters/hepmc2pileup.cpp \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
-	classes/DelphesHepMCReader.h \
+	classes/DelphesHepMC2Reader.h \
 	classes/DelphesPileUpWriter.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
@@ -212,14 +212,26 @@ EXECUTABLE_OBJ +=  \
 	tmp/examples/Example1.$(ObjSuf) \
 	tmp/validation/DelphesValidation.$(ObjSuf)
 
-DelphesHepMC$(ExeSuf): \
-	tmp/readers/DelphesHepMC.$(ObjSuf)
+DelphesHepMC2$(ExeSuf): \
+	tmp/readers/DelphesHepMC2.$(ObjSuf)
 
-tmp/readers/DelphesHepMC.$(ObjSuf): \
-	readers/DelphesHepMC.cpp \
+tmp/readers/DelphesHepMC2.$(ObjSuf): \
+	readers/DelphesHepMC2.cpp \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
-	classes/DelphesHepMCReader.h \
+	classes/DelphesHepMC2Reader.h \
+	modules/Delphes.h \
+	external/ExRootAnalysis/ExRootProgressBar.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h \
+	external/ExRootAnalysis/ExRootTreeWriter.h
+DelphesHepMC3$(ExeSuf): \
+	tmp/readers/DelphesHepMC3.$(ObjSuf)
+
+tmp/readers/DelphesHepMC3.$(ObjSuf): \
+	readers/DelphesHepMC3.cpp \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesHepMC3Reader.h \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
@@ -262,13 +274,15 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
-	DelphesHepMC$(ExeSuf) \
+	DelphesHepMC2$(ExeSuf) \
+	DelphesHepMC3$(ExeSuf) \
 	DelphesLHEF$(ExeSuf) \
 	DelphesROOT$(ExeSuf) \
 	DelphesSTDHEP$(ExeSuf)
 
 EXECUTABLE_OBJ +=  \
-	tmp/readers/DelphesHepMC.$(ObjSuf) \
+	tmp/readers/DelphesHepMC2.$(ObjSuf) \
+	tmp/readers/DelphesHepMC3.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
 	tmp/readers/DelphesROOT.$(ObjSuf) \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
@@ -515,9 +529,16 @@ tmp/classes/DelphesFormula.$(ObjSuf): \
 	classes/DelphesFormula.$(SrcSuf) \
 	classes/DelphesFormula.h \
 	classes/DelphesClasses.h
-tmp/classes/DelphesHepMCReader.$(ObjSuf): \
-	classes/DelphesHepMCReader.$(SrcSuf) \
-	classes/DelphesHepMCReader.h \
+tmp/classes/DelphesHepMC2Reader.$(ObjSuf): \
+	classes/DelphesHepMC2Reader.$(SrcSuf) \
+	classes/DelphesHepMC2Reader.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesStream.h \
+	external/ExRootAnalysis/ExRootTreeBranch.h
+tmp/classes/DelphesHepMC3Reader.$(ObjSuf): \
+	classes/DelphesHepMC3Reader.$(SrcSuf) \
+	classes/DelphesHepMC3Reader.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesStream.h \
@@ -1144,7 +1165,8 @@ DELPHES_OBJ +=  \
 	tmp/classes/DelphesCylindricalFormula.$(ObjSuf) \
 	tmp/classes/DelphesFactory.$(ObjSuf) \
 	tmp/classes/DelphesFormula.$(ObjSuf) \
-	tmp/classes/DelphesHepMCReader.$(ObjSuf) \
+	tmp/classes/DelphesHepMC2Reader.$(ObjSuf) \
+	tmp/classes/DelphesHepMC3Reader.$(ObjSuf) \
 	tmp/classes/DelphesLHEFReader.$(ObjSuf) \
 	tmp/classes/DelphesModule.$(ObjSuf) \
 	tmp/classes/DelphesPileUpReader.$(ObjSuf) \

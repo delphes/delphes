@@ -291,7 +291,7 @@ all:
 
 executableDeps {converters/*.cpp} {examples/*.cpp} {validation/*.cpp}
 
-executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp} {readers/DelphesROOT.cpp}
+executableDeps {readers/DelphesHepMC2.cpp} {readers/DelphesHepMC3.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp} {readers/DelphesROOT.cpp}
 
 puts {ifeq ($(HAS_CMSSW),true)}
 executableDeps {readers/DelphesCMSFWLite.cpp}
