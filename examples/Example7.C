@@ -29,6 +29,7 @@ void Example7(const char *inputFile)
   TClonesArray *branchJet = treeReader->UseBranch("JetPUPPITight");
   TClonesArray *branchElectron = treeReader->UseBranch("ElectronMedium");
   TClonesArray *branchWeight = treeReader->UseBranch("Weight");
+  TClonesArray *branchEvent = treeReader->UseBranch("Event");
 
   // Book histograms
   TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 100, 0.0, 1000.0);
@@ -39,15 +40,21 @@ void Example7(const char *inputFile)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
-
-    Double_t w =1.0;
-    // read MC event weight
+    
+    // main MC event weight
+    HepMCEvent *event = (HepMCEvent*) branchEvent -> At(0);
+    Double_t w = event->Weight;
+    
+    // read lhe event weights
     if(branchWeight->GetEntries() > 0)
     {
       Weight *weight = (Weight*) branchWeight -> At(0);
-      w = weight->Weight;
+      Double_t lhe_weight = weight->Weight;
+      
+      //cout<<lhe_weight<<endl;
+      // do stuff ...
     }
-    
+
     // If event contains at least 1 jet
     if(branchJet->GetEntries() > 0)
     {
@@ -65,7 +72,6 @@ void Example7(const char *inputFile)
       if (BtagOk && pt > 30. && eta < 5.)  
         histJetPT->Fill(jet->PT, w);
     }
-
 
     // If event contains at least 1 jet
     if(branchElectron->GetEntries() > 0)

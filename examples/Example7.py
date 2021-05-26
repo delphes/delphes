@@ -32,9 +32,10 @@ treeReader = ROOT.ExRootTreeReader(chain)
 numberOfEntries = treeReader.GetEntries()
 
 # Get pointers to branches used in this analysis
-branchJet = treeReader.UseBranch("JetPUPPITight")
+branchJet      = treeReader.UseBranch("JetPUPPITight")
 branchElectron = treeReader.UseBranch("ElectronMedium")
-branchWeight = treeReader.UseBranch("Weight")
+branchWeight   = treeReader.UseBranch("Weight")
+branchEvent    = treeReader.UseBranch("Event")
 
 # Book histograms
 histJetPT = ROOT.TH1F("jet_pt", "jet P_{T}", 100, 0.0, 1000.0)
@@ -45,11 +46,15 @@ for entry in range(0, numberOfEntries):
   # Load selected branches with data from specified event
   treeReader.ReadEntry(entry)
 
-  w = 1.0  
-  ## read MC event weight
-  if branchWeight.GetEntries() > 0:  
-    weight = branchWeight.At(0).Weight
+  ## main MC event weight
+  w =  branchEvent[0].Weight
 
+  ## read lhe event weight
+  for weight in branchWeight:  
+    lhe_weight = weight.Weight 
+    ## do stuff ... 
+    ## print lhe_weight
+    
   # If event contains at least 1 jet
   if branchJet.GetEntries() > 0:
     # Take first jet
@@ -75,6 +80,7 @@ for entry in range(0, numberOfEntries):
     pt = electron.PT
     eta = abs(electron.Eta)
 
+    ## looseCut = 0.3, mediumCut = 0.2, tightCut = 0.1
     IsoCut = 0.2
     IsoOk = electron.IsolationVar < IsoCut
 
