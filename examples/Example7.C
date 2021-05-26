@@ -46,9 +46,9 @@ void Example7(const char *inputFile)
     Double_t w = event->Weight;
     
     // read lhe event weights
-    if(branchWeight->GetEntries() > 0)
+    for(Int_t i = 0; i < branchWeight->GetEntriesFast(); ++i)
     {
-      Weight *weight = (Weight*) branchWeight -> At(0);
+      Weight *weight = (Weight*) branchWeight -> At(i);
       Double_t lhe_weight = weight->Weight;
       
       //cout<<lhe_weight<<endl;
