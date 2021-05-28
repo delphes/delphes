@@ -15,11 +15,11 @@ Commands to compile the code:
 
 Finally, we can run Delphes:
 
-   ./DelphesHepMC
+   ./DelphesHepMC3
 
 Command line parameters:
 
-   ./DelphesHepMC config_file output_file [input_file(s)]
+   ./DelphesHepMC3 config_file output_file [input_file(s)]
      config_file - configuration file in Tcl format
      output_file - output file in ROOT format,
      input_file(s) - input file(s) in HepMC format,
