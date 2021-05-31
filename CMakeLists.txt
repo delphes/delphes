@@ -28,7 +28,7 @@ ENDIF(SET_RPATH)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 # Declare ROOT dependency
-find_package(ROOT COMPONENTS EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
+find_package(ROOT COMPONENTS Core EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
 include(${ROOT_USE_FILE})
 
 # Declare Pythia8 dependancy
@@ -94,4 +94,4 @@ if(PYTHIA8_FOUND)
   target_link_libraries(DelphesDisplay ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
 
-install(TARGETS Delphes DelphesDisplay DESTINATION lib)
+install(TARGETS Delphes DelphesDisplay DESTINATION ${CMAKE_INSTALL_LIBDIR})
