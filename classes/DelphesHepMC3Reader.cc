@@ -325,13 +325,12 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
       return kFALSE;
     }
 
-    AnalyzeParticle(factory, allParticleOutputArray,
-      stableParticleOutputArray, partonOutputArray);
+    AnalyzeParticle(factory);
   }
 
   if(EventReady())
   {
-    FinalizeParticles(allParticleOutputArray);
+    FinalizeParticles(allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
   }
 
   return kTRUE;
@@ -373,13 +372,13 @@ void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long event
 void DelphesHepMC3Reader::AnalyzeWeight(ExRootTreeBranch *branch)
 {
   Weight *element;
-  vector<double>::const_iterator itWeight;
+  vector<double>::const_iterator itWeights;
 
-  for(itWeight = fWeights.begin(); itWeight != fWeights.end(); ++itWeight)
+  for(itWeights = fWeights.begin(); itWeights != fWeights.end(); ++itWeights)
   {
     element = static_cast<Weight *>(branch->NewEntry());
 
-    element->Weight = *itWeight;
+    element->Weight = *itWeights;
   }
 }
 
@@ -405,7 +404,6 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
     position = factory->New<TLorentzVector>();
     array = factory->NewArray();
     position->SetXYZT(0.0, 0.0, 0.0, 0.0);
-    array->Clear();
     fVertices.push_back(make_pair(position, array));
   }
   else
@@ -431,55 +429,36 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory)
 {
   Candidate *candidate;
-  TParticlePDG *pdgParticle;
-  int pdgCode;
 
   candidate = factory->NewCandidate();
 
   candidate->PID = fPID;
-  pdgCode = TMath::Abs(candidate->PID);
 
   candidate->Status = fParticleStatus;
 
-  pdgParticle = fPDG->GetParticle(fPID);
-  candidate->Charge = pdgParticle ? int(pdgParticle->Charge() / 3.0) : -999;
   candidate->Mass = fMass;
 
   candidate->Momentum.SetPxPyPzE(fPx, fPy, fPz, fE);
-  if(fMomentumCoefficient != 1.0)
-  {
-    candidate->Momentum *= fMomentumCoefficient;
-  }
 
   candidate->D1 = fParticleCode;
 
   AnalyzeVertex(factory, fOutVertexCode, candidate);
-
-  if(!pdgParticle) return;
-
-  if(fParticleStatus == 1)
-  {
-    stableParticleOutputArray->Add(candidate);
-  }
-  else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-  {
-    partonOutputArray->Add(candidate);
-  }
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
+void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
+  TObjArray *stableParticleOutputArray,
+  TObjArray *partonOutputArray)
 {
   TLorentzVector *position;
   TObjArray *array;
   Candidate *candidate;
+  TParticlePDG *pdgParticle;
+  int pdgCode;
   map<int, int >::iterator itVertexMap;
   map<int, pair<int, int> >::iterator itMotherMap;
   map<int, pair<int, int> >::iterator itDaughterMap;
@@ -499,6 +478,11 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
       if(fPositionCoefficient != 1.0)
       {
         candidate->Position *= fPositionCoefficient;
+      }
+
+      if(fMomentumCoefficient != 1.0)
+      {
+        candidate->Momentum *= fMomentumCoefficient;
       }
 
       candidate->M1 = i;
@@ -540,6 +524,23 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
       allParticleOutputArray->Add(candidate);
 
       ++counter;
+
+      pdgParticle = fPDG->GetParticle(candidate->PID);
+
+      candidate->Charge = pdgParticle ? int(pdgParticle->Charge() / 3.0) : -999;
+
+      if(!pdgParticle) continue;
+
+      pdgCode = TMath::Abs(candidate->PID);
+
+      if(candidate->Status == 1)
+      {
+        stableParticleOutputArray->Add(candidate);
+      }
+      else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+      {
+        partonOutputArray->Add(candidate);
+      }
     }
   }
 

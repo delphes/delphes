@@ -64,12 +64,11 @@ public:
 private:
   void AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate = 0);
 
-  void AnalyzeParticle(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
+  void AnalyzeParticle(DelphesFactory *factory);
+
+  void FinalizeParticles(TObjArray *allParticleOutputArray,
     TObjArray *stableParticleOutputArray,
     TObjArray *partonOutputArray);
-
-  void FinalizeParticles(TObjArray *allParticleOutputArray);
 
   FILE *fInputFile;
 
