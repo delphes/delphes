@@ -234,14 +234,7 @@ tmp/readers/DelphesHepMC3.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h \
-	external/HepMC3/ReaderAscii.h \
-	external/HepMC3/GenEvent.h \
-	external/HepMC3/GenCrossSection.h \
-	external/HepMC3/GenPdfInfo.h \
-	external/HepMC3/GenParticle.h \
-	external/HepMC3/GenVertex.h \
-	external/HepMC3/Units.h
+	external/ExRootAnalysis/ExRootTreeWriter.h
 DelphesLHEF$(ExeSuf): \
 	tmp/readers/DelphesLHEF.$(ObjSuf)
 
@@ -677,59 +670,6 @@ tmp/external/Hector/H_VerticalKicker.$(ObjSuf): \
 	external/Hector/H_VerticalKicker.$(SrcSuf)
 tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf): \
 	external/Hector/H_VerticalQuadrupole.$(SrcSuf)
-tmp/external/HepMC3/GenCrossSection.$(ObjSuf): \
-	external/HepMC3/GenCrossSection.$(SrcSuf) \
-	external/HepMC3/GenCrossSection.h \
-	external/HepMC3/GenEvent.h
-tmp/external/HepMC3/GenEvent.$(ObjSuf): \
-	external/HepMC3/GenEvent.$(SrcSuf) \
-	external/HepMC3/GenEvent.h \
-	external/HepMC3/GenParticle.h \
-	external/HepMC3/GenVertex.h \
-	external/HepMC3/Data/GenEventData.h
-tmp/external/HepMC3/GenHeavyIon.$(ObjSuf): \
-	external/HepMC3/GenHeavyIon.$(SrcSuf) \
-	external/HepMC3/GenHeavyIon.h
-tmp/external/HepMC3/GenParticle.$(ObjSuf): \
-	external/HepMC3/GenParticle.$(SrcSuf) \
-	external/HepMC3/GenParticle.h \
-	external/HepMC3/GenVertex.h \
-	external/HepMC3/GenEvent.h \
-	external/HepMC3/Setup.h \
-	external/HepMC3/Attribute.h
-tmp/external/HepMC3/GenPdfInfo.$(ObjSuf): \
-	external/HepMC3/GenPdfInfo.$(SrcSuf) \
-	external/HepMC3/GenPdfInfo.h
-tmp/external/HepMC3/GenRunInfo.$(ObjSuf): \
-	external/HepMC3/GenRunInfo.$(SrcSuf) \
-	external/HepMC3/GenRunInfo.h \
-	external/HepMC3/Data/GenRunInfoData.h
-tmp/external/HepMC3/GenVertex.$(ObjSuf): \
-	external/HepMC3/GenVertex.$(SrcSuf) \
-	external/HepMC3/GenVertex.h \
-	external/HepMC3/GenParticle.h \
-	external/HepMC3/GenEvent.h \
-	external/HepMC3/Setup.h \
-	external/HepMC3/Attribute.h
-tmp/external/HepMC3/ReaderAscii.$(ObjSuf): \
-	external/HepMC3/ReaderAscii.$(SrcSuf) \
-	external/HepMC3/ReaderAscii.h \
-	external/HepMC3/GenEvent.h \
-	external/HepMC3/GenParticle.h \
-	external/HepMC3/GenVertex.h \
-	external/HepMC3/Units.h
-tmp/external/HepMC3/ReaderAsciiHepMC2.$(ObjSuf): \
-	external/HepMC3/ReaderAsciiHepMC2.$(SrcSuf) \
-	external/HepMC3/ReaderAsciiHepMC2.h \
-	external/HepMC3/GenEvent.h \
-	external/HepMC3/GenVertex.h \
-	external/HepMC3/GenParticle.h \
-	external/HepMC3/GenHeavyIon.h \
-	external/HepMC3/GenPdfInfo.h \
-	external/HepMC3/Setup.h
-tmp/external/HepMC3/Setup.$(ObjSuf): \
-	external/HepMC3/Setup.$(SrcSuf) \
-	external/HepMC3/Setup.h
 tmp/external/TrackCovariance/AcceptanceClx.$(ObjSuf): \
 	external/TrackCovariance/AcceptanceClx.$(SrcSuf)
 tmp/external/TrackCovariance/ObsTrk.$(ObjSuf): \
@@ -1271,16 +1211,6 @@ DELPHES_OBJ +=  \
 	tmp/external/Hector/H_TransportMatrices.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalKicker.$(ObjSuf) \
 	tmp/external/Hector/H_VerticalQuadrupole.$(ObjSuf) \
-	tmp/external/HepMC3/GenCrossSection.$(ObjSuf) \
-	tmp/external/HepMC3/GenEvent.$(ObjSuf) \
-	tmp/external/HepMC3/GenHeavyIon.$(ObjSuf) \
-	tmp/external/HepMC3/GenParticle.$(ObjSuf) \
-	tmp/external/HepMC3/GenPdfInfo.$(ObjSuf) \
-	tmp/external/HepMC3/GenRunInfo.$(ObjSuf) \
-	tmp/external/HepMC3/GenVertex.$(ObjSuf) \
-	tmp/external/HepMC3/ReaderAscii.$(ObjSuf) \
-	tmp/external/HepMC3/ReaderAsciiHepMC2.$(ObjSuf) \
-	tmp/external/HepMC3/Setup.$(ObjSuf) \
 	tmp/external/TrackCovariance/AcceptanceClx.$(ObjSuf) \
 	tmp/external/TrackCovariance/ObsTrk.$(ObjSuf) \
 	tmp/external/TrackCovariance/SolGeom.$(ObjSuf) \
@@ -1974,12 +1904,6 @@ modules/TrackSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-external/HepMC3/Units.h: \
-	external/HepMC3/Errors.h \
-	external/HepMC3/Setup.h \
-	external/HepMC3/FourVector.h
-	@touch $@
-
 external/fastjet/ClusterSequence.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
@@ -2064,11 +1988,11 @@ modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-modules/EnergyScale.h: \
+modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-modules/Isolation.h: \
+modules/EnergyScale.h: \
 	classes/DelphesModule.h
 	@touch $@
 
@@ -2115,11 +2039,6 @@ external/fastjet/internal/TilingExtent.hh: \
 
 modules/TrackPileUpSubtractor.h: \
 	classes/DelphesModule.h
-	@touch $@
-
-external/HepMC3/ReaderAscii.h: \
-	external/HepMC3/Reader.h \
-	external/HepMC3/GenEvent.h
 	@touch $@
 
 modules/Efficiency.h: \
@@ -2178,18 +2097,8 @@ external/fastjet/RectangularGrid.hh: \
 	external/fastjet/Selector.hh
 	@touch $@
 
-external/HepMC3/Data/GenEventData.h: \
-	external/HepMC3/Data/GenParticleData.h \
-	external/HepMC3/Data/GenVertexData.h \
-	external/HepMC3/Units.h
-	@touch $@
-
 modules/PileUpMerger.h: \
 	classes/DelphesModule.h
-	@touch $@
-
-external/HepMC3/GenPdfInfo.h: \
-	external/HepMC3/Attribute.h
 	@touch $@
 
 external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh: \
@@ -2221,11 +2130,6 @@ modules/RunPUPPI.h: \
 
 modules/Cloner.h: \
 	classes/DelphesModule.h
-	@touch $@
-
-external/HepMC3/ReaderAsciiHepMC2.h: \
-	external/HepMC3/Reader.h \
-	external/HepMC3/GenEvent.h
 	@touch $@
 
 external/fastjet/PseudoJet.hh: \
@@ -2285,11 +2189,6 @@ external/fastjet/internal/Dnn4piCylinder.hh: \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
 
-external/HepMC3/Attribute.h: \
-	external/HepMC3/GenParticle_fwd.h \
-	external/HepMC3/GenVertex_fwd.h
-	@touch $@
-
 modules/VertexSorter.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -2329,11 +2228,6 @@ modules/ParticlePropagator.h: \
 	classes/DelphesModule.h
 	@touch $@
 
-external/HepMC3/GenRunInfo.h: \
-	external/HepMC3/Units.h \
-	external/HepMC3/Attribute.h
-	@touch $@
-
 modules/PdgCodeFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -2344,23 +2238,6 @@ modules/TruthVertexFinder.h: \
 
 classes/DelphesSTDHEPReader.h: \
 	classes/DelphesXDRReader.h
-	@touch $@
-
-external/HepMC3/GenEvent.h: \
-	external/HepMC3/Units.h \
-	external/HepMC3/GenParticle_fwd.h \
-	external/HepMC3/GenVertex_fwd.h \
-	external/HepMC3/GenPdfInfo_fwd.h \
-	external/HepMC3/GenHeavyIon_fwd.h \
-	external/HepMC3/GenCrossSection_fwd.h \
-	external/HepMC3/GenHeavyIon.h \
-	external/HepMC3/GenPdfInfo.h \
-	external/HepMC3/GenCrossSection.h \
-	external/HepMC3/GenRunInfo.h
-	@touch $@
-
-external/HepMC3/GenHeavyIon.h: \
-	external/HepMC3/Attribute.h
 	@touch $@
 
 external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh: \
@@ -2431,14 +2308,6 @@ external/fastjet/internal/BasicRandom.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
 
-external/HepMC3/GenVertex.h: \
-	external/HepMC3/GenParticle_fwd.h \
-	external/HepMC3/GenVertex_fwd.h \
-	external/HepMC3/Data/GenVertexData.h \
-	external/HepMC3/FourVector.h \
-	external/HepMC3/GenEvent.h
-	@touch $@
-
 modules/ClusterCounting.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -2450,10 +2319,6 @@ modules/SimpleCalorimeter.h: \
 external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh: \
 	external/fastjet/JetDefinition.hh \
 	external/fastjet/PseudoJet.hh
-	@touch $@
-
-external/HepMC3/GenCrossSection.h: \
-	external/HepMC3/Attribute.h
 	@touch $@
 
 external/ExRootAnalysis/ExRootTask.h: \
@@ -2506,14 +2371,6 @@ external/fastjet/ClusterSequenceStructure.hh: \
 
 modules/StatusPidFilter.h: \
 	classes/DelphesModule.h
-	@touch $@
-
-external/HepMC3/GenParticle.h: \
-	external/HepMC3/Data/GenParticleData.h \
-	external/HepMC3/FourVector.h \
-	external/HepMC3/GenParticle_fwd.h \
-	external/HepMC3/GenVertex_fwd.h \
-	external/HepMC3/GenEvent.h
 	@touch $@
 
 external/fastjet/LimitedWarning.hh: \
