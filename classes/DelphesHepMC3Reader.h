@@ -35,8 +35,10 @@
 class TObjArray;
 class TStopwatch;
 class TDatabasePDG;
+class TLorentzVector;
 class ExRootTreeBranch;
 class DelphesFactory;
+class Candidate;
 
 class DelphesHepMC3Reader
 {
@@ -60,6 +62,8 @@ public:
   void AnalyzeWeight(ExRootTreeBranch *branch);
 
 private:
+  void AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate = 0);
+
   void AnalyzeParticle(DelphesFactory *factory,
     TObjArray *allParticleOutputArray,
     TObjArray *stableParticleOutputArray,
@@ -78,7 +82,7 @@ private:
 
   double fMomentumCoefficient, fPositionCoefficient;
 
-  std::vector<double> fWeight;
+  std::vector<double> fWeights;
 
   double fCrossSection, fCrossSectionError;
 
@@ -91,9 +95,13 @@ private:
   int fParticleCode, fPID, fParticleStatus, fOutVertexCode;
   double fPx, fPy, fPz, fE, fMass;
 
-  int fM1, fM2;
+  std::vector<std::pair<TLorentzVector *, TObjArray *> > fVertices;
+  std::vector<int> fParticles;
 
-  std::map<int, int> fVertexMap;
+  std::map<int, int> fInVertexMap;
+  std::map<int, int> fOutVertexMap;
+
+  std::map<int, std::pair<int, int> > fMotherMap;
   std::map<int, std::pair<int, int> > fDaughterMap;
 };
 

@@ -55,7 +55,7 @@ static const int kBufferSize = 16384;
 
 DelphesHepMC3Reader::DelphesHepMC3Reader() :
   fInputFile(0), fBuffer(0), fPDG(0),
-  fVertexCounter(-1), fParticleCounter(-1)
+  fVertexCounter(-2), fParticleCounter(-1)
 {
   fBuffer = new char[kBufferSize];
 
@@ -80,12 +80,16 @@ void DelphesHepMC3Reader::SetInputFile(FILE *inputFile)
 
 void DelphesHepMC3Reader::Clear()
 {
-  fWeight.clear();
+  fWeights.clear();
   fMomentumCoefficient = 1.0;
   fPositionCoefficient = 1.0;
-  fVertexCounter = -1;
+  fVertexCounter = -2;
   fParticleCounter = -1;
-  fVertexMap.clear();
+  fVertices.clear();
+  fParticles.clear();
+  fInVertexMap.clear();
+  fOutVertexMap.clear();
+  fMotherMap.clear();
   fDaughterMap.clear();
 }
 
@@ -93,7 +97,7 @@ void DelphesHepMC3Reader::Clear()
 
 bool DelphesHepMC3Reader::EventReady()
 {
-  return (fParticleCounter == 0);
+  return (fVertexCounter == -1) && (fParticleCounter == 0);
 }
 
 //---------------------------------------------------------------------------
@@ -117,11 +121,6 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
   if(key == 'E')
   {
     Clear();
-
-    fX = 0.0;
-    fY = 0.0;
-    fZ = 0.0;
-    fT = 0.0;
 
     rc = bufferStream.ReadInt(fEventNumber)
       && bufferStream.ReadInt(fVertexCounter)
@@ -167,7 +166,7 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
   {
     while(bufferStream.ReadDbl(weight))
     {
-      fWeight.push_back(weight);
+      fWeights.push_back(weight);
     }
   }
   else if(key == 'A' && bufferStream.FindStr("mpi"))
@@ -256,13 +255,12 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
   }
   else if(key == 'V')
   {
+    fParticles.clear();
+
     fX = 0.0;
     fY = 0.0;
     fZ = 0.0;
     fT = 0.0;
-
-    fM1 = 0;
-    fM2 = 0;
 
     rc = bufferStream.ReadInt(fVertexCode)
       && bufferStream.ReadInt(fVertexStatus);
@@ -285,12 +283,9 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
 
     while(bufferStream.ReadInt(code))
     {
-      if(code < fM1 || fM1 == 0) fM1 = code;
-      if(code > fM2) fM2 = code;
-      fVertexMap[code] = fVertexCode;
+      fParticles.push_back(code);
+      bufferStream.FindChr(',');
     }
-
-    if(fM1 == fM2) fM2 = 0;
 
     if(bufferStream.FindChr('@'))
     {
@@ -306,6 +301,8 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
         return kFALSE;
       }
     }
+
+    AnalyzeVertex(factory, fVertexCode);
   }
   else if(key == 'P' && fParticleCounter > 0)
   {
@@ -326,16 +323,6 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
       cerr << "** ERROR: "
            << "invalid particle format" << endl;
       return kFALSE;
-    }
-
-    itDaughterMap = fDaughterMap.find(fOutVertexCode);
-    if(itDaughterMap == fDaughterMap.end())
-    {
-      fDaughterMap[fOutVertexCode] = make_pair(fParticleCode, fParticleCode);
-    }
-    else
-    {
-      itDaughterMap->second.second = fParticleCode;
     }
 
     AnalyzeParticle(factory, allParticleOutputArray,
@@ -362,7 +349,7 @@ void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long event
 
   element->ProcessID = fProcessID;
   element->MPI = fMPI;
-  element->Weight = fWeight.size() > 0 ? fWeight[0] : 1.0;
+  element->Weight = fWeights.size() > 0 ? fWeights[0] : 1.0;
   element->CrossSection = fCrossSection;
   element->CrossSectionError = fCrossSectionError;
   element->Scale = fScale;
@@ -388,11 +375,57 @@ void DelphesHepMC3Reader::AnalyzeWeight(ExRootTreeBranch *branch)
   Weight *element;
   vector<double>::const_iterator itWeight;
 
-  for(itWeight = fWeight.begin(); itWeight != fWeight.end(); ++itWeight)
+  for(itWeight = fWeights.begin(); itWeight != fWeights.end(); ++itWeight)
   {
     element = static_cast<Weight *>(branch->NewEntry());
 
     element->Weight = *itWeight;
+  }
+}
+
+//---------------------------------------------------------------------------
+
+void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate)
+{
+  int index;
+  TLorentzVector *position;
+  TObjArray *array;
+  vector<int>::iterator itParticle;
+  map<int, int>::iterator itVertexMap;
+
+  itVertexMap = fOutVertexMap.find(code);
+  if(itVertexMap == fOutVertexMap.end())
+  {
+    --fVertexCounter;
+
+    index = fVertices.size();
+    fOutVertexMap[code] = index;
+    if(candidate && code > 0) fInVertexMap[code] = index;
+
+    position = factory->New<TLorentzVector>();
+    array = factory->NewArray();
+    position->SetXYZT(0.0, 0.0, 0.0, 0.0);
+    array->Clear();
+    fVertices.push_back(make_pair(position, array));
+  }
+  else
+  {
+    index = itVertexMap->second;
+    position = fVertices[index].first;
+    array = fVertices[index].second;
+  }
+
+  if(candidate)
+  {
+    array->Add(candidate);
+  }
+  else
+  {
+    position->SetXYZT(fX, fY, fZ, fT);
+    for(itParticle = fParticles.begin(); itParticle != fParticles.end(); ++itParticle)
+    {
+      fInVertexMap[*itParticle] = index;
+    }
   }
 }
 
@@ -424,27 +457,9 @@ void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory,
     candidate->Momentum *= fMomentumCoefficient;
   }
 
-  candidate->Position.SetXYZT(fX, fY, fZ, fT);
-  if(fPositionCoefficient != 1.0)
-  {
-    candidate->Position *= fPositionCoefficient;
-  }
+  candidate->D1 = fParticleCode;
 
-  candidate->D1 = -1;
-  candidate->D2 = -1;
-
-  if(fOutVertexCode < 0)
-  {
-    candidate->M1 = fM1 - 1;
-    candidate->M2 = fM2 - 1;
-  }
-  else
-  {
-    candidate->M1 = fOutVertexCode - 1;
-    candidate->M2 = -1;
-  }
-
-  allParticleOutputArray->Add(candidate);
+  AnalyzeVertex(factory, fOutVertexCode, candidate);
 
   if(!pdgParticle) return;
 
@@ -462,33 +477,106 @@ void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory,
 
 void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
 {
+  TLorentzVector *position;
+  TObjArray *array;
   Candidate *candidate;
   map<int, int >::iterator itVertexMap;
+  map<int, pair<int, int> >::iterator itMotherMap;
   map<int, pair<int, int> >::iterator itDaughterMap;
-  int i, index;
+  int i, j, code, counter;
+
+  counter = 0;
+  for(i = 0; i < fVertices.size(); ++i)
+  {
+    position = fVertices[i].first;
+    array = fVertices[i].second;
+
+    for(j = 0; j < array->GetEntriesFast(); ++j)
+    {
+      candidate = static_cast<Candidate *>(array->At(j));
+
+      candidate->Position = *position;
+      if(fPositionCoefficient != 1.0)
+      {
+        candidate->Position *= fPositionCoefficient;
+      }
+
+      candidate->M1 = i;
+
+      itDaughterMap = fDaughterMap.find(i);
+      if(itDaughterMap == fDaughterMap.end())
+      {
+        fDaughterMap[i] = make_pair(counter, counter);
+      }
+      else
+      {
+        itDaughterMap->second.second = counter;
+      }
+
+      code = candidate->D1;
+
+      itVertexMap = fInVertexMap.find(code);
+      if(itVertexMap == fInVertexMap.end())
+      {
+        candidate->D1 = -1;
+      }
+      else
+      {
+        code = itVertexMap->second;
+
+        candidate->D1 = code;
+
+        itMotherMap = fMotherMap.find(code);
+        if(itMotherMap == fMotherMap.end())
+        {
+          fMotherMap[code] = make_pair(counter, -1);
+        }
+        else
+        {
+          itMotherMap->second.second = counter;
+        }
+      }
+
+      allParticleOutputArray->Add(candidate);
+
+      ++counter;
+    }
+  }
 
   for(i = 0; i < allParticleOutputArray->GetEntriesFast(); ++i)
   {
     candidate = static_cast<Candidate *>(allParticleOutputArray->At(i));
 
-    index = i + 1;
-
-    itVertexMap = fVertexMap.find(index);
-    if(itVertexMap != fVertexMap.end())
+    itMotherMap = fMotherMap.find(candidate->M1);
+    if(itMotherMap == fMotherMap.end())
     {
-      index = itVertexMap->second;
+      candidate->M1 = -1;
+      candidate->M2 = -1;
+    }
+    else
+    {
+      candidate->M1 = itMotherMap->second.first;
+      candidate->M2 = itMotherMap->second.second;
     }
 
-    itDaughterMap = fDaughterMap.find(index);
-    if(itDaughterMap == fDaughterMap.end())
+    if(candidate->D1 < 0)
     {
       candidate->D1 = -1;
       candidate->D2 = -1;
     }
     else
     {
-      candidate->D1 = itDaughterMap->second.first - 1;
-      candidate->D2 = itDaughterMap->second.second - 1;
+      itDaughterMap = fDaughterMap.find(candidate->D1);
+      if(itDaughterMap == fDaughterMap.end())
+      {
+        candidate->D1 = -1;
+        candidate->D2 = -1;
+      }
+      else
+      {
+        candidate->D1 = itDaughterMap->second.first;
+        candidate->D2 = itDaughterMap->second.second;
+      }
     }
   }
 }
