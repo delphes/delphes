@@ -13,15 +13,15 @@ Quick start with Delphes
 Commands to get the code:
 
 ```
-   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz
+   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.5.0.tar.gz
 
-   tar -zxf Delphes-3.4.2.tar.gz
+   tar -zxf Delphes-3.5.0.tar.gz
 ```
 
 Commands to compile the code:
 
 ```
-   cd Delphes-3.4.2
+   cd Delphes-3.5.0
 
    make
 ```
