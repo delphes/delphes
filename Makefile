@@ -231,6 +231,7 @@ tmp/readers/DelphesHepMC3.$(ObjSuf): \
 	readers/DelphesHepMC3.cpp \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
+	classes/DelphesHepMC3Reader.h \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
@@ -2505,7 +2506,7 @@ distclean: clean
 dist:
 	@echo ">> Building $(DISTTAR)"
 	@mkdir -p $(DISTDIR)
-	@cp -a AUTHORS CHANGELOG CMakeLists.txt COPYING DelphesEnv.sh LICENSE NOTICE README README_4LHCb Makefile MinBias.pileup configure cards classes converters display doc examples external modules python readers validation $(DISTDIR)
+	@cp -a AUTHORS CHANGELOG CMakeLists.txt COPYING DelphesEnv.sh LICENSE NOTICE README README_4LHCb Makefile MinBias.pileup configure cards classes cmake converters display doc examples external modules python readers validation $(DISTDIR)
 	@find $(DISTDIR) -depth -name .\* -exec rm -rf {} \;
 	@tar -czf $(DISTTAR) $(DISTDIR)
 	@rm -rf $(DISTDIR)
