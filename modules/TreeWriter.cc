@@ -404,7 +404,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->C = candidate->C;
     entry->Mass = m;
 
-    //particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     //const TLorentzVector &initialPosition = particle->Position;
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
@@ -560,7 +560,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->C = candidate->C;
     entry->Mass = m;
 
-    //particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     //const TLorentzVector &initialPosition = particle->Position;
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
