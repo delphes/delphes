@@ -8,6 +8,8 @@
 #        michele.selvaggi@cern.ch
 #####################################################################
 
+## MOD2: set vtx mode timing to MC truth
+
 set B 2.0
 
 ## Drift chamber coordinates
@@ -38,6 +40,10 @@ set ExecutionPath {
 
   TrackMerger
   Calorimeter
+
+  TimeSmearingNeutrals
+  TimeOfFlightNeutralHadron
+
   EFlowMerger
 
   PhotonEfficiency
@@ -396,7 +402,7 @@ module ClusterCounting ClusterCounting {
 ########################################
 
 module TimeSmearing TimeSmearing {
-  set TrackInputArray ClusterCounting/tracks
+  set InputArray ClusterCounting/tracks
   set OutputArray tracks
 
   # assume constant 30 ps resolution for now
@@ -405,12 +411,13 @@ module TimeSmearing TimeSmearing {
                      }
 }
 
+
 ########################################
 #   Time Of Flight Measurement
 ########################################
 
 module TimeOfFlight TimeOfFlight {
-  set TrackInputArray TimeSmearing/tracks
+  set InputArray TimeSmearing/tracks
   set VertexInputArray TruthVertexFinder/vertices
 
   set OutputArray tracks
@@ -419,7 +426,7 @@ module TimeOfFlight TimeOfFlight {
   # 1: assume vertex time tV = 0
   # 2: calculate vertex time as vertex TOF, assuming tPV=0
 
-  set VertexTimeMode 2
+  set VertexTimeMode 0
 }
 
 ##############
@@ -454,7 +461,8 @@ module DualReadoutCalorimeter Calorimeter {
   set HCalEnergySignificanceMin 1.0
   set EnergySignificanceMin 1.0
 
-  set SmearTowerCenter true
+  #set SmearTowerCenter true
+  set SmearTowerCenter false
     set pi [expr {acos(-1)}]
 
     # Lists of the edges of each tower in eta and phi;
@@ -510,6 +518,7 @@ module DualReadoutCalorimeter Calorimeter {
     add EnergyFraction {1000045} {0.0 0.0}
     # energy fractions for K0short and Lambda
     add EnergyFraction {310} {0.3 0.7}
+    add EnergyFraction {130} {0.3 0.7}
     add EnergyFraction {3122} {0.3 0.7}
 
 
@@ -526,6 +535,38 @@ module DualReadoutCalorimeter Calorimeter {
     }
 }
 
+########################################
+#   Time Smearing Neutrals
+########################################
+
+module TimeSmearing TimeSmearingNeutrals {
+  set InputArray Calorimeter/eflowNeutralHadrons
+  set OutputArray eflowNeutralHadrons
+
+  # assume constant 30 ps resolution for now
+  set TimeResolution {
+                       (abs(eta) > 0.0 && abs(eta) <= 3.0)* 30E-12
+                     }
+}
+
+########################################
+#   Time Of Flight Measurement
+########################################
+
+module TimeOfFlight TimeOfFlightNeutralHadron {
+  set InputArray TimeSmearingNeutrals/eflowNeutralHadrons
+  set VertexInputArray TruthVertexFinder/vertices
+
+  set OutputArray eflowNeutralHadrons
+
+  # 0: assume vertex time tV from MC Truth (ideal case)
+  # 1: assume vertex time tV = 0
+  # 2: calculate vertex time as vertex TOF, assuming tPV=0
+
+  ## TBF (add option to take hard vertex time)
+  set VertexTimeMode 1
+}
+
 ####################
 # Energy flow merger
 ####################
@@ -534,9 +575,10 @@ module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray Calorimeter/eflowTracks
   add InputArray Calorimeter/eflowPhotons
-  add InputArray Calorimeter/eflowNeutralHadrons
+  add InputArray TimeOfFlightNeutralHadron/eflowNeutralHadrons
   set OutputArray eflow
 }
+
 
 ###################
 # Photon efficiency
@@ -847,7 +889,7 @@ module TreeWriter TreeWriter {
 
     add Branch Calorimeter/eflowTracks EFlowTrack Track
     add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
-    add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+    add Branch TimeOfFlightNeutralHadron/eflowNeutralHadrons EFlowNeutralHadron Tower
 
     add Branch EFlowMerger/eflow ParticleFlowCandidate ParticleFlowCandidate
 
