@@ -48,9 +48,9 @@ private:
   DelphesFormula *fResolutionFormula;
   Int_t fVertexTimeMode;
 
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItInputArray; //!
 
-  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fInputArray; //!
 
   TObjArray *fOutputArray; //!
 

@@ -51,7 +51,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeOfFlight::TimeOfFlight() :
-  fItTrackInputArray(0), fItVertexInputArray(0)
+  fItInputArray(0), fItVertexInputArray(0)
 {
 }
 
@@ -70,8 +70,8 @@ void TimeOfFlight::Init()
   fVertexTimeMode = GetInt("VertexTimeMode", 0);
 
   // import track input array
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "MuonMomentumSmearing/muons"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
+  fItInputArray = fInputArray->MakeIterator();
 
   // import vertex input array
   fVertexInputArray = ImportArray(GetString("VertexInputArray", "TruthVertexFinder/vertices"));
@@ -85,7 +85,7 @@ void TimeOfFlight::Init()
 
 void TimeOfFlight::Finish()
 {
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  if(fItInputArray) delete fItInputArray;
   if(fItVertexInputArray) delete fItVertexInputArray;
 }
 
@@ -102,8 +102,8 @@ void TimeOfFlight::Process()
   // first compute momenta of vertices based on reconstructed tracks
   ComputeVertexMomenta();
 
-  fItTrackInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  fItInputArray->Reset();
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
@@ -115,8 +115,6 @@ void TimeOfFlight::Process()
 
     // time at vertex from MC truth
     t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
-
-    if (candidate->Position.Vect().Mag() < 5.) continue;
 
     // various options on how to calculate the vertex time
     ti=0;
@@ -209,8 +207,8 @@ void TimeOfFlight::ComputeVertexMomenta()
 
     while((constituent = static_cast<Candidate *>(itGenParts.Next())))
     {
-      fItTrackInputArray->Reset();
-      while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+      fItInputArray->Reset();
+      while((track = static_cast<Candidate *>(fItInputArray->Next())))
       {
         // get gen part that generated track
         particle = static_cast<Candidate *>(track->GetCandidates()->At(0));

@@ -47,10 +47,10 @@ private:
 
   Int_t fVertexTimeMode;
 
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItInputArray; //!
   TIterator *fItVertexInputArray; //!
 
-  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fInputArray; //!
   const TObjArray *fVertexInputArray; //!
 
   TObjArray *fOutputArray; //!

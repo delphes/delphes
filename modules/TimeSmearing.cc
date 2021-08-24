@@ -51,7 +51,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fItTrackInputArray(0), fResolutionFormula(0)
+  fItInputArray(0), fResolutionFormula(0)
 {
 	fResolutionFormula = new DelphesFormula;
 }
@@ -73,8 +73,8 @@ void TimeSmearing::Init()
   fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
 
   // import track input array
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "MuonMomentumSmearing/muons"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
+  fItInputArray = fInputArray->MakeIterator();
 
 
   // create output array
@@ -85,7 +85,7 @@ void TimeSmearing::Init()
 
 void TimeSmearing::Finish()
 {
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
@@ -99,8 +99,8 @@ void TimeSmearing::Process()
 
   const Double_t c_light = 2.99792458E8;
 
-  fItTrackInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  fItInputArray->Reset();
+  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
     const TLorentzVector &candidateFinalPosition = candidate->Position;
