@@ -450,16 +450,18 @@ void SimpleCalorimeter::FinalizeTower()
   pt = energy / TMath::CosH(eta);
 
   // check whether barrel or endcap tower
-  if (fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
+  if ((fTowerRmax - fTower->Position.Perp()) < 1.e-06 && TMath::Abs(eta) > 0.)
     r = fTower->Position.Z()/TMath::SinH(eta);
   else
     r = fTower->Position.Pt();
 
   fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+  fTower->L = fTower->Position.Vect().Mag();
 
   fTower->Eem = (!fIsEcal) ? 0 : energy;
   fTower->Ehad = (fIsEcal) ? 0 : energy;
+  fTower->Etrk = fTrackEnergy;
 
   fTower->Edges[0] = fTowerEdges[0];
   fTower->Edges[1] = fTowerEdges[1];

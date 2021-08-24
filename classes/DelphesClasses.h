@@ -514,6 +514,7 @@ public:
 
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
+  Float_t Etrk; // total charged energy hitting tower
 
   Float_t Edges[4]; // calorimeter tower edges
 
@@ -524,7 +525,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Tower, 2)
+  ClassDef(Tower, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -603,12 +604,13 @@ public:
 
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
+  Float_t Etrk; // total charged energy hitting tower
 
   Float_t Edges[4]; // calorimeter tower edges
 
   TRefArray Particles; // references to generated particles
 
-  ClassDef(ParticleFlowCandidate, 2)
+  ClassDef(ParticleFlowCandidate, 3)
 
 };
 
@@ -673,6 +675,7 @@ public:
 
   Float_t Eem;
   Float_t Ehad;
+  Float_t Etrk;
 
   Float_t Edges[4];
   Float_t DeltaEta;

@@ -454,6 +454,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->E = momentum.E();
     entry->Eem = candidate->Eem;
     entry->Ehad = candidate->Ehad;
+    entry->Etrk = candidate->Etrk;
     entry->Edges[0] = candidate->Edges[0];
     entry->Edges[1] = candidate->Edges[1];
     entry->Edges[2] = candidate->Edges[2];
@@ -574,6 +575,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
 
     entry->Eem = candidate->Eem;
     entry->Ehad = candidate->Ehad;
+    entry->Etrk = candidate->Etrk;
     entry->Edges[0] = candidate->Edges[0];
     entry->Edges[1] = candidate->Edges[1];
     entry->Edges[2] = candidate->Edges[2];

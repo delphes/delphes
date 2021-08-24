@@ -78,6 +78,9 @@ private:
   Double_t fHCalTrackSigma;
   Double_t fTrackSigma;
 
+  Double_t fTowerTime;
+  Double_t fTowerTimeWeight;
+
   Bool_t fSmearTowerCenter;
 
   TFractionMap fFractionMap; //!
