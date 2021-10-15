@@ -456,9 +456,10 @@ module DualReadoutCalorimeter Calorimeter {
 
   set ECalEnergyMin 0.5
   set HCalEnergyMin 0.5
-  set EnergyMin 0.5
   set ECalEnergySignificanceMin 1.0
   set HCalEnergySignificanceMin 1.0
+
+  set EnergyMin 1.0
   set EnergySignificanceMin 1.0
 
   #set SmearTowerCenter true
@@ -612,7 +613,7 @@ module Isolation PhotonIsolation {
 
   set PTMin 0.5
 
-  set PTRatioMax 999.
+  set PTRatioMax 9999.
 }
 
 #################
@@ -673,7 +674,7 @@ module Isolation ElectronIsolation {
 
   set PTMin 0.5
 
-  set PTRatioMax 0.12
+  set PTRatioMax 9999
 }
 
 #################
@@ -709,7 +710,7 @@ module Isolation MuonIsolation {
 
   set PTMin 0.5
 
-  set PTRatioMax 0.25
+  set PTRatioMax 9999.
 }
 
 ###################
@@ -893,19 +894,15 @@ module TreeWriter TreeWriter {
 
     add Branch EFlowMerger/eflow ParticleFlowCandidate ParticleFlowCandidate
 
-    add Branch Calorimeter/photons CaloPhoton Photon
-    add Branch PhotonEfficiency/photons PhotonEff Photon
-    add Branch PhotonIsolation/photons PhotonIso Photon
+    add Branch ElectronEfficiency/electrons Electron Electron
+    add Branch MuonEfficiency/muons Muon Muon
+    add Branch PhotonEfficiency/photons Photon Photon
+
+    add Branch JetEnergyScale/jets Jet Jet
+    add Branch MissingET/momentum MissingET MissingET
 
     add Branch GenJetFinder/jets GenJet Jet
     add Branch GenMissingET/momentum GenMissingET MissingET
-
-    add Branch JetEnergyScale/jets Jet Jet
-    add Branch ElectronIsolation/electrons Electron Electron
-    add Branch PhotonIsolation/photons Photon Photon
-    add Branch MuonIsolation/muons Muon Muon
-
-    add Branch MissingET/momentum MissingET MissingET
 
     # add Info InfoName InfoValue
     add Info Bz $B
