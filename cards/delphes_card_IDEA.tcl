@@ -121,12 +121,10 @@ module Efficiency ChargedHadronTrackingEfficiency {
     set UseMomentumVector true
 
     # We use only one efficiency, we set only 0 effincency out of eta bounds:
-
     set EfficiencyFormula {
-        (abs(eta) > 3.0)                                       * (0.000) +
-        (pt >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
-        (pt < 0.5 && pt >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
-        (pt < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
+        (abs(eta) > 2.56)                                  * (0.000) +
+        (pt < 0.1) * (abs(eta) <= 2.56)                    * (0.000)
+        (pt >= 0.1) * (abs(eta) <= 2.56)                   * (1.000)
     }
 }
 
@@ -143,10 +141,9 @@ module Efficiency ElectronTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for electrons:
     set EfficiencyFormula {
-        (abs(eta) > 3.0)                                       * (0.000) +
-        (pt >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
-        (pt < 0.5 && pt >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
-        (pt < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
+        (abs(eta) > 2.56)                                  * (0.000) +
+        (pt < 0.1) * (abs(eta) <= 2.56)                    * (0.000)
+        (pt >= 0.1) * (abs(eta) <= 2.56)                   * (1.000)
     }
 }
 
@@ -162,10 +159,9 @@ module Efficiency MuonTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for muons:
     set EfficiencyFormula {
-        (abs(eta) > 3.0)                                       * (0.000) +
-        (pt >= 0.5) * (abs(eta) <= 3.0)                    * (0.997) +
-        (pt < 0.5 && pt >= 0.3) * (abs(eta) <= 3.0)    * (0.65) +
-        (pt < 0.3) * (abs(eta) <= 3.0)                     * (0.06)
+        (abs(eta) > 2.56)                                  * (0.000) +
+        (pt < 0.1) * (abs(eta) <= 2.56)                    * (0.000)
+        (pt >= 0.1) * (abs(eta) <= 2.56)                   * (1.000)
     }
 }
 
@@ -588,6 +584,7 @@ module Merger EFlowMerger {
 module Efficiency PhotonEfficiency {
   set InputArray Calorimeter/eflowPhotons
   set OutputArray photons
+  set UseMomentumVector true
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
   # efficiency formula for photons
@@ -648,6 +645,7 @@ module PdgCodeFilter MuonFilter {
 module Efficiency ElectronEfficiency {
   set InputArray ElectronFilter/electrons
   set OutputArray electrons
+  set UseMomentumVector true
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
@@ -684,6 +682,7 @@ module Isolation ElectronIsolation {
 module Efficiency MuonEfficiency {
   set InputArray MuonFilter/muons
   set OutputArray muons
+  set UseMomentumVector true
 
   # set EfficiencyFormula {efficiency as a function of eta and pt}
 
