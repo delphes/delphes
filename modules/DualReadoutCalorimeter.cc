@@ -509,7 +509,6 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   if(!fTower) return;
 
-
   // if no hadronic energy, use ECAL resolution
   if (fHCalTowerEnergy <= fHCalEnergyMin)
   {
@@ -527,7 +526,6 @@ void DualReadoutCalorimeter::FinalizeTower()
   }
 
   energy = LogNormal(energy, sigma);
-  //cout<<energy<<","<<ecalEnergy<<","<<hcalEnergy<<endl;
 
   if(energy < fEnergyMin || energy < fEnergySignificanceMin*sigma) energy = 0.0;
 
@@ -560,16 +558,19 @@ void DualReadoutCalorimeter::FinalizeTower()
   pt = energy / TMath::CosH(eta);
 
   // check whether barrel or endcap tower
-  if ((fTowerRmax - fTower->Position.Perp()) < 1.e-06 && TMath::Abs(eta) > 0.)
+
+  // endcap
+  if (TMath::Abs(fTower->Position.Pt() - fTowerRmax) > 1.e-06 && TMath::Abs(eta) > 0.){
     r = fTower->Position.Z()/TMath::SinH(eta);
-  else
+  }
+  // barrel
+  else {
     r = fTower->Position.Pt();
+  }
 
   fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
-
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->L = fTower->Position.Vect().Mag();
-  //cout<<"   tower pt, eta, phi, l, tof:  "<<fTower->Momentum.E()<<", "<<fTower->Momentum.Eta()<<", "<<fTower->Momentum.Phi()<<", "<<fTower->L<<", "<<fTower->Position.T()/2.99792458E2<<endl;
 
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
