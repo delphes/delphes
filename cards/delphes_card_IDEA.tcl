@@ -472,11 +472,11 @@ module DualReadoutCalorimeter Calorimeter {
 
   set ECalEnergyMin 0.5
   set HCalEnergyMin 0.5
-  set ECalEnergySignificanceMin 1.0
-  set HCalEnergySignificanceMin 1.0
+  set ECalEnergySignificanceMin 3.0
+  set HCalEnergySignificanceMin 3.0
 
-  set EnergyMin 1.0
-  set EnergySignificanceMin 1.0
+  set EnergyMin 0.5
+  set EnergySignificanceMin 3.0
 
   #set SmearTowerCenter true
   set SmearTowerCenter false
