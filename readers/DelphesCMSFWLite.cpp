@@ -405,7 +405,7 @@ int main(int argc, char *argv[])
 
       for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || eventCounter-skipEvents < maxEvents); ++event)
       {
-        if(eventCounter > skipEvents){
+        if(eventCounter >= skipEvents){
           ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
             allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
           modularDelphes->ProcessTask();
