@@ -5,20 +5,22 @@
 #include <TDecompChol.h>
 #include <TRandom.h>
 #include <iostream>
+#include "SolGeom.h"
 #include "SolGridCov.h"
 #include "ObsTrk.h"
 //
 // Constructors
 //
-// x(3) track origin, p(3) track momentum at origin, Q charge, B magnetic field in Tesla
-ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
+// x(3) track origin, p(3) track momentum at origin, Q charge, B ma gnetic field in Tesla
+ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G)
 {
-	SetB(B);
+	fB = G->B();
+	SetB(fB);
+	fG = G;
 	fGC = GC;
 	fGenX = x;
 	fGenP = p;
 	fGenQ = Q;
-	fB = B;
 	fGenPar.ResizeTo(5);
 	fGenParMm.ResizeTo(5);
 	fGenParACTS.ResizeTo(6);
@@ -35,12 +37,8 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 	fGenParMm = ParToMm(fGenPar);
 	fGenParACTS = ParToACTS(fGenPar);
 	fGenParILC = ParToILC(fGenPar);
-	/*
-	cout << "ObsTrk::ObsTrk: fGenPar";
-	for (Int_t i = 0; i < 5; i++)cout << fGenPar(i) << ", ";
-	cout << endl;
-	*/
-	fObsPar = GenToObsPar(fGenPar, fGC);
+	//
+	fObsPar = GenToObsPar(fGenPar);
 	fObsParMm = ParToMm(fObsPar);
 	fObsParACTS = ParToACTS(fObsPar);
 	fObsParILC = ParToILC(fObsPar);
@@ -53,14 +51,15 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC)
 }
 //
 // x[3] track origin, p[3] track momentum at origin, Q charge, B magnetic field in Tesla
-ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, Double_t B, SolGridCov* GC)
+ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G)
 {
-	SetB(B);
+	fB = G->B();
+	SetB(fB);
+	fG = G;
 	fGC = GC;
 	fGenX.SetXYZ(x[0],x[1],x[2]);
 	fGenP.SetXYZ(p[0],p[1],p[2]);
 	fGenQ = Q;
-	fB = B;
 	fGenPar.ResizeTo(5);
 	fGenParMm.ResizeTo(5);
 	fGenParACTS.ResizeTo(6);
@@ -76,12 +75,8 @@ ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, Double_t B, SolGridCov* GC)
 	fGenPar = XPtoPar(fGenX, fGenP, Q);
 	fGenParACTS = ParToACTS(fGenPar);
 	fGenParILC = ParToILC(fGenPar);
-	/*
-	cout << "ObsTrk::ObsTrk: fGenPar";
-	for (Int_t i = 0; i < 5; i++)cout << fGenPar(i) << ", ";
-	cout << endl;
-	*/
-	fObsPar = GenToObsPar(fGenPar, fGC);
+	//
+	fObsPar = GenToObsPar(fGenPar);
 	fObsParACTS = ParToACTS(fObsPar);
 	fObsParILC = ParToILC(fObsPar);
 	fObsX = ParToX(fObsPar);
@@ -112,47 +107,54 @@ ObsTrk::~ObsTrk()
 	fCovILC.Clear();
 }
 //
-TVectorD ObsTrk::GenToObsPar(TVectorD gPar, SolGridCov *GC)
+TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 {
-	TVector3 p = ParToP(gPar);
-	Double_t pt = p.Pt();
-	Double_t tanTh = 1.0 / TMath::Abs(gPar(4));
-	Double_t angd = TMath::ATan(tanTh)*180. / TMath::Pi();
 	//
 	// Check ranges
-	Double_t minPt = GC->GetMinPt ();
-	//if (pt < minPt) cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is below grid range of " << minPt << endl;
-	Double_t maxPt = GC->GetMaxPt();
-	//if (pt > maxPt) cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is above grid range of " << maxPt << endl;
-	Double_t minAn = GC->GetMinAng();
-	//if (angd < minAn) cout << "Warning ObsTrk::GenToObsPar: angle " << angd 
-	//	<< " is below grid range of " << minAn << endl;
-	Double_t maxAn = GC->GetMaxAng();
-	//if (angd > maxAn) cout << "Warning ObsTrk::GenToObsPar: angle " << angd
-	//	<< " is above grid range of " << maxAn << endl;
+	Double_t minPt = fGC->GetMinPt();
+	//if (pt < minPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is below grid range of " << minPt << std::endl;
+	Double_t maxPt = fGC->GetMaxPt();
+	//if (pt > maxPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is above grid range of " << maxPt << std::endl;
+	Double_t minAn = fGC->GetMinAng();
+	//if (angd < minAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd 
+	//	<< " is below grid range of " << minAn << std::endl;
+	Double_t maxAn = fGC->GetMaxAng();
+	//if (angd > maxAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd
+	//	<< " is above grid range of " << maxAn << std::endl;
 	//
-	TMatrixDSym Cov = GC->GetCov(pt, angd);
+	TMatrixDSym Cov(5);
+	//
+	// Check if track origin is inside beampipe and betwen the first disks
+	//
+	Double_t Rin = fG->GetRmin();
+	Double_t ZinPos = fG->GetZminPos();
+	Double_t ZinNeg = fG->GetZminNeg();
+	Bool_t inside = TrkUtil::IsInside(fGenX, Rin, ZinNeg, ZinPos); // Check if in inner box
+	if (inside)
+	{
+		//std::cout<<"ObsTrk:: inside: x= "<<fGenX(0)<<", y= "<<fGenX(1)
+                //                        <<", z= "<<fGenX(2)<<std::endl;
+		// Observed track parameters
+		Double_t pt = fGenP.Pt();
+		Double_t angd = fGenP.Theta() * 180. / TMath::Pi();
+		Cov = fGC->GetCov(pt, angd);				// Track covariance
+	}
+	else
+	{
+		//std::cout<<"ObsTrk:: outside: x= "<<fGenX(0)<<", y= "<<fGenX(1)
+                //                         <<", z= "<<fGenX(2)<<std::endl;
+		SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
+		Bool_t Res = kTRUE; Bool_t MS = kTRUE;
+		trk->CovCalc(Res, MS);					// Calculate covariance matrix
+		Cov = trk->Cov();					// Track covariance
+		delete trk;
+	}
+	//
 	fCov = Cov;
 	//
 	// Now do Choleski decomposition and random number extraction, with appropriate stabilization
 	//
-	TMatrixDSym CvN = Cov;
-	TMatrixDSym DCv(5); DCv.Zero();
-	TMatrixDSym DCvInv(5); DCvInv.Zero();
-	for (Int_t id = 0; id < 5; id++)
-	{
-		Double_t dVal = TMath::Sqrt(Cov(id, id));
-		DCv   (id, id) = dVal;
-		DCvInv(id, id) = 1.0 / dVal;
-	}
-	CvN.Similarity(DCvInv);			// Normalize diagonal to 1
-	TDecompChol Chl(CvN);
-	Bool_t OK = Chl.Decompose();		// Choleski decomposition of normalized matrix
-	TMatrixD U = Chl.GetU();			// Get Upper triangular matrix
-	TMatrixD Ut(TMatrixD::kTransposed, U); // Transposed of U (lower triangular)
-	TVectorD r(5);
-	for (Int_t i = 0; i < 5; i++)r(i) = gRandom->Gaus(0.0, 1.0);		// Array of normal random numbers
-	TVectorD oPar = gPar + DCv*(Ut*r);	// Observed parameter vector
+	TVectorD oPar = TrkUtil::CovSmear(gPar, Cov);
 	//
 	return oPar;
 }

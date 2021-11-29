@@ -5,6 +5,7 @@
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
 #include <TDecompChol.h>
+#include "SolGeom.h"
 #include "TrkUtil.h"
 #include "SolGridCov.h"
 //
@@ -22,7 +23,8 @@ class ObsTrk: public TrkUtil
 	//
 private:	
 	Double_t fB;					// Solenoid magnetic field
-	SolGridCov *fGC;				// Covariance matrix grid
+	SolGridCov* fGC;				// Covariance matrix grid
+	SolGeom*    fG;					// Tracker geometry
 	Double_t fGenQ;					// Generated track charge
 	Double_t fObsQ;					// Observed  track charge
 	TVector3 fGenX;					// Generated track origin (x,y,z)
@@ -46,14 +48,14 @@ private:
 	//
 	// Service routines
 	//
-	TVectorD GenToObsPar(TVectorD gPar, SolGridCov* GC);
+	TVectorD GenToObsPar(TVectorD gPar);
 	//
 public:
 	//
 	// Constructors
 	// x(3) track origin, p(3) track momentum at origin, Q charge, B magnetic field in Tesla
-	ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t B, SolGridCov *GC);	// Initialize and generate smeared 
-	ObsTrk(Double_t *x, Double_t *p, Double_t Q, Double_t B, SolGridCov* GC);	// Initialize and generate smeared track
+	ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G);	// Initialize and generate smeared 
+	ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G);	// Initialize and generate smeared track
 	// Destructor
 	~ObsTrk();
 	//

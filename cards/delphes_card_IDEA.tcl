@@ -916,6 +916,7 @@ module TreeWriter TreeWriter {
     add Branch TruthVertexFinder/vertices GenVertex Vertex
 
     add Branch EFlowTrackMerger/eflowTracks EFlowTrack Track
+    add Branch TrackSmearing/tracks Track Track
     add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
     add Branch TimeOfFlightNeutralHadron/eflowNeutralHadrons EFlowNeutralHadron Tower
 
