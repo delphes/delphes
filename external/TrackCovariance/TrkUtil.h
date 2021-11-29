@@ -6,6 +6,7 @@
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
 #include <TRandom.h>
+#include <TMath.h>
 //
 //
 // Class test
