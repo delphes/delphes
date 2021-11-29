@@ -22,14 +22,14 @@ class AcceptanceClx {
 	//
 private:
 	TMatrixF fAcc;		// Acceptance matrix
-	Int_t fNPtNodes;	// Numer of Pt nodes
+	Int_t fNPtNodes;	// Numer of Pt nodes 
 	TVectorF fPtArray;	// Array of Pt nodes
-	Int_t fNThNodes;	// Numer of Theta nodes
+	Int_t fNThNodes;	// Numer of Theta nodes 
 	TVectorF fThArray;	// Array of Theta nodes		(Theta in degrees)
 	//
 	// Service routines
 	void VecInsert(Int_t i, Float_t x, TVectorF& Vec);
-	void SplitPt(Int_t i, TVectorF &AccPt);
+	void SplitPt(Int_t i, TVectorF &AccPt);	
 	void SplitTh(Int_t i, TVectorF &AccTh);
 public:
 	//
@@ -43,7 +43,7 @@ public:
 	TMatrixF* GetAccMatrix() { return &fAcc; }
 	Int_t GetNrPt() { return fNPtNodes; }
 	Int_t GetNrTh() { return fNThNodes; }
-
+	
 	TVectorF* GetPtArray() { return &fPtArray; }
 	TVectorF* GetThArray() { return &fThArray; }
 	//

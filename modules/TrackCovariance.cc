@@ -102,6 +102,12 @@ void TrackCovariance::Process()
   Candidate *candidate, *mother, *particle;
   Double_t mass, p, pt, q, ct;
   Double_t dd0, ddz, dphi, dct, dp, dpt, dC;
+  //
+  // Get cylindrical box for fast track simulation
+  //
+  Double_t Rin = fGeometry->GetRmin();
+  Double_t ZinPos = fGeometry->GetZminPos();
+  Double_t ZinNeg = fGeometry->GetZminNeg();
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
@@ -114,11 +120,15 @@ void TrackCovariance::Process()
     const TLorentzVector &candidatePosition = particle->Position*1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
-    if ( !fCovariance->IsAccepted(candidateMomentum.Vect()) ) continue;
+    Bool_t inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
+    Bool_t Accept = kTRUE;
+    if(inside) Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
+    else       Accept = fCovariance->IsAccepted(candidatePosition.Vect(),candidateMomentum.Vect(), fGeometry);
+    if(!Accept) continue;
 
     mass = candidateMomentum.M();
 
-    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz, fCovariance);
+    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
 
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());

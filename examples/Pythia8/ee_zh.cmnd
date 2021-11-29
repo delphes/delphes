@@ -1,6 +1,6 @@
 
 ! number of events to generate
-Main:numberOfEvents = 1000         ! number of events to generate
+Main:numberOfEvents = 1000       ! number of events to generate
 
 Beams:idA = 11                   ! first beam, e- = -11
 Beams:idB = -11                  ! second beam, e+ = 11

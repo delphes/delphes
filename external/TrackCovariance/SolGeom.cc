@@ -86,6 +86,10 @@ void SolGeom::Read(const char *data)
     if (tyLay == 2) fFlay++;
     if (flLay == 1) fNm++;
   }
+//
+// Define inner box for fast tracking
+//
+    SetMinBoundaries();
 }
 
 SolGeom::~SolGeom()
@@ -102,4 +106,24 @@ SolGeom::~SolGeom()
   delete[] fsgLayU;
   delete[] fsgLayL;
   delete[] fflLay;
+}
+
+//
+// Get inner boundaries of cylindrical box for fast simulation
+//
+void SolGeom::SetMinBoundaries()
+{
+	// Get radius of first barrel layer
+	fRmin = 1000000.0;
+	fZminPos = 1000000.0;
+	fZminNeg = -1000000.0;
+	for (Int_t i = 0; i < fNlay; i++){
+		if (ftyLay[i] == 1) {				// Cylinders
+			if (frPos[i] < fRmin) fRmin = frPos[i];
+		}
+		if (ftyLay[i] == 2) {				// Disks
+			if (frPos[i] > 0.0 && frPos[i] < fZminPos) fZminPos = frPos[i];	// Positive direction
+			if (frPos[i] < 0.0 && frPos[i] > fZminNeg) fZminNeg = frPos[i];	// Negative direction
+		}
+	}
 }

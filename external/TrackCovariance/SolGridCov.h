@@ -17,8 +17,8 @@ private:
   Int_t fNang;       // Number of angle points in grid
   TVectorD fAnga;    // Array of angle points in degrees
   TMatrixDSym *fCov; // Pointers to grid of covariance matrices
-	AcceptanceClx *fAcc;				// Pointer to acceptance class
-	Int_t fNminHits;					// Minimum number of hits to accept track
+  AcceptanceClx *fAcc;		// Pointer to acceptance class
+  Int_t fNminHits;		// Minimum number of hits to accept track
   // Service routines
   Int_t GetMinIndex(Double_t xval, Int_t N, TVectorD x); // Find bin
   TMatrixDSym MakePosDef(TMatrixDSym NormMat); // Force positive definitness
@@ -39,9 +39,10 @@ public:
 	AcceptanceClx* AccPnt() { return fAcc; };			// Return Acceptance class pointer
 	void SetMinHits(Int_t MinHits) { fNminHits = MinHits; };	// Set minimum number of hits to accept (default = 6)
 	Int_t GetMinHits() { return fNminHits; };
-	Bool_t IsAccepted(Double_t pt, Double_t Theta);		// From pt (GeV) and theta (degrees)
-	Bool_t IsAccepted(Double_t *p);						// From momentum components (GeV)
-	Bool_t IsAccepted(TVector3 p);						// As above in Vector3 format
+	Bool_t IsAccepted(Double_t pt, Double_t Theta);			// From pt (GeV) and theta (degrees)
+	Bool_t IsAccepted(Double_t *p);					// From momentum components (GeV)
+	Bool_t IsAccepted(TVector3 p);					// As above in Vector3 format
+	Bool_t IsAccepted(TVector3 x, TVector3 p, SolGeom *G);		// As above checking track origin
 
 };
 

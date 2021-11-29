@@ -102,8 +102,31 @@ Bool_t SolGridCov::IsAccepted(TVector3 p)
 	//
 	return Accept;
 }
+//
+// Detailed acceptance check
+//
+Bool_t SolGridCov::IsAccepted(TVector3 x, TVector3 p, SolGeom* G)
+{
+	Bool_t Accept = kFALSE;
+	//
+	// Check if track origin is inside beampipe and betwen the first disks
+	//
+	Double_t Rin = G->GetRmin();
+	Double_t ZinPos = G->GetZminPos();
+	Double_t ZinNeg = G->GetZminNeg();
+	Bool_t inside = TrkUtil::IsInside(x, Rin, ZinNeg, ZinPos); // Check if in inner box
+	if (inside) Accept = IsAccepted(p);
+	else
+	{
+		SolTrack* trk = new SolTrack(x, p, G);
+		if (trk->nmHit() >= fNminHits)Accept = kTRUE;
+		delete trk;
+	}
+	//
+	return Accept;
+}
 
-
+//
 // Find bin in grid
 Int_t SolGridCov::GetMinIndex(Double_t xval, Int_t N, TVectorD x)
 {
@@ -192,7 +215,7 @@ TMatrixDSym SolGridCov::GetCov(Double_t pt, Double_t ang)
   TDecompChol Chl(CvN);
   if (!Chl.Decompose())
   {
-    cout << "SolGridCov::GetCov: Interpolated matrix not positive definite. Recovering ...." << endl;
+    std::cout << "SolGridCov::GetCov: Interpolated matrix not positive definite. Recovering ...." << std::endl;
     TMatrixDSym rCv = MakePosDef(CvN); CvN = rCv;
     TMatrixDSym DCv(5); DCv.Zero();
     for (Int_t id = 0; id < 5; id++) DCv(id, id) = TMath::Sqrt(Cv(id, id));
