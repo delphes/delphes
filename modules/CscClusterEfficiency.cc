@@ -69,7 +69,6 @@ CscClusterEfficiency::~CscClusterEfficiency()
 void CscClusterEfficiency::Init()
 {
   // read CscClusterEfficiency formula
-  cout<<"initialize"<<endl;
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
   // import input array

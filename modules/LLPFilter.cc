@@ -150,7 +150,7 @@ void LLPFilter::Process()
     if(pt < fPTMin) continue;
     if (fDaughterNumber > 0)
     {
-      if (candidate->D2-candidate->D1 != fDaughterNumber) continue;//require 3 daughters
+      if (candidate->D2-candidate->D1 != fDaughterNumber) continue;//require at least fDaughterNumber daughters
 
     }
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end()) continue; //require pdgID is one of the LLP id
@@ -159,42 +159,31 @@ void LLPFilter::Process()
     // loop over particles to find LLP daughters and assign EM and hadronic energy
     candidate->Eem = 0.0;
     candidate->Ehad = 0.0;
-
     fItParticleInputArray->Reset();
 
     while((daughter = static_cast<Candidate *>(fItParticleInputArray->Next())))
     {
 
-      // check mother is LLP
-      //check ID is 123456 or neutrinos or charged leptons
       daughterPdg = daughter->PID;
       if (daughter->Status != 1)continue;
-
       if (daughter->IsPU)continue;
-
       if (abs(daughterPdg)==12 || abs(daughterPdg)==14 || abs(daughterPdg)==16 || abs(daughterPdg)==13)continue; // ignore neutrinos and muons
-
-
       if (abs(daughterPdg) > 1000000) continue;//ignore BSM particles
+      
       const TLorentzVector &daughterProdPosition = daughter->Position;
       const TLorentzVector &daughterMomentum = daughter->Momentum;
-
       const TLorentzVector distance = daughterProdPosition - candidateDecayPosition;
 
-      if (sqrt(pow(distance.X(), 2) + pow(distance.Y(), 2) + pow(distance.Z(), 2))>100) continue; //if vertices are close, then matched, this 1 m only works for those decay in muon system, would be too large for tracker related
+      // look for mother until find LLP or reach the top of the tree
       tempCandidate = daughter;
       while(tempCandidate->M1 != -1 && tempCandidate->M1 != index)
       {
         tempCandidate  = static_cast<Candidate *>(fParticleInputArray->At(tempCandidate->M1));
-        // if (tempCandidate->PID == pdgCode)break;
-
       }
       if (tempCandidate->M1 == -1) continue;
 
       if (abs(daughterPdg)==11 || abs(daughterPdg)==22 || abs(daughterPdg)==111)candidate->Eem += daughterMomentum.E();
       else candidate->Ehad += daughterMomentum.E();
-
-
     }
 
 

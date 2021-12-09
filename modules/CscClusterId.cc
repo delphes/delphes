@@ -112,7 +112,7 @@ void CscClusterId::Process()
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    NStationEff = fFormula->Eval(decayR, decayZ, Ehad); //pt is used as argument in DelphesCscClusterFormula
+    NStationEff = fFormula->Eval(decayR, decayZ, Ehad);
 
     // assign average station for the cluster
     if (decayZ < 6320) avgStation = 1;
