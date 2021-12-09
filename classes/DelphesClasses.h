@@ -161,6 +161,13 @@ public:
   Float_t Y; // particle vertex position (y component) | hepevt.vhep[number][1]
   Float_t Z; // particle vertex position (z component) | hepevt.vhep[number][2]
 
+  Float_t decayX;
+  Float_t decayY;
+  Float_t decayZ;
+  Float_t decayT;
+
+  Float_t ctau;
+
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -532,6 +539,38 @@ public:
 
   ClassDef(HectorHit, 1)
 };
+//---------------------------------------------------------------------------
+
+class CscCluster: public SortableObject
+{
+public:
+  Int_t NHits; //nCSC hits
+  Float_t Eta; // eta of LLP
+  Float_t Phi; // phi of LLP
+  Float_t PT; // pt of LLP
+  Float_t Px;// px of LLP
+  Float_t Py;// py of LLP
+  Float_t Pz;// pz of LLP
+  Float_t E; // E of LLP
+  Float_t Ehad; // had energy of LLP
+  Float_t Eem; // em energy of LLP
+
+  Float_t pid; // LLP pid
+
+  Float_t T; // LLP decay time-photon travel time
+  Float_t X; // LLP decay x
+  Float_t Y; //  LLP decay y
+  Float_t Z; //  LLP decay z
+  Float_t R; //  LLP decay z
+  Float_t beta;
+  Float_t ctau;
+
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  ClassDef(CscCluster, 4)
+};
 
 //---------------------------------------------------------------------------
 
@@ -575,7 +614,7 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, InitialPosition, PositionError, Area;
+  TLorentzVector Momentum, Position, InitialPosition, DecayPosition, PositionError, Area;
 
   Float_t L; // path length
   Float_t ErrorT; // path length

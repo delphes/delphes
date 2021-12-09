@@ -56,6 +56,8 @@
 #pragma link C++ class Photon+;
 #pragma link C++ class Electron+;
 #pragma link C++ class Muon+;
+#pragma link C++ class CscCluster+;
+
 #pragma link C++ class Jet+;
 #pragma link C++ class Track+;
 #pragma link C++ class Tower+;
@@ -64,4 +66,3 @@
 #pragma link C++ class Candidate+;
 
 #endif
-
