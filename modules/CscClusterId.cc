@@ -28,7 +28,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesCscClusterFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -54,7 +54,7 @@ using namespace std;
 CscClusterId::CscClusterId() :
   fFormula(0), fItInputArray(0)
 {
-  fFormula = new DelphesFormula;
+  fFormula = new DelphesCscClusterFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ void CscClusterId::Process()
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    NStationEff = fFormula->Eval(decayR, decayZ, Ehad); //pt is used as argument in DelphesFormula
+    NStationEff = fFormula->Eval(decayR, decayZ, Ehad); //pt is used as argument in DelphesCscClusterFormula
 
     // assign average station for the cluster
     if (decayZ < 6320) avgStation = 1;

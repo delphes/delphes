@@ -28,7 +28,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesCscClusterFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -54,7 +54,7 @@ using namespace std;
 CscClusterEfficiency::CscClusterEfficiency() :
   fFormula(0), fItInputArray(0)
 {
-  fFormula = new DelphesFormula;
+  fFormula = new DelphesCscClusterFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ CscClusterEfficiency::~CscClusterEfficiency()
 void CscClusterEfficiency::Init()
 {
   // read CscClusterEfficiency formula
-
+  cout<<"initialize"<<endl;
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
   // import input array
@@ -105,8 +105,8 @@ void CscClusterEfficiency::Process()
     Ehad = candidate->Ehad;
     Eem = candidate->Eem;
     // apply an efficency formula
-    //pt, eta, phi, energy
     if(gRandom->Uniform() > fFormula->Eval(decayR, decayZ, Ehad, Eem)) continue;
+
 
     fOutputArray->Add(candidate);
   }

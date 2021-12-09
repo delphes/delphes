@@ -16,43 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CscClusterEfficiency_h
-#define CscClusterEfficiency_h
+#ifndef DelphesCscClusterFormula_h
+#define DelphesCscClusterFormula_h
 
-/** \class CscClusterEfficiency
- *
- *  Selects candidates from the InputArray according to the CscClusterEfficiency formula.
- *
- *  \author P. Demin - UCL, Louvain-la-Neuve
- *
- */
+#include "TFormula.h"
 
-#include "classes/DelphesModule.h"
+class Candidate;
 
-class TIterator;
-class TObjArray;
-class DelphesCscClusterFormula;
-
-class CscClusterEfficiency: public DelphesModule
+class DelphesCscClusterFormula: public TFormula
 {
 public:
-  CscClusterEfficiency();
-  ~CscClusterEfficiency();
+  DelphesCscClusterFormula();
 
-  void Init();
-  void Process();
-  void Finish();
+  DelphesCscClusterFormula(const char *name, const char *expression);
 
-private:
-  DelphesCscClusterFormula *fFormula; //!
+  ~DelphesCscClusterFormula();
 
-  TIterator *fItInputArray; //!
+  Int_t Compile(const char *expression);
 
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
-
-  ClassDef(CscClusterEfficiency, 1)
+  Double_t Eval(Double_t deltaR, Double_t deltaZ = 0, Double_t Ehad = 0, Double_t Eem = 0);
 };
 
-#endif
+#endif /* DelphesCscClusterFormula_h */

@@ -31,7 +31,7 @@
 
 class TIterator;
 class TObjArray;
-class DelphesFormula;
+class DelphesCscClusterFormula;
 
 class CscClusterId: public DelphesModule
 {
@@ -44,7 +44,7 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  DelphesCscClusterFormula *fFormula; //!
 
   TIterator *fItInputArray; //!
 

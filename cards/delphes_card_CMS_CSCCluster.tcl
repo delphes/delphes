@@ -65,6 +65,7 @@ set ExecutionPath {
   TreeWriter
 }
 
+
 #################################
 # Propagate particles in cylinder
 #################################
@@ -407,15 +408,6 @@ module PdgCodeFilter ElectronFilter {
 # LLP filter
 #################
 
-module PdgCodeFilter HiggsFilter {
-set InputArray Delphes/allParticles
-  set OutputArray higgs
-  set Invert true
-  add PdgCode {25}
-}
-
-
-
 
 # filter out LLPs that decay in CSC
 module LLPFilter CSCFilter {
@@ -425,9 +417,9 @@ module LLPFilter CSCFilter {
   # DecayRegion = 0: no cuts on decay region
   # DecayRegion = 1: select LLP that decays in CSC volume
   # DecayRegion = 2: select LLP that decays outside of calorimeters, for genMET calculation
-  set RequireStatus true
-  set Status 2
-  add PdgCode {9000005}
+  set RequireStatus false
+  add PdgCode {1500001}
+
 
 }
 # filter out LLPs regardless of decay position
@@ -435,13 +427,12 @@ module LLPFilter llpFilter {
   set InputArray Delphes/allParticles
   set OutputArray LLP
   set DecayRegion 0
-  set RequireStatus true
-  set Status 2
+  set RequireStatus false
 
   # DecayRegion = 0: no cuts on decay region
   # DecayRegion = 1: select LLP that decays in CSC volume
   # DecayRegion = 2: select LLP that decays outside of calorimeters, for genMET calculation
-  add PdgCode {9000005}
+  add PdgCode {1500001}
 
 }
 
@@ -454,175 +445,174 @@ module CscClusterEfficiency ClusterEfficiency {
   # efficiency formula for Csc Cluster, as a function of LLP decay vertex in R, Z and hadronic and EM energy
   set EfficiencyFormula {
 
-    (pt > 3900 && eta < 6710) * ((energy >= 0.0 && energy < 25.0 && 0.0 == phi)*(0.0049) +
-    (energy >= 0.0 && energy < 25.0&& phi > 0.0 && phi < 25.0)*(0.0130) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 25.0 && phi < 50.0)*(0.0346) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 50.0 && phi < 75.0)*(0.0623) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 75.0 && phi < 100.0)*(0.0919) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 100.0 && phi < 150.0)*(0.1086) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 150.0 && phi < 200.0)*(0.1292) +
-    (energy >= 0.0 && energy < 25.0 && phi >= 200.0)*(0.1106) +
-    (energy >= 25.0 && energy < 50.0 && 0.0 == phi)*(0.0249) +
-    (energy >= 25.0 && energy < 50.0&& phi > 0.0 && phi < 25.0)*(0.0285) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 25.0 && phi < 50.0)*(0.0501) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 50.0 && phi < 75.0)*(0.0841) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 75.0 && phi < 100.0)*(0.1021) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 100.0 && phi < 150.0)*(0.1129) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 150.0 && phi < 200.0)*(0.1141) +
-    (energy >= 25.0 && energy < 50.0 && phi >= 200.0)*(0.1370) +
-    (energy >= 50.0 && energy < 75.0 && 0.0 == phi)*(0.0282) +
-    (energy >= 50.0 && energy < 75.0&& phi > 0.0 && phi < 25.0)*(0.0445) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 25.0 && phi < 50.0)*(0.0643) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 50.0 && phi < 75.0)*(0.0903) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 75.0 && phi < 100.0)*(0.0998) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 100.0 && phi < 150.0)*(0.1420) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 150.0 && phi < 200.0)*(0.1429) +
-    (energy >= 50.0 && energy < 75.0 && phi >= 200.0)*(0.0882) +
-    (energy >= 75.0 && energy < 100.0 && 0.0 == phi)*(0.0594) +
-    (energy >= 75.0 && energy < 100.0&& phi > 0.0 && phi < 25.0)*(0.0521) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 25.0 && phi < 50.0)*(0.0605) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 50.0 && phi < 75.0)*(0.0791) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 75.0 && phi < 100.0)*(0.1117) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 100.0 && phi < 150.0)*(0.0862) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 150.0 && phi < 200.0)*(0.0698) +
-    (energy >= 75.0 && energy < 100.0 && phi >= 200.0)*(0.0500) +
-    (energy >= 100.0 && energy < 125.0 && 0.0 == phi)*(0.0758) +
-    (energy >= 100.0 && energy < 125.0&& phi > 0.0 && phi < 25.0)*(0.0414) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 25.0 && phi < 50.0)*(0.0755) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 50.0 && phi < 75.0)*(0.1027) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 75.0 && phi < 100.0)*(0.0440) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 100.0 && phi < 150.0)*(0.0811) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 150.0 && phi < 200.0)*(0.1538) +
-    (energy >= 100.0 && energy < 125.0 && phi >= 200.0)*(0.0833) +
-    (energy >= 125.0 && energy < 150.0 && 0.0 == phi)*(0.0300) +
-    (energy >= 125.0 && energy < 150.0&& phi > 0.0 && phi < 25.0)*(0.0609) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 25.0 && phi < 50.0)*(0.0745) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 50.0 && phi < 75.0)*(0.0610) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 75.0 && phi < 100.0)*(0.1224) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 100.0 && phi < 150.0)*(0.1667) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 150.0 && phi < 200.0)*(0.0000) +
-    (energy >= 125.0 && energy < 150.0 && phi >= 200.0)*(0.0000) +
-    (energy >= 150.0 && 0.0 == phi)*(0.0282) +
-    (energy >= 150.0&& phi > 0.0 && phi < 25.0)*(0.0809) +
-    (energy >= 150.0&& phi >= 25.0 && phi < 50.0)*(0.0352) +
-    (energy >= 150.0&& phi >= 50.0 && phi < 75.0)*(0.0984) +
-    (energy >= 150.0&& phi >= 75.0 && phi < 100.0)*(0.0968) +
-    (energy >= 150.0&& phi >= 100.0 && phi < 150.0)*(0.1282) +
-    (energy >= 150.0&& phi >= 150.0 && phi < 200.0)*(0.2105) +
-    (energy >= 150.0 && phi >= 200.0)*(0.0769)) +
-    (eta > 6710) * ((energy >= 0.0 && energy < 25.0 && 0.0 == phi)*(0.0184) +
-    (energy >= 0.0 && energy < 25.0&& phi > 0.0 && phi < 25.0)*(0.0772) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 25.0 && phi < 50.0)*(0.2086) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 50.0 && phi < 75.0)*(0.3091) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 75.0 && phi < 100.0)*(0.3867) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 100.0 && phi < 150.0)*(0.4500) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 150.0 && phi < 200.0)*(0.4746) +
-    (energy >= 0.0 && energy < 25.0 && phi >= 200.0)*(0.4906) +
-    (energy >= 25.0 && energy < 50.0 && 0.0 == phi)*(0.0955) +
-    (energy >= 25.0 && energy < 50.0&& phi > 0.0 && phi < 25.0)*(0.1461) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 25.0 && phi < 50.0)*(0.2594) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 50.0 && phi < 75.0)*(0.3556) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 75.0 && phi < 100.0)*(0.4165) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 100.0 && phi < 150.0)*(0.4693) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 150.0 && phi < 200.0)*(0.5054) +
-    (energy >= 25.0 && energy < 50.0 && phi >= 200.0)*(0.5219) +
-    (energy >= 50.0 && energy < 75.0 && 0.0 == phi)*(0.1472) +
-    (energy >= 50.0 && energy < 75.0&& phi > 0.0 && phi < 25.0)*(0.1970) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 25.0 && phi < 50.0)*(0.2974) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 50.0 && phi < 75.0)*(0.3783) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 75.0 && phi < 100.0)*(0.4335) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 100.0 && phi < 150.0)*(0.4736) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 150.0 && phi < 200.0)*(0.4937) +
-    (energy >= 50.0 && energy < 75.0 && phi >= 200.0)*(0.5077) +
-    (energy >= 75.0 && energy < 100.0 && 0.0 == phi)*(0.2053) +
-    (energy >= 75.0 && energy < 100.0&& phi > 0.0 && phi < 25.0)*(0.2314) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 25.0 && phi < 50.0)*(0.3114) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 50.0 && phi < 75.0)*(0.3799) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 75.0 && phi < 100.0)*(0.4420) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 100.0 && phi < 150.0)*(0.4502) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 150.0 && phi < 200.0)*(0.5348) +
-    (energy >= 75.0 && energy < 100.0 && phi >= 200.0)*(0.5115) +
-    (energy >= 100.0 && energy < 125.0 && 0.0 == phi)*(0.2198) +
-    (energy >= 100.0 && energy < 125.0&& phi > 0.0 && phi < 25.0)*(0.2404) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 25.0 && phi < 50.0)*(0.3295) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 50.0 && phi < 75.0)*(0.3932) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 75.0 && phi < 100.0)*(0.4327) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 100.0 && phi < 150.0)*(0.4377) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 150.0 && phi < 200.0)*(0.5175) +
-    (energy >= 100.0 && energy < 125.0 && phi >= 200.0)*(0.6087) +
-    (energy >= 125.0 && energy < 150.0 && 0.0 == phi)*(0.2147) +
-    (energy >= 125.0 && energy < 150.0&& phi > 0.0 && phi < 25.0)*(0.2605) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 25.0 && phi < 50.0)*(0.3442) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 50.0 && phi < 75.0)*(0.3622) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 75.0 && phi < 100.0)*(0.4407) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 100.0 && phi < 150.0)*(0.5168) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 150.0 && phi < 200.0)*(0.5056) +
-    (energy >= 125.0 && energy < 150.0 && phi >= 200.0)*(0.4559) +
-    (energy >= 150.0 && 0.0 == phi)*(0.2824) +
-    (energy >= 150.0&& phi > 0.0 && phi < 25.0)*(0.2447) +
-    (energy >= 150.0&& phi >= 25.0 && phi < 50.0)*(0.3519) +
-    (energy >= 150.0&& phi >= 50.0 && phi < 75.0)*(0.3772) +
-    (energy >= 150.0&& phi >= 75.0 && phi < 100.0)*(0.4447) +
-    (energy >= 150.0&& phi >= 100.0 && phi < 150.0)*(0.4703) +
-    (energy >= 150.0&& phi >= 150.0 && phi < 200.0)*(0.4460) +
-    (energy >= 150.0 && phi >= 200.0)*(0.4400)) +
-    (pt < 2700 && eta < 6710) * ((energy >= 0.0 && energy < 25.0 && 0.0 == phi)*(0.0002) +
-    (energy >= 0.0 && energy < 25.0&& phi > 0.0 && phi < 25.0)*(0.0001) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 25.0 && phi < 50.0)*(0.0006) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 50.0 && phi < 75.0)*(0.0014) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 75.0 && phi < 100.0)*(0.0025) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 100.0 && phi < 150.0)*(0.0046) +
-    (energy >= 0.0 && energy < 25.0&& phi >= 150.0 && phi < 200.0)*(0.0060) +
-    (energy >= 0.0 && energy < 25.0 && phi >= 200.0)*(0.0136) +
-    (energy >= 25.0 && energy < 50.0 && 0.0 == phi)*(0.0000) +
-    (energy >= 25.0 && energy < 50.0&& phi > 0.0 && phi < 25.0)*(0.0000) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 25.0 && phi < 50.0)*(0.0006) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 50.0 && phi < 75.0)*(0.0015) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 75.0 && phi < 100.0)*(0.0033) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 100.0 && phi < 150.0)*(0.0051) +
-    (energy >= 25.0 && energy < 50.0&& phi >= 150.0 && phi < 200.0)*(0.0098) +
-    (energy >= 25.0 && energy < 50.0 && phi >= 200.0)*(0.0146) +
-    (energy >= 50.0 && energy < 75.0 && 0.0 == phi)*(0.0000) +
-    (energy >= 50.0 && energy < 75.0&& phi > 0.0 && phi < 25.0)*(0.0001) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 25.0 && phi < 50.0)*(0.0003) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 50.0 && phi < 75.0)*(0.0015) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 75.0 && phi < 100.0)*(0.0038) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 100.0 && phi < 150.0)*(0.0052) +
-    (energy >= 50.0 && energy < 75.0&& phi >= 150.0 && phi < 200.0)*(0.0114) +
-    (energy >= 50.0 && energy < 75.0 && phi >= 200.0)*(0.0181) +
-    (energy >= 75.0 && energy < 100.0 && 0.0 == phi)*(0.0000) +
-    (energy >= 75.0 && energy < 100.0&& phi > 0.0 && phi < 25.0)*(0.0001) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 25.0 && phi < 50.0)*(0.0005) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 50.0 && phi < 75.0)*(0.0022) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 75.0 && phi < 100.0)*(0.0067) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 100.0 && phi < 150.0)*(0.0047) +
-    (energy >= 75.0 && energy < 100.0&& phi >= 150.0 && phi < 200.0)*(0.0113) +
-    (energy >= 75.0 && energy < 100.0 && phi >= 200.0)*(0.0145) +
-    (energy >= 100.0 && energy < 125.0 && 0.0 == phi)*(0.0000) +
-    (energy >= 100.0 && energy < 125.0&& phi > 0.0 && phi < 25.0)*(0.0001) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 25.0 && phi < 50.0)*(0.0003) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 50.0 && phi < 75.0)*(0.0016) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 75.0 && phi < 100.0)*(0.0110) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 100.0 && phi < 150.0)*(0.0029) +
-    (energy >= 100.0 && energy < 125.0&& phi >= 150.0 && phi < 200.0)*(0.0138) +
-    (energy >= 100.0 && energy < 125.0 && phi >= 200.0)*(0.0000) +
-    (energy >= 125.0 && energy < 150.0 && 0.0 == phi)*(0.0000) +
-    (energy >= 125.0 && energy < 150.0&& phi > 0.0 && phi < 25.0)*(0.0000) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 25.0 && phi < 50.0)*(0.0000) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 50.0 && phi < 75.0)*(0.0026) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 75.0 && phi < 100.0)*(0.0047) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 100.0 && phi < 150.0)*(0.0085) +
-    (energy >= 125.0 && energy < 150.0&& phi >= 150.0 && phi < 200.0)*(0.0152) +
-    (energy >= 125.0 && energy < 150.0 && phi >= 200.0)*(0.0164) +
-    (energy >= 150.0 && 0.0 == phi)*(0.0000) +
-    (energy >= 150.0&& phi > 0.0 && phi < 25.0)*(0.0000) +
-    (energy >= 150.0&& phi >= 25.0 && phi < 50.0)*(0.0000) +
-    (energy >= 150.0&& phi >= 50.0 && phi < 75.0)*(0.0000) +
-    (energy >= 150.0&& phi >= 75.0 && phi < 100.0)*(0.0000) +
-    (energy >= 150.0&& phi >= 100.0 && phi < 150.0)*(0.0000) +
-    (energy >= 150.0&& phi >= 150.0 && phi < 200.0)*(0.0080) +
-    (energy >= 150.0 && phi >= 200.0)*(0.0143))
- }
+      (decayR > 3900 && decayZ < 6710) * ((Eem >= 0.0 && Eem < 25.0 && 0.0 == Ehad)*(0.0049) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0130) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0346) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0623) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0919) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.1086) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.1292) +
+      (Eem >= 0.0 && Eem < 25.0 && Ehad >= 200.0)*(0.1106) +
+      (Eem >= 25.0 && Eem < 50.0 && 0.0 == Ehad)*(0.0249) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0285) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0501) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0841) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.1021) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.1129) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.1141) +
+      (Eem >= 25.0 && Eem < 50.0 && Ehad >= 200.0)*(0.1370) +
+      (Eem >= 50.0 && Eem < 75.0 && 0.0 == Ehad)*(0.0282) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0445) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0643) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0903) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0998) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.1420) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.1429) +
+      (Eem >= 50.0 && Eem < 75.0 && Ehad >= 200.0)*(0.0882) +
+      (Eem >= 75.0 && Eem < 100.0 && 0.0 == Ehad)*(0.0594) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0521) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0605) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0791) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.1117) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0862) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0698) +
+      (Eem >= 75.0 && Eem < 100.0 && Ehad >= 200.0)*(0.0500) +
+      (Eem >= 100.0 && Eem < 125.0 && 0.0 == Ehad)*(0.0758) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0414) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0755) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.1027) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0440) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0811) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.1538) +
+      (Eem >= 100.0 && Eem < 125.0 && Ehad >= 200.0)*(0.0833) +
+      (Eem >= 125.0 && Eem < 150.0 && 0.0 == Ehad)*(0.0300) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0609) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0745) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0610) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.1224) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.1667) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0000) +
+      (Eem >= 125.0 && Eem < 150.0 && Ehad >= 200.0)*(0.0000) +
+      (Eem >= 150.0 && 0.0 == Ehad)*(0.0282) +
+      (Eem >= 150.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0809) +
+      (Eem >= 150.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0352) +
+      (Eem >= 150.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0984) +
+      (Eem >= 150.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0968) +
+      (Eem >= 150.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.1282) +
+      (Eem >= 150.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.2105) +
+      (Eem >= 150.0 && Ehad >= 200.0)*(0.0769)) +
+      (decayZ > 6710) * ((Eem >= 0.0 && Eem < 25.0 && 0.0 == Ehad)*(0.0184) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0772) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.2086) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3091) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.3867) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.4500) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.4746) +
+      (Eem >= 0.0 && Eem < 25.0 && Ehad >= 200.0)*(0.4906) +
+      (Eem >= 25.0 && Eem < 50.0 && 0.0 == Ehad)*(0.0955) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad > 0.0 && Ehad < 25.0)*(0.1461) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.2594) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3556) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.4165) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.4693) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.5054) +
+      (Eem >= 25.0 && Eem < 50.0 && Ehad >= 200.0)*(0.5219) +
+      (Eem >= 50.0 && Eem < 75.0 && 0.0 == Ehad)*(0.1472) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad > 0.0 && Ehad < 25.0)*(0.1970) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.2974) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3783) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.4335) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.4736) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.4937) +
+      (Eem >= 50.0 && Eem < 75.0 && Ehad >= 200.0)*(0.5077) +
+      (Eem >= 75.0 && Eem < 100.0 && 0.0 == Ehad)*(0.2053) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad > 0.0 && Ehad < 25.0)*(0.2314) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.3114) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3799) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.4420) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.4502) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.5348) +
+      (Eem >= 75.0 && Eem < 100.0 && Ehad >= 200.0)*(0.5115) +
+      (Eem >= 100.0 && Eem < 125.0 && 0.0 == Ehad)*(0.2198) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad > 0.0 && Ehad < 25.0)*(0.2404) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.3295) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3932) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.4327) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.4377) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.5175) +
+      (Eem >= 100.0 && Eem < 125.0 && Ehad >= 200.0)*(0.6087) +
+      (Eem >= 125.0 && Eem < 150.0 && 0.0 == Ehad)*(0.2147) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad > 0.0 && Ehad < 25.0)*(0.2605) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.3442) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3622) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.4407) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.5168) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.5056) +
+      (Eem >= 125.0 && Eem < 150.0 && Ehad >= 200.0)*(0.4559) +
+      (Eem >= 150.0 && 0.0 == Ehad)*(0.2824) +
+      (Eem >= 150.0&& Ehad > 0.0 && Ehad < 25.0)*(0.2447) +
+      (Eem >= 150.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.3519) +
+      (Eem >= 150.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.3772) +
+      (Eem >= 150.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.4447) +
+      (Eem >= 150.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.4703) +
+      (Eem >= 150.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.4460) +
+      (Eem >= 150.0 && Ehad >= 200.0)*(0.4400)) +
+      (decayR < 2700 && decayZ < 6710) * ((Eem >= 0.0 && Eem < 25.0 && 0.0 == Ehad)*(0.0002) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0001) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0006) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0014) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0025) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0046) +
+      (Eem >= 0.0 && Eem < 25.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0060) +
+      (Eem >= 0.0 && Eem < 25.0 && Ehad >= 200.0)*(0.0136) +
+      (Eem >= 25.0 && Eem < 50.0 && 0.0 == Ehad)*(0.0000) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0000) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0006) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0015) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0033) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0051) +
+      (Eem >= 25.0 && Eem < 50.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0098) +
+      (Eem >= 25.0 && Eem < 50.0 && Ehad >= 200.0)*(0.0146) +
+      (Eem >= 50.0 && Eem < 75.0 && 0.0 == Ehad)*(0.0000) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0001) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0003) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0015) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0038) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0052) +
+      (Eem >= 50.0 && Eem < 75.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0114) +
+      (Eem >= 50.0 && Eem < 75.0 && Ehad >= 200.0)*(0.0181) +
+      (Eem >= 75.0 && Eem < 100.0 && 0.0 == Ehad)*(0.0000) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0001) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0005) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0022) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0067) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0047) +
+      (Eem >= 75.0 && Eem < 100.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0113) +
+      (Eem >= 75.0 && Eem < 100.0 && Ehad >= 200.0)*(0.0145) +
+      (Eem >= 100.0 && Eem < 125.0 && 0.0 == Ehad)*(0.0000) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0001) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0003) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0016) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0110) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0029) +
+      (Eem >= 100.0 && Eem < 125.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0138) +
+      (Eem >= 100.0 && Eem < 125.0 && Ehad >= 200.0)*(0.0000) +
+      (Eem >= 125.0 && Eem < 150.0 && 0.0 == Ehad)*(0.0000) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0000) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0000) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0026) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0047) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0085) +
+      (Eem >= 125.0 && Eem < 150.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0152) +
+      (Eem >= 125.0 && Eem < 150.0 && Ehad >= 200.0)*(0.0164) +
+      (Eem >= 150.0 && 0.0 == Ehad)*(0.0000) +
+      (Eem >= 150.0&& Ehad > 0.0 && Ehad < 25.0)*(0.0000) +
+      (Eem >= 150.0&& Ehad >= 25.0 && Ehad < 50.0)*(0.0000) +
+      (Eem >= 150.0&& Ehad >= 50.0 && Ehad < 75.0)*(0.0000) +
+      (Eem >= 150.0&& Ehad >= 75.0 && Ehad < 100.0)*(0.0000) +
+      (Eem >= 150.0&& Ehad >= 100.0 && Ehad < 150.0)*(0.0000) +
+      (Eem >= 150.0&& Ehad >= 150.0 && Ehad < 200.0)*(0.0080) +
+      (Eem >= 150.0 && Ehad >= 200.0)*(0.0143)) }
 }
 
 module CscClusterId CutBasedIDEfficiency {
@@ -631,30 +621,30 @@ set InputArray CSCFilter/LLP
 
   # efficiency formula for Csc Cluster, as a function of LLP decay vertex in R, Z and hadronic and EM energy
   set EfficiencyFormula {
-    (pt > 3900 && eta < 6710) * ((0.0 == phi)*(0.0656) +
-    (phi > 0.0 && phi < 25.0)*(0.0777) +
-    (phi >= 25.0 && phi < 50.0)*(0.1607) +
-    (phi >= 50.0 && phi < 75.0)*(0.2294) +
-    (phi >= 75.0 && phi < 100.0)*(0.3146) +
-    (phi >= 100.0 && phi < 150.0)*(0.3107) +
-    (phi >= 150.0 && phi < 200.0)*(0.3177) +
-    (phi >= 200.0)*(0.3229)) +
-    (eta > 6710) * ((0.0 == phi)*(0.2987) +
-    (phi > 0.0 && phi < 25.0)*(0.3100) +
-    (phi >= 25.0 && phi < 50.0)*(0.4476) +
-    (phi >= 50.0 && phi < 75.0)*(0.5335) +
-    (phi >= 75.0 && phi < 100.0)*(0.5961) +
-    (phi >= 100.0 && phi < 150.0)*(0.6368) +
-    (phi >= 150.0 && phi < 200.0)*(0.6814) +
-    (phi >= 200.0)*(0.6998)) +
-    (pt < 2700 && eta < 6710) * ((0.0 == phi)*(0.8604) +
-    (phi > 0.0 && phi < 25.0)*(0.3335) +
-    (phi >= 25.0 && phi < 50.0)*(0.2457) +
-    (phi >= 50.0 && phi < 75.0)*(0.1831) +
-    (phi >= 75.0 && phi < 100.0)*(0.2100) +
-    (phi >= 100.0 && phi < 150.0)*(0.2443) +
-    (phi >= 150.0 && phi < 200.0)*(0.2532) +
-    (phi >= 200.0)*(0.2404))
+    (decayR > 3900 && decayZ < 6710) * ((0.0 == Ehad)*(0.0656) +
+    (Ehad > 0.0 && Ehad < 25.0)*(0.0777) +
+    (Ehad >= 25.0 && Ehad < 50.0)*(0.1607) +
+    (Ehad >= 50.0 && Ehad < 75.0)*(0.2294) +
+    (Ehad >= 75.0 && Ehad < 100.0)*(0.3146) +
+    (Ehad >= 100.0 && Ehad < 150.0)*(0.3107) +
+    (Ehad >= 150.0 && Ehad < 200.0)*(0.3177) +
+    (Ehad >= 200.0)*(0.3229)) +
+    (decayZ > 6710) * ((0.0 == Ehad)*(0.2987) +
+    (Ehad > 0.0 && Ehad < 25.0)*(0.3100) +
+    (Ehad >= 25.0 && Ehad < 50.0)*(0.4476) +
+    (Ehad >= 50.0 && Ehad < 75.0)*(0.5335) +
+    (Ehad >= 75.0 && Ehad < 100.0)*(0.5961) +
+    (Ehad >= 100.0 && Ehad < 150.0)*(0.6368) +
+    (Ehad >= 150.0 && Ehad < 200.0)*(0.6814) +
+    (Ehad >= 200.0)*(0.6998)) +
+    (decayR < 2700 && decayZ < 6710) * ((0.0 == Ehad)*(0.8604) +
+    (Ehad > 0.0 && Ehad < 25.0)*(0.3335) +
+    (Ehad >= 25.0 && Ehad < 50.0)*(0.2457) +
+    (Ehad >= 50.0 && Ehad < 75.0)*(0.1831) +
+    (Ehad >= 75.0 && Ehad < 100.0)*(0.2100) +
+    (Ehad >= 100.0 && Ehad < 150.0)*(0.2443) +
+    (Ehad >= 150.0 && Ehad < 200.0)*(0.2532) +
+    (Ehad >= 200.0)*(0.2404))
   }
 }
 ######################
@@ -1054,7 +1044,6 @@ module TreeWriter TreeWriter {
 
   #add Branch GenJetFinder/jets GenJet Jet
   #add Branch GenMissingET/momentum GenMissingET MissingET
-  add Branch HiggsFilter/higgs higgs GenParticle
 
 
 
@@ -1070,5 +1059,5 @@ module TreeWriter TreeWriter {
   add Branch llpFilter/LLP llp CscCluster
   add Branch CSCFilter/LLP Cscllp CscCluster
 
-  add Branch ClusterEfficiency/cluster CscCluster130 CscCluster
+  add Branch ClusterEfficiency/cluster CscCluster CscCluster
 }
