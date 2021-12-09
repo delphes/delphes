@@ -27,7 +27,6 @@
  */
 
 #include "classes/DelphesClasses.h"
-
 #include "classes/DelphesFactory.h"
 #include "classes/SortableObject.h"
 
@@ -39,6 +38,7 @@ CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
 CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
 CompBase *Track::fgCompare = CompPT<Track>::Instance();
 CompBase *Tower::fgCompare = CompE<Tower>::Instance();
+CompBase *ParticleFlowCandidate::fgCompare = CompE<ParticleFlowCandidate>::Instance();
 CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
 CompBase *Vertex::fgCompare = CompSumPT2<Vertex>::Instance();
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
@@ -103,9 +103,50 @@ TLorentzVector Jet::P4() const
 TLorentzVector Track::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
   return vec;
 }
+
+//------------------------------------------------------------------------------
+
+TMatrixDSym Track::CovarianceMatrix() const
+{
+  TMatrixDSym Cv;
+  Cv.ResizeTo(5, 5);
+
+  // convert diagonal term to original units
+  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
+  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC, 2.);
+  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+
+  // off diagonal terms
+  Cv(0, 1)=ErrorD0Phi;
+  Cv(0, 2)=ErrorD0C;
+  Cv(0, 3)=ErrorD0DZ;
+  Cv(0, 4)=ErrorD0CtgTheta;
+  Cv(1, 2)=ErrorPhiC;
+  Cv(1, 3)=ErrorPhiDZ;
+  Cv(1, 4)=ErrorPhiCtgTheta;
+  Cv(2, 3)=ErrorCDZ;
+  Cv(2, 4)=ErrorCCtgTheta;
+  Cv(3, 4)=ErrorDZCtgTheta;
+
+  Cv(1, 0)=Cv(0, 1);
+  Cv(2, 0)=Cv(0, 2);
+  Cv(3, 0)=Cv(0, 3);
+  Cv(4, 0)=Cv(0, 4);
+  Cv(2, 1)=Cv(1, 2);
+  Cv(3, 1)=Cv(1, 3);
+  Cv(4, 1)=Cv(1, 4);
+  Cv(3, 2)=Cv(2, 3);
+  Cv(4, 2)=Cv(2, 4);
+  Cv(4, 3)=Cv(3, 4);
+
+  return Cv;
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -118,13 +159,62 @@ TLorentzVector Tower::P4() const
 
 //------------------------------------------------------------------------------
 
+TLorentzVector ParticleFlowCandidate::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
+  return vec;
+}
+
+//------------------------------------------------------------------------------
+
+TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
+{
+  TMatrixDSym Cv;
+  Cv.ResizeTo(5, 5);
+
+  // convert diagonal term to original units
+  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
+  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2)=TMath::Power(ErrorC, 2.);
+  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+
+  // off diagonal terms
+  Cv(0, 1)=ErrorD0Phi;
+  Cv(0, 2)=ErrorD0C;
+  Cv(0, 3)=ErrorD0DZ;
+  Cv(0, 4)=ErrorD0CtgTheta;
+  Cv(1, 2)=ErrorPhiC;
+  Cv(1, 3)=ErrorPhiDZ;
+  Cv(1, 4)=ErrorPhiCtgTheta;
+  Cv(2, 3)=ErrorCDZ;
+  Cv(2, 4)=ErrorCCtgTheta;
+  Cv(3, 4)=ErrorDZCtgTheta;
+
+  Cv(1, 0)=Cv(0, 1);
+  Cv(2, 0)=Cv(0, 2);
+  Cv(3, 0)=Cv(0, 3);
+  Cv(4, 0)=Cv(0, 4);
+  Cv(2, 1)=Cv(1, 2);
+  Cv(3, 1)=Cv(1, 3);
+  Cv(4, 1)=Cv(1, 4);
+  Cv(3, 2)=Cv(2, 3);
+  Cv(4, 2)=Cv(2, 4);
+  Cv(4, 3)=Cv(3, 4);
+
+  return Cv;
+}
+
+//------------------------------------------------------------------------------
+
 Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
   Flavor(0), FlavorAlgo(0), FlavorPhys(0),
   BTag(0), BTagAlgo(0), BTagPhys(0),
-  TauTag(0), TauWeight(0.0), Eem(0.0), Ehad(0.0),
+  TauTag(0), TauWeight(0.0), Eem(0.0), Ehad(0.0), Etrk(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
@@ -132,17 +222,23 @@ Candidate::Candidate() :
   DecayPosition(0.0, 0.0, 0.0, 0.0),
   PositionError(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
+  TrackCovariance(5),
   L(0),
   D0(0), ErrorD0(0),
   DZ(0), ErrorDZ(0),
   P(0), ErrorP(0),
+  C(0), ErrorC(0),
   PT(0), ErrorPT(0),
   CtgTheta(0), ErrorCtgTheta(0),
   Phi(0), ErrorPhi(0),
   Xd(0), Yd(0), Zd(0),
+  Nclusters(0.0),
+  dNdx(0.0),
   TrackResolution(0),
   NCharged(0),
   NNeutrals(0),
+  NeutralEnergyFraction(0),  // charged energy fraction
+  ChargedEnergyFraction(0),  // neutral energy fraction
   Beta(0),
   BetaStar(0),
   MeanSqDeltaR(0),
@@ -162,6 +258,7 @@ Candidate::Candidate() :
   ExclYmerge34(0),
   ExclYmerge45(0),
   ExclYmerge56(0),
+  ParticleDensity(0),
   fFactory(0),
   fArray(0)
 {
@@ -283,6 +380,7 @@ void Candidate::Copy(TObject &obj) const
   object.TauWeight = TauWeight;
   object.Eem = Eem;
   object.Ehad = Ehad;
+  object.Etrk = Etrk;
   object.Edges[0] = Edges[0];
   object.Edges[1] = Edges[1];
   object.Edges[2] = Edges[2];
@@ -303,6 +401,8 @@ void Candidate::Copy(TObject &obj) const
   object.ErrorDZ = ErrorDZ;
   object.P = P;
   object.ErrorP = ErrorP;
+  object.C = C;
+  object.ErrorC = ErrorC;
   object.PT = PT;
   object.ErrorPT = ErrorPT;
   object.CtgTheta = CtgTheta;
@@ -312,9 +412,13 @@ void Candidate::Copy(TObject &obj) const
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
+  object.Nclusters = Nclusters;
+  object.dNdx = dNdx;
   object.TrackResolution = TrackResolution;
   object.NCharged = NCharged;
   object.NNeutrals = NNeutrals;
+  object.NeutralEnergyFraction = NeutralEnergyFraction;
+  object.ChargedEnergyFraction = ChargedEnergyFraction;
   object.Beta = Beta;
   object.BetaStar = BetaStar;
   object.MeanSqDeltaR = MeanSqDeltaR;
@@ -365,7 +469,7 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedJet = SoftDroppedJet;
   object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
-
+  object.TrackCovariance = TrackCovariance;
   object.fFactory = fFactory;
   object.fArray = 0;
 
@@ -412,6 +516,7 @@ void Candidate::Clear(Option_t *option)
   TauWeight = 0.0;
   Eem = 0.0;
   Ehad = 0.0;
+  Etrk = 0.0;
   Edges[0] = 0.0;
   Edges[1] = 0.0;
   Edges[2] = 0.0;
@@ -423,6 +528,7 @@ void Candidate::Clear(Option_t *option)
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   DecayPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  TrackCovariance.Zero();
   L = 0.0;
   ErrorT = 0.0;
   D0 = 0.0;
@@ -431,6 +537,8 @@ void Candidate::Clear(Option_t *option)
   ErrorDZ = 0.0;
   P = 0.0;
   ErrorP = 0.0;
+  C = 0.0;
+  ErrorC = 0.0;
   PT = 0.0;
   ErrorPT = 0.0;
   CtgTheta = 0.0;
@@ -440,6 +548,8 @@ void Candidate::Clear(Option_t *option)
   Xd = 0.0;
   Yd = 0.0;
   Zd = 0.0;
+  Nclusters = 0.0;
+  dNdx = 0.0;
   TrackResolution = 0.0;
   NCharged = 0;
   NNeutrals = 0;

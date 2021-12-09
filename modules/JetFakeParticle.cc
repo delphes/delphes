@@ -145,10 +145,9 @@ void JetFakeParticle::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
+    eta = candidateMomentum.Eta();
+    phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
 

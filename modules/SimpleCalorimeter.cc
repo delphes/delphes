@@ -207,10 +207,15 @@ void SimpleCalorimeter::Process()
   // loop over all particles
   fItParticleInputArray->Reset();
   number = -1;
+  fTowerRmax=0.;
   while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
+
+    // compute maximum radius (needed in FinalizeTower to assess whether barrel or endcap tower)
+    if (particlePosition.Perp() > fTowerRmax)
+      fTowerRmax=particlePosition.Perp();
 
     pdgCode = TMath::Abs(particle->PID);
 
@@ -393,10 +398,12 @@ void SimpleCalorimeter::Process()
 
     fTowerEnergy += energy;
 
-    fTowerTime += energy * position.T();
-    fTowerTimeWeight += energy;
+    fTowerTime += energy * energy * position.T(); //sigma_t ~ 1/E
+    fTowerTimeWeight += energy * energy;
 
     fTower->AddCandidate(particle);
+    fTower->Position = position;
+
   }
 
   // finalize last tower
@@ -408,7 +415,7 @@ void SimpleCalorimeter::Process()
 void SimpleCalorimeter::FinalizeTower()
 {
   Candidate *tower, *track, *mother;
-  Double_t energy, neutralEnergy, pt, eta, phi;
+  Double_t energy, neutralEnergy, pt, eta, phi, r;
   Double_t sigma, neutralSigma;
   Double_t time;
 
@@ -442,11 +449,22 @@ void SimpleCalorimeter::FinalizeTower()
 
   pt = energy / TMath::CosH(eta);
 
-  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, time);
+  // endcap
+  if (TMath::Abs(fTower->Position.Pt() - fTowerRmax) > 1.e-06 && TMath::Abs(eta) > 0.){
+    r = fTower->Position.Z()/TMath::SinH(eta);
+  }
+  // barrel
+  else {
+    r = fTower->Position.Pt();
+  }
+
+  fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+  fTower->L = fTower->Position.Vect().Mag();
 
   fTower->Eem = (!fIsEcal) ? 0 : energy;
   fTower->Ehad = (fIsEcal) ? 0 : energy;
+  fTower->Etrk = fTrackEnergy;
 
   fTower->Edges[0] = fTowerEdges[0];
   fTower->Edges[1] = fTowerEdges[1];
@@ -506,9 +524,7 @@ void SimpleCalorimeter::FinalizeTower()
       mother = track;
       track = static_cast<Candidate *>(track->Clone());
       track->AddCandidate(mother);
-
-      track->Momentum *= rescaleFactor;
-
+      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt()*rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
       fEFlowTrackOutputArray->Add(track);
     }
   }

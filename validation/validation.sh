@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 ################################################################################
 #
-# This code produces at set of validation plots for a given detector card.
+# This code produces a set of validation plots for a given detector card.
 #
 # In order to run this you need to compile Delphes with Pythia8 first, see:
 #
@@ -9,11 +9,11 @@
 #
 # After you (re-)compiled Delphes with Pythia8 you are ready to go, execute from Delphes main dir:
 #
-# ./examples/validation.sh [detector_card] [number_of_events]
+# ./validation/validation.sh [detector_card] [number_of_events]
 #
 #  e.g.
 #
-# ./examples/validation.sh cards/delphes_card_CMS.tcl 100000
+# ./validation/validation.sh cards/delphes_card_CMS.tcl 100000
 #
 # Note that the more events you specify, the more accurate the controls plots will be ...
 # This said, 500k events should be ok for most cases.
@@ -37,7 +37,7 @@ output=validation_${cardbase%.*}.root
 mainoutputdir=report_${cardbase%.*}
 outputrootdir=report_${cardbase%.*}/root
 cardlabel=${cardbase%.*}
-version=$(cat VERSION)
+version=x.y.z
 outpdf=$mainoutputdir/${output%.*}.pdf
 cardsdir=validation/cards
 samplesdir=validation/samples

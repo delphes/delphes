@@ -10,6 +10,7 @@
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
+#include "TParameter.h"
 #include "TClonesArray.h"
 #include "TFile.h"
 #include "TROOT.h"
@@ -47,6 +48,14 @@ ExRootTreeBranch *ExRootTreeWriter::NewBranch(const char *name, TClass *cl)
   ExRootTreeBranch *branch = new ExRootTreeBranch(name, cl, fTree);
   fBranches.insert(branch);
   return branch;
+}
+
+//------------------------------------------------------------------------------
+
+void ExRootTreeWriter::AddInfo(const char *name, Double_t value)
+{
+  if(!fTree) fTree = NewTree();
+  fTree->GetUserInfo()->Add(new TParameter<Double_t>(name, value));
 }
 
 //------------------------------------------------------------------------------

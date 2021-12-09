@@ -216,8 +216,10 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
     {
       // Prevent duplicated particle.
       if(!isMiniAOD) stableParticleOutputArray->Add(candidate);
+      if (pdgCode == 11 || pdgCode == 13) partonOutputArray->Add(candidate);
     }
-    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    //else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
+    else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
     {
       partonOutputArray->Add(candidate);
     }
@@ -308,7 +310,7 @@ int main(int argc, char *argv[])
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
-  Int_t i;
+  Int_t i, maxEvents, skipEvents;
   Long64_t eventCounter, numberOfEvents;
   Bool_t firstEvent = kTRUE;
 
@@ -350,6 +352,19 @@ int main(int argc, char *argv[])
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
+    
+    maxEvents = confReader->GetInt("::MaxEvents", 0);
+    skipEvents = confReader->GetInt("::SkipEvents", 0);
+    
+    if(maxEvents < 0)
+    {
+      throw runtime_error("MaxEvents must be zero or positive");
+    }
+    
+    if(skipEvents < 0)
+    {
+      throw runtime_error("SkipEvents must be zero or positive");
+    }
 
     modularDelphes = new Delphes("Delphes");
     modularDelphes->SetConfReader(confReader);
@@ -388,18 +403,20 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       treeWriter->Clear();
 
-      for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
+      for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || eventCounter-skipEvents < maxEvents); ++event)
       {
-        ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
-          allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
-        modularDelphes->ProcessTask();
+        if(eventCounter >= skipEvents){
+          ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
+            allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
+          modularDelphes->ProcessTask();
 
-        firstEvent = kFALSE;
+          firstEvent = kFALSE;
 
-        treeWriter->Fill();
+          treeWriter->Fill();
 
-        modularDelphes->Clear();
-        treeWriter->Clear();
+          modularDelphes->Clear();
+          treeWriter->Clear();
+        }
 
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;

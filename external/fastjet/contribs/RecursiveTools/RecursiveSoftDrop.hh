@@ -1,4 +1,4 @@
-// $Id: RecursiveSoftDrop.hh 1082 2017-10-10 12:00:13Z gsoyez $
+// $Id: RecursiveSoftDrop.hh 1192 2018-10-30 16:08:36Z gsoyez $
 //
 // Copyright (c) 2014-, Gavin P. Salam, Gregory Soyez, Jesse Thaler,
 // Kevin Zhou, Frederic Dreyer
@@ -23,7 +23,12 @@
 #ifndef __RECURSIVESOFTDROP_HH__
 #define __RECURSIVESOFTDROP_HH__
 
+// we'll use the native FJ class for reculstering if available
+#if FASTJET_VERSION_NUMBER >= 30100
+#include "fastjet/tools/Recluster.hh"
+#else
 #include "Recluster.hh"
+#endif
 #include "SoftDrop.hh"
 #include "fastjet/WrappedStructure.hh"
 

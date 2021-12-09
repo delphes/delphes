@@ -103,6 +103,7 @@ void FastJetFinder::Init()
 
   fJetAlgorithm = GetInt("JetAlgorithm", 6);
   fParameterR = GetDouble("ParameterR", 0.5);
+  fParameterP = GetDouble("ParameterP", -1.0);
 
   fConeRadius = GetDouble("ConeRadius", 0.5);
   fSeedThreshold = GetDouble("SeedThreshold", 1.0);
@@ -246,6 +247,10 @@ void FastJetFinder::Init()
     fValenciaPlugin = new ValenciaPlugin(fParameterR, fBeta, fGamma);
     fDefinition = new JetDefinition(fValenciaPlugin);
     break;
+  case 10:
+    fDefinition = new JetDefinition(ee_genkt_algorithm,fParameterR,fParameterP);
+    break;
+
   }
 
   fPlugin = plugin;
@@ -315,6 +320,8 @@ void FastJetFinder::Process()
 
   Double_t deta, dphi, detaMax, dphiMax;
   Double_t time, timeWeight;
+  Double_t neutralEnergyFraction, chargedEnergyFraction;
+
   Int_t number, ncharged, nneutrals;
   Int_t charge;
   Double_t rho = 0.0;
@@ -417,6 +424,9 @@ void FastJetFinder::Process()
     ncharged = 0;
     nneutrals = 0;
 
+    neutralEnergyFraction =0.;
+    chargedEnergyFraction =0.;
+
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
 
@@ -431,10 +441,16 @@ void FastJetFinder::Process()
       if(dphi > dphiMax) dphiMax = dphi;
 
       if(constituent->Charge == 0)
+      {
         nneutrals++;
+        neutralEnergyFraction += constituent->Momentum.E();
+      }
       else
+      {
         ncharged++;
-
+        chargedEnergyFraction += constituent->Momentum.E();
+      }
+      
       time += TMath::Sqrt(constituent->Momentum.E()) * (constituent->Position.T());
       timeWeight += TMath::Sqrt(constituent->Momentum.E());
 
@@ -454,6 +470,9 @@ void FastJetFinder::Process()
     candidate->NNeutrals = nneutrals;
     candidate->NCharged = ncharged;
 
+    candidate->NeutralEnergyFraction = (momentum.E() > 0 ) ? neutralEnergyFraction/momentum.E() : 0.0;
+    candidate->ChargedEnergyFraction = (momentum.E() > 0 ) ? chargedEnergyFraction/momentum.E() : 0.0;
+
     //for exclusive clustering, access y_n,n+1 as exclusive_ymerge (fNJets);
     candidate->ExclYmerge23 = excl_ymerge23;
     candidate->ExclYmerge34 = excl_ymerge34;
@@ -469,9 +488,7 @@ void FastJetFinder::Process()
 
       fastjet::Filter trimmer(fastjet::JetDefinition(fastjet::kt_algorithm, fRTrim), fastjet::SelectorPtFractionMin(fPtFracTrim));
       fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
-
-      trimmed_jet = join(trimmed_jet.constituents());
-
+      
       candidate->TrimmedP4[0].SetPtEtaPhiM(trimmed_jet.pt(), trimmed_jet.eta(), trimmed_jet.phi(), trimmed_jet.m());
 
       // four hardest subjets

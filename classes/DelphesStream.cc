@@ -105,3 +105,39 @@ bool DelphesStream::ReadInt(int &value)
 }
 
 //------------------------------------------------------------------------------
+
+bool DelphesStream::FindChr(int value)
+{
+  char *position;
+  bool result = false;
+
+  position = strchr(fBuffer, value);
+
+  if(position)
+  {
+    result = true;
+    fBuffer = position + 1;
+  }
+
+  return result;
+}
+
+//------------------------------------------------------------------------------
+
+bool DelphesStream::FindStr(const char *value)
+{
+  char *position;
+  bool result = false;
+
+  position = strstr(fBuffer, value);
+
+  if(position)
+  {
+    result = true;
+    fBuffer = position + strlen(value);
+  }
+
+  return result;
+}
+
+//------------------------------------------------------------------------------

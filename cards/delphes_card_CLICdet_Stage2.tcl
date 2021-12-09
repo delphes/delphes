@@ -489,12 +489,13 @@ module Efficiency ChargedHadronTrackingEfficiency {
     # Current full simulation with CLICdet provides for pions:
 
     set EfficiencyFormula {
-	(abs(eta) > 2.54) * (0.000) +
-	(energy >= 80) * (abs(eta) < 2.54)  * (1.000) +
-	(energy < 80 && energy >= 3) * (abs(eta) <=2.54 && abs(eta) > 2.34)  * (0.994) +
-	(energy < 80 && energy >= 3) * (abs(eta) <= 2.34) * (1.000) +
-	(energy < 3) * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.000) +
-	(energy < 3) * (abs(eta) <= 0.55 ) * (1.000) 
+ (pt <= 0.1)                                                                        * (0.000) +
+ (pt > 0.1)                                * (abs(eta) > 2.54)                      * (0.000) +
+ (pt > 0.1) * (energy >= 80)               * (abs(eta) < 2.54)                      * (1.000) +
+ (pt > 0.1) * (energy < 80 && energy >= 3) * (abs(eta) <=2.54 && abs(eta) > 2.34)   * (0.994) +
+ (pt > 0.1) * (energy < 80 && energy >= 3) * (abs(eta) <= 2.34)                     * (1.000) +
+ (pt > 0.1) * (energy < 3)                 * (abs(eta) <= 2.54 && abs(eta) > 0.55 ) * (0.990) +
+ (pt > 0.1) * (energy < 3)                 * (abs(eta) <= 0.55 )                    * (1.000) 
     }
 }
 
@@ -509,16 +510,16 @@ module Efficiency ElectronTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for electrons:
     set EfficiencyFormula {
-	(pt <= 1)                                                               * (0.000) +
-	(abs(eta) > 2.54)                                                       * (0.000) +
-	(energy >= 80)                 * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
-	(energy >= 80)                 * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
-	(energy >= 80)                 * (abs(eta) <= 2.34  )                   * (1.000) +
-	(energy < 80 && energy >= 5) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
-	(energy < 80 && energy >= 5) * (abs(eta) <= 2.17)                     * (1.000) +
-	(energy < 5)   * (abs(eta) > 2.34 )                     * (0.000) +
-	(energy < 5)   * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
-	(energy < 5)   * (abs(eta) <= 0.76)                     * (0.999)
+ (pt <= 0.1)                                                                        * (0.000) +
+ (pt > 0.1)                                * (abs(eta) > 2.54)                      * (0.000) +
+ (pt > 0.1) * (energy >= 80)               * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (0.993) +
+ (pt > 0.1) * (energy >= 80)               * (abs(eta) <= 2.44 && abs(eta) > 2.34 ) * (0.997) +
+ (pt > 0.1) * (energy >= 80)               * (abs(eta) <= 2.34  )                   * (1.000) +
+ (pt > 0.1) * (energy < 80 && energy >= 5) * (abs(eta) <= 2.54 && abs(eta) > 2.17 ) * (0.998) +
+ (pt > 0.1) * (energy < 80 && energy >= 5) * (abs(eta) <= 2.17)                     * (1.000) +
+ (pt > 0.1) * (energy < 5)                 * (abs(eta) <= 2.54 && abs(eta) > 2.34 ) * (1.000) +
+ (pt > 0.1) * (energy < 5)                 * (abs(eta) <= 2.34 && abs(eta) > 0.76 ) * (0.997) +
+ (pt > 0.1) * (energy < 5)                 * (abs(eta) <= 0.76)                     * (0.999)
     }
 }
 
@@ -532,16 +533,14 @@ module Efficiency MuonTrackingEfficiency {
 
     # Current full simulation with CLICdet provides for muons:
     set EfficiencyFormula {
-	(pt < 1)                                                                * (0.000) +
-	(abs(eta) > 2.54)                                                       * (0.000) +
-	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 80)                 * (0.994) +
-	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 5 && energy < 80)   * (0.996) +
-	(abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy < 5 )                  * (0.996) +
-	(abs(eta) <= 2.44 )                    * (energy >= 5 )                 * (1.000) +
-	(abs(eta) <= 2.44 && abs(eta) > 2.25 ) * (energy < 5 && pt >=1 )        * (0.999) +
-	(abs(eta) <= 2.25 )                    * (energy >= 1)                  * (1.000) 
-
-	
+  (pt <= 0.1)                                                                          * (0.000) +
+  (pt > 0.1) * (abs(eta) > 2.54)                                                       * (0.000) +
+  (pt > 0.1) * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 80)                 * (0.994) +
+  (pt > 0.1) * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy >= 5 && energy < 80)   * (0.996) +
+  (pt > 0.1) * (abs(eta) <= 2.54 && abs(eta) > 2.44 ) * (energy < 5 )                  * (0.996) +
+  (pt > 0.1) * (abs(eta) <= 2.44 )                    * (energy >= 5 )                 * (1.000) +
+  (pt > 0.1) * (abs(eta) <= 2.44 && abs(eta) > 2.25 ) * (energy < 5 )                  * (0.999) +
+  (pt > 0.1) * (abs(eta) <= 2.25 )                    * (energy < 5 )                  * (1.000) 
     }
 }
 
@@ -1135,7 +1134,7 @@ module Merger GenMissingET {
 
 module FastJetFinder FastJetFinderKt {
     #  set InputArray Calorimeter/towers
-    set InputArray EFlowMerger/eflow
+    set InputArray EFlowFilter/eflow
 
     set OutputArray KTjets
 

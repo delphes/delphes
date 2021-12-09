@@ -35,8 +35,11 @@
 #include "modules/EnergySmearing.h"
 #include "modules/MomentumSmearing.h"
 #include "modules/TrackSmearing.h"
+#include "modules/TrackCovariance.h"
+#include "modules/ClusterCounting.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
+#include "modules/TimeOfFlight.h"
 #include "modules/SimpleCalorimeter.h"
 #include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
@@ -71,6 +74,9 @@
 #include "modules/VertexSorter.h"
 #include "modules/VertexFinder.h"
 #include "modules/VertexFinderDA4D.h"
+#include "modules/DecayFilter.h"
+#include "modules/ParticleDensity.h"
+#include "modules/TruthVertexFinder.h"
 #include "modules/ExampleModule.h"
 #include "modules/LLPFilter.h"
 #include "modules/CscClusterEfficiency.h"
@@ -92,8 +98,11 @@
 #pragma link C++ class EnergySmearing+;
 #pragma link C++ class MomentumSmearing+;
 #pragma link C++ class TrackSmearing+;
+#pragma link C++ class TrackCovariance+;
+#pragma link C++ class ClusterCounting+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
+#pragma link C++ class TimeOfFlight+;
 #pragma link C++ class SimpleCalorimeter+;
 #pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
@@ -128,6 +137,9 @@
 #pragma link C++ class VertexSorter+;
 #pragma link C++ class VertexFinder+;
 #pragma link C++ class VertexFinderDA4D+;
+#pragma link C++ class DecayFilter+;
+#pragma link C++ class ParticleDensity+;
+#pragma link C++ class TruthVertexFinder+;
 #pragma link C++ class ExampleModule+;
 #pragma link C++ class LLPFilter+;
 #pragma link C++ class CscClusterEfficiency+;

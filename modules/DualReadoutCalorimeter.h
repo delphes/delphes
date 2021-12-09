@@ -59,6 +59,7 @@ private:
   Double_t fECalTowerEnergy, fHCalTowerEnergy;
   Double_t fECalTrackEnergy, fHCalTrackEnergy;
   Double_t fTrackEnergy;
+  Double_t fTowerRmax;
 
   Double_t fTimingEnergyMin;
   Bool_t fElectronsFromTrack;
@@ -76,6 +77,9 @@ private:
   Double_t fECalTrackSigma;
   Double_t fHCalTrackSigma;
   Double_t fTrackSigma;
+
+  Double_t fTowerTime;
+  Double_t fTowerTimeWeight;
 
   Bool_t fSmearTowerCenter;
 

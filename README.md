@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/delphes/delphes.svg?style=shield)](https://circleci.com/gh/delphes/delphes)
+[![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
 
 Delphes
 =======
@@ -13,15 +13,15 @@ Quick start with Delphes
 Commands to get the code:
 
 ```
-   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz
+   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.5.0.tar.gz
 
-   tar -zxf Delphes-3.4.2.tar.gz
+   tar -zxf Delphes-3.5.0.tar.gz
 ```
 
 Commands to compile the code:
 
 ```
-   cd Delphes-3.4.2
+   cd Delphes-3.5.0
 
    make
 ```
@@ -29,13 +29,13 @@ Commands to compile the code:
 Finally, we can run Delphes:
 
 ```
-   ./DelphesHepMC
+   ./DelphesHepMC3
 ```
 
 Command line parameters:
 
 ```
-   ./DelphesHepMC config_file output_file [input_file(s)]
+   ./DelphesHepMC3 config_file output_file [input_file(s)]
      config_file - configuration file in Tcl format
      output_file - output file in ROOT format,
      input_file(s) - input file(s) in HepMC format,
@@ -66,9 +66,7 @@ git clone git://github.com/delphes/delphes.git Delphes
 
 cd Delphes
 
-source  /afs/cern.ch/sw/lcg/external/gcc/4.9.3/x86_64-slc6/setup.sh
-
-source /afs/cern.ch/sw/lcg/app/releases/ROOT/6.06.00/x86_64-slc6-gcc49-opt/root/bin/thisroot.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc10-opt/setup.sh
 
 make 
 ```
@@ -88,8 +86,8 @@ Start ROOT and load Delphes shared library:
 Open ROOT file and do some basic analysis using Draw or TBrowser:
 
 ```
-   TFile::Open("delphes_output.root");
-   Delphes->Draw("Electron.PT");
+   TFile *f = TFile::Open("delphes_output.root");
+   f->Get("Delphes")->Draw("Electron.PT");
    TBrowser browser;
 ```
 

@@ -52,6 +52,8 @@ private:
 
   TObjArray *fOutputArray; //!
 
+  Double_t fUseMomentumVector; //!
+
   ClassDef(Efficiency, 1)
 };
 

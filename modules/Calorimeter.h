@@ -59,6 +59,7 @@ private:
 
   Double_t fTimingEnergyMin;
   Bool_t fElectronsFromTrack;
+  Double_t fTowerRmax;
 
   Int_t fTowerTrackHits, fTowerPhotonHits;
 

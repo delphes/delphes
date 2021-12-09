@@ -230,10 +230,15 @@ void Calorimeter::Process()
   // loop over all particles
   fItParticleInputArray->Reset();
   number = -1;
+  fTowerRmax=0.;
   while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
+
+    // compute maximum radius (needed in FinalizeTower to assess whether barrel or endcap tower)
+    if (particlePosition.Perp() > fTowerRmax)
+      fTowerRmax=particlePosition.Perp();
 
     pdgCode = TMath::Abs(particle->PID);
 
@@ -449,6 +454,7 @@ void Calorimeter::Process()
     }
 
     fTower->AddCandidate(particle);
+    fTower->Position = position;
   }
 
   // finalize last tower
@@ -460,7 +466,7 @@ void Calorimeter::Process()
 void Calorimeter::FinalizeTower()
 {
   Candidate *track, *tower, *mother;
-  Double_t energy, pt, eta, phi;
+  Double_t energy, pt, eta, phi, r;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalNeutralEnergy, hcalNeutralEnergy;
 
@@ -510,19 +516,25 @@ void Calorimeter::FinalizeTower()
 
   for(size_t i = 0; i < fTower->ECalEnergyTimePairs.size(); ++i)
   {
-    weight = TMath::Sqrt(fTower->ECalEnergyTimePairs[i].first);
+    weight = TMath::Power((fTower->ECalEnergyTimePairs[i].first),2);
     sumWeightedTime += weight * fTower->ECalEnergyTimePairs[i].second;
     sumWeight += weight;
     fTower->NTimeHits++;
   }
 
+  // check whether barrel or endcap tower
+  if (fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
+    r = fTower->Position.Z()/TMath::SinH(eta);
+  else
+    r = fTower->Position.Pt();
+
   if(sumWeight > 0.0)
   {
-    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, sumWeightedTime / sumWeight);
+    fTower->Position.SetPtEtaPhiE(r, eta, phi, sumWeightedTime / sumWeight);
   }
   else
   {
-    fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 999999.9);
+    fTower->Position.SetPtEtaPhiE(r, eta, phi, 999999.9);
   }
 
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
@@ -558,7 +570,7 @@ void Calorimeter::FinalizeTower()
   // if ecal neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack
   if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
-    // create new photon tower
+    // create new photon tower assuming null mass
     tower = static_cast<Candidate *>(fTower->Clone());
     pt = ecalNeutralEnergy / TMath::CosH(eta);
 
@@ -645,8 +657,8 @@ void Calorimeter::FinalizeTower()
       mother = track;
       track = static_cast<Candidate *>(track->Clone());
       track->AddCandidate(mother);
-
       track->Momentum *= rescaleFactor;
+      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt()*rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
 
       fEFlowTrackOutputArray->Add(track);
     }

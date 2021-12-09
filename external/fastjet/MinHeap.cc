@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: MinHeap.cc 4354 2018-04-22 07:12:37Z salam $
+// $Id: MinHeap.cc 4442 2020-05-05 07:50:11Z soyez $
 //
-// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -109,7 +109,15 @@ void MinHeap::update(unsigned int loc, double new_value) {
     }
 
     // now compare current location to children (at 2*loc+1, 2*loc+2)
-    ValueLoc * child = &(_heap[2*loc+1]);
+    //ValueLoc * child = &(_heap[2*loc+1]);
+    // GPS 2020-04-07: changed the way the following line
+    //   is expressed, so as to work around issue reported by
+    //   Andrii Verbyitskyi where compilation with gcc's
+    //   -D_GLIBCXX_ASSERTIONS=1  -D_GLIBCXX_SANITIZE_VECTOR=1
+    //   results in a crash because the compiler thinks we
+    //   are accessing the vector at a location that is sometimes
+    //   invalid, whereas we are just getting the address
+    ValueLoc * child = &(_heap[0]) + (2*loc+1);
     if (child < heap_end && child->minloc->value < here->minloc->value ) {
       here->minloc = child->minloc;
       change_made = true;}

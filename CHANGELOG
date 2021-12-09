@@ -1,3 +1,22 @@
+3.5.0:
+
+- fixed validation code
+- fixed weighted time and tower position in calorimeter modules
+- fixed propagation of charged particles with low transverse momentum (thanks to Olmo Cerri)
+- updated FastJet library to 3.3.4 and FastJet Contrib library to 1.045
+- removed zero mass assumption for all tracks
+- added support for HepMC3 format
+- added particle-density dependence to formula parameterization (thanks to Roberto Preghenella)
+- added DecayFilter module for LLP decay in flight
+- added PFcandidate class to ROOT tree writer
+- added neutral and charged energy fraction to jets
+- added generalized ee kT clustering
+- added covariance matrix for track parameters smearing (thanks to Franco Bedeschi)
+- added IDEA card with track covariance
+- added generic ILC detector model
+- added muon collider detector model
+- added LHeC and FCCeh cards
+
 3.4.2:
 - added DenseTrackFilter for modelling tracking inefficiencies in boosted, dense environments
 - added detector cards for CLIC, HL-LHC and IDEA detectors

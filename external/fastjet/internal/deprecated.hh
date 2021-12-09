@@ -1,8 +1,8 @@
 
 //FJSTARTHEADER
-// $Id: deprecated.hh 4354 2018-04-22 07:12:37Z salam $
+// $Id: deprecated.hh 4442 2020-05-05 07:50:11Z soyez $
 //
-// Copyright (c) 2005-2018, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -38,7 +38,7 @@
 
 // define a deprecation macro based on the capabilities of the compiler
 // (as determined at configure time).
-#if defined(FASTJET_HAVE_CXX14_DEPRECATED) and (!defined(__FJCORE__))
+#if defined(FASTJET_HAVE_CXX14_DEPRECATED) && (!defined(__FJCORE__))
 #define FASTJET_DEPRECATED               [[deprecated]]
 #define FASTJET_DEPRECATED_MSG(message)  [[deprecated(message)]]
 #elif defined(FASTJET_HAVE_GNUCXX_DEPRECATED)

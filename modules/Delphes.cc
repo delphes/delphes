@@ -60,8 +60,11 @@ using namespace std;
 Delphes::Delphes(const char *name) :
   fFactory(0)
 {
-  TFolder *folder = new TFolder(name, "");
+  TFolder *folder;
+
   fFactory = new DelphesFactory("ObjectFactory");
+
+  folder = new TFolder(name, "");
 
   SetName(name);
   SetFolder(folder);
@@ -79,6 +82,7 @@ Delphes::~Delphes()
   TFolder *folder = GetFolder();
   if(folder)
   {
+    gROOT->GetListOfBrowsables()->Remove(folder);
     folder->Clear();
     delete folder;
   }

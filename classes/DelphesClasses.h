@@ -32,6 +32,7 @@
 // Dependencies (#includes)
 
 #include "TLorentzVector.h"
+#include "TMatrixDSym.h"
 #include "TObject.h"
 #include "TRef.h"
 #include "TRefArray.h"
@@ -149,12 +150,7 @@ public:
   Float_t PT; // particle transverse momentum
   Float_t Eta; // particle pseudorapidity
   Float_t Phi; // particle azimuthal angle
-
   Float_t Rapidity; // particle rapidity
-  Float_t CtgTheta; // particle cotangent of theta
-
-  Float_t D0; // particle transverse impact parameter
-  Float_t DZ; // particle longitudinal impact parameter
 
   Float_t T; // particle vertex position (t component) | hepevt.vhep[number][3]
   Float_t X; // particle vertex position (x component) | hepevt.vhep[number][0]
@@ -393,6 +389,10 @@ public:
 
   Int_t NCharged; // number of charged constituents
   Int_t NNeutrals; // number of neutral constituents
+
+  Float_t NeutralEnergyFraction;  // charged energy fraction
+  Float_t ChargedEnergyFraction;  // neutral energy fraction
+
   Float_t Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents)
   Float_t BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)
   Float_t MeanSqDeltaR; // average distance (squared) between constituent and jet weighted by pt (squared) of constituent
@@ -444,6 +444,8 @@ public:
   Float_t Eta; // track pseudorapidity
   Float_t Phi; // track azimuthal angle
   Float_t CtgTheta; // track cotangent of theta
+  Float_t C; // track curvature inverse
+  Float_t Mass; // particle mass
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
@@ -465,6 +467,8 @@ public:
   Float_t L; // track path length
   Float_t D0; // track transverse impact parameter
   Float_t DZ; // track longitudinal impact parameter
+  Float_t Nclusters; // Number of ionization clusters
+  Float_t dNdx; // Number of ionization clusters
 
   Float_t ErrorP; // track momentum error
   Float_t ErrorPT; // track transverse momentum error
@@ -474,6 +478,19 @@ public:
   Float_t ErrorT; // time measurement error
   Float_t ErrorD0; // track transverse impact parameter error
   Float_t ErrorDZ; // track longitudinal impact parameter error
+  Float_t ErrorC; // track curvature error
+
+  // track covariance off-diagonal terms
+  Float_t ErrorD0Phi;
+  Float_t ErrorD0C;
+  Float_t ErrorD0DZ;
+  Float_t ErrorD0CtgTheta;
+  Float_t ErrorPhiC;
+  Float_t ErrorPhiDZ;
+  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorCDZ;
+  Float_t ErrorCCtgTheta;
+  Float_t ErrorDZCtgTheta;
 
   TRef Particle; // reference to generated particle
 
@@ -483,6 +500,7 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4() const;
+  TMatrixDSym CovarianceMatrix() const;
 
   ClassDef(Track, 3)
 };
@@ -503,6 +521,7 @@ public:
 
   Float_t Eem; // calorimeter tower electromagnetic energy
   Float_t Ehad; // calorimeter tower hadronic energy
+  Float_t Etrk; // total charged energy hitting tower
 
   Float_t Edges[4]; // calorimeter tower edges
 
@@ -513,7 +532,93 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Tower, 2)
+  ClassDef(Tower, 3)
+};
+
+//---------------------------------------------------------------------------
+
+class ParticleFlowCandidate: public SortableObject
+{
+
+public:
+  Int_t PID; // HEP ID number
+
+  Int_t Charge; // track charge
+
+  Float_t E; // reconstructed energy [GeV]
+  Float_t P; // track momentum
+  Float_t PT; // track transverse momentum
+  Float_t Eta; // track pseudorapidity
+  Float_t Phi; // track azimuthal angle
+  Float_t CtgTheta; // track cotangent of theta
+  Float_t C; // track curvature inverse
+  Float_t Mass; // particle mass
+
+  Float_t EtaOuter; // track pseudorapidity at the tracker edge
+  Float_t PhiOuter; // track azimuthal angle at the tracker edge
+
+  Float_t T; // track vertex position (t component)
+  Float_t X; // track vertex position (x component)
+  Float_t Y; // track vertex position (y component)
+  Float_t Z; // track vertex position (z component)
+
+  Float_t TOuter; // track position (t component) at the tracker edge
+  Float_t XOuter; // track position (x component) at the tracker edge
+  Float_t YOuter; // track position (y component) at the tracker edge
+  Float_t ZOuter; // track position (z component) at the tracker edge
+
+  Float_t Xd; // X coordinate of point of closest approach to vertex
+  Float_t Yd; // Y coordinate of point of closest approach to vertex
+  Float_t Zd; // Z coordinate of point of closest approach to vertex
+
+  Float_t L; // track path length
+  Float_t D0; // track transverse impact parameter
+  Float_t DZ; // track longitudinal impact parameter
+  Float_t Nclusters; // Number of ionization clusters
+  Float_t dNdx; // Number of ionization clusters
+
+  Float_t ErrorP; // track momentum error
+  Float_t ErrorPT; // track transverse momentum error
+  Float_t ErrorPhi; // track azimuthal angle error
+  Float_t ErrorCtgTheta; // track cotangent of theta error
+
+  Float_t ErrorT; // time measurement error
+  Float_t ErrorD0; // track transverse impact parameter error
+  Float_t ErrorDZ; // track longitudinal impact parameter error
+  Float_t ErrorC; // track curvature error
+
+  // track covariance off-diagonal terms
+  Float_t ErrorD0Phi;
+  Float_t ErrorD0C;
+  Float_t ErrorD0DZ;
+  Float_t ErrorD0CtgTheta;
+  Float_t ErrorPhiC;
+  Float_t ErrorPhiDZ;
+  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorCDZ;
+  Float_t ErrorCCtgTheta;
+  Float_t ErrorDZCtgTheta;
+
+  Int_t VertexIndex; // reference to vertex
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  TLorentzVector P4() const;
+  TMatrixDSym CovarianceMatrix() const;
+
+  Int_t NTimeHits; // number of hits contributing to time measurement
+
+  Float_t Eem; // calorimeter tower electromagnetic energy
+  Float_t Ehad; // calorimeter tower hadronic energy
+  Float_t Etrk; // total charged energy hitting tower
+
+  Float_t Edges[4]; // calorimeter tower edges
+
+  TRefArray Particles; // references to generated particles
+
+  ClassDef(ParticleFlowCandidate, 3)
+
 };
 
 //---------------------------------------------------------------------------
@@ -609,6 +714,7 @@ public:
 
   Float_t Eem;
   Float_t Ehad;
+  Float_t Etrk;
 
   Float_t Edges[4];
   Float_t DeltaEta;
@@ -617,11 +723,13 @@ public:
   TLorentzVector Momentum, Position, InitialPosition, DecayPosition, PositionError, Area;
 
   Float_t L; // path length
+  Float_t DZ;
+  Float_t ErrorDZ;
   Float_t ErrorT; // path length
   Float_t D0;
   Float_t ErrorD0;
-  Float_t DZ;
-  Float_t ErrorDZ;
+  Float_t C;
+  Float_t ErrorC;
   Float_t P;
   Float_t ErrorP;
   Float_t PT;
@@ -630,6 +738,9 @@ public:
   Float_t ErrorCtgTheta;
   Float_t Phi;
   Float_t ErrorPhi;
+
+  Float_t Nclusters; // Number of ionization clusters
+  Float_t dNdx; // Number of ionization clusters per unit length
 
   Float_t Xd;
   Float_t Yd;
@@ -648,6 +759,9 @@ public:
   Float_t MeanSqDeltaR;
   Float_t PTD;
   Float_t FracPt[5];
+  Float_t NeutralEnergyFraction;  // charged energy fraction
+  Float_t ChargedEnergyFraction;  // neutral energy fraction
+
 
   // Timing information
 
@@ -662,6 +776,10 @@ public:
   Float_t SumPtNeutral;
   Float_t SumPtChargedPU;
   Float_t SumPt;
+
+  // ACTS compliant 6x6 track covariance (D0, phi, Curvature, dz, ctg(theta))
+
+  TMatrixDSym TrackCovariance;
 
   // vertex variables
 
@@ -696,6 +814,9 @@ public:
   Double_t ExclYmerge34;
   Double_t ExclYmerge45;
   Double_t ExclYmerge56;
+
+  // event characteristics variables
+  Double_t ParticleDensity; // particle multiplicity density in the proximity of the particle
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }

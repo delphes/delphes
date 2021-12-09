@@ -34,7 +34,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesHepMCReader.h"
+#include "classes/DelphesHepMC2Reader.h"
 #include "classes/DelphesPileUpWriter.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
   TIterator *itParticle = 0;
   Candidate *candidate = 0;
   DelphesPileUpWriter *writer = 0;
-  DelphesHepMCReader *reader = 0;
+  DelphesHepMC2Reader *reader = 0;
   Int_t i;
   Long64_t length, eventCounter;
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
     itParticle = stableParticleOutputArray->MakeIterator();
 
-    reader = new DelphesHepMCReader;
+    reader = new DelphesHepMC2Reader;
 
     i = 2;
     do

@@ -28,6 +28,7 @@ public:
   Bool_t ReadEntry(Long64_t entry);
 
   TClonesArray *UseBranch(const char *branchName);
+  Double_t GetInfo(const char *name);
 
 private:
   Bool_t Notify();
