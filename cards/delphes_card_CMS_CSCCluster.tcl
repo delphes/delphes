@@ -5,8 +5,6 @@
 set ExecutionPath {
   ParticlePropagator
 
-
-
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
   MuonTrackingEfficiency
@@ -60,7 +58,6 @@ set ExecutionPath {
   CSCFilter
   CutBasedIDEfficiency
   ClusterEfficiency
-
 
   TreeWriter
 }
@@ -413,10 +410,10 @@ module PdgCodeFilter ElectronFilter {
 module LLPFilter CSCFilter {
   set InputArray Delphes/allParticles
   set OutputArray LLP
-  set DecayRegion 1
   # DecayRegion = 0: no cuts on decay region
   # DecayRegion = 1: select LLP that decays in CSC volume
   # DecayRegion = 2: select LLP that decays outside of calorimeters, for genMET calculation
+  set DecayRegion 1
   set RequireStatus false
   add PdgCode {1500001}
 
@@ -426,12 +423,11 @@ module LLPFilter CSCFilter {
 module LLPFilter llpFilter {
   set InputArray Delphes/allParticles
   set OutputArray LLP
-  set DecayRegion 0
-  set RequireStatus false
-
   # DecayRegion = 0: no cuts on decay region
   # DecayRegion = 1: select LLP that decays in CSC volume
   # DecayRegion = 2: select LLP that decays outside of calorimeters, for genMET calculation
+  set DecayRegion 0
+  set RequireStatus false
   add PdgCode {1500001}
 
 }
@@ -1033,31 +1029,14 @@ module UniqueObjectFinder UniqueObjectFinder {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-#add Branch Delphes/allParticles Particle GenParticle
-  #add Branch Delphes/stableParticles Particle GenParticle
-  #add Branch TrackMerger/tracks Track Track
-  #add Branch Calorimeter/towers Tower Tower
-
-  #add Branch HCal/eflowTracks EFlowTrack Track
-  #add Branch ECal/eflowPhotons EFlowPhoton Tower
-  #add Branch HCal/eflowNeutralHadrons EFlowNeutralHadron Tower
-
-  #add Branch GenJetFinder/jets GenJet Jet
-  #add Branch GenMissingET/momentum GenMissingET MissingET
-
-
+# add Branch Delphes/allParticles Particle GenParticle
 
   add Branch UniqueObjectFinder/jets Jet Jet
   add Branch UniqueObjectFinder/electrons Electron Electron
-  #add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/muons Muon Muon
 
-  #add Branch FatJetFinder/jets FatJet Jet
-
   add Branch MissingET/momentum MissingET MissingET
-  #add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch llpFilter/LLP llp CscCluster
   add Branch CSCFilter/LLP Cscllp CscCluster
-
   add Branch ClusterEfficiency/cluster CscCluster CscCluster
 }

@@ -162,8 +162,6 @@ public:
   Float_t decayZ;
   Float_t decayT;
 
-  Float_t ctau;
-
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
@@ -649,7 +647,6 @@ public:
 class CscCluster: public SortableObject
 {
 public:
-  Int_t NHits; //nCSC hits
   Float_t Eta; // eta of LLP
   Float_t Phi; // phi of LLP
   Float_t PT; // pt of LLP
@@ -659,16 +656,14 @@ public:
   Float_t E; // E of LLP
   Float_t Ehad; // had energy of LLP
   Float_t Eem; // em energy of LLP
-
   Float_t pid; // LLP pid
-
   Float_t T; // LLP decay time-photon travel time
   Float_t X; // LLP decay x
   Float_t Y; //  LLP decay y
   Float_t Z; //  LLP decay z
   Float_t R; //  LLP decay z
-  Float_t beta;
-  Float_t ctau;
+  Float_t beta; // LLP beta
+  Float_t ctau; //LLP ctau
 
 
   static CompBase *fgCompare; //!

@@ -522,8 +522,8 @@ tmp/classes/DelphesClasses.$(ObjSuf): \
 	classes/DelphesFactory.h \
 	classes/SortableObject.h
 tmp/classes/DelphesCscClusterFormula.$(ObjSuf): \
-		classes/DelphesCscClusterFormula.$(SrcSuf) \
-		classes/DelphesCscClusterFormula.h
+	classes/DelphesCscClusterFormula.$(SrcSuf) \
+	classes/DelphesCscClusterFormula.h
 tmp/classes/DelphesCylindricalFormula.$(ObjSuf): \
 	classes/DelphesCylindricalFormula.$(SrcSuf) \
 	classes/DelphesCylindricalFormula.h
@@ -761,7 +761,7 @@ tmp/modules/CscClusterId.$(ObjSuf): \
 	modules/CscClusterId.$(SrcSuf) \
 	modules/CscClusterId.h \
 	classes/DelphesClasses.h \
-  classes/DelphesFactory.h \
+	classes/DelphesFactory.h \
 	classes/DelphesCscClusterFormula.h \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \

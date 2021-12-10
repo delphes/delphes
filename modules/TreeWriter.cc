@@ -244,9 +244,6 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->decayY = DecayPosition.Y();
     entry->decayZ = DecayPosition.Z();
     entry->decayT = DecayPosition.T()* 1.0E-3 / c_light;
-    float beta = entry->P/momentum.E();
-    float gamma = 1./sqrt(1-beta*beta);
-    entry->ctau = sqrt(pow(entry->decayX-entry->X,2)+pow(entry->decayY-entry->Y,2)+pow(entry->decayZ-entry->Z,2))/(beta*gamma);// in millimeter
   }
 }
 
@@ -929,31 +926,23 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, TObjArray *array)
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
 
-
-    // entry->Eta = position.Eta();
-    // entry->Phi = position.Phi();
-
     entry->PT = momentum.Pt(); // pt of LLP
     entry->Px = momentum.Px();// px of LLP
     entry->Py = momentum.Py();// py of LLP
     entry->Pz = momentum.Pz();// pz of LLP
     entry->E = momentum.E(); // E of LLP
     entry->pid = candidate->PID; // LLP pid
-    entry->Eem = candidate->Eem; // LLP pid
-    entry->Ehad = candidate->Ehad; // LLP pid
+    entry->Eem = candidate->Eem; // LLP Eem
+    entry->Ehad = candidate->Ehad; // LLP Ehad
     Double_t beta = momentum.P()/momentum.E();
     Double_t gamma = 1.0/sqrt(1-beta*beta);
     Double_t decayDistance = sqrt(pow(position.X(),2)+pow(position.Y(),2)+pow(position.Z(),2)); // mm
     entry->beta = beta; // LLP pid
-    entry->ctau = decayDistance/(beta * gamma);; // LLP pid
-
-    // entry->T = (position.T()-sqrt(pow(position.X(),2)+pow(position.Y(),2)+pow(position.Z(),2)))* 1.0E-3 / c_light; // LLP decay time-photon travel time
-
+    entry->ctau = decayDistance/(beta * gamma); // LLP travel time in its rest frame
     entry->T = decayDistance*(1./beta-1)* 1.0E-3/c_light*1e9; // ns
     entry->X = position.X(); // LLP decay x
     entry->Y = position.Y(); //  LLP decay y
     entry->Z = position.Z(); //  LLP decay z
-    // entry->Size = 100;
   }
 }
 
