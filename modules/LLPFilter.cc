@@ -18,9 +18,11 @@
 
 /** \class LLPFilter
  *
- *  Removes particles with specific PDG codes
+ *  Filter LLPs with particular PDG ID/status and calculate the EM and hadronic energy of LLP based on decay particles
+ *  The classification of EM and hadronic energy of LLP is based on instructions from the HEPData entry for the CMS paper searching
+ *  for neutral LLPs in the CMS endcap muon detectors: https://www.hepdata.net/record/104408
  *
- *  \author M. Selvaggi
+ *  \author Christina Wang
  *
  */
 
@@ -145,6 +147,7 @@ void LLPFilter::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     const TLorentzVector &candidateProdPosition = candidate->Position;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
+    // TLorentzVector candidateDecayPosition;
     pt = candidateMomentum.Pt();
     eta = candidateMomentum.Eta();
     if(pt < fPTMin) continue;
@@ -179,6 +182,8 @@ void LLPFilter::Process()
         tempCandidate  = static_cast<Candidate *>(fParticleInputArray->At(tempCandidate->M1));
       }
       if (tempCandidate->M1 == -1) continue;
+
+      // candidateDecayPosition = daughter->Position;
 
       if (abs(daughterPdg)==11 || abs(daughterPdg)==22 || abs(daughterPdg)==111)candidate->Eem += daughterMomentum.E();
       else candidate->Ehad += daughterMomentum.E();

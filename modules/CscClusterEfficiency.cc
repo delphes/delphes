@@ -16,13 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \class CscClusterEfficiency
- *
- *  Selects candidates from the InputArray according to the CscClusterEfficiency formula.
- *
- *  \author P. Demin - UCL, Louvain-la-Neuve
- *
- */
+ /** \class CscClusterEfficiency
+  *
+  *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
+  *  It is implemented based on the ClusterEfficiency parameterization function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
+  *
+  *  \author Christina Wang
+  *
+  */
 
 #include "modules/CscClusterEfficiency.h"
 

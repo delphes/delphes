@@ -21,12 +21,12 @@
 
 /** \class CscClusterId
  *
- *  Selects candidates from the InputArray according to the CscClusterId formula.
+ *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
+ *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author Christina Wang
  *
  */
-
 #include "classes/DelphesModule.h"
 
 class TIterator;

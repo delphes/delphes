@@ -21,11 +21,14 @@
 #ifndef LLPFilter_h
 #define LLPFilter_h
 
+
 /** \class LLPFilter
  *
- *  Removes particles with specific PDG codes
+ *  Filter LLPs with particular PDG ID/status and calculate the EM and hadronic energy of LLP based on decay particles
+ *  The classification of EM and hadronic energy of LLP is based on instructions from the HEPData entry for the CMS paper searching
+ *  for neutral LLPs in the CMS endcap muon detectors: https://www.hepdata.net/record/104408
  *
- *  \author M. Selvaggi
+ *  \author Christina Wang
  *
  */
 
