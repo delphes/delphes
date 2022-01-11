@@ -480,7 +480,7 @@ void DelphesHepMC2Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
         candidate->D2 = -1;
         const TLorentzVector &decayPosition = candidate->Position;
         candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T());// decay position
-      }
+     }
       else
       {
         candidate->D1 = itDaughterMap->second.first;
@@ -488,6 +488,7 @@ void DelphesHepMC2Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
         candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->At(candidate->D1));
         const TLorentzVector &decayPosition = candidateDaughter->Position;
         candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T());// decay position
+        
 
       }
     }

@@ -169,10 +169,8 @@ void LLPFilter::Process()
       if (daughter->IsPU)continue;
       if (abs(daughterPdg)==12 || abs(daughterPdg)==14 || abs(daughterPdg)==16 || abs(daughterPdg)==13)continue; // ignore neutrinos and muons
       if (abs(daughterPdg) > 1000000) continue;//ignore BSM particles
-      
-      const TLorentzVector &daughterProdPosition = daughter->Position;
+
       const TLorentzVector &daughterMomentum = daughter->Momentum;
-      const TLorentzVector distance = daughterProdPosition - candidateDecayPosition;
 
       // look for mother until find LLP or reach the top of the tree
       tempCandidate = daughter;
@@ -185,8 +183,6 @@ void LLPFilter::Process()
       if (abs(daughterPdg)==11 || abs(daughterPdg)==22 || abs(daughterPdg)==111)candidate->Eem += daughterMomentum.E();
       else candidate->Ehad += daughterMomentum.E();
     }
-
-
 
     // used detector geometry in Figure 4.1.1, page141 from CERN-LHCC-97-032: https://cds.cern.ch/record/343814?ln=en
     // decayRegion = 0: no cuts on decay region

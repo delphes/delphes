@@ -197,7 +197,6 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
-    const TLorentzVector &DecayPosition = candidate->DecayPosition;
 
     entry = static_cast<GenParticle *>(branch->NewEntry());
 
@@ -240,10 +239,6 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Z = position.Z();
     entry->T = position.T() * 1.0E-3 / c_light;
 
-    entry->decayX = DecayPosition.X();
-    entry->decayY = DecayPosition.Y();
-    entry->decayZ = DecayPosition.Z();
-    entry->decayT = DecayPosition.T()* 1.0E-3 / c_light;
   }
 }
 

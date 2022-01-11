@@ -669,7 +669,7 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  ClassDef(CscCluster, 4)
+  ClassDef(CscCluster, 5)
 };
 
 //---------------------------------------------------------------------------
@@ -715,7 +715,7 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, InitialPosition, DecayPosition, PositionError, Area;
+  TLorentzVector Momentum, Position, InitialPosition, PositionError, DecayPosition, Area;
 
   Float_t L; // path length
   Float_t DZ;
