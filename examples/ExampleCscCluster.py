@@ -73,7 +73,7 @@ if __name__ == '__main__':
       # Require MET > 200 GeV
       if branchMET.At(0).MET < 200: continue
 
-      # Require at least 1 jet with pT>50 GeV and eta< 2.4
+      # Require at least 1 jet with pT > 50 GeV and abs(eta) < 2.4
       nJet = 0
       for i in range(branchJet.GetEntries()):
           jet = branchJet.At(i)
