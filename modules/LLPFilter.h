@@ -50,7 +50,13 @@ public:
 
 private:
   Double_t fPTMin; //!
-  Int_t fDecayRegion;
+  Bool_t fRequireDecayRegion;
+  Int_t fDecayRegionRMax;
+  Int_t fDecayRegionRMin;
+  Int_t fDecayRegionZMax;
+  Int_t fDecayRegionZMin;
+  Int_t fDecayRegionEtaMax;
+  Int_t fDecayRegionEtaMin;
   Int_t fDaughterNumber;
   Bool_t fInvert; //!
   Bool_t fRequireStatus; //!

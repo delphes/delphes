@@ -410,10 +410,18 @@ module PdgCodeFilter ElectronFilter {
 module LLPFilter CSCFilter {
   set InputArray Delphes/allParticles
   set OutputArray LLP
-  # DecayRegion = 0: no cuts on decay region
-  # DecayRegion = 1: select LLP that decays in CSC volume
-  # DecayRegion = 2: select LLP that decays outside of calorimeters, for genMET calculation
-  set DecayRegion 1
+
+  # CMS CSC region
+  # used detector geometry in Figure 4.1.1, page141 from CERN-LHCC-97-032: https://cds.cern.ch/record/343814?ln=en
+
+  set RequireDecayRegion true
+  set DecayRegionRMax 6955
+  set DecayRegionRMin 0
+  set DecayRegionZMax 11000
+  set DecayRegionZMin 4000
+  set DecayRegionEtaMax 2
+  set DecayRegionEtaMin 0
+
   set RequireStatus false
   add PdgCode {1500001}
 
@@ -423,10 +431,9 @@ module LLPFilter CSCFilter {
 module LLPFilter llpFilter {
   set InputArray Delphes/allParticles
   set OutputArray LLP
-  # DecayRegion = 0: no cuts on decay region
-  # DecayRegion = 1: select LLP that decays in CSC volume
-  # DecayRegion = 2: select LLP that decays outside of calorimeters, for genMET calculation
-  set DecayRegion 0
+  set RequireDecayRegion false
+
+
   set RequireStatus false
   add PdgCode {1500001}
 

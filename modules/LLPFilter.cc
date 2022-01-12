@@ -21,6 +21,7 @@
  *  Filter LLPs with particular PDG ID/status and calculate the EM and hadronic energy of LLP based on decay particles
  *  The classification of EM and hadronic energy of LLP is based on instructions from the HEPData entry for the CMS paper searching
  *  for neutral LLPs in the CMS endcap muon detectors: https://www.hepdata.net/record/104408
+ *  Muons and neutrinos are ignored. Photons, electrons, and pi0 are EM energy and everything else is hadronic energy.
  *
  *  \author Christina Wang
  *
@@ -76,9 +77,15 @@ void LLPFilter::Init()
   fPTMin = GetDouble("PTMin", 0.0);
 
   fInvert = GetBool("Invert", false);
-  fDecayRegion = GetInt("DecayRegion", 0);
   fDaughterNumber = GetInt("DaughterNumber", 0);
+  fRequireDecayRegion = GetBool("RequireDecayRegion", 0);
 
+  fDecayRegionRMax = GetInt("DecayRegionRMax", 0); //mm
+  fDecayRegionRMin = GetInt("DecayRegionRMin", 0); //mm
+  fDecayRegionZMax = GetInt("DecayRegionZMax", 0); //mm
+  fDecayRegionZMin = GetInt("DecayRegionZMin", 0); //mm
+  fDecayRegionEtaMax = GetInt("DecayRegionEtaMax", 0); // requirement on abs(eta)
+  fDecayRegionEtaMin = GetInt("DecayRegionEtaMin", 0); //requirement on abs(eta)
 
 
   // no pileup
@@ -147,7 +154,6 @@ void LLPFilter::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     const TLorentzVector &candidateProdPosition = candidate->Position;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
-    // TLorentzVector candidateDecayPosition;
     pt = candidateMomentum.Pt();
     eta = candidateMomentum.Eta();
     if(pt < fPTMin) continue;
@@ -183,32 +189,21 @@ void LLPFilter::Process()
       }
       if (tempCandidate->M1 == -1) continue;
 
-      // candidateDecayPosition = daughter->Position;
-
+      // assign LLP EM or hadronic energy, depending on the daughter ID
       if (abs(daughterPdg)==11 || abs(daughterPdg)==22 || abs(daughterPdg)==111)candidate->Eem += daughterMomentum.E();
       else candidate->Ehad += daughterMomentum.E();
     }
 
-    // used detector geometry in Figure 4.1.1, page141 from CERN-LHCC-97-032: https://cds.cern.ch/record/343814?ln=en
-    // decayRegion = 0: no cuts on decay region
-    // decayRegion = 1: select LLP that decays in CSC volume
-    // decayRegion = 2: select LLP that decays outside of calorimeters
-    if (fDecayRegion == 1)
+    if (fRequireDecayRegion)
     {
-      if (abs(eta) < 2
-         && abs(candidateDecayPosition.Z())<11000 && abs(candidateDecayPosition.Z())>4000
-         && sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2)) < 6955)
+      if (abs(eta) < fDecayRegionEtaMax && abs(eta) > fDecayRegionEtaMin
+         && abs(candidateDecayPosition.Z()) < fDecayRegionZMax && abs(candidateDecayPosition.Z()) > fDecayRegionZMin
+         && sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2)) < fDecayRegionRMax
+         && sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2)) > fDecayRegionRMin)
       {
         fOutputArray->Add(candidate);
       }
 
-    }
-    else if(fDecayRegion == 2)
-    {
-      if (abs(candidateDecayPosition.Z()) > 5680 && sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2)) > 3000)
-      {
-        fOutputArray->Add(candidate);
-      }
     }
     else{
       fOutputArray->Add(candidate);
