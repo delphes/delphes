@@ -45,6 +45,8 @@ public:
 
 private:
   DelphesCscClusterFormula *fFormula; //!
+  DelphesCscClusterFormula *fEtaFormula; //!
+  Double_t fEtaCutMax;
 
   TIterator *fItInputArray; //!
 

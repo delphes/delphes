@@ -80,12 +80,12 @@ void LLPFilter::Init()
   fDaughterNumber = GetInt("DaughterNumber", 0);
   fRequireDecayRegion = GetBool("RequireDecayRegion", 0);
 
-  fDecayRegionRMax = GetInt("DecayRegionRMax", 0); //mm
-  fDecayRegionRMin = GetInt("DecayRegionRMin", 0); //mm
-  fDecayRegionZMax = GetInt("DecayRegionZMax", 0); //mm
-  fDecayRegionZMin = GetInt("DecayRegionZMin", 0); //mm
-  fDecayRegionEtaMax = GetInt("DecayRegionEtaMax", 0); // requirement on abs(eta)
-  fDecayRegionEtaMin = GetInt("DecayRegionEtaMin", 0); //requirement on abs(eta)
+  fDecayRegionRMax = GetDouble("DecayRegionRMax", 0.0); //mm
+  fDecayRegionRMin = GetDouble("DecayRegionRMin", 0.0); //mm
+  fDecayRegionZMax = GetDouble("DecayRegionZMax", 0.0); //mm
+  fDecayRegionZMin = GetDouble("DecayRegionZMin", 0.0); //mm
+  fDecayRegionEtaMax = GetDouble("DecayRegionEtaMax", 0.0); // requirement on abs(eta)
+  fDecayRegionEtaMin = GetDouble("DecayRegionEtaMin", 0.0); //requirement on abs(eta)
 
 
   // no pileup

@@ -622,6 +622,8 @@ module CscClusterId CutBasedIDEfficiency {
 set InputArray CSCFilter/LLP
   set OutputArray cluster
 
+  set EtaCutMax 1.9
+
   # efficiency formula for Csc Cluster, as a function of LLP decay vertex in R, Z and hadronic and EM energy
   set EfficiencyFormula {
     (decayR > 3900 && decayZ < 6710) * ((0.0 == Ehad)*(0.0656) +
@@ -649,6 +651,12 @@ set InputArray CSCFilter/LLP
     (Ehad >= 150.0 && Ehad < 200.0)*(0.2532) +
     (Ehad >= 200.0)*(0.2404))
   }
+  set EtaCutFormula {
+    (decayZ < 6320 || (decayZ < 7240 && decayR > 2750)) * (1.8) +
+    ( !(decayZ < 6320 || (decayZ < 7240 && decayR > 2750)) && decayZ < 9700) * (1.6) +
+    (decayZ >= 9700) * (1.8)
+  }
+
 }
 ######################
 # ChargedHadronFilter

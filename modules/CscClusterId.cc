@@ -20,6 +20,7 @@
   *
   *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
   *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
+  *  to reproduce the cut-based ID efficiency of the CMS paper.
   *
   *  \author Christina Wang
   *
@@ -47,15 +48,16 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
+#include "assert.h"
 using namespace std;
 
 //------------------------------------------------------------------------------
 
 CscClusterId::CscClusterId() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0), fEtaFormula(0), fItInputArray(0)
 {
   fFormula = new DelphesCscClusterFormula;
+  fEtaFormula = new DelphesCscClusterFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -63,6 +65,7 @@ CscClusterId::CscClusterId() :
 CscClusterId::~CscClusterId()
 {
   if(fFormula) delete fFormula;
+  if(fEtaFormula) delete fEtaFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -72,6 +75,8 @@ void CscClusterId::Init()
   // read efficiency formula
 
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
+  fEtaFormula->Compile(GetString("EtaCutFormula", "1.0"));
+  fEtaCutMax = GetDouble("EtaCutMax", 999.0);
 
   // import input array
 
@@ -113,21 +118,12 @@ void CscClusterId::Process()
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
+    // calculate the NStation > 1 efficiency, implemented according to Additional Figure 8 in HEPData
     NStationEff = fFormula->Eval(decayR, decayZ, Ehad);
 
-    // assign average station for the cluster
-    if (decayZ < 6320) avgStation = 1;
-    else if (decayZ < 7240 && decayR > 2750)avgStation = 1;
-    else if (decayZ < 8500) avgStation = 2;
-    else if (decayZ < 9700) avgStation = 3;
-    else avgStation = 4;
-
-    // if NStation == 1, different eta cut is applied
-    if (avgStation == 1) eta_cut = 1.8;
-    else if (avgStation == 2) eta_cut = 1.6;
-    else if (avgStation == 3) eta_cut = 1.6;
-    else if (avgStation == 4) eta_cut = 1.8;
-    if(gRandom->Uniform() > NStationEff*(abs(eta)<1.9)+(1.0-NStationEff)*(abs(eta)<eta_cut)) continue;
+    // depending on the decay region (station Number), different eta cut is applied, implemented based on cut_based_id.py in HEPData
+    float eta_cut = fEtaFormula->Eval(decayR, decayZ);
+    if(gRandom->Uniform() > NStationEff*(abs(eta)<fEtaCutMax)+(1.0-NStationEff)*(abs(eta)<eta_cut)) continue;
 
     fOutputArray->Add(candidate);
   }
