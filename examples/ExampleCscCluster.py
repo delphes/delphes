@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 This script computes and prints the signal efficiency when reinterpreting the CMS analysis searching for LLPs that decay in the endcap muon detectors (https://arxiv.org/abs/2107.04838)
 The event-level and cluster-level selections follow the exact selections applied in the paper and the recasting instructions provided in the HEPData entry (https://www.hepdata.net/record/104408)
@@ -24,7 +23,7 @@ if __name__ == '__main__':
       pass
 
     if len(sys.argv) < 2:
-      print(" Usage: Example1.py input_file")
+      print(" Usage: ExampleCscCluster.py input_file")
       sys.exit(1)
 
     ROOT.gSystem.Load("libDelphes")
