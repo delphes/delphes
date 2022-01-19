@@ -5,13 +5,15 @@
 #include <TMath.h>
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
+#include "TrkUtil.h"
 #include "ObsTrk.h"
 #include <vector>
 #include <iostream>
 //
 // Class for vertex fitting
 
-class VertexFit {
+class VertexFit: public TrkUtil
+{
 	//
 	// Vertex fitting with track parameters steering
 	// Author: F. Bedeschi, INFN-Pisa, Italy
@@ -20,19 +22,19 @@ class VertexFit {
 private:
 	//
 	// Inputs
-	Int_t fNtr;					// Number of tracks
+	Int_t fNtr;							// Number of tracks
 	std::vector<TVectorD*> fPar;		// Input parameter array
 	std::vector<TVectorD*> fParNew;		// Updated parameter array
 	std::vector<TMatrixDSym*> fCov;		// Input parameter covariances
 	std::vector<TMatrixDSym*> fCovNew;	// Updated parameter covariances
 	// Constraints
-	Bool_t fVtxCst;				// Vertex constraint flag
-	TVectorD fxCst;				// Constraint value
+	Bool_t fVtxCst;					// Vertex constraint flag
+	TVectorD fxCst;					// Constraint value
 	TMatrixDSym fCovCst;			// Constraint 
 	TMatrixDSym fCovCstInv;			// Inverse of constraint covariance
 	//
 	// Results
-	Bool_t fVtxDone;				// Flag vertex fit completed
+	Bool_t fVtxDone;			// Flag vertex fit completed
 	Double_t fRold;				// Current value of vertex radius
 	TVectorD fXv;				// Found vertex
 	TMatrixDSym fcovXv;			// Vertex covariance
@@ -51,17 +53,17 @@ private:
 	std::vector<TMatrixDSym*> fWinvi;		// ACA'
 	//
 	// Service routines
-	//void InitWrkArrays();							// Initializations
 	void ResetWrkArrays();							// Clear work arrays
-	Double_t StartRadius();							// Starting vertex radius determination
-	Double_t FastRv(TVectorD p1, TVectorD p2);		// Fast vertex radius determination
-	TMatrixDSym RegInv(TMatrixDSym& Smat0);			// Regularized 3D matrix inversion 
-	TMatrixD Fill_A(TVectorD par, Double_t phi);		// Derivative of track position wrt track parameters
-	TVectorD Fill_a(TVectorD par, Double_t phi);		// Derivative of track position wrt track phase
+	//Double_t StartRadius();							// Starting vertex radius determination
+	//Double_t FastRv(TVectorD p1, TVectorD p2);		// Fast vertex radius determination
+	//TMatrixDSym RegInv(TMatrixDSym& Smat0);		// Regularized 3D matrix inversion 
+	//TMatrixD Fill_A(TVectorD par, Double_t phi);	// Derivative of track position wrt track parameters
+	//TVectorD Fill_a(TVectorD par, Double_t phi);	// Derivative of track position wrt track phase
 	TVectorD Fill_x0(TVectorD par);					// Track position at dma to z-axis
-	TVectorD Fill_x(TVectorD par, Double_t phi);		// Track position at given phase
+	TVectorD Fill_x(TVectorD par, Double_t phi);	// Track position at given phase
 	void UpdateTrkArrays(Int_t i);					// Fill track realted arrays
-	void VertexFitter();								// Vertex finder routine
+	void VtxFitNoSteer();							// Vertex fitter routine w/o parameter steering
+	void VertexFitter();							// Vertex fitter routine w/  parameter steering
 public:
 	//
 	// Constructors
