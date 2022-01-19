@@ -1,6 +1,6 @@
 /*
 Example of using vertex fitter class to fit primary vertex
-assumed to be generated in (0,0,0)
+assumed to be generated with Pythia8/ee_zh_smr-shf.cmn
 */
 
 #ifdef __CLING__
@@ -43,6 +43,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 	TH1D* hTrFound = new TH1D("hTrFound", "Found primary tracks", 41, -0.5, 40.5);
 	TH1D* hTrFoundG = new TH1D("hTrFoundG", "Found GOOD primary tracks", 41, -0.5, 40.5);
 	TH1D* hTrFoundB = new TH1D("hTrFoundB", "Found BAD  primary tracks", 41, -0.5, 40.5);
+	TH1D* hTrDiff = new TH1D("hTrDiff", "Found - available tracks", 21, -10.5, 10.5);
 	//
 	// Loop over all events
 	Int_t Nev = TMath::Min(Nevent, (Int_t)numberOfEntries);
@@ -86,6 +87,21 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				TVectorD obsPar(5, oPar);	// Fill observed parameters
 				pr[it] = new TVectorD(obsPar);
 				cv[it] = new TMatrixDSym(trk->CovarianceMatrix());
+				// Check covariance
+				/*
+				TMatrixDSymEigen Eign(*cv[it]);
+				TVectorD lambda = Eign.GetEigenValues();
+				Bool_t good = kTRUE;
+				for(Int_t i=0; i<5; i++) if(lambda(i)<0.0) good = kFALSE;
+				if(!good){
+					std::cout<<"Cov["<<it<<"]"<<" eigenvalues: "
+					<<lambda(0)<<", "<<lambda(1)<<", "<<lambda(2)<<", "
+					<<lambda(3)<<", "<<lambda(4)<<std::endl;
+					TMatrixDSym Ctmp = *cv[it];
+					std::cout<<"Error D (dir - cov) "<<trk->ErrorD0
+					<<" - "<<TMath::Sqrt(Ctmp(0,0))<<std::endl;
+				}
+				*/
 				//std::cout << "Track loaded it= " << it << std::endl;
 			//
 			// Find true primary vertex
@@ -119,6 +135,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 
 			}		// End loop on tracks
 		}
+		std::cout<<"PVtxFind true vertex: Nprim= "<<Nprim<<", x,y,z= "<<xpv<<", "<<ypv<<", "<<zpv<<std::endl;
 		//
 		// Find primary vertex
 		//
@@ -131,16 +148,24 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 		covpvc(0, 0) = 0.0097 * 0.0097;
 		covpvc(1, 1) = 2.55e-05 * 2.55e-05;
 		covpvc(2, 2) = 0.64 * 0.64;
+		if(Nprim == 0){
+			xpv = xpvc(0);
+			ypv = xpvc(1);
+			zpv = xpvc(2);
+		}
 		//
 		//
 		// Skim tracks
 		Int_t nSkim = 0;
 		Int_t* nSkimmed = new Int_t[NtrG];
-		VertexFit* Vskim = new VertexFit();
-		Vskim->AddVtxConstraint(xpvc, covpvc);
-		Double_t MaxChi2 = 2.0+3*sqrt(2.);
+		TVectorD** PrSk = new TVectorD * [1];
+		TMatrixDSym** CvSk = new TMatrixDSym * [1];
+		Double_t MaxChi2 = 2.0+3*2.;
 		for (Int_t n = 0; n < NtrG; n++) {
-			Vskim->AddTrk(pr[n], cv[n]);
+			PrSk[0] = new TVectorD(*pr[n]);
+			CvSk[0] = new TMatrixDSym(*cv[n]);
+			VertexFit* Vskim = new VertexFit(1,PrSk, CvSk);
+			Vskim->AddVtxConstraint(xpvc, covpvc);
 			Double_t Chi2One = Vskim->GetVtxChi2();
 			//std::cout<<"Track "<<n<<", Chi2 = "<<Chi2One<<std::endl;
 			if (Chi2One < MaxChi2) {
@@ -148,44 +173,46 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				//std::cout << "nSkimmed[" << nSkim << "] = " << n << std::endl;
 				nSkim++;
 			}
-			Vskim->RemoveTrk(0);
+			// Cleanup
+			delete Vskim;
 		}
+		delete PrSk[0];
+		delete CvSk[0];
+		delete[] PrSk;
+		delete[] CvSk;
+		//
 		// Load tracks for primary fit
 		Int_t MinTrk = 1;	// Minumum # tracks for vertex fit
-		TVectorD** PrFit = new TVectorD * [nSkim];
-		TMatrixDSym** CvFit = new TMatrixDSym * [nSkim];
 		if (nSkim >= MinTrk) {
+			TVectorD** PrFit = new TVectorD * [nSkim];
+			TMatrixDSym** CvFit = new TMatrixDSym * [nSkim];
 			for (Int_t n = 0; n < nSkim; n++) {
 				PrFit[n] = new TVectorD(*pr[nSkimmed[n]]);
 				CvFit[n] = new TMatrixDSym(*cv[nSkimmed[n]]);
-				TVectorD test = *PrFit[n];
-				//std::cout << "Test *PrFit[" << n << "](0) = " << test(0) << std::endl;
 			}
-		}
-		delete[] nSkimmed;
-		delete Vskim;
-		Int_t Nfound = nSkim;
-		if(entry%500 ==0)std::cout << "Found tracks "<<Nfound << std::endl;
-		if (nSkim >= MinTrk) {
+			delete[] nSkimmed;
+			Int_t Nfound = nSkim;
+			if(entry%500 ==0)std::cout << "Found tracks "<<Nfound << std::endl;
+			const Int_t MaxFound = 100; Double_t Chi2LL[MaxFound]; Double_t *Chi2L = Chi2LL;
 			VertexFit* Vtx = new VertexFit(nSkim, PrFit, CvFit);
 			//std::cout << "Vertex fit created " << std::endl;
 			Vtx->AddVtxConstraint(xpvc, covpvc);
 			//
 			// Remove tracks with large chi2
-			Double_t MaxChi2Fit = 9.;
+			Double_t MaxChi2Fit = 4.5;
 			Bool_t Done = kFALSE;
 			while (!Done) {
 				//std::cout << "After while " << std::endl;
 				// Find largest Chi2 contribution
 				TVectorD Chi2List = Vtx->GetVtxChi2List();	// Get contributions to Chi2
 				//std::cout << "After Chi2List.  " << std::endl; Chi2List.Print();
-				Double_t* Chi2L = new Double_t[Nfound];
+				//Double_t* Chi2L = new Double_t[Nfound];
 				Chi2L = Chi2List.GetMatrixArray();
 				Int_t iMax = TMath::LocMax(Nfound, Chi2L);
 				//std::cout << "iMax =  "<<iMax << std::endl;
 				Double_t Chi2Mx = Chi2L[iMax];
 				//std::cout << "Chi2Mx "<<Chi2Mx << std::endl;
-				if (Chi2Mx > MaxChi2Fit && Nfound > 2) {
+				if (Chi2Mx > MaxChi2Fit && Nfound > 1) {
 					//std::cout << "Before remove.  Nfound = "<<Nfound << std::endl;
 					Vtx->RemoveTrk(iMax);
 					//std::cout << "After remove." << std::endl;
@@ -194,18 +221,15 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				else {
 					Done = kTRUE;
 				}
-				//std::cout << "Done =  " << Done << std::endl;
-				//delete[] Chi2L;
-				//std::cout << "Array Chi2L removed " << std::endl;
 			}
 			//
 			//std::cout << "Before getting vertex " << std::endl;
 			//
 			// Require minimum number of tracks in vertex
-			Int_t Nmin = 2;
+			Int_t Nmin = 1;
 			if (Nfound >= Nmin) {
 				TVectorD xvtx = Vtx->GetVtx();
-				//std::cout << "Found vertex " << xvtx(0)<<", "<<xvtx(1)<<", "<<xvtx(2) << std::endl;
+				std::cout << "Found vertex " << xvtx(0)<<", "<<xvtx(1)<<", "<<xvtx(2) << std::endl;
 				TMatrixDSym covX = Vtx->GetVtxCov();
 				Double_t Chi2 = Vtx->GetVtxChi2();
 				Double_t Ndof = 2 * (Double_t)Nfound;
@@ -221,10 +245,16 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				//
 				hTrPrim->Fill(Nprim);
 				hTrFound->Fill((Double_t)Nfound);
+				hTrDiff->Fill((Double_t)Nfound-Nprim);
 				//std::cout << "Histograms filled " << std::endl;
 			}
 			//
+			// Clean
 			delete Vtx;
+			for (Int_t i = 0; i < nSkim; i++) delete PrFit[i];
+			for (Int_t i = 0; i < nSkim; i++) delete CvFit[i];
+			delete[] PrFit;
+			delete[] CvFit;
 		}
 
 		//std::cout << "Vertex chi2/Ndof = " << Chi2 / Ndof << std::endl;
@@ -232,12 +262,8 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 		// Cleanup
 		for (Int_t i = 0; i < NtrG; i++) delete pr[i];
 		for (Int_t i = 0; i < NtrG; i++) delete cv[i];
-		for (Int_t i = 0; i < nSkim; i++) delete PrFit[i];
-		for (Int_t i = 0; i < nSkim; i++) delete CvFit[i];
 		delete[] pr;
 		delete[] cv;
-		delete[] PrFit;
-		delete[] CvFit;
 	}
 	//
 	// Show resulting histograms
@@ -253,10 +279,12 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 	Cnv->cd(4); hChi2->Draw();
 	//
 	TCanvas* CnvN = new TCanvas("CnvN", "Primary tracks found", 100, 100, 900, 500);
-	CnvN->Divide(2, 1);
+	CnvN->Divide(2, 2);
 	CnvN->cd(1);
 	hTrPrim->Draw();
 	CnvN->cd(2);
 	hTrFound->SetLineColor(kRed);
 	hTrFound->Draw();
+	CnvN->cd(3);
+	hTrDiff->Draw();
 }

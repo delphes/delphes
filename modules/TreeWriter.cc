@@ -368,16 +368,16 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->ErrorCtgTheta = candidate->ErrorCtgTheta;
 
     // add some offdiagonal covariance matrix elements
-    entry->ErrorD0Phi          = candidate->TrackCovariance(0,1);
+    entry->ErrorD0Phi          = candidate->TrackCovariance(0,1)*1.e3;
     entry->ErrorD0C            = candidate->TrackCovariance(0,2);
-    entry->ErrorD0DZ           = candidate->TrackCovariance(0,3);
-    entry->ErrorD0CtgTheta     = candidate->TrackCovariance(0,4);
-    entry->ErrorPhiC           = candidate->TrackCovariance(1,2);
-    entry->ErrorPhiDZ          = candidate->TrackCovariance(1,3);
+    entry->ErrorD0DZ           = candidate->TrackCovariance(0,3)*1.e6;
+    entry->ErrorD0CtgTheta     = candidate->TrackCovariance(0,4)*1.e3;
+    entry->ErrorPhiC           = candidate->TrackCovariance(1,2)*1.e-3;
+    entry->ErrorPhiDZ          = candidate->TrackCovariance(1,3)*1.e3;
     entry->ErrorPhiCtgTheta    = candidate->TrackCovariance(1,4);
     entry->ErrorCDZ            = candidate->TrackCovariance(2,3);
-    entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4);
-    entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4);
+    entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4)*1.e-3;
+    entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4)*1.e3;
 
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
