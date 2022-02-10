@@ -44,6 +44,13 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 	TH1D* hTrFoundG = new TH1D("hTrFoundG", "Found GOOD primary tracks", 41, -0.5, 40.5);
 	TH1D* hTrFoundB = new TH1D("hTrFoundB", "Found BAD  primary tracks", 41, -0.5, 40.5);
 	TH1D* hTrDiff = new TH1D("hTrDiff", "Found - available tracks", 21, -10.5, 10.5);
+	// Chi2 for cuts
+	TH1D* hChi2SngP = new TH1D("hChi2SngP", "#chi^2 for single tracks", 200, 0., 50.);
+	TH1D* hChi2MaxP = new TH1D("hChi2MaxP", "#chi^2 max contribution", 200, 0., 50.);
+	TH1D* hChi2SngN = new TH1D("hChi2SngN", "#chi^2 for single tracks", 200, 0., 50.);
+	TH1D* hChi2MaxN = new TH1D("hChi2MaxN", "#chi^2 max contribution", 200, 0., 50.);
+	
+	
 	//
 	// Loop over all events
 	Int_t Nev = TMath::Min(Nevent, (Int_t)numberOfEntries);
@@ -52,9 +59,9 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 		Int_t NtrG = branchTrack->GetEntries();
-		if(entry%500 ==0)std::cout << "Event "<<entry<<" opened containing " << NtrG << " tracks" << std::endl;
-		TVectorD** pr = new TVectorD * [NtrG];
-		TMatrixDSym** cv = new TMatrixDSym * [NtrG];
+		TVectorD** pr = new TVectorD * [NtrG];		// Track Parameters
+		TMatrixDSym** cv = new TMatrixDSym * [NtrG];	// Track covariances
+		Bool_t *fprvx = new Bool_t[NtrG];		// Primary vertex flag
 		//
 		// test Particle branch
 		Int_t Ngen = branchGenPart->GetEntries();
@@ -87,22 +94,6 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				TVectorD obsPar(5, oPar);	// Fill observed parameters
 				pr[it] = new TVectorD(obsPar);
 				cv[it] = new TMatrixDSym(trk->CovarianceMatrix());
-				// Check covariance
-				/*
-				TMatrixDSymEigen Eign(*cv[it]);
-				TVectorD lambda = Eign.GetEigenValues();
-				Bool_t good = kTRUE;
-				for(Int_t i=0; i<5; i++) if(lambda(i)<0.0) good = kFALSE;
-				if(!good){
-					std::cout<<"Cov["<<it<<"]"<<" eigenvalues: "
-					<<lambda(0)<<", "<<lambda(1)<<", "<<lambda(2)<<", "
-					<<lambda(3)<<", "<<lambda(4)<<std::endl;
-					TMatrixDSym Ctmp = *cv[it];
-					std::cout<<"Error D (dir - cov) "<<trk->ErrorD0
-					<<" - "<<TMath::Sqrt(Ctmp(0,0))<<std::endl;
-				}
-				*/
-				//std::cout << "Track loaded it= " << it << std::endl;
 			//
 			// Find true primary vertex
 				GenParticle* gp = (GenParticle*)trk->Particle.GetObject();
@@ -113,6 +104,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				Double_t y = gp->Y;
 				Double_t z = gp->Z;
 				Bool_t prim = kTRUE;	// Is primary?
+				fprvx[it] = kFALSE;
 				Int_t mp = gp->M1;	// Mother
 				while (mp > 0) {
 					GenParticle* gm =
@@ -128,6 +120,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				}
 				if (prim) {		// It's a primary track
 					Nprim++;
+					fprvx[it] = kTRUE;
 					xpv = x;	// Store true primary
 					ypv = y;
 					zpv = z;
@@ -135,7 +128,11 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 
 			}		// End loop on tracks
 		}
-		std::cout<<"PVtxFind true vertex: Nprim= "<<Nprim<<", x,y,z= "<<xpv<<", "<<ypv<<", "<<zpv<<std::endl;
+		if(entry%500 ==0){
+		  std::cout << "Event "<<entry<<" opened containing " << NtrG << " / "<< Nprim 
+		  << "   Total / primary tracks"<< std::endl;
+		}
+		//std::cout<<"PVtxFind true vertex: Nprim= "<<Nprim<<", x,y,z= "<<xpv<<", "<<ypv<<", "<<zpv<<std::endl;
 		//
 		// Find primary vertex
 		//
@@ -160,7 +157,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 		Int_t* nSkimmed = new Int_t[NtrG];
 		TVectorD** PrSk = new TVectorD * [1];
 		TMatrixDSym** CvSk = new TMatrixDSym * [1];
-		Double_t MaxChi2 = 2.0+3*2.;
+		Double_t MaxChi2 = 9.;
 		for (Int_t n = 0; n < NtrG; n++) {
 			PrSk[0] = new TVectorD(*pr[n]);
 			CvSk[0] = new TMatrixDSym(*cv[n]);
@@ -168,6 +165,9 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 			Vskim->AddVtxConstraint(xpvc, covpvc);
 			Double_t Chi2One = Vskim->GetVtxChi2();
 			//std::cout<<"Track "<<n<<", Chi2 = "<<Chi2One<<std::endl;
+			if(fprvx[n])hChi2SngP->Fill(Chi2One);
+			else hChi2SngN->Fill(Chi2One);
+			//
 			if (Chi2One < MaxChi2) {
 				nSkimmed[nSkim] = n;
 				//std::cout << "nSkimmed[" << nSkim << "] = " << n << std::endl;
@@ -183,12 +183,14 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 		//
 		// Load tracks for primary fit
 		Int_t MinTrk = 1;	// Minumum # tracks for vertex fit
+		std::vector<Int_t> trnum;
 		if (nSkim >= MinTrk) {
 			TVectorD** PrFit = new TVectorD * [nSkim];
 			TMatrixDSym** CvFit = new TMatrixDSym * [nSkim];
 			for (Int_t n = 0; n < nSkim; n++) {
 				PrFit[n] = new TVectorD(*pr[nSkimmed[n]]);
 				CvFit[n] = new TMatrixDSym(*cv[nSkimmed[n]]);
+				trnum.push_back(nSkimmed[n]);
 			}
 			delete[] nSkimmed;
 			Int_t Nfound = nSkim;
@@ -199,7 +201,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 			Vtx->AddVtxConstraint(xpvc, covpvc);
 			//
 			// Remove tracks with large chi2
-			Double_t MaxChi2Fit = 4.5;
+			Double_t MaxChi2Fit = 8.0;
 			Bool_t Done = kFALSE;
 			while (!Done) {
 				//std::cout << "After while " << std::endl;
@@ -212,9 +214,12 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 				//std::cout << "iMax =  "<<iMax << std::endl;
 				Double_t Chi2Mx = Chi2L[iMax];
 				//std::cout << "Chi2Mx "<<Chi2Mx << std::endl;
+				if(fprvx[trnum[iMax]])hChi2MaxP->Fill(Chi2Mx);
+				else hChi2MaxN->Fill(Chi2Mx);
 				if (Chi2Mx > MaxChi2Fit && Nfound > 1) {
 					//std::cout << "Before remove.  Nfound = "<<Nfound << std::endl;
 					Vtx->RemoveTrk(iMax);
+					trnum.erase(trnum.begin() + iMax);
 					//std::cout << "After remove." << std::endl;
 					Nfound--;
 				}
@@ -229,7 +234,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 			Int_t Nmin = 1;
 			if (Nfound >= Nmin) {
 				TVectorD xvtx = Vtx->GetVtx();
-				std::cout << "Found vertex " << xvtx(0)<<", "<<xvtx(1)<<", "<<xvtx(2) << std::endl;
+				//std::cout << "Found vertex " << xvtx(0)<<", "<<xvtx(1)<<", "<<xvtx(2) << std::endl;
 				TMatrixDSym covX = Vtx->GetVtxCov();
 				Double_t Chi2 = Vtx->GetVtxChi2();
 				Double_t Ndof = 2 * (Double_t)Nfound;
@@ -255,6 +260,8 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 			for (Int_t i = 0; i < nSkim; i++) delete CvFit[i];
 			delete[] PrFit;
 			delete[] CvFit;
+			delete[] fprvx;
+			trnum.clear();
 		}
 
 		//std::cout << "Vertex chi2/Ndof = " << Chi2 / Ndof << std::endl;
@@ -270,11 +277,11 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 	//
 	TCanvas* Cnv = new TCanvas("Cnv", "Delphes primary vertex pulls", 50, 50, 900, 500);
 	Cnv->Divide(2, 2);
-	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);
+	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111); gStyle->SetOptStat(111111);
 	hXpull->Fit("gaus"); hXpull->Draw();
-	Cnv->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111);
+	Cnv->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111); gStyle->SetOptStat(111111);
 	hYpull->Fit("gaus"); hYpull->Draw();
-	Cnv->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111);
+	Cnv->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111); gStyle->SetOptStat(111111);
 	hZpull->Fit("gaus"); hZpull->Draw();
 	Cnv->cd(4); hChi2->Draw();
 	//
@@ -287,4 +294,15 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 	hTrFound->Draw();
 	CnvN->cd(3);
 	hTrDiff->Draw();
+	//
+	TCanvas* CnvCh = new TCanvas("CnvCh", "#chi^2", 200, 200, 900, 500);
+	CnvCh->Divide(2,1);
+	CnvCh->cd(1);
+	hChi2SngP->Draw();
+	hChi2SngN->SetLineColor(kRed);
+	hChi2SngN->Draw("SAME");
+	CnvCh->cd(2);
+	hChi2MaxP->Draw();
+	hChi2MaxN->SetLineColor(kRed);
+	hChi2MaxN->Draw("SAME");
 }

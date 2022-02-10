@@ -73,15 +73,18 @@ ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G)
 	fCovACTS.ResizeTo(6, 6);
 	fCovILC.ResizeTo(5, 5);
 	fGenPar = XPtoPar(fGenX, fGenP, Q);
+	fGenParMm = ParToMm(fGenPar);
 	fGenParACTS = ParToACTS(fGenPar);
 	fGenParILC = ParToILC(fGenPar);
 	//
 	fObsPar = GenToObsPar(fGenPar);
+	fObsParMm = ParToMm(fObsPar);
 	fObsParACTS = ParToACTS(fObsPar);
 	fObsParILC = ParToILC(fObsPar);
 	fObsX = ParToX(fObsPar);
 	fObsP = ParToP(fObsPar);
 	fObsQ = ParToQ(fObsPar);
+	fCovMm = CovToMm(fCov);
 	fCovACTS = CovToACTS(fObsPar, fCov);
 	fCovILC = CovToILC(fCov);
 }
