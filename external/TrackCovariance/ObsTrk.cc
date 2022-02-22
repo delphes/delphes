@@ -133,6 +133,10 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 	Double_t ZinPos = fG->GetZminPos();
 	Double_t ZinNeg = fG->GetZminNeg();
 	Bool_t inside = TrkUtil::IsInside(fGenX, Rin, ZinNeg, ZinPos); // Check if in inner box
+	SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
+	Double_t Xfirst, Yfirst, Zfirst;
+	Int_t iLay = trk->FirstHit(Xfirst, Yfirst, Zfirst);
+	TVector3 fXfirst(Xfirst, Yfirst, Zfirst);
 	if (inside)
 	{
 		//std::cout<<"ObsTrk:: inside: x= "<<fGenX(0)<<", y= "<<fGenX(1)
@@ -146,12 +150,11 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 	{
 		//std::cout<<"ObsTrk:: outside: x= "<<fGenX(0)<<", y= "<<fGenX(1)
                 //                         <<", z= "<<fGenX(2)<<std::endl;
-		SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
 		Bool_t Res = kTRUE; Bool_t MS = kTRUE;
 		trk->CovCalc(Res, MS);					// Calculate covariance matrix
-		Cov = trk->Cov();					// Track covariance
-		delete trk;
-	}
+		Cov = trk->Cov();
+	}					// Track covariance
+	delete trk;
 	//
 	fCov = Cov;
 	//
