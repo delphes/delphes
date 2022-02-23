@@ -16,7 +16,7 @@ Vertex fitting code
 VertexFit::VertexFit()
 {
 	fNtr = 0;
-	fRold = -1.0;
+	fRstart = -1.0;
 	fVtxDone = kFALSE;
 	fVtxCst = kFALSE;
 	fxCst.ResizeTo(3);
@@ -30,7 +30,7 @@ VertexFit::VertexFit()
 VertexFit::VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov)
 {
 	fNtr = Ntr;
-	fRold = -1.0;
+	fRstart = -1.0;
 	fVtxDone = kFALSE;
 	fVtxCst = kFALSE;
 	fxCst.ResizeTo(3);
@@ -54,7 +54,7 @@ VertexFit::VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov)
 VertexFit::VertexFit(Int_t Ntr, ObsTrk** track)
 {
 	fNtr = Ntr;
-	fRold = -1.0;
+	fRstart = -1.0;
 	fVtxDone = kFALSE;
 	fVtxCst = kFALSE;
 	fxCst.ResizeTo(3);
@@ -219,21 +219,30 @@ void VertexFit::VtxFitNoSteer()
 	//
 	std::vector<TVectorD*> x0i;				// Tracks at ma
 	std::vector<TVectorD*> ni;				// Track derivative wrt phase
-	std::vector<TMatrixDSym*> Ci;			// Position error matrix at fixed phase
+	std::vector<TMatrixDSym*> Ci;				// Position error matrix at fixed phase
 	std::vector<TVectorD*> wi;				// Ci*ni
+	std::vector<Double_t> s_in;				// Starting phase
+	//
+	// 
 	//
 	// Track loop
 	for (Int_t i = 0; i < fNtr; i++)
 	{
-		Double_t s = 0.;
 		TVectorD par = *fPar[i];
 		TMatrixDSym Cov = *fCov[i];
-		x0i.push_back(new TVectorD(Fill_x0(par)));
+		Double_t s = 0.;
+		// Case when starting radius is provided
+		if(fRstart > TMath::Abs(par(0))){
+			s = 2.*TMath::ASin(par(2)*TMath::Sqrt((fRstart*fRstart-par(0)*par(0))/(1.+2.*par(2)*par(0))));
+		}
+		//
+		x0i.push_back(new TVectorD(Fill_x(par, s)));
 		ni.push_back(new TVectorD(derXds(par, s)));
 		TMatrixD A = derXdPar(par, s);
 		Ci.push_back(new TMatrixDSym(Cov.Similarity(A)));
 		TMatrixDSym Cinv = RegInv(*Ci[i]);
 		wi.push_back(new TVectorD(Cinv * (*ni[i])));
+		s_in.push_back(s);
 	}
 	//std::cout << "Vtx init completed. fNtr = "<<fNtr << std::endl;
 	//
@@ -261,7 +270,7 @@ void VertexFit::VtxFitNoSteer()
 	//
 	for (Int_t i = 0; i < fNtr; i++){
 		Double_t si = Dot(*wi[i], fXv - (*x0i[i])) / Ci[i]->Similarity(*wi[i]);
-		ffi.push_back(si);
+		ffi.push_back(si+s_in[i]);
 		//TVectorD xvi = Fill_x(*fPar[i],si);
 		//std::cout << "Fast vertex "<<i<<": xvi = "<<xvi(0)<<", "<<xvi(1)<<", "<<xvi(2) 
 		//	<<", si = "<<si<< std::endl;
@@ -279,6 +288,7 @@ void VertexFit::VtxFitNoSteer()
 	ni.clear();
 	Ci.clear(); 
 	wi.clear();
+	s_in.clear();
 }
 //
 void  VertexFit::VertexFitter()
@@ -401,7 +411,7 @@ void  VertexFit::VertexFitter()
 	}		// end of iteration loop
 	//
 	fVtxDone = kTRUE;		// Set fit completion flag
-	fRold = TMath::Sqrt(fXv(0)*fXv(0) + fXv(1)*fXv(1));	// Store fit 
+	//fRstart = TMath::Sqrt(fXv(0)*fXv(0) + fXv(1)*fXv(1));	// Store fit 
 	//std::cout << "Found vertex " << fXv(0) << ", " << fXv(1) << ", " << fXv(2) 
 	//	<< ", after "<<Ntry<<" iterations"<<std::endl;
 	//

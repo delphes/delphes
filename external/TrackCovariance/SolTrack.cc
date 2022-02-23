@@ -233,6 +233,48 @@ Int_t SolTrack::HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *
 	return kmh;
 }
 //
+Int_t SolTrack::FirstHit(Double_t &Xfirst, Double_t &Yfirst, Double_t &Zfirst)
+{
+	Int_t iFirst = -1;	
+	Int_t iFirstLay = -1;	// Default return with no hits
+	Xfirst = 0.;
+	Yfirst = 0.;
+	Zfirst = 0.;
+	Int_t Nmh = nmHit();	// # measurement hits
+	if(Nmh > 0){
+		Int_t    *ih = new Int_t   [Nmh];
+		Double_t *Xh = new Double_t[Nmh];
+		Double_t *Yh = new Double_t[Nmh];
+		Double_t *Zh = new Double_t[Nmh];
+		Double_t *dh = new Double_t[Nmh];
+		//
+		Int_t n = HitListXYZ(ih, Xh, Yh, Zh);	
+		//
+		for(Int_t i=0; i<Nmh; i++){
+			Double_t rr = TMath::Sqrt(Xh[i]*Xh[i]+Yh[i]*Yh[i]);	// Hit radius		
+			dh[i] = TMath::ASin(C() * TMath::Sqrt((rr * rr - D() * D()) / (1. + 2 * C() * D()))) / C();	// Arc length traveled
+		}
+		//
+		Int_t *hord = new Int_t[Nmh];			// hit order by increasing arc length
+		TMath::Sort(Nmh, dh, hord, kFALSE);		// Order by increasing arc length
+		iFirst = hord[0];				// First hit pointer
+		Xfirst = Xh[iFirst];
+		Yfirst = Yh[iFirst];
+		Zfirst = Zh[iFirst];
+		iFirstLay = ih[iFirst];
+		//
+		// Clean
+		delete [] ih;
+		delete [] Xh;
+		delete [] Yh;
+		delete [] Zh;
+		delete [] dh;
+		delete [] hord;
+	}
+//
+	return 	iFirstLay;	// Return first hit layer number
+}
+//
 // Track plot
 //
 TGraph *SolTrack::TrkPlot()

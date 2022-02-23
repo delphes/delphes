@@ -35,7 +35,7 @@ private:
 	//
 	// Results
 	Bool_t fVtxDone;			// Flag vertex fit completed
-	Double_t fRold;				// Current value of vertex radius
+	Double_t fRstart;			// Starting value of vertex radius (0 = none)
 	TVectorD fXv;				// Found vertex
 	TMatrixDSym fcovXv;			// Vertex covariance
 	Double_t fChi2;				// Vertex fit Chi2
@@ -82,8 +82,9 @@ public:
 	//
 	// Handle tracks/constraints
 	void AddVtxConstraint(TVectorD xv, TMatrixDSym cov);	// Add gaussian vertex constraint
-	void AddTrk(TVectorD *par, TMatrixDSym *Cov);				// Add track to input list
-	void RemoveTrk(Int_t iTrk);								// Remove iTrk track
+	void AddTrk(TVectorD *par, TMatrixDSym *Cov);		// Add track to input list
+	void RemoveTrk(Int_t iTrk);				// Remove iTrk track
+	void SetStartR(Double_t R) { fRstart = R; };		// Set starting radius
 	//
 };
 

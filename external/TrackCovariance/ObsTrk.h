@@ -45,6 +45,7 @@ private:
 									// (D, z0, phi0, theta, q/p, time)
 	TMatrixDSym fCovILC;			// Covariance of track parameters in ILC format
 									// (d0, phi0, w, z0, tan(lambda))
+	TVector3 fXfirst;			// x,y,z of first track hit
 	//
 	// Service routines
 	//
@@ -88,8 +89,9 @@ public:
 	TMatrixDSym GetCov()	{ return fCov; }	// in meters
 	TMatrixDSym GetCovMm()	{ return fCov; }	// in mm
 	TMatrixDSym GetCovACTS(){ return fCovACTS; }
-	TMatrixDSym GetCovILC(){ return fCovILC; }
-	//
+	TMatrixDSym GetCovILC() { return fCovILC; }
+	// First hit
+	TVector3 GetFirstHit()  { return fXfirst; }
 };
 
 #endif
