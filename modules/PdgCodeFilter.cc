@@ -132,7 +132,7 @@ void PdgCodeFilter::Process()
       if (isBHadron(abs(pdgCode)) ){
         candidate->PT = candidate->PT * 1e-18;
         if (candidate->PT ==0) candidate->PT = 1e-18;
-        candidate->Momentum.SetPtEtaPhiM(candidate->PT, candidate->Momentum.Eta(), candidate->Phi, candidate->Momentum.M());
+        candidate->Momentum.SetPtEtaPhiM(candidate->PT, candidate->Momentum.Eta(), candidate->Momentum.Phi(), candidate->Momentum.M());
         fOutputArray->Add(candidate);
         continue;
       }
