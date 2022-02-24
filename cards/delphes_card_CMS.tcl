@@ -584,10 +584,13 @@ module Merger ScalarHT {
 
 module PdgCodeFilter NeutrinoFilter {
 
-  set InputArray Delphes/stableParticles
+  #set InputArray Delphes/stableParticles
+  set InputArray Delphes/allParticles
   set OutputArray filteredParticles
 
   set PTMin 0.0
+  set RequireStatus true
+  set RequireKeepGhostBHadron true
 
   add PdgCode {12}
   add PdgCode {14}
@@ -782,6 +785,7 @@ module UniqueObjectFinder UniqueObjectFinder {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
+#  add Branch NeutrinoFilter/filteredParticles Particle2 GenParticle
 
   add Branch TrackMerger/tracks Track Track
   add Branch Calorimeter/towers Tower Tower
