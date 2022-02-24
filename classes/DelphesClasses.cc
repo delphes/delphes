@@ -229,6 +229,7 @@ Candidate::Candidate() :
   CtgTheta(0), ErrorCtgTheta(0),
   Phi(0), ErrorPhi(0),
   Xd(0), Yd(0), Zd(0),
+  XFirstHit(0), YFirstHit(0), ZFirstHit(0),
   Nclusters(0.0),
   dNdx(0.0),
   TrackResolution(0),
@@ -408,6 +409,9 @@ void Candidate::Copy(TObject &obj) const
   object.Xd = Xd;
   object.Yd = Yd;
   object.Zd = Zd;
+  object.XFirstHit = XFirstHit;
+  object.YFirstHit = YFirstHit;
+  object.ZFirstHit = ZFirstHit;
   object.Nclusters = Nclusters;
   object.dNdx = dNdx;
   object.TrackResolution = TrackResolution;
@@ -543,6 +547,9 @@ void Candidate::Clear(Option_t *option)
   Xd = 0.0;
   Yd = 0.0;
   Zd = 0.0;
+  XFirstHit = 0.0;
+  YFirstHit = 0.0;
+  ZFirstHit = 0.0;
   Nclusters = 0.0;
   dNdx = 0.0;
   TrackResolution = 0.0;

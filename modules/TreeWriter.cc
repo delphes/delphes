@@ -383,6 +383,10 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;
 
+    entry->XFirstHit = candidate->XFirstHit;
+    entry->YFirstHit = candidate->YFirstHit;
+    entry->ZFirstHit = candidate->ZFirstHit;
+
     const TLorentzVector &momentum = candidate->Momentum;
 
     pt = momentum.Pt();
@@ -542,6 +546,10 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;
+
+    entry->XFirstHit = candidate->XFirstHit;
+    entry->YFirstHit = candidate->YFirstHit;
+    entry->ZFirstHit = candidate->ZFirstHit;
 
     const TLorentzVector &momentum = candidate->Momentum;
 

@@ -119,7 +119,7 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 	Double_t maxPt = fGC->GetMaxPt();
 	//if (pt > maxPt) std::cout << "Warning ObsTrk::GenToObsPar: pt " << pt << " is above grid range of " << maxPt << std::endl;
 	Double_t minAn = fGC->GetMinAng();
-	//if (angd < minAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd 
+	//if (angd < minAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd
 	//	<< " is below grid range of " << minAn << std::endl;
 	Double_t maxAn = fGC->GetMaxAng();
 	//if (angd > maxAn) std::cout << "Warning ObsTrk::GenToObsPar: angle " << angd
@@ -136,7 +136,9 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 	SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
 	Double_t Xfirst, Yfirst, Zfirst;
 	Int_t iLay = trk->FirstHit(Xfirst, Yfirst, Zfirst);
-	TVector3 fXfirst(Xfirst, Yfirst, Zfirst);
+	fXfirst = TVector3(Xfirst, Yfirst, Zfirst);
+  //std::cout<<"obs trk: "<<Xfirst<<","<<Yfirst<<","<<Zfirst<<std::endl;
+
 	if (inside)
 	{
 		//std::cout<<"ObsTrk:: inside: x= "<<fGenX(0)<<", y= "<<fGenX(1)
