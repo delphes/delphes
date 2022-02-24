@@ -785,7 +785,6 @@ module UniqueObjectFinder UniqueObjectFinder {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
-#  add Branch NeutrinoFilter/filteredParticles Particle2 GenParticle
 
   add Branch TrackMerger/tracks Track Track
   add Branch Calorimeter/towers Tower Tower
