@@ -126,7 +126,6 @@ void PdgCodeFilter::Process()
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     pdgCode = candidate->PID;
-    //std::cout << "--" << pdgCode << std::endl;
 
     if (fRequireKeepGhostBHadron) {
       if (isBHadron(abs(pdgCode)) ){
