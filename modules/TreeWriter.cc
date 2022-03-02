@@ -44,6 +44,7 @@
 #include "TRandom3.h"
 #include "TString.h"
 
+#include <set>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -148,7 +149,10 @@ void TreeWriter::Finish()
 void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
 {
   TIter it1(candidate->GetCandidates());
+  set<Candidate *> s;
+  set<Candidate *>::iterator it3;
   it1.Reset();
+  s.clear();
   array->Clear();
 
   while((candidate = static_cast<Candidate *>(it1.Next())))
@@ -158,7 +162,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     // particle
     if(candidate->GetCandidates()->GetEntriesFast() == 0)
     {
-      array->Add(candidate);
+      s.insert(candidate);
       continue;
     }
 
@@ -166,7 +170,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     candidate = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     if(candidate->GetCandidates()->GetEntriesFast() == 0)
     {
-      array->Add(candidate);
+      s.insert(candidate);
       continue;
     }
 
@@ -177,9 +181,14 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
       candidate = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
       if(candidate->GetCandidates()->GetEntriesFast() == 0)
       {
-        array->Add(candidate);
+        s.insert(candidate);
       }
     }
+  }
+
+  for(it3 = s.begin(); it3 != s.end(); ++it3)
+  {
+    array->Add(*it3);
   }
 }
 
