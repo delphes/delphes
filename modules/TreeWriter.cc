@@ -174,7 +174,11 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     it2.Reset();
     while((candidate = static_cast<Candidate *>(it2.Next())))
     {
-      array->Add(candidate->GetCandidates()->At(0));
+      candidate = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+      if(candidate->GetCandidates()->GetEntriesFast() == 0)
+      {
+        array->Add(candidate);
+      }
     }
   }
 }
