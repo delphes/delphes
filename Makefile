@@ -21,6 +21,7 @@ DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml $(SYSLIBS)
 ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
 HAS_CMSSW = true
 CXXFLAGS += -std=c++0x -I$(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH))
+CXXFLAGS += -std=c++1y
 OPT_LIBS += -L$(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH)))
 ifneq ($(CMSSW_RELEASE_BASE),)
 CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src
@@ -460,6 +461,9 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/VertexSorter.h \
 	modules/VertexFinder.h \
 	modules/VertexFinderDA4D.h \
+	modules/LLPFilter.h \
+	modules/CscClusterEfficiency.h \
+	modules/CscClusterId.h \
 	modules/DecayFilter.h \
 	modules/ParticleDensity.h \
 	modules/TruthVertexFinder.h \
@@ -517,6 +521,9 @@ tmp/classes/DelphesClasses.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/SortableObject.h
+tmp/classes/DelphesCscClusterFormula.$(ObjSuf): \
+	classes/DelphesCscClusterFormula.$(SrcSuf) \
+	classes/DelphesCscClusterFormula.h
 tmp/classes/DelphesCylindricalFormula.$(ObjSuf): \
 	classes/DelphesCylindricalFormula.$(SrcSuf) \
 	classes/DelphesCylindricalFormula.h
@@ -733,11 +740,29 @@ tmp/modules/ClusterCounting.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	external/TrackCovariance/TrkUtil.h
 tmp/modules/ConstituentFilter.$(ObjSuf): \
-	modules/ConstituentFilter.$(SrcSuf) \
-	modules/ConstituentFilter.h \
+        modules/ConstituentFilter.$(SrcSuf) \
+        modules/ConstituentFilter.h \
+        classes/DelphesClasses.h \
+        classes/DelphesFactory.h \
+        classes/DelphesFormula.h \
+        external/ExRootAnalysis/ExRootClassifier.h \
+        external/ExRootAnalysis/ExRootFilter.h \
+        external/ExRootAnalysis/ExRootResult.h
+tmp/modules/CscClusterEfficiency.$(ObjSuf): \
+	modules/CscClusterEfficiency.$(SrcSuf) \
+	modules/CscClusterEfficiency.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
-	classes/DelphesFormula.h \
+	classes/DelphesCscClusterFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/CscClusterId.$(ObjSuf): \
+	modules/CscClusterId.$(SrcSuf) \
+	modules/CscClusterId.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesCscClusterFormula.h \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
@@ -875,6 +900,15 @@ tmp/modules/JetFlavorAssociation.$(ObjSuf): \
 tmp/modules/JetPileUpSubtractor.$(ObjSuf): \
 	modules/JetPileUpSubtractor.$(SrcSuf) \
 	modules/JetPileUpSubtractor.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/LLPFilter.$(ObjSuf): \
+	modules/LLPFilter.$(SrcSuf) \
+	modules/LLPFilter.h \
 	classes/DelphesClasses.h \
 	classes/DelphesFactory.h \
 	classes/DelphesFormula.h \
@@ -1162,6 +1196,7 @@ tmp/modules/Weighter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootResult.h
 DELPHES_OBJ +=  \
 	tmp/classes/DelphesClasses.$(ObjSuf) \
+	tmp/classes/DelphesCscClusterFormula.$(ObjSuf) \
 	tmp/classes/DelphesCylindricalFormula.$(ObjSuf) \
 	tmp/classes/DelphesFactory.$(ObjSuf) \
 	tmp/classes/DelphesFormula.$(ObjSuf) \
@@ -1226,6 +1261,8 @@ DELPHES_OBJ +=  \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ClusterCounting.$(ObjSuf) \
 	tmp/modules/ConstituentFilter.$(ObjSuf) \
+	tmp/modules/CscClusterEfficiency.$(ObjSuf) \
+	tmp/modules/CscClusterId.$(ObjSuf) \
 	tmp/modules/DecayFilter.$(ObjSuf) \
 	tmp/modules/Delphes.$(ObjSuf) \
 	tmp/modules/DenseTrackFilter.$(ObjSuf) \
@@ -1241,6 +1278,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/JetFakeParticle.$(ObjSuf) \
 	tmp/modules/JetFlavorAssociation.$(ObjSuf) \
 	tmp/modules/JetPileUpSubtractor.$(ObjSuf) \
+	tmp/modules/LLPFilter.$(ObjSuf) \
 	tmp/modules/LeptonDressing.$(ObjSuf) \
 	tmp/modules/Merger.$(ObjSuf) \
 	tmp/modules/MomentumSmearing.$(ObjSuf) \
@@ -1766,7 +1804,7 @@ FASTJET_OBJ +=  \
 
 ifeq ($(HAS_PYTHIA8),true)
 FASTJET_OBJ +=  \
-	
+
 endif
 
 tmp/display/Delphes3DGeometry.$(ObjSuf): \
@@ -1813,7 +1851,7 @@ DISPLAY_OBJ +=  \
 
 ifeq ($(HAS_PYTHIA8),true)
 DISPLAY_OBJ +=  \
-	
+
 endif
 
 tmp/external/tcl/panic.$(ObjSuf): \
@@ -1924,6 +1962,10 @@ external/fastjet/internal/ClosestPair2D.hh: \
 	@touch $@
 
 modules/FastJetGridMedianEstimator.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/LLPFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
 
@@ -2256,6 +2298,10 @@ external/fastjet/RangeDefinition.hh: \
 	external/fastjet/internal/deprecated.hh
 	@touch $@
 
+modules/CscClusterEfficiency.h: \
+	classes/DelphesModule.h
+	@touch $@
+
 external/fastjet/PseudoJetStructureBase.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
@@ -2380,6 +2426,10 @@ external/fastjet/LimitedWarning.hh: \
 
 external/fastjet/config.h: \
 	external/fastjet/config_win.h
+	@touch $@
+
+modules/CscClusterId.h: \
+	classes/DelphesModule.h
 	@touch $@
 
 classes/DelphesClasses.h: \
@@ -2547,5 +2597,3 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ
 	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
 
 ###
-
-

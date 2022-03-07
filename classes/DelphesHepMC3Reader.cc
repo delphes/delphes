@@ -457,6 +457,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
   TLorentzVector *position;
   TObjArray *array;
   Candidate *candidate;
+  Candidate *candidateDaughter;
   TParticlePDG *pdgParticle;
   int pdgCode;
   map<int, int >::iterator itVertexMap;
@@ -572,11 +573,16 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
       {
         candidate->D1 = -1;
         candidate->D2 = -1;
+        const TLorentzVector &decayPosition = candidate->Position;
+        candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T());// decay position
       }
       else
       {
         candidate->D1 = itDaughterMap->second.first;
         candidate->D2 = itDaughterMap->second.second;
+        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->At(candidate->D1));
+        const TLorentzVector &decayPosition = candidateDaughter->Position;
+        candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T());// decay position
       }
     }
   }

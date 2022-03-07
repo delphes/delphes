@@ -34,6 +34,7 @@ CompBase *GenParticle::fgCompare = 0;
 CompBase *Photon::fgCompare = CompPT<Photon>::Instance();
 CompBase *Electron::fgCompare = CompPT<Electron>::Instance();
 CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
+
 CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
 CompBase *Track::fgCompare = CompPT<Track>::Instance();
 CompBase *Tower::fgCompare = CompE<Tower>::Instance();
@@ -41,6 +42,7 @@ CompBase *ParticleFlowCandidate::fgCompare = CompE<ParticleFlowCandidate>::Insta
 CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
 CompBase *Vertex::fgCompare = CompSumPT2<Vertex>::Instance();
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
+CompBase *CscCluster::fgCompare = CompE<CscCluster>::Instance();
 
 //------------------------------------------------------------------------------
 
@@ -217,6 +219,7 @@ Candidate::Candidate() :
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
   InitialPosition(0.0, 0.0, 0.0, 0.0),
+  DecayPosition(0.0, 0.0, 0.0, 0.0),
   PositionError(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
   TrackCovariance(5),
@@ -388,6 +391,7 @@ void Candidate::Copy(TObject &obj) const
   object.Momentum = Momentum;
   object.Position = Position;
   object.InitialPosition = InitialPosition;
+  object.DecayPosition = DecayPosition;
   object.PositionError = PositionError;
   object.Area = Area;
   object.L = L;
@@ -526,6 +530,7 @@ void Candidate::Clear(Option_t *option)
   Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  DecayPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
   TrackCovariance.Zero();
   L = 0.0;
