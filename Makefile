@@ -21,7 +21,6 @@ DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml $(SYSLIBS)
 ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
 HAS_CMSSW = true
 CXXFLAGS += -std=c++0x -I$(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH))
-CXXFLAGS += -std=c++1y
 OPT_LIBS += -L$(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH)))
 ifneq ($(CMSSW_RELEASE_BASE),)
 CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src
@@ -461,13 +460,13 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/VertexSorter.h \
 	modules/VertexFinder.h \
 	modules/VertexFinderDA4D.h \
-	modules/LLPFilter.h \
-	modules/CscClusterEfficiency.h \
-	modules/CscClusterId.h \
 	modules/DecayFilter.h \
 	modules/ParticleDensity.h \
 	modules/TruthVertexFinder.h \
-	modules/ExampleModule.h
+	modules/ExampleModule.h \
+	modules/LLPFilter.h \
+	modules/CscClusterEfficiency.h \
+	modules/CscClusterId.h
 tmp/modules/ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict.$(SrcSuf)
 ModulesDict$(PcmSuf): \
@@ -523,7 +522,8 @@ tmp/classes/DelphesClasses.$(ObjSuf): \
 	classes/SortableObject.h
 tmp/classes/DelphesCscClusterFormula.$(ObjSuf): \
 	classes/DelphesCscClusterFormula.$(SrcSuf) \
-	classes/DelphesCscClusterFormula.h
+	classes/DelphesCscClusterFormula.h \
+	classes/DelphesClasses.h
 tmp/classes/DelphesCylindricalFormula.$(ObjSuf): \
 	classes/DelphesCylindricalFormula.$(SrcSuf) \
 	classes/DelphesCylindricalFormula.h
@@ -740,14 +740,14 @@ tmp/modules/ClusterCounting.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	external/TrackCovariance/TrkUtil.h
 tmp/modules/ConstituentFilter.$(ObjSuf): \
-        modules/ConstituentFilter.$(SrcSuf) \
-        modules/ConstituentFilter.h \
-        classes/DelphesClasses.h \
-        classes/DelphesFactory.h \
-        classes/DelphesFormula.h \
-        external/ExRootAnalysis/ExRootClassifier.h \
-        external/ExRootAnalysis/ExRootFilter.h \
-        external/ExRootAnalysis/ExRootResult.h
+	modules/ConstituentFilter.$(SrcSuf) \
+	modules/ConstituentFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/CscClusterEfficiency.$(ObjSuf): \
 	modules/CscClusterEfficiency.$(SrcSuf) \
 	modules/CscClusterEfficiency.h \
@@ -1804,7 +1804,7 @@ FASTJET_OBJ +=  \
 
 ifeq ($(HAS_PYTHIA8),true)
 FASTJET_OBJ +=  \
-
+	
 endif
 
 tmp/display/Delphes3DGeometry.$(ObjSuf): \
@@ -1851,7 +1851,7 @@ DISPLAY_OBJ +=  \
 
 ifeq ($(HAS_PYTHIA8),true)
 DISPLAY_OBJ +=  \
-
+	
 endif
 
 tmp/external/tcl/panic.$(ObjSuf): \
@@ -2597,3 +2597,5 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ
 	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
 
 ###
+
+
