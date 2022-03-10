@@ -54,11 +54,11 @@ private:
   Int_t fCharge; //!
   Bool_t fRequireNotPileup; //!
 
-  Bool_t fRequireKeepGhostBHadron; //!
+  Bool_t fRequireKeepGhostHadron; //!
 
   std::vector<Int_t> fPdgCodes;
 
-  Bool_t isBHadron(const unsigned int absPdgId); //!
+  Bool_t isBCSHadron(const unsigned int absPdgId); //!
 
   TIterator *fItInputArray; //!
 

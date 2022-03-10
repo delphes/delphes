@@ -85,7 +85,7 @@ void PdgCodeFilter::Init()
   fCharge = GetInt("Charge", 1);
 
   // keep bhadron
-  fRequireKeepGhostBHadron = GetBool("RequireKeepGhostBHadron", false);
+  fRequireKeepGhostHadron = GetBool("RequireKeepGhostHadron", false);
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
@@ -127,8 +127,8 @@ void PdgCodeFilter::Process()
   {
     pdgCode = candidate->PID;
 
-    if (fRequireKeepGhostBHadron) {
-      if (isBHadron(abs(pdgCode)) ){
+    if (fRequireKeepGhostHadron) {
+      if (isBCSHadron(abs(pdgCode)) ){
         candidate->PT = candidate->PT * 1e-18;
         if (candidate->PT ==0) candidate->PT = 1e-18;
         candidate->Momentum.SetPtEtaPhiM(candidate->PT, candidate->Momentum.Eta(), candidate->Momentum.Phi(), candidate->Momentum.M());
@@ -153,7 +153,7 @@ void PdgCodeFilter::Process()
   }
 }
 
-Bool_t PdgCodeFilter::isBHadron(const unsigned int absPdgId) {
+Bool_t PdgCodeFilter::isBCSHadron(const unsigned int absPdgId) {
   if (absPdgId <= 100)
     return false;  // Fundamental particles and MC internals
   if (absPdgId >= 1000000000)
@@ -172,6 +172,16 @@ Bool_t PdgCodeFilter::isBHadron(const unsigned int absPdgId) {
     return true;  // B mesons
   if (nq1 == 5)
     return true;  // B baryons
+
+  if (nq1 == 0 and nq2 == 4)
+    return true;  // C mesons
+  if (nq1 == 4)
+    return true;  // C baryons
+
+  if (nq1 == 0 and nq2 == 3)
+    return true;  // S mesons
+  if (nq1 == 3)
+    return true;  // S baryons
 
   return false;
 }
