@@ -128,7 +128,7 @@ void PdgCodeFilter::Process()
     pdgCode = candidate->PID;
 
     if (fRequireKeepGhostHadron) {
-      if (isBCSHadron(abs(pdgCode)) ){
+      if (isHadron(abs(pdgCode)) && candidate->Status != fStatus ){
         candidate->PT = candidate->PT * 1e-18;
         if (candidate->PT ==0) candidate->PT = 1e-18;
         candidate->Momentum.SetPtEtaPhiM(candidate->PT, candidate->Momentum.Eta(), candidate->Momentum.Phi(), candidate->Momentum.M());
@@ -153,7 +153,7 @@ void PdgCodeFilter::Process()
   }
 }
 
-Bool_t PdgCodeFilter::isBCSHadron(const unsigned int absPdgId) {
+Bool_t PdgCodeFilter::isHadron(const unsigned int absPdgId) {
   if (absPdgId <= 100)
     return false;  // Fundamental particles and MC internals
   if (absPdgId >= 1000000000)
@@ -182,6 +182,17 @@ Bool_t PdgCodeFilter::isBCSHadron(const unsigned int absPdgId) {
     return true;  // S mesons
   if (nq1 == 3)
     return true;  // S baryons
+
+  if (nq1 == 0 and nq2 == 2)
+    return true;  // U mesons
+  if (nq1 == 2)
+    return true;  // U baryons
+
+  if (nq1 == 0 and nq2 == 1)
+    return true;  // D mesons
+  if (nq1 == 1)
+    return true;  // D baryons
+
 
   return false;
 }

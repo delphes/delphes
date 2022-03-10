@@ -58,7 +58,7 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  Bool_t isBCSHadron(const unsigned int absPdgId); //!
+  Bool_t isHadron(const unsigned int absPdgId); //!
 
   TIterator *fItInputArray; //!
 
