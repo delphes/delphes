@@ -590,7 +590,7 @@ module PdgCodeFilter NeutrinoFilter {
 
   set PTMin 0.0
   set RequireStatus true
-  set RequireKeepGhostBHadron true
+  set RequireKeepGhostHadron true
 
   add PdgCode {12}
   add PdgCode {14}
