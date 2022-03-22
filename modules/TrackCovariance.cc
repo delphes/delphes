@@ -120,6 +120,7 @@ void TrackCovariance::Process()
     const TLorentzVector &candidatePosition = particle->Position*1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
+
     Bool_t inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
     Bool_t Accept = kTRUE;
     if(inside) Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
@@ -129,6 +130,7 @@ void TrackCovariance::Process()
     mass = candidateMomentum.M();
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
+
 
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
@@ -149,6 +151,10 @@ void TrackCovariance::Process()
     candidate->Xd = track.GetObsX().X()*1e03;
     candidate->Yd = track.GetObsX().Y()*1e03;
     candidate->Zd = track.GetObsX().Z()*1e03;
+
+    candidate->XFirstHit = track.GetFirstHit().X()*1e03;
+    candidate->YFirstHit = track.GetFirstHit().Y()*1e03;
+    candidate->ZFirstHit = track.GetFirstHit().Z()*1e03;
 
     candidate->D0       = track.GetObsPar()[0]*1e03;
     candidate->Phi      = track.GetObsPar()[1];

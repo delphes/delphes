@@ -175,7 +175,7 @@ Int_t SolTrack::nmHit()
 Int_t SolTrack::HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh)
 {
 	//
-	// Return lists of hits associated to a track including all scattering layers. 
+	// Return lists of hits associated to a track including all scattering layers.
 	// Return value is the total number of measurement hits
 	// kmh = total number of measurement layers hit for given type
 	// ihh = pointer to layer number
@@ -189,7 +189,7 @@ Int_t SolTrack::HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh)
 	for (Int_t i = 0; i < fG->Nl(); i++)
 	{
 		Double_t R; Double_t phi; Double_t zz;
-		if (HitLayer(i, R, phi, zz)) 
+		if (HitLayer(i, R, phi, zz))
 		{
 			zhh[kh] = zz;
 			rhh[kh] = R;
@@ -206,7 +206,7 @@ Int_t SolTrack::HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh)
 Int_t SolTrack::HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *&Zh)
 {
 	//
-	// Return lists of hits associated to a track for all measurement layers. 
+	// Return lists of hits associated to a track for all measurement layers.
 	// Return value is the total number of measurement hits
 	// kmh = total number of measurement layers hit for given type
 	// ihh = pointer to layer number
@@ -231,6 +231,48 @@ Int_t SolTrack::HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *
 	}
 	//
 	return kmh;
+}
+//
+Int_t SolTrack::FirstHit(Double_t &Xfirst, Double_t &Yfirst, Double_t &Zfirst)
+{
+	Int_t iFirst = -1;
+	Int_t iFirstLay = -1;	// Default return with no hits
+	Xfirst = 0.;
+	Yfirst = 0.;
+	Zfirst = 0.;
+	Int_t Nmh = nmHit();	// # measurement hits
+	if(Nmh > 0){
+		Int_t    *ih = new Int_t   [Nmh];
+		Double_t *Xh = new Double_t[Nmh];
+		Double_t *Yh = new Double_t[Nmh];
+		Double_t *Zh = new Double_t[Nmh];
+		Double_t *dh = new Double_t[Nmh];
+		//
+		Int_t n = HitListXYZ(ih, Xh, Yh, Zh);
+		//
+		for(Int_t i=0; i<Nmh; i++){
+			Double_t rr = TMath::Sqrt(Xh[i]*Xh[i]+Yh[i]*Yh[i]);	// Hit radius
+			dh[i] = TMath::ASin(C() * TMath::Sqrt((rr * rr - D() * D()) / (1. + 2 * C() * D()))) / C();	// Arc length traveled
+		}
+		//
+		Int_t *hord = new Int_t[Nmh];			// hit order by increasing arc length
+		TMath::Sort(Nmh, dh, hord, kFALSE);		// Order by increasing arc length
+		iFirst = hord[0];				// First hit pointer
+		Xfirst = Xh[iFirst];
+		Yfirst = Yh[iFirst];
+		Zfirst = Zh[iFirst];
+		iFirstLay = ih[iFirst];
+		//
+		// Clean
+		delete [] ih;
+		delete [] Xh;
+		delete [] Yh;
+		delete [] Zh;
+		delete [] dh;
+		delete [] hord;
+	}
+//
+	return 	iFirstLay;	// Return first hit layer number
 }
 //
 // Track plot
@@ -284,7 +326,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 {
 	//
 	//
-	// Input flags: 
+	// Input flags:
 	//				Res = .TRUE. turn on resolution effects/Use standard resolutions
 	//					  .FALSE. set all resolutions to 0
 	//				MS  = .TRUE. include Multiple Scattering
@@ -367,7 +409,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 			ny = 0.0;
 			nz = 1.0;
 		}
-		Double_t corr = TMath::Abs(pxi*nx + pyi * ny + pzi * nz) / p(); 
+		Double_t corr = TMath::Abs(pxi*nx + pyi * ny + pzi * nz) / p();
 		Double_t Rlf = fG->lTh(i) / (corr*fG->lX0(i));					// Rad. length fraction
 		thms[ii] = 0.0136*TMath::Sqrt(Rlf)*(1.0 + 0.038*TMath::Log(Rlf)) / p();		// MS angle
 		if (!MS)thms[ii] = 0;
@@ -395,7 +437,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 		Int_t i = ih[ii];				// True layer number
 		Int_t ityp  = fG->lTyp(i);			// Layer type Barrel or Z
 		Int_t nmeai = fG->lND(i);			// # measurements in layer
-		
+
 		if (fG->isMeasure(i))
 		{
 			Double_t Ri = rh[ii];
@@ -427,7 +469,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 						Rm(im, 1) = csa * dRphi(1) - ssa * dRz(1);	// phi0 derivative
 						Rm(im, 2) = csa * dRphi(2) - ssa * dRz(2);	// C derivative
 						Rm(im, 3) = csa * dRphi(3) - ssa * dRz(3);	// z0 derivative
-						Rm(im, 4) = csa * dRphi(4) - ssa * dRz(4);	// cot(theta) derivative	
+						Rm(im, 4) = csa * dRphi(4) - ssa * dRz(4);	// cot(theta) derivative
 					}
 					if (ityp == 2)		// Z type layer (Measure R-phi at const. Z)
 					{
@@ -488,7 +530,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 						for (Int_t nmk = 0; nmk < nmeak; nmk++)
 						{
 							Double_t strk = 0;
-							if (nmk + 1 == 1) strk = fG->lStU(k);	// Stereo angle upper 
+							if (nmk + 1 == 1) strk = fG->lStU(k);	// Stereo angle upper
 							if (nmk + 1 == 2) strk = fG->lStL(k);	// Stereo angle lower
 							//if (im == km && Res) Sm(im, km) += sig*sig;	// Detector resolution on diagonal
 							if (im == km && Res) {
@@ -499,7 +541,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 							}
 							//
 							// Loop on all layers below for MS contributions
-							for (Int_t jj = 0; jj < kk; jj++)		
+							for (Int_t jj = 0; jj < kk; jj++)
 							{
 								Double_t di = dik(ii, jj);
 								Double_t dk = dik(kk, jj);

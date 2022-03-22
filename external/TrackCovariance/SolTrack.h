@@ -72,6 +72,7 @@ public:
 	Bool_t HitLayer(Int_t Layer, Double_t &R, Double_t &phi, Double_t &zz);
 	Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh);
 	Int_t HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *&Zh);
+	Int_t FirstHit(Double_t &Xfirst, Double_t &Yfirst, Double_t &Zfirst);	// First hit position
 	//
 	// Track graph
 	TGraph *TrkPlot();	// Graph with R-z plot of track trajectory

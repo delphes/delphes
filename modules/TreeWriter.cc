@@ -44,6 +44,7 @@
 #include "TRandom3.h"
 #include "TString.h"
 
+#include <set>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -149,7 +150,10 @@ void TreeWriter::Finish()
 void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
 {
   TIter it1(candidate->GetCandidates());
+  set<Candidate *> s;
+  set<Candidate *>::iterator it3;
   it1.Reset();
+  s.clear();
   array->Clear();
 
   while((candidate = static_cast<Candidate *>(it1.Next())))
@@ -159,7 +163,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     // particle
     if(candidate->GetCandidates()->GetEntriesFast() == 0)
     {
-      array->Add(candidate);
+      s.insert(candidate);
       continue;
     }
 
@@ -167,7 +171,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     candidate = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
     if(candidate->GetCandidates()->GetEntriesFast() == 0)
     {
-      array->Add(candidate);
+      s.insert(candidate);
       continue;
     }
 
@@ -175,8 +179,17 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     it2.Reset();
     while((candidate = static_cast<Candidate *>(it2.Next())))
     {
-      array->Add(candidate->GetCandidates()->At(0));
+      candidate = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+      if(candidate->GetCandidates()->GetEntriesFast() == 0)
+      {
+        s.insert(candidate);
+      }
     }
+  }
+
+  for(it3 = s.begin(); it3 != s.end(); ++it3)
+  {
+    array->Add(*it3);
   }
 }
 
@@ -370,20 +383,24 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->ErrorCtgTheta = candidate->ErrorCtgTheta;
 
     // add some offdiagonal covariance matrix elements
-    entry->ErrorD0Phi          = candidate->TrackCovariance(0,1);
+    entry->ErrorD0Phi          = candidate->TrackCovariance(0,1)*1.e3;
     entry->ErrorD0C            = candidate->TrackCovariance(0,2);
-    entry->ErrorD0DZ           = candidate->TrackCovariance(0,3);
-    entry->ErrorD0CtgTheta     = candidate->TrackCovariance(0,4);
-    entry->ErrorPhiC           = candidate->TrackCovariance(1,2);
-    entry->ErrorPhiDZ          = candidate->TrackCovariance(1,3);
+    entry->ErrorD0DZ           = candidate->TrackCovariance(0,3)*1.e6;
+    entry->ErrorD0CtgTheta     = candidate->TrackCovariance(0,4)*1.e3;
+    entry->ErrorPhiC           = candidate->TrackCovariance(1,2)*1.e-3;
+    entry->ErrorPhiDZ          = candidate->TrackCovariance(1,3)*1.e3;
     entry->ErrorPhiCtgTheta    = candidate->TrackCovariance(1,4);
     entry->ErrorCDZ            = candidate->TrackCovariance(2,3);
-    entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4);
-    entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4);
+    entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4)*1.e-3;
+    entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4)*1.e3;
 
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;
+
+    entry->XFirstHit = candidate->XFirstHit;
+    entry->YFirstHit = candidate->YFirstHit;
+    entry->ZFirstHit = candidate->ZFirstHit;
 
     const TLorentzVector &momentum = candidate->Momentum;
 
@@ -544,6 +561,10 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
     entry->Zd = candidate->Zd;
+
+    entry->XFirstHit = candidate->XFirstHit;
+    entry->YFirstHit = candidate->YFirstHit;
+    entry->ZFirstHit = candidate->ZFirstHit;
 
     const TLorentzVector &momentum = candidate->Momentum;
 
