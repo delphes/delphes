@@ -489,17 +489,15 @@ void DualReadoutCalorimeter::FinalizeTower()
   Candidate *track, *tower, *mother;
   Double_t energy, pt, eta, phi, r, time;
   Double_t ecalEnergy, hcalEnergy;
-  Double_t ecalNeutralEnergy, hcalNeutralEnergy, neutralEnergy;
+  Double_t neutralEnergy;
 
   Double_t ecalSigma, hcalSigma, sigma;
-  Double_t ecalNeutralSigma, hcalNeutralSigma, neutralSigma;
+  Double_t neutralSignficance;
 
   Double_t weightTrack, weightCalo, bestEnergyEstimate, rescaleFactor;
 
   TLorentzVector momentum;
   TFractionMap::iterator itFractionMap;
-
-  Float_t weight, sumWeightedTime, sumWeight;
 
   if(!fTower) return;
 
@@ -517,8 +515,10 @@ void DualReadoutCalorimeter::FinalizeTower()
     sigma  = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
   }
 
-  if (fSmearLogNormal) energy = LogNormal(energy, sigma);
-  else energy = TruncatedGaussian(energy, sigma);
+  if (fSmearLogNormal)
+    energy = LogNormal(energy, sigma);
+  else
+    energy = TruncatedGaussian(energy, sigma);
 
   if(energy < fEnergyMin || energy < fEnergySignificanceMin*sigma) energy = 0.0;
 
@@ -593,11 +593,24 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   // fill energy flow candidates
 
+
   fTrackSigma = TMath::Sqrt(fTrackSigma);
   neutralEnergy = max( (energy - fTrackEnergy) , 0.0);
-  neutralSigma = neutralEnergy / TMath::Sqrt(fTrackSigma*fTrackSigma + sigma*sigma);
 
-  if(neutralEnergy > fEnergyMin && neutralSigma > fEnergySignificanceMin)
+  // in order to compute whether excess is significant, we need
+  // to recompute sigma using the reconstructed energy of the excess
+  if (fHCalTowerEnergy <= fHCalEnergyMin)
+  {
+    sigma  = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, neutralEnergy);
+  }
+  else
+  {
+    sigma  = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, neutralEnergy);
+  }
+
+  neutralSignficance = neutralEnergy / TMath::Sqrt(fTrackSigma*fTrackSigma + sigma*sigma);
+
+  if(neutralEnergy > fEnergyMin && neutralSignficance > fEnergySignificanceMin)
   {
     // create new photon tower
     tower = static_cast<Candidate*>(fTower->Clone());
