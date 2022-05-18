@@ -180,6 +180,9 @@ void DualReadoutCalorimeter::Init()
   // switch on or off the dithering of the center of DualReadoutCalorimeter towers
   fSmearTowerCenter = GetBool("SmearTowerCenter", true);
 
+  // switch on or off the log normal smearing (gaussian if false)
+  fSmearLogNormal = GetBool("SmearLogNormal", true);
+
   // read resolution formulas
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
   fHCalResolutionFormula->Compile(GetString("HCalResolutionFormula", "0"));
@@ -514,7 +517,8 @@ void DualReadoutCalorimeter::FinalizeTower()
     sigma  = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
   }
 
-  energy = LogNormal(energy, sigma);
+  if (fSmearLogNormal) energy = LogNormal(energy, sigma);
+  else energy = TruncatedGaussian(energy, sigma);
 
   if(energy < fEnergyMin || energy < fEnergySignificanceMin*sigma) energy = 0.0;
 
@@ -522,8 +526,16 @@ void DualReadoutCalorimeter::FinalizeTower()
   ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fECalTowerEnergy);
   hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fHCalTowerEnergy);
 
-  ecalEnergy = LogNormal(fECalTowerEnergy, ecalSigma);
-  hcalEnergy = LogNormal(fHCalTowerEnergy, hcalSigma);
+  if (fSmearLogNormal)
+  {
+    ecalEnergy = LogNormal(fECalTowerEnergy, ecalSigma);
+    hcalEnergy = LogNormal(fHCalTowerEnergy, hcalSigma);
+  }
+  else
+  {
+    ecalEnergy = TruncatedGaussian(fECalTowerEnergy, ecalSigma);
+    hcalEnergy = TruncatedGaussian(fHCalTowerEnergy, hcalSigma);
+  }
 
   time = (fTowerTimeWeight < 1.0E-09) ? 0.0 : fTowerTime / fTowerTimeWeight;
 
@@ -658,6 +670,25 @@ Double_t DualReadoutCalorimeter::LogNormal(Double_t mean, Double_t sigma)
     a = TMath::Log(mean) - 0.5*b*b;
 
     return TMath::Exp(a + b*gRandom->Gaus(0.0, 1.0));
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+Double_t DualReadoutCalorimeter::TruncatedGaussian(Double_t mean, Double_t sigma)
+{
+  Double_t result = -1;
+  if(mean > 0.0)
+  {
+    while (result < 0.0)
+    {
+      result = gRandom->Gaus(mean, sigma);
+    }
+    return result;
   }
   else
   {
