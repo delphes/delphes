@@ -78,6 +78,9 @@
 #include "modules/ParticleDensity.h"
 #include "modules/TruthVertexFinder.h"
 #include "modules/ExampleModule.h"
+#include "modules/LLPFilter.h"
+#include "modules/CscClusterEfficiency.h"
+#include "modules/CscClusterId.h"
 
 #ifdef __CINT__
 
@@ -138,5 +141,8 @@
 #pragma link C++ class ParticleDensity+;
 #pragma link C++ class TruthVertexFinder+;
 #pragma link C++ class ExampleModule+;
+#pragma link C++ class LLPFilter+;
+#pragma link C++ class CscClusterEfficiency+;
+#pragma link C++ class CscClusterId+;
 
 #endif
