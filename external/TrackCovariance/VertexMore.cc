@@ -8,12 +8,16 @@ VertexMore::VertexMore(VertexFit* V)
 	fUnits = kFALSE;
 	fV = V;
 	fNtr = fV->GetNtrk();
-	fPar.ResizeTo(5);
-	fCov.ResizeTo(5, 5);
+	fPar.ResizeTo(5);	fPar.Zero();
+	fCov.ResizeTo(5, 5);	fCov.Zero();
 	fCp.ResizeTo(3, 3);
 	CalcParCov();
 	fXv.ResizeTo(3);
 	fXv = fV->GetVtx();
+	if(fQtot != 0){
+		fPar = MakeVpar();
+		fCov = MakeVcov();
+	}
 	fBigCov.ResizeTo(3 * (fNtr + 1), 3 * (fNtr + 1));
 	FillBigCov();
 }
@@ -22,12 +26,16 @@ VertexMore::VertexMore(VertexFit* V, Bool_t opt)
 	fUnits = opt;
 	fV = V;
 	fNtr = fV->GetNtrk();
-	fPar.ResizeTo(5);
-	fCov.ResizeTo(5, 5);
+	fPar.ResizeTo(5);	fPar.Zero();
+	fCov.ResizeTo(5, 5);	fCov.Zero();
 	fCp.ResizeTo(3, 3);
 	CalcParCov();
 	fXv.ResizeTo(3);
 	fXv = fV->GetVtx();
+	if(fQtot != 0){
+		fPar = MakeVpar();
+		fCov = MakeVcov();
+	}
 	fBigCov.ResizeTo(3 * (fNtr + 1), 3 * (fNtr + 1));
 	FillBigCov();
 }

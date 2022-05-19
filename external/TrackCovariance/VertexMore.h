@@ -53,8 +53,8 @@ public:
 	// Destructor
 	~VertexMore();
 	//
-	TVectorD GetVpar(){fPar = MakeVpar(); return fPar;};		// Get vertex track parameters
-	TMatrixDSym GetVcov(){fCov = MakeVcov(); return fCov;};		// Get vertex track covariance
+	TVectorD GetVpar(){ return fPar;};		// Get vertex track parameters
+	TMatrixDSym GetVcov(){ return fCov;};		// Get vertex track covariance
 	Double_t GetCharge(Int_t i) { return fQ[i]; };
 	TVector3 GetMomentum(Int_t i) { return *fpi[i]; };		// Momentum of track i at vertex
 	TMatrixDSym GetMomentumC(Int_t i) { return *fCpi[i]; };		// Momentum errors of track i at vertex
