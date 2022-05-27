@@ -110,9 +110,9 @@ VertexFit::~VertexFit()
 	//
 	for (Int_t i = 0; i < fNtr; i++)
 	{
-		fPar[i]->Clear();		delete fPar[i];
+		fPar[i]->Clear();	delete fPar[i];
 		fParNew[i]->Clear();	delete fParNew[i];
-		fCov[i]->Clear();		delete fCov[i];
+		fCov[i]->Clear();	delete fCov[i];
 		fCovNew[i]->Clear();	delete fCovNew[i];
 	}	
 	fPar.clear();
@@ -391,6 +391,8 @@ void  VertexFit::VertexFitter()
 			ffi[i] += Dot(a, b) / fa2i[i];
 			TVectorD newPar = *fPar[i] - ((*fCov[i]) * (*fAti[i])) * lambda;
 			fParNew[i] = new TVectorD(newPar);
+			TMatrixDSym newCov = GetNewCov(i);
+			fCovNew[i] = new TMatrixDSym(newCov);
 		}
 		// Add external constraint to Chi2
 		if (fVtxCst) Chi2 += fCovCstInv.Similarity(x - fxCst);
@@ -443,6 +445,122 @@ TVectorD VertexFit::GetVtxChi2List()
 {
 	if (!fVtxDone) VertexFitter();
 	return fChi2List;
+}
+//
+// Correlation matrix of new track parameters
+TMatrixD VertexFit::DaiDa0k(Int_t i, Int_t k)
+{
+	TMatrixD M3(3, 3);
+	TMatrixD M5(5, 5);
+	//
+	// Initialize D^{-1}
+	TMatrixDSym D(3);	D.Zero();
+	TMatrixDSym Dm1(3);
+	for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
+	Dm1 = RegInv(D);
+	// Other useful matrices
+	TMatrixD Ait = *fAti[i];
+	TMatrixD Ai(TMatrixD::kTransposed, Ait);
+	//
+	TMatrixD Akt = *fAti[k];
+	TMatrixD Ak(TMatrixD::kTransposed, Akt);
+	// i
+	TMatrixD Ui3(TMatrixD::kUnit, M3);
+	TMatrixD Ui5(TMatrixD::kUnit, M5);
+	if (k != i) {
+		Ui3.Zero();
+		Ui5.Zero();
+	}
+	TMatrixD Mi0 = (*fDi[i]) * (Ui3 - (Dm1 * (*fDi[k])));
+	TMatrixD Mik = Ait * (Mi0 * Ak);
+	TMatrixD Mi = Ui5 - (*fCov[i]) * Mik;
+	//
+	return Mi;
+}
+TMatrixD VertexFit::GetNewCov(Int_t i, Int_t j)
+{
+	TMatrixD Cij(5,5); Cij.Zero();
+	//
+	// Main computation
+	for(Int_t k=0; k<fNtr; k++){
+		TMatrixD Mi = DaiDa0k(i, k);
+		TMatrixD Mj = DaiDa0k(j, k);
+		TMatrixD Mjt(TMatrixD::kTransposed,Mj);
+		Cij += Mi*((*fCov[k])*Mjt);
+	}
+	//
+	return Cij;
+}
+//
+// Just diagonal terms
+TMatrixDSym VertexFit::GetNewCov(Int_t i)
+{
+	TMatrixD  Cov = GetNewCov(i,i);
+	TMatrixDSym CovSym(5);
+	for(Int_t k1=0; k1<5; k1++){
+		for(Int_t k2=0; k2<5; k2++)CovSym(k1,k2) = 0.5*(Cov(k1,k2)+Cov(k2,k1));
+	}
+	//
+	return CovSym;
+}
+//
+// Correlation parameters vertex
+TMatrixD VertexFit::GetNewCovXvPar(Int_t i)
+{
+	TMatrixD Cxp(5,5); Cxp.Zero();
+	TMatrixD M3(3,3); 
+	TMatrixD M5(5,5);
+	//
+	// Initialize D^{-1}
+	TMatrixDSym D(3);	D.Zero();
+	TMatrixDSym Dm1(3);
+	for(Int_t k=0; k<fNtr; k++) D += *fDi[k];
+	Dm1 = RegInv(D);
+	// Other useful matrices
+	TMatrixD Ait = *fAti[i];
+	TMatrixD Ai(TMatrixD::kTransposed,Ait);
+	//
+	// Main computation
+	for(Int_t k=0; k<fNtr; k++){		
+		TMatrixD Akt = *fAti[k];
+		TMatrixD Ak(TMatrixD::kTransposed,Akt);
+		// i
+		TMatrixD Ui3(TMatrixD::kUnit,M3);
+		TMatrixD Ui5(TMatrixD::kUnit,M5);
+		if(k != i){
+			Ui3.Zero();
+			Ui5.Zero();
+		}	
+		TMatrixD Mi0 = (*fDi[i])*(Ui3-(Dm1*(*fDi[k])));
+		TMatrixD Mik = Ait*(Mi0*Ak);
+		TMatrixD Mi = Ui5-(*fCov[i])*Mik;
+		TMatrixD Mit(TMatrixD::kTransposed,Mi);
+		Cxp += (*fDi[k])*(Ak*((*fCov[k])*Mit));
+	}
+	//
+	Cxp = Dm1*Cxp;
+	return Cxp;	
+}
+//
+// Vertex derivative wrt starting paramenters
+TMatrixD VertexFit::GetDxvDpar0(Int_t i)
+{
+	TMatrixD dXvDa0(3, 5); dXvDa0.Zero();	// Return matrix
+	//
+	// Initialize D^{-1}
+	TMatrixDSym D(3);	D.Zero();
+	TMatrixDSym Dm1(3);
+	for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
+	Dm1 = RegInv(D);
+	//
+	// Other useful matrix
+	TMatrixD Ait = *fAti[i];
+	TMatrixD Ai(TMatrixD::kTransposed, Ait);
+	//
+	// Calculate result
+	dXvDa0 = Dm1 * (*fDi[i] * Ai);
+	//
+	return dXvDa0;
 }
 //
 // Handle tracks/constraints

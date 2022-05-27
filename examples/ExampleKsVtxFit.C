@@ -52,7 +52,7 @@ void ExampleKsVtxFit(const char* inputFile, Int_t Nevent = 5)
 		const Int_t NtFit = 2;
 		TVectorD** pr = new TVectorD * [NtFit];
 		TMatrixDSym** cv = new TMatrixDSym * [NtFit];
-		std::cout<<"Start of event "<<entry<<std::endl;
+		//std::cout<<"Start of event "<<entry<<std::endl;
 		//
 		// Search for generated Ks--> pi+ pi-
 		Int_t KsID = 310;
@@ -89,7 +89,7 @@ void ExampleKsVtxFit(const char* inputFile, Int_t Nevent = 5)
 			}
 		    }
 		}	// Done searching
-		std::cout<<"Done searching. Found "<<NKs<<" K0s"<<std::endl;
+		//std::cout<<"Done searching. Found "<<NKs<<" K0s"<<std::endl;
 		//
 		// If event contains at least 1 Ks and 1 track
 		//
@@ -151,14 +151,24 @@ void ExampleKsVtxFit(const char* inputFile, Int_t Nevent = 5)
 					//
 					// Fit vertex
 					//
-					Double_t Rmin = 17.;	// Lowest layer
-					Double_t Rvtx = TMath::Sqrt(gVtx(0)*gVtx(0)+gVtx(0)*gVtx(0));
+					Double_t Rmin = 17.;	// Lowest measurement layer
+					Double_t RvtxGen = TMath::Sqrt(gVtx(0)*gVtx(0)+gVtx(1)*gVtx(1));
 					VertexFit* Vtx = new VertexFit(NtFit, pr, cv);
-					if(Rvtx > Rmin)Vtx->SetStartR(Rvtx+10.);
+					Double_t r1 = TMath::Sqrt(pow(gti1[k]->XFirstHit,2)+pow(gti1[k]->YFirstHit,2));
+					Double_t r2 = TMath::Sqrt(pow(gti2[k]->XFirstHit,2)+pow(gti2[k]->YFirstHit,2));
+					Double_t Rvtx = TMath::Min(r1,r2);	// Radius of lowest hit
+					if(Rvtx > Rmin)Vtx->SetStartR(Rvtx);
 					//std::cout<<"BEFORE VERTEX FIT. Rvtx = "<<Rvtx<<std::endl;
 					TVectorD xvtx = Vtx->GetVtx();
 					TMatrixDSym covX = Vtx->GetVtxCov();
 					Double_t Chi2 = Vtx->GetVtxChi2();
+					Double_t Chi2Max = 25.;
+					if(Chi2 > Chi2Max){	// Try lower starting point
+						VertexFit* Vtx1 = new VertexFit(NtFit, pr, cv);
+						xvtx = Vtx1->GetVtx();
+						covX = Vtx1->GetVtxCov();
+						Chi2 = Vtx1->GetVtxChi2();
+					}
 					//
 					// Fill plots
 					//
@@ -169,11 +179,20 @@ void ExampleKsVtxFit(const char* inputFile, Int_t Nevent = 5)
 					hYpull->Fill(PullY);
 					hZpull->Fill(PullZ);
 					hChi2->Fill(Chi2);
-					std::cout<<"xg: "<<gVtx(0)<<", yg: "<<gVtx(1)<<", zg: "<<gVtx(2)<<std::endl;
-					std::cout<<"xr: "<<xvtx(0)<<", yr: "<<xvtx(1)<<", zr: "<<xvtx(2)<<std::endl;
+					if(Chi2 >10){
+						std::cout<<"Chi2 = "<<Chi2<<", Rvtx = "<<Rvtx<<", Rgen = "<<RvtxGen
+						<<", Ctg1 = "<<oPar1[4]<<", Ctg2 = "<<oPar2[4]<<std::endl;
+						GenParticle* g1 =  gpi1[k];
+						GenParticle* g2 =  gpi2[k];
+						std::cout<<"p1T = "<<g1->PT*g1->Charge<<", p1Z = "<<g1->Pz
+							 <<", p2T = "<<g2->PT*g2->Charge<<", p2Z = "<<g2->Pz<<std::endl;
+						std::cout<<"xg: "<<gVtx(0)<<", yg: "<<gVtx(1)<<", zg: "<<gVtx(2)<<std::endl;
+						std::cout<<"xr: "<<xvtx(0)<<", yr: "<<xvtx(1)<<", zr: "<<xvtx(2)<<std::endl;
+					}
 					// Cleanup
 					for (Int_t i = 0; i < NtFit; i++) delete pr[i];
 					for (Int_t i = 0; i < NtFit; i++) delete cv[i];
+					delete Vtx;
 				}
 			} // End loop on Ks
 			//std::cout<<"Joust out of Ks loop"<<std::endl;
