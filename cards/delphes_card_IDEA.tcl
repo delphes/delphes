@@ -54,6 +54,7 @@ set ExecutionPath {
   PhotonIsolation
 
   MuonFilter
+  TowerMerger
 
   ElectronFilter
   ElectronEfficiency
@@ -470,10 +471,10 @@ module DualReadoutCalorimeter Calorimeter {
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
 
-  set EnergyMin 0.5
-  set EnergySignificanceMin 3.0
+  set ECalMinSignificance 3.0
+  set HCalMinSignificance 2.0
 
-  set SmearLogNormal true
+  set SmearLogNormal false
 
   #set SmearTowerCenter true
   set SmearTowerCenter false
@@ -486,32 +487,25 @@ module DualReadoutCalorimeter Calorimeter {
     # Endcaps: deta=0.02 towers up to |eta| <= 3.0 (8.6° = 100 mrad)
     # Cell size: about 6 cm x 6 cm
 
-    #barrel:
+    set EtaPhiRes 0.02
+    set EtaMax 3.0
+
+    set pi [expr {acos(-1)}]
+
+    set nbins_phi [expr {$pi/$EtaPhiRes} ]
+    set nbins_phi [expr {int($nbins_phi)} ]
+
     set PhiBins {}
-    for {set i -120} {$i <= 120} {incr i} {
-        add PhiBins [expr {$i * $pi/120}]
-    }
-    #deta=0.02 units for |eta| <= 0.88
-    for {set i -44} {$i < 45} {incr i} {
-        set eta [expr {$i * 0.02}]
-        add EtaPhiBins $eta $PhiBins
+    for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
+      add PhiBins [expr {$i * $pi/$nbins_phi}]
     }
 
-    #endcaps:
-    set PhiBins {}
-    for {set i -120} {$i <= 120} {incr i} {
-        add PhiBins [expr {$i* $pi/120}]
-    }
-    #deta=0.02 units for 0.88 < |eta| <= 3.0
-    #first, from -3.0 to -0.88
-    for {set i 0} {$i <=106} {incr i} {
-        set eta [expr {-3.00 + $i * 0.02}]
-        add EtaPhiBins $eta $PhiBins
-    }
-    #same for 0.88 to 3.0
-    for  {set i 1} {$i <=106} {incr i} {
-        set eta [expr {0.88 + $i * 0.02}]
-        add EtaPhiBins $eta $PhiBins
+    set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
+    set nbins_eta [expr {int($nbins_eta)} ]
+
+    for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
+      set eta [expr {$i * $EtaPhiRes}]
+      add EtaPhiBins $eta $PhiBins
     }
 
     # default energy fractions {abs(PDG code)} {Fecal Fhcal}
@@ -538,14 +532,14 @@ module DualReadoutCalorimeter Calorimeter {
 
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
     set ECalResolutionFormula {
-    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.11^2)+
-    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.11^2)
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.11^2 + 0.05^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.11^2 + 0.05^2)
     }
 
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     set HCalResolutionFormula {
-    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.30^2)+
-    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.30^2)
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.30^2 + 0.05^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.30^2 + 0.05^2)
     }
 }
 
@@ -605,6 +599,18 @@ module Merger EFlowMerger {
   add InputArray Calorimeter/eflowPhotons
   add InputArray TimeOfFlightNeutralHadron/eflowNeutralHadrons
   set OutputArray eflow
+}
+
+
+####################
+# Tower merger
+####################
+
+module Merger TowerMerger {
+# add InputArray InputArray
+  add InputArray Calorimeter/towers
+  add InputArray MuonFilter/muons
+  set OutputArray towers
 }
 
 
@@ -918,6 +924,7 @@ module TreeWriter TreeWriter {
     add Branch TimeOfFlightNeutralHadron/eflowNeutralHadrons EFlowNeutralHadron Tower
 
     add Branch EFlowMerger/eflow ParticleFlowCandidate ParticleFlowCandidate
+    add Branch Calorimeter/towers Tower Tower
 
     add Branch ElectronEfficiency/electrons Electron Electron
     add Branch MuonEfficiency/muons Muon Muon
