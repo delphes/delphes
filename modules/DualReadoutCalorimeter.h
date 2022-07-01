@@ -70,8 +70,9 @@ private:
   Double_t fHCalEnergyMin;
   Double_t fEnergyMin;
 
-  Double_t fECalEnergySignificanceMin;
-  Double_t fHCalEnergySignificanceMin;
+  Double_t fECalMinSignificance;
+  Double_t fHCalMinSignificance;
+
   Double_t fEnergySignificanceMin;
 
   Double_t fECalTrackSigma;
