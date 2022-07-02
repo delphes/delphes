@@ -127,8 +127,8 @@ module Efficiency ChargedHadronTrackingEfficiency {
 
     set EfficiencyFormula {
         (abs(eta) > 2.56)                                  * (0.000) +
-        (pt < 0.1) * (abs(eta) <= 2.56)                    * (0.000) +
-        (pt >= 0.1) * (abs(eta) <= 2.56)                   * (1.000)
+        (pt < 0.1) * (abs(eta) <= 2.56)       * (0.000) +
+        (pt >= 0.1) * (abs(eta) <= 2.56)      * (1.000)
     }
 }
 
@@ -162,8 +162,8 @@ module Efficiency MuonTrackingEfficiency {
 
     set EfficiencyFormula {
         (abs(eta) > 2.56)                                  * (0.000) +
-        (pt < 0.1) * (abs(eta) <= 2.56)                    * (0.000) +
-        (pt >= 0.1) * (abs(eta) <= 2.56)                   * (1.000)
+        (pt < 0.1) * (abs(eta) <= 2.56)       * (0.000) +
+        (pt >= 0.1) * (abs(eta) <= 2.56)      * (1.000)
     }
 }
 
@@ -471,8 +471,8 @@ module DualReadoutCalorimeter Calorimeter {
   set EFlowPhotonOutputArray eflowPhotons
   set EFlowNeutralHadronOutputArray eflowNeutralHadrons
 
-  set ECalMinSignificance 3.0
-  set HCalMinSignificance 2.0
+  set ECalMinSignificance 2.0
+  set HCalMinSignificance 2.5
 
   set SmearLogNormal false
 
@@ -538,8 +538,8 @@ module DualReadoutCalorimeter Calorimeter {
 
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     set HCalResolutionFormula {
-    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.30^2 + 0.05^2)+
-    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.30^2 + 0.05^2)
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.3^2 + 0.05^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.3^2 + 0.05^2)
     }
 }
 
