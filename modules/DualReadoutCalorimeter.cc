@@ -683,8 +683,10 @@ void DualReadoutCalorimeter::FinalizeTower()
       Double_t p = (neutralEnergy > mass) ? TMath::Sqrt(neutralEnergy*neutralEnergy - mass*mass) : 0.;
       pt = p / TMath::CosH(eta);
       if (p > 0)
+      {
         tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
-      fEFlowNeutralHadronOutputArray->Add(tower);
+        fEFlowNeutralHadronOutputArray->Add(tower);
+      }
     }
 
     if (debug) cout<<"       creating neutral excess with energy, eta, phi: "<<neutralEnergy<<","<<eta<<","<<phi<<endl;
