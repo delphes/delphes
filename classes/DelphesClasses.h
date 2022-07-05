@@ -411,6 +411,7 @@ public:
   Int_t NSubJetsPruned; // number of subjets pruned
   Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
 
+  Double_t ExclYmerge12;
   Double_t ExclYmerge23;
   Double_t ExclYmerge34;
   Double_t ExclYmerge45;
@@ -817,6 +818,7 @@ public:
   Int_t NSubJetsSoftDropped; // number of subjets soft-dropped
 
   // Exclusive clustering variables
+  Double_t ExclYmerge12;
   Double_t ExclYmerge23;
   Double_t ExclYmerge34;
   Double_t ExclYmerge45;

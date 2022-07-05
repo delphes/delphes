@@ -71,6 +71,9 @@ set ExecutionPath {
 
   FastJetFinder
 
+  GenJetFinderDurhamN2
+  FastJetFinderDurhamN2
+
   JetEnergyScale
 
   JetFlavorAssociation
@@ -776,6 +779,52 @@ module PdgCodeFilter NeutrinoFilter {
   add PdgCode {-16}
 }
 
+###################################
+# Gen Jet finder Durham exclusive
+###################################
+
+module FastJetFinder GenJetFinderDurhamN2 {
+
+  set InputArray NeutrinoFilter/filteredParticles
+  set OutputArray jets
+
+  # algorithm: 11 ee-durham kT algorithm
+  # ref: https://indico.cern.ch/event/1173562/contributions/4929025/attachments/2470068/4237859/2022-06-FCC-jets.pdf
+  # to run exclusive njet mode set NJets to int
+  # to run exclusive dcut mode set DCut to float
+  # if DCut > 0 will run in dcut mode
+
+  set JetAlgorithm 11
+  set ExclusiveClustering true
+  set NJets 2
+  # set DCut 10.0
+}
+
+################################
+# Jet finder Durham exclusive
+################################
+
+module FastJetFinder FastJetFinderDurhamN2 {
+#  set InputArray Calorimeter/towers
+  set InputArray EFlowMerger/eflow
+
+  set OutputArray jets
+
+  # algorithm: 11 ee-durham kT algorithm
+  # ref: https://indico.cern.ch/event/1173562/contributions/4929025/attachments/2470068/4237859/2022-06-FCC-jets.pdf
+  # to run exclusive njet mode set NJets to int
+  # to run exclusive dcut mode set DCut to float
+  # if DCut > 0 will run in dcut mode
+
+  set JetAlgorithm 11
+  set ExclusiveClustering true
+  set NJets 2
+  # set DCut 10.0
+
+}
+
+
+
 
 #####################
 # MC truth jet finder
@@ -923,6 +972,9 @@ module TreeWriter TreeWriter {
 
     add Branch GenJetFinder/jets GenJet Jet
     add Branch GenMissingET/momentum GenMissingET MissingET
+
+    add Branch GenJetFinderDurhamN2/jets GenJetDurhamN2 Jet
+    add Branch FastJetFinderDurhamN2/jets JetDurhamN2 Jet
 
     # add Info InfoName InfoValue
     add Info Bz $B

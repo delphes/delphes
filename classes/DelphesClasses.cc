@@ -255,6 +255,7 @@ Candidate::Candidate() :
   NSubJetsTrimmed(0),
   NSubJetsPruned(0),
   NSubJetsSoftDropped(0),
+  ExclYmerge12(0),
   ExclYmerge23(0),
   ExclYmerge34(0),
   ExclYmerge45(0),
@@ -469,6 +470,11 @@ void Candidate::Copy(TObject &obj) const
   object.NSubJetsTrimmed = NSubJetsTrimmed;
   object.NSubJetsPruned = NSubJetsPruned;
   object.NSubJetsSoftDropped = NSubJetsSoftDropped;
+  object.ExclYmerge12 = ExclYmerge12;
+  object.ExclYmerge23 = ExclYmerge23;
+  object.ExclYmerge34 = ExclYmerge34;
+  object.ExclYmerge45 = ExclYmerge45;
+  object.ExclYmerge56 = ExclYmerge56;
 
   object.SoftDroppedJet = SoftDroppedJet;
   object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
@@ -597,6 +603,14 @@ void Candidate::Clear(Option_t *option)
   SoftDroppedJet.SetXYZT(0.0, 0.0, 0.0, 0.0);
   SoftDroppedSubJet1.SetXYZT(0.0, 0.0, 0.0, 0.0);
   SoftDroppedSubJet2.SetXYZT(0.0, 0.0, 0.0, 0.0);
+
+  ExclYmerge12 = 0.0;
+  ExclYmerge23 = 0.0;
+  ExclYmerge34 = 0.0;
+  ExclYmerge45 = 0.0;
+  ExclYmerge56 = 0.0;
+  ParticleDensity = 0.0;
+
 
   for(i = 0; i < 5; ++i)
   {

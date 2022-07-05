@@ -885,6 +885,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     }
 
     //--- exclusive clustering variables ---
+    entry->ExclYmerge12 = candidate->ExclYmerge12;
     entry->ExclYmerge23 = candidate->ExclYmerge23;
     entry->ExclYmerge34 = candidate->ExclYmerge34;
     entry->ExclYmerge45 = candidate->ExclYmerge45;
