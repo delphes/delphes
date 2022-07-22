@@ -416,6 +416,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/AngularSmearing.h \
 	modules/PhotonConversions.h \
 	modules/ParticlePropagator.h \
+	modules/UnstablePropagator.h \
 	modules/Efficiency.h \
 	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
@@ -692,6 +693,8 @@ tmp/external/TrackCovariance/TrkUtil.$(ObjSuf): \
 	external/TrackCovariance/TrkUtil.$(SrcSuf)
 tmp/external/TrackCovariance/VertexFit.$(ObjSuf): \
 	external/TrackCovariance/VertexFit.$(SrcSuf)
+tmp/external/TrackCovariance/VertexMore.$(ObjSuf): \
+	external/TrackCovariance/VertexMore.$(SrcSuf)
 tmp/modules/AngularSmearing.$(ObjSuf): \
 	modules/AngularSmearing.$(SrcSuf) \
 	modules/AngularSmearing.h \
@@ -1155,6 +1158,15 @@ tmp/modules/UniqueObjectFinder.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/UnstablePropagator.$(ObjSuf): \
+	modules/UnstablePropagator.$(SrcSuf) \
+	modules/UnstablePropagator.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/VertexFinder.$(ObjSuf): \
 	modules/VertexFinder.$(SrcSuf) \
 	modules/VertexFinder.h \
@@ -1254,6 +1266,7 @@ DELPHES_OBJ +=  \
 	tmp/external/TrackCovariance/SolTrack.$(ObjSuf) \
 	tmp/external/TrackCovariance/TrkUtil.$(ObjSuf) \
 	tmp/external/TrackCovariance/VertexFit.$(ObjSuf) \
+	tmp/external/TrackCovariance/VertexMore.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
@@ -1305,6 +1318,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/TreeWriter.$(ObjSuf) \
 	tmp/modules/TruthVertexFinder.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
+	tmp/modules/UnstablePropagator.$(ObjSuf) \
 	tmp/modules/VertexFinder.$(ObjSuf) \
 	tmp/modules/VertexFinderDA4D.$(ObjSuf) \
 	tmp/modules/VertexSorter.$(ObjSuf) \
@@ -2081,6 +2095,10 @@ external/fastjet/internal/TilingExtent.hh: \
 	@touch $@
 
 modules/TrackPileUpSubtractor.h: \
+	classes/DelphesModule.h
+	@touch $@
+
+modules/UnstablePropagator.h: \
 	classes/DelphesModule.h
 	@touch $@
 
