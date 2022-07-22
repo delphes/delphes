@@ -13,6 +13,8 @@ set RandomSeed 123
 ## MOD2: set vtx mode timing to MC truth
 
 set B 2.0
+set R 2.25
+set HL 2.5
 
 ## Drift chamber coordinates
 set DCHZMIN -2.125
@@ -28,6 +30,7 @@ set DCHRMAX 2.02
 set ExecutionPath {
 
   TruthVertexFinder
+  UnstablePropagator
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -97,12 +100,35 @@ module TruthVertexFinder TruthVertexFinder {
   set VertexOutputArray vertices
 }
 
+###########################################
+# Propagate unstable particles in cylinder
+###########################################
+
+module UnstablePropagator UnstablePropagator {
+  set InputArray Delphes/allParticles
+
+  # inner radius of the solenoid, in m
+  set Radius $R
+
+  # half-length: z of the solenoid, in m
+  set HalfLength $HL
+
+  # minimum flight distance requested to propagate
+  # unstable charged particle in B field (in m)
+  set Lmin 1.0E-06
+
+  # magnetic field, in T
+  set Bz $B
+}
+
+
+
 #################################
 # Propagate particles in cylinder
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray Delphes/stableParticles
+  set InputArray Delphes/allParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -110,10 +136,10 @@ module ParticlePropagator ParticlePropagator {
   set MuonOutputArray muons
 
   # inner radius of the solenoid, in m
-  set Radius 2.25
+  set Radius $R
 
   # half-length: z of the solenoid, in m
-  set HalfLength 2.5
+  set HalfLength $HL
 
   # magnetic field, in T
   set Bz $B
