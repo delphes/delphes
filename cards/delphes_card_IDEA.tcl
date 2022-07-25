@@ -128,7 +128,7 @@ module UnstablePropagator UnstablePropagator {
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray Delphes/allParticles
+  set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
