@@ -533,7 +533,11 @@ void DualReadoutCalorimeter::FinalizeTower()
     //energy = TruncatedGaussian(energy, caloSigma);
     energy = gRandom->Gaus(energy, caloSigma);
 
+  if (debug) cout<<"   smeared energy: "<<energy<<endl;
+
+  if (energy < 0.) energy = 0.;
   // set tower energy to 0 when energy deposit is not significant
+
   if (isPureEM)
   {
     // estimate resolution from the measurement this time
@@ -579,11 +583,9 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   time = (fTowerTimeWeight < 1.0E-09) ? 0.0 : fTowerTime / fTowerTimeWeight;
 
-  fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
-  fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
-  fTower->L = fTower->Position.Vect().Mag();
 
-  fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+  fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
+  fTower->L = fTower->Position.Vect().Mag();
   fTower->Etrk = fTrackEnergy;
 
   // these are stored for debugging purposes, should not be used since they are
@@ -729,6 +731,7 @@ void DualReadoutCalorimeter::FinalizeTower()
       track = static_cast<Candidate *>(track->Clone());
       track->AddCandidate(mother);
       track->Momentum.SetPtEtaPhiM(track->Momentum.Pt()*rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
+      if (debug) cout<<"  track Momentum: "<< track->PID<<", "<<track->Momentum.Pt()<<", "<<track->Momentum.Eta()<<", "<<track->Momentum.M()<<endl;
       fEFlowTrackOutputArray->Add(track);
     }
   }
