@@ -240,6 +240,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Px = momentum.Px();
     entry->Py = momentum.Py();
     entry->Pz = momentum.Pz();
+    entry->P = momentum.P();
 
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
