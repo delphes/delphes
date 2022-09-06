@@ -162,7 +162,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(GenParticle, 3)
+  ClassDef(GenParticle, 2)
 };
 
 //---------------------------------------------------------------------------
