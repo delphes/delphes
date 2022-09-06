@@ -157,17 +157,12 @@ public:
   Float_t Y; // particle vertex position (y component) | hepevt.vhep[number][1]
   Float_t Z; // particle vertex position (z component) | hepevt.vhep[number][2]
 
-  Float_t decayX;
-  Float_t decayY;
-  Float_t decayZ;
-  Float_t decayT;
-
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4() const;
 
-  ClassDef(GenParticle, 2)
+  ClassDef(GenParticle, 3)
 };
 
 //---------------------------------------------------------------------------
