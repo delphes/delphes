@@ -38,12 +38,6 @@ def main():
         "--queue",
         help="queue for condor",
         choices=[
-            "1nh",
-            "2nh",
-            "8nh",
-            "1nd",
-            "2nd",
-            "1nw",
             "espresso",
             "microcentury",
             "longlunch",
@@ -52,7 +46,7 @@ def main():
             "testmatch",
             "nextweek",
         ],
-        default="2nh",
+        default="longlunch",
     )
 
     args = parser.parse_args()
@@ -114,7 +108,7 @@ def main():
         print("   NCPUS (available): {}".format(mp.cpu_count()))
         print("")
         ## clean old stuff
-        os.system("rm -rf logs job* {}".format(outdir))
+        #os.system("rm -rf logs job* {}".format(outdir))
 
     elif args.command == "launch_condor":
 
@@ -124,7 +118,7 @@ def main():
         print("   PRIORITY  : {}".format(args.priority))
         print("")
         ## clean old stuff
-        os.system("rm -rf logs job* {}".format(outdir))
+        #os.system("rm -rf logs job* {}".format(outdir))
         os.system("mkdir -p logs")
 
         cmdfile = """# here goes your shell script
@@ -171,7 +165,6 @@ def main():
             ## -------- launch local submission
             if args.command == "launch_local":
 
-                os.system("rm -rf job*")
                 cmd = "src/validation.sh {}".format(cmd_args)
 
                 if args.dry:
