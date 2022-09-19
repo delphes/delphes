@@ -1,0 +1,18 @@
+rm -rf validation_delphes_card_FCChh_I job_*; python3.5 DelphesGuns.py 1
+
+python3.5 DelphesGuns.py 2
+
+python3.5
+
+
+HOME=/Users/michele/Programs/delphes/new_validation/python_bis
+DELPHES=/Users/michele/Programs/delphes
+rm -rf job_211_0
+./validation.sh 211 100 0.1 50000.0 -6.0 6.0 0 validation_delphes_card_FCChh_I/particle_gun_211 $HOME $DELPHES validation_delphes_card_FCChh_I.tcl --log
+
+
+rm -rf job* validation_delphes_card_FCChh_I*; python3 submit.py 1
+
+python3 submit.py 2
+
+python3 submit.py 3; open -a Preview validation_delphes_card_FCChh_I.pdf
