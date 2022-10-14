@@ -15,8 +15,8 @@ SrcSuf = cc
 PcmSuf = _rdict.pcm
 
 CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
-DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
-DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml $(SYSLIBS)
+DELPHES_LIBS = $(shell $(RC) --libs) -lEG
+DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml
 
 ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
 HAS_CMSSW = true
@@ -94,10 +94,8 @@ DISTTAR = $(DISTDIR).tar.gz
 
 all:
 
-
 hepmc2pileup$(ExeSuf): \
 	tmp/converters/hepmc2pileup.$(ObjSuf)
-
 tmp/converters/hepmc2pileup.$(ObjSuf): \
 	converters/hepmc2pileup.cpp \
 	classes/DelphesClasses.h \
@@ -109,7 +107,6 @@ tmp/converters/hepmc2pileup.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 lhco2root$(ExeSuf): \
 	tmp/converters/lhco2root.$(ObjSuf)
-
 tmp/converters/lhco2root.$(ObjSuf): \
 	converters/lhco2root.cpp \
 	classes/DelphesClasses.h \
@@ -121,7 +118,6 @@ tmp/converters/lhco2root.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 pileup2root$(ExeSuf): \
 	tmp/converters/pileup2root.$(ObjSuf)
-
 tmp/converters/pileup2root.$(ObjSuf): \
 	converters/pileup2root.cpp \
 	classes/DelphesClasses.h \
@@ -133,7 +129,6 @@ tmp/converters/pileup2root.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 root2lhco$(ExeSuf): \
 	tmp/converters/root2lhco.$(ObjSuf)
-
 tmp/converters/root2lhco.$(ObjSuf): \
 	converters/root2lhco.cpp \
 	classes/DelphesClasses.h \
@@ -141,7 +136,6 @@ tmp/converters/root2lhco.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeReader.h
 root2pileup$(ExeSuf): \
 	tmp/converters/root2pileup.$(ObjSuf)
-
 tmp/converters/root2pileup.$(ObjSuf): \
 	converters/root2pileup.cpp \
 	classes/DelphesClasses.h \
@@ -150,7 +144,6 @@ tmp/converters/root2pileup.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeReader.h
 stdhep2pileup$(ExeSuf): \
 	tmp/converters/stdhep2pileup.$(ObjSuf)
-
 tmp/converters/stdhep2pileup.$(ObjSuf): \
 	converters/stdhep2pileup.cpp \
 	classes/DelphesClasses.h \
@@ -162,7 +155,6 @@ tmp/converters/stdhep2pileup.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 CaloGrid$(ExeSuf): \
 	tmp/examples/CaloGrid.$(ObjSuf)
-
 tmp/examples/CaloGrid.$(ObjSuf): \
 	examples/CaloGrid.cpp \
 	external/ExRootAnalysis/ExRootConfReader.h \
@@ -170,7 +162,6 @@ tmp/examples/CaloGrid.$(ObjSuf): \
 	display/Delphes3DGeometry.h
 Example1$(ExeSuf): \
 	tmp/examples/Example1.$(ObjSuf)
-
 tmp/examples/Example1.$(ObjSuf): \
 	examples/Example1.cpp \
 	classes/DelphesClasses.h \
@@ -181,7 +172,6 @@ tmp/examples/Example1.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootUtilities.h
 DelphesValidation$(ExeSuf): \
 	tmp/validation/DelphesValidation.$(ObjSuf)
-
 tmp/validation/DelphesValidation.$(ObjSuf): \
 	validation/DelphesValidation.cpp \
 	classes/DelphesClasses.h \
@@ -200,7 +190,6 @@ EXECUTABLE +=  \
 	CaloGrid$(ExeSuf) \
 	Example1$(ExeSuf) \
 	DelphesValidation$(ExeSuf)
-
 EXECUTABLE_OBJ +=  \
 	tmp/converters/hepmc2pileup.$(ObjSuf) \
 	tmp/converters/lhco2root.$(ObjSuf) \
@@ -211,10 +200,8 @@ EXECUTABLE_OBJ +=  \
 	tmp/examples/CaloGrid.$(ObjSuf) \
 	tmp/examples/Example1.$(ObjSuf) \
 	tmp/validation/DelphesValidation.$(ObjSuf)
-
 DelphesHepMC2$(ExeSuf): \
 	tmp/readers/DelphesHepMC2.$(ObjSuf)
-
 tmp/readers/DelphesHepMC2.$(ObjSuf): \
 	readers/DelphesHepMC2.cpp \
 	classes/DelphesClasses.h \
@@ -226,7 +213,6 @@ tmp/readers/DelphesHepMC2.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 DelphesHepMC3$(ExeSuf): \
 	tmp/readers/DelphesHepMC3.$(ObjSuf)
-
 tmp/readers/DelphesHepMC3.$(ObjSuf): \
 	readers/DelphesHepMC3.cpp \
 	classes/DelphesClasses.h \
@@ -238,7 +224,6 @@ tmp/readers/DelphesHepMC3.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 DelphesLHEF$(ExeSuf): \
 	tmp/readers/DelphesLHEF.$(ObjSuf)
-
 tmp/readers/DelphesLHEF.$(ObjSuf): \
 	readers/DelphesLHEF.cpp \
 	classes/DelphesClasses.h \
@@ -250,7 +235,6 @@ tmp/readers/DelphesLHEF.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 DelphesROOT$(ExeSuf): \
 	tmp/readers/DelphesROOT.$(ObjSuf)
-
 tmp/readers/DelphesROOT.$(ObjSuf): \
 	readers/DelphesROOT.cpp \
 	classes/DelphesClasses.h \
@@ -263,7 +247,6 @@ tmp/readers/DelphesROOT.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 DelphesSTDHEP$(ExeSuf): \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
-
 tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 	readers/DelphesSTDHEP.cpp \
 	classes/DelphesClasses.h \
@@ -279,18 +262,15 @@ EXECUTABLE +=  \
 	DelphesLHEF$(ExeSuf) \
 	DelphesROOT$(ExeSuf) \
 	DelphesSTDHEP$(ExeSuf)
-
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesHepMC2.$(ObjSuf) \
 	tmp/readers/DelphesHepMC3.$(ObjSuf) \
 	tmp/readers/DelphesLHEF.$(ObjSuf) \
 	tmp/readers/DelphesROOT.$(ObjSuf) \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
-
 ifeq ($(HAS_CMSSW),true)
 DelphesCMSFWLite$(ExeSuf): \
 	tmp/readers/DelphesCMSFWLite.$(ObjSuf)
-
 tmp/readers/DelphesCMSFWLite.$(ObjSuf): \
 	readers/DelphesCMSFWLite.cpp \
 	classes/DelphesClasses.h \
@@ -302,16 +282,12 @@ tmp/readers/DelphesCMSFWLite.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
 	DelphesCMSFWLite$(ExeSuf)
-
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesCMSFWLite.$(ObjSuf)
-
 endif
-
 ifeq ($(HAS_PROMC),true)
 DelphesProMC$(ExeSuf): \
 	tmp/readers/DelphesProMC.$(ObjSuf)
-
 tmp/readers/DelphesProMC.$(ObjSuf): \
 	readers/DelphesProMC.cpp \
 	classes/DelphesClasses.h \
@@ -323,16 +299,12 @@ tmp/readers/DelphesProMC.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
 	DelphesProMC$(ExeSuf)
-
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesProMC.$(ObjSuf)
-
 endif
-
 ifeq ($(HAS_PROIO),true)
 DelphesProIO$(ExeSuf): \
 	tmp/readers/DelphesProIO.$(ObjSuf)
-
 tmp/readers/DelphesProIO.$(ObjSuf): \
 	readers/DelphesProIO.cpp \
 	classes/DelphesClasses.h \
@@ -344,16 +316,12 @@ tmp/readers/DelphesProIO.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
 	DelphesProIO$(ExeSuf)
-
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesProIO.$(ObjSuf)
-
 endif
-
 ifeq ($(HAS_PYTHIA8),true)
 DelphesPythia8$(ExeSuf): \
 	tmp/readers/DelphesPythia8.$(ObjSuf)
-
 tmp/readers/DelphesPythia8.$(ObjSuf): \
 	readers/DelphesPythia8.cpp \
 	classes/DelphesClasses.h \
@@ -365,10 +333,8 @@ tmp/readers/DelphesPythia8.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootTreeWriter.h
 EXECUTABLE +=  \
 	DelphesPythia8$(ExeSuf)
-
 EXECUTABLE_OBJ +=  \
 	tmp/readers/DelphesPythia8.$(ObjSuf)
-
 tmp/modules/Pythia8Dict.$(SrcSuf): \
 	modules/Pythia8LinkDef.h \
 	modules/PileUpMergerPythia8.h
@@ -378,12 +344,9 @@ Pythia8Dict$(PcmSuf): \
 	tmp/modules/Pythia8Dict$(PcmSuf)
 DELPHES_DICT_OBJ +=  \
 	tmp/modules/Pythia8Dict.$(ObjSuf)
-
 DELPHES_DICT_PCM +=  \
 	Pythia8Dict$(PcmSuf)
-
 endif
-
 tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/ClassesLinkDef.h \
 	classes/DelphesModule.h \
@@ -476,12 +439,10 @@ DELPHES_DICT_OBJ +=  \
 	tmp/classes/ClassesDict.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootAnalysisDict.$(ObjSuf) \
 	tmp/modules/ModulesDict.$(ObjSuf)
-
 DELPHES_DICT_PCM +=  \
 	ClassesDict$(PcmSuf) \
 	ExRootAnalysisDict$(PcmSuf) \
 	ModulesDict$(PcmSuf)
-
 tmp/modules/FastJetDict.$(SrcSuf): \
 	modules/FastJetLinkDef.h \
 	modules/FastJetFinder.h \
@@ -493,10 +454,8 @@ FastJetDict$(PcmSuf): \
 	tmp/modules/FastJetDict$(PcmSuf)
 FASTJET_DICT_OBJ +=  \
 	tmp/modules/FastJetDict.$(ObjSuf)
-
 FASTJET_DICT_PCM +=  \
 	FastJetDict$(PcmSuf)
-
 tmp/display/DisplayDict.$(SrcSuf): \
 	display/DisplayLinkDef.h \
 	display/DelphesDisplay.h \
@@ -512,10 +471,8 @@ DisplayDict$(PcmSuf): \
 	tmp/display/DisplayDict$(PcmSuf)
 DISPLAY_DICT_OBJ +=  \
 	tmp/display/DisplayDict.$(ObjSuf)
-
 DISPLAY_DICT_PCM +=  \
 	DisplayDict$(PcmSuf)
-
 tmp/classes/DelphesClasses.$(ObjSuf): \
 	classes/DelphesClasses.$(SrcSuf) \
 	classes/DelphesClasses.h \
@@ -1323,12 +1280,10 @@ DELPHES_OBJ +=  \
 	tmp/modules/VertexFinderDA4D.$(ObjSuf) \
 	tmp/modules/VertexSorter.$(ObjSuf) \
 	tmp/modules/Weighter.$(ObjSuf)
-
 ifeq ($(HAS_PYTHIA8),true)
 DELPHES_OBJ +=  \
 	tmp/modules/PileUpMergerPythia8.$(ObjSuf)
 endif
-
 tmp/external/PUPPI/PuppiAlgo.$(ObjSuf): \
 	external/PUPPI/PuppiAlgo.$(SrcSuf)
 tmp/external/PUPPI/PuppiContainer.$(ObjSuf): \
@@ -1815,12 +1770,10 @@ FASTJET_OBJ +=  \
 	tmp/modules/FastJetFinder.$(ObjSuf) \
 	tmp/modules/FastJetGridMedianEstimator.$(ObjSuf) \
 	tmp/modules/RunPUPPI.$(ObjSuf)
-
 ifeq ($(HAS_PYTHIA8),true)
 FASTJET_OBJ +=  \
 	
 endif
-
 tmp/display/Delphes3DGeometry.$(ObjSuf): \
 	display/Delphes3DGeometry.$(SrcSuf) \
 	display/Delphes3DGeometry.h \
@@ -1862,12 +1815,10 @@ DISPLAY_OBJ +=  \
 	tmp/display/DelphesEventDisplay.$(ObjSuf) \
 	tmp/display/DelphesHtmlSummary.$(ObjSuf) \
 	tmp/display/DelphesPlotSummary.$(ObjSuf)
-
 ifeq ($(HAS_PYTHIA8),true)
 DISPLAY_OBJ +=  \
 	
 endif
-
 tmp/external/tcl/panic.$(ObjSuf): \
 	external/tcl/panic.c
 tmp/external/tcl/tclAlloc.$(ObjSuf): \
@@ -1944,19 +1895,15 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclStringObj.$(ObjSuf) \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
-
 modules/DenseTrackFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/VertexFinderDA4D.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TrackSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/ClusterSequence.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
@@ -1967,155 +1914,122 @@ external/fastjet/ClusterSequence.hh: \
 	external/fastjet/ClusterSequenceStructure.hh \
 	external/fastjet/internal/deprecated.hh
 	@touch $@
-
 external/fastjet/internal/ClosestPair2D.hh: \
 	external/fastjet/internal/ClosestPair2DBase.hh \
 	external/fastjet/internal/SearchTree.hh \
 	external/fastjet/internal/MinHeap.hh \
 	external/fastjet/SharedPtr.hh
 	@touch $@
-
 modules/FastJetGridMedianEstimator.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/LLPFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/internal/MinHeap.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
-
 modules/EnergySmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/LeptonDressing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/internal/Voronoi.hh: \
 	external/fastjet/LimitedWarning.hh
 	@touch $@
-
 external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh \
 	external/fastjet/GhostedAreaSpec.hh \
 	external/fastjet/LimitedWarning.hh
 	@touch $@
-
 external/fastjet/JetDefinition.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/internal/deprecated.hh \
 	external/fastjet/ClusterSequence.hh
 	@touch $@
-
 modules/ConstituentFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Calorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 classes/DelphesModule.h: \
 	external/ExRootAnalysis/ExRootTask.h
 	@touch $@
-
 modules/AngularSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/IdentificationMap.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TrackCovariance.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/ExampleModule.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/EnergyScale.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/internal/Dnn2piCylinder.hh: \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
-
 external/fastjet/Selector.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/RangeDefinition.hh
 	@touch $@
-
 modules/JetPileUpSubtractor.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/contribs/Nsubjettiness/Njettiness.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/SharedPtr.hh
 	@touch $@
-
 external/fastjet/internal/LazyTiling25.hh: \
 	external/fastjet/internal/MinHeap.hh \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/internal/LazyTiling9Alt.hh \
 	external/fastjet/internal/LazyTiling9.hh
 	@touch $@
-
 external/fastjet/Error.hh: \
 	external/fastjet/internal/base.hh \
 	external/fastjet/config.h \
 	external/fastjet/LimitedWarning.hh
 	@touch $@
-
 modules/DecayFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/internal/TilingExtent.hh: \
 	external/fastjet/ClusterSequence.hh
 	@touch $@
-
 modules/TrackPileUpSubtractor.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/UnstablePropagator.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Efficiency.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/tools/GridMedianBackgroundEstimator.hh: \
 	external/fastjet/tools/BackgroundEstimatorBase.hh \
 	external/fastjet/RectangularGrid.hh
 	@touch $@
-
 external/fastjet/internal/DnnPlane.hh: \
 	external/fastjet/internal/Triangulation.hh \
 	external/fastjet/internal/DynamicNearestNeighbours.hh
 	@touch $@
-
 external/fastjet/ClusterSequenceArea.hh: \
 	external/fastjet/ClusterSequenceAreaBase.hh \
 	external/fastjet/ClusterSequenceActiveArea.hh \
@@ -2124,75 +2038,59 @@ external/fastjet/ClusterSequenceArea.hh: \
 	external/fastjet/ClusterSequenceVoronoiArea.hh \
 	external/fastjet/AreaDefinition.hh
 	@touch $@
-
 modules/JetFakeParticle.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/OldCalorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/ClusterSequence1GhostPassiveArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh \
 	external/fastjet/ClusterSequenceActiveArea.hh
 	@touch $@
-
 external/fastjet/internal/LazyTiling9Alt.hh: \
 	external/fastjet/internal/MinHeap.hh \
 	external/fastjet/ClusterSequence.hh
 	@touch $@
-
 modules/TrackCountingTauTagging.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh: \
 	external/fastjet/JetDefinition.hh \
 	external/fastjet/ClusterSequence.hh
 	@touch $@
-
 external/fastjet/RectangularGrid.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Selector.hh
 	@touch $@
-
 modules/PileUpMerger.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/JetDefinition.hh
 	@touch $@
-
 display/DelphesBranchElement.h: \
 	display/DelphesCaloData.h
 	@touch $@
-
 modules/TimeOfFlight.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/JetDefinition.hh
 	@touch $@
-
 external/fastjet/internal/DynamicNearestNeighbours.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/Error.hh
 	@touch $@
-
 modules/RunPUPPI.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Cloner.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/PseudoJet.hh: \
 	external/fastjet/internal/numconsts.hh \
 	external/fastjet/internal/IsBase.hh \
@@ -2200,42 +2098,34 @@ external/fastjet/PseudoJet.hh: \
 	external/fastjet/Error.hh \
 	external/fastjet/PseudoJetStructureBase.hh
 	@touch $@
-
 modules/PhotonID.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/tools/Pruner.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/WrappedStructure.hh \
 	external/fastjet/tools/Transformer.hh
 	@touch $@
-
 external/fastjet/internal/LazyTiling9.hh: \
 	external/fastjet/internal/MinHeap.hh \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/internal/LazyTiling9Alt.hh
 	@touch $@
-
 modules/PileUpJetID.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/version.hh: \
 	external/fastjet/config.h
 	@touch $@
-
 modules/MomentumSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TauTagging.h: \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/GhostedAreaSpec.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/internal/BasicRandom.hh \
@@ -2243,235 +2133,182 @@ external/fastjet/GhostedAreaSpec.hh: \
 	external/fastjet/LimitedWarning.hh \
 	external/fastjet/internal/deprecated.hh
 	@touch $@
-
 external/fastjet/internal/Dnn4piCylinder.hh: \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
-
 modules/VertexSorter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Delphes.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/VertexFinder.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/UniqueObjectFinder.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TrackCountingBTagging.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/PileUpMergerPythia8.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/ClusterSequenceActiveArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh \
 	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh
 	@touch $@
-
 modules/JetFlavorAssociation.h: \
 	classes/DelphesClasses.h \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/ParticlePropagator.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/PdgCodeFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TruthVertexFinder.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 classes/DelphesSTDHEPReader.h: \
 	classes/DelphesXDRReader.h
 	@touch $@
-
 external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh: \
 	external/fastjet/JetDefinition.hh
 	@touch $@
-
 external/PUPPI/PuppiContainer.hh: \
 	external/fastjet/PseudoJet.hh
 	@touch $@
-
 external/fastjet/RangeDefinition.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Error.hh \
 	external/fastjet/LimitedWarning.hh \
 	external/fastjet/internal/deprecated.hh
 	@touch $@
-
 modules/CscClusterEfficiency.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/PseudoJetStructureBase.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
-
 external/fastjet/ClusterSequenceAreaBase.hh: \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/LimitedWarning.hh \
 	external/fastjet/Selector.hh \
 	external/fastjet/internal/deprecated.hh
 	@touch $@
-
 modules/PhotonConversions.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/ClusterSequenceVoronoiArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/AreaDefinition.hh \
 	external/fastjet/ClusterSequenceAreaBase.hh
 	@touch $@
-
 modules/BTagging.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/RecoPuFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/Hector.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/ImpactParameterSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 display/DelphesPlotSummary.h: \
 	external/ExRootAnalysis/ExRootTreeReader.h
 	@touch $@
-
 modules/Weighter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TaggingParticlesSkimmer.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/internal/BasicRandom.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
-
 modules/ClusterCounting.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/SimpleCalorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh: \
 	external/fastjet/JetDefinition.hh \
 	external/fastjet/PseudoJet.hh
 	@touch $@
-
 external/ExRootAnalysis/ExRootTask.h: \
 	external/ExRootAnalysis/ExRootConfReader.h
 	@touch $@
-
 external/fastjet/tools/Subtractor.hh: \
 	external/fastjet/internal/base.hh \
 	external/fastjet/tools/Transformer.hh \
 	external/fastjet/tools/BackgroundEstimatorBase.hh
 	@touch $@
-
 external/fastjet/internal/LazyTiling9SeparateGhosts.hh: \
 	external/fastjet/internal/MinHeap.hh \
 	external/fastjet/ClusterSequence.hh \
 	external/fastjet/internal/LazyTiling9Alt.hh
 	@touch $@
-
 external/fastjet/internal/Dnn3piCylinder.hh: \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
 	@touch $@
-
 external/fastjet/AreaDefinition.hh: \
 	external/fastjet/GhostedAreaSpec.hh
 	@touch $@
-
 modules/ParticleDensity.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TreeWriter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/TimeSmearing.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh: \
 	external/fastjet/FunctionOfPseudoJet.hh
 	@touch $@
-
 external/fastjet/ClusterSequenceStructure.hh: \
 	external/fastjet/internal/base.hh \
 	external/fastjet/SharedPtr.hh \
 	external/fastjet/PseudoJetStructureBase.hh
 	@touch $@
-
 modules/StatusPidFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 external/fastjet/LimitedWarning.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
-
 external/fastjet/config.h: \
 	external/fastjet/config_win.h
 	@touch $@
-
 modules/CscClusterId.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 classes/DelphesClasses.h: \
 	classes/SortableObject.h
 	@touch $@
-
 external/fastjet/ClusterSequencePassiveArea.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequence1GhostPassiveArea.hh
 	@touch $@
-
 modules/FastJetFinder.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/BeamSpotFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
 modules/DualReadoutCalorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
-
-
 
 ###
 
@@ -2615,5 +2452,4 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ
 	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
 
 ###
-
 
