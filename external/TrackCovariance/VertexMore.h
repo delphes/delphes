@@ -4,6 +4,8 @@
 //
 #include <TMath.h>
 #include <TVectorD.h>
+#include <TLorentzVector.h>
+#include <TVector3.h>
 #include <TMatrixDSym.h>
 #include "TrkUtil.h"
 #include "VertexFit.h"
@@ -11,6 +13,9 @@
 #include <iostream>
 //
 // Class to include found vertices in vertex fitting
+//
+//	Author: F. Bedeschi, INFN-Pisa, Italy
+//
 
 class VertexMore: public TrkUtil
 {
@@ -24,27 +29,44 @@ private:
 	// Inputs
 	VertexFit* fV;						// Input vertex
 	TVectorD fXv;						// running vertex position
+	TMatrixDSym fXvCov;					// running vertex error matrix
 	Bool_t fUnits;						// Default is m, can switch to mm
 	Double_t fa;						// conversion constant C = a/(2Pt)
-	Int_t fNtr;							// NUmber of tracks in vertex
+	Int_t fNtr;						// NUmber of tracks in vertex
 	TVectorD fPar;						// Vertex track parameters
 	TMatrixDSym fCov;					// Vertex track covariance
 	TVectorD MakeVpar();					// Init vertex parameters
 	TMatrixDSym MakeVcov();					// Init Vertex parameter covariance
-	std::vector<Double_t> fQ;			// Track Charges
-	std::vector<TVector3*> fpi;			// Track Momenta
-	std::vector<TMatrixDSym*> fCpi;		// Track Momentum errors
+	std::vector<Double_t> fQ;				// Track Charges
+	std::vector<TVector3*> fpi;				// Track Momenta
+	std::vector<TMatrixDSym*> fCpi;				// Track Momentum errors
 	TVector3 fP;						// Total momentum
 	Double_t fQtot;						// Vertex charge
 	TMatrixDSym fCp;					// Total momentum errors
-	TMatrixDSym fBigCov;				// Full covariance matrix of vertex position and momenta
+	TVectorD fBigPar;					// Full vertex/momenta vector
+	TMatrixDSym fBigCov;					// Full covariance matrix of vertex position and momenta
+	void Mprt(TMatrixD M, Bool_t Opt);					// Compact matrix printing
 	void FillBigCov();					// Fill fBigCov
+	void FillBigPar();					// Fill fBigPar
 	//	
+	Double_t dSdD(Int_t i);					// Derivative of phase wrt D
+	Double_t dSdC(Int_t i);					// Derivative of phase wrt C
 	void CalcParCov();					// Calculate parameters and covariance
 	TMatrixD dPdAlf(Int_t i);			// Derivatives of momentum wrt parameters
+	TMatrixD dXdAlf(Int_t i);			// Derivatives of position wrt parameters
 	TMatrixD DparDx(TVector3 xv, TVector3 pv, Double_t Q); // Derivatives of parameters wrt point on track
 	TMatrixD DparDp(TVector3 xv, TVector3 pv, Double_t Q); // Derivatives of parameters wrt track momentum
-
+	//
+	// Mass constraints
+	//
+	Int_t fNc;					// Nr. of mass constraints
+	TVectorD fMassC;				// Constraint vector
+	TMatrixD fMderC;				// Constraint derivatives wrt momenta	
+	std::vector<Double_t> fMass;			// Mass of ith constraint
+	std::vector<Int_t>    fNtracks;			// nr. tracks in ith constraint
+	std::vector<Double_t*> fmasses;			// Input masses lists
+	std::vector<Int_t*>    flists;			// Input list of tracks
+	void UpdateConstr(TVectorD p);			// Update constraints and derivatives
 public:
 	//
 	// Constructors
@@ -61,7 +83,14 @@ public:
 	TVector3 GetTotalP() { return fP; };				// Total vertex momentum
 	Double_t GetTotalQ() { return fQtot; };				// Total vertex charge
 	TMatrixDSym GetTotalPcov() { return fCp; };			// Total vertex momentum errors
-	TMatrixDSym GetBigCov() { return fBigCov; };			// Vertex momenta full covariance
+	TMatrixDSym GetBigCov() { return fBigCov; };			// Vertex/momenta full covariance
+	TVectorD GetBigPar(){ return fBigPar;};				// Vertex/momenta array
+	TVectorD GetXv(){ return fXv;};					// Vertex position
+	TMatrixDSym GetXvCov(){ return fXvCov;};			// Vertex covariance;
+	//
+	// Mass constraints
+	void AddMassConstraint(Double_t Mass, Int_t Ntr, Double_t* masses, Int_t* list); 
+	void MassConstrFit();
 };
 
 #endif
