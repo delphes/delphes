@@ -5,6 +5,7 @@
 #include <TVector3.h>
 #include <TVectorD.h>
 #include <TMatrixDSym.h>
+#include <TMatrixDSymEigen.h>
 #include <TRandom.h>
 #include <TMath.h>
 //
@@ -28,7 +29,7 @@ protected:
 	void SetB(Double_t Bz) { fBz = Bz; }
 	TVectorD XPtoPar(TVector3 x, TVector3 p, Double_t Q);
 	TVector3 ParToP(TVectorD Par);
-	TMatrixDSym RegInv(TMatrixDSym& Min);
+	TMatrixDSym RegInv(TMatrixDSym& Min);		// Regularized matrix inversion
 	//
 	// Track trajectory derivatives
 	TMatrixD derXdPar(TVectorD par, Double_t s);	// derivatives of position wrt parameters
@@ -71,6 +72,7 @@ public:
 	static TVector3 ParToP(TVectorD Par, Double_t Bz);	// Get Momentum from track parameters
 	static Double_t ParToQ(TVectorD Par);			// Get track charge
 	static void LineDistance(TVector3 x0, TVector3 y0, TVector3 dirx, TVector3 diry, Double_t &sx, Double_t &sy, Double_t &distance);
+	static Bool_t CheckPosDef(TMatrixDSym Msym);		// Check positive definitness
 	//
 	// Track trajectory
 	//
