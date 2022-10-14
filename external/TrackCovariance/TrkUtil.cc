@@ -127,7 +127,7 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Double_t r2 = x(0) * x(0) + x(1) * x(1);
 	Double_t cross = x(0) * p(1) - x(1) * p(0);
 	Double_t T = TMath::Sqrt(pt * pt - 2 * a * cross + a * a * r2);
-	Double_t phi0 = TMath::ATan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T);	// Phi0
+	Double_t phi0 = TMath::ATan2((p(1) - a * x(0)), (p(0) + a * x(1)));	// Phi0
 	Double_t D;							// Impact parameter D
 	if (pt < 10.0) D = (T - pt) / a;
 	else D = (-2 * cross + a * r2) / (T + pt);
@@ -136,13 +136,21 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Par(1) = phi0;	// Store phi0
 	Par(2) = C;		// Store C
 	//Longitudinal parameters
+	Double_t ct = p(2) / pt;
+	// Old
+	/*
 	Double_t B = C * TMath::Sqrt(TMath::Max(r2 - D * D, 0.0) / (1 + 2 * C * D));
 	Double_t st = TMath::ASin(B) / C;
-	Double_t ct = p(2) / pt;
 	Double_t z0;
 	Double_t dot = x(0) * p(0) + x(1) * p(1);
 	if (dot > 0.0) z0 = x(2) - ct * st;
 	else z0 = x(2) + ct * st;
+	*/
+	// New
+	Double_t s = TMath::ATan2(p(1),p(0)) - phi0;
+	if(s >  TMath::Pi()) s-= TMath::TwoPi();
+	if(s < -TMath::Pi()) s+= TMath::TwoPi();
+	Double_t z0 = x(2)-ct*s/(2.*C);
 	//
 	Par(3) = z0;		// Store z0
 	Par(4) = ct;		// Store cot(theta)
@@ -325,6 +333,16 @@ TMatrixDSym TrkUtil::RegInv(TMatrixDSym& Min)
 	TMatrixDSym Rinv(N);				// Inverse of R
 	TMatrixDSym Minv(N);				// Inverse of M
 	//
+	//*******************
+	// Trivial case N = 1
+	//*******************
+	//
+	if(N == 1){
+		Minv(0,0) = 1.0;
+		if(M(0,0) != 0.0) Minv(0,0) = 1.0/M(0,0);
+		return Minv;
+	}
+	//
 	// Check for 0's and normalize
 	for (Int_t i = 0; i < N; i++)
 	{
@@ -413,6 +431,52 @@ TMatrixDSym TrkUtil::RegInv(TMatrixDSym& Min)
 	Minv = Rinv.Similarity(D);
 	return Minv;
 }
+
+//
+// Check potive definite matrix
+//
+
+Bool_t TrkUtil::CheckPosDef(TMatrixDSym Msym)
+{
+	Bool_t retVal = kTRUE;
+	Int_t N = Msym.GetNrows();
+	//std::cout<<"N = "<<N<<", Msym = "; Msym.Print();
+	TMatrixDSym Nsym(N);
+	TVectorD Diag(N);
+	for(Int_t i=0; i< N; i++){
+		if(Msym(i,i) <= 0){
+			std::cout<<"CheckDefPos: found <= 0 on main diagonal M("<<i<<", "<<i<<") = "<<
+			Msym(i,i)<<std::endl;
+			retVal = kFALSE;
+		}
+		else Diag(i) = TMath::Sqrt(Msym(i,i));
+	}
+	//
+	if(retVal){
+	//
+	// Normalize
+		for(Int_t i=0; i<N; i++){
+			for(Int_t j=0; j<N; j++)Nsym(i,j) = Msym(i,j)/(Diag(i)*Diag(j));
+		}
+	}
+	//
+	// Find eigenvalues
+	//
+	TMatrixDSymEigen Eign(Nsym);
+	TVectorD lambda = Eign.GetEigenValues();
+	for(Int_t i=0; i< N; i++){
+		if(lambda(i) <= 0){
+			std::cout<<"CheckDefPos: found <= 0 eigenvalue E("<<i<<") = "<<
+			lambda(i)<<std::endl;
+			std::cout<<"CheckDefPos: input matrix NOT posite definite. Printing normalized matrix."<<std::endl;
+			Nsym.Print();
+			retVal = kFALSE;
+		}
+	}
+	//
+	return retVal;
+}
+
 //
 // Track tracjectory
 //
