@@ -12,7 +12,7 @@ inputFile = sys.argv[1]
 outputFile = sys.argv[2]
 config = sys.argv[3]
 
-config_module = os.path.basename(config).strip('.py')
+config_module = os.path.basename(config).strip(".py")
 cfg = importlib.import_module(config_module)
 
 # Create chain of root trees
