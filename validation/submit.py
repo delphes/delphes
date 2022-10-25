@@ -68,6 +68,8 @@ def main():
     cfg = importlib.import_module(config_module)
 
     particles = []
+    plots = cfg.eff_plots + cfg.eff_tag_plots + cfg.reso_plots
+
     for plot in cfg.eff_plots:
         for hist in plot.eff_histos:
             part = hist.particle
@@ -111,7 +113,7 @@ def main():
     print(" OUTDIR           = {}".format(outdir))
     print("")
 
-    threads = []
+    pool = mp.Pool()
     cmdfile = ""
     ## -------- launch local submission
     if args.command == "launch_local":
@@ -119,8 +121,9 @@ def main():
         print("")
         print("   NCPUS (available): {}".format(mp.cpu_count()))
         print("")
+
         ## clean old stuff
-        # os.system("rm -rf logs job* {}".format(outdir))
+        os.system("rm -rf logs/* job* {} {}".format(outdir, config_module))
 
     elif args.command == "launch_condor":
 
@@ -147,6 +150,7 @@ def main():
             args.priority, args.queue
         )
 
+    """
     for p in particles:
 
         jobs_outdir = "{}/particle_gun_{}".format(outdir, p.pid)
@@ -182,9 +186,7 @@ def main():
                 if args.dry:
                     print(cmd)
                 else:
-                    thread = mp.Process(target=run_cmd, args=(cmd,))
-                    thread.start()
-                    threads.append(thread)
+                    pool.apply_async(run_cmd, args=(cmd,))
 
             ## -------- launch condor submission
             elif args.command == "launch_condor":
@@ -194,8 +196,8 @@ def main():
     ## run commands in multithreading mode
     if args.command == "launch_local":
         if not args.dry:
-            for proc in threads:
-                proc.join()
+            pool.close()
+            pool.join()
 
     elif args.command == "launch_condor":
         with open("condor_validation.sub", "w") as f:
@@ -203,11 +205,12 @@ def main():
         if not args.dry:
             os.system("condor_submit condor_validation.sub")
 
+    """
     ## -------- collect jobs
     if args.collect:
 
         ## first hadd files
-        threads = []
+        pool = mp.Pool()
         print("")
         print(" collecting jobs ... ")
         print("")
@@ -217,39 +220,53 @@ def main():
             jobs_outdir = "{}/particle_gun_{}".format(outdir, p.pid)
             os.chdir("{}".format(jobs_outdir))
             cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(jobs_outdir, p.pid, p.pid)
-            #for i in range(int(cfg.njobs)):
-            #    cmd_hadd += " val_{}_{}.root".format(p.pid, i)
-
-            # os.system(cmd_hadd)
             os.chdir(homedir)
-            thread = mp.Process(target=run_cmd, args=(cmd_hadd,))
-            thread.start()
-            threads.append(thread)
+            pool.apply_async(run_cmd, args=(cmd_hadd,))
 
         ## run hadd in multithreading mode
-        for proc in threads:
-            proc.join()
+        pool.close()
+        pool.join()
 
         validation_dir = outdir
-        report_name = cfg.name
-        report_latex = LatexReport(report_name, validation_dir)
 
         print("")
         print(" producing report ... ")
         print("")
 
+        ## produce plots in multithreading mode
         os.system("mkdir -p {}".format(config_module))
+
+        name_path_dict = dict()
+        pool = mp.Pool()
+
+        manager = mp.Manager()
+        name_path_dict = manager.dict()
+        for plot in plots:
+            pool.apply_async(
+                run_plot,
+                args=(
+                    plot,
+                    validation_files,
+                    config_module,
+                    name_path_dict,
+                ),
+            )
+
+        pool.close()
+        pool.join()
+
+        ## produce latex report
+        report_name = cfg.name
+        report_latex = LatexReport(report_name, validation_dir)
         for section_title, subsections in cfg.report.items():
             report_latex.section(section_title)
             for subsection_title, subsubsections in subsections.items():
                 report_latex.subsection(subsection_title)
                 for title, plots in subsubsections.items():
-                    print(title)
                     report_latex.begin_frame(title)
                     figs = []
                     for plot in plots:
-                        fig = plot.plot(validation_files, config_module)
-                        figs.append(fig)
+                        figs.append(name_path_dict[plot.name])
                     report_latex.add_figures(figs)
 
         report_latex.compile()
@@ -264,8 +281,15 @@ def main():
 
 
 # _____________________________________________________________________________________________________________
-def run_cmd(plot_cmd):
-    os.system(plot_cmd)
+def run_cmd(cmd):
+    os.system(cmd)
+
+
+# _____________________________________________________________________________________________________________
+def run_plot(plot, validation_files, dir, name_path_dict):
+    name = plot.name
+    path = plot.plot(validation_files, dir)
+    name_path_dict[name] = path
 
 
 # _______________________________________________________________________________________
