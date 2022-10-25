@@ -202,7 +202,7 @@ def main():
         with open("condor_validation.sub", "w") as f:
             f.write(cmdfile)
         if not args.dry:
-            pass
+            os.system("condor_submit condor_validation.sub")
 
     ## -------- collect jobs
     if args.collect:
