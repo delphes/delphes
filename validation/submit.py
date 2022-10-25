@@ -74,6 +74,18 @@ def main():
             if part not in particles:
                 particles.append(part)
 
+    for plot in cfg.eff_tag_plots:
+        for hist in plot.eff_histos:
+            part = hist.particle
+            if part not in particles:
+                particles.append(part)
+
+    for plot in cfg.reso_plots:
+        for hist in plot.res_histos:
+            part = hist.particle
+            if part not in particles:
+                particles.append(part)
+
     validation_files = dict()
     for p in particles:
         validation_files[p] = "{}/particle_gun_{}/val_{}.root".format(outdir, p.pid, p.pid)
@@ -108,7 +120,7 @@ def main():
         print("   NCPUS (available): {}".format(mp.cpu_count()))
         print("")
         ## clean old stuff
-        #os.system("rm -rf logs job* {}".format(outdir))
+        # os.system("rm -rf logs job* {}".format(outdir))
 
     elif args.command == "launch_condor":
 
@@ -118,7 +130,7 @@ def main():
         print("   PRIORITY  : {}".format(args.priority))
         print("")
         ## clean old stuff
-        #os.system("rm -rf logs job* {}".format(outdir))
+        # os.system("rm -rf logs job* {}".format(outdir))
         os.system("mkdir -p logs")
 
         cmdfile = """# here goes your shell script
@@ -229,16 +241,15 @@ def main():
         for section_title, subsections in cfg.report.items():
             report_latex.section(section_title)
             for subsection_title, subsubsections in subsections.items():
-                report_latex.subsection(section_title)
-                if "Efficiency" in subsection_title:
-                    for part, plots in subsubsections.items():
-                        frame_title = "{} {} efficiency".format(part, section_title.lower())
-                        report_latex.begin_frame(frame_title)
-                        figs = []
-                        for plot in plots:
-                            fig = plot.plot(validation_files, outdir)
-                            figs.append(fig)
-                        report_latex.add_figures(figs)
+                report_latex.subsection(subsection_title)
+                for title, plots in subsubsections.items():
+                    print(title)
+                    report_latex.begin_frame(title)
+                    figs = []
+                    for plot in plots:
+                        fig = plot.plot(validation_files, outdir)
+                        figs.append(fig)
+                    report_latex.add_figures(figs)
 
         report_latex.compile()
 

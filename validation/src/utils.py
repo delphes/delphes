@@ -12,7 +12,6 @@ import matplotlib
 
 # matplotlib.use("tkagg")
 
-
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["axes.labelweight"] = "bold"
 plt.gcf().subplots_adjust(bottom=0.15)
@@ -42,7 +41,7 @@ class Observable:
         self.xmin = xmin
         self.xmax = xmax
         self.opt = opt  # absolute (reco/gen) or relative (reco-gen)
-        self.reso_label = "$\sigma$({}) {}".format(self.label, self.unit)
+        self.reso_label = "$\sigma({})$ {}".format(self.label, self.unit)
         if opt == "rel":
             self.reso_label = "$\sigma({})/{}$".format(self.label, self.label)
         self.eff_label = "${}$ {}".format(self.label, self.unit)
@@ -84,66 +83,233 @@ class Slices2D:
 
 
 class ResolutionHisto:
-    def __init__(self, particle, observable, slices, label):
+    def __init__(self, particle, collection, observable, binning, slice, label):
         self.particle = particle
         self.observable = observable
-        self.slices = slices
+        self.collection = collection
+        self.binning = binning
+        self.slice = slice
         self.label = label
         self.histograms = OrderedDict()
         self.histogram_names = OrderedDict()
+        self.finalhistname = "res_{}_{}_{}_{}_{}_".format(
+            collection,
+            particle.name,
+            observable.name,
+            self.observable.opt,
+            binning.obs.name,
+        )
 
-        for bin in slices.bins:
-            # print(particle.name, observable.name, slices.obsX.name,slices.obsY.name, bin)
-            binX = bin[0]
-            binY = bin[1]
-            histname = "res_{}_{}_{}_{}_{}{}_{}_{}{}_{}_{}".format(
-                label,
+        for obs, bin2 in slice.items():
+            self.finalhistname += "{}{}_{}".format(obs.name, bin2[0], bin2[1])
+
+        for bin in binning.bins:
+            histname = "res_{}_{}_{}_{}_{}{}_{}_".format(
+                collection,
                 particle.name,
                 observable.name,
                 self.observable.opt,
-                slices.obsX.name,
-                binX[0],
-                binX[1],
-                slices.obsY.name,
-                binY[0],
-                binY[1],
-                slices.name,
+                binning.obs.name,
+                bin[0],
+                bin[1],
             )
+
+            for obs, bin2 in slice.items():
+                histname += "{}{}_{}".format(obs.name, bin2[0], bin2[1])
+
             # print(histname)
             self.histogram_names[bin] = histname
 
+    def construct(self):
+        for bin in self.binning.bins:
+            # print(bin)
             self.histograms[bin] = ROOT.TH1F(
-                histname, histname, observable.nbins, observable.xmin, observable.xmax
+                self.histogram_names[bin],
+                self.histogram_names[bin],
+                self.observable.nbins,
+                self.observable.xmin,
+                self.observable.xmax,
             )
+            # print("constructing {}".format(self.histogram_names[bin]))
 
-    def fill(self, reco_particle, gen_particle):
-        funcname_gen = "get_gen{}".format(self.observable.varname)
-        funcname_sliceX = "get_gen{}".format(self.slices.obsX.varname)
-        funcname_sliceY = "get_gen{}".format(self.slices.obsY.varname)
-        funcname_reco = "get_reco{}".format(self.observable.varname)
-        val_gen = globals()[funcname_gen](gen_particle)
-        if val_gen > 0:
-            val_sliceX = globals()[funcname_sliceX](gen_particle)
-            val_sliceY = globals()[funcname_sliceY](gen_particle)
-            val_reco = globals()[funcname_reco](reco_particle)
-            # print(self.observable.name, val_gen, val_reco)
-            for bin in self.slices.bins:
-                binX = bin[0]
-                binY = bin[1]
-                if (
-                    val_sliceX > binX[0]
-                    and val_sliceX <= binX[1]
-                    and val_sliceY > binY[0]
-                    and val_sliceY <= binY[1]
-                ):
-                    if self.observable.opt == "rel":
-                        self.histograms[bin].Fill(val_reco / val_gen)
-                    elif self.observable.opt == "abs":
-                        self.histograms[bin].Fill(val_reco - val_gen)
+    def fill(self, gen_coll, reco_coll):
+        for gen in gen_coll:
+            if self.particle.pid not in [1, 2, 3, 4, 5, 21]:
+                if abs(gen.PID) != self.particle.pid:
+                    continue
+
+            funcname_gen = "get_gen{}".format(self.observable.varname)
+            funcname_sliceX = "get_gen{}".format(self.binning.obs.varname)
+            funcname_reco = "get_reco{}".format(self.observable.varname)
+            val_gen = globals()[funcname_gen](gen)
+
+            val_sliceX = globals()[funcname_sliceX](gen)
+            for binX in self.binning.bins:
+                if val_sliceX > binX[0] and val_sliceX <= binX[1]:
+                    for obs, binY in self.slice.items():
+                        funcname_sliceY = "get_gen{}".format(obs.varname)
+                        val_sliceY = globals()[funcname_sliceY](gen)
+                        if val_sliceY > binY[0] and val_sliceY <= binY[1]:
+                            reco = get_reco(gen, reco_coll)
+                            if reco:
+                                val_reco = globals()[funcname_reco](reco)
+                                if self.observable.opt == "rel":
+                                    self.histograms[binX].Fill(val_reco / val_gen)
+                                elif self.observable.opt == "abs":
+                                    self.histograms[binX].Fill(val_reco - val_gen)
 
     def write(self):
-        for bin in self.slices.bins:
+        for bin in self.binning.bins:
             self.histograms[bin].Write()
+
+
+# _______________________________________________________________________________
+""" ResolutionPlot class """
+
+
+class ResolutionPlot:
+    def __init__(
+        self,
+        name,
+        res_histos,
+        text,
+    ):
+        self.name = name
+        self.res_histos = res_histos
+        self.text = text
+        self.datasets_reso = []
+
+    def construct(self):
+        for hist in self.res_histos:
+            hist.construct()
+
+    def write_histos(self):
+        for hist in self.res_histos:
+            hist.write()
+
+    def plot(self, validation_files, outdir):
+
+        ## compute ratios and store them in a new file
+        reso_filename = "{}/reso_{}.root".format(
+            outdir,
+            self.name,
+        )
+
+        reso_file = ROOT.TFile(reso_filename, "RECREATE")
+        self.datasets = []
+
+        for h in self.res_histos:
+            input_file = validation_files[h.particle]
+
+            file = ROOT.TFile(input_file)
+            file.cd()
+
+            nbins = len(h.binning.bins)
+            bins = array("d", [x[0] for x in h.binning.bins])
+            bins.append(h.binning.bins[-1][1])
+
+            final_histogram = ROOT.TH1F(h.finalhistname, h.finalhistname, nbins, bins)
+
+            for bin in h.binning.bins:
+                hist = file.Get(h.histogram_names[bin])
+                x = (bin[0] + bin[1]) * 0.5
+
+                ## extract place where maximum is
+                mode = hist.GetXaxis().GetBinCenter(hist.GetMaximumBin())
+
+                ## extract resolution
+                # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
+                # sigma = getFWHM(hist) / 2.35
+                sigma = hist.GetRMS()
+
+                debug_str = "{}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
+                    h.histogram_names[bin], x, mode, sigma
+                )
+                # print(debug_str)
+                if mode > 0:
+                    sigma = sigma / mode
+                else:
+                    # print("did not find histogram maximum in: {}".format(h.histogram_names[bin]))
+                    mode = 1
+
+                final_histogram.Fill(x, sigma)
+
+            reso_file.cd()
+            final_histogram.Write()
+            file.Close()
+
+            self.datasets_reso.append(
+                Dataset(
+                    reso_filename,
+                    h.finalhistname,
+                    h.label,
+                )
+            )
+
+        reso_file.Close()
+
+        ## produce actual plots
+
+        x_label = self.res_histos[0].binning.obs.eff_label
+        y_label = self.res_histos[0].observable.reso_label
+
+        self.plot_path = "{}/{}.pdf".format(outdir, self.name)
+        plot_reso = PlotHisto1D(self.datasets_reso, self.plot_path, x_label, y_label)
+
+        if "log" in self.res_histos[0].binning.scale:
+            plot_reso.set_xscale("log")
+
+        plot_reso.add_text(self.text)
+        plot_reso.set_xmin(self.res_histos[0].binning.bins[0][0])
+        plot_reso.plot()
+
+        print("plotted {}".format(self.plot_path))
+        return self.plot_path
+
+
+# _______________________________________________________________________________
+""" ResolutionBlock function """
+
+
+def ResolutionBlock(particle_list, branch, observables, bins_mom, bins_eta, reso_plots):
+    reso_dict = dict()
+    for obs in observables:
+        for p in particle_list:
+            reso_pt = []
+            for bin in bins_eta[1].bins:
+                res_histo_pt = ResolutionHisto(
+                    p,
+                    branch,
+                    obs,
+                    bins_mom[0],
+                    {bins_eta[1].obs: bin},
+                    "{} < ${}$ < {}".format(bin[0], bins_eta[1].obs.label, bin[1]),
+                )
+                reso_pt.append(res_histo_pt)
+            reso_pt_plot = ResolutionPlot(
+                "reso_{}_{}_pt".format(p.name, obs.name), reso_pt, Text("", (0.5, 0.5))
+            )
+            reso_dict[(p, obs, "pt")] = reso_pt_plot
+            reso_plots.append(reso_pt_plot)
+
+            reso_eta = []
+            for bin in bins_mom[1].bins:
+                res_histo_eta = ResolutionHisto(
+                    p,
+                    branch,
+                    obs,
+                    bins_eta[0],
+                    {bins_mom[1].obs: bin},
+                    "{} < ${}$ < {}".format(bin[0], bins_mom[1].obs.label, bin[1]),
+                )
+                reso_eta.append(res_histo_eta)
+            reso_eta_plot = ResolutionPlot(
+                "reso_{}_{}_eta".format(p.name, obs.name), reso_eta, Text("", (0.5, 0.5))
+            )
+            reso_dict[(p, obs, "eta")] = reso_eta_plot
+            reso_plots.append(reso_eta_plot)
+
+    return reso_dict
 
 
 # _______________________________________________________________________________
@@ -265,7 +431,7 @@ class EfficiencyPlot1D:
             )
         eff_file.Close()
 
-        self.x_label = "${}$".format(self.eff_histos[0].binning.obs.label)
+        self.x_label = self.eff_histos[0].binning.obs.eff_label
         self.y_label = "efficiency"
         self.plot_path = "{}/{}.pdf".format(outdir, self.name)
 
@@ -281,54 +447,174 @@ class EfficiencyPlot1D:
 
 
 # _______________________________________________________________________________
-def EfficiencyBlock(particle_list, branch, bins_mom, bins_eta, eff_plots):
-    eff_histos_mom = OrderedDict()
-    eff_histos_eta = OrderedDict()
+""" Efficiency histo class """
 
-    eff_plot_mom = OrderedDict()
-    eff_plot_eta = OrderedDict()
 
+class EfficiencyTaggingHisto:
+    def __init__(self, particle, collection, gen_cond, reco_cond, binning, slice, label):
+        self.particle = particle
+        self.collection = collection
+        self.binning = binning
+        self.slice = slice
+        self.gen_cond = gen_cond
+        self.reco_cond = reco_cond
+        self.label = label
+
+        self.histname = "{}_{}_{}_{}_{}_".format(
+            particle.name,
+            collection,
+            gen_cond.replace(" ", ""),
+            reco_cond.replace(" ", ""),
+            binning.obs.name,
+        )
+
+        for obs, bin in slice.items():
+            self.histname += "{}{}_{}".format(obs.name, bin[0], bin[1])
+
+        self.num_histname = "num_{}".format(self.histname)
+        self.den_histname = "den_{}".format(self.histname)
+        self.eff_histname = "eff_{}".format(self.histname)
+
+        # takes 2D slices as input, plots as function of X and slicing in Y
+        self.obs = binning.obs
+        self.nbins = len(binning.bins)
+        self.bins = binning.bins
+        self.bin_array = array("d", [x[0] for x in self.bins])
+        self.bin_array.append(self.bins[-1][1])
+
+    def construct(self):
+        self.num_hist = ROOT.TH1F(self.num_histname, self.num_histname, self.nbins, self.bin_array)
+        self.den_hist = ROOT.TH1F(self.den_histname, self.den_histname, self.nbins, self.bin_array)
+
+    def fill(self, jet_coll):
+        # need only one jet collection for tagging, since gen info is extracted from them
+
+        gen_coll = [p for p in jet_coll if eval(self.gen_cond)]
+        reco_coll = [p for p in jet_coll if eval(self.reco_cond)]
+
+        funcname_gen_obs = "get_gen{}".format(self.obs.varname)
+        funcname_gen_cuts = dict()
+        for obs, bin in self.slice.items():
+            funcname_gen_cuts[obs] = "get_gen{}".format(obs.varname)
+        for gen in gen_coll:
+            val_x = globals()[funcname_gen_obs](gen)
+            val_y = dict()
+            ok = True
+
+            for obs, bin in self.slice.items():
+                val_y = globals()[funcname_gen_cuts[obs]](gen)
+                # print(val_x, obs.name, val_y, bin)
+                if val_y < bin[0] or val_y > bin[1]:
+                    ok = False
+            if ok:
+                self.den_hist.Fill(val_x)
+                reco = get_reco(gen, reco_coll)
+                # print("find gen")
+                if reco:
+                    self.num_hist.Fill(val_x)
+                    # print("find reco")
+
+    def write(self):
+        self.num_hist.Write()
+        self.den_hist.Write()
+
+
+# _______________________________________________________________________________
+def EfficiencyParticleBlock(particle_list, branch, mom, eta, eff_plots):
+    eff_dict = OrderedDict()
     for p in particle_list:
-        # for p in [pion]:
-        eff_histos_mom[p] = []
-        eff_histos_eta[p] = []
-        for bin in bins_eta[1].bins:
-            eff_histos_mom[p].append(
-                EfficiencyHisto(
-                    p,
-                    branch,
-                    bins_mom[0],
-                    {bins_eta[1].obs: bin},
-                    "{} < ${}$ < {}".format(bin[0], bins_eta[1].obs.label, bin[1]),
-                )
-            )
 
-        for bin in bins_mom[1].bins:
-            eff_histos_eta[p].append(
-                EfficiencyHisto(
-                    p,
-                    branch,
-                    bins_eta[0],
-                    {bins_mom[1].obs: bin},
-                    "{} < ${}$ < {}".format(bin[0], bins_mom[1].obs.label, bin[1]),
-                )
+        eff_pt_histos = []
+        for bin in eta[1].bins:
+            eff_histo = EfficiencyHisto(
+                p,
+                branch,
+                mom[0],
+                {eta[1].obs: bin},
+                "{} < ${}$ < {}".format(bin[0], eta[1].obs.label, bin[1]),
             )
+            eff_pt_histos.append(eff_histo)
 
-        eff_plot_mom[p] = EfficiencyPlot1D(
-            "eff_{}_{}_{}".format(branch.lower(), p.name, bins_mom[0].obs.name),
-            eff_histos_mom[p],
-            Text("{} {}".format(p.label, branch.lower()), (0.5, 0.5)),
-        )
-        eff_plot_eta[p] = EfficiencyPlot1D(
-            "eff_{}_{}_{}".format(branch.lower(), p.name, bins_eta[0].obs.name),
-            eff_histos_eta[p],
-            Text("{} {}".format(p.label, branch.lower()), (0.5, 0.5)),
+        eff_pt_plot = EfficiencyPlot1D(
+            "eff_{}_{}_{}".format(branch.lower(), p.name, mom[0].obs.name),
+            eff_pt_histos,
+            Text("", (0.5, 0.5)),
         )
 
-        eff_plots.append(eff_plot_mom[p])
-        eff_plots.append(eff_plot_eta[p])
+        eff_dict[(p, "pt")] = eff_pt_plot
+        eff_plots.append(eff_pt_plot)
 
-    return eff_plot_mom, eff_plot_eta
+        eff_eta_histos = []
+        for bin in mom[1].bins:
+            eff_histo = EfficiencyHisto(
+                p,
+                branch,
+                eta[0],
+                {mom[1].obs: bin},
+                "{} < ${}$ < {}".format(bin[0], mom[1].obs.label, bin[1]),
+            )
+            eff_eta_histos.append(eff_histo)
+
+        eff_eta_plot = EfficiencyPlot1D(
+            "eff_{}_{}_{}".format(branch.lower(), p.name, eta[0].obs.name),
+            eff_eta_histos,
+            Text("", (0.5, 0.5)),
+        )
+        eff_dict[(p, "eta")] = eff_eta_plot
+        eff_plots.append(eff_eta_plot)
+
+    return eff_dict
+
+
+# _______________________________________________________________________________
+def EfficiencyTaggingBlock(jet_coll, flavor_tag, mom, eta, gen_cond, wps, tag_flag, eff_tag_plots):
+
+    eff_tag_dict = dict()
+
+    for part, cond in gen_cond.items():
+        for wp in wps:
+            eff_tag_pt_histos = []
+            for etabin in eta[1].bins:
+                eff_tag_pt = EfficiencyTaggingHisto(
+                    part,
+                    jet_coll,
+                    cond,  # gen condition
+                    "p.{} & (1 << {})".format(tag_flag, wp),  # reco condition
+                    mom[0],
+                    {eta[1].obs: etabin},
+                    "{} < ${}$ < {}".format(etabin[0], eta[1].obs.label, etabin[1]),
+                )
+                eff_tag_pt_histos.append(eff_tag_pt)
+            eff_tag_pt_plot = EfficiencyPlot1D(
+                "eff_{}_{}_{}_pt".format(flavor_tag, part.name, wp),
+                eff_tag_pt_histos,
+                Text("", (0.5, 0.5)),
+            )
+            eff_tag_dict[(part, wp, "pt")] = eff_tag_pt_plot
+            eff_tag_plots.append(eff_tag_pt_plot)
+
+            eff_tag_eta_histos = []
+            for ptbin in mom[1].bins:
+                eff_tag_eta = EfficiencyTaggingHisto(
+                    part,
+                    jet_coll,
+                    cond,  # gen condition
+                    "p.{} & (1 << {})".format(tag_flag, wp),  # reco condition
+                    eta[0],
+                    {mom[1].obs: ptbin},
+                    "{} < ${}$ < {}".format(ptbin[0], mom[1].obs.label, ptbin[1]),
+                )
+                eff_tag_eta_histos.append(eff_tag_eta)
+
+            eff_tag_eta_plot = EfficiencyPlot1D(
+                "eff_{}_{}_{}_eta".format(flavor_tag, part.name, wp),
+                eff_tag_eta_histos,
+                Text("", (0.5, 0.5)),
+            )
+            eff_tag_dict[(part, wp, "eta")] = eff_tag_eta_plot
+            eff_tag_plots.append(eff_tag_eta_plot)
+
+    return eff_tag_dict
 
 
 # _______________________________________________________________________________
@@ -382,9 +668,12 @@ class PlotHisto1D:
         self.text.append(text)
 
     def plot(self):
+
         fig, ax = plt.subplots()
         samples = self.data
+
         j = 0
+
         for sample in samples:
 
             filename = sample.filename
@@ -401,7 +690,10 @@ class PlotHisto1D:
             if self.normalize:
                 integral = hist.Integral(0, hist.GetNbinsX() + 1)
 
-            for i in range(1, hist.GetNbinsX() + 1):
+            nbins = hist.GetNbinsX() + 1
+
+            for i in range(1, nbins):
+                # print(hist.GetBinCenter(i), hist.GetBinContent(i) / integral)
                 x.append(hist.GetBinCenter(i))
                 y.append(hist.GetBinContent(i) / integral)
 
@@ -455,135 +747,17 @@ class PlotHisto1D:
 
         ax.set_xlabel(self.title_x, fontsize=self.size)
         ax.set_ylabel(self.title_y, fontsize=self.size)
+
         ax.tick_params(axis="both", labelsize=14)
         ax.grid(linestyle="dashed")
-
-        if hasattr(self, "ymin") and hasattr(self, "ymax"):
-            ax.set_ylim(self.ymin, self.ymax)
-        if hasattr(self, "xmin") and hasattr(self, "xmax"):
-            ax.set_xlim(self.xmin, self.xmax)
-
-        ax.set_xscale(self.xscale)
-        ax.set_yscale(self.yscale)
         fig.tight_layout()
         fig_file = "{}".format(self.name)
+        ax.set_xscale(self.xscale)
+        ax.set_yscale(self.yscale)
         fig.savefig(fig_file)
-        return fig, ax
-
-
-# _______________________________________________________________________________
-""" ResolutionPlot class """
-
-
-class ResolutionPlot:
-    def __init__(self, particle, colstring, observable, slices, input_file, outdir):
-        self.particle = particle
-        self.colstring = colstring
-        self.observable = observable
-        self.slices = slices
-        self.input_file = input_file
-        self.reso_histos = ResolutionHisto(particle, observable, slices, colstring)
-        ## slice resolution plots according to Y dimension
-
-        self.x_label = self.reso_histos.slices.obsX.eff_label
-        self.y_label = self.reso_histos.observable.reso_label
-        self.reso_plot_name = "{}/reso_{}_{}_{}_{}_{}".format(
-            outdir,
-            self.reso_histos.label,
-            self.reso_histos.particle.name,
-            self.reso_histos.observable.name,
-            self.reso_histos.observable.opt,
-            self.reso_histos.slices.name,
-        )
-        self.plot_path = "{}.pdf".format(self.reso_plot_name)
-        # write tree
-        resolution_file = "{}.root".format(self.reso_plot_name)
-        root_reso = ROOT.TFile(resolution_file, "RECREATE")
-
-        slices = self.reso_histos.slices.binsY
-        bins = self.reso_histos.slices.binsX
-
-        histnames_labels = OrderedDict()
-        for slice in slices:
-            nbinsX = len(self.reso_histos.slices.binsX)
-            binsX = [x[0] for x in self.reso_histos.slices.binsX]
-            binsX.append(self.reso_histos.slices.binsX[-1][1])
-            histname = "{}_{}_{}_{}_{}{}_{}_{}".format(
-                self.reso_histos.label,
-                self.reso_histos.particle.name,
-                self.reso_histos.slices.obsX.name,
-                self.reso_histos.observable.opt,
-                self.reso_histos.slices.obsY.name,
-                slice[0],
-                slice[1],
-                self.reso_histos.slices.name,
-            )
-            histname = "reso_{}".format(histname)
-            histogram = ROOT.TH1F(histname, histname, nbinsX, array("d", binsX))
-            label = "{} < {} < {}".format(
-                slice[0], self.reso_histos.slices.obsY.slice_label, slice[1]
-            )
-            histnames_labels[label] = histname
-
-            for bin in bins:
-                file = ROOT.TFile(input_file)
-                hist = file.Get(self.reso_histos.histogram_names[(bin, slice)])
-                print(input_file, self.reso_histos.histogram_names[(bin, slice)])
-                # hist.Rebin(2)
-                x = (bin[0] + bin[1]) * 0.5
-
-                ## extract place where maximum is
-                mode = hist.GetXaxis().GetBinCenter(hist.GetMaximumBin())
-
-                ## extract resolution
-                # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
-                # sigma = getFWHM(hist) / 2.35
-                sigma = hist.GetRMS()
-
-                debug_str = "{}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
-                    histname, x, mode, sigma
-                )
-                # print(debug_str)
-                if mode > 0:
-                    sigma = sigma / mode
-                else:
-                    print("Did not find histogram maximum ...")
-
-                histogram.Fill(x, sigma)
-
-            root_reso.cd()
-            histogram.Write()
-        root_reso.Close()
-
-        self.datasets_reso = []
-        ## prduce resolution plots
-
-        for label, histname in histnames_labels.items():
-            self.datasets_reso.append(
-                Dataset(
-                    resolution_file,
-                    histname,
-                    label,
-                )
-            )
-
-    def plot(self):
-        # print(datasets_reso, self.reso_plot_name, self.x_label, self.y_label)
-        plot_reso = PlotHisto1D(self.datasets_reso, self.reso_plot_name, self.x_label, self.y_label)
-
-        xobs_str = self.reso_histos.slices.name.partition("_")[0]
-        yobs_str = self.reso_histos.slices.name.partition("_")[2]
-
-        if "log" in xobs_str:
-            plot_reso.set_xscale("log")
-
-        text_str = "{} ({})".format(self.colstring, self.particle.label)
-        text = Text(text_str, (0.5, 0.5))
-        text.set_weight("bold")
-        plot_reso.text.append(text)
-        plot_reso.plot()
-        print("plotted {} ... ".format(self.plot_path))
-        return self.plot_path
+        fig.clf()
+        ax.cla()
+        plt.close("all")
 
 
 # _______________________________________________________________________________
@@ -850,38 +1024,51 @@ def get_reco(genpart, coll):
 
 def get_genTrackParam(part):
 
-    x = TVector3(part.X, part.Y, part.Y) * 1.0e-03  # in meters
+    x = TVector3(part.X, part.Y, part.Z) * 1.0e-03  # in meters
     p = TVector3(part.Px, part.Py, part.Pz)
     Q = part.Charge
 
     Par = TVectorD(5)
 
-    from DelphesValidationInit import Bz
+    from src.init import Bz
 
     a = -Q * Bz * 0.2998  # Units are Tesla, GeV and meters
     pt = p.Pt()
-    # Half curvature
-    C = a / (2 * pt)
-    r2 = x.Perp2()
-    cross = x(0) * p(1) - x(1) * p(0)
-    T = TMath.Sqrt(pt * pt - 2 * a * cross + a * a * r2)
-    phi0 = TMath.ATan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T)  # Phi0
-    D = (T - pt) / a  # Impact parameter D
-    if pt > 10.0:
-        D = (-2 * cross + a * r2) / (T + pt)
+    if a > 1.0e-06:
+        # print(Q, Bz, a)
+        # Half curvature
+        C = a / (2 * pt)
+        r2 = x.Perp2()
+        cross = x(0) * p(1) - x(1) * p(0)
+        T = TMath.Sqrt(pt * pt - 2 * a * cross + a * a * r2)
+        phi0 = TMath.ATan2((p(1) - a * x(0)) / T, (p(0) + a * x(1)) / T)  # Phi0
+        D = (T - pt) / a  # Impact parameter D
+        if pt > 10.0:
+            D = (-2 * cross + a * r2) / (T + pt)
 
-    Par[0] = D  # Store D
-    Par[1] = phi0  # Store phi0
-    Par[2] = C  # Store C
-    # Longitudinal parameters
-    B = C * TMath.Sqrt(TMath.Max(r2 - D * D, 0.0) / (1 + 2 * C * D))
-    st = TMath.ASin(B) / C
-    ct = p(2) / pt
-    z0 = x(2) - ct * st
-    #
-    Par[3] = z0  # Store z0
-    Par[4] = ct  # Store cot(theta)
-    #
+        Par[0] = D  # Store D
+        Par[1] = phi0  # Store phi0
+        Par[2] = C  # Store C
+        # Longitudinal parameters
+        B = C * TMath.Sqrt(TMath.Max(r2 - D * D, 0.0) / (1 + 2 * C * D))
+        st = TMath.ASin(B) / C
+        ct = p(2) / pt
+        z0 = x(2) - ct * st
+        #
+        Par[3] = z0  # Store z0
+        Par[4] = ct  # Store cot(theta)
+        #
+
+    else:
+        Par[0] = -999.0
+        Par[1] = p.Phi()
+        Par[2] = -999.0
+        Par[3] = -999.0
+        if p.Pt() < 1.0e-06:
+            Par[4] = TMath.Sign(part.Pz, 1.0) * 999999
+        else:
+            Par[4] = 1 / math.tan(p.Theta())
+
     return Par
 
 

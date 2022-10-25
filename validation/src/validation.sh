@@ -58,6 +58,7 @@ OUTDELPHES="events_${PDG}_${SEED}.root"
 BEAMSTR="Beams:LHEF = ${OUTLHE}"
 echo $BEAMSTR >> configLHE.cmnd
 echo 'Main:numberOfEvents = '${NEVTS} >> configLHE.cmnd
+echo 'Main:timesAllowErrors = '${NEVTS} >> configLHE.cmnd
 ${DELPHES_PATH}/DelphesPythia8 ${DELPHES_CARD} configLHE.cmnd ${OUTDELPHES}
 
 

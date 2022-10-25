@@ -13,11 +13,11 @@ add ExecutionPath PionFilter
 add ExecutionPath TreeWriter
 
 module FastJetFinder GenJetFinder {
-  set JetPTMin 1.0
+  set JetPTMin 10.0
 }
 
 module FastJetFinder FastJetFinder {
-  set JetPTMin 1.0
+  set JetPTMin 10.0
 }
 
 ##########################
@@ -70,7 +70,7 @@ module FastJetFinder CaloJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.4
 
-  set JetPTMin 1.0
+  set JetPTMin 10.0
 }
 
 ########################
@@ -86,7 +86,7 @@ module FastJetFinder PFJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.4
 
-  set JetPTMin 1.0
+  set JetPTMin 10.0
 }
 
 #########################
