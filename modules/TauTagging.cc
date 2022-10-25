@@ -243,17 +243,17 @@ void TauTagging::Process()
         }
       }
     }
-    
+
     // fake electrons and muons
-    
+
     if (pdgCode == 0)
     {
-     
-      Double_t drMin = fDeltaR;   
+
+      Double_t drMin = fDeltaR;
       fItPartonInputArray->Reset();
       while((part = static_cast<Candidate *>(fItPartonInputArray->Next())))
       {
-        if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13) 
+        if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13)
         {
             tauMomentum = part->Momentum;
             if (tauMomentum.Pt() < fClassifier->fPTMin) continue;
@@ -265,7 +265,7 @@ void TauTagging::Process()
                drMin = dr;
                pdgCode = TMath::Abs(part->PID);
                charge = part->Charge;
-            }  
+            }
         }
       }
     }
@@ -280,6 +280,7 @@ void TauTagging::Process()
 
     // apply an efficency formula
     eff = formula->Eval(pt, eta, phi, e);
+    jet->TauFlavor = pdgCode;
     jet->TauTag |= (gRandom->Uniform() <= eff) << fBitNumber;
     jet->TauWeight = eff;
 
