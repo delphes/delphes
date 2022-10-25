@@ -150,7 +150,6 @@ def main():
             args.priority, args.queue
         )
 
-    """
     for p in particles:
 
         jobs_outdir = "{}/particle_gun_{}".format(outdir, p.pid)
@@ -205,7 +204,6 @@ def main():
         if not args.dry:
             os.system("condor_submit condor_validation.sub")
 
-    """
     ## -------- collect jobs
     if args.collect:
 
