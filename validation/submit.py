@@ -65,7 +65,6 @@ def main():
     os.system("cp {} .".format(config))
     config_basename = os.path.basename(config)
     config_module = config_basename.strip(".py")
-    print(config_module)
     cfg = importlib.import_module(config_module)
 
     particles = []
@@ -239,6 +238,7 @@ def main():
         print(" producing report ... ")
         print("")
 
+        os.system("mkdir -p {}".format(config_module))
         for section_title, subsections in cfg.report.items():
             report_latex.section(section_title)
             for subsection_title, subsubsections in subsections.items():
@@ -248,7 +248,7 @@ def main():
                     report_latex.begin_frame(title)
                     figs = []
                     for plot in plots:
-                        fig = plot.plot(validation_files, outdir)
+                        fig = plot.plot(validation_files, config_module)
                         figs.append(fig)
                     report_latex.add_figures(figs)
 
