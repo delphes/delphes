@@ -54,6 +54,7 @@ def main():
     config = args.config
     outdir = os.path.abspath(args.outdir)
     homedir = os.getcwd()
+    delphes_path = os.path.abspath("{}/..".format(homedir))
 
     ## to avoid matplotlib warnings
     os.system("mkdir -p .matplotlib")
@@ -96,7 +97,7 @@ def main():
     print(" CONFIGURATION    = {}".format(config))
     print(" CARD             = {}".format(cfg.card))
     print(" HOME             = {}".format(homedir))
-    print(" DELPHES PATH     = {}".format(cfg.delphes_path))
+    print(" DELPHES PATH     = {}".format(delphes_path))
     print(" NJOBS            = {}".format(cfg.njobs))
     print(" NEVTS_PER_JOB    = {}".format(cfg.nevts_per_job))
     print(" PMIN             = {}".format(cfg.pmin))
@@ -165,7 +166,7 @@ def main():
                 seed,
                 jobs_outdir,
                 homedir,
-                cfg.delphes_path,
+                delphes_path,
                 cfg.card,
                 config,
             )

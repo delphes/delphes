@@ -13,31 +13,14 @@ from src.utils import (
     Text,
 )
 
-
-"""
-1) prepare validation card:
-
-- validation_delphes_card_FCChh_I.tcl
-
-2) make sure all the other needed cards are in the same directory:
-
-- muonMomentumResolution_I.tcl
-- trackMomentumResolution_I.tcl
-- FCChh_I.tcl
-
-"""
-
-### global parameters for event generation
-delphes_path = "/Users/michele/Programs/delphes_dev/"
-
 ## provide relative path to the directory
 scenario = "I"
 card = "FCC/scenarios/validation_delphes_card_FCChh_{}.tcl".format(scenario)
 name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
-njobs = 1
-nevts_per_job = 100
+njobs = 4
+nevts_per_job = 10
 
 pmin = 0.1
 pmax = 50000.0
