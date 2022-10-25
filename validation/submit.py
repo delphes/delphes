@@ -217,9 +217,9 @@ def main():
 
             jobs_outdir = "{}/particle_gun_{}".format(outdir, p.pid)
             os.chdir("{}".format(jobs_outdir))
-            cmd_hadd = "cd {}; hadd -f val_{}.root".format(jobs_outdir, p.pid)
-            for i in range(int(cfg.njobs)):
-                cmd_hadd += " val_{}_{}.root".format(p.pid, i)
+            cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(jobs_outdir, p.pid, p.pid)
+            #for i in range(int(cfg.njobs)):
+            #    cmd_hadd += " val_{}_{}.root".format(p.pid, i)
 
             # os.system(cmd_hadd)
             os.chdir(homedir)
