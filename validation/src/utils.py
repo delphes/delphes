@@ -287,7 +287,9 @@ def ResolutionBlock(particle_list, branch, observables, bins_mom, bins_eta, reso
                 )
                 reso_pt.append(res_histo_pt)
             reso_pt_plot = ResolutionPlot(
-                "reso_{}_{}_pt".format(p.name, obs.name), reso_pt, Text("", (0.5, 0.5))
+                "reso_{}_{}_{}_pt".format(branch.lower(), p.name, obs.name),
+                reso_pt,
+                Text("", (0.5, 0.5)),
             )
             reso_dict[(p, obs, "pt")] = reso_pt_plot
             reso_plots.append(reso_pt_plot)
@@ -304,7 +306,9 @@ def ResolutionBlock(particle_list, branch, observables, bins_mom, bins_eta, reso
                 )
                 reso_eta.append(res_histo_eta)
             reso_eta_plot = ResolutionPlot(
-                "reso_{}_{}_eta".format(p.name, obs.name), reso_eta, Text("", (0.5, 0.5))
+                "reso_{}_{}_{}_eta".format(branch.lower(), p.name, obs.name),
+                reso_eta,
+                Text("", (0.5, 0.5)),
             )
             reso_dict[(p, obs, "eta")] = reso_eta_plot
             reso_plots.append(reso_eta_plot)
@@ -570,7 +574,6 @@ def EfficiencyParticleBlock(particle_list, branch, mom, eta, eff_plots):
 def EfficiencyTaggingBlock(jet_coll, flavor_tag, mom, eta, gen_cond, wps, tag_flag, eff_tag_plots):
 
     eff_tag_dict = dict()
-
     for part, cond in gen_cond.items():
         for wp in wps:
             eff_tag_pt_histos = []
