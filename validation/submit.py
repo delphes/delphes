@@ -19,7 +19,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--config", help="path to config file", default="config/cfg_fcchh_I.py")
-    parser.add_argument("--outdir", help="path output directory", default="validation_fcchh_I")
+    parser.add_argument("--outdir", help="path output directory", default="validation_samples")
     parser.add_argument("--collect", help="collect jobs and produce report", action="store_true")
 
     subparsers = parser.add_subparsers(dest="command")
@@ -65,9 +65,12 @@ def main():
     os.system("cp {} .".format(config))
     config_basename = os.path.basename(config)
     config_module = config_basename.strip(".py")
+    proc_dir = config_module
+    sample_dir = "{}/{}".format(outdir, proc_dir)
     cfg = importlib.import_module(config_module)
 
     particles = []
+
     plots = cfg.eff_plots + cfg.eff_tag_plots + cfg.reso_plots
 
     for plot in cfg.eff_plots:
@@ -90,7 +93,7 @@ def main():
 
     validation_files = dict()
     for p in particles:
-        validation_files[p] = "{}/particle_gun_{}/val_{}.root".format(outdir, p.pid, p.pid)
+        validation_files[p] = "{}/particle_gun_{}/val_{}.root".format(sample_dir, p.pid, p.pid)
     print("")
     print("=================================================")
     print("")
@@ -110,7 +113,7 @@ def main():
     for p in particles:
         part_gun_str = "{} {}".format(part_gun_str, p.pid)
     print(part_gun_str)
-    print(" OUTDIR           = {}".format(outdir))
+    print(" OUTDIR           = {}".format(sample_dir))
     print("")
 
     pool = mp.Pool()
@@ -122,8 +125,8 @@ def main():
         print("   NCPUS (available): {}".format(mp.cpu_count()))
         print("")
 
-        ## clean old stuff
-        os.system("rm -rf logs/* job* {} {}".format(outdir, config_module))
+        ## clean previous runs and logs
+        os.system("rm -rf logs/* job* {} {}".format(sample_dir, proc_dir))
 
     elif args.command == "launch_condor":
 
@@ -132,8 +135,7 @@ def main():
         print("   QUEUE     : {}".format(args.queue))
         print("   PRIORITY  : {}".format(args.priority))
         print("")
-        ## clean old stuff
-        # os.system("rm -rf logs job* {}".format(outdir))
+
         os.system("mkdir -p logs")
 
         cmdfile = """# here goes your shell script
@@ -150,10 +152,13 @@ def main():
             args.priority, args.queue
         )
 
+        ## clean previous runs and logs
+        os.system("rm -rf logs/* job* {} {}".format(sample_dir, proc_dir))
+
     for p in particles:
 
-        jobs_outdir = "{}/particle_gun_{}".format(outdir, p.pid)
-        os.system("mkdir -p {}".format(jobs_outdir))
+        jobs_outdir = "{}/particle_gun_{}".format(sample_dir, p.pid)
+        os.system("mkdir -p {}".format(jobs_sample_dir))
 
         for i in range(int(cfg.njobs)):
             seed = i
@@ -215,7 +220,7 @@ def main():
 
         for p in particles:
 
-            jobs_outdir = "{}/particle_gun_{}".format(outdir, p.pid)
+            jobs_outdir = "{}/particle_gun_{}".format(sample_dir, p.pid)
             os.chdir("{}".format(jobs_outdir))
             cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(jobs_outdir, p.pid, p.pid)
             os.chdir(homedir)
@@ -225,27 +230,27 @@ def main():
         pool.close()
         pool.join()
 
-        validation_dir = outdir
-
         print("")
-        print(" producing report ... ")
+        print(" producing plots ... ")
         print("")
 
         ## produce plots in multithreading mode
-        os.system("mkdir -p {}".format(config_module))
+        os.system("rm -rf  {}".format(proc_dir))
+        os.system("mkdir -p {}".format(proc_dir))
 
         name_path_dict = dict()
-        pool = mp.Pool()
 
+        pool = mp.Pool(4)
         manager = mp.Manager()
         name_path_dict = manager.dict()
+
         for plot in plots:
-            pool.apply_async(
+            pool.apply(
                 run_plot,
                 args=(
                     plot,
                     validation_files,
-                    config_module,
+                    proc_dir,
                     name_path_dict,
                 ),
             )
@@ -253,9 +258,13 @@ def main():
         pool.close()
         pool.join()
 
+        print("")
+        print(" producing report ... ")
+        print("")
+
         ## produce latex report
         report_name = cfg.name
-        report_latex = LatexReport(report_name, validation_dir)
+        report_latex = LatexReport(report_name, sample_dir)
         for section_title, subsections in cfg.report.items():
             report_latex.section(section_title)
             for subsection_title, subsubsections in subsections.items():
@@ -274,7 +283,6 @@ def main():
         print(" ")
 
     ## do some cleaning
-    os.system("rm {}".format(config_basename))
     os.system("rm -rf .matplotlib")
 
 
