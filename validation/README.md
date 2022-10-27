@@ -13,13 +13,13 @@ python3 submit.py  --config config/cfg_fcchh_I.py launch_local
 To run on condor:
 
 ```
-python3 submit.py  --config config/cfg_fcchh_I.py launch_condor --queue longlunch --priority group_u_CMST3.all
+python3 submit.py --config config/cfg_fcchh_I.py launch_condor --queue longlunch --priority group_u_CMST3.all
 ```
 
 When jobs (local or batch) are done, collect, hadd and produce final report:
 
 ```
-python3 submit.py --collect
+python3 submit.py --config config/cfg_fcchh_I.py --collect
 ```
 
 Configuration file
