@@ -212,6 +212,7 @@ class ResolutionPlot:
 
             final_histogram = ROOT.TH1F(h.finalhistname, h.finalhistname, nbins, bins)
 
+            i=1
             for bin in h.binning.bins:
                 hist = file.Get(h.histogram_names[bin])
                 x = (bin[0] + bin[1]) * 0.5
@@ -223,6 +224,7 @@ class ResolutionPlot:
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
                 # sigma = getFWHM(hist) / 2.35
                 sigma = hist.GetRMS()
+                sigma_err = hist.GetRMSError()
 
                 if h.observable.opt == "rel":
                     if mode > 0:
@@ -236,7 +238,11 @@ class ResolutionPlot:
                 )
                 # print(debug_str)
 
-                final_histogram.Fill(x, sigma)
+                #final_histogram.Fill(x, sigma)
+                final_histogram.SetBinContent(i, sigma)
+                final_histogram.SetBinError(i, sigma_err)
+
+                i+=1
 
             reso_file.cd()
             final_histogram.Write()
