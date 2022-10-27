@@ -158,7 +158,7 @@ def main():
     for p in particles:
 
         jobs_outdir = "{}/particle_gun_{}".format(sample_dir, p.pid)
-        os.system("mkdir -p {}".format(jobs_sample_dir))
+        os.system("mkdir -p {}".format(jobs_outdir))
 
         for i in range(int(cfg.njobs)):
             seed = i
@@ -240,12 +240,12 @@ def main():
 
         name_path_dict = dict()
 
-        pool = mp.Pool(4)
+        pool = mp.Pool()
         manager = mp.Manager()
         name_path_dict = manager.dict()
 
         for plot in plots:
-            pool.apply(
+            pool.apply_async(
                 run_plot,
                 args=(
                     plot,
