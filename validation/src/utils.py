@@ -355,6 +355,8 @@ class EfficiencyHisto:
     def construct(self):
         self.num_hist = ROOT.TH1F(self.num_histname, self.num_histname, self.nbins, self.bin_array)
         self.den_hist = ROOT.TH1F(self.den_histname, self.den_histname, self.nbins, self.bin_array)
+        self.num_hist.Sumw2()
+        self.den_hist.Sumw2()
 
     def fill(self, gen_coll, reco_coll):
         funcname_gen_obs = "get_gen{}".format(self.obs.varname)
