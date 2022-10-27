@@ -27,7 +27,7 @@ Configuration file
 
 Examples can be found in the ```config``` directory. The validation will run on the card specified under the variable ```card```.
 
-In order to run properly, the following collection have to be defined in the ```TreeWriter``` section of the card:
+In order to run properly, the following collections have to be defined in the ```TreeWriter``` section of the card:
 ```
 "Particle", "Track", "Tower", "EFlowTrack", "EFlowPhoton", "EFlowNeutralHadron", "Electron", "Muon", "Photon", "PFJet", "Jet", "CaloJet", "GenJet"
 ```
