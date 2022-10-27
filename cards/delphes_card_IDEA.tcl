@@ -73,15 +73,15 @@ set ExecutionPath {
   GenMissingET
 
   FastJetFinder
+  JetEnergyScale
 
   GenJetFinderDurhamN2
   FastJetFinderDurhamN2
 
-  JetEnergyScale
-
   JetFlavorAssociation
 
   BTagging
+  CTagging
   TauTagging
 
   TreeWriter
@@ -937,14 +937,36 @@ module BTagging BTagging {
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
 
   # default efficiency formula (misidentification rate)
+  add EfficiencyFormula {0} {0.005}
+
+  # efficiency formula for c-jets (misidentification rate)
+  add EfficiencyFormula {4} {0.01}
+
+  # efficiency formula for b-jets
+  add EfficiencyFormula {5} {0.85}
+}
+
+###########
+# c-tagging
+###########
+
+module BTagging CTagging {
+  set JetInputArray JetEnergyScale/jets
+
+  set BitNumber 1
+
+  # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
+
+  # default efficiency formula (misidentification rate)
   add EfficiencyFormula {0} {0.01}
 
   # efficiency formula for c-jets (misidentification rate)
-  add EfficiencyFormula {4} {0.10}
+  add EfficiencyFormula {5} {0.05}
 
   # efficiency formula for b-jets
-  add EfficiencyFormula {5} {0.80}
+  add EfficiencyFormula {4} {0.80}
 }
+
 
 #############
 # tau-tagging
@@ -960,9 +982,9 @@ module TauTagging TauTagging {
   set TauEtaMax 3.0
 
   # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.001}
+  add EfficiencyFormula {0} {0.01}
   # efficiency formula for tau-jets
-  add EfficiencyFormula {15} {0.6}
+  add EfficiencyFormula {15} {0.85}
 }
 
 
