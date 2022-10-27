@@ -40,7 +40,7 @@ class Observable:
         self.nbins = nbins
         self.xmin = xmin
         self.xmax = xmax
-        self.opt = opt  # absolute (reco/gen) or relative (reco-gen)
+        self.opt = opt  # abs (reco/gen) or rel (reco-gen)
         self.reso_label = "$\sigma({})$ {}".format(self.label, self.unit)
         if opt == "rel":
             self.reso_label = "$\sigma({})/{}$".format(self.label, self.label)
@@ -179,13 +179,15 @@ class ResolutionPlot:
         self.text = text
         self.datasets_reso = []
 
-    def construct(self):
+    def construct(self, pid):
         for hist in self.res_histos:
-            hist.construct()
+            if hist.particle.pid == pid:
+                hist.construct()
 
-    def write_histos(self):
+    def write_histos(self, pid):
         for hist in self.res_histos:
-            hist.write()
+            if hist.particle.pid == pid:
+                hist.write()
 
     def plot(self, validation_files, outdir):
 
@@ -222,15 +224,17 @@ class ResolutionPlot:
                 # sigma = getFWHM(hist) / 2.35
                 sigma = hist.GetRMS()
 
-                debug_str = "{}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
-                    h.histogram_names[bin], x, mode, sigma
+                if h.observable.opt == "rel":
+                    if mode > 0:
+                        sigma = sigma / mode
+                    else:
+                        # print("did not find histogram maximum in: {}".format(h.histogram_names[bin]))
+                        mode = 1
+
+                debug_str = "{} {}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
+                    h.histogram_names[bin], h.observable.opt, x, mode, sigma
                 )
                 # print(debug_str)
-                if mode > 0:
-                    sigma = sigma / mode
-                else:
-                    # print("did not find histogram maximum in: {}".format(h.histogram_names[bin]))
-                    mode = 1
 
                 final_histogram.Fill(x, sigma)
 
@@ -392,13 +396,15 @@ class EfficiencyPlot1D:
         self.eff_histos = eff_histos
         self.text = text
 
-    def construct(self):
+    def construct(self, pid):
         for hist in self.eff_histos:
-            hist.construct()
+            if hist.particle.pid == pid:
+                hist.construct()
 
-    def write_histos(self):
+    def write_histos(self, pid):
         for hist in self.eff_histos:
-            hist.write()
+            if hist.particle.pid == pid:
+                hist.write()
 
     def plot(self, validation_files, outdir):
 
@@ -689,6 +695,7 @@ class PlotHisto1D:
                 continue
             # print(hname)
             x, y = [], []
+            yerr = []
             integral = 1.0
             if self.normalize:
                 integral = hist.Integral(0, hist.GetNbinsX() + 1)
@@ -699,6 +706,7 @@ class PlotHisto1D:
                 # print(hist.GetBinCenter(i), hist.GetBinContent(i) / integral)
                 x.append(hist.GetBinCenter(i))
                 y.append(hist.GetBinContent(i) / integral)
+                yerr.append(hist.GetBinError(i))
 
             file.Close()
             """
@@ -711,7 +719,7 @@ class PlotHisto1D:
                 linewidth=2,
             )
             """
-
+            """
             ax.step(
                 x,
                 y,
@@ -719,6 +727,8 @@ class PlotHisto1D:
                 # histtype="step",
                 linewidth=2,
             )
+            """
+            ax.errorbar(x, y, yerr=yerr, fmt="o", label="{}".format(sample.label), linewidth=2)
 
         # Create new legend handles but use the colors from the existing ones
 

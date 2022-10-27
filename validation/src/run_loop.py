@@ -4,17 +4,14 @@ from src.init import *
 debug = False
 # debug = False
 
-for plot in cfg.eff_plots:
-    plot.construct()
-
-for plot in cfg.eff_tag_plots:
-    plot.construct()
-
-for plot in cfg.reso_plots:
-    plot.construct()
-
 # reads from input file which gun we are running
 gun_pid = int(inputFile.split("_")[1])
+
+plots = cfg.eff_plots + cfg.eff_tag_plots + cfg.reso_plots
+
+for plot in plots:
+    plot.construct(gun_pid)
+
 
 # Loop over all events
 if debug:
@@ -55,11 +52,5 @@ for entry in range(0, numberOfEntries):
 # write tree
 out_root = ROOT.TFile(outputFile, "RECREATE")
 
-for plot in cfg.eff_plots:
-    plot.write_histos()
-
-for plot in cfg.eff_tag_plots:
-    plot.write_histos()
-
-for plot in cfg.reso_plots:
-    plot.write_histos()
+for plot in plots:
+    plot.write_histos(gun_pid)
