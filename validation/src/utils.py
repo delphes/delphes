@@ -212,7 +212,7 @@ class ResolutionPlot:
 
             final_histogram = ROOT.TH1F(h.finalhistname, h.finalhistname, nbins, bins)
 
-            i=1
+            i = 1
             for bin in h.binning.bins:
                 hist = file.Get(h.histogram_names[bin])
                 x = (bin[0] + bin[1]) * 0.5
@@ -237,11 +237,11 @@ class ResolutionPlot:
                 debug_str = "{} {}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
                     h.histogram_names[bin], h.observable.opt, x, mode, sigma
                 )
-                # print(debug_str)
+                print(debug_str)
 
-                final_histogram.GetBinContent(i,sigma)
-                final_histogram.GetBinError(i,sigma_err)
-                i+=1
+                final_histogram.SetBinContent(i, sigma)
+                final_histogram.SetBinError(i, sigma_err)
+                i += 1
 
             reso_file.cd()
             final_histogram.Write()
@@ -962,6 +962,7 @@ def getEffSigma(theHist, wmin=0.2, wmax=1.8, epsilon=0.01):
     # print(low, high)
     return 0.5 * (high - low)
 
+
 # _______________________________________________________________________________
 """ compute minimal interval that contains 68% area under curve """
 
@@ -978,11 +979,10 @@ def getEffSigma2(theHist):
     integrals = dict()
     for i in range(theHist.GetNbinsX() + 1):
         for j in range(theHist.GetNbinsX() + 1):
-            delta_x = 0.5*(theHist.GetBinCenter(j) - theHist.GetBinCenter(i))
+            delta_x = 0.5 * (theHist.GetBinCenter(j) - theHist.GetBinCenter(i))
             integrals[delta_x] = 0.683 - theHist.Integral(i, j) / thesum
-    
-    return min(integrals, key=integrals.get)
 
+    return min(integrals, key=integrals.get)
 
 
 # _______________________________________________________________________________
