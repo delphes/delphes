@@ -212,7 +212,6 @@ class ResolutionPlot:
 
             final_histogram = ROOT.TH1F(h.finalhistname, h.finalhistname, nbins, bins)
 
-            i=1
             for bin in h.binning.bins:
                 hist = file.Get(h.histogram_names[bin])
                 x = (bin[0] + bin[1]) * 0.5
@@ -224,7 +223,6 @@ class ResolutionPlot:
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
                 # sigma = getFWHM(hist) / 2.35
                 sigma = hist.GetRMS()
-                sigma_err = hist.GetRMSError()
 
                 if h.observable.opt == "rel":
                     if mode > 0:
@@ -238,11 +236,7 @@ class ResolutionPlot:
                 )
                 # print(debug_str)
 
-                #final_histogram.Fill(x, sigma)
-                final_histogram.SetBinContent(i, sigma)
-                final_histogram.SetBinError(i, sigma_err)
-
-                i+=1
+                final_histogram.Fill(x, sigma)
 
             reso_file.cd()
             final_histogram.Write()
@@ -1138,7 +1132,8 @@ def get_recoDZ(part):
 
 
 def get_genPhi(part):
-    return get_genTrackParam(part)[1]
+    # return get_genTrackParam(part)[1]
+    return part.P4().Phi()
 
 
 # _______________________________________________________________________________
@@ -1154,7 +1149,8 @@ def get_recoPhi(part):
 
 
 def get_genCtgTheta(part):
-    return get_genTrackParam(part)[4]
+    # return get_genTrackParam(part)[4]
+    return math.cos(get_genTheta(part)) / math.sin(get_genTheta(part))
 
 
 # _______________________________________________________________________________
@@ -1170,7 +1166,8 @@ def get_recoCtgTheta(part):
 
 
 def get_genTheta(part):
-    return arccotan(get_genTrackParam(part)[4])
+    # return arccotan(get_genTrackParam(part)[4])
+    return part.P4().Theta()
 
 
 # _______________________________________________________________________________
@@ -1178,7 +1175,10 @@ def get_genTheta(part):
 
 
 def get_recoTheta(part):
-    return arccotan(part.CtgTheta)
+    if hasattr(part, "CtgTheta"):
+        return arccotan(part.CtgTheta)
+    else:
+        return part.P4().Theta()
 
 
 # _______________________________________________________________________________
@@ -1186,7 +1186,10 @@ def get_recoTheta(part):
 
 
 def get_genP(part):
-    return part.P
+    if hasattr(part, "P"):
+        return part.P
+    else:
+        return part.P4().P()
 
 
 # _______________________________________________________________________________
