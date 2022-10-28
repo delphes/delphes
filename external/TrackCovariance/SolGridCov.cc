@@ -16,10 +16,11 @@ using namespace std;
 SolGridCov::SolGridCov()
 {
   // Define pt-polar angle grid
-  fNpt = 22;
+  fNpt = 28;
   fPta.ResizeTo(fNpt);
   Double_t p[] = { 0.1, 0.2, 0.5, 0.7, 1., 2., 3., 4., 6., 8., 10., 15.,
-                   20., 25., 30., 40., 50., 60., 80., 100., 150., 200. };
+                   20., 25., 30., 40., 50., 60., 80., 100., 150., 200.,
+		   500., 1000., 2000., 10000., 20000., 50000. };
   for (Int_t ip = 0; ip < fNpt; ip++) fPta(ip) = p[ip];
 
   fNang = 13;
