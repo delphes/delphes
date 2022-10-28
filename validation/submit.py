@@ -245,7 +245,7 @@ def main():
         name_path_dict = manager.dict()
 
         for plot in plots:
-            pool.apply_async(
+            pool.apply(
                 run_plot,
                 args=(
                     plot,
