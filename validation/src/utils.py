@@ -212,6 +212,7 @@ class ResolutionPlot:
 
             final_histogram = ROOT.TH1F(h.finalhistname, h.finalhistname, nbins, bins)
 
+            i=1
             for bin in h.binning.bins:
                 hist = file.Get(h.histogram_names[bin])
                 x = (bin[0] + bin[1]) * 0.5
@@ -221,8 +222,10 @@ class ResolutionPlot:
 
                 ## extract resolution
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
+                sigma = getEffSigma2(hist)
+                sigma_err = hist.GetRMSError()
                 # sigma = getFWHM(hist) / 2.35
-                sigma = hist.GetRMS()
+                # sigma = hist.GetRMS()
 
                 if h.observable.opt == "rel":
                     if mode > 0:
@@ -236,7 +239,9 @@ class ResolutionPlot:
                 )
                 # print(debug_str)
 
-                final_histogram.Fill(x, sigma)
+                final_histogram.GetBinContent(i,sigma)
+                final_histogram.GetBinError(i,sigma_err)
+                i+=1
 
             reso_file.cd()
             final_histogram.Write()
@@ -956,6 +961,28 @@ def getEffSigma(theHist, wmin=0.2, wmax=1.8, epsilon=0.01):
                     width = wx
     # print(low, high)
     return 0.5 * (high - low)
+
+# _______________________________________________________________________________
+""" compute minimal interval that contains 68% area under curve """
+
+
+def getEffSigma2(theHist):
+
+    weight = 0.0
+    points = []
+    thesum = theHist.Integral(0, theHist.GetNbinsX() + 1)
+
+    if thesum == 0:
+        return 0.0
+    # fill list of bin centers and the integral up to those point
+    integrals = dict()
+    for i in range(theHist.GetNbinsX() + 1):
+        for j in range(theHist.GetNbinsX() + 1):
+            delta_x = 0.5*(theHist.GetBinCenter(j) - theHist.GetBinCenter(i))
+            integrals[delta_x] = 0.683 - theHist.Integral(i, j) / thesum
+    
+    return min(integrals, key=integrals.get)
+
 
 
 # _______________________________________________________________________________
