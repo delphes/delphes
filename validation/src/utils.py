@@ -222,10 +222,10 @@ class ResolutionPlot:
 
                 ## extract resolution
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
-                sigma = getEffSigma2(hist)
+                # sigma = getEffSigma2(hist)
                 sigma_err = hist.GetRMSError()
                 # sigma = getFWHM(hist) / 2.35
-                # sigma = hist.GetRMS()
+                sigma = hist.GetRMS()
 
                 if h.observable.opt == "rel":
                     if mode > 0:
@@ -978,9 +978,9 @@ def getEffSigma2(theHist):
     # fill list of bin centers and the integral up to those point
     integrals = dict()
     for i in range(theHist.GetNbinsX() + 1):
-        for j in range(theHist.GetNbinsX() + 1):
+        for j in range(i, theHist.GetNbinsX() + 1):
             delta_x = 0.5 * (theHist.GetBinCenter(j) - theHist.GetBinCenter(i))
-            integrals[delta_x] = 0.683 - theHist.Integral(i, j) / thesum
+            integrals[delta_x] = abs(0.683 - (theHist.Integral(i, j) / thesum))
 
     return min(integrals, key=integrals.get)
 
