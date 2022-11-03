@@ -20,7 +20,7 @@ def main():
 
     parser.add_argument("--config", help="path to config file", default="config/cfg_fcchh_I.py")
     parser.add_argument("--outdir", help="path output directory", default="validation_samples")
-    parser.add_argument("--collect", help="collect jobs and produce report", action="store_true")
+    #parser.add_argument("--collect", help="collect jobs and produce report", action="store_true")
 
     subparsers = parser.add_subparsers(dest="command")
 
@@ -48,6 +48,11 @@ def main():
         ],
         default="longlunch",
     )
+
+    collect = subparsers.add_parser(
+        "collect", help="collect jobs and plot"
+    )
+
 
     args = parser.parse_args()
 
@@ -210,7 +215,8 @@ def main():
             os.system("condor_submit condor_validation.sub")
 
     ## -------- collect jobs
-    if args.collect:
+    #if args.collect:
+    if args.command == "collect":   
 
         ## first hadd files
         pool = mp.Pool()
