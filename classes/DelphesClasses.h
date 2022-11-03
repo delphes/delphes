@@ -368,6 +368,7 @@ public:
   UInt_t Flavor; // jet flavor
   UInt_t FlavorAlgo; // jet flavor
   UInt_t FlavorPhys; // jet flavor
+  UInt_t TauFlavor; // jet flavor according to Tau tagging module
 
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
   UInt_t BTagAlgo; // 0 or 1 for a jet that has been tagged as containing a heavy quark
@@ -421,7 +422,7 @@ public:
   TLorentzVector P4() const;
   TLorentzVector Area;
 
-  ClassDef(Jet, 4)
+  ClassDef(Jet, 5)
 };
 
 //---------------------------------------------------------------------------
@@ -703,6 +704,7 @@ public:
   UInt_t Flavor;
   UInt_t FlavorAlgo;
   UInt_t FlavorPhys;
+  UInt_t TauFlavor;
 
   UInt_t BTag;
   UInt_t BTagAlgo;

@@ -94,6 +94,10 @@ set ExecutionPath {
   BTaggingM
   BTaggingT
 
+  CTaggingL
+  CTaggingM
+  CTaggingT
+
   TauTaggingL
   TauTaggingM
   TauTaggingT
@@ -1250,6 +1254,110 @@ module BTagging BTaggingT {
 
   }
 }
+
+
+###############
+# c-tagging L
+###############
+
+module BTagging CTaggingL {
+  set JetInputArray JetEnergyScale/jets
+
+  set BitNumber 4
+
+  add EfficiencyFormula {4} {
+
+  1.05 * (
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.95)
+  )
+
+  }
+
+  add EfficiencyFormula {5} {
+
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.25)
+
+  }
+
+  add EfficiencyFormula {0} {
+
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.80)
+
+  }
+}
+
+
+###############
+# c-tagging M
+###############
+
+module BTagging CTaggingM {
+  set JetInputArray JetEnergyScale/jets
+
+  set BitNumber 5
+
+  add EfficiencyFormula {4} {
+
+  1.05 * (
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.65)
+  )
+
+  }
+
+  add EfficiencyFormula {5} {
+
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.07)
+
+  }
+
+  add EfficiencyFormula {0} {
+
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.14)
+
+  }
+}
+
+
+
+###############
+# c-tagging T
+###############
+
+module BTagging CTaggingT {
+  set JetInputArray JetEnergyScale/jets
+
+  set BitNumber 6
+
+  add EfficiencyFormula {4} {
+
+  1.05 * (
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.40)
+  )
+
+  }
+
+  add EfficiencyFormula {5} {
+
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.025)
+
+  }
+
+  add EfficiencyFormula {0} {
+
+  (pt <= 20.0)                                             * (0.00) +
+  (abs(eta) < 4.0)                     * (pt > 20.0)       * (0.01)
+
+  }
+}
+
 
 
 #################
