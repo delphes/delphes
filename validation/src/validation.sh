@@ -32,7 +32,7 @@ cp -r ${HOMEDIR}/src .
 ################################################################################
 
 OUTLHE="events_${PDG}_${SEED}.lhe"
-python3.10 src/flatGunLHEventProducer.py \
+python3 src/flatGunLHEventProducer.py \
   --pdg $PDG \
   --nevts $NEVTS \
   --pmin $PMIN \
@@ -71,5 +71,5 @@ ${DELPHES_PATH}/DelphesPythia8 ${DELPHES_CARD} configLHE.cmnd ${OUTDELPHES}
 cp ${DELPHES_PATH}/libDelphes.so .
 OUTVAL="val_${PDG}_${SEED}.root"
 mv src/run_loop.py .
-python3.10 run_loop.py ${OUTDELPHES} ${OUTVAL} ${CFG}
+python3 run_loop.py ${OUTDELPHES} ${OUTVAL} ${CFG}
 cp ${OUTVAL} ${OUTPUTDIR}
