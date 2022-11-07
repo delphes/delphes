@@ -153,7 +153,7 @@ TMatrixDSym Track::CovarianceMatrix() const
 TLorentzVector Tower::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiM(ET, Eta, Phi, 0.0);
+  vec.SetPtEtaPhiE(ET, Eta, Phi, E);
   return vec;
 }
 
