@@ -21,8 +21,8 @@
 
 using namespace std;
 
-Bool_t debug = false;
-//Bool_t debug = true;
+//Bool_t debug = false;
+Bool_t debug = true;
 
 int main(int argc, char *argv[])
 {
@@ -124,17 +124,20 @@ int main(int argc, char *argv[])
       set<std::pair<Double_t, Int_t> >::iterator it2 = it;
       it2--;
 
+      if (n==0) continue;
       for(int j = 0; j <= it->second; j++)
       {
 
         Double_t yval0 = 0 + 6.28 * j / it->second;
 
+        //if(debug) cout << it2->first << "," << yval0 << "," << it->first << "," << yval0 << endl;
         if(debug) cout << it2->first << "," << yval0 << "," << it->first << "," << yval0 << endl;
 
         linex = new TLine(it->first, yval0, it2->first, yval0);
         linex->SetLineColor(kRed + 3);
         linex->Draw();
       }
+
     }
   }
 
