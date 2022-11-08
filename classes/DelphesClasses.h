@@ -515,7 +515,11 @@ public:
 
   Float_t E; // calorimeter tower energy
 
-  Float_t T; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
+  Float_t T; // calo deposit time, averaged by sqrt(EM energy) over all particles
+  Float_t X; // calo tower position
+  Float_t Y; // calo tower position
+  Float_t Z; // calo tower position
+
   Int_t NTimeHits; // number of hits contributing to time measurement
 
   Float_t Eem; // calorimeter tower electromagnetic energy
@@ -531,7 +535,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Tower, 3)
+  ClassDef(Tower, 4)
 };
 
 //---------------------------------------------------------------------------
