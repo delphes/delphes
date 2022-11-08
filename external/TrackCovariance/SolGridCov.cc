@@ -190,8 +190,14 @@ TMatrixDSym SolGridCov::GetCov(Double_t pt, Double_t ang)
   if (minPt == fNpt - 1)minPt = fNpt - 2;
   Double_t dpt = fPta(minPt + 1) - fPta(minPt);
   // Put ang in 0-90 range
-  ang = TMath::Abs(ang);
-  while (ang > 90.)ang -= 90.;  // Needs to be fixed
+  ang = TMath::Abs(ang);	// Force positive polar angle
+  if(ang > 180.){
+	std::cout<<"SolGridCov::GetCov: illegal polar angle "<<ang<<std::endl;
+	TMatrixDSym CvZero(5); CvZero.Zero();
+	return CvZero;
+  }
+  if(ang > 90.)ang = 180.-ang;	// Assume left right symmetry
+  //
   Int_t minAng = GetMinIndex(ang, fNang, fAnga);
   if (minAng == -1)minAng = 0;
   if (minAng == fNang - 1)minAng = fNang - 2;
