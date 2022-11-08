@@ -193,8 +193,8 @@ TMatrixDSym SolGridCov::GetCov(Double_t pt, Double_t ang)
   ang = TMath::Abs(ang);	// Force positive polar angle
   if(ang > 180.){
 	std::cout<<"SolGridCov::GetCov: illegal polar angle "<<ang<<std::endl;
-	TMatrixDSym CvZer0(5); CvZero.Zero();
-	return;
+	TMatrixDSym CvZero(5); CvZero.Zero();
+	return CvZero;
   }
   if(ang > 90.)ang = 180.-ang;	// Assume left right symmetry
   //
