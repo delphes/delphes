@@ -117,15 +117,15 @@ ObsTrk::~ObsTrk()
 	fCovILC.Clear();
 }
 //
-// Rescale covariance for electrons
+// Rescale covariance if needed
 //
-void ObsTrk::SetElectron(Double_t scale)
+void ObsTrk::SetScale(Double_t scale)
 {
 //
-// Scale covariance matrix by "scale" for electrons
+// Scale covariance matrix by "scale"
 //
-	fEflag = kTRUE;		// Electron flag 
-	fEscale = scale;	// Electron scale
+	fEflag = kTRUE;		// Scaling flag 
+	fEscale = scale;	// scale of resolution
 	FillObs();		// Reset covariance and extract new parameters
 }
 
@@ -183,7 +183,7 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 	//
 	// Now do Choleski decomposition and random number extraction, with appropriate stabilization
 	//
-	TVectorD oPar = TrkUtil::CovSmear(gPar, Cov);
+	TVectorD oPar = TrkUtil::CovSmear(gPar, fCov);
 	//
 	return oPar;
 }

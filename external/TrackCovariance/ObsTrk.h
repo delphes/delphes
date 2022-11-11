@@ -97,7 +97,7 @@ public:
 	// First hit
 	TVector3 GetFirstHit()  { return fXfirst; }
 	// Set electron resolution degradation scale
-	void SetElectron(Double_t scale);
+	void SetScale(Double_t scale);
 };
 
 #endif

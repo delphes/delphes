@@ -136,7 +136,7 @@ void TrackCovariance::Process()
     Bool_t Electron = kFALSE;
     if(Electron){
        Double_t Escale = 2.;
-       track.SetElectron(Escale);
+       track.SetScale(Escale);
     }
     //**********************************************************
 
