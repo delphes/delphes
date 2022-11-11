@@ -21,6 +21,8 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G)
 	fGenX = x;
 	fGenP = p;
 	fGenQ = Q;
+	fEflag = kFALSE;		// Electron flag 
+	fEscale = 1.;			// Electron scale
 	fGenPar.ResizeTo(5);
 	fGenParMm.ResizeTo(5);
 	fGenParACTS.ResizeTo(6);
@@ -33,21 +35,10 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G)
 	fCovMm.ResizeTo(5, 5);
 	fCovACTS.ResizeTo(6, 6);
 	fCovILC.ResizeTo(5, 5);
-	fGenPar = XPtoPar(x,p,Q);
-	fGenParMm = ParToMm(fGenPar);
-	fGenParACTS = ParToACTS(fGenPar);
-	fGenParILC = ParToILC(fGenPar);
 	//
-	fObsPar = GenToObsPar(fGenPar);
-	fObsParMm = ParToMm(fObsPar);
-	fObsParACTS = ParToACTS(fObsPar);
-	fObsParILC = ParToILC(fObsPar);
-	fObsX = ParToX(fObsPar);
-	fObsP = ParToP(fObsPar);
-	fObsQ = ParToQ(fObsPar);
-	fCovMm = CovToMm(fCov);
-	fCovACTS = CovToACTS(fObsPar, fCov);
-	fCovILC = CovToILC(fCov);
+	FillGen();
+	//
+	FillObs();
 }
 //
 // x[3] track origin, p[3] track momentum at origin, Q charge, B magnetic field in Tesla
@@ -60,6 +51,8 @@ ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G)
 	fGenX.SetXYZ(x[0],x[1],x[2]);
 	fGenP.SetXYZ(p[0],p[1],p[2]);
 	fGenQ = Q;
+	fEflag = kFALSE;		// Electron flag 
+	fEscale = 1.;			// Electron scale
 	fGenPar.ResizeTo(5);
 	fGenParMm.ResizeTo(5);
 	fGenParACTS.ResizeTo(6);
@@ -72,11 +65,25 @@ ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G)
 	fCovMm.ResizeTo(5, 5);
 	fCovACTS.ResizeTo(6, 6);
 	fCovILC.ResizeTo(5, 5);
-	fGenPar = XPtoPar(fGenX, fGenP, Q);
+	//
+	FillGen();
+	//
+	FillObs();
+}
+void ObsTrk::FillGen()
+{
+// Fill Generated track arrays
+//
+	fGenPar = XPtoPar(fGenX, fGenP, fGenQ);
 	fGenParMm = ParToMm(fGenPar);
 	fGenParACTS = ParToACTS(fGenPar);
 	fGenParILC = ParToILC(fGenPar);
-	//
+}
+//
+void ObsTrk::FillObs()
+{
+// Fill Observed track arrays
+//
 	fObsPar = GenToObsPar(fGenPar);
 	fObsParMm = ParToMm(fObsPar);
 	fObsParACTS = ParToACTS(fObsPar);
@@ -109,6 +116,19 @@ ObsTrk::~ObsTrk()
 	fCovACTS.Clear();
 	fCovILC.Clear();
 }
+//
+// Rescale covariance if needed
+//
+void ObsTrk::SetScale(Double_t scale)
+{
+//
+// Scale covariance matrix by "scale"
+//
+	fEflag = kTRUE;		// Scaling flag 
+	fEscale = scale;	// scale of resolution
+	FillObs();		// Reset covariance and extract new parameters
+}
+
 //
 TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 {
@@ -158,11 +178,12 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 	}					// Track covariance
 	delete trk;
 	//
-	fCov = Cov;
+	if(fEflag) fCov = (fEscale*fEscale)*Cov;
+	else fCov = Cov;
 	//
 	// Now do Choleski decomposition and random number extraction, with appropriate stabilization
 	//
-	TVectorD oPar = TrkUtil::CovSmear(gPar, Cov);
+	TVectorD oPar = TrkUtil::CovSmear(gPar, fCov);
 	//
 	return oPar;
 }

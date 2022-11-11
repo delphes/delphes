@@ -46,9 +46,13 @@ private:
 	TMatrixDSym fCovILC;			// Covariance of track parameters in ILC format
 									// (d0, phi0, w, z0, tan(lambda))
 	TVector3 fXfirst;			// x,y,z of first track hit
+	Bool_t fEflag;				// Electron flag
+	Double_t fEscale;			// Electron resolution degradation
 	//
 	// Service routines
 	//
+	void FillGen();				// Fill generated arrays
+	void FillObs();				// Fill observed arrays
 	TVectorD GenToObsPar(TVectorD gPar);
 	//
 public:
@@ -92,6 +96,8 @@ public:
 	TMatrixDSym GetCovILC() { return fCovILC; }
 	// First hit
 	TVector3 GetFirstHit()  { return fXfirst; }
+	// Set electron resolution degradation scale
+	void SetScale(Double_t scale);
 };
 
 #endif
