@@ -130,7 +130,15 @@ void TrackCovariance::Process()
     mass = candidateMomentum.M();
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
-
+    //**********************************************************
+    //************ deal with electrons here ********************
+    //**********************************************************
+    Bool_t Electron = kFALSE;
+    if(Electron){
+       Double_t Escale = 2.;
+       track.SetElectron(Escale);
+    }
+    //**********************************************************
 
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
