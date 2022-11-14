@@ -11,7 +11,7 @@
 //
 // Constructors
 //
-// x(3) track origin, p(3) track momentum at origin, Q charge, B ma gnetic field in Tesla
+// x(3) track origin, p(3) track momentum at origin, Q charge, B magnetic field in Tesla
 ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G)
 {
 	fB = G->B();
@@ -38,7 +38,12 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G)
 	//
 	FillGen();
 	//
-	FillObs();
+	fCov = CovCalc(fGenPar);
+	fCovMm = CovToMm(fCov);
+	fCovACTS = CovToACTS(fObsPar, fCov);
+	fCovILC = CovToILC(fCov);
+	//
+	fObsDone = kFALSE;
 }
 //
 // x[3] track origin, p[3] track momentum at origin, Q charge, B magnetic field in Tesla
@@ -68,7 +73,12 @@ ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G)
 	//
 	FillGen();
 	//
-	FillObs();
+	fCov = CovCalc(fGenPar);
+	fCovMm = CovToMm(fCov);
+	fCovACTS = CovToACTS(fObsPar, fCov);
+	fCovILC = CovToILC(fCov);
+	//
+	fObsDone = kFALSE;
 }
 void ObsTrk::FillGen()
 {
@@ -84,16 +94,15 @@ void ObsTrk::FillObs()
 {
 // Fill Observed track arrays
 //
-	fObsPar = GenToObsPar(fGenPar);
+	fObsPar = TrkUtil::CovSmear(fGenPar, fCov);
 	fObsParMm = ParToMm(fObsPar);
 	fObsParACTS = ParToACTS(fObsPar);
 	fObsParILC = ParToILC(fObsPar);
 	fObsX = ParToX(fObsPar);
 	fObsP = ParToP(fObsPar);
 	fObsQ = ParToQ(fObsPar);
-	fCovMm = CovToMm(fCov);
-	fCovACTS = CovToACTS(fObsPar, fCov);
-	fCovILC = CovToILC(fCov);
+	//
+	fObsDone = kTRUE;
 }
 //
 // Destructor
@@ -124,13 +133,22 @@ void ObsTrk::SetScale(Double_t scale)
 //
 // Scale covariance matrix by "scale"
 //
-	fEflag = kTRUE;		// Scaling flag 
-	fEscale = scale;	// scale of resolution
-	FillObs();		// Reset covariance and extract new parameters
+	fEscale = scale;			// scale of resolution
+	if(!fEflag){ 
+		fCov *= (fEscale*fEscale);	// Rescale covariance matrix
+		fEflag = kTRUE;				// Scaling flag 
+		// Update covariance matrix variants
+		fCovMm = CovToMm(fCov);
+		fCovACTS = CovToACTS(fObsPar, fCov);
+		fCovILC = CovToILC(fCov);
+	}
+	else std::cout<<"ObsTrk::SetScale: Already called --> no action"<<std::endl;
 }
 
 //
-TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
+// Calculate covariance matrix
+//
+TMatrixDSym ObsTrk::CovCalc(TVectorD gPar)
 {
 	//
 	// Check ranges
@@ -177,13 +195,7 @@ TVectorD ObsTrk::GenToObsPar(TVectorD gPar)
 		Cov = trk->Cov();
 	}					// Track covariance
 	delete trk;
-	//
-	if(fEflag) fCov = (fEscale*fEscale)*Cov;
-	else fCov = Cov;
-	//
-	// Now do Choleski decomposition and random number extraction, with appropriate stabilization
-	//
-	TVectorD oPar = TrkUtil::CovSmear(gPar, fCov);
-	//
-	return oPar;
+//
+	return Cov;
 }
+
