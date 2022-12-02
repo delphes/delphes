@@ -14,7 +14,7 @@ import matplotlib
 
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["axes.labelweight"] = "bold"
-plt.gcf().subplots_adjust(bottom=0.15)
+# plt.gcf().subplots_adjust(bottom=0.15)
 
 # _______________________________________________________________________________
 """ Particle class """
@@ -143,6 +143,10 @@ class ResolutionHisto:
             funcname_reco = "get_reco{}".format(self.observable.varname)
             val_gen = globals()[funcname_gen](gen)
 
+            # if self.binning.obs.varname != "Theta": continue
+            # if self.observable.name != "d0": continue
+            # if self.observable.varname != "Theta": continue
+
             val_sliceX = globals()[funcname_sliceX](gen)
             for binX in self.binning.bins:
                 if val_sliceX > binX[0] and val_sliceX <= binX[1]:
@@ -153,6 +157,7 @@ class ResolutionHisto:
                             reco = get_reco(gen, reco_coll)
                             if reco:
                                 val_reco = globals()[funcname_reco](reco)
+                                # print(val_reco, val_gen)
                                 if self.observable.opt == "rel":
                                     self.histograms[binX].Fill(val_reco / val_gen)
                                 elif self.observable.opt == "abs":
@@ -237,7 +242,7 @@ class ResolutionPlot:
                 debug_str = "{} {}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
                     h.histogram_names[bin], h.observable.opt, x, mode, sigma
                 )
-                print(debug_str)
+                # print(debug_str)
 
                 final_histogram.SetBinContent(i, sigma)
                 final_histogram.SetBinError(i, sigma_err)
@@ -876,9 +881,7 @@ class LatexReport:
 
     def subfigure(self, figure, caption):
         """Return tex lines for subfigures."""
-        tex_line = (
-            r"\begin{subfigure}{0.45\textwidth}" + "\n" + r"\includegraphics[width=\linewidth]{"
-        )
+        tex_line = r"\begin{subfigure}{0.45\textwidth}" + "\n" + r"\includegraphics[width=\linewidth]{"
         tex_line += figure
         tex_line += r"}" + "\n" + r"\vspace*{-0.15cm}" + "\n" + r"\caption{"
 
@@ -1119,7 +1122,7 @@ def get_genTrackParam(part):
 
 
 def arccotan(x):
-    return math.pi / 2 - math.atan(x)
+    return math.pi / 2 - math.atan2(x, 1)
 
 
 # _______________________________________________________________________________
@@ -1127,7 +1130,8 @@ def arccotan(x):
 
 
 def get_genD0(part):
-    return get_genTrackParam(part)[0] * 1.0e03
+    # return get_genTrackParam(part)[0] * 1.0e03
+    return 0.0
 
 
 # _______________________________________________________________________________
@@ -1143,7 +1147,8 @@ def get_recoD0(part):
 
 
 def get_genDZ(part):
-    return get_genTrackParam(part)[3] * 1.0e03
+    # return get_genTrackParam(part)[3] * 1.0e03
+    return 0.0
 
 
 # _______________________________________________________________________________
@@ -1194,7 +1199,11 @@ def get_recoCtgTheta(part):
 
 def get_genTheta(part):
     # return arccotan(get_genTrackParam(part)[4])
-    return part.P4().Theta()
+    # return part.P4().Theta()
+    if abs(part.Eta) > 10:
+        return math.copysign(1, part.Eta) * 3.14
+    else:
+        return 2 * math.atan(math.exp(-part.Eta))
 
 
 # _______________________________________________________________________________
@@ -1203,9 +1212,12 @@ def get_genTheta(part):
 
 def get_recoTheta(part):
     if hasattr(part, "CtgTheta"):
-        return arccotan(part.CtgTheta)
+        # return arccotan(part.CtgTheta)
+        # return part.P4().Theta()
+        return 2 * math.atan(math.exp(-part.Eta))
     else:
-        return part.P4().Theta()
+        # return part.P4().Theta()
+        return 2 * math.atan(math.exp(-part.Eta))
 
 
 # _______________________________________________________________________________
