@@ -51,6 +51,8 @@ private:
   Double_t fBz;
   Int_t fNMinHits;
 
+  Double_t fElectronScaleFactor;
+
   SolGeom *fGeometry;
   SolGridCov *fCovariance;
 

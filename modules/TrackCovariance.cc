@@ -73,6 +73,9 @@ void TrackCovariance::Init()
   fGeometry->Read(GetString("DetectorGeometry", ""));
   fNMinHits = GetInt("NMinHits", 6);
 
+  // scale factors to apply to resolutions
+  fElectronScaleFactor = GetDouble("ElectronScaleFactor", 1.0);
+
   // load geometry
   fCovariance->Calc(fGeometry);
   fCovariance->SetMinHits(fNMinHits);
@@ -120,7 +123,6 @@ void TrackCovariance::Process()
     const TLorentzVector &candidatePosition = particle->Position*1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
-
     Bool_t inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
     Bool_t Accept = kTRUE;
     if(inside) Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
@@ -131,6 +133,7 @@ void TrackCovariance::Process()
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
 
+    if(TMath::Abs(candidate->PID) == 11) track.SetScale(fElectronScaleFactor);
 
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
