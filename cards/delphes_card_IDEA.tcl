@@ -225,9 +225,6 @@ module TrackCovariance TrackSmearing {
     ## magnetic field
     set Bz $B
 
-    ## scale factors
-    set ElectronScaleFactor 2.0
-
     ## uses https://raw.githubusercontent.com/selvaggi/FastTrackCovariance/master/GeoIDEA_BASE.txt
     set DetectorGeometry {
 
@@ -562,12 +559,15 @@ module DualReadoutCalorimeter Calorimeter {
     add EnergyFraction {3122} {0.3 0.7}
 
 
+    ## ECAL crystals for the EM part from 2008.00338
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
     set ECalResolutionFormula {
-    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.11^2 + 0.05^2)+
-    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.11^2 + 0.05^2)
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.005^2 + energy*0.03^2 + 0.002^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.005^2 + energy*0.03^2 + 0.002^2)
     }
 
+
+    # Dual Readout
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     set HCalResolutionFormula {
     (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.3^2 + 0.05^2)+
