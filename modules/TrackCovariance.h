@@ -52,6 +52,8 @@ private:
   Int_t fNMinHits;
 
   Double_t fElectronScaleFactor;
+  Double_t fMuonScaleFactor;
+  Double_t fChargedHadronScaleFactor;
 
   SolGeom *fGeometry;
   SolGridCov *fCovariance;

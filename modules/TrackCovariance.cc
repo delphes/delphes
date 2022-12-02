@@ -75,6 +75,8 @@ void TrackCovariance::Init()
 
   // scale factors to apply to resolutions
   fElectronScaleFactor = GetDouble("ElectronScaleFactor", 1.0);
+  fMuonScaleFactor = GetDouble("fMuonScaleFactor", 1.0);
+  fChargedHadronScaleFactor = GetDouble("fChargedHadronScaleFactor", 1.0);
 
   // load geometry
   fCovariance->Calc(fGeometry);
@@ -133,7 +135,19 @@ void TrackCovariance::Process()
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
 
-    if(TMath::Abs(candidate->PID) == 11) track.SetScale(fElectronScaleFactor);
+    // apply rescaling factors to resolution
+    if (TMath::Abs(candidate->PID) == 11)
+		{
+      track.SetScale(fElectronScaleFactor);
+		}
+    else if (TMath::Abs(candidate->PID) == 13)
+		{
+      track.SetScale(fMuonScaleFactor);
+		}
+    else
+		{
+      track.SetScale(fChargedHadronScaleFactor);
+    }
 
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
