@@ -505,8 +505,8 @@ module DualReadoutCalorimeter Calorimeter {
 
   set SmearLogNormal false
 
-  #set SmearTowerCenter true
-  set SmearTowerCenter false
+  set SmearTowerCenter true
+  #set SmearTowerCenter false
     set pi [expr {acos(-1)}]
 
     # Lists of the edges of each tower in eta and phi;
