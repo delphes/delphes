@@ -225,9 +225,11 @@ module TrackCovariance TrackSmearing {
     ## magnetic field
     set Bz $B
 
+    ## scale factors
+    set ElectronScaleFactor 2.0
+
     ## uses https://raw.githubusercontent.com/selvaggi/FastTrackCovariance/master/GeoIDEA_BASE.txt
     set DetectorGeometry {
-
 
       # Layer type 1 = R (barrel) or 2 = z (forward/backward)
       # Layer label
