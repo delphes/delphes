@@ -20,7 +20,6 @@ def main():
 
     parser.add_argument("--config", help="path to config file", default="config/cfg_fcchh_I.py")
     parser.add_argument("--outdir", help="path output directory", default="validation_samples")
-    #parser.add_argument("--collect", help="collect jobs and produce report", action="store_true")
 
     subparsers = parser.add_subparsers(dest="command")
 

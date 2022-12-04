@@ -18,18 +18,19 @@ card = "validation_delphes_card_IDEA.tcl"
 name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
-njobs = 1
-nevts_per_job = 1000
+njobs = 100
+nevts_per_job = 10000
 
+#
 pmin = 0.1
-pmax = 500.0
+pmax = 100.0
 log = True
 etamin = -3.0
 etamax = 3.0
-ecm = 1000.0
+ecm = 200.0
 
-## plotting parameters
-nbins = 50
+# plotting parameters
+nbins = 100
 
 nbins_plin = nbins
 plin_min = 0.0
@@ -52,9 +53,9 @@ nbins_theta = nbins
 theta_min = 0.1
 theta_max = 3.04
 
-bins_thetalinf = compute_bins(theta_min, theta_max, nbins_theta, 1, "lin")
+bins_thetalinf = compute_bins(theta_min, theta_max, nbins_theta, 2, "lin")
 
-bins_plinf = compute_bins(plin_min, plin_max, nbins_plin, 1, "lin")
+bins_plinf = compute_bins(plin_min, plin_max, nbins_plin, 2, "lin")
 bins_plogf = compute_bins(plog_min, plog_max, nbins_plog, 2, "log")
 
 bins_jetplinf = compute_bins(20.0, plin_max, nbins_plin, 1, "lin")
@@ -66,13 +67,11 @@ bins_elogf = compute_bins(elog_min, elog_max, nbins_elog, 2, "log")
 bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 1, "lin")
 bins_jetelogf = compute_bins(20.0, elog_max, nbins_elog, 2, "log")
 
-bins_thetalinc = [(0.1, 0.73), (0.73, 1.57)]
+bins_thetalinc = [(1.4, 1.8), (0.6, 1.0), (0.1, 0.5)]
 bins_plogc = [
     (0.5, 1.5),
     (5, 15),
     (20, 50),
-    (50, 100),
-    (100, 500),
 ]
 
 bins_jetplogc = [
@@ -140,8 +139,8 @@ mom = (plogf, plogc)
 theta = (thetalinf, thetalinc)
 obs = [obs_p, obs_d0, obs_dz, obs_phi, obs_theta]
 
-# tracks = [pion, muon]
-tracks = [pion]
+tracks = [pion, muon, electron]
+# tracks = [pion]
 reso_track_plots = ResolutionBlock(tracks, "Track", obs, mom, theta, reso_plots)
 
 report["tracks"]["resolution"] = OrderedDict()
@@ -157,8 +156,8 @@ for p in tracks:
 # efficiency
 mom = (plogf, plogc)
 theta = (thetalinf, thetalinc)
-# tracks = [pion, muon, electron]
-tracks = [pion]
+tracks = [pion, muon, electron]
+# tracks = [pion]
 eff_track_plots = EfficiencyParticleBlock(tracks, "Track", mom, theta, eff_plots)
 
 report["tracks"]["efficiency"] = OrderedDict()
@@ -169,11 +168,9 @@ for p in tracks:
         eff_track_plots[((p, "eta"))],
     ]
 
-
 ########################
 # Calorimeter particles
 ########################
-
 
 report["calorimeter"] = OrderedDict()
 caloparticles = [electron, photon, pion, kl]
@@ -289,7 +286,7 @@ reso_elepf_e = ResolutionHisto(
 
 reso_ele_pftest_histos = [reso_eletrk_e, reso_elecalo_e, reso_elepf_e]
 reso_ele_pftest_plot = ResolutionPlot(
-    "reso_ele_pftest_e", reso_ele_pftest_histos, Text("", (0.5, 0.5))
+    "reso_ele_pftest_e", reso_ele_pftest_histos, Text("electrons", (0.5, 0.5))
 )
 
 reso_pitrk_e = ResolutionHisto(
@@ -321,7 +318,7 @@ reso_pipf_e = ResolutionHisto(
 
 reso_pi_pftest_histos = [reso_pitrk_e, reso_picalo_e, reso_pipf_e]
 reso_pi_pftest_plot = ResolutionPlot(
-    "reso_pi_pftest_e", reso_pi_pftest_histos, Text("", (0.5, 0.5))
+    "reso_pi_pftest_e", reso_pi_pftest_histos, Text("charged pions", (0.5, 0.5))
 )
 
 
@@ -340,12 +337,12 @@ reso_jetpf_e = ResolutionHisto(
     obs_e,
     ejetlogf,
     {obs_theta: (0.73, 1.57)},
-    "particle-flow, 0.73 < $\theta$ < 1.57",
+    "particle-flow, 0.73 < $\\theta$ < 1.57",
 )
 
 reso_jet_pftest_histos = [reso_jetcalo_e, reso_jetpf_e]
 reso_jet_pftest_plot = ResolutionPlot(
-    "reso_jet_pftest_e", reso_jet_pftest_histos, Text("", (0.5, 0.5))
+    "reso_jet_pftest_e", reso_jet_pftest_histos, Text("PF-jets", (0.5, 0.5))
 )
 
 title = "particle-flow/calo/track resolution: ${}$".format(obs_e.label)
@@ -370,26 +367,23 @@ eff_pfnh_plots = EfficiencyParticleBlock(pfnh, "EFlowNeutralHadron", mom, theta,
 
 report["particle-flow"]["efficiency"] = OrderedDict()
 for p in pftracks:
-    for o in obs:
-        title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
-        report["particle-flow"]["efficiency"][title] = [
-            eff_pftrack_plots[((p, "pt"))],
-            eff_pftrack_plots[((p, "eta"))],
-        ]
+    title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
+    report["particle-flow"]["efficiency"][title] = [
+        eff_pftrack_plots[((p, "pt"))],
+        eff_pftrack_plots[((p, "eta"))],
+    ]
 for p in pfgamma:
-    for o in obs:
-        title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
-        report["particle-flow"]["efficiency"][title] = [
-            eff_pfgamma_plots[((p, "pt"))],
-            eff_pfgamma_plots[((p, "eta"))],
-        ]
+    title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
+    report["particle-flow"]["efficiency"][title] = [
+        eff_pfgamma_plots[((p, "pt"))],
+        eff_pfgamma_plots[((p, "eta"))],
+    ]
 for p in pfnh:
-    for o in obs:
-        title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
-        report["particle-flow"]["efficiency"][title] = [
-            eff_pfnh_plots[((p, "pt"))],
-            eff_pfnh_plots[((p, "eta"))],
-        ]
+    title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
+    report["particle-flow"]["efficiency"][title] = [
+        eff_pfnh_plots[((p, "pt"))],
+        eff_pfnh_plots[((p, "eta"))],
+    ]
 
 ########################
 # Electron

@@ -440,6 +440,7 @@ class EfficiencyPlot1D:
             hist_den = file.Get(hist.den_histname)
             hist_eff = hist_num.Clone()
             hist_eff.Divide(hist_den)
+            hist_eff.Sumw2()
             hist_eff.SetNameTitle(hist.eff_histname, hist.eff_histname)
             eff_file.cd()
             hist_eff.Write()
@@ -881,7 +882,9 @@ class LatexReport:
 
     def subfigure(self, figure, caption):
         """Return tex lines for subfigures."""
-        tex_line = r"\begin{subfigure}{0.45\textwidth}" + "\n" + r"\includegraphics[width=\linewidth]{"
+        tex_line = (
+            r"\begin{subfigure}{0.45\textwidth}" + "\n" + r"\includegraphics[width=\linewidth]{"
+        )
         tex_line += figure
         tex_line += r"}" + "\n" + r"\vspace*{-0.15cm}" + "\n" + r"\caption{"
 

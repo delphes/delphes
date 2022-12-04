@@ -19,8 +19,8 @@ card = "FCC/scenarios/validation_delphes_card_FCChh_{}.tcl".format(scenario)
 name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
-njobs = 4
-nevts_per_job = 1000
+njobs = 100
+nevts_per_job = 10000
 
 pmin = 0.1
 pmax = 50000.0
@@ -53,18 +53,18 @@ nbins_eta = nbins
 eta_min = etamin
 eta_max = etamax
 
-bins_etalinf = compute_bins(eta_min, eta_max, nbins_eta, 1, "lin")
+bins_etalinf = compute_bins(eta_min, eta_max, nbins_eta, 2, "lin")
 
-bins_ptlinf = compute_bins(ptlin_min, ptlin_max, nbins_ptlin, 1, "lin")
+bins_ptlinf = compute_bins(ptlin_min, ptlin_max, nbins_ptlin, 2, "lin")
 bins_ptlogf = compute_bins(ptlog_min, ptlog_max, nbins_ptlog, 2, "log")
 
-bins_jetptlinf = compute_bins(20.0, ptlin_max, nbins_ptlin, 1, "lin")
+bins_jetptlinf = compute_bins(20.0, ptlin_max, nbins_ptlin, 2, "lin")
 bins_jetptlogf = compute_bins(20.0, ptlog_max, nbins_ptlog, 2, "log")
 
-bins_elinf = compute_bins(elin_min, elin_max, nbins_elin, 1, "lin")
+bins_elinf = compute_bins(elin_min, elin_max, nbins_elin, 2, "lin")
 bins_elogf = compute_bins(elog_min, elog_max, nbins_elog, 2, "log")
 
-bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 1, "lin")
+bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 2, "lin")
 bins_jetelogf = compute_bins(20.0, elog_max, nbins_elog, 2, "log")
 
 bins_etalinc = [(0.0, 2.5), (2.5, 4.0), (4.0, 6.0)]
@@ -292,7 +292,7 @@ reso_elepf_e = ResolutionHisto(
 
 reso_ele_pftest_histos = [reso_eletrk_e, reso_elecalo_e, reso_elepf_e]
 reso_ele_pftest_plot = ResolutionPlot(
-    "reso_ele_pftest_e", reso_ele_pftest_histos, Text("", (0.5, 0.5))
+    "reso_ele_pftest_e", reso_ele_pftest_histos, Text("electrons", (0.5, 0.5))
 )
 
 reso_pitrk_e = ResolutionHisto(
@@ -324,7 +324,7 @@ reso_pipf_e = ResolutionHisto(
 
 reso_pi_pftest_histos = [reso_pitrk_e, reso_picalo_e, reso_pipf_e]
 reso_pi_pftest_plot = ResolutionPlot(
-    "reso_pi_pftest_e", reso_pi_pftest_histos, Text("", (0.5, 0.5))
+    "reso_pi_pftest_e", reso_pi_pftest_histos, Text("charged pions", (0.5, 0.5))
 )
 
 
@@ -348,7 +348,7 @@ reso_jetpf_e = ResolutionHisto(
 
 reso_jet_pftest_histos = [reso_jetcalo_e, reso_jetpf_e]
 reso_jet_pftest_plot = ResolutionPlot(
-    "reso_jet_pftest_e", reso_jet_pftest_histos, Text("", (0.5, 0.5))
+    "reso_jet_pftest_e", reso_jet_pftest_histos, Text("PF-jets", (0.5, 0.5))
 )
 
 title = "particle-flow/calo/track resolution: ${}$".format(obs_e.label)
@@ -373,26 +373,23 @@ eff_pfnh_plots = EfficiencyParticleBlock(pfnh, "EFlowNeutralHadron", mom, eta, e
 
 report["particle-flow"]["efficiency"] = OrderedDict()
 for p in pftracks:
-    for o in obs:
-        title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
-        report["particle-flow"]["efficiency"][title] = [
-            eff_pftrack_plots[((p, "pt"))],
-            eff_pftrack_plots[((p, "eta"))],
-        ]
+    title = "{} particle-flow efficiency".format(p.label)
+    report["particle-flow"]["efficiency"][title] = [
+        eff_pftrack_plots[((p, "pt"))],
+        eff_pftrack_plots[((p, "eta"))],
+    ]
 for p in pfgamma:
-    for o in obs:
-        title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
-        report["particle-flow"]["efficiency"][title] = [
-            eff_pfgamma_plots[((p, "pt"))],
-            eff_pfgamma_plots[((p, "eta"))],
-        ]
+    title = "{} particle-flow efficiency".format(p.label)
+    report["particle-flow"]["efficiency"][title] = [
+        eff_pfgamma_plots[((p, "pt"))],
+        eff_pfgamma_plots[((p, "eta"))],
+    ]
 for p in pfnh:
-    for o in obs:
-        title = "{} particle-flow efficiency: ${}$".format(p.label, o.label)
-        report["particle-flow"]["efficiency"][title] = [
-            eff_pfnh_plots[((p, "pt"))],
-            eff_pfnh_plots[((p, "eta"))],
-        ]
+    title = "{} particle-flow efficiency".format(p.label)
+    report["particle-flow"]["efficiency"][title] = [
+        eff_pfnh_plots[((p, "pt"))],
+        eff_pfnh_plots[((p, "eta"))],
+    ]
 
 ########################
 # Electron
