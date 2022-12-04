@@ -144,7 +144,7 @@ report["tracks"] = OrderedDict()
 # resolution
 mom = (ptlogf, ptlogc)
 eta = (etalinf, etalinc)
-obs = [obs_p, obs_d0, obs_dz, obs_phi, obs_theta]
+obs = [obs_p]
 
 tracks = [pion, muon]
 reso_track_plots = ResolutionBlock(tracks, "Track", obs, mom, eta, reso_plots)
