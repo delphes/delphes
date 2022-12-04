@@ -439,8 +439,12 @@ class EfficiencyPlot1D:
             hist_num = file.Get(hist.num_histname)
             hist_den = file.Get(hist.den_histname)
             hist_eff = hist_num.Clone()
-            hist_eff.Divide(hist_den)
+            # hist_num.Sumw2()
+            # hist_den.Sumw2()
+
             hist_eff.Sumw2()
+            hist_eff.Divide(hist_den)
+            # hist_eff.Sumw2()
             hist_eff.SetNameTitle(hist.eff_histname, hist.eff_histname)
             eff_file.cd()
             hist_eff.Write()
