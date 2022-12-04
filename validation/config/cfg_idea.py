@@ -19,15 +19,15 @@ name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
 njobs = 100
-nevts_per_job = 10000
+nevts_per_job = 25000
 
 #
 pmin = 0.1
-pmax = 100.0
+pmax = 200.0
 log = True
 etamin = -3.0
 etamax = 3.0
-ecm = 200.0
+ecm = 400.0
 
 # plotting parameters
 nbins = 100
@@ -51,7 +51,7 @@ elog_max = pmax
 
 nbins_theta = nbins
 theta_min = 0.1
-theta_max = 3.04
+theta_max = 3.14
 
 bins_thetalinf = compute_bins(theta_min, theta_max, nbins_theta, 2, "lin")
 
