@@ -20,7 +20,7 @@ name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
 njobs = 100
-nevts_per_job = 10000
+nevts_per_job = 25000
 
 pmin = 0.1
 pmax = 50000.0
@@ -30,7 +30,7 @@ etamax = 6.0
 ecm = 100000.0
 
 ## plotting parameters
-nbins = 50
+nbins = 100
 
 nbins_ptlin = nbins
 ptlin_min = 0.0
