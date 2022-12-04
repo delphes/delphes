@@ -48,10 +48,10 @@ def main():
         default="longlunch",
     )
 
-    collect = subparsers.add_parser(
-        "collect", help="collect jobs and plot"
+    collect = subparsers.add_parser("collect", help="collect jobs and plot")
+    collect.add_argument(
+        "--no_hadd", help="collect without hadding", action="store_true", default=False
     )
-
 
     args = parser.parse_args()
 
@@ -214,26 +214,29 @@ def main():
             os.system("condor_submit condor_validation.sub")
 
     ## -------- collect jobs
-    #if args.collect:
-    if args.command == "collect":   
+    # if args.collect:
+    if args.command == "collect":
 
-        ## first hadd files
-        pool = mp.Pool()
-        print("")
-        print(" collecting jobs ... ")
-        print("")
+        if not args.no_hadd:
+            ## first hadd files
+            pool = mp.Pool()
+            print("")
+            print(" collecting jobs ... ")
+            print("")
 
-        for p in particles:
+            for p in particles:
 
-            jobs_outdir = "{}/particle_gun_{}".format(sample_dir, p.pid)
-            os.chdir("{}".format(jobs_outdir))
-            cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(jobs_outdir, p.pid, p.pid)
-            os.chdir(homedir)
-            pool.apply_async(run_cmd, args=(cmd_hadd,))
+                jobs_outdir = "{}/particle_gun_{}".format(sample_dir, p.pid)
+                os.chdir("{}".format(jobs_outdir))
+                cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(
+                    jobs_outdir, p.pid, p.pid
+                )
+                os.chdir(homedir)
+                pool.apply_async(run_cmd, args=(cmd_hadd,))
 
-        ## run hadd in multithreading mode
-        pool.close()
-        pool.join()
+            ## run hadd in multithreading mode
+            pool.close()
+            pool.join()
 
         print("")
         print(" producing plots ... ")
@@ -250,7 +253,7 @@ def main():
         name_path_dict = manager.dict()
 
         for plot in plots:
-            pool.apply(
+            pool.apply_async(
                 run_plot,
                 args=(
                     plot,
