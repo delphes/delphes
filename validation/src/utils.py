@@ -42,6 +42,9 @@ class Observable:
         self.xmax = xmax
         self.opt = opt  # abs (reco/gen) or rel (reco-gen)
         self.reso_label = "$\sigma({})$ {}".format(self.label, self.unit)
+        if opt == "mean":
+            self.reso_label = "$< {} >$ {}".format(self.label, self.unit)
+
         if opt == "rel":
             self.reso_label = "$\sigma({})/{}$".format(self.label, self.label)
         self.eff_label = "${}$ {}".format(self.label, self.unit)
@@ -143,10 +146,6 @@ class ResolutionHisto:
             funcname_reco = "get_reco{}".format(self.observable.varname)
             val_gen = globals()[funcname_gen](gen)
 
-            # if self.binning.obs.varname != "Theta": continue
-            # if self.observable.name != "d0": continue
-            # if self.observable.varname != "Theta": continue
-
             val_sliceX = globals()[funcname_sliceX](gen)
             for binX in self.binning.bins:
                 if val_sliceX > binX[0] and val_sliceX <= binX[1]:
@@ -160,7 +159,7 @@ class ResolutionHisto:
                                 # print(val_reco, val_gen)
                                 if self.observable.opt == "rel":
                                     self.histograms[binX].Fill(val_reco / val_gen)
-                                elif self.observable.opt == "abs":
+                                else:
                                     self.histograms[binX].Fill(val_reco - val_gen)
 
     def write(self):
@@ -228,24 +227,40 @@ class ResolutionPlot:
                 ## extract resolution
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
                 # sigma = getEffSigma2(hist)
-                sigma_err = hist.GetRMSError()
-                # sigma = getFWHM(hist) / 2.35
                 sigma = hist.GetRMS()
+                sigma_err = hist.GetRMSError()
+                mean = hist.GetMean()
+                mean_err = hist.GetMeanError()
 
-                if h.observable.opt == "rel":
+                value = 0.0
+                value_err = 0.0
+
+                ### plot raw sigma from residual plot
+                if h.observable.opt == "abs":
+                    value = sigma
+                    value_err = sigma_err
+
+                ### plot sigma corrected by the mode (relative resolution)
+                elif h.observable.opt == "rel":
                     if mode > 0:
-                        sigma = sigma / mode
+                        value = sigma / mode
+                        value_err = sigma_err / mode
                     else:
                         # print("did not find histogram maximum in: {}".format(h.histogram_names[bin]))
-                        mode = 1
+                        value = 1
+                        value_err = 0.0
+
+                ### plot absolute scale
+                elif h.observable.opt == "mean":
+                    value = mean
+                    value_err = mean_err
 
                 debug_str = "{} {}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
-                    h.histogram_names[bin], h.observable.opt, x, mode, sigma
+                    h.histogram_names[bin], h.observable.opt, x, value, value_err
                 )
-                # print(debug_str)
 
-                final_histogram.SetBinContent(i, sigma)
-                final_histogram.SetBinError(i, sigma_err)
+                final_histogram.SetBinContent(i, value)
+                final_histogram.SetBinError(i, value_err)
                 i += 1
 
             reso_file.cd()
@@ -886,9 +901,7 @@ class LatexReport:
 
     def subfigure(self, figure, caption):
         """Return tex lines for subfigures."""
-        tex_line = (
-            r"\begin{subfigure}{0.45\textwidth}" + "\n" + r"\includegraphics[width=\linewidth]{"
-        )
+        tex_line = r"\begin{subfigure}{0.45\textwidth}" + "\n" + r"\includegraphics[width=\linewidth]{"
         tex_line += figure
         tex_line += r"}" + "\n" + r"\vspace*{-0.15cm}" + "\n" + r"\caption{"
 
@@ -1124,6 +1137,19 @@ def get_genTrackParam(part):
     return Par
 
 
+# ________________________________________________________________________________
+def getC(Q, pt):
+    from src.init import Bz
+
+    a = -Q * Bz * 0.2998  # Units are Tesla, GeV and meters
+    C = 0
+    if a > 1.0e-06:
+        # print(Q, Bz, a)
+        # Half curvature
+        C = a / (2 * pt) * 1e03  # in mm^-1
+    return C
+
+
 # _______________________________________________________________________________
 """ returns arccotan for x in [0;PI] """
 
@@ -1232,10 +1258,7 @@ def get_recoTheta(part):
 
 
 def get_genP(part):
-    if hasattr(part, "P"):
-        return part.P
-    else:
-        return part.P4().P()
+    return part.P4().P()
 
 
 # _______________________________________________________________________________
@@ -1244,6 +1267,22 @@ def get_genP(part):
 
 def get_recoP(part):
     return part.P
+
+
+# _______________________________________________________________________________
+""" returns gen C """
+
+
+def get_genC(part):
+    return getC(part.Charge, part.PT)
+
+
+# _______________________________________________________________________________
+""" returns reco C """
+
+
+def get_recoC(part):
+    return returnC(part.Charge, part.PT)
 
 
 # _______________________________________________________________________________
@@ -1298,3 +1337,129 @@ def get_genEta(part):
 
 def get_recoEta(part):
     return part.Eta
+
+
+# ________________________________________________________________________________
+""" compute correlation element i, j  """
+
+
+def get_corr(part, i, j):
+
+    cov_xy = part.CovarianceMatrix()(i, j)
+    sigma_x = math.sqrt(part.CovarianceMatrix()(i, i))
+    sigma_y = math.sqrt(part.CovarianceMatrix()(j, j))
+    return cov_xy / (sigma_x * sigma_y)
+
+
+# ________________________________________________________________________________
+""" returns corr matrix:  D0, Pḧi, C, DZ, CtgTheta """
+
+
+def get_recoCorrD0Phi(part):
+    return get_corr(part, 0, 1)
+
+
+def get_genCorrD0Phi(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrD0C(part):
+    return get_corr(part, 0, 2)
+
+
+def get_genCorrD0C(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrD0DZ(part):
+    return get_corr(part, 0, 3)
+
+
+def get_genCorrD0DZ(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrD0CtgTheta(part):
+    return get_corr(part, 0, 4)
+
+
+def get_genCorrD0CtgTheta(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrPhiC(part):
+    return get_corr(part, 1, 2)
+
+
+def get_genCorrPhiC(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrPhiDZ(part):
+    return get_corr(part, 1, 3)
+
+
+def get_genCorrPhiDZ(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrPhiCtgTheta(part):
+    return get_corr(part, 1, 4)
+
+
+def get_genCorrPhiCtgTheta(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrCDZ(part):
+    return get_corr(part, 2, 3)
+
+
+def get_genCorrCDZ(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrCCtgTheta(part):
+    return get_corr(part, 2, 4)
+
+
+def get_genCorrCCtgTheta(part):
+    return 0.0
+
+
+# ________________________________________________________________________________
+
+
+def get_recoCorrDZCtgTheta(part):
+    return get_corr(part, 3, 4)
+
+
+def get_genCorrDZCtgTheta(part):
+    return 0.0
+
+
+# ________________________________________________________________________________

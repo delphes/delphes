@@ -18,15 +18,15 @@ card = "validation_delphes_card_IDEA.tcl"
 name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
-njobs = 5
-nevts_per_job = 5000
+njobs = 8
+nevts_per_job = 10000
 
 pmin = 0.1
-pmax = 100.0
+pmax = 200.0
 log = True
 etamin = -3.0
 etamax = 3.0
-ecm = 200.0
+ecm = 400.0
 
 ## plotting parameters
 nbins = 50
@@ -50,7 +50,7 @@ elog_max = pmax
 
 nbins_theta = nbins
 theta_min = 0.1
-theta_max = 3.04
+theta_max = 3.14
 
 nbins_eta = nbins
 eta_min = -3.0
@@ -60,16 +60,16 @@ eta_max = 3.0
 bins_thetalinf = compute_bins(theta_min, theta_max, nbins_theta, 2, "lin")
 bins_etalinf = compute_bins(eta_min, eta_max, nbins_eta, 2, "lin")
 
-bins_plinf = compute_bins(plin_min, plin_max, nbins_plin, 1, "lin")
+bins_plinf = compute_bins(plin_min, plin_max, nbins_plin, 2, "lin")
 bins_plogf = compute_bins(plog_min, plog_max, nbins_plog, 2, "log")
 
-bins_jetplinf = compute_bins(20.0, plin_max, nbins_plin, 1, "lin")
+bins_jetplinf = compute_bins(20.0, plin_max, nbins_plin, 2, "lin")
 bins_jetplogf = compute_bins(20.0, plog_max, nbins_plog, 2, "log")
 
-bins_elinf = compute_bins(elin_min, elin_max, nbins_elin, 1, "lin")
+bins_elinf = compute_bins(elin_min, elin_max, nbins_elin, 2, "lin")
 bins_elogf = compute_bins(elog_min, elog_max, nbins_elog, 2, "log")
 
-bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 1, "lin")
+bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 2, "lin")
 bins_jetelogf = compute_bins(20.0, elog_max, nbins_elog, 2, "log")
 
 bins_thetalinc = [(0.8, 0.9), (1.4, 1.74)]
@@ -102,6 +102,24 @@ obs_phi = Observable("phi", "Phi", "\phi", " [rad]", 100, -0.01, 0.01, "abs")
 obs_theta = Observable("theta", "Theta", "\\theta", "[rad]", 100, -0.01, 0.01, "abs")
 obs_eta = Observable("eta", "Eta", "\eta", "", 100, -0.01, 0.01, "abs")
 
+## covariance matrix
+obs_corr_d0phi = Observable("corr_d0phi", "CorrD0Phi", "\\rho(d_0, \phi)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0c = Observable("corr_d0c", "CorrD0C", "\\rho(d_0, C)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0dz = Observable("corr_d0dz", "CorrD0DZ", "\\rho(d_0, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0ctgtheta = Observable(
+    "corr_d0ctgtheta", "CorrD0CtgTheta", "\\rho(d_0, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_phic = Observable("corr_phic", "CorrPhiC", "\\rho(\phi, C)", "", 100, -1.0, 1.0, "mean")
+obs_corr_phidz = Observable("corr_phidz", "CorrPhiDZ", "\\rho(\phi, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_phictgtheta = Observable(
+    "corr_phictgtheta", "CorrPhiCtgTheta", "\\rho(\phi, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_cdz = Observable("corr_cdz", "CorrCDZ", "\\rho(C, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_cctgtheta = Observable("corr_cctgtheta", "CorrCCtgTheta", "\\rho(C, ctg(\\theta))", "", 100, -1.0, 1.0, "mean")
+obs_corr_dzctgtheta = Observable(
+    "corr_dzctgtheta", "CorrDZCtgTheta", "\\rho(d_z, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+)
+
 # particles
 pion = Particle("pi", "$\pi^{\pm}$", 211)
 electron = Particle("ele", "$e^{\pm}$", 11)
@@ -115,7 +133,6 @@ strange = Particle("strange", "s", 3)
 charm = Particle("charm", "c", 4)
 bottom = Particle("bottom", "b", 5)
 gluon = Particle("gluon", "g", 21)
-
 
 plogf = Slices1D(obs_p, bins_plogf, "log")
 plinf = Slices1D(obs_p, bins_plinf, "linear")
@@ -132,23 +149,32 @@ eff_plots = []  ## all eff plots (for step1)
 eff_tag_plots = []  ## all eff plots (for step1)
 report = OrderedDict()
 
-
 ########################
 # Tracking
 ########################
-
 
 report["tracks"] = OrderedDict()
 
 # resolution
 mom = (plinf, plogc)
 theta = (thetalinf, thetalinc)
-# theta = (etalinf, etalinc)
-obs = [obs_p, obs_d0, obs_dz, obs_phi, obs_theta]
 
-# tracks = [pion, muon]
 tracks = [pion, electron, muon]
-#tracks = [pion]
+
+## covariance matrix
+obs = [
+
+    obs_corr_d0phi,
+    obs_corr_d0c,
+    obs_corr_d0dz,
+    obs_corr_d0ctgtheta,
+    obs_corr_phic,
+    obs_corr_phidz,
+    obs_corr_phictgtheta,
+    obs_corr_cdz,
+    obs_corr_cctgtheta,
+    obs_corr_dzctgtheta,
+]
 reso_track_plots = ResolutionBlock(tracks, "Track", obs, mom, theta, reso_plots)
 
 report["tracks"]["resolution"] = OrderedDict()

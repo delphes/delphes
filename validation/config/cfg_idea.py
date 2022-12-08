@@ -53,18 +53,22 @@ nbins_theta = nbins
 theta_min = 0.1
 theta_max = 3.14
 
+nbins_eta = nbins
+eta_min = -3.0
+eta_max = 3.0
+
 bins_thetalinf = compute_bins(theta_min, theta_max, nbins_theta, 2, "lin")
 
 bins_plinf = compute_bins(plin_min, plin_max, nbins_plin, 2, "lin")
 bins_plogf = compute_bins(plog_min, plog_max, nbins_plog, 2, "log")
 
-bins_jetplinf = compute_bins(20.0, plin_max, nbins_plin, 1, "lin")
+bins_jetplinf = compute_bins(20.0, plin_max, nbins_plin, 2, "lin")
 bins_jetplogf = compute_bins(20.0, plog_max, nbins_plog, 2, "log")
 
-bins_elinf = compute_bins(elin_min, elin_max, nbins_elin, 1, "lin")
+bins_elinf = compute_bins(elin_min, elin_max, nbins_elin, 2, "lin")
 bins_elogf = compute_bins(elog_min, elog_max, nbins_elog, 2, "log")
 
-bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 1, "lin")
+bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 2, "lin")
 bins_jetelogf = compute_bins(20.0, elog_max, nbins_elog, 2, "log")
 
 bins_thetalinc = [(1.4, 1.8), (0.6, 1.0), (0.1, 0.5)]
@@ -92,6 +96,25 @@ obs_d0 = Observable("d0", "D0", "d_0", "[mm]", 500, -0.2, 0.2, "abs")
 obs_dz = Observable("dz", "DZ", "d_z", "[mm]", 500, -0.2, 0.2, "abs")
 obs_phi = Observable("phi", "Phi", "\phi", " [rad]", 500, -0.001, 0.001, "abs")
 obs_theta = Observable("theta", "Theta", "\\theta", "[rad]", 500, -0.001, 0.001, "abs")
+
+## covariance matrix
+obs_corr_d0phi = Observable("corr_d0phi", "CorrD0Phi", "\\rho(d_0, \phi)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0c = Observable("corr_d0c", "CorrD0C", "\\rho(d_0, C)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0dz = Observable("corr_d0dz", "CorrD0DZ", "\\rho(d_0, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0ctgtheta = Observable(
+    "corr_d0ctgtheta", "CorrD0CtgTheta", "\\rho(d_0, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_phic = Observable("corr_phic", "CorrPhiC", "\\rho(\phi, C)", "", 100, -1.0, 1.0, "mean")
+obs_corr_phidz = Observable("corr_phidz", "CorrPhiDZ", "\\rho(\phi, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_phictgtheta = Observable(
+    "corr_phictgtheta", "CorrPhiCtgTheta", "\\rho(\phi, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_cdz = Observable("corr_cdz", "CorrCDZ", "\\rho(C, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_cctgtheta = Observable("corr_cctgtheta", "CorrCCtgTheta", "\\rho(C, ctg(\\theta))", "", 100, -1.0, 1.0, "mean")
+obs_corr_dzctgtheta = Observable(
+    "corr_dzctgtheta", "CorrDZCtgTheta", "\\rho(d_z, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+)
+
 
 # particles
 pion = Particle("pi", "$\pi^{\pm}$", 211)
@@ -137,7 +160,24 @@ report["tracks"] = OrderedDict()
 # resolution
 mom = (plogf, plogc)
 theta = (thetalinf, thetalinc)
-obs = [obs_p, obs_d0, obs_dz, obs_phi, obs_theta]
+
+obs = [
+    obs_p,
+    obs_d0,
+    obs_dz,
+    obs_phi,
+    obs_theta,
+    obs_corr_d0phi,
+    obs_corr_d0c,
+    obs_corr_d0dz,
+    obs_corr_d0ctgtheta,
+    obs_corr_phic,
+    obs_corr_phidz,
+    obs_corr_phictgtheta,
+    obs_corr_cdz,
+    obs_corr_cctgtheta,
+    obs_corr_dzctgtheta,
+]
 
 tracks = [pion, muon, electron]
 # tracks = [pion]
@@ -263,7 +303,7 @@ reso_eletrk_e = ResolutionHisto(
     obs_e,
     elogf,
     {obs_theta: (0.73, 1.57)},
-    "track, 0 < $\theta$ < 1.57",
+    "track, 0 < $\\theta$ < 1.57",
 )
 
 reso_elecalo_e = ResolutionHisto(
@@ -272,7 +312,7 @@ reso_elecalo_e = ResolutionHisto(
     obs_e,
     elogf,
     {obs_theta: (0.73, 1.57)},
-    "calo, 0 < $\theta$ < 1.57",
+    "calo, 0 < $\\theta$ < 1.57",
 )
 
 reso_elepf_e = ResolutionHisto(
@@ -281,13 +321,11 @@ reso_elepf_e = ResolutionHisto(
     obs_e,
     elogf,
     {obs_theta: (0.73, 1.57)},
-    "particle-flow, 0 < $\theta$ < 1.57",
+    "particle-flow, 0 < $\\theta$ < 1.57",
 )
 
 reso_ele_pftest_histos = [reso_eletrk_e, reso_elecalo_e, reso_elepf_e]
-reso_ele_pftest_plot = ResolutionPlot(
-    "reso_ele_pftest_e", reso_ele_pftest_histos, Text("electrons", (0.5, 0.5))
-)
+reso_ele_pftest_plot = ResolutionPlot("reso_ele_pftest_e", reso_ele_pftest_histos, Text("electrons", (0.5, 0.5)))
 
 reso_pitrk_e = ResolutionHisto(
     pion,
@@ -295,7 +333,7 @@ reso_pitrk_e = ResolutionHisto(
     obs_e,
     elogf,
     {obs_theta: (0.73, 1.57)},
-    "track, 0.73 < $\theta$ < 1.57",
+    "track, 0.73 < $\\theta$ < 1.57",
 )
 
 reso_picalo_e = ResolutionHisto(
@@ -304,7 +342,7 @@ reso_picalo_e = ResolutionHisto(
     obs_e,
     elogf,
     {obs_theta: (0.73, 1.57)},
-    "calo, 0.73 < $\theta$ < 1.57",
+    "calo, 0.73 < $\\theta$ < 1.57",
 )
 
 reso_pipf_e = ResolutionHisto(
@@ -313,13 +351,11 @@ reso_pipf_e = ResolutionHisto(
     obs_e,
     elogf,
     {obs_theta: (0.73, 1.57)},
-    "particle-flow, 0.73 < $\theta$ < 1.57",
+    "particle-flow, 0.73 < $\\theta$ < 1.57",
 )
 
 reso_pi_pftest_histos = [reso_pitrk_e, reso_picalo_e, reso_pipf_e]
-reso_pi_pftest_plot = ResolutionPlot(
-    "reso_pi_pftest_e", reso_pi_pftest_histos, Text("charged pions", (0.5, 0.5))
-)
+reso_pi_pftest_plot = ResolutionPlot("reso_pi_pftest_e", reso_pi_pftest_histos, Text("charged pions", (0.5, 0.5)))
 
 
 reso_jetcalo_e = ResolutionHisto(
@@ -328,7 +364,7 @@ reso_jetcalo_e = ResolutionHisto(
     obs_e,
     ejetlogf,
     {obs_theta: (0.73, 1.57)},
-    "calo, 0.73 < $\theta$ < 1.57",
+    "calo, 0.73 < $\\theta$ < 1.57",
 )
 
 reso_jetpf_e = ResolutionHisto(
@@ -341,9 +377,7 @@ reso_jetpf_e = ResolutionHisto(
 )
 
 reso_jet_pftest_histos = [reso_jetcalo_e, reso_jetpf_e]
-reso_jet_pftest_plot = ResolutionPlot(
-    "reso_jet_pftest_e", reso_jet_pftest_histos, Text("PF-jets", (0.5, 0.5))
-)
+reso_jet_pftest_plot = ResolutionPlot("reso_jet_pftest_e", reso_jet_pftest_histos, Text("PF-jets", (0.5, 0.5)))
 
 title = "particle-flow/calo/track resolution: ${}$".format(obs_e.label)
 report["particle-flow"]["resolution"][title] = [
@@ -465,17 +499,11 @@ gen_cond_tautag[tau] = "p.TauFlavor == 15"
 gen_cond_tautag[up] = "p.TauFlavor == 0"
 
 
-eff_btag_plots = EfficiencyTaggingBlock(
-    "Jet", "b-tag", mom, theta, gen_cond_btag, [0], "BTag", eff_tag_plots
-)
+eff_btag_plots = EfficiencyTaggingBlock("Jet", "b-tag", mom, theta, gen_cond_btag, [0], "BTag", eff_tag_plots)
 
-eff_ctag_plots = EfficiencyTaggingBlock(
-    "Jet", "c-tag", mom, theta, gen_cond_ctag, [1], "BTag", eff_tag_plots
-)
+eff_ctag_plots = EfficiencyTaggingBlock("Jet", "c-tag", mom, theta, gen_cond_ctag, [1], "BTag", eff_tag_plots)
 
-eff_tautag_plots = EfficiencyTaggingBlock(
-    "Jet", "tau-tag", mom, theta, gen_cond_tautag, [0], "TauTag", eff_tag_plots
-)
+eff_tautag_plots = EfficiencyTaggingBlock("Jet", "tau-tag", mom, theta, gen_cond_tautag, [0], "TauTag", eff_tag_plots)
 
 eff_tag_dict = dict()
 eff_tag_dict["b-tag"] = eff_btag_plots
