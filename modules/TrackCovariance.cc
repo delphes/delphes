@@ -38,6 +38,7 @@
 #include "TrackCovariance/SolGeom.h"
 #include "TrackCovariance/SolGridCov.h"
 #include "TrackCovariance/ObsTrk.h"
+#include "classes/DelphesFormula.h"
 
 #include "TLorentzVector.h"
 #include "TMath.h"
@@ -51,11 +52,18 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TrackCovariance::TrackCovariance() :
-  fGeometry(0), fCovariance(0), fAcx(0), fItInputArray(0)
+  fGeometry(0), fCovariance(0), fAcx(0), fItInputArray(0),
+	fElectronScaleFactor(0), fMuonScaleFactor(0), fChargedHadronScaleFactor(0)
 {
   fGeometry = new SolGeom();
   fCovariance = new SolGridCov();
+	fElectronScaleFactor = new DelphesFormula;
+	fMuonScaleFactor = new DelphesFormula;
+	fChargedHadronScaleFactor = new DelphesFormula;
 }
+
+
+
 
 //------------------------------------------------------------------------------
 
@@ -63,6 +71,9 @@ TrackCovariance::~TrackCovariance()
 {
   if(fGeometry) delete fGeometry;
   if(fCovariance) delete fCovariance;
+  if(fElectronScaleFactor) delete fElectronScaleFactor;
+  if(fMuonScaleFactor) delete fMuonScaleFactor;
+  if(fChargedHadronScaleFactor) delete fChargedHadronScaleFactor;
 }
 
 //------------------------------------------------------------------------------
@@ -74,9 +85,9 @@ void TrackCovariance::Init()
   fNMinHits = GetInt("NMinHits", 6);
 
   // scale factors to apply to resolutions
-  fElectronScaleFactor = GetDouble("ElectronScaleFactor", 1.0);
-  fMuonScaleFactor = GetDouble("fMuonScaleFactor", 1.0);
-  fChargedHadronScaleFactor = GetDouble("fChargedHadronScaleFactor", 1.0);
+  fElectronScaleFactor->Compile(GetString("ElectronScaleFactor", "1.0"));
+  fMuonScaleFactor->Compile(GetString("MuonScaleFactor", "1.0"));
+  fChargedHadronScaleFactor->Compile(GetString("ChargedHadronScaleFactor", "1.0"));
 
   // load geometry
   fCovariance->Calc(fGeometry);
@@ -135,19 +146,20 @@ void TrackCovariance::Process()
 
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
 
-    // apply rescaling factors to resolution
+		// apply rescaling factors to resolution
     if (TMath::Abs(candidate->PID) == 11)
 		{
-      track.SetScale(fElectronScaleFactor);
+			track.SetScale(fElectronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
 		}
     else if (TMath::Abs(candidate->PID) == 13)
 		{
-      track.SetScale(fMuonScaleFactor);
+      track.SetScale(fMuonScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
 		}
     else
 		{
-      track.SetScale(fChargedHadronScaleFactor);
+      track.SetScale(fChargedHadronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
+
 
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
