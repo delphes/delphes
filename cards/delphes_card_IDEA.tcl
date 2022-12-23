@@ -226,14 +226,9 @@ module TrackCovariance TrackSmearing {
     set Bz $B
 
     ## scale factors
-
-    set ElectronScaleFactor  {
-        (abs(eta) < 0.673)                         * (1.5) +
-        (abs(eta) >= 0.673)                        * (2.5)
-    }
+    set ElectronScaleFactor  {1.25}
 
 
-    ## uses https://raw.githubusercontent.com/selvaggi/FastTrackCovariance/master/GeoIDEA_BASE.txt
     set DetectorGeometry {
 
       # Layer type 1 = R (barrel) or 2 = z (forward/backward)
