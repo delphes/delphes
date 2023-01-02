@@ -30,7 +30,6 @@ set DCHRMAX 2.02
 set ExecutionPath {
 
   TruthVertexFinder
-  UnstablePropagator
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -99,28 +98,6 @@ module TruthVertexFinder TruthVertexFinder {
   set InputArray Delphes/stableParticles
   set VertexOutputArray vertices
 }
-
-###########################################
-# Propagate unstable particles in cylinder
-###########################################
-
-module UnstablePropagator UnstablePropagator {
-  set InputArray Delphes/allParticles
-
-  # inner radius of the solenoid, in m
-  set Radius $R
-
-  # half-length: z of the solenoid, in m
-  set HalfLength $HL
-
-  # minimum flight distance requested to propagate
-  # unstable charged particle in B field (in m)
-  set Lmin 1.0E-06
-
-  # magnetic field, in T
-  set Bz $B
-}
-
 
 
 #################################
