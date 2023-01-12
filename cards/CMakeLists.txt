@@ -1,8 +1,11 @@
 file(GLOB confDir *.tcl)
-file(GLOB confFccDir FCC/*.tcl)
-file(GLOB confCmsPhase2Dir CMS_PhaseII/*.tcl)
-
 # copy *.tcl files into cards
 install(FILES ${confDir} DESTINATION cards)
-install(FILES ${confFccDir} DESTINATION cards/FCC)
-install(FILES ${confCmsPhase2Dir} DESTINATION cards/CMS_PhaseII)
+
+# Install FCC cards into subfolder, including scenarios subdirectory
+install(DIRECTORY FCC DESTINATION cards
+  FILES_MATCHING PATTERN "*.tcl")
+
+# Install CMS_PhaseII cards into subfolder
+install(DIRECTORY CMS_PhaseII DESTINATION cards
+  FILES_MATCHING PATTERN "*.tcl")
