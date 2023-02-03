@@ -414,7 +414,7 @@ module DualReadoutCalorimeter Calorimeter {
 #################
 
 module PdgCodeFilter ElectronFilter {
-  set InputArray Calorimeter/eflowTracks
+  set InputArray EFlowTrackMerger/eflowTracks
   set OutputArray electrons
   set Invert true
   add PdgCode {11}
@@ -427,7 +427,7 @@ module PdgCodeFilter ElectronFilter {
 #################
 
 module PdgCodeFilter MuonFilter {
-  set InputArray Calorimeter/eflowTracks
+  set InputArray EFlowTrackMerger/eflowTracks
   set OutputArray muons
   set Invert true
   add PdgCode {13}
