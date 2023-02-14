@@ -227,7 +227,9 @@ class ResolutionPlot:
                 ## extract resolution
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
                 # sigma = getEffSigma2(hist)
-                sigma = hist.GetRMS()
+                # sigma = hist.GetRMS()
+
+                sigma = getSigmaGaus(hist, 2.0)
                 sigma_err = hist.GetRMSError()
                 mean = hist.GetMean()
                 mean_err = hist.GetMeanError()
@@ -243,8 +245,8 @@ class ResolutionPlot:
                 ### plot sigma corrected by the mode (relative resolution)
                 elif h.observable.opt == "rel":
                     if mode > 0:
-                        value = sigma / mode
-                        value_err = sigma_err / mode
+                        value = sigma
+                        value_err = sigma_err
                     else:
                         # print("did not find histogram maximum in: {}".format(h.histogram_names[bin]))
                         value = 1
@@ -1006,6 +1008,25 @@ def getEffSigma2(theHist):
             integrals[delta_x] = abs(0.683 - (theHist.Integral(i, j) / thesum))
 
     return min(integrals, key=integrals.get)
+
+
+# _______________________________________________________________________________
+""" compute minimal interval that contains 68% area under curve """
+
+
+def getSigmaGaus(histo, sigma_range=2):
+
+    ## extract place where maximum is
+    x0 = histo.GetXaxis().GetBinCenter(histo.GetMaximumBin())
+    d = histo.GetRMS()
+
+    # now perform gaussian fit in [x_max_sigm, x_max_sigp]
+    f = ROOT.TF1("gaus", "gaus", 0.0, 6.0)
+
+    s = sigma_range
+    histo.Fit("gaus", "Q", "", x0 - s * d, x0 + s * d)
+
+    return f.GetParameter(2)
 
 
 # _______________________________________________________________________________
