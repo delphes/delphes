@@ -14,6 +14,11 @@ import matplotlib
 
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["axes.labelweight"] = "bold"
+
+from ROOT import gROOT
+
+gROOT.SetBatch(True)
+
 # plt.gcf().subplots_adjust(bottom=0.15)
 
 # _______________________________________________________________________________
@@ -229,7 +234,7 @@ class ResolutionPlot:
                 # sigma = getEffSigma2(hist)
                 # sigma = hist.GetRMS()
 
-                sigma = getSigmaGaus(hist, 2.0)
+                sigma = getSigmaGaus(hist, 1.0)
                 sigma_err = hist.GetRMSError()
                 mean = hist.GetMean()
                 mean_err = hist.GetMeanError()
@@ -289,6 +294,8 @@ class ResolutionPlot:
 
         if "log" in self.res_histos[0].binning.scale:
             plot_reso.set_xscale("log")
+
+        plot_reso.set_yscale("log")
 
         plot_reso.add_text(self.text)
         plot_reso.set_xmin(self.res_histos[0].binning.bins[0][0])
@@ -1021,7 +1028,7 @@ def getSigmaGaus(histo, sigma_range=2):
     d = histo.GetRMS()
 
     # now perform gaussian fit in [x_max_sigm, x_max_sigp]
-    f = ROOT.TF1("gaus", "gaus", 0.0, 6.0)
+    f = ROOT.TF1("gaus", "gaus", 0.0, 2.0)
 
     s = sigma_range
     histo.Fit("gaus", "Q", "", x0 - s * d, x0 + s * d)

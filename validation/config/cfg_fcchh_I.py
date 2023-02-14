@@ -291,9 +291,7 @@ reso_elepf_e = ResolutionHisto(
 )
 
 reso_ele_pftest_histos = [reso_eletrk_e, reso_elecalo_e, reso_elepf_e]
-reso_ele_pftest_plot = ResolutionPlot(
-    "reso_ele_pftest_e", reso_ele_pftest_histos, Text("electrons", (0.5, 0.5))
-)
+reso_ele_pftest_plot = ResolutionPlot("reso_ele_pftest_e", reso_ele_pftest_histos, Text("electrons", (0.5, 0.5)))
 
 reso_pitrk_e = ResolutionHisto(
     pion,
@@ -323,13 +321,11 @@ reso_pipf_e = ResolutionHisto(
 )
 
 reso_pi_pftest_histos = [reso_pitrk_e, reso_picalo_e, reso_pipf_e]
-reso_pi_pftest_plot = ResolutionPlot(
-    "reso_pi_pftest_e", reso_pi_pftest_histos, Text("charged pions", (0.5, 0.5))
-)
+reso_pi_pftest_plot = ResolutionPlot("reso_pi_pftest_e", reso_pi_pftest_histos, Text("charged pions", (0.5, 0.5)))
 
 
 reso_jetcalo_e = ResolutionHisto(
-    gluon,
+    up,
     "CaloJet",
     obs_e,
     ejetlogf,
@@ -338,7 +334,7 @@ reso_jetcalo_e = ResolutionHisto(
 )
 
 reso_jetpf_e = ResolutionHisto(
-    gluon,
+    up,
     "PFJet",
     obs_e,
     ejetlogf,
@@ -347,9 +343,7 @@ reso_jetpf_e = ResolutionHisto(
 )
 
 reso_jet_pftest_histos = [reso_jetcalo_e, reso_jetpf_e]
-reso_jet_pftest_plot = ResolutionPlot(
-    "reso_jet_pftest_e", reso_jet_pftest_histos, Text("PF-jets", (0.5, 0.5))
-)
+reso_jet_pftest_plot = ResolutionPlot("reso_jet_pftest_e", reso_jet_pftest_histos, Text("PF-jets", (0.5, 0.5)))
 
 title = "particle-flow/calo/track resolution: ${}$".format(obs_e.label)
 report["particle-flow"]["resolution"][title] = [
@@ -471,13 +465,9 @@ gen_cond_tautag[tau] = "p.TauFlavor == 15"
 gen_cond_tautag[up] = "p.TauFlavor == 0"
 
 
-eff_btag_plots = EfficiencyTaggingBlock(
-    "Jet", "b-tag", mom, eta, gen_cond_btag, [0, 1, 2], "BTag", eff_tag_plots
-)
+eff_btag_plots = EfficiencyTaggingBlock("Jet", "b-tag", mom, eta, gen_cond_btag, [0, 1, 2], "BTag", eff_tag_plots)
 
-eff_ctag_plots = EfficiencyTaggingBlock(
-    "Jet", "c-tag", mom, eta, gen_cond_ctag, [4, 5, 6], "BTag", eff_tag_plots
-)
+eff_ctag_plots = EfficiencyTaggingBlock("Jet", "c-tag", mom, eta, gen_cond_ctag, [4, 5, 6], "BTag", eff_tag_plots)
 
 eff_tautag_plots = EfficiencyTaggingBlock(
     "Jet", "tau-tag", mom, eta, gen_cond_tautag, [0, 1, 2], "TauTag", eff_tag_plots
