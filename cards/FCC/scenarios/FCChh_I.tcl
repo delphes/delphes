@@ -1566,6 +1566,16 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/muons Muon Muon
   add Branch UniqueObjectFinder/jets Jet Jet
 
+  #collections for objects before isolation and uniqueobjectfinder
+  add Branch PhotonEfficiency/photons PhotonNoIso Photon
+  add Branch ElectronEfficiency/electrons ElectronNoIso Electron
+  add Branch MuonEfficiency/muons MuonNoIso Muon
+
+  #collections for objects after isolation but before uniqueobjectfinder
+  add Branch PhotonIsolation/photons PhotonNoOR Photon
+  add Branch ElectronIsolation/electrons ElectronNoOR Electron
+  add Branch MuonIsolation/muons MuonNoOR Muon
+
   add Branch GenJetFinder02/jets GenJet02 Jet
   add Branch GenJetFinder04/jets GenJet04 Jet
   add Branch GenJetFinder08/jets GenJet08 Jet
