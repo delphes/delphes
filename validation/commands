@@ -1,0 +1,7 @@
+make -j 20 HAS_PYTHIA8=true
+
+python3 submit.py launch_local --dry
+python3 submit.py launch_condor --dry
+
+rm -rf job* validation_delphes_card_FCChh_I*; python3 submit.py  --config config/cfg_fcchh_I.py launch_local
+python3 submit.py --collect

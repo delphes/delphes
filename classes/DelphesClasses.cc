@@ -153,7 +153,7 @@ TMatrixDSym Track::CovarianceMatrix() const
 TLorentzVector Tower::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiM(ET, Eta, Phi, 0.0);
+  vec.SetPtEtaPhiE(ET, Eta, Phi, E);
   return vec;
 }
 
@@ -212,7 +212,7 @@ Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
-  Flavor(0), FlavorAlgo(0), FlavorPhys(0),
+  Flavor(0), FlavorAlgo(0), FlavorPhys(0), TauFlavor(0),
   BTag(0), BTagAlgo(0), BTagPhys(0),
   TauTag(0), TauWeight(0.0), Eem(0.0), Ehad(0.0), Etrk(0.0),
   DeltaEta(0.0), DeltaPhi(0.0),
@@ -375,6 +375,7 @@ void Candidate::Copy(TObject &obj) const
   object.Flavor = Flavor;
   object.FlavorAlgo = FlavorAlgo;
   object.FlavorPhys = FlavorPhys;
+  object.TauFlavor = TauFlavor;
   object.BTag = BTag;
   object.BTagAlgo = BTagAlgo;
   object.BTagPhys = BTagPhys;
@@ -519,6 +520,7 @@ void Candidate::Clear(Option_t *option)
   Flavor = 0;
   FlavorAlgo = 0;
   FlavorPhys = 0;
+  TauFlavor = 0;
   BTag = 0;
   BTagAlgo = 0;
   BTagPhys = 0;

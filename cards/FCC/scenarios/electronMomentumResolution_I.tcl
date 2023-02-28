@@ -3,7 +3,7 @@
 #
 #  By Z.Drasal(CERN) on: 2017-04-06.14:31:32
 #
-set ResolutionFormula {    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 0.0000 && energy < 1.0000) * (0.00315864) + \
+set ResolutionFormula {   1.5 * ( (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 0.0000 && energy < 1.0000) * (0.00315864) + \
    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 1.0000 && energy < 2.0000) * (0.003159 + (energy-1.000000)* 0.000007) + \
    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 2.0000 && energy < 5.0000) * (0.003166 + (energy-2.000000)* 0.000011) + \
    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 5.0000 && energy < 10.0000) * (0.003198 + (energy-5.000000)* 0.000012) + \
@@ -482,5 +482,5 @@ set ResolutionFormula {    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >
    (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 10.0000 && energy < 100.0000) * (0.065492 + (energy-10.000000)* 0.000107) + \
    (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 100.0000 && energy < 1000.0000) * (0.075097 + (energy-100.000000)* 0.000243) + \
    (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 1000.0000 && energy < 10000.0000) * (0.294198 + (energy-1000.000000)* 0.000280) + \
-   (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 10000.0000) * (2.814894*energy/10000.000000)
+   (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 10000.0000) * (2.814894*energy/10000.000000) ) 
 }

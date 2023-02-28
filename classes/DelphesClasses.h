@@ -368,6 +368,7 @@ public:
   UInt_t Flavor; // jet flavor
   UInt_t FlavorAlgo; // jet flavor
   UInt_t FlavorPhys; // jet flavor
+  UInt_t TauFlavor; // jet flavor according to Tau tagging module
 
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
   UInt_t BTagAlgo; // 0 or 1 for a jet that has been tagged as containing a heavy quark
@@ -421,7 +422,7 @@ public:
   TLorentzVector P4() const;
   TLorentzVector Area;
 
-  ClassDef(Jet, 4)
+  ClassDef(Jet, 5)
 };
 
 //---------------------------------------------------------------------------
@@ -514,7 +515,11 @@ public:
 
   Float_t E; // calorimeter tower energy
 
-  Float_t T; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
+  Float_t T; // calo deposit time, averaged by sqrt(EM energy) over all particles
+  Float_t X; // calo tower position
+  Float_t Y; // calo tower position
+  Float_t Z; // calo tower position
+
   Int_t NTimeHits; // number of hits contributing to time measurement
 
   Float_t Eem; // calorimeter tower electromagnetic energy
@@ -530,7 +535,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Tower, 3)
+  ClassDef(Tower, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -703,6 +708,7 @@ public:
   UInt_t Flavor;
   UInt_t FlavorAlgo;
   UInt_t FlavorPhys;
+  UInt_t TauFlavor;
 
   UInt_t BTag;
   UInt_t BTagAlgo;

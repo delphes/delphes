@@ -75,6 +75,7 @@ public:
 	// Destructor
 	~VertexMore();
 	//
+	VertexFit* GetVinput(){ return fV; };		// Return pointer to initial vertex
 	TVectorD GetVpar(){ return fPar;};		// Get vertex track parameters
 	TMatrixDSym GetVcov(){ return fCov;};		// Get vertex track covariance
 	Double_t GetCharge(Int_t i) { return fQ[i]; };

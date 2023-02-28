@@ -62,8 +62,9 @@ AcceptanceClx::AcceptanceClx(SolGeom* InGeo)
 	// Start grid parameters
 	//
 	// Pt nodes
-	const Int_t NpPtInp = 5;
-	Float_t PtInit[NpPtInp] = { 0., 1., 10., 100., 250. };
+	const Int_t NpPtInp = 10;
+	Float_t PtInit[NpPtInp] = { 0., 1., 10., 100., 250.,
+		 		   500., 1000., 2000., 10000, 50000. };
 	TVectorF Pta(NpPtInp, PtInit);
 	Int_t NpPt = Pta.GetNrows();	// Nr. of starting pt points
 	// Theta nodes

@@ -46,10 +46,16 @@ private:
 	TMatrixDSym fCovILC;			// Covariance of track parameters in ILC format
 									// (d0, phi0, w, z0, tan(lambda))
 	TVector3 fXfirst;			// x,y,z of first track hit
+	Bool_t fEflag;				// Electron flag
+	Double_t fEscale;			// Electron resolution degradation
+	Bool_t fObsDone;			// Flags completion of parameter generation
 	//
 	// Service routines
 	//
-	TVectorD GenToObsPar(TVectorD gPar);
+	void FillGen();				// Fill generated arrays
+	void FillObs();				// Fill observed arrays
+	TVectorD GenToObsPar(TVectorD gPar);	// Extract observed parameters
+	TMatrixDSym CovCalc(TVectorD gPar);	// Calculate covariance matrix
 	//
 public:
 	//
@@ -74,17 +80,25 @@ public:
 	TVectorD GetGenParACTS()	{ return fGenParACTS; }
 	// d0, phi0, w, z0, tan(lambda)
 	TVectorD GetGenParILC()	{ return fGenParILC; }
+	//
 	// Observed level X, P, Q
-	Double_t GetObsQ()	{ return fObsQ; }
-	TVector3 GetObsX()	{ return fObsX; }
-	TVector3 GetObsP()	{ return fObsP; }
+	Double_t GetObsQ()	{ if(!fObsDone) FillObs();
+				  return fObsQ; }
+	TVector3 GetObsX()	{ if(!fObsDone) FillObs();
+				  return fObsX; }
+	TVector3 GetObsP()	{ if(!fObsDone) FillObs();
+				  return fObsP; }
 	// D, phi0, C, z0, cot(th)
-	TVectorD GetObsPar()	{ return fObsPar; }		// in meters
-	TVectorD GetObsParMm()	{ return fObsParMm; }	// In mm
+	TVectorD GetObsPar()	{ if(!fObsDone) FillObs();
+				  return fObsPar; }		// in meters
+	TVectorD GetObsParMm()	{ if(!fObsDone) FillObs();
+				  return fObsParMm; }		// In mm
 	// D, z0, phi0, theta, q/p, time
-	TVectorD GetObsParACTS()	{ return fObsParACTS; }
+	TVectorD GetObsParACTS(){ if(!fObsDone) FillObs();
+				  return fObsParACTS; }
 	// d0, phi0, w, z0, tan(lambda)
-	TVectorD GetObsParILC()	{ return fObsParILC; }
+	TVectorD GetObsParILC()	{ if(!fObsDone) FillObs();
+				  return fObsParILC; }
 	// Covariances
 	TMatrixDSym GetCov()	{ return fCov; }	// in meters
 	TMatrixDSym GetCovMm()	{ return fCov; }	// in mm
@@ -92,6 +106,8 @@ public:
 	TMatrixDSym GetCovILC() { return fCovILC; }
 	// First hit
 	TVector3 GetFirstHit()  { return fXfirst; }
+	// Set resolution degradation scale
+	void SetScale(Double_t scale);
 };
 
 #endif

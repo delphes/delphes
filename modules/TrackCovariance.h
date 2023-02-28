@@ -36,6 +36,7 @@ class TObjArray;
 class SolGeom;
 class SolGridCov;
 class AcceptanceClx;
+class DelphesFormula;
 
 class TrackCovariance: public DelphesModule
 {
@@ -50,6 +51,10 @@ public:
 private:
   Double_t fBz;
   Int_t fNMinHits;
+
+  DelphesFormula *fElectronScaleFactor;
+  DelphesFormula *fMuonScaleFactor;
+  DelphesFormula *fChargedHadronScaleFactor;
 
   SolGeom *fGeometry;
   SolGridCov *fCovariance;
