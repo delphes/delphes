@@ -313,7 +313,7 @@ TMatrixD VertexMore::DparDx(TVector3 xv, TVector3 pv, Double_t Q)
 	// Track parameters
 	if(fUnits) xv *= 1.0e-3;	// Change to meters
 	TVectorD Par = XPtoPar(xv, pv, Q);
-	xv *= 1.0e3;
+	if(fUnits) xv *= 1.0e3;
 	if(fUnits)fPar = ParToMm(Par);	// Back to mm
 	//
 	Double_t D = Par(0);
@@ -413,7 +413,7 @@ TMatrixD VertexMore::DparDp(TVector3 xv, TVector3 pv, Double_t Q)
 	// Track parameters
 	if(fUnits) xv *= 1.0e-3;	// Change to meters
 	TVectorD Par = XPtoPar(xv, pv, Q);
-	xv *= 1.0e3;
+	if(fUnits) xv *= 1.0e3;
 	if(fUnits)fPar = ParToMm(Par);	// Back to mm
 	//
 	Double_t D = Par(0);
