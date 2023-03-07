@@ -53,16 +53,16 @@ private:
 	std::vector<TMatrixDSym*> fWinvi;		// ACA'
 	//
 	// Service routines
-	void ResetWrkArrays();							// Clear work arrays
-	TVectorD Fill_x0(TVectorD par);					// Track position at dma to z-axis
+	void ResetWrkArrays();				// Clear work arrays
+	TVectorD Fill_x0(TVectorD par);			// Track position at dma to z-axis
 	TVectorD Fill_x(TVectorD par, Double_t phi);	// Track position at given phase
-	void UpdateTrkArrays(Int_t i);					// Fill track realted arrays
-	void VtxFitNoSteer();							// Vertex fitter routine w/o parameter steering
-	void VertexFitter();							// Vertex fitter routine w/  parameter steering
+	void UpdateTrkArrays(Int_t i);			// Fill track realted arrays
+	void VtxFitNoSteer();				// Vertex fitter routine w/o parameter steering
+	void VertexFitter();				// Vertex fitter routine w/  parameter steering
 public:
 	//
 	// Constructors
-	VertexFit();										// Initialize waiting for tracks
+	VertexFit();						// Initialize waiting for tracks
 	VertexFit(Int_t Ntr, ObsTrk** tracks);			// Initialize with ObsTrk tracks
 	VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov);	// Initialize with parameters and covariances
 	// Destructor
