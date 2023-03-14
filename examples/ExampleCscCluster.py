@@ -2,6 +2,7 @@
 This script computes and prints the signal efficiency when reinterpreting the CMS analysis searching for LLPs that decay in the endcap muon detectors (https://arxiv.org/abs/2107.04838)
 The event-level and cluster-level selections follow the exact selections applied in the paper and the recasting instructions provided in the HEPData entry (https://www.hepdata.net/record/104408)
 The user would need to normalize to the correct signal cross section and luminosity to get the expected signal yield.
+Need input ROOT file from running Delphes
 """
 
 import sys
@@ -13,7 +14,7 @@ def deltaR(eta1, phi1, eta2, phi2):
 def dPhi(phi1, phi2):
     delta = phi1-phi2
     while delta > math.pi: delta -= 2* math.pi
-    while delta < math.pi: delta += 2* math.pi
+    while delta < -math.pi: delta += 2* math.pi
     return delta
 
 if __name__ == '__main__':
@@ -23,7 +24,7 @@ if __name__ == '__main__':
       pass
 
     if len(sys.argv) < 2:
-      print(" Usage: ExampleCscCluster.py input_file")
+      print(" Usage: ExampleCscCluster.py input_root_file")
       sys.exit(1)
 
     ROOT.gSystem.Load("libDelphes")
