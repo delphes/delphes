@@ -1,4 +1,3 @@
-set MaxEvents 1000
 source FCChh_I.tcl
 
 set ExecutionPath [lreplace $ExecutionPath end end]

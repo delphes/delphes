@@ -274,7 +274,7 @@ module MomentumSmearing ElectronMomentumSmearing {
   set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
 
-  source trackMomentumResolution_I.tcl
+  source electronMomentumResolution_I.tcl
 }
 
 

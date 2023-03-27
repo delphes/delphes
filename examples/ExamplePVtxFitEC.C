@@ -11,6 +11,7 @@ R__LOAD_LIBRARY(libDelphes)
 #include "modules/TrackCovariance.h"
 #include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
+#include "VtxPulls.h"
 
 #endif
 
@@ -49,17 +50,7 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 	TClonesArray* branchTrack = treeReader->UseBranch("Track");
 
 	// Book histograms
-	Int_t Nbin = 100;
-	// Vertex fit pulls
-	TH1D* hXpull = new TH1D("hXpull", "Pull X vertex component", Nbin, -10., 10.);
-	TH1D* hYpull = new TH1D("hYpull", "Pull Y vertex component", Nbin, -10., 10.);
-	TH1D* hZpull = new TH1D("hZpull", "Pull Z vertex component", Nbin, -10., 10.);
-	TH1D* hChi2 = new TH1D("hChi2", "Vertex #chi^{2}/N_{dof}", Nbin, 0., 10.);
-	// Generation check
-	TH1D* hXvpull = new TH1D("hXvpull", "Pull X generated vertex", Nbin, -10., 10.);
-	TH1D* hYvpull = new TH1D("hYvpull", "Pull Y generated vertex", Nbin, -10., 10.);
-	TH1D* hZvpull = new TH1D("hZvpull", "Pull Z generated vertex", Nbin, -10., 10.);
-
+	VtxPulls* Pulls = new VtxPulls();
 	//
 	// Loop over all events
 	Int_t Nev = TMath::Min(Nevent, (Int_t)numberOfEntries);
@@ -72,6 +63,15 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 		Int_t NtrG = branchTrack->GetEntries();
 		TVectorD** pr = new TVectorD * [NtrG];
 		TMatrixDSym** cv = new TMatrixDSym * [NtrG];
+		TVectorD vTrue(3);
+		std::vector<TVectorD> pGen;	// True momenta
+		//
+		// Print event numbers
+		if(entry % 500 == 0){
+			std::cout<<std::endl;
+			std::cout <<"Event " << entry << std::endl;
+			std::cout<<"Nr. of tracks " << NtrG << std::endl;
+		}
 		//
 		// True vertex
 		Double_t xpv, ypv, zpv;
@@ -122,6 +122,9 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 					xpv = x;
 					ypv = y;
 					zpv = z; 
+					vTrue(0) = x;
+					vTrue(1) = y;
+					vTrue(2) = z;
 					//
 					// Reconstructed track parameters
 					Double_t obsD0 = trk->D0;
@@ -135,40 +138,32 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 					pr[Ntr] = new TVectorD(obsPar);
 					cv[Ntr] = new TMatrixDSym(trk->CovarianceMatrix());
 					Ntr++;
+					// Store true momenta
+					GenParticle* gen = (GenParticle*) trk->Particle.GetObject();
+					TVectorD GenP(3);
+					GenP(0) = gen->Px;
+					GenP(1) = gen->Py;
+					GenP(2) = gen->Pz;
+					pGen.push_back(GenP);
 				}
 			}		// End loop on tracks
 		}
 		//
 		// Fit primary vertex with beam constraint
 		//
-		Int_t MinTrk = 3;	// Minumum # tracks for vertex fit
+		Int_t MinTrk = 1;	// Minumum # tracks for vertex fit
 		if (Ntr >= MinTrk) {
 			VertexFit* Vtx = new VertexFit(Ntr, pr, cv);
 			Vtx->AddVtxConstraint(xpvc, covpvc);
 			TVectorD xvtx = Vtx->GetVtx();
-			TMatrixDSym covX = Vtx->GetVtxCov();
-			Double_t Chi2 = Vtx->GetVtxChi2();
-			Double_t Ndof = 2 * (Double_t)Ntr;
+			//std::cout<<"N tracks = "<<Ntr<<", X,Y,Z in: "<<xpvc(0)<<", "<<xpvc(1)<<", "<<xpvc(2)<<std::endl;
+			//std::cout<<"X, Y, Z out: "<<xvtx(0)<<", "<<xvtx(1)<<", "<<xvtx(2)<<std::endl;
+			for(Int_t i=0; i<Ntr; i++){
+				TVectorD pMom = pGen[i];
+				//pMom.Print();
+			}
+			Pulls->Fill(vTrue, pGen, Vtx);
 			delete Vtx;
-			//
-			Double_t PullX = (xvtx(0)-xpv) / TMath::Sqrt(covX(0, 0));
-			Double_t PullY = (xvtx(1)-ypv) / TMath::Sqrt(covX(1, 1));
-			Double_t PullZ = (xvtx(2)-zpv) / TMath::Sqrt(covX(2, 2));
-			//
-			Double_t PullXv = (xpvc(0)-xpv) / TMath::Sqrt(covpvc(0, 0));
-			Double_t PullYv = (xpvc(1)-ypv) / TMath::Sqrt(covpvc(1, 1));
-			Double_t PullZv = (xpvc(2)-zpv) / TMath::Sqrt(covpvc(2, 2));
-			//
-			//
-			// Fill histograms
-			hXpull->Fill(PullX);
-			hYpull->Fill(PullY);
-			hZpull->Fill(PullZ);
-			hChi2->Fill(Chi2 / Ndof);
-			//
-			hXvpull->Fill(PullXv);
-			hYvpull->Fill(PullYv);
-			hZvpull->Fill(PullZv);
 		}
 
 		//
@@ -177,27 +172,11 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 		for (Int_t i = 0; i < Ntr; i++) delete cv[i];
 		delete[] pr;
 		delete[] cv;
+		pGen.clear();
 	}
 
 	//
 	// Show resulting histograms
 	//
-	TCanvas* Cnv = new TCanvas("Cnv", "Delphes primary vertex pulls", 50, 50, 900, 500);
-	Cnv->Divide(2, 2);
-	Cnv->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);
-	hXpull->Fit("gaus"); hXpull->Draw();
-	Cnv->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111);
-	hYpull->Fit("gaus"); hYpull->Draw();
-	Cnv->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111);
-	hZpull->Fit("gaus"); hZpull->Draw();
-	Cnv->cd(4); hChi2->Draw();
-	//
-	TCanvas* Cnv1 = new TCanvas("Cnv1", "Generated primary vertex pulls", 100, 100, 900, 500);
-	Cnv1->Divide(3, 1);
-	Cnv1->cd(1); gPad->SetLogy(1); gStyle->SetOptFit(1111);
-	hXvpull->Fit("gaus"); hXvpull->Draw();
-	Cnv1->cd(2); gPad->SetLogy(1); gStyle->SetOptFit(1111);
-	hYvpull->Fit("gaus"); hYvpull->Draw();
-	Cnv1->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111);
-	hZvpull->Fit("gaus"); hZvpull->Draw();
+	Pulls->Print();
 }
