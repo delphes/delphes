@@ -614,8 +614,10 @@ void VertexMore::MassConstrFit()
 		TVectorD pm = p.GetSub(3*i+3,3*i+5);
 		TVector3 p3(pm(0), pm(1), pm(2));
 		Ptot += p3;
+                if ( fpi[i] ) delete fpi[i];
 		fpi[i] = new TVector3(p3);
 		TMatrixDSym Cpm = CovP.GetSub(3*i+3,3*i+5,3*i+3,3*i+5);
+                if ( fCpi[i] ) delete fCpi[i] ;
 		fCpi[i] = new TMatrixDSym(Cpm);
 	}
 	fP = Ptot;

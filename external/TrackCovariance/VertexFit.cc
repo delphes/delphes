@@ -330,6 +330,8 @@ void  VertexFit::VertexFitter()
 		// Reset work arrays
 		//
 		ResetWrkArrays();
+
+
 		//
 		// Start loop on tracks
 		//
@@ -390,8 +392,10 @@ void  VertexFit::VertexFitter()
 			TVectorD b = (*fWi[i]) * (x - *fx0i[i] + *fdi[i]);
 			ffi[i] += Dot(a, b) / fa2i[i];
 			TVectorD newPar = *fPar[i] - ((*fCov[i]) * (*fAti[i])) * lambda;
+                        if ( fParNew[i] ) delete fParNew[i];
 			fParNew[i] = new TVectorD(newPar);
 			TMatrixDSym newCov = GetNewCov(i);
+                        if ( fCovNew[i] ) delete fCovNew[i];
 			fCovNew[i] = new TMatrixDSym(newCov);
 		}
 		// Add external constraint to Chi2
