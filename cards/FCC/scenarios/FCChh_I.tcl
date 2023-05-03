@@ -1586,7 +1586,7 @@ module TreeWriter TreeWriter {
   add Branch GenJetFinder15/jets GenJet15 Jet
 
   add Branch FastJetFinder02/jets ParticleFlowJet02 Jet
-  add Branch FastJetFinder04/jets ParticleFlowJet04 Jet 
+  add Branch FastJetFinder04/jets ParticleFlowJet04 Jet
   add Branch FastJetFinder08/jets ParticleFlowJet08 Jet
   add Branch FastJetFinder15/jets ParticleFlowJet15 Jet
 
