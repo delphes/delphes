@@ -82,6 +82,7 @@ void TrackCovariance::Init()
 {
   fBz = GetDouble("Bz", 0.0);
   fGeometry->Read(GetString("DetectorGeometry", ""));
+  fGeometry->SetBz(fBz);
   fNMinHits = GetInt("NMinHits", 6);
 
   // scale factors to apply to resolutions
