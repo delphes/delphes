@@ -1030,9 +1030,9 @@ module Isolation PhotonIsolation {
 
   set OutputArray photons
 
-  # veto isolation cand. based on proximity to input cand.
-  set DeltaRMin 0.02
-  set UseMiniCone true
+  # veto isolation cand. based on proximity to input cand. -> turned out not to be needed
+  # set DeltaRMin 0.02
+  # set UseMiniCone true
 
   set DeltaRMax 0.3
 
@@ -1082,9 +1082,9 @@ module Isolation ElectronIsolation {
 
   set OutputArray electrons
 
-  # veto isolation cand. based on proximity to input cand.
-  set DeltaRMin 0.02
-  set UseMiniCone true
+  # veto isolation cand. based on proximity to input cand. -> turned out not to be needed
+  # set DeltaRMin 0.02
+  # set UseMiniCone true
 
   set DeltaRMax 0.3
 
@@ -1557,6 +1557,9 @@ module TreeWriter TreeWriter {
   #add Branch TrackMerger/tracks Track Track
   #add Branch TowerMerger/towers Tower Tower
 
+  #Temporary addition for manual isoVar validation/recalculation
+  # add Branch EFlowFilter/eflow ParticleFlowCandidates ParticleFlowCandidate 
+
   add Branch EFlowTrackMerger/eflowTracks EFlowTrack Track
   add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
   add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
@@ -1564,7 +1567,18 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/muons Muon Muon
-  add Branch UniqueObjectFinder/jets Jet Jet
+  add Branch UniqueObjectFinder/jets Jet Jet 
+
+  #collections for objects before isolation and uniqueobjectfinder
+  add Branch PhotonEfficiency/photons PhotonNoIso Photon
+  add Branch ElectronEfficiency/electrons ElectronNoIso Electron
+  add Branch MuonEfficiency/muons MuonNoIso Muon
+  add Branch JetEnergyScale/jets JetNoIso Jet
+
+  #collections for objects after isolation but before uniqueobjectfinder -> not needed?
+  # add Branch PhotonIsolation/photons PhotonNoOR Photon
+  # add Branch ElectronIsolation/electrons ElectronNoOR Electron
+  # add Branch MuonIsolation/muons MuonNoOR Muon
 
   add Branch GenJetFinder02/jets GenJet02 Jet
   add Branch GenJetFinder04/jets GenJet04 Jet
