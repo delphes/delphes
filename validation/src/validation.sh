@@ -50,6 +50,9 @@ python3 src/flatGunLHEventProducer.py \
 ## 2. run Delphes
 ################################################################################
 
+
+
+
 cp -r ${DELPHES_PATH}/cards/* .
 cp -r ${DELPHES_PATH}/examples/Pythia8/configLHE.cmnd .
 
@@ -59,8 +62,13 @@ BEAMSTR="Beams:LHEF = ${OUTLHE}"
 echo $BEAMSTR >> configLHE.cmnd
 echo 'Main:numberOfEvents = '${NEVTS} >> configLHE.cmnd
 echo 'Main:timesAllowErrors = '${NEVTS} >> configLHE.cmnd
-${DELPHES_PATH}/DelphesPythia8 ${DELPHES_CARD} configLHE.cmnd ${OUTDELPHES}
 
+## run DelphesLHE if single that require no hadronisation
+if [[ "$PDG" == "11" || "$PDG" == "13" || "$PDG" == "22" || "$PDG" == "130" || "$PDG" == "211" ]]; then
+  ${DELPHES_PATH}/DelphesLHEF ${DELPHES_CARD} ${OUTDELPHES} ${OUTLHE}
+else
+  ${DELPHES_PATH}/DelphesPythia8 ${DELPHES_CARD} configLHE.cmnd ${OUTDELPHES}
+fi
 
 #cp ${OUTDELPHES} ${OUTPUTDIR}
 

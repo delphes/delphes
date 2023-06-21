@@ -30,7 +30,6 @@ set DCHRMAX 2.02
 set ExecutionPath {
 
   TruthVertexFinder
-  UnstablePropagator
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -99,28 +98,6 @@ module TruthVertexFinder TruthVertexFinder {
   set InputArray Delphes/stableParticles
   set VertexOutputArray vertices
 }
-
-###########################################
-# Propagate unstable particles in cylinder
-###########################################
-
-module UnstablePropagator UnstablePropagator {
-  set InputArray Delphes/allParticles
-
-  # inner radius of the solenoid, in m
-  set Radius $R
-
-  # half-length: z of the solenoid, in m
-  set HalfLength $HL
-
-  # minimum flight distance requested to propagate
-  # unstable charged particle in B field (in m)
-  set Lmin 1.0E-06
-
-  # magnetic field, in T
-  set Bz $B
-}
-
 
 
 #################################
@@ -226,11 +203,10 @@ module TrackCovariance TrackSmearing {
     set Bz $B
 
     ## scale factors
-    set ElectronScaleFactor 2.0
+    set ElectronScaleFactor  {1.25}
 
-    ## uses https://raw.githubusercontent.com/selvaggi/FastTrackCovariance/master/GeoIDEA_BASE.txt
+
     set DetectorGeometry {
-
 
       # Layer type 1 = R (barrel) or 2 = z (forward/backward)
       # Layer label
@@ -248,27 +224,13 @@ module TrackCovariance TrackSmearing {
 
       # barrel  name       zmin   zmax   r        w (m)      X0        n_meas  th_up (rad) th_down (rad)    reso_up (m)   reso_down (m)  flag
 
-      # barrel  name       zmin   zmax   r        w (m)      X0        n_meas  th_up (rad) th_down (rad)    reso_up (m)   reso_down (m)  flag
-
-      1        PIPE       -100    100    0.015    0.001655  0.2805     0        0          0                0             0              0
-      1        VTXLOW     -0.12   0.12   0.017    0.00028   0.0937     2        0          1.5708           3e-006        3e-006         1
-      1        VTXLOW     -0.16   0.16   0.023    0.00028   0.0937     2        0          1.5708           3e-006        3e-006         1
-      1        VTXLOW     -0.16   0.16   0.031    0.00028   0.0937     2        0          1.5708           3e-006        3e-006         1
-      1        VTXHIGH    -1      1      0.32     0.00047   0.0937     2        0          1.5708           7e-006        7e-006         1
-      1        VTXHIGH    -1.05   1.05   0.34     0.00047   0.0937     2        0          1.5708           7e-006        7e-006         1
-
-      # endcap  name       rmin   rmax   z        w (m)      X0        n_meas   th_up (rad)  th_down (rad)   reso_up (m)   reso_down (m) flag
-
-      2        VTXDSK      0.141  0.3   -0.92     0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.138  0.3   -0.9      0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.065  0.3   -0.42     0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.062  0.3   -0.4      0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.062  0.3    0.4      0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.065  0.3    0.42     0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.138  0.3    0.9      0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-      2        VTXDSK      0.141  0.3    0.92     0.00028   0.0937     2        0          1.5708           7e-006        7e-006         1
-
-      1 DCHCANI $DCHZMIN $DCHZMAX $DCHRMIN 0.0002 0.237223 0 0 0 0 0 0
+      1 PIPE -100 100 0.01 0.00235 0.35276 0 0 0 0 0 0
+      1 VTXLOW -0.0965 0.0965 0.012 0.00028 0.0937 2 0 1.5708 3e-06 3e-06 1
+      1 VTXLOW -0.1609 0.1609 0.02 0.00028 0.0937 2 0 1.5708 3e-06 3e-06 1
+      1 VTXLOW -0.2575 0.2575 0.031525 0.00028 0.0937 2 0 1.5708 3e-06 3e-06 1
+      1 VTXLOW -0.1609 0.1609 0.15 0.00028 0.0937 2 0 1.5708 3e-06 3e-06 1
+      1 VTXHIGH -0.3263 0.3263 0.315 0.00047 0.0937 2 0 1.5708 7e-06 7e-06 1
+      1 DCHCANI -2.125 2.125 0.345 0.0002 0.237223 0 0 0 0 0 0
       1 DCH -2 2 0.36 0.0147748 1400 1 0.0203738 0 0.0001 0 1
       1 DCH -2 2 0.374775 0.0147748 1400 1 -0.0212097 0 0.0001 0 1
       1 DCH -2 2 0.38955 0.0147748 1400 1 0.0220456 0 0.0001 0 1
@@ -381,21 +343,27 @@ module TrackCovariance TrackSmearing {
       1 DCH -2 2 1.97045 0.0147748 1400 1 -0.111072 0 0.0001 0 1
       1 DCH -2 2 1.98523 0.0147748 1400 1 0.111898 0 0.0001 0 1
       1 DCH -2 2 2 0.0147748 1400 1 -0.112723 0 0.0001 0 1
-      1 DCHCANO $DCHZMIN $DCHZMAX $DCHRMAX $DCHRMAX 0.02 1.667 0 0 0 0 0 0
-      1 BSILWRP -2.35 2.35 2.04 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
-      1 BSILWRP -2.35 2.35 2.06 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
+      1 DCHCANO -2.125 2.125 2.02 0.02 1.667 0 0 0 0 0 0
+      1 BSILWRP -2.35 2.35 2.04 0.00047 0.0937 2 0 1.5708 7e-06 9e-05 1
+      1 BSILWRP -2.35 2.35 2.06 0.00047 0.0937 2 0 1.5708 7e-06 9e-05 1
       1 MAG -2.5 2.5 2.25 0.05 0.0658 0 0 0 0 0 0
-      1 BPRESH -2.55 2.55 2.45 0.02 1 2 0 1.5708 7e-005 0.01 1
-      2 DCHWALL $DCHRMIN $DCHRMAX $DCHZMAX 0.25 5.55 0 0 0 0 0 0
-      2 DCHWALL $DCHRMIN $DCHRMAX $DCHZMIN 0.25 5.55 0 0 0 0 0 0
-      2 FSILWRP 0.354 2.02 -2.32 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
-      2 FSILWRP 0.35 2.02 -2.3 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
-      2 FSILWRP 0.35 2.02 2.3 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
-      2 FSILWRP 0.354 2.02 2.32 0.00047 0.0937 2 0 1.5708 7e-006 9e-005 1
+      1 BPRESH -2.55 2.55 2.45 0.02 1 2 0 1.5708 7e-05 0.01 1
+      2 VTXDSK 0.105 0.29 -0.93 0.00028 0.0937 2 0 1.5708 7e-06 7e-06 1
+      2 VTXDSK 0.075 0.29 -0.62 0.00028 0.0937 2 0 1.5708 7e-06 7e-06 1
+      2 VTXDSK 0.0365 0.2515 -0.2575 0.00028 0.0937 2 0 1.5708 7e-06 7e-06 1
+      2 VTXDSK 0.0365 0.2515 0.2575 0.00028 0.0937 2 0 1.5708 7e-06 7e-06 1
+      2 VTXDSK 0.075 0.29 0.62 0.00028 0.0937 2 0 1.5708 7e-06 7e-06 1
+      2 VTXDSK 0.105 0.29 0.93 0.00028 0.0937 2 0 1.5708 7e-06 7e-06 1
+      2 DCHWALL 0.345 2.02 2.125 0.25 5.55 0 0 0 0 0 0
+      2 DCHWALL 0.345 2.02 -2.125 0.25 5.55 0 0 0 0 0 0
+      2 FSILWRP 0.354 2.02 -2.32 0.00047 0.0937 2 0 1.5708 7e-06 9e-05 1
+      2 FSILWRP 0.35 2.02 -2.3 0.00047 0.0937 2 0 1.5708 7e-06 9e-05 1
+      2 FSILWRP 0.35 2.02 2.3 0.00047 0.0937 2 0 1.5708 7e-06 9e-05 1
+      2 FSILWRP 0.354 2.02 2.32 0.00047 0.0937 2 0 1.5708 7e-06 9e-05 1
       2 FRAD 0.38 2.09 2.49 0.0043 0.005612 0 0 0 0 0 0
       2 FRAD 0.38 2.09 -2.49 0.0043 0.005612 0 0 0 0 0 0
-      2 FPRESH 0.39 2.43 -2.55 0.02 1 2 0 1.5708 7e-005 0.01 1
-      2 FPRESH 0.39 2.43 2.55 0.02 1 2 0 1.5708 7e-005 0.01 1
+      2 FPRESH 0.39 2.43 -2.55 0.02 1 2 0 1.5708 7e-05 0.01 1
+      2 FPRESH 0.39 2.43 2.55 0.02 1 2 0 1.5708 7e-05 0.01 1
     }
 
 }
@@ -508,8 +476,8 @@ module DualReadoutCalorimeter Calorimeter {
 
   set SmearLogNormal false
 
-  #set SmearTowerCenter true
-  set SmearTowerCenter false
+  set SmearTowerCenter true
+  #set SmearTowerCenter false
     set pi [expr {acos(-1)}]
 
     # Lists of the edges of each tower in eta and phi;
@@ -562,12 +530,15 @@ module DualReadoutCalorimeter Calorimeter {
     add EnergyFraction {3122} {0.3 0.7}
 
 
+    ## ECAL crystals for the EM part from 2008.00338
     # set ECalResolutionFormula {resolution formula as a function of eta and energy}
     set ECalResolutionFormula {
-    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.11^2 + 0.05^2)+
-    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.01^2 + energy*0.11^2 + 0.05^2)
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.005^2 + energy*0.03^2 + 0.002^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 3.0)    * sqrt(energy^2*0.005^2 + energy*0.03^2 + 0.002^2)
     }
 
+
+    # Dual Readout
     # set HCalResolutionFormula {resolution formula as a function of eta and energy}
     set HCalResolutionFormula {
     (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.3^2 + 0.05^2)+

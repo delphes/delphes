@@ -1,3 +1,5 @@
+set RandomSeed 123
+
 #
 # Official Delphes card prepared by FCC-hh collaboration
 #
@@ -46,8 +48,10 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
+  ForwardLooperTracks
 
   Calorimeter
+  EFlowTrackMerger
   EFlowMerger
   EFlowFilter
 
@@ -138,6 +142,7 @@ module ParticlePropagator ParticlePropagator {
 module Efficiency ChargedHadronTrackingEfficiency {
   set InputArray ParticlePropagator/chargedHadrons
   set OutputArray chargedHadrons
+  set UseMomentumVector true
 
  # TBC (which eta_max ? which pT min?)
 
@@ -179,6 +184,7 @@ module Efficiency ChargedHadronTrackingEfficiency {
 module Efficiency ElectronTrackingEfficiency {
   set InputArray ParticlePropagator/electrons
   set OutputArray electrons
+  set UseMomentumVector true
 
   set EfficiencyFormula {
 
@@ -217,6 +223,7 @@ module Efficiency ElectronTrackingEfficiency {
 module Efficiency MuonTrackingEfficiency {
   set InputArray ParticlePropagator/muons
   set OutputArray muons
+  set UseMomentumVector true
 
   set EfficiencyFormula {
 
@@ -267,7 +274,7 @@ module MomentumSmearing ElectronMomentumSmearing {
   set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
 
-  source trackMomentumResolution_I.tcl
+  source electronMomentumResolution_I.tcl
 }
 
 
@@ -294,10 +301,26 @@ module Merger TrackMerger {
   set OutputArray tracks
 }
 
+######################
+# Looper Selection
+######################
+
+module Efficiency ForwardLooperTracks  {
+  set InputArray TrackMerger/tracks
+  set OutputArray tracks
+  set UseMomentumVector False
+
+  ## select looping tracks that end up in position |eta| > 6.000 (lost by calo)
+  set EfficiencyFormula {
+    (abs(eta) > 6.0 )                                 * (1.000) +
+    (abs(eta) <= 6.0 )                                * (0.000)
+  }
+
+}
+
 #############
 # Calorimeter
 #############
-
 module DualReadoutCalorimeter Calorimeter {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray TrackMerger/tracks
@@ -314,77 +337,84 @@ module DualReadoutCalorimeter Calorimeter {
 
   set SmearLogNormal false
 
-  set SmearTowerCenter false
-  set pi [expr {acos(-1)}]
+  set SmearTowerCenter true
+  #set SmearTowerCenter false
+    set pi [expr {acos(-1)}]
 
-  # Lists of the edges of each tower in eta and phi;
-  # each list starts with the lower edge of the first tower;
-  # the list ends with the higher edged of the last tower.
-  # Barrel:  deta=0.02 towers up to |eta| <= 0.88 ( up to 45°)
-  # Endcaps: deta=0.02 towers up to |eta| <= 3.0 (8.6° = 100 mrad)
-  # Cell size: about 6 cm x 6 cm
+    # Lists of the edges of each tower in eta and phi;
+    # each list starts with the lower edge of the first tower;
+    # the list ends with the higher edged of the last tower.
+    # Barrel:  deta=0.02 towers up to |eta| <= 0.88 ( up to 45°)
+    # Endcaps: deta=0.02 towers up to |eta| <= 3.0 (8.6° = 100 mrad)
+    # Cell size: about 6 cm x 6 cm
 
-  set EtaPhiRes 0.02
-  set EtaMax 6.0
+    set EtaPhiRes 0.02
+    set EtaMax 6.0
 
-  set pi [expr {acos(-1)}]
+    set pi [expr {acos(-1)}]
 
-  set nbins_phi [expr {$pi/$EtaPhiRes} ]
-  set nbins_phi [expr {int($nbins_phi)} ]
+    set nbins_phi [expr {$pi/$EtaPhiRes} ]
+    set nbins_phi [expr {int($nbins_phi)} ]
 
-  set PhiBins {}
-  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-    add PhiBins [expr {$i * $pi/$nbins_phi}]
-  }
+    set PhiBins {}
+    for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
+      add PhiBins [expr {$i * $pi/$nbins_phi}]
+    }
 
-  set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
-  set nbins_eta [expr {int($nbins_eta)} ]
+    set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
+    set nbins_eta [expr {int($nbins_eta)} ]
 
-  for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
-    set eta [expr {$i * $EtaPhiRes}]
-    add EtaPhiBins $eta $PhiBins
-  }
+    for {set i -$nbins_eta} {$i <= $nbins_eta} {incr i} {
+      set eta [expr {$i * $EtaPhiRes}]
+      add EtaPhiBins $eta $PhiBins
+    }
 
-  # default energy fractions {abs(PDG code)} {Fecal Fhcal}
-  add EnergyFraction {0} {0.0 1.0}
-  # energy fractions for e, gamma and pi0
-  add EnergyFraction {11} {1.0 0.0}
-  add EnergyFraction {22} {1.0 0.0}
-  add EnergyFraction {111} {1.0 0.0}
-  # energy fractions for muon, neutrinos and neutralinos
-  add EnergyFraction {12} {0.0 0.0}
-  add EnergyFraction {13} {0.0 0.0}
-  add EnergyFraction {14} {0.0 0.0}
-  add EnergyFraction {16} {0.0 0.0}
-  add EnergyFraction {1000022} {0.0 0.0}
-  add EnergyFraction {1000023} {0.0 0.0}
-  add EnergyFraction {1000025} {0.0 0.0}
-  add EnergyFraction {1000035} {0.0 0.0}
-  add EnergyFraction {1000045} {0.0 0.0}
-  # energy fractions for K0short and Lambda
-  add EnergyFraction {310} {0.3 0.7}
-  add EnergyFraction {130} {0.3 0.7}
-  add EnergyFraction {3122} {0.3 0.7}
+    # default energy fractions {abs(PDG code)} {Fecal Fhcal}
+    add EnergyFraction {0} {0.0 1.0}
+    # energy fractions for e, gamma and pi0
+    add EnergyFraction {11} {1.0 0.0}
+    add EnergyFraction {22} {1.0 0.0}
+    add EnergyFraction {111} {1.0 0.0}
+    # energy fractions for muon, neutrinos and neutralinos
+    add EnergyFraction {12} {0.0 0.0}
+    add EnergyFraction {13} {0.0 0.0}
+    add EnergyFraction {14} {0.0 0.0}
+    add EnergyFraction {16} {0.0 0.0}
+    add EnergyFraction {1000022} {0.0 0.0}
+    add EnergyFraction {1000023} {0.0 0.0}
+    add EnergyFraction {1000025} {0.0 0.0}
+    add EnergyFraction {1000035} {0.0 0.0}
+    add EnergyFraction {1000045} {0.0 0.0}
+    # energy fractions for K0short and Lambda
+    add EnergyFraction {310} {0.3 0.7}
+    add EnergyFraction {130} {0.3 0.7}
+    add EnergyFraction {3122} {0.3 0.7}
 
-  # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  set ECalResolutionFormula {
-  (abs(eta) <= 4.0)                      * sqrt(energy^2*0.003^2 + energy*0.028^2 + 0.12^2)+
-  (abs(eta) > 4.0 && abs(eta) <= 6.0)    * sqrt(energy^2*0.01^2 + energy*0.10^2 + 0.30^2)
-  }
 
-  # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-  set HCalResolutionFormula {
-  (abs(eta) <= 4.0 )                     * sqrt(energy^2*0.01^2 + energy*0.35^2 + 0.5^2)+
-  (abs(eta) > 4.0 && abs(eta) <= 6.0)    * sqrt(energy^2*0.03^2 + energy*0.50^2 + 1.0^2)
-  }
+    ## ECAL crystals for the EM part from 2008.00338
+    # set ECalResolutionFormula {resolution formula as a function of eta and energy}
+    set ECalResolutionFormula {
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.005^2 + energy*0.03^2 + 0.002^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 6.0)    * sqrt(energy^2*0.005^2 + energy*0.03^2 + 0.002^2)
+    }
+
+
+    # Dual Readout
+    # set HCalResolutionFormula {resolution formula as a function of eta and energy}
+    set HCalResolutionFormula {
+    (abs(eta) <= 0.88 )                     * sqrt(energy^2*0.01^2 + energy*0.3^2 + 0.05^2)+
+    (abs(eta) > 0.88 && abs(eta) <= 6.0)    * sqrt(energy^2*0.01^2 + energy*0.3^2 + 0.05^2)
+    }
 }
+
+
 
 #################
 # Electron filter
 #################
 
 module PdgCodeFilter ElectronFilter {
-  set InputArray Calorimeter/eflowTracks
+  set InputArray EFlowTrackMerger/eflowTracks
   set OutputArray electrons
   set Invert true
   add PdgCode {11}
@@ -397,7 +427,7 @@ module PdgCodeFilter ElectronFilter {
 #################
 
 module PdgCodeFilter MuonFilter {
-  set InputArray Calorimeter/eflowTracks
+  set InputArray EFlowTrackMerger/eflowTracks
   set OutputArray muons
   set Invert true
   add PdgCode {13}
@@ -417,17 +447,32 @@ module Merger TowerMerger {
   set OutputArray towers
 }
 
+
+
+############################
+# Energy flow track merger
+############################
+
+module Merger EFlowTrackMerger {
+# add InputArray InputArray
+  add InputArray Calorimeter/eflowTracks
+  add InputArray ForwardLooperTracks/tracks
+  set OutputArray eflowTracks
+}
+
+
 ####################
 # Energy flow merger
 ####################
 
 module Merger EFlowMerger {
 # add InputArray InputArray
-  add InputArray Calorimeter/eflowTracks
+  add InputArray EFlowTrackMerger/eflowTracks
   add InputArray Calorimeter/eflowPhotons
   add InputArray Calorimeter/eflowNeutralHadrons
   set OutputArray eflow
 }
+
 
 ######################
 # EFlowFilter
@@ -985,9 +1030,9 @@ module Isolation PhotonIsolation {
 
   set OutputArray photons
 
-  # veto isolation cand. based on proximity to input cand.
-  set DeltaRMin 0.02
-  set UseMiniCone true
+  # veto isolation cand. based on proximity to input cand. -> turned out not to be needed
+  # set DeltaRMin 0.02
+  # set UseMiniCone true
 
   set DeltaRMax 0.3
 
@@ -1037,9 +1082,9 @@ module Isolation ElectronIsolation {
 
   set OutputArray electrons
 
-  # veto isolation cand. based on proximity to input cand.
-  set DeltaRMin 0.02
-  set UseMiniCone true
+  # veto isolation cand. based on proximity to input cand. -> turned out not to be needed
+  # set DeltaRMin 0.02
+  # set UseMiniCone true
 
   set DeltaRMax 0.3
 
@@ -1512,14 +1557,28 @@ module TreeWriter TreeWriter {
   #add Branch TrackMerger/tracks Track Track
   #add Branch TowerMerger/towers Tower Tower
 
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
+  #Temporary addition for manual isoVar validation/recalculation
+  # add Branch EFlowFilter/eflow ParticleFlowCandidates ParticleFlowCandidate 
+
+  add Branch EFlowTrackMerger/eflowTracks EFlowTrack Track
   add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
   add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/muons Muon Muon
-  add Branch UniqueObjectFinder/jets Jet Jet
+  add Branch UniqueObjectFinder/jets Jet Jet 
+
+  #collections for objects before isolation and uniqueobjectfinder
+  add Branch PhotonEfficiency/photons PhotonNoIso Photon
+  add Branch ElectronEfficiency/electrons ElectronNoIso Electron
+  add Branch MuonEfficiency/muons MuonNoIso Muon
+  add Branch JetEnergyScale/jets JetNoIso Jet
+
+  #collections for objects after isolation but before uniqueobjectfinder -> not needed?
+  # add Branch PhotonIsolation/photons PhotonNoOR Photon
+  # add Branch ElectronIsolation/electrons ElectronNoOR Electron
+  # add Branch MuonIsolation/muons MuonNoOR Muon
 
   add Branch GenJetFinder02/jets GenJet02 Jet
   add Branch GenJetFinder04/jets GenJet04 Jet

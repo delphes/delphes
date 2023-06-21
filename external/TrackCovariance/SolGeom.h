@@ -51,7 +51,8 @@ public:
   ~SolGeom();
 
   void Read(const char *data);
-
+  void SetBz(const Double_t Bz);
+  
   Double_t B()                     { return fB; }
   Int_t    Nl()                    { return fNlay; }
   Int_t    Nm()                    { return fNm; }

@@ -127,3 +127,11 @@ void SolGeom::SetMinBoundaries()
 		}
 	}
 }
+
+//
+// Set magnetic field strength manually 
+//
+void SolGeom::SetBz(const Double_t Bz)
+{
+	fB = Bz;
+}

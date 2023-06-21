@@ -1,4 +1,3 @@
-set MaxEvents 1000
 source delphes_card_IDEA.tcl
 
 set ExecutionPath [lreplace $ExecutionPath end end]
