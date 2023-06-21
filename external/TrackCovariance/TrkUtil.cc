@@ -363,6 +363,7 @@ TMatrixDSym TrkUtil::RegInv(TMatrixDSym& Min)
 		{
 			std::cout << "VertexFit::RegInv: null determinant for N = 2" << std::endl;
 			Rinv.Zero();	// Return null matrix
+			//std::cout<<"VertexFit::Min:"; Min.Print();
 		}
 		else
 		{

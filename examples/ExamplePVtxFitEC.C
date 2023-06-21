@@ -138,6 +138,7 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 				}
 			}		// End loop on tracks
 		}
+		if(entry % 100 == 0)std::cout<<"Event # "<<entry<<std::endl;
 		//
 		// Fit primary vertex with beam constraint
 		//
