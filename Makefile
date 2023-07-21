@@ -1055,7 +1055,8 @@ tmp/modules/TrackCovariance.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	external/TrackCovariance/SolGeom.h \
 	external/TrackCovariance/SolGridCov.h \
-	external/TrackCovariance/ObsTrk.h
+	external/TrackCovariance/ObsTrk.h \
+	classes/DelphesFormula.h
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \

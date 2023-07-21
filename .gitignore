@@ -22,3 +22,11 @@ root2lhco
 root2pileup
 stdhep2pileup
 tmp
+
+Makefile
+DelphesHepMC2
+DelphesHepMC3
+DelphesPythia8
+DisplayDict_rdict.pcm
+Pythia8Dict_rdict.pcm
+libDelphesDisplay.so
