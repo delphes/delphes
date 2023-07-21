@@ -21,6 +21,10 @@ Input cards were imported from https://github.com/eic/delphes_EIC.
 - Detector configuration card
 - Pythia 8 configuration file
 
+### How to configure and run DELPHES
+```
+./DelphesPythia8 ./2ndDET_cards/delphes_card_ATHENA.tcl ./2ndDET_pythia8cards/CC_DIS.cmnd ./2ndDET_analysis/test_output.root
+```
 
 [![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
 
