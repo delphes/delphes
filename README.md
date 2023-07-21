@@ -16,6 +16,11 @@ cd delphes/
 make
 make display
 ```
+### Inputs
+Input cards were imported from https://github.com/eic/delphes_EIC. 
+- Detector configuration card
+- Pythia 8 configuration file
+
 
 [![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
 

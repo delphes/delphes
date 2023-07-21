@@ -795,20 +795,20 @@ module TrackCountingBTagging TrackCountingBTagging {
 # Particle ID Systems
 ##################
 
-source ${DelphesCardsPath}/pfRICH_0.25mrad.tcl
-#source ${DelphesCardsPath}/pfRICH_0.0mrad.tcl
-source ${DelphesCardsPath}/barrelDIRC_epid.tcl
-source ${DelphesCardsPath}/barrelDIRC_hpid.tcl
-#source ${DelphesCardsPath}/BTOF.epid.t020ps.tcl
-#source ${DelphesCardsPath}/BTOF.hpid.t020ps.tcl
-source ${DelphesCardsPath}/BTOF.epid.t030ps.tcl
-source ${DelphesCardsPath}/BTOF.hpid.t030ps.tcl
-#source ${DelphesCardsPath}/dualRICH_aerogel_0.00mrad.tcl
-#source ${DelphesCardsPath}/dualRICH_aerogel_0.50mrad.tcl
-source ${DelphesCardsPath}/dualRICH_aerogel_0.25mrad.tcl
-source ${DelphesCardsPath}/dualRICH_c2f6_0.25mrad.tcl
-#source ${DelphesCardsPath}/dualRICH_c2f6_0.00mrad.tcl
-#source ${DelphesCardsPath}/dualRICH_c2f6_0.50mrad.tcl
+source pfRICH_0.25mrad.tcl
+#source pfRICH_0.0mrad.tcl
+source barrelDIRC_epid.tcl
+source barrelDIRC_hpid.tcl
+#source BTOF.epid.t020ps.tcl
+#source BTOF.hpid.t020ps.tcl
+source BTOF.epid.t030ps.tcl
+source BTOF.hpid.t030ps.tcl
+#source dualRICH_aerogel_0.00mrad.tcl
+#source dualRICH_aerogel_0.50mrad.tcl
+source dualRICH_aerogel_0.25mrad.tcl
+source dualRICH_c2f6_0.25mrad.tcl
+#source dualRICH_c2f6_0.00mrad.tcl
+#source dualRICH_c2f6_0.50mrad.tcl
 
 ##################
 # ROOT tree writer
