@@ -30,3 +30,4 @@ DelphesPythia8
 DisplayDict_rdict.pcm
 Pythia8Dict_rdict.pcm
 libDelphesDisplay.so
+*.root
