@@ -1,3 +1,22 @@
+## Additions
+### How to install DELPHES
+Clone **delphes** project
+```
+git clone https://github.com/delphes/delphes.git
+```
+Set environment variables for compiling
+```
+setenv HAS_PYTHIA8 true
+setenv PYTHIA8 ${path_to_Pythia8}
+```
+Configure and build
+```
+cd delphes/
+./configure
+make
+make display
+```
+
 [![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
 
 Delphes
