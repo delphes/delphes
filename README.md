@@ -1,4 +1,15 @@
 ## Additions
+
+### Getting started from SDCC from BNL
+Login into eic node
+```
+rterm -i
+```
+Set up work space
+```
+mkdir /gpfs02/eic/jkim
+ln -s /gpfs02/eic/jkim
+```
 ### How to install DELPHES
 Clone **delphes** project
 ```
@@ -20,10 +31,14 @@ make display
 Input cards were imported from https://github.com/eic/delphes_EIC. 
 - Detector configuration card
 - Pythia 8 configuration file
-
 ### How to configure and run DELPHES
 ```
-./DelphesPythia8 ./2ndDET_cards/delphes_card_ATHENA.tcl ./2ndDET_pythia8cards/CC_DIS.cmnd ./2ndDET_analysis/test_output.root
+./DelphesPythia8 ./2ndDET_cards/delphes_card_ATHENA.tcl ./2ndDET_pythia8cards/CC_DIS.cmnd test_output.root
+```
+### How to run analysis scripts
+```
+root -l 2ndDET_analysis/resolution.C'("CC_DIS_ATHENA_3T_1M_20230802_output.root")'
+root -l 2ndDET_analysis/track.C'("CC_DIS_ATHENA_3T_1M_20230802_output.root")'
 ```
 
 [![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)

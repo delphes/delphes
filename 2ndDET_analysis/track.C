@@ -1,6 +1,6 @@
 //////////////////////////////////////////
-// 07/21/2023 Jihee Kim (jkim11@bnl.gov)
-// Calculate resolutions of particles
+// 08/02/2023 Jihee Kim (jkim11@bnl.gov)
+// Tracks of particles
 //////////////////////////////////////////
 
 #ifdef __CLING__
@@ -13,7 +13,7 @@ class ExRootTreeReader;
 class ExRootResult;
 #endif
 
-void resolution(const char *inputFile)
+void track(const char *inputFile)
 {
   // Setting for figures
   TStyle* kStyle = new TStyle("kStyle","Kim's Style");
@@ -57,16 +57,18 @@ void resolution(const char *inputFile)
   ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
   // Get pointers to branches used in this analysis
   TClonesArray *branchParticle = treeReader->UseBranch("Particle");
-  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
+  TClonesArray* branchTrack = treeReader->UseBranch("Track");
   // Get total number of events
   Long64_t allEntries = treeReader->GetEntries();
   cout << "** Chain contains " << allEntries << " events" << endl;
 
   GenParticle *particle;
-  Electron *electron;
+  Track *track;  
+  
   // Book histograms
-  TH1* hElectronDeltaPT = new TH1D("hElectronDeltaPT",";(p_{T}^{rec}-p_{T}^{gen})/p_{T}^{gen};Number of electrons",100, -0.1, 0.1);
-  TH1* hElectronDeltaEta = new TH1D("hElectronDeltaEta",";(#eta^{rec}-#eta^{gen})/#eta^{gen};Number of electrons", 100, -0.1, 0.1);
+  TH1* hTrackPtGen = new TH1D("hTrackPtGen", ";Generated Pt [GeV];Number of tracks",100,0.,60.);
+  TH1* hTrackPtRec = new TH1D("hTrackPtRec", ";Reconstructed Pt [GeV];Number of tracks",100,0.,60.);
+  TH1* hTrackPtAcc = new TH1F("hTrackPtAcc", ";Pt [GeV];Pt Acceptance = Rec/Gen",100,0.,60.);
 
   Long64_t entry;
   Int_t i;
@@ -76,39 +78,53 @@ void resolution(const char *inputFile)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
-    // Loop over all electrons in event
-    for(i = 0; i < branchElectron->GetEntriesFast(); ++i)
+    //
+    if (branchTrack->GetEntries() > 0)
+    {
+      // Loop on all tracks
+      for (i = 0; i < branchTrack->GetEntries(); ++i)
       {
-        electron = (Electron*) branchElectron->At(i);
-        particle = (GenParticle*) electron->Particle.GetObject();
+        track = (Track*) branchTrack->At(i);
+        particle = (GenParticle*) track->Particle.GetObject();
 
-        hElectronDeltaPT->Fill((particle->PT - electron->PT)/particle->PT);
-        hElectronDeltaEta->Fill((particle->Eta - electron->Eta)/particle->Eta);
+        hTrackPtGen->Fill(particle->PT);
+        hTrackPtRec->Fill(track->PT);
       }
+    }
   }
 
   // Plot figures
   TCanvas *cnv1 = new TCanvas("cnv1", "cnv1");
-  hElectronDeltaPT->GetXaxis()->CenterTitle(true);
-  hElectronDeltaPT->GetYaxis()->CenterTitle(true);
-  hElectronDeltaPT->SetLineWidth(2);
-  hElectronDeltaPT->Fit("gaus");
-  TF1 *gaus_hElectronDeltaPT = hElectronDeltaPT->GetFunction("gaus");
-  gaus_hElectronDeltaPT->SetLineWidth(2);
-  gaus_hElectronDeltaPT->SetLineColor(kRed);
-  hElectronDeltaPT->Draw();
-  cnv1->SaveAs("./plots/hElectronDeltaPT.png");
+  cnv1->SetLogy(1);
+  hTrackPtGen->GetXaxis()->CenterTitle(true);
+  hTrackPtGen->GetYaxis()->CenterTitle(true);
+  hTrackPtGen->SetLineWidth(2);
+  hTrackPtGen->Draw();
+  cnv1->SaveAs("./plots/hTrackPtGen.png");
 
   TCanvas *cnv2 = new TCanvas("cnv2", "cnv2");
-  hElectronDeltaEta->GetXaxis()->CenterTitle(true);
-  hElectronDeltaEta->GetYaxis()->CenterTitle(true);
-  hElectronDeltaEta->SetLineWidth(2);
-  hElectronDeltaEta->Fit("gaus");
-  TF1 *gaus_hElectronDeltaEta = hElectronDeltaEta->GetFunction("gaus");
-  gaus_hElectronDeltaEta->SetLineWidth(2);
-  gaus_hElectronDeltaEta->SetLineColor(kRed);
-  hElectronDeltaEta->Draw();
-  cnv2->SaveAs("./plots/hElectronDeltaEta.png");
+  cnv2->SetLogy(1);
+  hTrackPtRec->GetXaxis()->CenterTitle(true);
+  hTrackPtRec->GetYaxis()->CenterTitle(true);
+  hTrackPtRec->SetLineWidth(2);
+  hTrackPtRec->Draw();
+  cnv2->SaveAs("./plots/hTrackPtRec.png");
+  
+  TCanvas *cnv3 = new TCanvas("cnv3", "cnv3");
+  Int_t NbPt = hTrackPtGen->GetNbinsX();
+  for (Int_t j = 1; j < NbPt + 1; j++)
+  {
+    Float_t pgen = hTrackPtGen->GetBinContent(j);
+    Float_t prec = hTrackPtRec->GetBinContent(j);
+    Float_t PtAcc = 0.0;
+    if (pgen > 0.0) PtAcc = prec / pgen;
+    hTrackPtAcc->SetBinContent(j, PtAcc);
+  }
+  hTrackPtAcc->GetXaxis()->CenterTitle(true);
+  hTrackPtAcc->GetYaxis()->CenterTitle(true);
+  hTrackPtAcc->SetLineWidth(2);
+  hTrackPtAcc->Draw(); 
+  cnv3->SaveAs("./plots/hTrackPtAcc.png");
   
   cout << "** Done..." << endl;
 
