@@ -82,8 +82,8 @@ void resolution(const char *inputFile)
         electron = (Electron*) branchElectron->At(i);
         particle = (GenParticle*) electron->Particle.GetObject();
 
-        hElectronDeltaPT->Fill((particle->PT - electron->PT)/particle->PT);
-        hElectronDeltaEta->Fill((particle->Eta - electron->Eta)/particle->Eta);
+        hElectronDeltaPT->Fill((electron->PT - particle->PT)/particle->PT);
+        hElectronDeltaEta->Fill((electron->Eta - particle->Eta)/particle->Eta);
       }
   }
 

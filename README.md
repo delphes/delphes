@@ -10,6 +10,12 @@ Set up work space
 mkdir /gpfs02/eic/jkim
 ln -s /gpfs02/eic/jkim
 ```
+Set up environment and all the software lives under `$EICDIRECTORY`
+```
+setenv EIC_LEVEL EIC2022a
+source /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/etc/eic_cshrc.csh
+```
+
 ### How to install DELPHES
 Clone **delphes** project
 ```
