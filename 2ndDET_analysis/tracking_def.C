@@ -46,9 +46,11 @@ void tracking_def()
   TH2* hTrackingEfficiency5GeV = new TH2D("hTrackingEfficiency5GeV", ";#eta; Tracking efficiency",100,-5.,5.,100,0.,1.2);
   TH2* hTrackingEfficiency10GeV = new TH2D("hTrackingEfficiency10GeV", ";#eta; Tracking efficiency",100,-5.,5.,100,0.,1.2);
 
-  TH2* hTrackingResolutionEtaN3p3 = new TH2D("hTrackingResolutionEtaN3p3", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
-  TH2* hTrackingResolutionEtaN2p3 = new TH2D("hTrackingResolutionEtaN2p3", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
-  TH2* hTrackingResolutionEtaP1p3 = new TH2D("hTrackingResolutionEtaN1p3", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
+  TH2* hTrackingResolutionEtaBin1 = new TH2D("hTrackingResolutionEtaBin1", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
+  TH2* hTrackingResolutionEtaBin2 = new TH2D("hTrackingResolutionEtaBin2", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
+  TH2* hTrackingResolutionEtaBin3 = new TH2D("hTrackingResolutionEtaBin3", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
+  TH2* hTrackingResolutionEtaBin4 = new TH2D("hTrackingResolutionEtaBin4", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
+  TH2* hTrackingResolutionEtaBin5 = new TH2D("hTrackingResolutionEtaBin5", ";Pt [GeV]; Tracking resolution",100,0.,100.,100,0.,1.);
   
   for (int j : {1, 5, 10})
   {
@@ -64,17 +66,24 @@ void tracking_def()
     }
   }
 
-  for (int k : {1.3})
+  for (int eta = -35; eta <= 35; ++eta)
   {
-    for (int l = 0; l < 100; ++l)
+    const double etab = eta / 10.0;
+    for (int pt = 0; pt < 100; ++pt)
     {
-      if (k == -3.3)
-        hTrackingResolutionEtaN3p3->Fill(l,CommonTrackingResolution(k,l));
-      else if (k == -2.3)
-        hTrackingResolutionEtaN2p3->Fill(l,CommonTrackingResolution(k,l));
+      if (etab > -3.5 && etab <= -2.5)
+        hTrackingResolutionEtaBin1->Fill(pt,CommonTrackingResolution(etab,pt));
+      else if (etab > -2.5 && etab <= -1.5)
+        hTrackingResolutionEtaBin2->Fill(pt,CommonTrackingResolution(etab,pt));
+      else if (etab > -1.5 && etab <= 1.5)
+        hTrackingResolutionEtaBin3->Fill(pt,CommonTrackingResolution(etab,pt));
+      else if (etab > 1.5 && etab <= 2.5)
+        hTrackingResolutionEtaBin4->Fill(pt,CommonTrackingResolution(etab,pt));
+      else if (etab > 2.5 && etab <= 3.5)
+        hTrackingResolutionEtaBin5->Fill(pt,CommonTrackingResolution(etab,pt));
       else
-        hTrackingResolutionEtaP1p3->Fill(l,CommonTrackingResolution(k,l));
-    }
+        break;
+      }
   }
 
   // Plot figures
@@ -103,17 +112,17 @@ void tracking_def()
   cnv3->SaveAs("./plots/hTrackingEfficiency10GeV.png");
 
   TCanvas *cnv4 = new TCanvas("cnv4", "cnv4");
-  hTrackingResolutionEtaN3p3->GetXaxis()->CenterTitle(true);
-  hTrackingResolutionEtaN3p3->GetYaxis()->CenterTitle(true);
-  hTrackingResolutionEtaN3p3->SetMarkerStyle(7);
-  hTrackingResolutionEtaN3p3->SetMarkerColor(kBlue);
-  hTrackingResolutionEtaN2p3->SetMarkerStyle(7);
-  hTrackingResolutionEtaN2p3->SetMarkerColor(kRed);
-  hTrackingResolutionEtaP1p3->SetMarkerStyle(7);
-  hTrackingResolutionEtaP1p3->SetMarkerColor(kGreen);
-  hTrackingResolutionEtaN3p3->Draw();
-  hTrackingResolutionEtaN2p3->Draw("SAME");
-  hTrackingResolutionEtaP1p3->Draw("SAME");
+  hTrackingResolutionEtaBin1->GetXaxis()->CenterTitle(true);
+  hTrackingResolutionEtaBin1->GetYaxis()->CenterTitle(true);
+  hTrackingResolutionEtaBin1->SetMarkerStyle(7);
+  hTrackingResolutionEtaBin1->SetMarkerColor(kBlue);
+  hTrackingResolutionEtaBin2->SetMarkerStyle(7);
+  hTrackingResolutionEtaBin2->SetMarkerColor(kRed);
+  hTrackingResolutionEtaBin3->SetMarkerStyle(7);
+  hTrackingResolutionEtaBin3->SetMarkerColor(kGreen);
+  hTrackingResolutionEtaBin1->Draw();
+  hTrackingResolutionEtaBin2->Draw("SAME");
+  hTrackingResolutionEtaBin3->Draw("SAME");
   cnv4->SaveAs("./plots/hTrackingResolution.png");
 
   cout << "** Done..." << endl;
