@@ -18,7 +18,7 @@ void track(const char *inputFile, const char *outputFile)
   // Setting for figures
   TStyle* kStyle = new TStyle("kStyle","Kim's Style");
   kStyle->SetOptStat("emr");
-  kStyle->SetOptTitle(0);
+  kStyle->SetOptTitle(1);
   kStyle->SetOptFit(1);
   kStyle->SetStatColor(0);
   kStyle->SetStatW(0.15);
@@ -83,6 +83,15 @@ void track(const char *inputFile, const char *outputFile)
   TH2* hTrackPvsEtaGen = new TH2D("hTrackPvsEtaGen", ";#eta^{gen};Generated P [GeV]",100,-5.,5.,100,0.,200.);
   TH2* hTrackPvsEtaRec = new TH2D("hTrackPvsEtaRec", ";#eta^{rec};Reconstructed P [GeV]",100,-5.,5.,100,0.,200.);
 
+  
+  TH1* hTrackPRes_P_1_2_Eta_N35_N30 = new TH1D("hTrackPRes_P_1_2_Eta_N35_N30","1<P[GeV]<2 & -3.5<#eta<-3.0;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+  TH1* hTrackPRes_P_1_2_Eta_N30_N25 = new TH1D("hTrackPRes_P_1_2_Eta_N30_N25","1<P[GeV]<2 & -3.0<#eta<-2.5;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+  TH1* hTrackPRes_P_1_2_Eta_N25_N20 = new TH1D("hTrackPRes_P_1_2_Eta_N25_N20","1<P[GeV]<2 & -2.5<#eta<-2.0;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+  TH1* hTrackPRes_P_1_2_Eta_N20_N15 = new TH1D("hTrackPRes_P_1_2_Eta_N20_N15","1<P[GeV]<2 & -2.0<#eta<-1.5;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+  TH1* hTrackPRes_P_1_2_Eta_N15_N10 = new TH1D("hTrackPRes_P_1_2_Eta_N15_N10","1<P[GeV]<2 & -1.5<#eta<-1.0;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+  TH1* hTrackPRes_P_1_2_Eta_N10_N05 = new TH1D("hTrackPRes_P_1_2_Eta_N10_N05","1<P[GeV]<2 & -1.0<#eta<-0.5;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+  TH1* hTrackPRes_P_1_2_Eta_N05_000 = new TH1D("hTrackPRes_P_1_2_Eta_N05_000","1<P[GeV]<2 & -0.5<#eta<0.0;(P^{rec}-P^{gen})/P^{gen};Number of tracks",100, -0.1, 0.1); 
+
   Long64_t entry;
   Int_t i;
 
@@ -114,6 +123,26 @@ void track(const char *inputFile, const char *outputFile)
         // Track momentum versus pseudorapidity
         hTrackPvsEtaGen->Fill(particle->Eta,particle->P);
         hTrackPvsEtaRec->Fill(track->Eta,track->P);
+	// Track momentum resolution
+	if (particle->P >= 1.0 && particle->P < 2.0)
+        {
+          if (particle->Eta > -3.5 && particle->Eta <= -3.0)
+	    hTrackPRes_P_1_2_Eta_N35_N30->Fill((track->P - particle->P)/particle->P);
+          else if (particle->Eta > -3.0 && particle->Eta <= -2.5)
+	    hTrackPRes_P_1_2_Eta_N30_N25->Fill((track->P - particle->P)/particle->P);
+          else if (particle->Eta > -2.5 && particle->Eta <= -2.0)
+	    hTrackPRes_P_1_2_Eta_N25_N20->Fill((track->P - particle->P)/particle->P);
+          else if (particle->Eta > -2.0 && particle->Eta <= -1.5)
+	    hTrackPRes_P_1_2_Eta_N20_N15->Fill((track->P - particle->P)/particle->P);
+          else if (particle->Eta > -1.5 && particle->Eta <= -1.0)
+	    hTrackPRes_P_1_2_Eta_N15_N10->Fill((track->P - particle->P)/particle->P);
+          else if (particle->Eta > -1.0 && particle->Eta <= -0.5)
+	    hTrackPRes_P_1_2_Eta_N10_N05->Fill((track->P - particle->P)/particle->P);
+          else if (particle->Eta > -0.5 && particle->Eta <= 0.0)
+	    hTrackPRes_P_1_2_Eta_N05_000->Fill((track->P - particle->P)/particle->P);
+	  else
+	   break; 
+        }
       }
     }
   }
@@ -257,6 +286,76 @@ void track(const char *inputFile, const char *outputFile)
   hTrackPvsEtaRec->SetLineWidth(2);
   hTrackPvsEtaRec->Draw("COLZ");
   cnv13->SaveAs("./plots/hTrackPvsEtaRec.png");
+
+  TCanvas *cnv100 = new TCanvas("cnv100", "cnv100", 8000, 1000);
+  cnv100->Divide(4,2);
+  cnv100->cd(1);
+  hTrackPRes_P_1_2_Eta_N35_N30->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N35_N30->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N35_N30->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N35_N30->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N35_N30 = hTrackPRes_P_1_2_Eta_N35_N30->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N35_N30->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N35_N30->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N35_N30->Draw();
+  cnv100->cd(2);
+  hTrackPRes_P_1_2_Eta_N30_N25->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N30_N25->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N30_N25->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N30_N25->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N30_N25 = hTrackPRes_P_1_2_Eta_N30_N25->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N30_N25->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N30_N25->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N30_N25->Draw();
+  cnv100->cd(3);
+  hTrackPRes_P_1_2_Eta_N25_N20->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N25_N20->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N25_N20->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N25_N20->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N25_N20 = hTrackPRes_P_1_2_Eta_N25_N20->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N25_N20->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N25_N20->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N25_N20->Draw();
+  cnv100->cd(4);
+  hTrackPRes_P_1_2_Eta_N20_N15->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N20_N15->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N20_N15->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N20_N15->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N20_N15 = hTrackPRes_P_1_2_Eta_N20_N15->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N20_N15->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N20_N15->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N20_N15->Draw();
+  cnv100->cd(5);
+  hTrackPRes_P_1_2_Eta_N15_N10->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N15_N10->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N15_N10->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N15_N10->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N15_N10 = hTrackPRes_P_1_2_Eta_N15_N10->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N15_N10->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N15_N10->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N15_N10->Draw();
+  cnv100->cd(6);
+  hTrackPRes_P_1_2_Eta_N10_N05->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N10_N05->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N10_N05->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N10_N05->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N10_N05 = hTrackPRes_P_1_2_Eta_N10_N05->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N10_N05->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N10_N05->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N10_N05->Draw();
+  cnv100->cd(7);
+  hTrackPRes_P_1_2_Eta_N05_000->GetXaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N05_000->GetYaxis()->CenterTitle(true);
+  hTrackPRes_P_1_2_Eta_N05_000->SetLineWidth(2);
+  hTrackPRes_P_1_2_Eta_N05_000->Fit("gaus");
+  TF1 *gaus_hTrackPRes_P_1_2_Eta_N05_000 = hTrackPRes_P_1_2_Eta_N05_000->GetFunction("gaus");
+  gaus_hTrackPRes_P_1_2_Eta_N05_000->SetLineWidth(2);
+  gaus_hTrackPRes_P_1_2_Eta_N05_000->SetLineColor(kRed);
+  hTrackPRes_P_1_2_Eta_N05_000->Draw();
+  cnv100->SaveAs("./plots/hTrackPRes_P_1_2.png");
+
+
+
 
   cout << "** Done..." << endl;
 
