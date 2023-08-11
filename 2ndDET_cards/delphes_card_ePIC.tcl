@@ -2,6 +2,10 @@
 # 08/09/2023 Check-Ping Wong (cwong1@bnl.gov) and Jihee Kim (jkim11@bnl.gov)
 # Added ePIC ECal and HCal resolutions
 # Changed magnetic field stregth from 3 T to 1.7 T (just scaling down); set Bz 
+# 08/10/2023 Jihee Kim
+# Added ePIC Tracking resolution and DCA transverse pointing resolution
+# 08/11/2023 Jihee Kim
+# Added ePIC Tracking eifficiency and DCA longitudinal pointing resolution
 ######################################################################################################################
 # ATHENA detector model. Based on parametrizations from G4 simulations made by the ATHENA collaboration
 # email: miguel.arratia@ucr.edu, ssekula@mail.smu.edu
@@ -103,36 +107,41 @@ module ParticlePropagator ParticlePropagator {
 ####################################
 # Common Tracking Efficiency Model
 ####################################
-# ATHENA model
+# Refer to ePIC tracking efficiency
+# According to Stephen Maple
+# In CraterLake version of ePIC tracking
+# Individual tracking layers in simulation are 100% efficient
+# When we use truth seeding 1 charged particle = 1 track (assuming it produces sufficient hits for track fitting)
+# See slide 5 of Barak's presentation https://indico.bnl.gov/event/20126/contributions/78820/attachments/48724/83521/real_seeding_072023.pdf
 set CommonTrackingEfficiency {
-    (eta > -3.5 && eta <= -3.0 ) * (pt*cosh(eta) > 1.25 && pt*cosh(eta)<6.0)   * (0.875) +
-    (eta > -3.5 && eta <= -3.0 ) * (pt*cosh(eta) > 6.0 )                       * (0.95) +
-    (eta > -3.0 && eta <= -2.5 ) * (pt*cosh(eta) > 0.55 && pt*cosh(eta)<2.0)   * (0.875) +
-    (eta > -3.0 && eta <= -2.5 ) * (pt*cosh(eta) > 2.0)                        * (0.95) +
-    (eta > -2.5 && eta <= -2.0)  * (pt*cosh(eta)> 0.45 && pt*cosh(eta)<0.6)    * (0.875) +
-    (eta > -2.5 && eta <= -2.0)  * (pt*cosh(eta)>0.6)                          * (0.95) +
-    (eta > -2.0 && eta <= -1.5)  * (pt*cosh(eta)> 0.250 && pt*cosh(eta)<0.500)* (0.875) +
-    (eta > -2.0 && eta <= -1.5)  * (pt*cosh(eta)>0.500)                        * (0.95) +    
-    (eta > -1.5 && eta <= -1.0)  * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.300)* (0.86) +
-    (eta > -1.5 && eta <= -1.0)  * (pt*cosh(eta) > 0.300)                      * (0.92) +
-    (eta > -1.0 && eta <= -0.5)  * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (0.89) +
-    (eta > -1.0 && eta <= -0.5)  * (pt*cosh(eta) > 0.200)                      * (0.98) +
-    (eta > -0.5 && eta <= 0.0)   * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)*(0.89) +
-    (eta > -0.5 && eta <= 0.0)   * (pt*cosh(eta) > 0.200 )                     * (0.98) +
-    (eta > 0.0 && eta <= 0.5 )   * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (0.89) +
-    (eta > 0.0 && eta <= 0.5 )   * (pt*cosh(eta) > 0.200)                      * (0.98) +
-    (eta > 0.5 && eta <= 1.0 )   * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (0.89) +
-    (eta > 0.5 && eta <= 1.0 )   * (pt*cosh(eta) > 0.200)                      * (0.98) +
-    (eta > 1.0 && eta <= 1.5)    * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (0.86) +
-    (eta > 1.0 && eta <= 1.5)    * (pt*cosh(eta) > 0.200)                      * (0.92) +
-    (eta > 1.5 && eta <= 2.0)    * (pt*cosh(eta) > 0.250 && pt*cosh(eta)<0.500)* (0.89) +
-    (eta > 1.5 && eta <= 2.0)    * (pt*cosh(eta) > 0.500)                      * (0.98) +
-    (eta > 2.0 && eta <= 2.5)    * (pt*cosh(eta) > 0.350 && pt*cosh(eta)<0.700)* (0.88) +
-    (eta > 2.0 && eta <= 2.5)    * (pt*cosh(eta) > 0.700)                      * (0.97) +
-    (eta > 2.5 && eta <= 3.0)    * (pt*cosh(eta) > 0.550 && pt*cosh(eta)<2.0)  * (0.87) +
-    (eta > 2.5 && eta <= 3.0)    * (pt*cosh(eta) > 2.0)                        * (0.95) +
-    (eta > 3.0 && eta <= 3.5)    * (pt*cosh(eta) > 0.850 && pt*cosh(eta)<4.0)  * (0.87) +
-    (eta > 3.0 && eta <= 3.5)    * (pt*cosh(eta) > 4.0)                        * (0.95) +
+    (eta > -3.5 && eta <= -3.0 ) * (pt*cosh(eta) > 1.25 && pt*cosh(eta)<6.0)   * (1.0) +
+    (eta > -3.5 && eta <= -3.0 ) * (pt*cosh(eta) > 6.0 )                       * (1.0) +
+    (eta > -3.0 && eta <= -2.5 ) * (pt*cosh(eta) > 0.55 && pt*cosh(eta)<2.0)   * (1.0) +
+    (eta > -3.0 && eta <= -2.5 ) * (pt*cosh(eta) > 2.0)                        * (1.0) +
+    (eta > -2.5 && eta <= -2.0)  * (pt*cosh(eta)> 0.45 && pt*cosh(eta)<0.6)    * (1.0) +
+    (eta > -2.5 && eta <= -2.0)  * (pt*cosh(eta)>0.6)                          * (1.0) +
+    (eta > -2.0 && eta <= -1.5)  * (pt*cosh(eta)> 0.250 && pt*cosh(eta)<0.500)* (1.0) +
+    (eta > -2.0 && eta <= -1.5)  * (pt*cosh(eta)>0.500)                        * (1.0) +    
+    (eta > -1.5 && eta <= -1.0)  * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.300)* (1.0) +
+    (eta > -1.5 && eta <= -1.0)  * (pt*cosh(eta) > 0.300)                      * (1.0) +
+    (eta > -1.0 && eta <= -0.5)  * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (1.0) +
+    (eta > -1.0 && eta <= -0.5)  * (pt*cosh(eta) > 0.200)                      * (1.0) +
+    (eta > -0.5 && eta <= 0.0)   * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)*(1.0) +
+    (eta > -0.5 && eta <= 0.0)   * (pt*cosh(eta) > 0.200 )                     * (1.0) +
+    (eta > 0.0 && eta <= 0.5 )   * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (1.0) +
+    (eta > 0.0 && eta <= 0.5 )   * (pt*cosh(eta) > 0.200)                      * (1.0) +
+    (eta > 0.5 && eta <= 1.0 )   * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (1.0) +
+    (eta > 0.5 && eta <= 1.0 )   * (pt*cosh(eta) > 0.200)                      * (1.0) +
+    (eta > 1.0 && eta <= 1.5)    * (pt*cosh(eta) > 0.150 && pt*cosh(eta)<0.200)* (1.0) +
+    (eta > 1.0 && eta <= 1.5)    * (pt*cosh(eta) > 0.200)                      * (1.0) +
+    (eta > 1.5 && eta <= 2.0)    * (pt*cosh(eta) > 0.250 && pt*cosh(eta)<0.500)* (1.0) +
+    (eta > 1.5 && eta <= 2.0)    * (pt*cosh(eta) > 0.500)                      * (1.0) +
+    (eta > 2.0 && eta <= 2.5)    * (pt*cosh(eta) > 0.350 && pt*cosh(eta)<0.700)* (1.0) +
+    (eta > 2.0 && eta <= 2.5)    * (pt*cosh(eta) > 0.700)                      * (1.0) +
+    (eta > 2.5 && eta <= 3.0)    * (pt*cosh(eta) > 0.550 && pt*cosh(eta)<2.0)  * (1.0) +
+    (eta > 2.5 && eta <= 3.0)    * (pt*cosh(eta) > 2.0)                        * (1.0) +
+    (eta > 3.0 && eta <= 3.5)    * (pt*cosh(eta) > 0.850 && pt*cosh(eta)<4.0)  * (1.0) +
+    (eta > 3.0 && eta <= 3.5)    * (pt*cosh(eta) > 4.0)                        * (1.0) +
     (abs(eta) > 3.5)  * (0.00)+
     0.0
 }
@@ -220,24 +229,30 @@ module TrackSmearing ChargedHadronSmearing {
     (eta<=0.5 && eta>0)     * (sqrt( (0.0065)^2 +   (0.0241/pt)^2   ) )  +                                                                                                   
     (eta<=1.0 && eta>0.5)   * (sqrt( (0.0068)^2 +   (0.0283/pt)^2   ) )  +                                                                                                              
     (eta<=1.5 && eta>1.0)   * (sqrt( (0.0084)^2 +   (0.0433/pt)^2   ) )  +                                                                                                             
-   
     (eta<=2.0 && eta>1.5)   * (sqrt( (0.0133)^2 +   (0.0579/pt)^2   ) )  +                                                                                                                 
     (eta<=2.5 && eta>2.0)   * (sqrt( (0.0141)^2 +   (0.0659/pt)^2   ) )  +                                                                                                              
     (eta<=3.0 && eta>2.5)   * (sqrt( (0.0308)^2 +   (0.0685/pt)^2   ) )  +                                                                                                               
     (eta<=3.5 && eta>3.0)   * (sqrt( (0.0770)^2 +   (0.0575/pt)^2   ) )  
   "
-
-  # ATHENA model
+  
+  # Refer to ePIC tracking resolution
+  # Provided by Stephen Maple
+  # Used CraterLake version of the ePIC tracking system with truth seeding
+  # DCA resolution in longitudinal (DZ) [mm]
   set DZResolutionFormula "
-    (abs(eta)<=0.5)                   * (sqrt( (0.0034)^2 +   (0.027/pt)^2   ) )  +
-    (abs(eta)<=1.0 && abs(eta)>0.5)   * (sqrt( (0.0038)^2 +   (0.036/pt)^2   ) )  +
-    (abs(eta)<=1.5 && abs(eta)>1.0)   * (sqrt( (0.0056)^2 +   (0.061/pt)^2   ) )  +
-    (abs(eta)<=2.0 && abs(eta)>1.5)   * (sqrt( (0.0072)^2 +   (0.116/pt)^2   ) )  +   
-    (abs(eta)<=2.5 && abs(eta)>2.0)   * (sqrt( (0.0095)^2 +   (0.244/pt)^2   ) )  + 
-    (abs(eta)<=3.0 && abs(eta)>2.5)   * (sqrt( (0.0330)^2 +   (2.581/pt)^2   ) )  +
-    (abs(eta)<=3.5 && abs(eta)>3.0)   * (sqrt( (0.1890)^2 +   (8.349/pt)^2   ) )  
+    (eta <= -2.5 && eta > -3.0) * (sqrt( (0.1322)^2 + (0.4925/pt)^2)) + 
+    (eta <= -2.0 && eta > -2.5) * (sqrt( (0.0828)^2 + (0.2337/pt)^2)) + 
+    (eta <= -1.5 && eta > -2.0) * (sqrt( (0.0380)^2 + (0.1099/pt)^2)) + 
+    (eta <= -1.0 && eta > -1.5) * (sqrt( (0.0160)^2 + (0.0666/pt)^2)) + 
+    (eta <= -0.5 && eta > -1.0) * (sqrt( (0.0055)^2 + (0.0351/pt)^2)) + 
+    (eta <=  0.0 && eta > -0.5) * (sqrt( (0.0047)^2 + (0.0260/pt)^2)) + 
+    (eta <=  0.5 && eta >  0.0) * (sqrt( (0.0047)^2 + (0.0264/pt)^2)) + 
+    (eta <=  1.0 && eta >  0.5) * (sqrt( (0.0057)^2 + (0.0351/pt)^2)) + 
+    (eta <=  1.5 && eta >  1.0) * (sqrt( (0.0160)^2 + (0.0658/pt)^2)) + 
+    (eta <=  2.0 && eta >  1.5) * (sqrt( (0.0382)^2 + (0.1122/pt)^2)) + 
+    (eta <=  2.5 && eta >  2.0) * (sqrt( (0.0864)^2 + (0.2372/pt)^2)) + 
+    (eta <=  3.0 && eta >  2.5) * (sqrt( (0.1433)^2 + (0.4948/pt)^2)) +    
   "
-
 
 }
 
@@ -278,17 +293,24 @@ module TrackSmearing MuonSmearing {
     (eta<=3.0 && eta>2.5)   * (sqrt( (0.0308)^2 +   (0.0685/pt)^2   ) )  +                                                                                                               
     (eta<=3.5 && eta>3.0)   * (sqrt( (0.0770)^2 +   (0.0575/pt)^2   ) )  
   "
-  # ATHENA model
-  set DZResolutionFormula "                                                                                                                                                                                
-    (abs(eta)<=0.5)                   * (sqrt( (0.0034)^2 +   (0.027/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=1.0 && abs(eta)>0.5)   * (sqrt( (0.0038)^2 +   (0.036/pt)^2   ) )  +                                                                                                          
-    (abs(eta)<=1.5 && abs(eta)>1.0)   * (sqrt( (0.0056)^2 +   (0.061/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=2.0 && abs(eta)>1.5)   * (sqrt( (0.0072)^2 +   (0.116/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=2.5 && abs(eta)>2.0)   * (sqrt( (0.0095)^2 +   (0.244/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=3.0 && abs(eta)>2.5)   * (sqrt( (0.0330)^2 +   (2.581/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=3.5 && abs(eta)>3.0)   * (sqrt( (0.1890)^2 +   (8.349/pt)^2   ) )                                                                                                              
+  # Refer to ePIC tracking resolution
+  # Provided by Stephen Maple
+  # Used CraterLake version of the ePIC tracking system with truth seeding
+  # DCA resolution in longitudinal (DZ) [mm]
+  set DZResolutionFormula "
+    (eta <= -2.5 && eta > -3.0) * (sqrt( (0.1322)^2 + (0.4925/pt)^2)) + 
+    (eta <= -2.0 && eta > -2.5) * (sqrt( (0.0828)^2 + (0.2337/pt)^2)) +    
+    (eta <= -1.5 && eta > -2.0) * (sqrt( (0.0380)^2 + (0.1099/pt)^2)) +    
+    (eta <= -1.0 && eta > -1.5) * (sqrt( (0.0160)^2 + (0.0666/pt)^2)) +    
+    (eta <= -0.5 && eta > -1.0) * (sqrt( (0.0055)^2 + (0.0351/pt)^2)) +    
+    (eta <=  0.0 && eta > -0.5) * (sqrt( (0.0047)^2 + (0.0260/pt)^2)) +    
+    (eta <=  0.5 && eta >  0.0) * (sqrt( (0.0047)^2 + (0.0264/pt)^2)) +    
+    (eta <=  1.0 && eta >  0.5) * (sqrt( (0.0057)^2 + (0.0351/pt)^2)) +    
+    (eta <=  1.5 && eta >  1.0) * (sqrt( (0.0160)^2 + (0.0658/pt)^2)) +    
+    (eta <=  2.0 && eta >  1.5) * (sqrt( (0.0382)^2 + (0.1122/pt)^2)) +    
+    (eta <=  2.5 && eta >  2.0) * (sqrt( (0.0864)^2 + (0.2372/pt)^2)) +    
+    (eta <=  3.0 && eta >  2.5) * (sqrt( (0.1433)^2 + (0.4948/pt)^2)) +    
   "
-
 
 }
 
@@ -331,17 +353,24 @@ module TrackSmearing ElectronSmearing {
     (eta<=3.5 && eta>3.0)   * (sqrt( (0.0770)^2 +   (0.0575/pt)^2   ) )  
   "
 
-  # ATHENA model
-  set DZResolutionFormula "                                                                                                                                                                                
-    (abs(eta)<=0.5)                   * (sqrt( (0.0034)^2 +   (0.027/pt)^2   ) )  +                                                                                                          
-    (abs(eta)<=1.0 && abs(eta)>0.5)   * (sqrt( (0.0038)^2 +   (0.036/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=1.5 && abs(eta)>1.0)   * (sqrt( (0.0056)^2 +   (0.061/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=2.0 && abs(eta)>1.5)   * (sqrt( (0.0072)^2 +   (0.116/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=2.5 && abs(eta)>2.0)   * (sqrt( (0.0095)^2 +   (0.244/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=3.0 && abs(eta)>2.5)   * (sqrt( (0.0330)^2 +   (2.581/pt)^2   ) )  +                                                                                                           
-    (abs(eta)<=3.5 && abs(eta)>3.0)   * (sqrt( (0.1890)^2 +   (8.349/pt)^2   ) )                                                                                                              
+  # Refer to ePIC tracking resolution
+  # Provided by Stephen Maple
+  # Used CraterLake version of the ePIC tracking system with truth seeding
+  # DCA resolution in longitudinal (DZ) [mm]
+  set DZResolutionFormula "
+    (eta <= -2.5 && eta > -3.0) * (sqrt( (0.1322)^2 + (0.4925/pt)^2)) +    
+    (eta <= -2.0 && eta > -2.5) * (sqrt( (0.0828)^2 + (0.2337/pt)^2)) +    
+    (eta <= -1.5 && eta > -2.0) * (sqrt( (0.0380)^2 + (0.1099/pt)^2)) +    
+    (eta <= -1.0 && eta > -1.5) * (sqrt( (0.0160)^2 + (0.0666/pt)^2)) +    
+    (eta <= -0.5 && eta > -1.0) * (sqrt( (0.0055)^2 + (0.0351/pt)^2)) +    
+    (eta <=  0.0 && eta > -0.5) * (sqrt( (0.0047)^2 + (0.0260/pt)^2)) +    
+    (eta <=  0.5 && eta >  0.0) * (sqrt( (0.0047)^2 + (0.0264/pt)^2)) +    
+    (eta <=  1.0 && eta >  0.5) * (sqrt( (0.0057)^2 + (0.0351/pt)^2)) +    
+    (eta <=  1.5 && eta >  1.0) * (sqrt( (0.0160)^2 + (0.0658/pt)^2)) +    
+    (eta <=  2.0 && eta >  1.5) * (sqrt( (0.0382)^2 + (0.1122/pt)^2)) +    
+    (eta <=  2.5 && eta >  2.0) * (sqrt( (0.0864)^2 + (0.2372/pt)^2)) +    
+    (eta <=  3.0 && eta >  2.5) * (sqrt( (0.1433)^2 + (0.4948/pt)^2)) +    
   "
-
 }
 
 ##############
@@ -376,6 +405,7 @@ module SimpleCalorimeter ECal {
 
   set pi [expr {acos(-1)}]
 
+  # ATHENA model
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
@@ -402,7 +432,7 @@ module SimpleCalorimeter ECal {
     foreach eta {1.0 1.0502701  1.06072776 1.07137342 1.08221211 1.09324904 1.10448965 1.11593955 1.12760462 1.13949092 1.15160481 1.16395288 1.17654201 1.18937936 1.20247241 1.21582897 1.22945719 1.24336562 1.25756317 1.27205918 1.28686345 1.30198626 1.31743839 1.33323117 1.34937654 1.36588703 1.38277588 1.40005705 1.41774529 1.43585618 1.45440623 1.47341295 1.4928949  1.51287184 1.53336478 1.55439612 1.57598979 1.59817135 1.62096821 1.64440978 1.66852765 1.69335587 1.71893119 1.74529337 1.77248548 1.80055436 1.82955102 1.8595312 1.89055593 1.92269228 1.95601417 1.99060337 2.02655061 2.063957 2.10293569 2.14361383 2.18613503 2.23066235 2.27738197 2.3265078 2.3782873  2.43300894 2.49101173 2.55269788 2.61854952 2.68915144 2.76522251 2.84766006 2.93760447 3.03653567 3.14642305 3.26996837 3.41102102 3.5 4.0} {
    	add EtaPhiBins $eta $PhiBins
     }
-    
+  # ATHENA model 
   add EnergyFraction {0} {0.0}
   # energy fractions for e, gamma and pi0
   add EnergyFraction {11} {1.0}
@@ -452,6 +482,7 @@ module SimpleCalorimeter HCal {
 
   set pi [expr {acos(-1)}]
 
+  # ATHENA model
     set PhiBins {}
     for {set i -30} {$i <=30} {incr i} {
 	add PhiBins [expr {$i * $pi/30.0}]
@@ -472,7 +503,7 @@ module SimpleCalorimeter HCal {
 	add EtaPhiBins $eta $PhiBins
     }
 
-
+  # ATHENA model
   add EnergyFraction {0} {1.0}
   # energy fractions for e, gamma and pi0
   add EnergyFraction {11} {0.0}
@@ -809,7 +840,7 @@ module TrackCountingBTagging TrackCountingBTagging {
 ##################
 # Particle ID Systems
 ##################
-
+# ATHENA model
 source pfRICH_0.25mrad.tcl
 #source pfRICH_0.0mrad.tcl
 source barrelDIRC_epid.tcl
