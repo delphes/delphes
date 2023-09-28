@@ -22,11 +22,12 @@ class VertexFit: public TrkUtil
 private:
 	//
 	// Inputs
-	Int_t fNtr;							// Number of tracks
+	Int_t fNtr;				// Number of tracks
 	std::vector<TVectorD*> fPar;		// Input parameter array
 	std::vector<TVectorD*> fParNew;		// Updated parameter array
 	std::vector<TMatrixDSym*> fCov;		// Input parameter covariances
 	std::vector<TMatrixDSym*> fCovNew;	// Updated parameter covariances
+	std::vector<Bool_t>fCharged;		// Charge tag
 	// Constraints
 	Bool_t fVtxCst;					// Vertex constraint flag
 	TVectorD fxCst;					// Constraint value
@@ -55,7 +56,7 @@ private:
 	// Service routines
 	void ResetWrkArrays();				// Clear work arrays
 	TVectorD Fill_x0(TVectorD par);			// Track position at dma to z-axis
-	TVectorD Fill_x(TVectorD par, Double_t phi);	// Track position at given phase
+	TVectorD Fill_x(TVectorD par, Double_t phi, Bool_t Q);	// Track position at given phase
 	void UpdateTrkArrays(Int_t i);			// Fill track realted arrays
 	void VtxFitNoSteer();				// Vertex fitter routine w/o parameter steering
 	void VertexFitter();				// Vertex fitter routine w/  parameter steering
@@ -65,10 +66,14 @@ public:
 	VertexFit();						// Initialize waiting for tracks
 	VertexFit(Int_t Ntr, ObsTrk** tracks);			// Initialize with ObsTrk tracks
 	VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov);	// Initialize with parameters and covariances
+	VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov, Bool_t* Charged);	// Initialize with parameters and covariances
+											// charge tag (true if charged)
+	
 	// Destructor
 	~VertexFit();
 	//
 	// Accessors also trigger calculations when needed
+	Bool_t IsCharged(Int_t i) { return fCharged[i]; };
 	Int_t GetNtrk() { return fNtr; };
 	TMatrixDSym GetOldCov(Int_t i) { return *fCov[i]; }; // Input track covariance
 	TVectorD GetVtx();
@@ -85,6 +90,7 @@ public:
 	// Handle tracks/constraints
 	void AddVtxConstraint(TVectorD xv, TMatrixDSym cov);	// Add gaussian vertex constraint
 	void AddTrk(TVectorD *par, TMatrixDSym *Cov);		// Add track to input list
+	void AddTrk(TVectorD *par, TMatrixDSym *Cov, Bool_t Charged);		// Add track to input list with charge tag
 	void RemoveTrk(Int_t iTrk);				// Remove iTrk track
 	void SetStartR(Double_t R) { fRstart = R; };		// Set starting radius
 	//

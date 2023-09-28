@@ -39,12 +39,39 @@ VertexFit::VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov)
 	fXv.ResizeTo(3);
 	fcovXv.ResizeTo(3, 3);
 	//
+	Bool_t Charged = kTRUE;
 	for (Int_t i = 0; i < fNtr; i++)
 	{
 		fPar.push_back(new TVectorD(*trkPar[i]));
 		fParNew.push_back(new TVectorD(*trkPar[i]));
 		fCov.push_back(new TMatrixDSym(*trkCov[i]));
 		fCovNew.push_back(new TMatrixDSym(*trkCov[i]));
+		fCharged.push_back(Charged);
+	}
+	fChi2List.ResizeTo(fNtr);
+	//
+}
+//
+// Build from list of parameters and covariances with charge tag
+VertexFit::VertexFit(Int_t Ntr, TVectorD** trkPar, TMatrixDSym** trkCov, Bool_t* Charged)
+{
+	fNtr = Ntr;
+	fRstart = -1.0;
+	fVtxDone = kFALSE;
+	fVtxCst = kFALSE;
+	fxCst.ResizeTo(3);
+	fCovCst.ResizeTo(3, 3);
+	fCovCstInv.ResizeTo(3, 3);
+	fXv.ResizeTo(3);
+	fcovXv.ResizeTo(3, 3);
+	//
+	for (Int_t i = 0; i < fNtr; i++)
+	{
+		fPar.push_back(new TVectorD(*trkPar[i]));
+		fParNew.push_back(new TVectorD(*trkPar[i]));
+		fCov.push_back(new TMatrixDSym(*trkCov[i]));
+		fCovNew.push_back(new TMatrixDSym(*trkCov[i]));
+		fCharged.push_back(Charged[i]);
 	}
 	fChi2List.ResizeTo(fNtr);
 	//
@@ -64,12 +91,14 @@ VertexFit::VertexFit(Int_t Ntr, ObsTrk** track)
 	fcovXv.ResizeTo(3, 3);
 	//
 	fChi2List.ResizeTo(fNtr);
+	Bool_t Charged = kTRUE;
 	for (Int_t i = 0; i < fNtr; i++)
 	{
 		fPar.push_back(new TVectorD(track[i]->GetObsPar()));
 		fParNew.push_back(new TVectorD(track[i]->GetObsPar()));
 		fCov.push_back(new TMatrixDSym(track[i]->GetCov()));
 		fCovNew.push_back(new TMatrixDSym(track[i]->GetCov()));
+		fCharged.push_back(Charged);
 	}
 }
 //
@@ -122,6 +151,7 @@ VertexFit::~VertexFit()
 	//
 	ResetWrkArrays();
 	ffi.clear();	
+	fCharged.clear();
 	fNtr = 0;
 }
 //
@@ -149,26 +179,17 @@ TVectorD VertexFit::Fill_x0(TVectorD par)
 	return x0;
 }
 //
-TVectorD VertexFit::Fill_x(TVectorD par, Double_t phi)
+TVectorD VertexFit::Fill_x(TVectorD par, Double_t phi, Bool_t Charged)
 {
 	//
 	// Calculate track 3D position for a given phase, phi
 	//
 	TVectorD x(3);
-	//
-	// Decode input arrays
-	//
-	//Double_t D = par(0);
-	Double_t p0 = par(1);
-	Double_t C = par(2);
-	//Double_t z0 = par(3);
-	Double_t ct = par(4);
-	//
-	TVectorD x0 = Fill_x0(par);
-	x(0) = x0(0) + (TMath::Sin(phi + p0) - TMath::Sin(p0)) / (2 * C);
-	x(1) = x0(1) - (TMath::Cos(phi + p0) - TMath::Cos(p0)) / (2 * C);
-	x(2) = x0(2) + ct * phi / (2 * C);
-	//
+	TVector3 xt;
+	if(Charged) xt = Xtrack(par, phi);
+	else        xt = Xtrack_N(par,phi);
+	for(Int_t i = 0; i<3; i++)x(i) = xt(i);
+//
 	return x;
 }
 //
@@ -181,7 +202,9 @@ void VertexFit::UpdateTrkArrays(Int_t i)
 	TMatrixDSym Cov = *fCov[i];
 	//
 	// Fill all track related work arrays arrays
-	TMatrixD A = derXdPar(par, fs);		// A = dx/da = derivatives wrt track parameters
+	TMatrixD A(3,5);				// A = dx/da = derivatives wrt track parameters
+	if(fCharged[i]) A = derXdPar(par, fs);	
+	else	        A = derXdPar_N(par, fs);
 	TMatrixDSym Winv = Cov;				
 	Winv.Similarity(A);			// W^-1 = A*C*A'
 
@@ -189,7 +212,7 @@ void VertexFit::UpdateTrkArrays(Int_t i)
 	fAti.push_back(new TMatrixD(At));		// Store A'
 	fWinvi.push_back(new TMatrixDSym(Winv));	// Store W^-1 matrix
 	//
-	TVectorD xs = Fill_x(par, fs);
+	TVectorD xs = Fill_x(par, fs, fCharged[i]);
 	fx0i.push_back(new TVectorD(xs));			// Start helix position
 	// 
 	TVectorD di = A * (par - *fPar[i]);			// x-shift
@@ -198,7 +221,9 @@ void VertexFit::UpdateTrkArrays(Int_t i)
 	TMatrixDSym W = RegInv(Winv);				// W = (A*C*A')^-1
 	fWi.push_back(new TMatrixDSym(W));			// Store W matrix
 	//
-	TVectorD a = derXds(par, fs);				// a = dx/ds = derivatives wrt phase
+	TVectorD a(3);						// a = dx/ds = derivatives wrt phase
+	if(fCharged[i]) a = derXds(par, fs);	
+	else 		a = derXds_N(par, fs);	
 	fai.push_back(new TVectorD(a));				// Store a
 	//
 	Double_t a2 = W.Similarity(a);
@@ -233,16 +258,32 @@ void VertexFit::VtxFitNoSteer()
 		Double_t s = 0.;
 		// Case when starting radius is provided
 		if(fRstart > TMath::Abs(par(0))){
-			s = 2.*TMath::ASin(par(2)*TMath::Sqrt((fRstart*fRstart-par(0)*par(0))/(1.+2.*par(2)*par(0))));
+			if(fCharged[i])s = 2.*TMath::ASin(par(2)*TMath::Sqrt((fRstart*fRstart-par(0)*par(0))/(1.+2.*par(2)*par(0))));
+			else s = TMath::Sqrt(fRstart*fRstart-par(0)*par(0));
 		}
 		//
-		x0i.push_back(new TVectorD(Fill_x(par, s)));
-		ni.push_back(new TVectorD(derXds(par, s)));
-		TMatrixD A = derXdPar(par, s);
+		x0i.push_back(new TVectorD(Fill_x(par, s, fCharged[i])));
+		TMatrixD A(3,5);
+		if(fCharged[i]){
+			ni.push_back(new TVectorD(derXds(par, s)));
+			A = derXdPar(par, s);}
+		else{
+			ni.push_back(new TVectorD(derXds_N(par, s)));
+			A = derXdPar_N(par, s);}
+		//
 		Ci.push_back(new TMatrixDSym(Cov.Similarity(A)));
 		TMatrixDSym Cinv = RegInv(*Ci[i]);
 		wi.push_back(new TVectorD(Cinv * (*ni[i])));
 		s_in.push_back(s);
+		if(!fCharged[i]){
+			/*std::cout<<"i = "<<i<<", Neutral s = "<<s<<std::endl;
+			std::cout<<"Par = "; par.Print();
+			std::cout<<"Cov = "; Cov.Print();
+			std::cout<<"A: "; A.Print();
+			std::cout<<"Ci "; Ci[i]->Print();
+			std::cout<<"wi "; wi[i]->Print();
+			*/
+		}
 	}
 	//std::cout << "Vtx init completed. fNtr = "<<fNtr << std::endl;
 	//
@@ -271,7 +312,7 @@ void VertexFit::VtxFitNoSteer()
 	for (Int_t i = 0; i < fNtr; i++){
 		Double_t si = Dot(*wi[i], fXv - (*x0i[i])) / Ci[i]->Similarity(*wi[i]);
 		ffi.push_back(si+s_in[i]);
-		//TVectorD xvi = Fill_x(*fPar[i],si);
+		//TVectorD xvi = Fill_x(*fPar[i],si, fCharged[i]);
 		//std::cout << "Fast vertex "<<i<<": xvi = "<<xvi(0)<<", "<<xvi(1)<<", "<<xvi(2) 
 		//	<<", si = "<<si<< std::endl;
 	}
@@ -330,8 +371,6 @@ void  VertexFit::VertexFitter()
 		// Reset work arrays
 		//
 		ResetWrkArrays();
-
-
 		//
 		// Start loop on tracks
 		//
@@ -529,7 +568,7 @@ TMatrixDSym VertexFit::GetNewCov(Int_t i)
 // Correlation parameters vertex
 TMatrixD VertexFit::GetNewCovXvPar(Int_t i)
 {
-	TMatrixD Cxp(5,5); Cxp.Zero();
+	TMatrixD Cxp(3,5); Cxp.Zero();
 	TMatrixD M3(3,3); 
 	TMatrixD M5(5,5);
 	//
@@ -561,17 +600,23 @@ TMatrixD VertexFit::GetNewCovXvPar(Int_t i)
 */
 	TMatrixD Mik = DaiDa0k(i, k);
 	TMatrixD Mikt(TMatrixD::kTransposed, Mik);
+	//std::cout<<"Mikt:"; Mikt.Print();
 	TMatrixD Akt = *fAti[i];
 	TMatrixD Ak(TMatrixD::kTransposed,Akt);
-	Cxp += (*fDi[k])*(Ak*Mikt);
+	//std::cout<<"Ak:"; Ak.Print();
+	TMatrixDSym C0k = *fCov[k];
+	//Cxp += (*fDi[k])*(Ak*(C0k*Mikt));
+	TMatrixD XvAlf0k = GetDxvDpar0(k);
+	Cxp += XvAlf0k*(C0k*Mikt);
+	//std::cout<<"Cxp:"; Cxp.Print();
 	}
 	//
 	if(fVtxCst){
 		TMatrixD Fi = (*fCov[i])*((*fAti[i])*(*fDi[i]));
 		TMatrixD Fit(TMatrixD::kTransposed, Fi);	
-		Cxp += fCovCstInv*Fit;
+		Cxp += Dm1*(fCovCstInv*Fit);
 	} 
-	Cxp = Dm1*Cxp;
+	//Cxp = Dm1*Cxp;
 	return Cxp;	
 }
 //
@@ -621,6 +666,25 @@ void VertexFit::AddTrk(TVectorD *par, TMatrixDSym *Cov)			// Add track to input 
 	fCov.push_back(Cov);
 	fParNew.push_back(par);			// add new track
 	fCovNew.push_back(Cov);
+	Bool_t Charged = kTRUE;
+	fCharged.push_back(Charged);
+	//
+	// Reset previous vertex temp arrays
+	ResetWrkArrays();
+	ffi.clear();
+	fVtxDone = kFALSE;			// Reset vertex done flag
+}
+//
+// Adding tracks one by one with charge tag
+void VertexFit::AddTrk(TVectorD *par, TMatrixDSym *Cov, Bool_t Charged)			// Add track to input list
+{
+	fNtr++;
+	fChi2List.ResizeTo(fNtr);	// Resize chi2 array
+	fPar.push_back(par);			// add new track
+	fCov.push_back(Cov);
+	fParNew.push_back(par);			// add new track
+	fCovNew.push_back(Cov);
+	fCharged.push_back(Charged);
 	//
 	// Reset previous vertex temp arrays
 	ResetWrkArrays();
@@ -638,6 +702,7 @@ void VertexFit::RemoveTrk(Int_t iTrk)	// Remove iTrk track
 	fCov.erase(fCov.begin() + iTrk);
 	fParNew.erase(fParNew.begin() + iTrk);		// Remove track
 	fCovNew.erase(fCovNew.begin() + iTrk);
+	fCharged.erase(fCharged.begin() + iTrk);
 	//
 	// Reset previous vertex temp arrays
 	ResetWrkArrays();
