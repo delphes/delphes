@@ -8,7 +8,7 @@
 #include <TStyle.h>
 #include "external/TrackCovariance/VertexFit.h"
 #include "external/TrackCovariance/VertexMore.h"
-#include "examples/VState.h"
+#include "examples/classes/VState.h"
 
 //
 // List all found vertices with given structure

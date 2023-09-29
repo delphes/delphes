@@ -14,9 +14,9 @@ R__LOAD_LIBRARY(libDelphes)
 #include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
 #include "external/TrackCovariance/VertexMore.h"
-#include "examples/VState.h"
-#include "examples/VList.h"
-#include "examples/KsPulls.h"
+#include "examples/classes/VState.h"
+#include "examples/classes/VList.h"
+#include "examples/classes/KsPulls.h"
 #endif
 //
 // Global variables
