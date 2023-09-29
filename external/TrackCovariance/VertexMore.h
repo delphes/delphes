@@ -53,6 +53,7 @@ private:
 	Double_t dSdC(Int_t i);					// Derivative of phase wrt C
 	void CalcParCov();					// Calculate parameters and covariance
 	TMatrixD dPdAlf(Int_t i);			// Derivatives of momentum wrt parameters
+	TMatrixD dPdX(Int_t i);				// Derivatives of momentum wrt vertex position
 	TMatrixD dXdAlf(Int_t i);			// Derivatives of position wrt parameters
 	TMatrixD DparDx(TVector3 xv, TVector3 pv, Double_t Q); // Derivatives of parameters wrt point on track
 	TMatrixD DparDp(TVector3 xv, TVector3 pv, Double_t Q); // Derivatives of parameters wrt track momentum

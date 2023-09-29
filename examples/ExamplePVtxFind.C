@@ -128,7 +128,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 
 			}		// End loop on tracks
 		}
-		if(entry%500 ==0){
+		if(entry%100 ==0){
 		  std::cout << "Event "<<entry<<" opened containing " << NtrG << " / "<< Nprim 
 		  << "   Total / primary tracks"<< std::endl;
 		}
@@ -194,7 +194,7 @@ void ExamplePVtxFind(const char* inputFile, Int_t Nevent = 5)
 			}
 			delete[] nSkimmed;
 			Int_t Nfound = nSkim;
-			if(entry%500 ==0)std::cout << "Found tracks "<<Nfound << std::endl;
+			if(entry%100 ==0)std::cout << "Found tracks "<<Nfound << std::endl;
 			const Int_t MaxFound = 100; Double_t Chi2LL[MaxFound]; Double_t *Chi2L = Chi2LL;
 			VertexFit* Vtx = new VertexFit(nSkim, PrFit, CvFit);
 			//std::cout << "Vertex fit created " << std::endl;

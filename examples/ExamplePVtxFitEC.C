@@ -11,7 +11,7 @@ R__LOAD_LIBRARY(libDelphes)
 #include "modules/TrackCovariance.h"
 #include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
-#include "VtxPulls.h"
+#include "examplles/classes/VtxPulls.h"
 
 #endif
 
@@ -148,6 +148,7 @@ void ExamplePVtxFitEC(const char* inputFile, Int_t Nevent = 5)
 				}
 			}		// End loop on tracks
 		}
+		if(entry % 100 == 0)std::cout<<"Event # "<<entry<<std::endl;
 		//
 		// Fit primary vertex with beam constraint
 		//

@@ -16,7 +16,7 @@ TrkUtil::TrkUtil(Double_t Bz)
 }
 TrkUtil::TrkUtil()
 {
-	fBz = 0.0;
+	fBz = 2.0;				// Default is 2 Tesla
 	fGasSel = 0;				// Default is He-Isobuthane (90-10)
 	fRmin = 0.0;				// Lower		DCH radius
 	fRmax = 0.0;				// Higher	DCH radius
@@ -202,6 +202,42 @@ TVector3 TrkUtil::ParToP(TVectorD Par, Double_t Bz)
 	Pval(2) = pt * ct;
 	//
 	return Pval;
+}
+//
+// Neutrals
+//
+//static
+TVectorD TrkUtil::XPtoPar_N(TVector3 x, TVector3 p)
+{
+//
+// Output neutral track parameter vector:
+// (D, phi0, pt, z0, cot(theta))
+	TVectorD pout(5);
+// Pt
+	pout(2) = p.Pt();
+// Direction
+	Double_t csp0 = p.X()/p.Pt();
+	Double_t snp0 = p.Y()/p.Pt();
+	pout(4) = p.Z()/p.Pt();
+	pout(1) = TMath::ATan2(snp0,csp0);
+// Impact parameters
+	pout(0) = x.Y()*csp0-x.X()*snp0;	// D (transverse)
+	Double_t s = x.Y()*snp0+x.X()*csp0;	// dist from pma
+	pout(3) = x.Z()-pout(4)*s;		// Z0
+	
+//
+	return pout;
+}
+//
+// static
+TVector3 TrkUtil::ParToP_N(TVectorD Par)
+{
+	Double_t phi0 = Par(1);
+	Double_t pt = Par(2);
+	Double_t ctg = Par(4);
+//
+	TVector3 p(pt*TMath::Cos(phi0), pt*TMath::Sin(phi0), pt*ctg);
+	return p;
 }
 //
 Double_t TrkUtil::ParToQ(TVectorD Par)
@@ -498,6 +534,86 @@ TVector3 TrkUtil::Xtrack(TVectorD par, Double_t s)
 	return Xt;
 }
 //
+// Phase
+//
+Double_t TrkUtil::GetPhase(TVectorD x, TVectorD par)
+{
+	// Definitions
+	// Transverse track parameters
+	Double_t D = par(0);
+	Double_t phi0 = par(1);
+	Double_t sf = TMath::Sin(phi0);
+	Double_t cf = TMath::Cos(phi0);
+	Double_t C = par(2);
+	//
+	Double_t sins = 2.*C*(x(0)*cf+x(1)*sf);
+	Double_t s = TMath::ASin(sins);
+	//
+	return s;
+}
+//
+//	Phase derivatives
+//	Track parameters
+TVectorD TrkUtil::dsdPar(TVectorD x, TVectorD par)
+{
+	// 
+	// Definitions
+	// Transverse track parameters
+	Double_t D = par(0);
+	Double_t phi0 = par(1);
+	Double_t sf = TMath::Sin(phi0);
+	Double_t cf = TMath::Cos(phi0);
+	Double_t C = par(2);
+	//
+	Double_t sins = 2.*C*(x(0)*cf+x(1)*sf);
+	Double_t coss = TMath::Sqrt(1.-sins*sins);
+	//
+	// Derivatives
+	//
+	TVectorD der(5); der.Zero();
+	der(1) = (2.*C*(-x(0)*sf+x(1)*cf))/coss;
+	der(2) = 2.*(x(0)*cf+x(1)*sf)/coss;
+//
+	return der;
+}
+//
+// position
+TVectorD TrkUtil::dsdx(TVectorD x, TVectorD par)
+{
+	// 
+	// Definitions
+	// Transverse track parameters
+	Double_t D = par(0);
+	Double_t phi0 = par(1);
+	Double_t sf = TMath::Sin(phi0);
+	Double_t cf = TMath::Cos(phi0);
+	Double_t C = par(2);
+	//
+	Double_t sins = 2.*C*(x(0)*cf+x(1)*sf);
+	Double_t coss = TMath::Sqrt(1.-sins*sins);
+	//
+	// Derivatives
+	//
+	TVectorD der(3); der.Zero();
+	der(0) = 2.*C*cf/coss;
+	der(1) = 2.*C*sf/coss;
+//
+	return der;
+}
+//
+// Trajectory of neutrals
+//
+TVector3 TrkUtil::Xtrack_N(TVectorD par, Double_t s)
+{
+	Double_t p0 = par(1);
+	Double_t ctg = par(4);
+	TVector3 x0 = ParToX(par);
+	TVector3 dir(TMath::Cos(p0), TMath::Sin(p0), ctg);
+	TVector3 Xt = x0 + s*dir;
+//
+	return Xt;
+}
+//
 // Track derivatives
 //
 // Constant radius
@@ -627,7 +743,7 @@ TMatrixD TrkUtil::derXdPar(TVectorD par, Double_t s)
 	Double_t D = par(0);
 	Double_t p0 = par(1);
 	Double_t C = par(2);
-	Double_t z0 = par(3);
+	//Double_t z0 = par(3);
 	Double_t ct = par(4);
 	//
 	// derivatives
@@ -682,7 +798,7 @@ TVectorD TrkUtil::dsdPar_R(TVectorD par, Double_t R)
 	//
 	// unpack parameters
 	Double_t D = par(0);
-	Double_t p0 = par(1);
+	//Double_t p0 = par(1);
 	Double_t C = par(2);
 	//
 	// derivatives
@@ -721,6 +837,101 @@ TVectorD TrkUtil::dsdPar_z(TVectorD par, Double_t z)
 	return dsdp;
 }
 //
+// Derivatives of neutral trajectory
+//dX/dPar
+TMatrixD TrkUtil::derXdPar_N(TVectorD par, Double_t s)	// derivatives of position wrt parameters
+{
+	TMatrixD dxdp(3, 5);	// return matrix
+	//
+	// unpack parameters
+	Double_t D = par(0);
+	Double_t p0 = par(1);
+	//Double_t pt = par(2);
+	//Double_t z0 = par(3);
+	//Double_t ct = par(4);
+	//
+	//
+	// derivatives
+	// dx/dD
+	dxdp(0, 0) = -TMath::Sin(p0);
+	dxdp(1, 0) =  TMath::Cos(p0);
+	dxdp(2, 0) = 0.;
+	// dx/dphi0
+	dxdp(0, 1) = -D * TMath::Cos(p0) - s * TMath::Sin(p0);
+	dxdp(1, 1) = -D * TMath::Sin(p0) + s * TMath::Cos(p0);
+	dxdp(2, 1) = 0;
+	// dx/dpt
+	dxdp(0, 2) = 0.;
+	dxdp(1, 2) = 0.;
+	dxdp(2, 2) = 0.;
+	// dx/dz0
+	dxdp(0, 3) = 0;
+	dxdp(1, 3) = 0;
+	dxdp(2, 3) = 1.;
+	// dx/dCtg
+	dxdp(0, 4) = 0;
+	dxdp(1, 4) = 0;
+	dxdp(2, 4) = s;
+//
+	return dxdp;
+}
+//dX/ds 
+TVectorD TrkUtil::derXds_N(TVectorD par, Double_t s)	// derivatives of position wrt phase
+{
+	TVectorD dxds(3);	// return vector
+	//
+	// unpack parameters
+	Double_t p0 = par(1);
+	Double_t ct = par(4);
+	//
+	// dX/ds
+	dxds(0) = TMath::Cos(p0);
+	dxds(1) = TMath::Sin(p0);
+	dxds(2) = ct;
+	//
+	return dxds;
+}
+//ds/dPar const R
+TVectorD TrkUtil::dsdPar_R_N(TVectorD par, Double_t R)	// derivatives of phase at constant R
+{
+	TVectorD dsdp(5);	// return vector
+	//
+	// unpack parameters
+	Double_t D = par(0);
+	//
+	// derivatives
+	Double_t s = TMath::Sqrt(R*R-D*D);
+	Double_t dMin = 0.01;
+	Double_t deriv = TMath::Max(dMin, -D/s);	// Protect against divergence
+	//
+	dsdp(0) = deriv;
+	dsdp(1) = 0;
+	dsdp(2) = 0;
+	dsdp(3) = 0;
+	dsdp(4) = 0;
+	//
+	return dsdp;
+}
+//ds/dPar const z
+TVectorD TrkUtil::dsdPar_z_N(TVectorD par, Double_t z)	// derivatives of phase at constant z
+{
+	TVectorD dsdp(5);	// return vector
+	//
+	// unpack parameters
+	Double_t z0 = par(3);
+	Double_t ct = par(4);
+	//
+	// derivatives
+	//
+	dsdp(0) = 0;
+	dsdp(1) = 0;
+	dsdp(2) = 0;
+	dsdp(3) = -1./ct;
+	dsdp(4) = -(z-z0)/(ct*ct);
+	//
+	return dsdp;
+}
+//
 // Setup chamber volume
 void TrkUtil::SetDchBoundaries(Double_t Rmin, Double_t Rmax, Double_t Zmin, Double_t Zmax)
 {
@@ -748,7 +959,7 @@ Double_t TrkUtil::TrkLen(TVectorD Par)
 		//
 		// Track pararameters
 		Double_t D = Par(0);		// Transverse impact parameter
-		Double_t phi0 = Par(1);		// Transverse direction at minimum approach
+		//Double_t phi0 = Par(1);		// Transverse direction at minimum approach
 		Double_t C = Par(2);		// Half curvature
 		Double_t z0 = Par(3);		// Z at minimum approach
 		Double_t ct = Par(4);		// cot(theta)
