@@ -60,7 +60,7 @@ class puppiParticle {
 
 };
 
-class puppiValSort : public std::binary_function<int,int,bool> {
+class puppiValSort {
  public:
 
   puppiValSort(){};
