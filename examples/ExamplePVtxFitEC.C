@@ -11,7 +11,7 @@ R__LOAD_LIBRARY(libDelphes)
 #include "modules/TrackCovariance.h"
 #include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
-#include "VtxPulls.h"
+#include "examplles/classes/VtxPulls.h"
 
 #endif
 
