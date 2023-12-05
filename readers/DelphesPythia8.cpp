@@ -411,6 +411,7 @@ int main(int argc, char *argv[])
         reader->AnalyzeWeight(branchWeightLHEF);
       }
 
+#if PYTHIA_VERSION_INTEGER > 8300
       // fill Pythia8 Weights - see https://pythia.org/latest-manual/CrossSectionsAndWeights.html
       for(int iWeight = 0; iWeight < pythia->info.weightNameVector().size(); ++iWeight)
       {
@@ -418,6 +419,7 @@ int main(int argc, char *argv[])
         weight = static_cast<Weight *>(branchWeight->NewEntry());
         weight->Weight = pythia->info.weightValueVector()[iWeight];
       }
+#endif
       
       treeWriter->Fill();
 
