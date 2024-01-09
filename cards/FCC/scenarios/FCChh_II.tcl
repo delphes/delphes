@@ -1060,7 +1060,6 @@ module Efficiency ElectronEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   set EfficiencyFormula {
-  0.95*(
   (pt <= 1.0) * (0.00) + \
   (abs(eta) <= 2.5) * (pt > 1.0 && pt < 5.0)  * (0.80) +
   (abs(eta) <= 2.5) * (pt > 5.0 && pt < 10.0) * (0.90) +
@@ -1074,7 +1073,6 @@ module Efficiency ElectronEfficiency {
   (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 5.0 && pt < 10.0) * (0.80) + \
   (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 10.0)             * (0.85) + \
   (abs(eta) > 6.0) * (0.00)
-  )
   }
 
 }
@@ -1117,7 +1115,6 @@ module Efficiency MuonEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   set EfficiencyFormula {
-  0.98 * (
   (pt <= 1.0) * (0.00) + \
   (abs(eta) <= 2.5) * (pt > 1.0 && pt < 5.0)  * (0.95) +
   (abs(eta) <= 2.5) * (pt > 5.0 && pt < 10.0) * (0.97) +
@@ -1131,7 +1128,6 @@ module Efficiency MuonEfficiency {
   (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 5.0 && pt < 10.0) * (0.90) + \
   (abs(eta) > 4.0 && abs(eta) <= 6.0) * (pt > 10.0)             * (0.95) + \
   (abs(eta) > 6.0) * (0.00)
-  )
   }
 
 }
