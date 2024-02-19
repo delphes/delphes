@@ -66,9 +66,9 @@ git clone git://github.com/delphes/delphes.git Delphes
 
 cd Delphes
 
-source /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc10-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
 
-make 
+make
 ```
 
 Simple analysis using TTree::Draw
@@ -118,11 +118,11 @@ Basic analysis macro:
   // Create chain of root trees
   TChain chain("Delphes");
   chain.Add("delphes_output.root");
-  
+
   // Create object of class ExRootTreeReader
   ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
   Long64_t numberOfEntries = treeReader->GetEntries();
-  
+
   // Get pointers to branches used in this analysis
   TClonesArray *branchElectron = treeReader->UseBranch("Electron");
 
@@ -135,16 +135,16 @@ Basic analysis macro:
 
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
-  
+
     // If event contains at least 1 electron
     if(branchElectron->GetEntries() > 0)
     {
       // Take first electron
       Electron *electron = (Electron*) branchElectron->At(0);
-      
+
       // Plot electron transverse momentum
       histElectronPT->Fill(electron->PT);
-      
+
       // Print electron transverse momentum
       cout << electron->PT << endl;
     }
