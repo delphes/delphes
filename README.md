@@ -66,7 +66,7 @@ Configure Delphes on lxplus.cern.ch
 
   cd Delphes
 
-  source /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc10-opt/setup.sh
+  source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
 
   make
 ```
@@ -133,21 +133,21 @@ Basic analysis macro:
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
   {
 
-   // Load selected branches with data from specified event
-   treeReader->ReadEntry(entry);
+    // Load selected branches with data from specified event
+    treeReader->ReadEntry(entry);
 
-   // If event contains at least 1 electron
-   if(branchElectron->GetEntries() > 0)
-   {
-    // Take first electron
-    Electron *electron = (Electron*) branchElectron->At(0);
+    // If event contains at least 1 electron
+    if(branchElectron->GetEntries() > 0)
+    {
+      // Take first electron
+      Electron *electron = (Electron*) branchElectron->At(0);
 
-    // Plot electron transverse momentum
-    histElectronPT->Fill(electron->PT);
+      // Plot electron transverse momentum
+      histElectronPT->Fill(electron->PT);
 
-    // Print electron transverse momentum
-    cout << electron->PT << endl;
-   }
+      // Print electron transverse momentum
+      cout << electron->PT << endl;
+    }
 
   }
 

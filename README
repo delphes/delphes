@@ -39,6 +39,7 @@ For more detailed documentation, please visit
 
   https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
 
+
 Configure Delphes on lxplus.cern.ch
 ====================================
 
@@ -111,21 +112,21 @@ Basic analysis macro:
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
   {
 
-   // Load selected branches with data from specified event
-   treeReader->ReadEntry(entry);
+    // Load selected branches with data from specified event
+    treeReader->ReadEntry(entry);
 
-   // If event contains at least 1 electron
-   if(branchElectron->GetEntries() > 0)
-   {
-    // Take first electron
-    Electron *electron = (Electron*) branchElectron->At(0);
+    // If event contains at least 1 electron
+    if(branchElectron->GetEntries() > 0)
+    {
+      // Take first electron
+      Electron *electron = (Electron*) branchElectron->At(0);
 
-    // Plot electron transverse momentum
-    histElectronPT->Fill(electron->PT);
+      // Plot electron transverse momentum
+      histElectronPT->Fill(electron->PT);
 
-    // Print electron transverse momentum
-    cout << electron->PT << endl;
-   }
+      // Print electron transverse momentum
+      cout << electron->PT << endl;
+    }
 
   }
 
