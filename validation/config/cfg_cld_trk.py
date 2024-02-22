@@ -14,7 +14,7 @@ from src.utils import (
 )
 
 ## provide relative path to the directory
-card = "validation_delphes_card_IDEA.tcl"
+card = "validation_delphes_card_CLD.tcl"
 name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:

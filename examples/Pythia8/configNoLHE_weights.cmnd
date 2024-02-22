@@ -1,0 +1,39 @@
+
+! number of events to generate
+Main:numberOfEvents = 10000       ! number of events to generate
+
+Beams:idA = 11                   ! first beam, e- = -11
+Beams:idB = -11                  ! second beam, e+ = 11
+Beams:eCM = 240.                 ! CM energy of collision
+
+! Vertex smearing :
+
+Beams:allowVertexSpread = on
+Beams:sigmaVertexX = 9.70e-3   !  13.7 mum / sqrt2
+Beams:sigmaVertexY = 25.5E-6   !  36.1 nm / sqrt2
+Beams:sigmaVertexZ = 0.64      !  0.64 mm
+Beams:sigmaTime    = 0.64      !  0.64 mm
+
+! Higgsstrahlung process
+HiggsSM:ffbar2HZ = on
+
+! 5) Force the Z decays to muons
+23:onMode = off
+23:onIfAny = 13 -13
+
+! 5) Force the H decays to b b 
+25:onMode = off
+25:onIfAny = 5 -5
+
+# MC event weights for systematic studies
+# see https://pythia.org//latest-manual/Variations.html
+# this will produce 1 nominal weight + 8 individual variations + 4 block variations
+
+UncertaintyBands:doVariations = on
+UncertaintyBands:List = { 
+    alphaShi fsr:muRfac=0.5 isr:muRfac=0.5, 
+    alphaSlo fsr:muRfac=2.0 isr:muRfac=2.0, 
+    hardHi fsr:cNS=2.0 isr:cNS=2.0, 
+    hardLo fsr:cNS=-2.0 isr:cNS=-2.0 
+} 
+

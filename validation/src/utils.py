@@ -1262,9 +1262,9 @@ def get_genTheta(part):
     # return arccotan(get_genTrackParam(part)[4])
     # return part.P4().Theta()
     if abs(part.Eta) > 10:
-        return math.copysign(1, part.Eta) * 3.14
+        return math.copysign(1, part.Eta) /180
     else:
-        return 2 * math.atan(math.exp(-part.Eta))
+        return 2 * math.atan(math.exp(-part.Eta))*180/3.1416
 
 
 # _______________________________________________________________________________
@@ -1275,10 +1275,10 @@ def get_recoTheta(part):
     if hasattr(part, "CtgTheta"):
         # return arccotan(part.CtgTheta)
         # return part.P4().Theta()
-        return 2 * math.atan(math.exp(-part.Eta))
+        return 2 * math.atan(math.exp(-part.Eta))*180/3.1416
     else:
         # return part.P4().Theta()
-        return 2 * math.atan(math.exp(-part.Eta))
+        return 2 * math.atan(math.exp(-part.Eta))*180/3.1416
 
 
 # _______________________________________________________________________________
