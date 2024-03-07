@@ -17,6 +17,7 @@ R__LOAD_LIBRARY(libDelphes)
 #include "examples/classes/VState.h"
 #include "examples/classes/VList.h"
 #include "examples/classes/B0KsKsPulls.h"
+#include "examples/classes/KsPulls.h"
 #endif
 //
 // Global variables
@@ -114,7 +115,7 @@ void VtxB02KsKs(const char* inputFile, Int_t Nevent = 10, Int_t prtOpt = 0)
 	// 
 	// Initialize histograms
 	B0KsKsPulls* B0Hist = new B0KsKsPulls();
-
+	KsPulls* KsPlots = new KsPulls();
 	//
 	// Loop over all events
 	Int_t Nev = TMath::Min(Nevent, (Int_t)numberOfEntries);
@@ -203,6 +204,7 @@ void VtxB02KsKs(const char* inputFile, Int_t Nevent = 10, Int_t prtOpt = 0)
 				}
 				TVectorD rKv1 = VMKs1->GetXv();			// Ks vertex
 				Double_t RKs1 = TMath::Sqrt(rKv1[0]*rKv1[0]+rKv1[1]*rKv1[1]);
+				KsPlots->Fill(Ks1State, VMKs1);
 				//std::cout<<"First Ks fit completed"<<std::endl;
 				//
 				// Load 2nd Ks tracks
@@ -242,6 +244,7 @@ void VtxB02KsKs(const char* inputFile, Int_t Nevent = 10, Int_t prtOpt = 0)
 				}
 				TVectorD rKv2 = VMKs2->GetXv();			// Ks vertex
 				Double_t RKs2 = TMath::Sqrt(rKv2[0]*rKv2[0]+rKv2[1]*rKv2[1]);
+				KsPlots->Fill(Ks2State, VMKs2);
 				//std::cout<<"Second Ks fit completed"<<std::endl;
 				//
 				// Load B0 tracks
@@ -266,7 +269,6 @@ void VtxB02KsKs(const char* inputFile, Int_t Nevent = 10, Int_t prtOpt = 0)
 				//
 				// Fill histograms
 				B0Hist->Fill(B0State, VMKs1, VMKs2, VMB0);
-				
 			} 	// End loop on found B0	
 		} 	// End loop on B0 types
 	}	// End event loop
@@ -274,4 +276,5 @@ void VtxB02KsKs(const char* inputFile, Int_t Nevent = 10, Int_t prtOpt = 0)
 //
 // Print histograms
 	B0Hist->Print();
+	KsPlots->Print();
 }

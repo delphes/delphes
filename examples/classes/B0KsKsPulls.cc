@@ -60,8 +60,16 @@ B0KsKsPulls::B0KsKsPulls()
 	Hlist.Add(h_B0Mass);
 	h_B0Mpull = new TH1D("h_B0Mpull", "B0 mass pull " , 100, -10., 10.);
 	Hlist.Add(h_B0Mpull);
-	h_B0Merr  = new TH1D("h_B0Merr" , "B0 mass error ", 100, 0., 0.5);
+	h_B0Merr  = new TH1D("h_B0Merr" , "B0 mass error ", 100, 0., 0.15);
 	Hlist.Add(h_B0Merr);
+
+	// B0 flight path
+	h_B0Lxy = new TH1D("h_B0Lxy", "B0 L 2D (fit - truth)", 100, -1.0, 1.0) ;
+	h_B0LxyS = new TH1D("h_B0LxyS", "B0 L 2D error", 100, 0.0, 1.0) ;
+	h_B0Lxyz = new TH1D("h_B0Lxyz", "B0 L 3D (fit - truth)", 100, -1.0, 1.0) ;
+	h_B0LxyzS = new TH1D("h_B0LxyzS", "B0 L 3D error", 100, 0.0, 1.0) ;
+	h_B0LxyPull = new TH1D("h_B0LxyPull", "B0 L 2D pull", 100, -10.0, 10.0) ;
+	h_B0LxyzPull = new TH1D("h_B0LxyzPull", "B0 L 3D pull", 100, -10.0, 10.0) ;
 }
 
 //
@@ -83,6 +91,33 @@ void B0KsKsPulls::Fill(VState* B0State, VertexMore* vKs1, VertexMore* vKs2, Vert
 	TVector3 gvB0(pKs1->X, pKs1->Y, pKs1->Z);	// B0 generated vertex
 	TVectorD rvB0    = vB0->GetXv();		// B0 reconstructed vertex
 	TMatrixDSym cvB0 = vB0->GetXvCov();		// B0 vertex covariance
+	//
+	// B0 origin
+	//
+	TVector3 gvsB0(pB0->X, pB0->Y, pB0->Z);		// B0 start vertex
+	TVector3 gLd = gvB0-gvsB0;			// B0 travel vector
+	Double_t gLxy = gLd.Pt();	// Lxy generated
+	Double_t gLxyz = gLd.Mag();	// Lxyz generated
+	TVector3 rV(rvB0(0),rvB0(1), rvB0(2));
+	TVector3 rLd = rV - gvsB0;	// Reconstructed travel vector
+	Double_t rLxy = rLd.Pt();	// Reconstructed Lxy
+	Double_t rLxyz = rLd.Mag();	// Reconstructed Lxyz
+	// Flight path errors
+	Double_t adLxy [2] = {gLd(0)/gLxy,  gLd(1)/gLxy};
+	Double_t adLxyz[3] = {gLd(0)/gLxyz, gLd(1)/gLxyz, gLd(2)/gLxyz};
+	TVectorD dLxy(2, adLxy);
+	TVectorD dLxyz(3, adLxyz);
+	//
+	TMatrixDSym Bcov3 = cvB0;
+	TMatrixDSym Bcov2 = cvB0.GetSub(0,1,0,1);
+	h_B0Lxy->Fill(rLxy-gLxy);
+	Double_t sLxy = TMath::Sqrt(Bcov2.Similarity(dLxy));
+	h_B0LxyS->Fill(sLxy);
+	h_B0LxyPull->Fill((rLxy-gLxy)/sLxy);
+	h_B0Lxyz->Fill(rLxyz-gLxyz);
+	Double_t sLxyz =  TMath::Sqrt(Bcov3.Similarity(dLxyz));
+	h_B0LxyzS->Fill(sLxyz);
+	h_B0LxyzPull->Fill((rLxyz-gLxyz)/sLxyz);
 	// Fill
 	h_B0Xv->Fill((rvB0(0)-gvB0(0))/TMath::Sqrt(cvB0(0,0)));
 	h_B0Yv->Fill((rvB0(1)-gvB0(1))/TMath::Sqrt(cvB0(1,1)));
@@ -257,6 +292,22 @@ void B0KsKsPulls::Print()
 	cnv3->cd(3); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_B0Mpull->Fit("gaus"); h_B0Mpull->Draw();
+	//
+	// Flight path plots
+	TCanvas * cnvp = new TCanvas("cnvp","B0 flight path plots",250,250, 900,600);
+	cnvp->Divide(3,2);
+	cnvp->cd(1);
+	h_B0Lxy->Draw();
+	cnvp->cd(2);
+	h_B0LxyS->Draw(); gPad->SetLogy(1);
+	cnvp->cd(3); gPad->SetLogy(1); gStyle->SetOptFit(1111);
+	h_B0LxyPull->Fit("gaus"); h_B0LxyPull->Draw(); 
+	cnvp->cd(4);
+	h_B0Lxyz->Draw();
+	cnvp->cd(5);
+	h_B0LxyzS->Draw(); gPad->SetLogy(1);
+	cnvp->cd(6); gPad->SetLogy(1);gStyle->SetOptFit(1111);
+	h_B0LxyzPull->Fit("gaus"); h_B0LxyzPull->Draw(); 
 	//
 	// write out everything
 	TFile hFile("hB0KsKs.root","RECREATE");
