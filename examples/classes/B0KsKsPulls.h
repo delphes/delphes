@@ -48,6 +48,13 @@ private:
 	TH1D* h_B0Mass;
 	TH1D* h_B0Merr;
 	TH1D* h_B0Mpull;
+	// B0 flight path
+	TH1D* h_B0Lxy;
+	TH1D* h_B0LxyS;
+	TH1D* h_B0LxyPull;
+	TH1D* h_B0Lxyz;
+	TH1D* h_B0LxyzS;
+	TH1D* h_B0LxyzPull;
 	// Histogram list	
 	TObjArray Hlist;
 public:
