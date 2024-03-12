@@ -45,7 +45,8 @@ private:
 	TMatrixDSym fCp;					// Total momentum errors
 	TVectorD fBigPar;					// Full vertex/momenta vector
 	TMatrixDSym fBigCov;					// Full covariance matrix of vertex position and momenta
-	void Mprt(TMatrixD M, Bool_t Opt);					// Compact matrix printing
+	void Mprt(TMatrixD M, Bool_t Opt);			// Compact matrix printing
+	void Init(VertexFit* V);				// Constructor initializations
 	void FillBigCov();					// Fill fBigCov
 	void FillBigPar();					// Fill fBigPar
 	//	
@@ -53,10 +54,14 @@ private:
 	Double_t dSdC(Int_t i);					// Derivative of phase wrt C
 	void CalcParCov();					// Calculate parameters and covariance
 	TMatrixD dPdAlf(Int_t i);			// Derivatives of momentum wrt parameters
+	TVectorD dPds(Int_t i);				// Derivative of momentum wrt phase
 	TMatrixD dPdX(Int_t i);				// Derivatives of momentum wrt vertex position
 	TMatrixD dXdAlf(Int_t i);			// Derivatives of position wrt parameters
 	TMatrixD DparDx(TVector3 xv, TVector3 pv, Double_t Q); // Derivatives of parameters wrt point on track
 	TMatrixD DparDp(TVector3 xv, TVector3 pv, Double_t Q); // Derivatives of parameters wrt track momentum
+	TMatrixD DpDa0(Int_t i, Int_t k);		// Derivatives of momentum wrt initial track parameters
+	TMatrixD BuildPPcov(Int_t i, Int_t j);		// Build <dPi,dPj> covariance from VertexFit info
+	TMatrixD BuildPXcov(Int_t i);			// Build <dPi,dXv> covariance from VertexFit info
 	//
 	// Mass constraints
 	//

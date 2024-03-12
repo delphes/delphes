@@ -354,7 +354,7 @@ void  VertexFit::VertexFitter()
 	//
 	Int_t Ntry = 0;
 	Int_t TryMax = 100;
-	Double_t eps = 1.0e-9; // vertex stability
+	Double_t eps = 1.0e-12; // vertex stability
 	Double_t epsi = 1000.;
 	//
 	// Iteration loop
@@ -488,6 +488,37 @@ TVectorD VertexFit::GetVtxChi2List()
 {
 	if (!fVtxDone) VertexFitter();
 	return fChi2List;
+}
+//
+// Derivative of phases wrt initial track arameters
+//
+TVectorD VertexFit::DsiDa0k(Int_t i, Int_t k)
+{
+	// Unit 3x3 matrix
+	TMatrixD M3(3, 3);
+	TMatrixD Ui3(TMatrixD::kUnit, M3);
+	if(i != k) Ui3.Zero();	
+	//
+	// Initialize D^{-1}
+	TMatrixDSym D(3);	D.Zero();
+	TMatrixDSym Dm1(3);
+	for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
+	// 
+	// if vertex constraint
+	if(fVtxCst) D += fCovCstInv;
+	Dm1 = RegInv(D);
+	// Other input variables
+	TVectorD ai   = *fai[i];
+	Double_t a2i  = fa2i[i];
+	TMatrixDSym Wi = *fWi[i];
+	TMatrixD Akt = *fAti[k];
+	TMatrixD Dk  = *fDi[k];
+	// final formula
+	TMatrixD T = (Akt*(Dk*Dm1-Ui3))*Wi;
+	TVectorD Sik = T*ai;
+	Sik *= 1./a2i;
+	//
+	return Sik;
 }
 //
 // Correlation matrix of new track parameters

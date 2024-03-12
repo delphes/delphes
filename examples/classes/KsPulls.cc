@@ -194,85 +194,85 @@ void KsPulls::Print()
 
 	//
 	// Ks plots
-	TCanvas * cnv = new TCanvas("cnv","Ks vertex pulls",10,10, 900,600);
-	cnv->Divide(3,2);
+	TCanvas * cnv10 = new TCanvas("cnv10","Ks vertex pulls",10,10, 900,600);
+	cnv10->Divide(3,2);
 	// X
-	cnv->cd(1); gPad->SetLogy(1);
+	cnv10->cd(1); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsXv->Fit("gaus"); h_KsXv->Draw();
 	// Y
-	cnv->cd(2); gPad->SetLogy(1);
+	cnv10->cd(2); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsYv->Fit("gaus"); h_KsYv->Draw();
 	// Z
-	cnv->cd(3); gPad->SetLogy(1);
+	cnv10->cd(3); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsZv->Fit("gaus"); h_KsZv->Draw();
 	// Px
-	cnv->cd(4); gPad->SetLogy(1);
+	cnv10->cd(4); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsPx->Fit("gaus"); h_KsPx->Draw();
 	// Py
-	cnv->cd(5); gPad->SetLogy(1);
+	cnv10->cd(5); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsPy->Fit("gaus"); h_KsPy->Draw();
 	// Pz
-	cnv->cd(6); gPad->SetLogy(1);
+	cnv10->cd(6); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsPz->Fit("gaus"); h_KsPz->Draw();
 	//
 	// Mass
-	TCanvas * cnv1 = new TCanvas("cnv1","Ks generated mass difference",100,100, 900,600);
-	cnv1->Divide(2,2);
-	cnv1->cd(1);
+	TCanvas * cnv11 = new TCanvas("cnv11","Ks generated mass difference",100,100, 900,600);
+	cnv11->Divide(2,2);
+	cnv11->cd(1);
 	h_KsdGenMass->Draw();
-	cnv1->cd(2);
+	cnv11->cd(2);
 	h_KsdRecMass->Draw();
-	cnv1->cd(3);
+	cnv11->cd(3);
 	h_KsMassErr->Draw();
-	cnv1->cd(4); gPad->SetLogy(1);
+	cnv11->cd(4); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_KsMassPull->Fit("gaus"); h_KsMassPull->Draw();
 	//
 	// Parameters
-	TCanvas * cnv2 = new TCanvas("cnv2","Ks track parameter pulls",100,100, 900,600);
-	cnv2->Divide(3,2);
+	TCanvas * cnv12 = new TCanvas("cnv12","Ks track parameter pulls",100,100, 900,600);
+	cnv12->Divide(3,2);
 	for(Int_t i=0; i<5; i++){
-		cnv2->cd(i+1); gPad->SetLogy(1);
+		cnv12->cd(i+1); gPad->SetLogy(1);
 		gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 		h_Ks_Par[i]->Fit("gaus"); h_Ks_Par[i]->Draw();
 	}
 	//
 	// Pion plots
 	// Parameters
-	TCanvas * cnv3 = new TCanvas("cnv3","Pi track parameter pulls",150,150, 900,600);
-	cnv3->Divide(3,2);
+	TCanvas * cnv13 = new TCanvas("cnv13","Pi track parameter pulls",150,150, 900,600);
+	cnv13->Divide(3,2);
 	for(Int_t i=0; i<5; i++){
-		cnv3->cd(i+1); gPad->SetLogy(1);
+		cnv13->cd(i+1); gPad->SetLogy(1);
 		gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 		h_Pi_Par[i]->Fit("gaus"); h_Pi_Par[i]->Draw();
 	}
 	// Momentum
 	// Px
-	TCanvas * cnv4 = new TCanvas("cnv4","Pi momentum pulls",200,200, 900,600);
-	cnv4->Divide(3,1);
-	cnv4->cd(1); gPad->SetLogy(1);
+	TCanvas * cnv14 = new TCanvas("cnv14","Pi momentum pulls",200,200, 900,600);
+	cnv14->Divide(3,1);
+	cnv14->cd(1); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_PiPx->Fit("gaus"); h_PiPx->Draw();
 	// Py
-	cnv4->cd(2); gPad->SetLogy(1);
+	cnv14->cd(2); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_PiPy->Fit("gaus"); h_PiPy->Draw();
 	// Pz
-	cnv4->cd(3); gPad->SetLogy(1);
+	cnv14->cd(3); gPad->SetLogy(1);
 	gStyle->SetOptStat(111111); gStyle->SetOptFit(1111);
 	h_PiPz->Fit("gaus"); h_PiPz->Draw();
 	// Correlations
-	TCanvas * cnv5 = new TCanvas("cnv5","Pi momentum pull correlations ",250,250, 900,600);
-	cnv5->Divide(2,2);
-	cnv5->cd(1); h_PullPxCorrR-> SetMarkerStyle(3); h_PullPxCorrR->Draw();
-	cnv5->cd(2); 
+	TCanvas * cnv15 = new TCanvas("cnv15","Pi momentum pull correlations ",250,250, 900,600);
+	cnv15->Divide(2,2);
+	cnv15->cd(1); h_PullPxCorrR-> SetMarkerStyle(3); h_PullPxCorrR->Draw();
+	cnv15->cd(2); 
 	h_KsRgen->Draw(); h_KsRrec->SetLineColor(kRed); h_KsRrec->Draw("SAME"); 
-	cnv5->cd(3); h_PullPxCorrPt-> SetMarkerStyle(3); h_PullPxCorrPt->Draw();
-	cnv5->cd(4); h_PullPxCorrLm-> SetMarkerStyle(3); h_PullPxCorrLm->Draw();
+	cnv15->cd(3); h_PullPxCorrPt-> SetMarkerStyle(3); h_PullPxCorrPt->Draw();
+	cnv15->cd(4); h_PullPxCorrLm-> SetMarkerStyle(3); h_PullPxCorrLm->Draw();
 }

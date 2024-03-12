@@ -23,19 +23,28 @@ void VertexMore::Mprt(TMatrixD M, Bool_t Opt)
 	}
 }
 // Constructors
-VertexMore::VertexMore(VertexFit* V)
+//
+void VertexMore::Init(VertexFit* V)
 {
-	fUnits = kFALSE;
+	//
+	// Set magnetic field and units
+	Double_t Bz = 2.;
+	SetB(Bz);
+	fa = -Bz * cSpeed();
+	if(fUnits)fa = -Bz * cSpeed()*1.0e-3;
+	//
+	// Initialize various arrays
+	//
 	fV = V;
 	fNtr = fV->GetNtrk();
-	fPar.ResizeTo(5);	fPar.Zero();
-	fCov.ResizeTo(5, 5);	fCov.Zero();
-	fCp.ResizeTo(3, 3);
-	CalcParCov();
 	fXv.ResizeTo(3);
 	fXvCov.ResizeTo(3,3);
 	fXv = fV->GetVtx();
 	fXvCov = fV->GetVtxCov();
+	fPar.ResizeTo(5);	fPar.Zero();
+	fCov.ResizeTo(5, 5);	fCov.Zero();
+	fCp.ResizeTo(3, 3);
+	CalcParCov();
 	fBigCov.ResizeTo(3 * (fNtr + 1), 3 * (fNtr + 1));
 	FillBigCov();
 	fBigPar.ResizeTo(3 * (fNtr + 1));
@@ -44,26 +53,16 @@ VertexMore::VertexMore(VertexFit* V)
 	fCov = MakeVcov();
 	fNc = 0;
 }
+//
+VertexMore::VertexMore(VertexFit* V)
+{
+	fUnits = kFALSE;
+	Init(V);
+}
 VertexMore::VertexMore(VertexFit* V, Bool_t opt)
 {
 	fUnits = opt;
-	fV = V;
-	fNtr = fV->GetNtrk();
-	fPar.ResizeTo(5);	fPar.Zero();
-	fCov.ResizeTo(5, 5);	fCov.Zero();
-	fCp.ResizeTo(3, 3);
-	CalcParCov();
-	fXv.ResizeTo(3);
-	fXvCov.ResizeTo(3,3);
-	fXv = fV->GetVtx();
-	fXvCov = fV->GetVtxCov();
-	fBigCov.ResizeTo(3 * (fNtr + 1), 3 * (fNtr + 1));
-	FillBigCov();
-	fBigPar.ResizeTo(3 * (fNtr + 1));
-	FillBigPar();
-	fPar = MakeVpar();
-	fCov = MakeVcov();
-	fNc = 0;
+	Init(V);
 }
 //
 // Destructor
@@ -80,7 +79,7 @@ VertexMore::~VertexMore()
 //
 // Main method to calculate parameters and covariance from vertex
 //
-Double_t VertexMore::dSdD(Int_t i)
+Double_t VertexMore::dSdD(Int_t i)	// ***** NOT USED *****
 {
 	// Derivative of phase of ith track wrt D
 	//
@@ -97,7 +96,7 @@ Double_t VertexMore::dSdD(Int_t i)
 	return Num/Den;
 }
 
-Double_t VertexMore::dSdC(Int_t i)
+Double_t VertexMore::dSdC(Int_t i)	// ***** NOT USED *****
 {
 	// Derivative of phase of ith track wrt C
 	//
@@ -114,7 +113,7 @@ Double_t VertexMore::dSdC(Int_t i)
 	return Num/Den;
 }
 
-TMatrixD VertexMore::dPdX(Int_t i)
+TMatrixD VertexMore::dPdX(Int_t i)	// ***** NOT USED *****
 {
 	TVectorD par = fV->GetNewPar(i);
 	TVectorD xv = fV->GetVtx();
@@ -143,86 +142,56 @@ TMatrixD VertexMore::dPdAlf(Int_t i)
 	TMatrixD dPdPar(5, 3); dPdPar.Zero();
 	TVectorD par = fV->GetNewPar(i);
 	TVectorD xv = fV->GetVtx();
-	//Double_t R2 = xv(0)*xv(0)+xv(1)*xv(1);
-	//
-	//Double_t D = par(0);
 	Double_t ph0 = par(1);
 	Double_t z_0 = par(3);
 	Double_t lm = par(4);
 	
 	TVector3 p = GetMomentum(i); 
 
-	if(fV->IsCharged(i)){				//Charged
+	if(fV->IsCharged(i)){		//Charged
 		Double_t C = par(2);
-		//Double_t a = fa * fQ[i];
-		//
-		// track momentum
-		//Double_t pt = p.Pt();
-		//Double_t pt = TMath::Abs(a / (2. * C));
-		//Double_t s = 2 * TMath::ASin(C * TMath::Sqrt(TMath::Max(R2 - D * D, 0.) / (1. + 2. * C * D)));
-		//Double_t s = (2.*C)*(xv(2)-z_0)/lm;
-		//TVector3 p(pt * TMath::Cos(s + ph0), pt * TMath::Sin(s + ph0), pt*lm);
-		/*
-		//    
-		Double_t sd = dSdD(i);
-		Double_t sc = dSdC(i);
 		//
 		// px
-		dPdPar(0, 0) = -p(1)*sd;
-		dPdPar(1, 0) = -p(1);			
-		dPdPar(2, 0) = -p(0)/C-p(1)*sc;
+		dPdPar(1, 0) = -p(1);			// phi0
+		dPdPar(2, 0) = -p(0)/C;			// C
 		// py
-		dPdPar(0, 1) =  p(0)*sd;
-		dPdPar(1, 1) =  p(0);
-		dPdPar(2, 1) = -p(1)/C+p(0)*sc;
+		dPdPar(1, 1) =  p(0);			// Phi0
+		dPdPar(2, 1) = -p(1)/C;			// C
 		// pz
-		dPdPar(2, 2) = -p(2) / C;
-		dPdPar(4, 2) = p.Pt();
-		
-		Double_t z = xv(2);
-		Double_t sc = 2.*(z-z_0)/lm;
-		Double_t sz = -2.*C/lm;
-		Double_t sl = -2.*C*(z-z_0)/(lm*lm);
-		*/
-		TVectorD dsda = dsdPar(xv, par);
-		//
+		dPdPar(2, 2) = -p(2) / C;		// C
+		dPdPar(4, 2) = p.Pt();			// cot(theta)
+	}else{				// Neutral
+		Double_t pt = p.Pt();
+		// 
 		// px
-		dPdPar(0, 0) =  0;			// D
-		dPdPar(1, 0) = -p(1)*(1.+dsda(1));	// phi0
-		dPdPar(2, 0) = -p(0)/C-p(1)*dsda(2);	// C
-		dPdPar(3, 0) =  0;			// z0
-		dPdPar(4, 0) =  0;			// cot(theta)
+		dPdPar(1, 0) = -p(1);		// phi0		
+		dPdPar(2, 0) = TMath::Cos(ph0);	// pt
 		// py
-		dPdPar(0, 1) =  0;
-		dPdPar(1, 1) =  p(0)*(1.+dsda(1));
-		dPdPar(2, 1) = -p(1)/C+p(0)*dsda(2);
-		dPdPar(3, 1) =  0;
-		dPdPar(4, 1) =  0;
+		dPdPar(1, 1) =  p(0);		// phi0
+		dPdPar(2, 1) = TMath::Sin(ph0);	// pt
 		// pz
-		dPdPar(2, 2) = -p(2) / C;
-		dPdPar(4, 2) = p.Pt();
-	}else{						// Neutral
-		Double_t pt = par(2);
-		TVector3 p(pt * TMath::Cos(ph0), pt * TMath::Sin(ph0), pt*lm);
-		//
-		// px
-		dPdPar(0, 0) = 0.;
-		dPdPar(1, 0) = -p(1);			
-		dPdPar(2, 0) = TMath::Cos(ph0);
-		// py
-		dPdPar(0, 1) =  0.;;
-		dPdPar(1, 1) =  p(0);
-		dPdPar(2, 1) = TMath::Sin(ph0);
-		// pz
-		dPdPar(2, 2) = lm;
-		dPdPar(4, 2) = pt;
+		dPdPar(2, 2) = lm;		// pt
+		dPdPar(4, 2) = pt;		// cot(theta)
 	}
 	//
 	return dPdPar;
 }
 
-
-TMatrixD VertexMore::dXdAlf(Int_t i)
+TVectorD VertexMore::dPds(Int_t i)
+{
+	TVectorD dPs(3); dPs.Zero();
+	TVector3 p = GetMomentum(i); 
+	//
+	if(fV->IsCharged(i)){				//Charged
+		dPs(0) = -p(1);
+		dPs(1) =  p(0);
+		dPs(2) =    0.;
+	}
+	//
+	return dPs;
+}
+//
+TMatrixD VertexMore::dXdAlf(Int_t i)		// *** NOT USED ***
 {
 	TMatrixD dXdPar(5, 3); dXdPar.Zero();
 	TVectorD xv = fV->GetVtx();
@@ -235,10 +204,9 @@ TMatrixD VertexMore::dXdAlf(Int_t i)
 	Double_t z0 = par(3);
 	Double_t ct = par(4);
 
-	if(fV->IsCharged(i)){					// Charged
+	if(fV->IsCharged(i)){			// Charged
 		//
 		Double_t C = par(2);
-		//Double_t s = 2.* TMath::ASin(C*TMath::Sqrt(TMath::Max(R2-D*D,0.)/(1.+2.*C*D)));
 		Double_t s = GetPhase(xv, par);
 		//
 		TVectorD dsdpr = dsdPar(xv, par);
@@ -262,46 +230,92 @@ TMatrixD VertexMore::dXdAlf(Int_t i)
 		dXdPar(3, 2) = 	1.;			// z0
 		dXdPar(4, 2) =  s/(2.*C);		// ctg
 	}
-	else{							// Neutral
-		
-		Double_t sd = -D/TMath::Sqrt(R2-D*D);
-		Double_t s = (xv(2)-z0)/ct;
+	else{					// Neutral
+		Double_t s = xv(0)*cf+xv(1)*sf;
 		//
 		// x
-		dXdPar(0, 0) = -sf+cf*sd;		// D
-		dXdPar(1, 0) = -D*cf - s*sf;		// phi0
+		dXdPar(0, 0) = -sf;			// D
+		//dXdPar(1, 0) = -D*cf - s*sf;		// phi0
+		dXdPar(1, 0) = -s*sf;			// phi0
 		// y
-		dXdPar(0, 1) =  cf+sf*sd;		// D
-		dXdPar(1, 1) = -D*sf + s*cf;		// phi0
+		dXdPar(0, 1) =  cf;			// D
+		//dXdPar(1, 1) = -D*sf + s*cf;		// phi0
+		dXdPar(1, 1) =  s*cf;			// phi0
 		// z
+		dXdPar(1, 2) =  D*ct;			// phi0
 		dXdPar(3, 2) = 	1.;			// z0
 		dXdPar(4, 2) =  s;			// ctg	
 	}
 	//
 	return dXdPar;
 }
+//
+TMatrixD VertexMore::DpDa0(Int_t i, Int_t k)
+{
+	//
+	//	Momentum derivatives wrt initial track parameters
+	//
+	TMatrixD dPidPar0k(3,5);		// Return matrix
+	// Get momentum derivatives wrt track parameters
+	TMatrixD dPdPar_i = dPdAlf(i);		// (5, 3)
+	TMatrixD dPdPar_iT(TMatrixD::kTransposed, dPdPar_i);	// (3, 5)
+	// Final track parameter derivative wrt initial parameters
+	TMatrixD DaDa0_k = fV->DaiDa0k(i, k);	// (5,5)
+	// 
+	// Update return matrix
+	dPidPar0k = dPdPar_iT*DaDa0_k;		// Track par. components
+	//
+	// Get derivatives wrt phase
+	TVectorD dPdph_i = dPds(i);		// (3)
+	// Phase derivative wrt initial track parameters
+	TVectorD DsDa0_k = fV->DsiDa0k(i,k);	// (5)
+	//
+	// Update return matrix
+	TMatrixD sPart(3,5);
+	dPidPar0k += sPart.Rank1Update(dPdph_i, DsDa0_k,1.0);
+	//
+	return dPidPar0k;
+}
+//
+TMatrixD VertexMore::BuildPPcov(Int_t i, Int_t j)
+{
+	TMatrixD pCov(3,3); pCov.Zero();
+	//
+	// Loop over all initial track parameters
+	for(Int_t k=0; k<fNtr; k++){
+		TMatrixD Dpi  = DpDa0(i, k);
+		TMatrixD Dpj  = DpDa0(j, k);
+		TMatrixD DpjT(TMatrixD::kTransposed, Dpj);
+		TMatrixDSym Ck = fV->GetOldCov(k);	// Initial track par. cov.
+		pCov += Dpi*(Ck*DpjT);
+	}
+	return pCov;
+}
+//
+TMatrixD VertexMore::BuildPXcov(Int_t i)
+{
+	TMatrixD pxCov(3,3); pxCov.Zero();
+	//
+	// Loop over all initial track parameters
+	for(Int_t k=0; k<fNtr; k++){
+		TMatrixD Dpi  = DpDa0(i, k);
+		TMatrixDSym Ck = fV->GetOldCov(k);	// Initial track par. cov.
+		TMatrixD DxvDa0_k = fV->GetDxvDpar0(k);
+		TMatrixD DxvDa0_kT(TMatrixD::kTransposed, DxvDa0_k);
+		pxCov += Dpi*(Ck*DxvDa0_kT);
+	}
+//
+	return pxCov;
+}
+//
 void VertexMore::CalcParCov()
 {
 	//
-	// Set magnetic field and units
-	Double_t Bz = 2.;
-	SetB(Bz);
-	fa = -Bz * cSpeed();
-	if(fUnits)fa = -Bz * cSpeed()*1.0e-3;
-	//
-	// Vertex position
-	TVectorD xv = fV->GetVtx();
-	//Double_t R2 = xv(0)*xv(0)+xv(1)*xv(1);
-	//
-	// Vertex momentum
-	TVector3 pv(0., 0., 0.);
-	//
-	// Vertex charge
-	fQtot = 0.;
+	TVectorD xv = fXv;		// Vertex position
+	TVector3 pv(0., 0., 0.);	// Vertex momentum
+	fQtot = 0.;			// Vertex charge
 	//
 	// Vertex momentum error
-	TMatrixD CovPtot(3, 3); CovPtot.Zero();
-	std::vector<TMatrixD*> dPdAlfa;
 	//
 	for (Int_t i = 0; i < fNtr; i++) {
 		// Unpack ith track parameters
@@ -315,14 +329,12 @@ void VertexMore::CalcParCov()
 		TVector3 p;
 		if(fV->IsCharged(i)){			// Charged
 			Double_t C = par(2);
-			Q = TMath::Sign(1., -C * Bz);
+			Q = TMath::Sign(1., C * fa);
 			Double_t a = fa * Q;
 			//
 			// Store track momenta
 			Double_t pt = TMath::Abs(a / (2. * C));
-			//Double_t s = 2 * TMath::ASin(C * TMath::Sqrt(TMath::Max(R2 - D * D, 0.) / (1. + 2. * C * D)));
-			// Double_t s = (2.*C)*(xv(2)-z_0)/lm;
-			Double_t s = GetPhase(xv, par);
+			Double_t s = fV->GetPhase(i);
 			TVector3 pc(pt * TMath::Cos(s + ph0), pt * TMath::Sin(s + ph0), pt*lm);
 			p = pc;
 		}else{					// Neutral
@@ -338,31 +350,11 @@ void VertexMore::CalcParCov()
 		pv += p;	// Total momentum
 		//
 		// Get momentum errors
-		TMatrixD dPdPar = dPdAlf(i);		// (5, 3)
-		dPdAlfa.push_back(new TMatrixD(dPdPar));
-		TMatrixDSym ParCov = fV->GetNewCov(i);	// (5, 5)
-		TMatrixDSym pCov = ParCov.SimilarityT(dPdPar);
-		//std::cout<<"pCov (1):"; pCov.Print();
-		// Add vertex uncertainty contribution if charged
-		
-		if(fV->IsCharged(i)){
-			TMatrixD dXP = dPdX(i);			// (3, 3)
-			TMatrixD dPX(TMatrixD::kTransposed,dXP);
-			// cross term 
-			TMatrixD XvPar = fV->GetNewCovXvPar(i);	// (3, 5)
-			TMatrixD cross = dPX*(XvPar*dPdPar);
-			TMatrixDSym pCov12(3); pCov12.Zero();
-			for(Int_t k1=0; k1<3; k1++){
-				for(Int_t k2=0; k2<3; k2++) pCov12(k1,k2) = cross(k1,k2)+cross(k2,k1);}
-			pCov += pCov12;
-			//std::cout<<"pCov (2):"; pCov.Print();
-			// vertex term
-			TMatrixDSym vCov = fV->GetVtxCov();
-			vCov.Similarity(dPX);
-			pCov += vCov;
-			//std::cout<<"vCov:"; vCov.Print();
-			//std::cout<<"pCov (3):"; pCov.Print();
-		
+		//
+		TMatrixDSym pCov(3);
+		TMatrixD pCovTmp = BuildPPcov(i, i);	// Get momentum covariance
+		for(Int_t h1=0; h1<3; h1++){		// Symmetrize
+			for(Int_t h2=0; h2<3; h2++)pCov(h1,h2) = 0.5*(pCovTmp(h1,h2)+pCovTmp(h2,h1));
 		}
 		fCpi.push_back(new TMatrixDSym(pCov));
 		//
@@ -372,29 +364,10 @@ void VertexMore::CalcParCov()
 	fP = pv;
 	//
 	// Total momentum error
+	TMatrixD CovPtot(3, 3); CovPtot.Zero();
 	for (Int_t i = 0; i < fNtr; i++) {
 		for (Int_t j = 0; j < fNtr; j++) {
-			TMatrixD Cij = fV->GetNewCov(i, j);
-			TMatrixD dPi = *dPdAlfa[i];
-			TMatrixD dPj = *dPdAlfa[j];
-			TMatrixD dPiT(TMatrixD::kTransposed, dPi);
-			CovPtot += dPiT * (Cij * dPj);
-			//
-			if(fV->IsCharged(i)){
-				TMatrixDSym vCov = fV->GetVtxCov();
-				TMatrixD dXPi = dPdX(i);		// (3, 3)
-				TMatrixD dPXi(TMatrixD::kTransposed,dXPi);
-				TMatrixD dXPj = dPdX(j);		// (3, 3)
-				TMatrixD dPXj(TMatrixD::kTransposed,dXPj);
-				CovPtot += dPXi*(vCov*dXPj);
-				// cross term
-				TMatrixD XvPari = fV->GetNewCovXvPar(i);	// (3, 5)
-				TMatrixD XvParit(TMatrixD::kTransposed, XvPari);
-				TMatrixD XvParj = fV->GetNewCovXvPar(j);	// (3, 5)
-				TMatrixD cross1 = dPXi*(XvParj*dPj);
-				TMatrixD cross2 = dPiT*(XvParit*dXPj);
-				CovPtot += (cross1+cross2);
-			}
+			CovPtot += BuildPPcov(i,j);
 		}
 	}
 	//
@@ -402,12 +375,6 @@ void VertexMore::CalcParCov()
 	for (Int_t i = 0; i < 3; i++) {
 		for (Int_t j = 0; j < 3; j++)fCp(i, j) = 0.5 * (CovPtot(i, j) + CovPtot(j, i));
 	}
-	// Clean
-	for (Int_t i = 0; i < fNtr; i++) {
-		dPdAlfa[i]->Clear();
-		delete dPdAlfa[i];
-	}
-	dPdAlfa.clear();
 	//
 }
 //
@@ -429,6 +396,47 @@ TVectorD VertexMore::MakeVpar()
 	return fPar;
 }
 //
+void VertexMore::FillBigCov()
+{
+	//
+	// Fill x vertex track momenta correlations
+	//
+	Int_t Nbig = 3*(fNtr+1);
+	TMatrixD BigCov(Nbig,Nbig); 
+	//
+	//
+	// <x,x>
+	TMatrixDSub(BigCov, 0, 2, 0, 2) = fXvCov; // <x.x>
+	// 
+	for(Int_t i=0; i<fNtr; i++){	// loop on <x, p_i>
+		// <x,p>
+		TMatrixD CovPX = BuildPXcov(i);
+		TMatrixD CovXP(TMatrixD::kTransposed, CovPX);
+		TMatrixDSub(BigCov, 0, 2, 3 * (i + 1), 3 * (i + 2) - 1) = CovXP; // <x.p>
+		TMatrixDSub(BigCov, 3 * (i + 1), 3 * (i + 2) - 1, 0, 2) = CovPX; // <p.x>
+		// <p, p>
+		for(Int_t j=0; j<fNtr; j++){
+			TMatrixD CovPP = BuildPPcov(i,j);
+			TMatrixDSub(BigCov, 3 * (i + 1), 3 * (i + 2) - 1, 3 * (j + 1), 3 * (j + 2) - 1) = CovPP;
+		}
+	}
+	// Symmetrize
+	for(Int_t i=0; i<Nbig; i++){
+		for(Int_t j=0; j<Nbig; j++)fBigCov(i,j) = 0.5*(BigCov(i,j)+BigCov(j,i));
+	}
+}
+//
+void VertexMore::FillBigPar()
+{
+	fBigPar.SetSub(0,fXv);
+	for(Int_t i=0; i<fNtr; i++){
+		TVector3 p = GetMomentum(i);
+		Double_t p_arr[3] = {p.x(), p.y(), p.z()};
+		TVectorD pv(3,p_arr);
+		fBigPar.SetSub(3*i+3,pv);  
+	}
+}
+//
 // Vertex parameter errors
 //
 TMatrixD VertexMore::DparDx(TVector3 xv, TVector3 pv, Double_t Q)
@@ -445,17 +453,15 @@ TMatrixD VertexMore::DparDx(TVector3 xv, TVector3 pv, Double_t Q)
 		if(fUnits)Par = ParToMm(Par);	// Back to mm
 	}
 	else Par = XPtoPar_N(xv, pv);		// Neutral
+		
 	//
 	Double_t D = Par(0);
 	Double_t ph0 = Par(1);
-	Double_t C = Par(3);
-	//Double_t z_0 = Par(3);
 	Double_t lm = Par(4);
 	//
 	// Derivative matrix
 	TMatrixD dParX(5,3); dParX.Zero();
 	if(Q != 0.0){
-		//Double_t C = Par(2);
 		Double_t a = fa * Q;
 		//
 		// dT/x, dT/p
@@ -479,11 +485,14 @@ TMatrixD VertexMore::DparDx(TVector3 xv, TVector3 pv, Double_t Q)
 		dParX(3, 2) = 1.0;
 	}
 	else{
+		Double_t pt = Par(2);
 		// D derivatives
 		Double_t cs = TMath::Cos(ph0);
 		Double_t sn = TMath::Sin(ph0);
+		Double_t s = xv.Y()*sn+xv.X()*cs;
+		//std::cout<<"dParX calc: sn= "<<sn<<", pt= "<<pt<<", D= "<<D<<", s= "<<s<<std::endl;
 		dParX(0,0) = -sn;	// x
-		dParX(0,1) = cs;	// y
+		dParX(0,1) =  cs;	// y
 		// z0 derivatives
 		dParX(3,0) = -lm*cs;	// x
 		dParX(3,1) = -lm*sn;	// y
@@ -493,101 +502,6 @@ TMatrixD VertexMore::DparDx(TVector3 xv, TVector3 pv, Double_t Q)
 	return dParX;
 }
 //
-void VertexMore::FillBigCov()
-{
-	//
-	// Fill x vertex track momenta correlations
-	//
-	Int_t Nbig = 3*(fNtr+1);
-	TMatrixD BigCov(Nbig,Nbig); 
-	//
-	//
-	// <x,x>
-	TMatrixDSub(BigCov, 0, 2, 0, 2) = fXvCov; // <x.x>
-	// 
-	for(Int_t i=0; i<fNtr; i++){	// loop on <x, p_i>
-		// <x,p>
-		TMatrixD CovXP(3, 3); CovXP.Zero();
-		TMatrixD dPda_i = dPdAlf(i);			// (5,3)
-		TMatrixD dPdat_i(TMatrixD::kTransposed, dPda_i);// (3.5)
-		//TMatrixD XvPar = fV->GetNewCovXvPar(i);	// (3, 5)
-		//TMatrixD Cxp = XvPar*dPda_i;
-		//std::cout<<"From GetNewCovPar:"; Cxp.Print();
-		
-		for(Int_t k=0; k<fNtr; k++){
-			TMatrixD dXda0_k = fV->GetDxvDpar0(k);	// (3, 5)
-			TMatrixDSym Ck = fV->GetOldCov(k);	// (5, 5)
-			TMatrixD dada0 = fV->DaiDa0k(i, k);	// (5, 5)
-			TMatrixD dada0_t(TMatrixD::kTransposed, dada0);	// (5, 5)
-			CovXP += (dXda0_k*Ck)*(dada0_t*dPda_i);
-		}
-		
-		//std::cout<<"From GetDxvDpar:"; CovXP.Print();
-		// Additional term
-		if(fV->IsCharged(i)){
-			TMatrixD dXPi = dPdX(i);
-			CovXP += fXvCov*dXPi;
-		}
-		//
-		TMatrixD CovPX(TMatrixD::kTransposed, CovXP);
-		TMatrixDSub(BigCov, 0, 2, 3 * (i + 1), 3 * (i + 2) - 1) = CovXP; // <x.p>
-		TMatrixDSub(BigCov, 3 * (i + 1), 3 * (i + 2) - 1, 0, 2) = CovPX; // <p.x>
-		// <p, p>
-		for(Int_t j=0; j<fNtr; j++){
-			TMatrixD dPda_j = dPdAlf(j);	// (5,3)
-			TMatrixD Cij = fV->GetNewCov(i,j);
-			TMatrixD CovPP = dPdat_i*(Cij*dPda_j);
-			// Additional terms
-			if(fV->IsCharged(i)){
-			// x- x term
-				TMatrixD dXPi = dPdX(i);		// (3, 3)
-				TMatrixD dPXi(TMatrixD::kTransposed,dXPi);
-				TMatrixD dXPj = dPdX(j);		// (3, 3)
-				TMatrixD dPXj(TMatrixD::kTransposed,dXPj);
-				CovPP += dPXi*(fXvCov*dXPj);
-				//
-			// x - p term
-			
-				TMatrixD XvPari = fV->GetNewCovXvPar(i);	// (3, 5)
-				TMatrixD XvParit(TMatrixD::kTransposed, XvPari);
-				TMatrixD XvParj = fV->GetNewCovXvPar(j);	// (3, 5)
-				TMatrixD cross1 = dPXi*(XvParj*dPda_j);
-				TMatrixD cross2 = dPdat_i*(XvParit*dXPj);
-				CovPP += (cross1+cross2);
-				/*
-				for(Int_t k=0; k<fNtr; k++){
-					TMatrixD dXda0_k = fV->GetDxvDpar0(k);	// (3, 5)
-					TMatrixD dXda0_kt(TMatrixD::kTransposed, dXda0_k);
-					TMatrixDSym Ck = fV->GetOldCov(k);	// (5, 5)
-					TMatrixD dada0 = fV->DaiDa0k(i, k);	// (5, 5)
-					TMatrixD dada0_t(TMatrixD::kTransposed, dada0);	// (5, 5)
-					
-					CovPP += (dPdat_i*dada0)*(Ck*(dXda0_kt*dXPj));
-					CovPP += (dPXi*dXda0_k)*(Ck*(dada0_t*dPda_j));
-				}
-			*/
-			}
-			//
-			TMatrixDSub(BigCov, 3 * (i + 1), 3 * (i + 2) - 1, 3 * (j + 1), 3 * (j + 2) - 1) = CovPP;
-		}
-	}
-	// Symmetrize
-	for(Int_t i=0; i<Nbig; i++){
-		for(Int_t j=0; j<Nbig; j++)fBigCov(i,j) = 0.5*(BigCov(i,j)+BigCov(j,i));
-	}
-}
-//
-void VertexMore::FillBigPar()
-{
-	fBigPar.SetSub(0,fXv);
-	for(Int_t i=0; i<fNtr; i++){
-		TVector3 p = GetMomentum(i);
-		Double_t p_arr[3] = {p.x(), p.y(), p.z()};
-		TVectorD pv(3,p_arr);
-		fBigPar.SetSub(3*i+3,pv);  
-	}
-}
-//
 TMatrixD VertexMore::DparDp(TVector3 xv, TVector3 pv, Double_t Q)
 {
 	//
@@ -595,18 +509,16 @@ TMatrixD VertexMore::DparDp(TVector3 xv, TVector3 pv, Double_t Q)
 	//
 	// Track parameters
 	TVectorD Par(5);
-	if(Q != 0.0){
+	if(Q != 0.0){				// Charged
 		if(fUnits) xv *= 1.0e-3;	// Change to meters
 		Par = XPtoPar(xv, pv, Q);
 		if(fUnits) xv *= 1.0e3;
 		if(fUnits)Par = ParToMm(Par);	// Back to mm
 	}
-	else Par = XPtoPar_N(xv, pv);
+	else Par = XPtoPar_N(xv, pv);		// Neutral	
 	//
 	Double_t D = Par(0);
 	Double_t ph0 = Par(1);
-	//Double_t C = Par(2);
-	//Double_t z_0 = Par(3);
 	Double_t lm = Par(4);
 	//
 	// Derivative matrix
@@ -649,21 +561,21 @@ TMatrixD VertexMore::DparDp(TVector3 xv, TVector3 pv, Double_t Q)
 	else{
 		Double_t cs = TMath::Cos(ph0);
 		Double_t sn = TMath::Sin(ph0);
-		Double_t pt = Par(2);
+		Double_t pt = pv.Pt();
 		Double_t s = xv.Y()*sn+xv.X()*cs;
 		//std::cout<<"dParP calc: sn= "<<sn<<", pt= "<<pt<<", D= "<<D<<", s= "<<s<<std::endl;
 		// D derivatives
-		dParP(0, 0) = s*sn/pt;	// px
+		dParP(0, 0) =  s*sn/pt;	// px
 		dParP(0, 1) = -s*cs/pt;	// py
 		// Phi0 derivatives
-		dParP(1, 0) = sn/pt;	// px
-		dParP(1, 1) = -cs/pt;	// py
+		dParP(1, 0) = -sn/pt;	// px
+		dParP(1, 1) =  cs/pt;	// py
 		// pt derivatives
 		dParP(2, 0) = cs;	// px
 		dParP(2, 1) = sn;	// py
 		// z0 derivatives
 		dParP(3, 0) = lm*(s*cs+D*sn)/pt;	// px
-		dParP(3, 1) = lm*(s*sn-D*cs)/pt;	// px
+		dParP(3, 1) = lm*(s*sn-D*cs)/pt;	// py
 		dParP(3, 2) = -s/pt;			// pz
 		// ctg derivatives
 		dParP(4, 0) = -lm*cs/pt;		// px
@@ -692,6 +604,7 @@ TMatrixDSym VertexMore::MakeVcov()
 	//
 	TMatrixD dAlfdq(5,3*(fNtr+1));
 	fCov.Zero();
+	//
 	TMatrixDSub(dAlfdq, 0, 4, 0, 2) = dParX;
 	for(Int_t i=0; i<fNtr; i++)TMatrixDSub(dAlfdq, 0, 4, 3*(i+1), 3*(i+2)-1) = dParP;
 	TMatrixDSym Bm = fBigCov;
@@ -833,8 +746,8 @@ void VertexMore::MassConstrFit()
 			PtotCov += Block;
 		}
 	}
-	for(Int_t i=0; i<fNtr; i++){
-		for(Int_t k=0; k<fNtr; k++)fCp(i,k) = 0.5*(PtotCov(i,k)+PtotCov(k,i));
+	for(Int_t i=0; i<3; i++){
+		for(Int_t k=0; k<3; k++)fCp(i,k) = 0.5*(PtotCov(i,k)+PtotCov(k,i));
 	}
 	//
 	// Vertex track

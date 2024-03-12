@@ -4,8 +4,10 @@
 //
 #include <iostream>
 #include <TH1.h>
+#include <TMath.h>
 #include <TCanvas.h>
 #include <TStyle.h>
+#include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
 #include "external/TrackCovariance/VertexMore.h"
 #include "examples/classes/VState.h"
@@ -28,6 +30,21 @@ private:
 	TH1D* h_DsPx;
 	TH1D* h_DsPy;
 	TH1D* h_DsPz;
+	// Ds tracks phases
+	TH1D* h_DsTph;
+	// Ds track parameters
+	TH1D* h_DsParD;
+	TH1D* h_DsParP0;
+	TH1D* h_DsParC;
+	TH1D* h_DsParZ0;
+	TH1D* h_DsParCt;
+	// Ds tracks momentum
+	TH1D* h_DsPionPx;
+	TH1D* h_DsPionPy;
+	TH1D* h_DsPionPz;
+	TH1D* h_DsKaonPx;
+	TH1D* h_DsKaonPy;
+	TH1D* h_DsKaonPz;
 	// Bs vertex
 	TH1D* h_BsXv;
 	TH1D* h_BsYv;
