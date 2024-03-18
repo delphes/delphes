@@ -1,7 +1,7 @@
 set RandomSeed 123
 
 ####################################################################                                l
-# FCC-ee IDEA detector model
+# FCC-ee PseudoCLD_o1_v01 detector model
 #
 # Authors: Elisa Fontanesi, Lorenzo Pezzotti, Massimiliano Antonello, Michele Selvaggi
 # email: efontane@bo.infn.it,
