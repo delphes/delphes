@@ -1,7 +1,7 @@
 set RandomSeed 123
 
 ####################################################################                                l
-# FCC-ee IDEA detector model
+# FCC-ee detector model with Silicon Tracking
 #
 # Authors: Elisa Fontanesi, Lorenzo Pezzotti, Massimiliano Antonello, Michele Selvaggi
 # email: efontane@bo.infn.it,
