@@ -2635,10 +2635,10 @@ RecordTracebackInfo(interp, pc, codePtr)
             ellipsis = "...";
         }
         if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-            sprintf(buf, "\n    while executing\n\"%.*s%s\"",
+            snprintf(buf, sizeof(buf), "\n    while executing\n\"%.*s%s\"",
                     numChars, cmd, ellipsis);
         } else {
-            sprintf(buf, "\n    invoked from within\n\"%.*s%s\"",
+            snprintf(buf, sizeof(buf), "\n    invoked from within\n\"%.*s%s\"",
                     numChars, cmd, ellipsis);
         }
         Tcl_AddObjErrorInfo(interp, buf, -1);
@@ -3610,7 +3610,7 @@ TclExprFloatError(interp, value)
     } else {			/* FAILS IF STRING REP CONTAINS NULLS */
 	char msg[100];
 	
-	sprintf(msg, "unknown floating-point error, errno = %d", errno);
+	snprintf(msg, sizeof(msg), "unknown floating-point error, errno = %d", errno);
 	Tcl_AppendToObj(Tcl_GetObjResult(interp), msg, -1);
 	Tcl_SetErrorCode(interp, "ARITH", "UNKNOWN", msg, (char *) NULL);
     }

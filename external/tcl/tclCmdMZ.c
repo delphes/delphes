@@ -330,7 +330,7 @@ Tcl_ScanCmd(dummy, interp, argc, argv)
 		{
 		    char buf[50];
 
-		    sprintf(buf, "bad scan conversion character \"%c\"", *fmt);
+		    snprintf(buf, sizeof(buf), "bad scan conversion character \"%c\"", *fmt);
 		    Tcl_SetResult(interp, buf, TCL_VOLATILE);
 		    code = TCL_ERROR;
 		    goto done;
@@ -407,7 +407,7 @@ Tcl_ScanCmd(dummy, interp, argc, argv)
 		break;
 
 	    case 'u':
-		sprintf(string, "%u", *((int *) curField->location));
+		snprintf(string, sizeof(string), "%u", *((int *) curField->location));
 		if (Tcl_SetVar(interp, argv[i+3], string, 0) == NULL) {
 		    goto storeError;
 		}
@@ -1404,7 +1404,7 @@ Tcl_WhileCmd(dummy, interp, argc, argv)
         if ((result != TCL_OK) && (result != TCL_CONTINUE)) {
             if (result == TCL_ERROR) {
                 char msg[60];
-                sprintf(msg, "\n    (\"while\" body line %d)",
+                snprintf(msg, sizeof(msg), "\n    (\"while\" body line %d)",
                         interp->errorLine);
                 Tcl_AddErrorInfo(interp, msg);
             }

@@ -158,7 +158,7 @@ float H_RecRPObject::getECorrectionFactor(const unsigned int facn, const unsigne
 		ee[i] = ee[i] - rece[i];
 	}
 	char mytitle[50];
-	sprintf(mytitle,"c_%d",method);
+	snprintf(mytitle, sizeof(mytitle), "c_%d",method);
 //	TCanvas*c = new TCanvas();
 //	c->SetTitle(mytitle);
 	TGraph* g1 = new TGraph(n,rece,ee);

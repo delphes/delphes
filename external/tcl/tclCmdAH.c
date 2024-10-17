@@ -186,7 +186,7 @@ Tcl_CaseObjCmd(dummy, interp, objc, objv)
 	    char msg[100];
 	    
 	    arg = Tcl_GetStringFromObj(armPtr, &argLen);
-	    sprintf(msg, "\n    (\"%.*s\" arm line %d)", argLen, arg,
+	    snprintf(msg, sizeof(msg), sizeof(msg), "\n    (\"%.*s\" arm line %d)", argLen, arg,
 	            interp->errorLine);
 	    Tcl_AddObjErrorInfo(interp, msg, -1);
 	}
@@ -436,7 +436,7 @@ Tcl_EvalObjCmd(dummy, interp, objc, objv)
     }
     if (result == TCL_ERROR) {
 	char msg[60];
-	sprintf(msg, "\n    (\"eval\" body line %d)", interp->errorLine);
+	snprintf(msg, sizeof(msg), "\n    (\"eval\" body line %d)", interp->errorLine);
 	Tcl_AddObjErrorInfo(interp, msg, -1);
     }
     return result;
@@ -582,7 +582,7 @@ Tcl_ForCmd(dummy, interp, argc, argv)
         if ((result != TCL_OK) && (result != TCL_CONTINUE)) {
             if (result == TCL_ERROR) {
                 char msg[60];
-                sprintf(msg, "\n    (\"for\" body line %d)",interp->errorLine);
+                snprintf(msg, sizeof(msg), "\n    (\"for\" body line %d)",interp->errorLine);
                 Tcl_AddErrorInfo(interp, msg);
             }
             break;
@@ -805,7 +805,7 @@ Tcl_ForeachObjCmd(dummy, interp, objc, objv)
 		break;
 	    } else if (result == TCL_ERROR) {
 		char msg[100];
-		sprintf(msg, "\n    (\"foreach\" body line %d)",
+		snprintf(msg, sizeof(msg), "\n    (\"foreach\" body line %d)",
 			interp->errorLine);
 		Tcl_AddObjErrorInfo(interp, msg, -1);
 		break;
@@ -871,15 +871,15 @@ Tcl_FormatObjCmd(dummy, interp, objc, objv)
     int size;			/* Number of bytes needed for result of
 				 * conversion, based on type of conversion
 				 * ("e", "s", etc.), width, and precision. */
-    int intValue;		/* Used to hold value to pass to sprintf, if
+    int intValue;		/* Used to hold value to pass to snprintf, if
 				 * it's a one-word integer or char value */
-    char *ptrValue = NULL;	/* Used to hold value to pass to sprintf, if
+    char *ptrValue = NULL;	/* Used to hold value to pass to snprintf, if
 				 * it's a one-word value. */
-    double doubleValue;		/* Used to hold value to pass to sprintf if
+    double doubleValue;		/* Used to hold value to pass to snprintf if
 				 * it's a double value. */
     int whichValue;		/* Indicates which of intValue, ptrValue,
 				 * or doubleValue has the value to pass to
-				 * sprintf, according to the following
+				 * snprintf, according to the following
 				 * definitions: */
 #   define INT_VALUE 0
 #   define PTR_VALUE 1
@@ -890,7 +890,7 @@ Tcl_FormatObjCmd(dummy, interp, objc, objv)
     char staticBuf[MAX_FLOAT_SIZE + 1];
                                 /* A static buffer to copy the format results 
 				 * into */
-    char *dst = staticBuf;      /* The buffer that sprintf writes into each
+    char *dst = staticBuf;      /* The buffer that snprintf writes into each
 				 * time the format processes a specifier */
     int dstSize = MAX_FLOAT_SIZE;
                                 /* The size of the dst buffer */
@@ -906,16 +906,16 @@ Tcl_FormatObjCmd(dummy, interp, objc, objv)
     char *end;			/* Used to locate end of numerical fields. */
 
     /*
-     * This procedure is a bit nasty.  The goal is to use sprintf to
+     * This procedure is a bit nasty.  The goal is to use snprintf to
      * do most of the dirty work.  There are several problems:
      * 1. this procedure can't trust its arguments.
      * 2. we must be able to provide a large enough result area to hold
      *    whatever's generated.  This is hard to estimate.
      * 2. there's no way to move the arguments from objv to the call
-     *    to sprintf in a reasonable way.  This is particularly nasty
+     *    to snprintf in a reasonable way.  This is particularly nasty
      *    because some of the arguments may be two-word values (doubles).
      * So, what happens here is to scan the format string one % group
-     * at a time, making many individual calls to sprintf.
+     * at a time, making many individual calls to snprintf.
      */
 
     if (objc < 2) {
@@ -1121,7 +1121,7 @@ Tcl_FormatObjCmd(dummy, interp, objc, objv)
 	    default:
 		{
 		    char buf[40];
-		    sprintf(buf, "bad field specifier \"%c\"", *format);
+		    snprintf(buf, sizeof(buf), "bad field specifier \"%c\"", *format);
 		    Tcl_SetResult(interp, buf, TCL_VOLATILE);
 		    goto fmtError;
 		}
@@ -1150,15 +1150,15 @@ Tcl_FormatObjCmd(dummy, interp, objc, objv)
 	    }
 
 	    if (whichValue == DOUBLE_VALUE) {
-	        sprintf(dst, newFormat, doubleValue);
+	        snprintf(dst, sizeof(dst), newFormat, doubleValue);
 	    } else if (whichValue == INT_VALUE) {
 		if (useShort) {
-		    sprintf(dst, newFormat, (short) intValue);
+		    snprintf(dst, sizeof(dst), newFormat, (short) intValue);
 		} else {
-		    sprintf(dst, newFormat, intValue);
+		    snprintf(dst, sizeof(dst), newFormat, intValue);
 		}
 	    } else {
-	        sprintf(dst, newFormat, ptrValue);
+	        snprintf(dst, sizeof(dst), newFormat, ptrValue);
 	    }
 	    Tcl_AppendToObj(resultPtr, dst, -1);
 	}

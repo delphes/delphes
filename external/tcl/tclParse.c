@@ -142,7 +142,7 @@ TclParseQuotes(interp, string, termChar, flags, termPtr, pvPtr)
 	    char buf[30];
 	    
 	    Tcl_ResetResult(interp);
-	    sprintf(buf, "missing %c", termChar);
+	    snprintf(buf, sizeof(buf), "missing %c", termChar);
 	    Tcl_SetResult(interp, buf, TCL_VOLATILE);
 	    *termPtr = string-1;
 	    return TCL_ERROR;
@@ -841,7 +841,7 @@ Tcl_ParseVar(interp, string, termPtr)
 		if (length > 100) {
 		    length = 100;
 		}
-		sprintf(msg, "\n    (parsing index for array \"%.*s\")",
+		snprintf(msg, sizeof(msg), "\n    (parsing index for array \"%.*s\")",
 			length, name1);
 		Tcl_AddErrorInfo(interp, msg);
 		result = NULL;

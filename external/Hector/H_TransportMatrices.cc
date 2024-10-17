@@ -50,10 +50,10 @@ extern void printMatrix(TMatrix * TMat) {
 	cout << endl << "\t";
 	for(int i=0;i<MDIM*MDIM;i++) {
 		if (el[i]<0)
-  			 {sprintf(temp,"%.5e",el[i]);}
+  			 {snprintf(temp, sizeof(temp), "%.5e",el[i]);}
 		else if (el[i]>0)
-   			 {sprintf(temp," %.5e",el[i]);}
-   		else {sprintf(temp,"       0    ");}
+   			 {snprintf(temp, sizeof(temp), " %.5e",el[i]);}
+   		else {snprintf(temp, sizeof(temp), "       0    ");}
    		
 		cout << temp << " ";
 		if((i+1)%MDIM == 0) { cout << endl << "\t"; }

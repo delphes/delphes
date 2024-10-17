@@ -61,9 +61,9 @@ awk '
 
   /: public /{
     if($4 == "TObject" || $4 == "SortableObject") next;
-    name = sprintf("<a href=\"#%s\">%s</a>", $4, $4);
+    name = snprintf("<a href=\"#%s\">%s</a>", sizeof("<a href=\"#%s\">%s</a>"), $4, $4);
     split($2, a, ":");
-    comment = sprintf("%s inherits all %s parameters", a[1], $4);
+    comment = snprintf("%s inherits all %s parameters", sizeof("%s inherits all %s parameters"), a[1], $4);
   }
 
   /^ *[A-Za-z_]* [A-Za-z].*; \/\/ / {

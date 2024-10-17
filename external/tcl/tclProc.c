@@ -266,7 +266,7 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
     if (precompiled) {
         if (numArgs > procPtr->numArgs) {
             char buf[128];
-            sprintf(buf, "\": arg list contains %d entries, precompiled header expects %d",
+            snprintf(buf, sizeof(buf), "\": arg list contains %d entries, precompiled header expects %d",
                     numArgs, procPtr->numArgs);
             Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                     "procedure \"", procName,
@@ -352,7 +352,7 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
                     || ((localPtr->defValuePtr != NULL)
                             && (fieldCount != 2))) {
                 char buf[128];
-                sprintf(buf, "\": formal parameter %d is inconsistent with precompiled body",
+                snprintf(buf, sizeof(buf), "\": formal parameter %d is inconsistent with precompiled body",
                         i);
                 Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
                         "procedure \"", procName,
@@ -610,7 +610,7 @@ Tcl_UplevelObjCmd(dummy, interp, objc, objv)
     }
     if (result == TCL_ERROR) {
 	char msg[60];
-	sprintf(msg, "\n    (\"uplevel\" body line %d)", interp->errorLine);
+	snprintf(msg, sizeof(msg), "\n    (\"uplevel\" body line %d)", interp->errorLine);
 	Tcl_AddObjErrorInfo(interp, msg, -1);
     }
 
@@ -989,7 +989,7 @@ TclObjInterpProc(clientData, interp, objc, objv)
 	    result = TclUpdateReturnInfo(iPtr);
 	} else if (result == TCL_ERROR) {
 	    char msg[100];
-	    sprintf(msg, "\n    (procedure \"%.50s\" line %d)",
+	    snprintf(msg, sizeof(msg), "\n    (procedure \"%.50s\" line %d)",
 		    procName, iPtr->errorLine);
 	    Tcl_AddObjErrorInfo(interp, msg, -1);
 	} else if (result == TCL_BREAK) {
@@ -1131,7 +1131,7 @@ TclProcCompileProc(interp, procPtr, bodyPtr, nsPtr, description, procName)
  		    numChars = 50;
  		    ellipsis = "...";
  		}
- 		sprintf(buf, "\n    (compiling %s \"%.*s%s\", line %d)",
+        snprintf(buf, sizeof(buf), "\n    (compiling %s \"%.*s%s\", line %d)",
  			description, numChars, procName, ellipsis,
  			interp->errorLine);
  		Tcl_AddObjErrorInfo(interp, buf, -1);
