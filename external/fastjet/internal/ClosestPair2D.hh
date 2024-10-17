@@ -54,18 +54,14 @@ public:
   /// after insertion and deletion must never exceed positions.size();
   /// objects are given IDs that correspond to their index in the vector 
   /// of positions
-  ClosestPair2D(const std::vector<Coord2D> & positions, 
-		const Coord2D & left_corner, const Coord2D & right_corner) {
-    _initialize(positions, left_corner, right_corner, positions.size());
-  };
+  ClosestPair2D(const std::vector<Coord2D> & positions,
+		const Coord2D & left_corner, const Coord2D & right_corner);
 
   /// constructor which allows structure to grow beyond positions.size(), up
   /// to max_size
   ClosestPair2D(const std::vector<Coord2D> & positions, 
 		const Coord2D & left_corner, const Coord2D & right_corner,
-		const unsigned int max_size) {
-    _initialize(positions, left_corner, right_corner, max_size);
-  };
+		const unsigned int max_size);
 
   /// provides the IDs of the closest pair as well as the distance between
   /// them

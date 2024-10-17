@@ -39,6 +39,16 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 const unsigned int twopow31      = 2147483648U;
 
+ClosestPair2D::ClosestPair2D(const std::vector<Coord2D> & positions,
+  const Coord2D & left_corner, const Coord2D & right_corner) {
+  _initialize(positions, left_corner, right_corner, positions.size());
+};
+ClosestPair2D::ClosestPair2D(const std::vector<Coord2D> & positions,
+  const Coord2D & left_corner, const Coord2D & right_corner,
+  const unsigned int max_size) {
+  _initialize(positions, left_corner, right_corner, max_size);
+};
+
 using namespace std;
 
 //----------------------------------------------------------------------
