@@ -14,7 +14,7 @@ class SolGeom{
   // Units are m
   //
 private:
-  const Int_t fNlMax = 200; // Maximum number of layers
+  const Int_t fNlMax = 700; // Maximum number of layers
 
   // B field
   Double_t fB; // B field in Tesla
