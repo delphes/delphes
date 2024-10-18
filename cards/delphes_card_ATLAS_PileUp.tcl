@@ -1,7 +1,9 @@
 #######################################
 # Order of execution of various modules
 #######################################
-
+# Has pileup, more accurate tracking efficiencys, impact parameter smearing (still cms)
+# and finally, eta/phi smearing! Based on ID TDR for ATLAS.
+# TODO: add ATLAS based ip smearing
 set ExecutionPath {
 
   PileUpMerger
@@ -16,6 +18,7 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
+  TrackSmearing
   Calorimeter
   ElectronFilter
   TrackPileUpSubtractor
@@ -117,11 +120,12 @@ module Efficiency ChargedHadronTrackingEfficiency {
   # add EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for charged hadrons
-  set EfficiencyFormula {                                                    (pt <= 0.1)   * (0.00) +
-                                           (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.70) +
-                                           (abs(eta) <= 1.5) * (pt > 1.0)                  * (0.95) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.60) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0)                  * (0.85) +
+  set EfficiencyFormula { 
+                         (pt <= 0.5)   * (0.00) +
+                         (abs(eta) <= 1.5) * (pt > 0.5   && pt <= 5.0)   * (0.85) +
+                         (abs(eta) <= 1.5) * (pt > 5.0)                  * (0.90) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.5   && pt <= 5.0)   * (0.75) +
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0)                  * (0.80) +
                          (abs(eta) > 2.5)                                                  * (0.00)}
 }
 
@@ -136,14 +140,13 @@ module Efficiency ElectronTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for electrons
-  set EfficiencyFormula {                                                    (pt <= 0.1)   * (0.00) +
-                                           (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.73) +
-                                           (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e2) * (0.95) +
-                                           (abs(eta) <= 1.5) * (pt > 1.0e2)                * (0.99) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.50) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e2) * (0.83) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e2)                * (0.90) +
-                         (abs(eta) > 2.5)                                                  * (0.00)}
+  set EfficiencyFormula { 
+                        (pt <= 0.5)   * (0.00) +
+                        (abs(eta) <= 1.5) * (pt > 0.5   && pt <= 5.0)   * (0.85) +
+                        (abs(eta) <= 1.5) * (pt > 5.0)                  * (0.90) +
+                        (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.5   && pt <= 5.0)   * (0.75) +
+                        (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0)                  * (0.80) +
+                        (abs(eta) > 2.5)                                                  * (0.00)}
 }
 
 ##########################
@@ -157,12 +160,13 @@ module Efficiency MuonTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for muons
-  set EfficiencyFormula {                                                    (pt <= 0.1)   * (0.00) +
-                                           (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.75) +
-                                           (abs(eta) <= 1.5) * (pt > 1.0)                  * (0.99) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.70) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0)                  * (0.98) +
-                         (abs(eta) > 2.5)                                                  * (0.00)}
+  set EfficiencyFormula {
+            (pt <= 0.5)   * (0.00) +
+            (abs(eta) <= 1.5) * (pt > 0.5   && pt <= 5.0)   * (0.85) +
+            (abs(eta) <= 1.5) * (pt > 5.0)                  * (0.90) +
+            (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.5   && pt <= 5.0)   * (0.75) +
+            (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0)                  * (0.80) +
+            (abs(eta) > 2.5)                                                  * (0.00)}
 }
 
 ########################################
@@ -226,6 +230,17 @@ module Merger TrackMerger {
   add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
+module TrackSmearing TrackSmearing {
+  set InputArray TrackMerger/tracks
+#  set BeamSpotInputArray BeamSpotFilter/beamSpotParticle
+  set OutputArray tracks
+#  set ApplyToPileUp true
+
+  # magnetic field, fixed now 2 T now 3.8 T from CMS
+  set Bz 2.0
+
+  source trackResolutionATLAS.tcl
+}
 
 #############
 # Calorimeter
@@ -233,7 +248,7 @@ module Merger TrackMerger {
 
 module Calorimeter Calorimeter {
   set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray TrackMerger/tracks
+  set TrackInputArray TrackSmearing/tracks
 
   set TowerOutputArray towers
   set PhotonOutputArray photons
@@ -353,7 +368,7 @@ module Merger NeutralTowerMerger {
 
 module Merger EFlowMergerAllTracks {
 # add InputArray InputArray
-  add InputArray TrackMerger/tracks
+  add InputArray TrackSmearing/tracks
   add InputArray Calorimeter/eflowPhotons
   add InputArray Calorimeter/eflowNeutralHadrons
   set OutputArray eflow
@@ -678,7 +693,7 @@ module TrackCountingTauTagging TauTagging {
  
   set ParticleInputArray Delphes/allParticles
   set PartonInputArray Delphes/partons
-  set TrackInputArray TrackMerger/tracks
+  set TrackInputArray TrackSmearing/tracks
   set JetInputArray JetEnergyScale/jets
 
   set DeltaR 0.2
@@ -737,7 +752,7 @@ module TreeWriter TreeWriter {
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
 #  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
-
+  add Branch EFlowMerger/eflow ParticleFlowCandidate ParticleFlowCandidate
   add Branch GenJetFinder/jets GenJet Jet
   add Branch GenMissingET/momentum GenMissingET MissingET
 
