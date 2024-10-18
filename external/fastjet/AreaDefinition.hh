@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: AreaDefinition.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2006-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2006-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -143,6 +143,15 @@ public:
 
   /// return a reference to the voronoi area spec
   const VoronoiAreaSpec & voronoi_spec() const {return _voronoi_spec;}
+
+  /// return a copy of this AreaDefinition with a user-defined set of seeds
+  AreaDefinition with_fixed_seed(const std::vector<int> & iseed) const{
+    if (_area_type == voronoi_area) {
+      return *this;
+    } else {
+      return AreaDefinition(_area_type, _ghost_spec.with_fixed_seed(iseed));
+    }
+  }
   
 private:
 

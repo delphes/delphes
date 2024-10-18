@@ -2,9 +2,9 @@
 #define __FASTJET_LAZYTILING9SEPARATEGHOSTS_HH__
 
 //FJSTARTHEADER
-// $Id: LazyTiling9SeparateGhosts.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -35,6 +35,8 @@
 #include "fastjet/internal/MinHeap.hh"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/internal/LazyTiling9Alt.hh"
+
+#include "fastjet/config.h"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 

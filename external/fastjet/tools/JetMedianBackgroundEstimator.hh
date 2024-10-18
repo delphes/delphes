@@ -1,10 +1,11 @@
 #ifndef __FASTJET_BACKGROUND_ESTIMATOR_HH__
 #define __FASTJET_BACKGROUND_ESTIMATOR_HH__
 
+
 //FJSTARTHEADER
-// $Id: JetMedianBackgroundEstimator.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,12 +32,17 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include <fastjet/ClusterSequenceAreaBase.hh>
-#include <fastjet/AreaDefinition.hh>
-#include <fastjet/FunctionOfPseudoJet.hh>
-#include <fastjet/Selector.hh>
-#include <fastjet/tools/BackgroundEstimatorBase.hh>
+#include "fastjet/config.h"
+#include "fastjet/ClusterSequenceAreaBase.hh"
+#include "fastjet/AreaDefinition.hh"
+#include "fastjet/FunctionOfPseudoJet.hh"
+#include "fastjet/Selector.hh"
+#include "fastjet/tools/BackgroundEstimatorBase.hh"
 #include <iostream>
+
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+#include <atomic>
+#endif
 
 FASTJET_BEGIN_NAMESPACE     // defined in fastjet/internal/base.hh
 
@@ -124,8 +130,8 @@ public:
   JetMedianBackgroundEstimator(const Selector &rho_range = SelectorIdentity())
     : _rho_range(rho_range), _jet_def(JetDefinition()),
       _enable_rho_m(true){ reset(); }
-  
 
+  
   /// default dtor
   ~JetMedianBackgroundEstimator(){}
 
@@ -138,7 +144,12 @@ public:
 
   /// tell the background estimator that it has a new event, composed
   /// of the specified particles.
-  virtual void set_particles(const std::vector<PseudoJet> & particles);
+  virtual void set_particles(const std::vector<PseudoJet> & particles) FASTJET_OVERRIDE;
+
+  // tell the background estimator that it has a new event, composed
+  // of the specified particles and use the supplied seed for the
+  // generation of ghosts. If the seed is empty, it is ignored.
+  virtual void set_particles_with_seed(const std::vector<PseudoJet> & particles, const std::vector<int> & seed) FASTJET_OVERRIDE;
 
   /// (re)set the cluster sequence (with area support) to be used by
   /// future calls to rho() etc. 
@@ -167,25 +178,44 @@ public:
   /// (re)set the selector to be used for future calls to rho() etc.
   void set_selector(const Selector & rho_range_selector) {
     _rho_range = rho_range_selector;
-    _uptodate = false;
+    _set_cache_unavailable();
   }
 
   /// determine whether the automatic calculation of rho_m and sigma_m
   /// is enabled (by default true)
-  void set_compute_rho_m(bool enable){ _enable_rho_m = enable;}
+  void set_compute_rho_m(bool enable){
+    _enable_rho_m = enable;
+    _set_cache_unavailable();
+  }
 
   //\}
+
+
+  /// return a pointer to a copy of this BGE; the user is responsible
+  /// for eventually deleting the resulting object.
+  BackgroundEstimatorBase * copy() const FASTJET_OVERRIDE {
+    return new JetMedianBackgroundEstimator(*this);
+  };
 
 
   /// @name  retrieving fundamental information
   //\{
   //----------------------------------------------------------------
+  /// get the full set of background properties
+  ///
+  /// For background estimators using a local ranges, this throws an
+  ///   error (use estimate(jet) instead)
+  /// In the presence of a rescaling, the rescaling is not included
+  BackgroundEstimate estimate() const FASTJET_OVERRIDE;
+  
+  /// get the full set of background properties for a given reference jet
+  BackgroundEstimate estimate(const PseudoJet &jet) const FASTJET_OVERRIDE;
 
   /// get rho, the median background density per unit area
-  double rho() const;
+  double rho() const FASTJET_OVERRIDE;
 
   /// get sigma, the background fluctuations per unit area
-  double sigma() const;
+  double sigma() const FASTJET_OVERRIDE;
 
   /// get rho, the median background density per unit area, locally at
   /// the position of a given jet.
@@ -193,7 +223,7 @@ public:
   /// If the Selector associated with the range takes a reference jet
   /// (i.e. is relocatable), then for subsequent operations the
   /// Selector has that jet set as its reference.
-  double rho(const PseudoJet & jet);
+  double rho(const PseudoJet & jet) FASTJET_OVERRIDE;
 
   /// get sigma, the background fluctuations per unit area,
   /// locally at the position of a given jet.
@@ -201,30 +231,30 @@ public:
   /// If the Selector associated with the range takes a reference jet
   /// (i.e. is relocatable), then for subsequent operations the
   /// Selector has that jet set as its reference.
-  double sigma(const PseudoJet &jet);
+  double sigma(const PseudoJet &jet) FASTJET_OVERRIDE;
 
   /// returns true if this background estimator has support for
   /// determination of sigma
-  virtual bool has_sigma() {return true;}
+  virtual bool has_sigma() const FASTJET_OVERRIDE {return true;}
 
   //----------------------------------------------------------------
   // now do the same thing for rho_m and sigma_m
 
   /// returns rho_m, the purely longitudinal, particle-mass-induced
   /// component of the background density per unit area
-  virtual double rho_m() const;
+  virtual double rho_m() const FASTJET_OVERRIDE;
 
   /// returns sigma_m, a measure of the fluctuations in the purely
   /// longitudinal, particle-mass-induced component of the background
   /// density per unit area; must be multipled by sqrt(area) to get
   /// fluctuations for a region of a given area.
-  virtual double sigma_m() const;
+  virtual double sigma_m() const FASTJET_OVERRIDE;
 
   /// Returns rho_m locally at the jet position. As for rho(jet), it is non-const.
-  virtual double rho_m(const PseudoJet & /*jet*/);
+  virtual double rho_m(const PseudoJet & /*jet*/) FASTJET_OVERRIDE;
 
   /// Returns sigma_m locally at the jet position. As for rho(jet), it is non-const.
-  virtual double sigma_m(const PseudoJet & /*jet*/);
+  virtual double sigma_m(const PseudoJet & /*jet*/) FASTJET_OVERRIDE;
 
   /// Returns true if this background estimator has support for
   /// determination of rho_m.
@@ -234,7 +264,7 @@ public:
   ///
   /// Note that support for sigma_m is automatic is one has sigma and
   /// rho_m support.
-  virtual bool has_rho_m() const {return _enable_rho_m && (_jet_density_class == 0);}
+  virtual bool has_rho_m() const FASTJET_OVERRIDE {return _enable_rho_m && (_jet_density_class == 0);}
   //\}
   
   /// @name  retrieving additional useful information
@@ -243,35 +273,16 @@ public:
   /// Returns the mean area of the jets used to actually compute the
   /// background properties in the last call of rho() or sigma()
   /// If the configuration has changed in the meantime, throw an error.
-  double mean_area() const{
-    if (!_uptodate)
-      throw Error("JetMedianBackgroundEstimator::mean_area(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
-    //_recompute_if_needed();
-    return _mean_area;
-  }
+  double mean_area() const;
   
   /// returns the number of jets used to actually compute the
   /// background properties in the last call of rho() or sigma()
   /// If the configuration has changed in the meantime, throw an error.
-  unsigned int n_jets_used() const{
-    if (!_uptodate)
-      throw Error("JetMedianBackgroundEstimator::n_jets_used(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
-    //_recompute_if_needed();
-    return _n_jets_used;
-  }
+  unsigned int n_jets_used() const;
 
   /// returns the jets used to actually compute the background
   /// properties
-  std::vector<PseudoJet> jets_used() const{
-    if (!_uptodate) throw Error("JetMedianBackgroundEstimator::n_jets_used(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
-    _check_csa_alive();
-    std::vector<PseudoJet> tmp_jets = _rho_range(_included_jets);
-    std::vector<PseudoJet> used_jets;
-    for (unsigned int i=0; i<tmp_jets.size(); i++){
-      if (tmp_jets[i].area()>0) used_jets.push_back(tmp_jets[i]);
-    }
-    return used_jets;
-  }
+  std::vector<PseudoJet> jets_used() const;
 
   /// Returns the estimate of the area (within the range defined by
   /// the selector) that is not occupied by jets. The value is that
@@ -287,12 +298,7 @@ public:
   ///
   /// The result here is just the cached result of the corresponding
   /// call to the ClusterSequenceAreaBase function.
-  double empty_area() const{
-    if (!_uptodate)
-      throw Error("JetMedianBackgroundEstimator::empty_area(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
-    //_recompute_if_needed();
-    return _empty_area;
-  }
+  double empty_area() const;
 
   /// Returns the number of empty jets used when computing the
   /// background properties. The value is that for the last call of
@@ -306,12 +312,7 @@ public:
   ///
   /// The result here is just the cached result of the corresponding
   /// call to the ClusterSequenceAreaBase function.
-  double n_empty_jets() const{
-    if (!_uptodate)
-      throw Error("JetMedianBackgroundEstimator::n_empty_jets(): one may not retrieve information about the last call to rho() or sigma() when the configuration has changed in the meantime.");
-    //_recompute_if_needed();
-    return _n_empty_jets;
-  }
+  double n_empty_jets() const;
 
   //}
 
@@ -337,7 +338,7 @@ public:
   ///  \param use_it             whether one uses the 4-vector area or not (true by default)
   void set_use_area_4vector(bool use_it = true){
     _use_area_4vector = use_it;
-    _uptodate = false;
+    _set_cache_unavailable();
   }  
 
   /// check if the estimator uses the 4-vector area or the scalar area
@@ -349,7 +350,7 @@ public:
   /// call to this function.
   void set_provide_fj2_sigma(bool provide_fj2_sigma = true) {
     _provide_fj2_sigma = provide_fj2_sigma;
-    _uptodate = false;
+    _set_cache_unavailable();
   }
 
   /// Set a pointer to a class that calculates the quantity whose
@@ -374,9 +375,9 @@ public:
   ///
   /// The BackgroundRescalingYPolynomial class can be used to get a
   /// rescaling that depends just on rapidity.
-  virtual void set_rescaling_class(const FunctionOfPseudoJet<double> * rescaling_class_in) {
+  virtual void set_rescaling_class(const FunctionOfPseudoJet<double> * rescaling_class_in) FASTJET_OVERRIDE {
     BackgroundEstimatorBase::set_rescaling_class(rescaling_class_in);
-    _uptodate = false;
+    _set_cache_unavailable();
   }
 
   //\}
@@ -386,32 +387,79 @@ public:
   //----------------------------------------------------------------
 
   /// returns a textual description of the background estimator
-  std::string description() const;
+  std::string description() const FASTJET_OVERRIDE;
 
   //\}
 
+  /// an internal class to hold results of the calculation
+  /// that are to be assigned to the "extras" part of a BackgroundEstimate
+  class Extras : public BackgroundEstimate::Extras {
+  public:
+    Extras()
+      :  _reference_jet(PseudoJet()), _n_jets_used(0),
+         _n_empty_jets(0.0), _empty_area(0.0) {}
 
+    /// returns the current reference jet
+    PseudoJet reference_jet() const {return _reference_jet;}
+    
+    /// returns the number of jets used to estimate the background
+    unsigned int n_jets_used() const {return _n_jets_used;}
+    
+    /// returns the number of empty (pure-ghost) jets
+    double n_empty_jets() const {return _n_empty_jets;}
+      
+    /// returns the empty (pure-ghost/unclustered) area!
+    double empty_area() const {return _empty_area;}
+
+    void set_reference_jet(const PseudoJet &reference_jet_in){
+      _reference_jet = reference_jet_in;
+    }
+    void set_n_jets_used(int n_jets_used_in){ _n_jets_used=n_jets_used_in;}
+    void set_n_empty_jets(double n_empty_jets_in){ _n_empty_jets=n_empty_jets_in;}
+    void set_empty_area(double empty_area_in){ _empty_area=empty_area_in;}
+    
+    
+  protected:
+    PseudoJet _reference_jet;  ///< current reference jet
+    unsigned int _n_jets_used; ///< number of jets used to estimate the background
+    double _n_empty_jets;      ///< number of empty (pure-ghost) jets
+    double _empty_area;        ///< the empty (pure-ghost/unclustered) area!
+  };
+
+  
 private:
 
-  /// do the actual job
-  void _compute() const;
-   
-  /// check if the properties need to be recomputed 
-  /// and do so if needed
-  void _recompute_if_needed() const {
-    if (!_uptodate) _compute();
-    _uptodate = true;
-  }
-
-  /// for estimation using a selector that takes a reference jet
-  /// (i.e. a selector that can be relocated) this function allows one
-  /// to set its position.
+  /// compute the background properties for a given jet (excluding
+  /// rescaling factors) and return a corresponding BackgroundEstimate
   ///
-  /// Note that this HAS to be called before any attempt to compute
-  /// the background properties. The call is, however, performed
-  /// automatically by the functions rho(jet) and sigma(jet).
-  void _recompute_if_needed(const PseudoJet &jet);
+  /// this leaves the cache (and the status flags) unchanged
+  BackgroundEstimate _compute(const PseudoJet &jet) const;
 
+  //------
+  // the next calls are meant for the case where the cache can be
+  // filled once and for all, i.e. cases where the selector does NOT
+  // take a reference
+  
+  /// fill the cache with the given estimate
+  void _cache_no_overwrite(const BackgroundEstimate &estimate) const;
+   
+  /// fill the cache with a computed estimate
+  void _compute_and_cache_no_overwrite() const;
+
+  //------
+  // the next calls are meant for the case where the selector does
+  // take a reference and the cache needs to be refilled whenever one
+  // calls this background estimate with a different reference jet
+
+  /// fill the cache with the given estimate
+  void _cache(const BackgroundEstimate &estimate) const;
+   
+  /// update the cache if need be and return the background
+  /// estimate. This is meant to be called for cases with a local
+  /// range (selector that takesa reference)
+  BackgroundEstimate _compute_and_cache_if_needed(const PseudoJet &jet) const;
+  //-----
+  
   /// check that the underlying structure is still alive
   /// throw an error otherwise
   void _check_csa_alive() const;
@@ -434,20 +482,8 @@ private:
   //SharedPtr<BackgroundRescalingBase> _rescaling_class_sharedptr;
   bool _enable_rho_m;
   
-  // the actual results of the computation
-  mutable double _rho;               ///< background estimated density per unit area
-  mutable double _sigma;             ///< background estimated fluctuations
-  mutable double _rho_m;             ///< "mass" background estimated density per unit area
-  mutable double _sigma_m;           ///< "mass" background estimated fluctuations
-  mutable double _mean_area;         ///< mean area of the jets used to estimate the background
-  mutable unsigned int _n_jets_used; ///< number of jets used to estimate the background
-  mutable double _n_empty_jets;      ///< number of empty (pure-ghost) jets
-  mutable double _empty_area;        ///< the empty (pure-ghost/unclustered) area!
-
   // internal variables
   SharedPtr<PseudoJetStructureBase> _csi; ///< allows to check if _csa is still valid
-  PseudoJet _current_reference;           ///< current reference jet
-  mutable bool _uptodate;                 ///< true when the background computation is up-to-date
 
   /// handle warning messages
   static LimitedWarning _warnings;
@@ -520,7 +556,6 @@ public:
 
   virtual std::string description() const {return "BackgroundPtMDensity";}
 };
-
 
 
 FASTJET_END_NAMESPACE

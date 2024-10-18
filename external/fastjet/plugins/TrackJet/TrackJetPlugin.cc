@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: TrackJetPlugin.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2007-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -88,7 +88,7 @@ public:
 // implementation of the TrackJet plugin
 //------------------------------------------------------------------
 
-bool TrackJetPlugin::_first_time = true;
+thread_safety_helpers::FirstTimeTrue TrackJetPlugin::_first_time;
 
 string TrackJetPlugin::description () const {
   ostringstream desc;
@@ -187,8 +187,7 @@ void TrackJetPlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void TrackJetPlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

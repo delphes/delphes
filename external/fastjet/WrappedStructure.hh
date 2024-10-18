@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: WrappedStructure.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -75,7 +75,7 @@ public:
   //\{
   //-------------------------------------------------------------
   /// returns true if there is an associated ClusterSequence
-  virtual bool has_associated_cluster_sequence() const FASTJET_OVERRIDE {
+  virtual bool has_associated_cluster_sequence() const FASTJET_OVERRIDE{
     return _structure->has_associated_cluster_sequence();
   }
 
@@ -87,7 +87,7 @@ public:
   
   /// returns true if this PseudoJet has an associated and still
   /// valid ClusterSequence.
-  virtual bool has_valid_cluster_sequence() const FASTJET_OVERRIDE {
+  virtual bool has_valid_cluster_sequence() const FASTJET_OVERRIDE{
     return _structure->has_valid_cluster_sequence();
   }
 
@@ -155,7 +155,7 @@ public:
   /// return true if the structure supports constituents. 
   ///
   /// false by default
-  virtual bool has_constituents() const  FASTJET_OVERRIDE{
+  virtual bool has_constituents() const FASTJET_OVERRIDE {
     return _structure->has_constituents();
   }
 
@@ -167,7 +167,7 @@ public:
   }
 
   /// return true if the structure supports exclusive_subjets. 
-  virtual bool has_exclusive_subjets() const  FASTJET_OVERRIDE{
+  virtual bool has_exclusive_subjets() const FASTJET_OVERRIDE{
     return _structure->has_exclusive_subjets();
   }
 
@@ -230,14 +230,14 @@ public:
   /// return true if the structure supports pieces. 
   ///
   /// false by default
-  virtual bool has_pieces(const PseudoJet &reference) const FASTJET_OVERRIDE {
+  virtual bool has_pieces(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->has_pieces(reference);
   }
 
   /// retrieve the pieces building the jet. 
   ///
   /// By default, throws an Error
-  virtual std::vector<PseudoJet> pieces(const PseudoJet &reference) const FASTJET_OVERRIDE {
+  virtual std::vector<PseudoJet> pieces(const PseudoJet &reference) const FASTJET_OVERRIDE{
     return _structure->pieces(reference);
   }
 
@@ -248,7 +248,7 @@ public:
   /// check if it has a defined area
   ///
   /// false by default
-  virtual bool has_area() const FASTJET_OVERRIDE  {
+  virtual bool has_area() const FASTJET_OVERRIDE{
     return _structure->has_area();
   }
 

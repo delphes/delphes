@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Filter.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,7 +31,7 @@
 #include "fastjet/tools/Filter.hh"
 #include "fastjet/tools/Recluster.hh"
 #include "fastjet/tools/Subtractor.hh"
-#include <fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh>
+#include "fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh"
 #include <cassert>
 #include <algorithm>
 #include <sstream>
@@ -65,8 +65,9 @@ string Filter::description() const {
     ostr << _subjet_def.description();
   }
   ostr<< ", selection " << _selector.description();
-  if (_subtractor) {
-    ostr << ", subtractor: " << _subtractor->description();
+  const FunctionOfPseudoJet<PseudoJet> *local_subtractor = _subtractor;
+  if (local_subtractor) {
+    ostr << ", subtractor: " << local_subtractor->description();
   } else if (_rho != 0) {
     ostr << ", subtracting with rho = " << _rho;
   }
@@ -94,8 +95,9 @@ PseudoJet Filter::result(const PseudoJet &jet) const {
   bool ca_optimised = _set_filtered_elements(jet, subjets);
 
   // apply subtraction if needed:
-  if (_subtractor){
-    subjets = (*_subtractor)(subjets);
+  const FunctionOfPseudoJet<PseudoJet> *local_subtractor = _subtractor;
+  if (local_subtractor){
+    subjets = (*local_subtractor)(subjets);
   } else if (_rho!=0){
     if (subjets.size()>0){
       //const ClusterSequenceAreaBase *csab = subjets[0].validated_csab();

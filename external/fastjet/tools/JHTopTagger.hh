@@ -2,9 +2,9 @@
 #define __FASTJET_JH_TOP_TAGGER_HH__
 
 //FJSTARTHEADER
-// $Id: JHTopTagger.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,9 +32,9 @@
 //FJENDHEADER
 
 
-#include <fastjet/tools/TopTaggerBase.hh>
-#include <fastjet/CompositeJetStructure.hh>
-#include <fastjet/LimitedWarning.hh>
+#include "fastjet/tools/TopTaggerBase.hh"
+#include "fastjet/CompositeJetStructure.hh"
+#include "fastjet/LimitedWarning.hh"
 
 FASTJET_BEGIN_NAMESPACE
 

@@ -1,8 +1,8 @@
 
 //FJSTARTHEADER
-// $Id: deprecated.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -39,20 +39,19 @@
 // define a deprecation macro based on the capabilities of the compiler
 // (as determined at configure time).
 #if defined(FASTJET_HAVE_CXX14_DEPRECATED) && (!defined(__FJCORE__))
-#define FASTJET_DEPRECATED               [[deprecated]]
-#define FASTJET_DEPRECATED_MSG(message)  [[deprecated(message)]]
+#define FASTJET_DEPRECATED(func)              [[deprecated]] func
+#define FASTJET_DEPRECATED_MSG(message,func)  [[deprecated(message)]] func
 #elif defined(FASTJET_HAVE_GNUCXX_DEPRECATED)
-#define FASTJET_DEPRECATED               __attribute__((__deprecated__))
-#define FASTJET_DEPRECATED_MSG(message)  __attribute__((__deprecated__))
+#define FASTJET_DEPRECATED(func)              func __attribute__((__deprecated__))
+#define FASTJET_DEPRECATED_MSG(message,func)  func __attribute__((__deprecated__))
 #else
-#define FASTJET_DEPRECATED               
-#define FASTJET_DEPRECATED_MSG(message) 
+#define FASTJET_DEPRECATED(func)              func
+#define FASTJET_DEPRECATED_MSG(message,func)  func
 #endif
 
-#else  // SIWG
-#define FASTJET_DEPRECATED               
-#define FASTJET_DEPRECATED_MSG(message) 
+#else  // SWIG
+#define FASTJET_DEPRECATED(func)              func
+#define FASTJET_DEPRECATED_MSG(message,func)  func
 #endif // SWIG
-
 
 #endif // __FASTJET_FASTJET_DEPRECATED_HH__

@@ -1,3 +1,6 @@
+2024/10/04: release of version 2.0.3, resolving use of wrong Recluster.hh in RecursiveSoftDrop.hh
+2024/02/22: release of version 2.0.2, addressing rounding issue in recursive soft drop example
+2021/08/21: release of version 2.0.1, addressing rare divide-by-zero in calculation of mu2
 2020/03/03: release of version 2.0.0 with updated readme
 
 2018/05/31: release of version 2.0.0-beta2 with corrected syntax

@@ -2,9 +2,9 @@
 #define __FASTJET_JETDEFINITION_HH__
 
 //FJSTARTHEADER
-// $Id: JetDefinition.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -123,6 +123,13 @@ enum Strategy {
   /// the automatic strategy choice that was being made in FJ 3.0
   /// (restricted to strategies that were present in FJ 3.0)
   BestFJ30     =  21, 
+  /// a variant of N2Plain strategy for native \f$e^+e^-\f$ algorithms
+  /// (eekt, ee_genkt) that uses a more accurate calculation of the
+  /// distance measure when angles between PseudoJets are smaller than
+  /// \f$\epsilon^{1/4}\f$, where \f$\epsilon\f$ is the machine
+  /// precision. It shifts the breakdown point from \f$\theta\sim
+  /// \sqrt{\epsilon}\f$ to \f$\theta \sim \epsilon\f$.
+  N2PlainEEAccurate =  31,
   /// the plugin has been used...
   plugin_strategy = 999
 };
@@ -362,12 +369,12 @@ public:
   ///
   /// the ordering of arguments here is old and deprecated (except
   /// as the common constructor for internal use)
-  FASTJET_DEPRECATED_MSG("This argument ordering is deprecated. Use JetDefinition(alg, R, strategy, scheme[, n_parameters]) instead")
+  FASTJET_DEPRECATED_MSG("This argument ordering is deprecated. Use JetDefinition(alg, R, strategy, scheme[, n_parameters]) instead",
   JetDefinition(JetAlgorithm jet_algorithm_in, 
                 double R_in, 
                 Strategy strategy_in,
                 RecombinationScheme recomb_scheme_in = E_scheme,
-                int nparameters_in = 1){
+                int nparameters_in = 1)){
     (*this) = JetDefinition(jet_algorithm_in,R_in,recomb_scheme_in,strategy_in,nparameters_in);
   }
 

@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id: D0RunIBaseConePlugin.cc 1779 2010-10-25 10:32:59Z soyez $
 //
-// Copyright (c) 2009-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -151,7 +151,7 @@ void D0RunIBaseConePlugin::run_clustering_worker(ClusterSequence & clust_seq) co
 //                                         //
 /////////////////////////////////////////////
 
-bool D0RunIpre96ConePlugin::_first_time=true;
+thread_safety_helpers::FirstTimeTrue D0RunIpre96ConePlugin::_first_time;
 
 string D0RunIpre96ConePlugin::description () const {
   ostringstream desc;
@@ -173,8 +173,7 @@ void D0RunIpre96ConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIpre96ConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  
@@ -199,7 +198,7 @@ void D0RunIpre96ConePlugin::_print_banner(ostream *ostr) const{
 //                                         //
 /////////////////////////////////////////////
 
-bool D0RunIConePlugin::_first_time=true;
+thread_safety_helpers::FirstTimeTrue D0RunIConePlugin::_first_time;
 
 string D0RunIConePlugin::description () const {
   ostringstream desc;
@@ -221,8 +220,7 @@ void D0RunIConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

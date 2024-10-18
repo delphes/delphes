@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence_TiledN2.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -345,7 +345,6 @@ void ClusterSequence::_tiled_N2_cluster() {
   }
 
   // now run the recombination loop
-  int history_location = n-1;
   while (tail != head) {
 
     // find the minimum of the diJ on this round
@@ -356,7 +355,6 @@ void ClusterSequence::_tiled_N2_cluster() {
     }
 
     // do the recombination between A and B
-    history_location++;
     jetA = & briefjets[diJ_min_jet];
     jetB = jetA->NN;
     // put the normalisation back in
@@ -377,19 +375,6 @@ void ClusterSequence::_tiled_N2_cluster() {
       int nn; // new jet index
       _do_ij_recombination_step(jetA->_jets_index, jetB->_jets_index, diJ_min, nn);
 
-      //OBS// get the two history indices
-      //OBSint hist_a = _jets[jetA->_jets_index].cluster_hist_index();
-      //OBSint hist_b = _jets[jetB->_jets_index].cluster_hist_index();
-      //OBS// create the recombined jet
-      //OBS_jets.push_back(_jets[jetA->_jets_index] + _jets[jetB->_jets_index]);
-      //OBSint nn = _jets.size() - 1;
-      //OBS_jets[nn].set_cluster_hist_index(history_location);
-      //OBS// update history
-      //OBS//cout <<n-1<<" "<<jetA-head<<" "<<jetB-head<<"; ";
-      //OBS_add_step_to_history(history_location, 
-      //OBS  		   min(hist_a,hist_b),max(hist_a,hist_b),
-      //OBS			   nn, diJ_min);
-
       // what was jetB will now become the new jet
       _bj_remove_from_tiles(jetA);
       oldB = * jetB;  // take a copy because we will need it...
@@ -399,10 +384,6 @@ void ClusterSequence::_tiled_N2_cluster() {
       // jet-beam recombination
       _do_iB_recombination_step(jetA->_jets_index, diJ_min);
 	    
-      //OBS// get the hist_index
-      //OBSint hist_a = _jets[jetA->_jets_index].cluster_hist_index();
-      //OBS//cout <<n-1<<" "<<jetA-head<<" "<<-1<<"; ";
-      //OBS_add_step_to_history(history_location,hist_a,BeamJet,Invalid,diJ_min); 
       _bj_remove_from_tiles(jetA);
     }
 
@@ -598,7 +579,6 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
   }
 
   // now run the recombination loop
-  int history_location = n-1;
   while (n > 0) {
 
     // find the minimum of the diJ on this round
@@ -614,7 +594,6 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
     }
 
     // do the recombination between A and B
-    history_location++;
     jetA = best->jet;
     jetB = jetA->NN;
     // put the normalisation back in
@@ -631,18 +610,6 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
       int nn; // new jet index
       _do_ij_recombination_step(jetA->_jets_index, jetB->_jets_index, diJ_min, nn);
       
-      //OBS// get the two history indices
-      //OBSint ihstry_a = _jets[jetA->_jets_index].cluster_hist_index();
-      //OBSint ihstry_b = _jets[jetB->_jets_index].cluster_hist_index();
-      //OBS// create the recombined jet
-      //OBS_jets.push_back(_jets[jetA->_jets_index] + _jets[jetB->_jets_index]);
-      //OBSint nn = _jets.size() - 1;
-      //OBS_jets[nn].set_cluster_hist_index(history_location);
-      //OBS// update history
-      //OBS//cout <<n-1<<" "<<jetA-head<<" "<<jetB-head<<"; ";
-      //OBS_add_step_to_history(history_location, 
-      //OBS  		   min(ihstry_a,ihstry_b),max(ihstry_a,ihstry_b),
-      //OBS			   nn, diJ_min);
       // what was jetB will now become the new jet
       _bj_remove_from_tiles(jetA);
       oldB = * jetB;  // take a copy because we will need it...
@@ -653,9 +620,6 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
       // jet-beam recombination
       // get the hist_index
       _do_iB_recombination_step(jetA->_jets_index, diJ_min);
-      //OBSint ihstry_a = _jets[jetA->_jets_index].cluster_hist_index();
-      //OBS//cout <<n-1<<" "<<jetA-head<<" "<<-1<<"; ";
-      //OBS_add_step_to_history(history_location,ihstry_a,BeamJet,Invalid,diJ_min); 
       _bj_remove_from_tiles(jetA);
     }
 
@@ -823,14 +787,12 @@ void ClusterSequence::_minheap_faster_tiled_N2_cluster() {
   jets_for_minheap.reserve(n); 
 
   // now run the recombination loop
-  int history_location = n-1;
   while (n > 0) {
 
     double diJ_min = minheap.minval() *_invR2;
     jetA = head + minheap.minloc();
 
     // do the recombination between A and B
-    history_location++;
     jetB = jetA->NN;
 
     if (jetB != NULL) {

@@ -2,9 +2,9 @@
 #define __FASTJET_SELECTOR_HH__
 
 //FJSTARTHEADER
-// $Id: Selector.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2009-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -330,14 +330,14 @@ public:
 protected:
   /// Helper for copying selector workers if needed
   ///
-  /// The following is needed if we want to modify a selectors that
+  /// The following is needed if we want to modify a selector that
   /// shares a worker with another selector. In that case, we need to
   /// get another copy of the worker to avoid interferences
   ///
   /// Note that any non-const operation has to call this to behave
   /// correctly w.r.t shared workers!
   void _copy_worker_if_needed(){
-    // do nothing if there's a sinlge user of the worker
+    // do nothing if there's a single user of the worker
     if (_worker.unique()) return;
 
     // call the worker's copy

@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id: CMSIterativeConePlugin.cc 1504 2009-04-10 13:39:48Z salam $
 //
-// Copyright (c) 2007-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -82,7 +82,7 @@ T deltaR2 (T eta1, T phi1, T eta2, T phi2) {
 }
 
 //------------------------------------------------------
-bool CMSIterativeConePlugin::_first_time = true;
+thread_safety_helpers::FirstTimeTrue CMSIterativeConePlugin::_first_time;
 
 string CMSIterativeConePlugin::description () const {
   ostringstream desc;
@@ -215,8 +215,7 @@ void CMSIterativeConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void CMSIterativeConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

@@ -22,7 +22,7 @@
 #define _LORENTZ_VECTOR_HH_
 
 #include <cmath>
-#include <fastjet/internal/base.hh>
+#include "fastjet/internal/base.hh"
 
 #ifndef M_PI
 #define M_PI  3.141592653589793238462643383279502884197 

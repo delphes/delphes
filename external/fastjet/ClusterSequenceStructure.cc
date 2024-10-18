@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceStructure.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -28,6 +28,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
+#include "fastjet/config.h"
 #include "fastjet/ClusterSequenceStructure.hh"
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
@@ -42,6 +43,9 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 
 ClusterSequenceStructure::~ClusterSequenceStructure(){
+  // with CXX11 support, the self-deletion is handled in
+  // release_pseudojet
+//std::shared_ptr: #ifndef FASTJET_HAVE_THREAD_SAFETY
   if (_associated_cs != NULL 
       && _associated_cs->will_delete_self_when_unused()) {
     // automatically handle deletion of the cluster sequence;
@@ -55,6 +59,7 @@ ClusterSequenceStructure::~ClusterSequenceStructure(){
     _associated_cs->signal_imminent_self_deletion();
     delete _associated_cs;
   }
+//std::shared_ptr: #endif // FASTJET_HAVE_THREAD_SAFETY
 }
 
 

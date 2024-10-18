@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: D0RunIIConePlugin.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -55,7 +55,7 @@ const double D0RunIIConePlugin::_DEFAULT_pT_min_second_protojet   = 0.   ;
 const int    D0RunIIConePlugin::_DEFAULT_merge_max                = 10000; 
 const double D0RunIIConePlugin::_DEFAULT_pT_min_nomerge           = 0.   ;
 
-bool D0RunIIConePlugin::_first_time = true;
+thread_safety_helpers::FirstTimeTrue D0RunIIConePlugin::_first_time;
 
 string D0RunIIConePlugin::description () const {
   ostringstream desc;
@@ -145,8 +145,7 @@ void D0RunIIConePlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void D0RunIIConePlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: CompositeJetStructure.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,11 +32,11 @@
 #ifndef __FASTJET_COMPOSITEJET_STRUCTURE_HH__
 #define __FASTJET_COMPOSITEJET_STRUCTURE_HH__
 
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/PseudoJetStructureBase.hh>
+#include "fastjet/PseudoJet.hh"
+#include "fastjet/PseudoJetStructureBase.hh"
 
 // to have access to the recombiner we need to include the JetDefinition header
-#include <fastjet/JetDefinition.hh>
+#include "fastjet/JetDefinition.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 

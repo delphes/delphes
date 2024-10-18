@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: GhostedAreaSpec.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -39,6 +39,7 @@
 #include "fastjet/Selector.hh"
 #include "fastjet/LimitedWarning.hh"
 #include "fastjet/internal/deprecated.hh"
+#include "fastjet/SharedPtr.hh"
 
 // 
 #define STATIC_GENERATOR 1
@@ -62,26 +63,84 @@ namespace gas {
 ///
 /// Class that defines the parameters that go into the measurement
 /// of active jet areas.
+///
+/// Notes about thread-safety.
+/// --------------------------
+///
+/// Ghosts are generated randomly, using by default a static random
+/// number generator.
+///
+/// By default, we will lock the number generator during the period
+/// over which we generate the required random numbers.  The procedure
+/// will keep track of the seeds that have been used to generate a
+/// particular set of ghosts and, ultimately, these seeds will be
+/// made available from ClusterSequenceArea via
+///
+///   ClusterSequenceArea::area_def().ghost_spec().get_last_seed(vector<int>);
+///
+/// To use user-specified seeds in a thread-safe way, the end-user
+/// should use
+///
+///   ClusterSequenceArea csa(particles, jet_def,
+///                           area_def.with_fixed_seed(user_defined_seed));
+///
+/// or explicitly make a copy of the AreaDefinition before doing
+/// the clustering:
+///
+///   AreaDefinition local_area_def
+///     = area_def.with_fixed_seed(user_defined_seed);
+///   ClusterSequenceArea csa(particles, jet_def, area_def,local_area_def);
+///
+/// This will use a local random generator to compute the ghosts (in
+/// particular, it will not affect the static global generator)
+///
+/// Note that each clustering done with the GhostedAreaSpec obtained
+/// through area_def.with_seed(user_defined_seed) will use exactly the
+/// same set of ghosts.  Using
+/// area_def.with_fixed_seed(user_defined_seed), with an empty vector
+/// passed as argument, will return to using the common static random
+/// generator.
 class GhostedAreaSpec {
 public:
   /// default constructor
-  GhostedAreaSpec(): _ghost_maxrap (gas::def_ghost_maxrap), 
-		     _ghost_rap_offset(0.0),
-                    _repeat       (gas::def_repeat), 
-                    _ghost_area   (gas::def_ghost_area), 
-                    _grid_scatter (gas::def_grid_scatter), 
-                    _pt_scatter   (gas::def_pt_scatter), 
-                    _mean_ghost_pt(gas::def_mean_ghost_pt),
-                    _fj2_placement(false) {_initialize();}
+  GhostedAreaSpec():
+    _ghost_maxrap (gas::def_ghost_maxrap), 
+    _ghost_rap_offset(0.0),
+    _repeat       (gas::def_repeat), 
+    _ghost_area   (gas::def_ghost_area), 
+    _grid_scatter (gas::def_grid_scatter), 
+    _pt_scatter   (gas::def_pt_scatter), 
+    _mean_ghost_pt(gas::def_mean_ghost_pt),
+    _fj2_placement(false),
+    _user_random_generator(){_initialize();}
   
   /// explicit constructor
+  ///
+  /// It takes as parameters the maximal (abs) rapidity for the ghosts
+  /// and an optional user-specified random number generator.
+  ///
+  /// For the latter, ownership is transferred to the GhostedAreaSpec
+  /// class (i.e. it is stored internally as a shared pointer)
   explicit GhostedAreaSpec(double ghost_maxrap_in, 
-                          int    repeat_in        = gas::def_repeat,
-                          double ghost_area_in    = gas::def_ghost_area,   
-                          double grid_scatter_in  = gas::def_grid_scatter, 
-                          double pt_scatter_in    = gas::def_pt_scatter,   
-                          double mean_ghost_pt_in = gas::def_mean_ghost_pt
-                          ): 
+                           BasicRandom<double> *user_random_generator): 
+    _ghost_maxrap(ghost_maxrap_in), 
+    _ghost_rap_offset(0.0),
+    _repeat       (gas::def_repeat), 
+    _ghost_area   (gas::def_ghost_area), 
+    _grid_scatter (gas::def_grid_scatter), 
+    _pt_scatter   (gas::def_pt_scatter), 
+    _mean_ghost_pt(gas::def_mean_ghost_pt),
+    _fj2_placement(false),
+    _user_random_generator(user_random_generator) {_initialize();}
+
+  /// explicit constructor
+  explicit GhostedAreaSpec(double ghost_maxrap_in, 
+                           int    repeat_in        = gas::def_repeat,
+                           double ghost_area_in    = gas::def_ghost_area,   
+                           double grid_scatter_in  = gas::def_grid_scatter, 
+                           double pt_scatter_in    = gas::def_pt_scatter,   
+                           double mean_ghost_pt_in = gas::def_mean_ghost_pt,
+                           BasicRandom<double> *user_random_generator=NULL): 
     _ghost_maxrap(ghost_maxrap_in), 
     _ghost_rap_offset(0.0),
     _repeat(repeat_in), 
@@ -89,7 +148,8 @@ public:
     _grid_scatter(grid_scatter_in),  
     _pt_scatter(pt_scatter_in), 
     _mean_ghost_pt(mean_ghost_pt_in),
-    _fj2_placement(false) {_initialize();}
+    _fj2_placement(false),
+    _user_random_generator(user_random_generator) {_initialize();}
 
   /// explicit constructor
   explicit GhostedAreaSpec(double ghost_minrap_in, 
@@ -98,8 +158,8 @@ public:
                            double ghost_area_in    = gas::def_ghost_area,   
                            double grid_scatter_in  = gas::def_grid_scatter, 
                            double pt_scatter_in    = gas::def_pt_scatter,   
-                           double mean_ghost_pt_in = gas::def_mean_ghost_pt
-                          ): 
+                           double mean_ghost_pt_in = gas::def_mean_ghost_pt,
+                           BasicRandom<double> *user_random_generator=NULL): 
     _ghost_maxrap    (0.5*(ghost_maxrap_in - ghost_minrap_in)), 
     _ghost_rap_offset(0.5*(ghost_maxrap_in + ghost_minrap_in)),
     _repeat(repeat_in), 
@@ -107,7 +167,8 @@ public:
     _grid_scatter(grid_scatter_in),  
     _pt_scatter(pt_scatter_in), 
     _mean_ghost_pt(mean_ghost_pt_in),
-    _fj2_placement(false) {_initialize();}
+    _fj2_placement(false),
+    _user_random_generator(user_random_generator) {_initialize();}
 
 
   /// constructor based on a Selector
@@ -116,8 +177,8 @@ public:
                            double ghost_area_in    = gas::def_ghost_area,   
                            double grid_scatter_in  = gas::def_grid_scatter, 
                            double pt_scatter_in    = gas::def_pt_scatter,   
-                           double mean_ghost_pt_in = gas::def_mean_ghost_pt
-			   );
+                           double mean_ghost_pt_in = gas::def_mean_ghost_pt,
+                           BasicRandom<double> *user_random_generator=NULL);
 
 
   /// does the initialization of actual ghost parameters
@@ -173,8 +234,8 @@ public:
   ///   sqrt(area)/(2*maxrap).
   ///
   /// FJ2 placement is now deprecated.
-  FASTJET_DEPRECATED_MSG("This is deprecated since we strongly recomment to use the new ghost placement instead")
-  void set_fj2_placement(bool  val);
+  FASTJET_DEPRECATED_MSG("This is deprecated since we strongly recommend use of the new ghost placement instead",
+  void set_fj2_placement(bool  val));
 
   /// return nphi (ghosts layed out (-nrap, 0..nphi-1), (-nrap+1,0..nphi-1),
   /// ... (nrap,0..nphi-1)
@@ -184,8 +245,15 @@ public:
   /// get all relevant information about the status of the 
   /// random number generator, so that it can be reset subsequently
   /// with set_random_status.
+  ///
+  /// 
   inline void get_random_status(std::vector<int> & __iseed) const {
-    _random_generator.get_status(__iseed);}
+    if (_user_random_generator){
+      _user_random_generator->get_status(__iseed);
+    } else {
+      _random_generator.get_status(__iseed);
+    }
+  }
 
   /// set the status of the random number generator, as obtained
   /// previously with get_random_status. Note that the random
@@ -193,8 +261,38 @@ public:
   /// instances of the class --- so if you modify the random for this
   /// instance, you modify it for all instances.
   inline void set_random_status(const std::vector<int> & __iseed) {
-    _random_generator.set_status(__iseed);}
+    if (_user_random_generator){
+      _user_random_generator->set_status(__iseed);
+    } else {
+      _random_generator.set_status(__iseed);
+    }
+  }
+
+  /// allows to return a copy of this GhostedAreaSpec with a local set
+  /// of seeds
+  GhostedAreaSpec with_fixed_seed(const std::vector<int> & __iseed) const {
+    GhostedAreaSpec new_spec = (*this);
+    new_spec._fixed_seed = __iseed;
+    return new_spec;
+  }
   
+  /// returns the current fixed seed
+  void get_fixed_seed(std::vector<int> & __iseed) const {
+    __iseed = _fixed_seed;
+  }
+  
+  /// allows the user to get the seed that was used at the start of the
+  /// last generation of ghosts.
+  ///
+  /// This should typically be access through the area definition held
+  /// by the ClusterSequenceArea, because the CSA class takes a copy of the
+  /// AreaDefinition and it is that copy that stored the 
+  void get_last_seed(std::vector<int> & __iseed) const {
+    if (_repeat > 1) _warn_fixed_last_seeds_nrepeat_gt_1
+                      .warn("Using fixed seeds (or accessing last used seeds) not sensible with repeat>1");
+    __iseed = _last_used_seed;
+  } 
+
   inline void checkpoint_random() {get_random_status(_random_checkpoint);}
   inline void restore_checkpoint_random() {set_random_status(_random_checkpoint);}
 
@@ -210,7 +308,10 @@ public:
   inline double random_at_own_risk() const {return _our_rand();}
   /// very deprecated public access to the generator itself
   inline BasicRandom<double> & generator_at_own_risk() const {
-    return _random_generator;}
+    return _user_random_generator ? *_user_random_generator : _random_generator;}
+  /// access to the user-defined random-number generator. Will be empty if not set.
+  inline SharedPtr<BasicRandom<double> > & user_random_generator_at_own_risk(){
+    return _user_random_generator;}
 
 private:
   
@@ -232,12 +333,44 @@ private:
 
 
   std::vector<int> _random_checkpoint;
+
+  // optional fixed seeds
+  std::vector<int> _fixed_seed;
+
+  // access to the seeds used the very last time
+  mutable std::vector<int> _last_used_seed;
+  
+  // in order to keep thread-safety, have an independent random
+  // generator for each thread
+  //
+  // 2015-09-24: thread_local is not supported by Apple's version of
+  // clang! So we'll rely on something different here (see comment at
+  // the top of the class)
+  //#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+  //  static thread_local BasicRandom<double> _random_generator;
+  //#else
   static BasicRandom<double> _random_generator;
+  //#endif    
   //mutable BasicRandom<double> _random_generator;
 
-  static LimitedWarning _warn_fj2_placement_deprecated;
+  /// a set of seeds as defined by the end-user
+  std::vector<int> _user_defined_seeds;
 
-  inline double _our_rand() const {return _random_generator();}
+  // allow for a user-defined random generator
+  SharedPtr<BasicRandom<double> > _user_random_generator;
+  
+  static LimitedWarning _warn_fj2_placement_deprecated;
+  static LimitedWarning _warn_fixed_last_seeds_nrepeat_gt_1;
+
+  inline double _our_rand() const {
+    return _user_random_generator ? (*_user_random_generator)() : _random_generator();}
+
+  inline void _our_rand(unsigned int npoints, double *pointer,
+                        std::vector<int> & used_init_seed) const {
+    return _user_random_generator
+      ? (*_user_random_generator)(npoints, pointer, used_init_seed)
+      : _random_generator(npoints, pointer, used_init_seed);
+  }
   
 };
 

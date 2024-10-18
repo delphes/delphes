@@ -17,7 +17,7 @@
 #include "Jet.hh"
 #include <iostream>
 
-#include <fastjet/internal/base.hh>
+#include "fastjet/internal/base.hh"
 
 FASTJET_BEGIN_NAMESPACE
 

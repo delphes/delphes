@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: PseudoJet.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -60,10 +60,55 @@ PseudoJet::PseudoJet(const double px_in, const double py_in, const double pz_in,
   this->_finish_init();
 
   // some default values for the history and user indices
+  // note: no reset of shared pointers needed
   _reset_indices();
-
+  
 }
 
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+/// copy-assignmemt
+///
+/// this has to be explicitly specified since atomic does not support it.
+PseudoJet & PseudoJet::operator=(const PseudoJet & other_pj){
+  _structure = other_pj._structure;
+  _user_info = other_pj._user_info;
+
+  _cluster_hist_index = other_pj._cluster_hist_index;
+  _user_index = other_pj._user_index;
+
+  // copy the remaining information through the reset_momentum call
+  // which properly handles the thread safety, notably related
+  // to caching of the phi and rap values
+  reset_momentum(other_pj);
+  
+  return *this;
+}
+#endif // FASTJET_HAVE_THREAD_SAFETY
+
+//std::shared_ptr: //----------------------------------------------------------------------
+//std::shared_ptr: #ifdef FASTJET_HAVE_THREAD_SAFETY
+//std::shared_ptr: PseudoJet::~PseudoJet(){
+//std::shared_ptr:   _release_jet_from_cs();
+//std::shared_ptr: }
+//std::shared_ptr: 
+//std::shared_ptr: // this has to be called everytime one tries to alter the jet
+//std::shared_ptr: // structural info
+//std::shared_ptr: void PseudoJet::_release_jet_from_cs(){
+//std::shared_ptr:   // check if the jet has the structure of type CSstruct in which case
+//std::shared_ptr:   // we have to check if there is a need for self-deletion of the CS
+//std::shared_ptr:   ClusterSequenceStructure * assoc_css = dynamic_cast<ClusterSequenceStructure *>(_structure.get());
+//std::shared_ptr:   if (assoc_css) {
+//std::shared_ptr:     const ClusterSequence * assoc_cs = assoc_css->associated_cluster_sequence();
+//std::shared_ptr:     if (assoc_cs) assoc_cs->release_pseudojet(*this);
+//std::shared_ptr:   }
+//std::shared_ptr: 
+//std::shared_ptr:   // slightly less efficient version
+//std::shared_ptr:   // if ((has_structure_of<ClusterSequence>()) && (has_valid_cluster_sequence())){
+//std::shared_ptr:   //   associated_cs()->release_pseudojet(*this);
+//std::shared_ptr:   // }
+//std::shared_ptr: }
+//std::shared_ptr: 
+//std::shared_ptr: #endif // FASTJET_HAVE_THREAD_SAFETY
 
 //----------------------------------------------------------------------
 /// do standard end of initialisation
@@ -78,7 +123,52 @@ void PseudoJet::_finish_init () {
   // So we initialise it; penalty is about 0.3ns per PseudoJet out of about
   // 10ns total initialisation time (on a intel Core i7 2.7GHz)
   _rap = pseudojet_invalid_rap;
+
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+  _init_status = Init_NotDone;
+#endif
 }
+
+//----------------------------------------------------------------------
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+void PseudoJet::_ensure_valid_rap_phi() const{
+  //TODO: for _init_status we can use memory_order_release when
+  //writing and memory_order_acquire when reading. Check if that has
+  //an impact on timing
+  if (_init_status!=Init_Done){
+    int expected = Init_NotDone;
+    // if it's 0 (not done), set thing to "operation in progress"
+    // (-1) and do the init
+    //
+    // Note:
+    //   - this has to be the strong version so we can make a single
+    //     test
+    //   - we need to make sure that the -1 is loaded properly
+    //     (success), hence a std::memory_order_seq_cst model
+    //   - the failure model can be anything since we're not going
+    //     to use the value anyway
+    if (_init_status.compare_exchange_strong(expected, Init_InProgress,
+                                             std::memory_order_seq_cst,
+                                             std::memory_order_relaxed)){
+      _set_rap_phi();
+      // Now we can safely set the status flag to Init_Done (after all
+      // physics variables are set). The memory ordering guarantees
+      // synchronisation across threads.
+      _init_status.store(Init_Done, memory_order_release); 
+    } else {
+      // wait until done
+      //
+      // Here we use memory_order_acquire to guarantee that the
+      // rap/phi values set in the thread which actually does the
+      // calculation are synchronised.
+      // Reading https://gcc.gnu.org/wiki/Atomic/GCCMM/AtomicSync in
+      // interesting in this context.
+      while (_init_status.load(memory_order_acquire) != Init_Done);
+    }
+    
+  }
+}
+#endif
 
 //----------------------------------------------------------------------
 void PseudoJet::_set_rap_phi() const {
@@ -345,6 +435,9 @@ void PseudoJet::set_cached_rap_phi(double rap_in, double phi_in) {
   _rap = rap_in; _phi = phi_in;
   if (_phi >= twopi) _phi -= twopi;
   if (_phi < 0)      _phi += twopi;
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+  _init_status = Init_Done;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -466,13 +559,17 @@ const ClusterSequence * PseudoJet::validated_cs() const {
 //----------------------------------------------------------------------
 // set the associated structure
 void PseudoJet::set_structure_shared_ptr(const SharedPtr<PseudoJetStructureBase> &structure_in){
+//std::shared_ptr: #ifdef FASTJET_HAVE_THREAD_SAFETY
+//std::shared_ptr:   // if the jet currently belongs to a cs, we need to release it before any chenge
+//std::shared_ptr:   _release_jet_from_cs();
+//std::shared_ptr: #endif //FASTJET_HAVE_THREAD_SAFETY
   _structure = structure_in;
 }
 
 //----------------------------------------------------------------------
 // return true if there is some structure associated with this PseudoJet
 bool PseudoJet::has_structure() const{
-  return bool(_structure);
+  return (bool) _structure; // cast to bool has to be made explicit
 }
 
 //----------------------------------------------------------------------

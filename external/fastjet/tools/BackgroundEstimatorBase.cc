@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: BackgroundEstimatorBase.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -37,6 +37,15 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 LimitedWarning BackgroundEstimatorBase::_warnings_empty_area;
 
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+BackgroundEstimatorBase::BackgroundEstimatorBase(const BackgroundEstimatorBase &other_bge){
+  _rescaling_class = other_bge._rescaling_class;
+  _cached_estimate = other_bge._cached_estimate;
+  _cache_available = other_bge._cache_available;
+  _writing_to_cache.store(other_bge._writing_to_cache.load());;
+}
+#endif
+
 //----------------------------------------------------------------------
 // given a quantity in a vector (e.g. pt_over_area) and knowledge
 // about the number of empty jets, calculate the median and
@@ -66,8 +75,9 @@ void BackgroundEstimatorBase::_median_and_stddev(const vector<double> & quantity
   // empty area can sometimes be negative; with small ranges this can
   // become pathological, so warn the user
   int n_jets_used = sorted_quantity_vector.size();
-  if (n_empty_jets < -n_jets_used/4.0)
+  if (n_empty_jets < -n_jets_used/4.0) {
     _warnings_empty_area.warn("BackgroundEstimatorBase::_median_and_stddev(...): the estimated empty area is suspiciously large and negative and may lead to an over-estimation of rho. This may be due to (i) a rare statistical fluctuation or (ii) too small a range used to estimate the background properties.");
+  }
 
   // now get the median & error, accounting for empty jets;
   // define the fractions of distribution at median, median-1sigma
@@ -138,6 +148,26 @@ double BackgroundEstimatorBase::_percentile(const vector<double> & sorted_quanti
 
 
 }
+
+void BackgroundEstimatorBase::_lock_if_needed() const{
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+  bool expected;
+  // the following waits until the cache_writing status is "false" and sets it to "true"
+  do {
+    expected = false;
+  } while (!_writing_to_cache.compare_exchange_strong(expected, true,
+                                                      memory_order_seq_cst,
+                                                      memory_order_relaxed));
+#endif // FASTJET_HAVE_THREAD_SAFETY
+}
+
+void BackgroundEstimatorBase::_unlock_if_needed() const{
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+  // release the "write-in-progress" lock
+  _writing_to_cache = false;
+#endif
+}
+
 
 
 FASTJET_END_NAMESPACE        // defined in fastjet/internal/base.hh

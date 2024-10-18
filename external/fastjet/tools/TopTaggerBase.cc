@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: TopTaggerBase.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -28,7 +28,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include <fastjet/tools/TopTaggerBase.hh>
+#include "fastjet/tools/TopTaggerBase.hh"
 
 FASTJET_BEGIN_NAMESPACE
 

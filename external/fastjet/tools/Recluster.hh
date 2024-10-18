@@ -1,7 +1,7 @@
 #ifndef __FASTJET_TOOLS_RECLUSTER_HH__
 #define __FASTJET_TOOLS_RECLUSTER_HH__
 
-// $Id: Recluster.hh 3753 2014-12-17 15:19:55Z salam $
+// $Id$
 //
 // Copyright (c) 2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -22,8 +22,8 @@
 // along with this code. If not, see <http://www.gnu.org/licenses/>.
 //----------------------------------------------------------------------
 
-#include <fastjet/JetDefinition.hh>
-#include <fastjet/FunctionOfPseudoJet.hh>   // to derive Recluster from FOfPJ<PJ>
+#include "fastjet/JetDefinition.hh"
+#include "fastjet/FunctionOfPseudoJet.hh"   // to derive Recluster from FOfPJ<PJ>
 #include <iostream>
 #include <string>
 

@@ -2,9 +2,9 @@
 #define __FASTJET_RECTANGULARGRID_HH__
 
 //FJSTARTHEADER
-// $Id: RectangularGrid.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -127,17 +127,17 @@ public:
 
   /// returns whether a given tile is good
   // tested in "issue" 2014-08-08-testing-rect-grid
-  virtual bool tile_is_good(int itile) const FASTJET_OVERRIDE {
+  virtual bool tile_is_good(int itile) const FASTJET_OVERRIDE{
     return _tile_selector.worker() ? _is_good[itile] : true;
   }
 
   /// returns the area of tile itile.
-  virtual double tile_area(int /* itile */) const FASTJET_OVERRIDE {
+  virtual double tile_area(int /* itile */) const FASTJET_OVERRIDE{
     return mean_tile_area();
   }
 
   /// returns the mean area of tiles.
-  virtual double mean_tile_area() const FASTJET_OVERRIDE {return _dphi*_dy;};
+  virtual double mean_tile_area() const FASTJET_OVERRIDE { return _dphi*_dy; }
 
   /// returns a textual description of the grid
   virtual std::string description() const FASTJET_OVERRIDE;
@@ -152,7 +152,7 @@ public:
   double dphi()   const {return _dphi;}
 
   /// returns true if the grid is in a suitably initialised state
-  virtual bool is_initialised() const FASTJET_OVERRIDE {return _ntotal > 0;}
+  virtual bool is_initialised() const FASTJET_OVERRIDE { return _ntotal > 0; }
 
 private:
   void _setup_grid();

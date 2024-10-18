@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence_Delaunay.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -68,8 +68,8 @@ void ClusterSequence::_delaunay_cluster () {
   }
 
   // initialise our DNN structure with the set of points
-  SharedPtr<DynamicNearestNeighbours> DNN;
   const bool verbose = false;
+  SharedPtr<DynamicNearestNeighbours> DNN;
 #ifndef DROP_CGAL // strategy = NlnN* are not supported if we drop CGAL...
   bool ignore_nearest_is_mirror = (_Rparam < twopi);
   if (_strategy == NlnN4pi) {

@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: CDFJetCluPlugin.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -43,7 +43,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 using namespace cdf;
 
-bool CDFJetCluPlugin::_first_time = true;
+thread_safety_helpers::FirstTimeTrue CDFJetCluPlugin::_first_time;
 
 string CDFJetCluPlugin::description () const {
   ostringstream desc;
@@ -168,8 +168,7 @@ void CDFJetCluPlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void CDFJetCluPlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  

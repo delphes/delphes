@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: AxesDefinition.hh 1130 2018-06-06 12:09:46Z jthaler $
+//  $Id: AxesDefinition.hh 1412 2024-02-29 00:15:59Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -42,9 +42,11 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 namespace contrib {
    
 // The following AxesDefinitions are currently available (and the relevant arguments, if needed)
+class HalfKT_Axes;
 class KT_Axes;
 class CA_Axes;
 class AntiKT_Axes;         // (R0)
+class WTA_HalfKT_Axes;
 class WTA_KT_Axes;
 class WTA_CA_Axes;
 class GenKT_Axes;          // (p, R0 = infinity)
@@ -52,9 +54,11 @@ class WTA_GenKT_Axes;      // (p, R0 = infinity)
 class GenET_GenKT_Axes;    // (delta, p, R0 = infinity)
 class Manual_Axes;
    
+class OnePass_HalfKT_Axes;
 class OnePass_KT_Axes;
 class OnePass_CA_Axes;
 class OnePass_AntiKT_Axes;       // (R0)
+class OnePass_WTA_HalfKT_Axes;
 class OnePass_WTA_KT_Axes;
 class OnePass_WTA_CA_Axes;
 class OnePass_GenKT_Axes;        // (p, R0 = infinity)
@@ -235,11 +239,18 @@ public:
                                                              const MeasureDefinition * ) const {
       fastjet::ClusterSequence jet_clust_seq(inputs, _def);
       
-      std::vector<fastjet::PseudoJet> axes = jet_clust_seq.exclusive_jets_up_to(n_jets);
+      std::vector<fastjet::PseudoJet> axes_temp = jet_clust_seq.exclusive_jets_up_to(n_jets);
       
-      if ((int)axes.size() < n_jets) {
+      if ((int)axes_temp.size() < n_jets) {
          _too_few_axes_warning.warn("ExclusiveJetAxes::get_starting_axes:  Fewer than N axes found; results are unpredictable.");
-         axes.resize(n_jets);  // resize to make sure there are enough axes to not yield an error elsewhere
+         axes_temp.resize(n_jets);  // resize to make sure there are enough axes to not yield an error elsewhere
+      }
+     
+      // Create axes list with extra information stripped (since ClusterSequence will not be kept around)
+      std::vector<fastjet::PseudoJet> axes;
+      axes.resize(n_jets);
+      for (unsigned int i = 0; i < axes_temp.size(); i++) {
+         axes[i].reset_momentum(axes_temp[i]);
       }
       
       return axes;
@@ -385,6 +396,46 @@ private:
    static LimitedWarning _too_few_axes_warning;
 
 };
+
+
+///------------------------------------------------------------------------
+/// \class HalfKT_Axes
+/// \brief Axes from exclusive generalized kT with p = 1/2
+///
+/// Axes from a general KT algorithm with p=1/2 (standard E-scheme recombination)
+///------------------------------------------------------------------------
+class HalfKT_Axes : public ExclusiveJetAxes {
+   
+public:
+   /// Constructor
+  HalfKT_Axes()
+   : ExclusiveJetAxes(fastjet::JetDefinition(fastjet::genkt_algorithm,
+                                             fastjet::JetDefinition::max_allowable_R,
+                                             0.5)) {
+      setNPass(NO_REFINING);
+   }
+   
+   /// Short description
+   virtual std::string short_description() const {
+      std::stringstream stream;
+      stream << std::fixed << std::setprecision(2)
+      << "HalfKT";
+      return stream.str();
+   };
+   
+   /// Long descriptions
+   virtual std::string description() const {
+      std::stringstream stream;
+      stream << std::fixed << std::setprecision(2)
+     << "Half KT Axes";
+      return stream.str();
+   };
+   
+   /// For copying purposes
+   virtual HalfKT_Axes* create() const {return new HalfKT_Axes(*this);}
+
+};
+
    
 ///------------------------------------------------------------------------
 /// \class KT_Axes
@@ -535,6 +586,47 @@ public:
 private:
    JetDefinition jet_def;  ///< my jet definition
 };
+
+///------------------------------------------------------------------------
+/// \class WTA_HalfKT_Axes
+/// \brief Axes from exclusive generalized kT with p =1/2, winner-take-all recombination
+///
+/// Axes from a general KT algorithm (p = 1/2) with a Winner Take All Recombiner
+///------------------------------------------------------------------------
+class WTA_HalfKT_Axes : public ExclusiveJetAxes {
+
+public:
+   /// Constructor
+  WTA_HalfKT_Axes()
+   : ExclusiveJetAxes(JetDefinitionWrapper(fastjet::genkt_algorithm,
+                                           fastjet::JetDefinition::max_allowable_R,
+                                            0.5,
+                                            new WinnerTakeAllRecombiner()
+                                            ).getJetDef()) {
+      setNPass(NO_REFINING);
+   }
+
+   /// Short description
+   virtual std::string short_description() const {
+      std::stringstream stream;
+      stream << std::fixed << std::setprecision(2)
+      << "WTA, HalfKT";
+      return stream.str();
+   };
+   
+   /// Long descriptions
+   virtual std::string description() const {
+      std::stringstream stream;
+      stream << std::fixed << std::setprecision(2)
+      << "Winner-Take-All Half KT Axes";
+      return stream.str();
+   };
+   
+   /// For copying purposes
+   virtual WTA_HalfKT_Axes* create() const {return new WTA_HalfKT_Axes(*this);}
+
+};
+
 
 ///------------------------------------------------------------------------
 /// \class WTA_KT_Axes
@@ -745,6 +837,38 @@ protected:
 };
 
 ///------------------------------------------------------------------------
+/// \class OnePass_HalfKT_Axes
+/// \brief Axes from exclusive generalized kT (p = 1/2) with one-pass minimization
+///
+/// Onepass minimization, General KT Axes with p = 1/2 (standard E-scheme recombination)
+///------------------------------------------------------------------------
+class OnePass_HalfKT_Axes : public HalfKT_Axes {
+   
+public:
+   /// Constructor
+  OnePass_HalfKT_Axes() : HalfKT_Axes() {
+      setNPass(ONE_PASS);
+   }
+   
+   /// Short description
+   virtual std::string short_description() const {
+      return "OnePass HalfKT";
+   };
+   
+   /// Long description
+   virtual std::string description() const {
+      std::stringstream stream;
+      stream << std::fixed << std::setprecision(2)
+      << "One-Pass Minimization from Half KT Axes";
+      return stream.str();
+   };
+   
+   /// For copying purposes
+   virtual OnePass_HalfKT_Axes* create() const {return new OnePass_HalfKT_Axes(*this);}
+};
+
+
+///------------------------------------------------------------------------
 /// \class OnePass_KT_Axes
 /// \brief Axes from exclusive kT, with one-pass minimization
 ///
@@ -772,7 +896,6 @@ public:
    
    /// For copying purposes
    virtual OnePass_KT_Axes* create() const {return new OnePass_KT_Axes(*this);}
-   
 
 };
 
@@ -841,6 +964,38 @@ public:
    /// For copying purposes
    virtual OnePass_AntiKT_Axes* create() const {return new OnePass_AntiKT_Axes(*this);}
 
+};
+
+
+///------------------------------------------------------------------------
+/// \class OnePass_WTA_HalfKT_Axes
+/// \brief Axes from exclusive generalized kT with p = 1/2, winner-take-all recombination, with one-pass minimization
+///
+/// Onepass minimization from winner-take-all, General KT Axes with p = 1/2
+///------------------------------------------------------------------------
+class OnePass_WTA_HalfKT_Axes : public WTA_HalfKT_Axes {
+   
+public:
+   /// Constructor
+   OnePass_WTA_HalfKT_Axes() : WTA_HalfKT_Axes() {
+      setNPass(ONE_PASS);
+   }
+
+   /// Short description
+   virtual std::string short_description() const {
+      return "OnePass WTA HalfKT";
+   };
+   
+   /// Long description
+   virtual std::string description() const {
+      std::stringstream stream;
+      stream << std::fixed << std::setprecision(2)
+      << "One-Pass Minimization from Winner-Take-All Half KT Axes";
+      return stream.str();
+   };
+   
+   /// For copying purposes
+   virtual OnePass_WTA_HalfKT_Axes* create() const {return new OnePass_WTA_HalfKT_Axes(*this);}
 };
 
 ///------------------------------------------------------------------------

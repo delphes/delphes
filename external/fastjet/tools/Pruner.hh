@@ -2,9 +2,9 @@
 #define __FASTJET_TOOLS_PRUNER_HH__
 
 //FJSTARTHEADER
-// $Id: Pruner.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -235,8 +235,8 @@ private:
 /// the softest is rejected.
 ///
 /// Note that this in not meant for standalone use [in particular
-/// because it could lead to memory issues due to the rejected indices
-/// stored internally].
+/// because it could lead to memory (and thread-safety) issues due to
+/// the rejected indices stored internally (as a mutable variable)].
 ///
 /// \endif
 class PruningRecombiner : public JetDefinition::Recombiner{

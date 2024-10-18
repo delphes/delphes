@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: GridMedianBackgroundEstimator.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -43,11 +43,13 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 void GridMedianBackgroundEstimator::set_particles(const vector<PseudoJet> & particles) {
   vector<double> scalar_pt(n_tiles(), 0.0);
 
-#ifdef FASTJET_GMBGE_USEFJGRID
   assert(all_tiles_equal_area());
   //assert(n_good_tiles() == n_tiles()); // not needed now that we have an implementation
-#endif
 
+  _cached_estimate.reset();
+  _cached_estimate.set_has_sigma(true);
+  _cached_estimate.set_mean_area(mean_tile_area());
+  
   // check if we need to compute only rho or both rho and rho_m
   if (_enable_rho_m){
     // both rho and rho_m
@@ -76,8 +78,9 @@ void GridMedianBackgroundEstimator::set_particles(const vector<PseudoJet> & part
     // compute rho_m and sigma_m (see comment below for the
     // normaliosation of sigma)
     double p50 = _percentile(scalar_dt, 0.5);
-    _rho_m   = p50 / mean_tile_area();
-    _sigma_m = (p50-_percentile(scalar_dt, (1.0-0.6827)/2.0))/sqrt(mean_tile_area());
+    _cached_estimate.set_has_rho_m(true);
+    _cached_estimate.set_rho_m(p50 / mean_tile_area());
+    _cached_estimate.set_sigma_m((p50-_percentile(scalar_dt, (1.0-0.6827)/2.0))/sqrt(mean_tile_area()));
   } else {
     // only rho
     //fill(_scalar_pt.begin(), _scalar_pt.end(), 0.0);
@@ -122,20 +125,39 @@ void GridMedianBackgroundEstimator::set_particles(const vector<PseudoJet> & part
   // watch out: by definition, our sigma is the standard deviation of
   // the pt density multiplied by the square root of the cell area
   double p50 = _percentile(scalar_pt, 0.5);
-  _rho   = p50 / mean_tile_area();
-  _sigma = (p50-_percentile(scalar_pt, (1.0-0.6827)/2.0))/sqrt(mean_tile_area());
+  _cached_estimate.set_rho(p50 / mean_tile_area());
+  _cached_estimate.set_sigma((p50-_percentile(scalar_pt, (1.0-0.6827)/2.0))/sqrt(mean_tile_area()));
 
-  _has_particles = true;
+  _cache_available = true;
 }
 
 
 //----------------------------------------------------------------------
 // retrieving fundamental information
 //----------------------------------------------------------------------
+
+// get the full set of background properties
+BackgroundEstimate GridMedianBackgroundEstimator::estimate() const{
+  verify_particles_set();
+  return _cached_estimate;  
+}
+ 
+// get the full set of background properties for a given reference jet
+BackgroundEstimate GridMedianBackgroundEstimator::estimate(const PseudoJet &jet) const{
+  verify_particles_set();
+  if (_rescaling_class == 0)
+    return _cached_estimate;
+  
+  BackgroundEstimate local_estimate = _cached_estimate;
+  local_estimate.apply_rescaling_factor((*_rescaling_class)(jet));
+  return local_estimate;
+}
+
+
 // get rho, the median background density per unit area
 double GridMedianBackgroundEstimator::rho() const {
   verify_particles_set();
-  return _rho;
+  return _cached_estimate.rho();
 }
 
 
@@ -145,7 +167,7 @@ double GridMedianBackgroundEstimator::rho() const {
 // given area.
 double GridMedianBackgroundEstimator::sigma() const{
   verify_particles_set();
-  return _sigma; 
+  return _cached_estimate.sigma(); 
 }
 
 //----------------------------------------------------------------------
@@ -177,7 +199,7 @@ double GridMedianBackgroundEstimator::rho_m() const {
     throw Error("GridMediamBackgroundEstimator: rho_m requested but rho_m calculation has been disabled.");
   }
   verify_particles_set();
-  return _rho_m;
+  return _cached_estimate.rho_m();
 }
 
 
@@ -190,7 +212,7 @@ double GridMedianBackgroundEstimator::sigma_m() const{
     throw Error("GridMediamBackgroundEstimator: sigma_m requested but rho_m/sigma_m calculation has been disabled.");
   }
   verify_particles_set();
-  return _sigma_m; 
+  return _cached_estimate.sigma_m(); 
 }
 
 //----------------------------------------------------------------------
@@ -215,7 +237,7 @@ double GridMedianBackgroundEstimator::sigma_m(const PseudoJet & jet){
 //----------------------------------------------------------------------
 // verify that particles have been set and throw an error if not
 void GridMedianBackgroundEstimator::verify_particles_set() const {
-  if (!_has_particles) throw Error("GridMedianBackgroundEstimator::rho() or sigma() called without particles having been set");
+  if (!_cache_available) throw Error("GridMedianBackgroundEstimator::rho() or sigma() called without particles having been set");
 }
 
 
@@ -224,13 +246,7 @@ void GridMedianBackgroundEstimator::verify_particles_set() const {
 //----------------------------------------------------------------------
 string GridMedianBackgroundEstimator::description() const { 
   ostringstream desc;
-#ifdef FASTJET_GMBGE_USEFJGRID
   desc << "GridMedianBackgroundEstimator, with " << RectangularGrid::description();
-#else
-  desc << "GridMedianBackgroundEstimator, with grid extension |y| < " << _ymax 
-       << ", and grid cells of size dy x dphi = " << _dy << " x " << _dphi
-       << " (requested size = " << _requested_grid_spacing << ")";
-#endif
   return desc.str();
 }       
 
@@ -254,68 +270,11 @@ void GridMedianBackgroundEstimator::set_rescaling_class(const FunctionOfPseudoJe
   // you need to call set_particles again if you set the rescaling
   // class. We thus warn if there are already some available
   // particles
-  if (_has_particles)
+  if (_cache_available)
     _warning_rescaling.warn("GridMedianBackgroundEstimator::set_rescaling_class(): trying to set the rescaling class when there are already particles that have been set is dangerous: the rescaling will not affect the already existing particles resulting in mis-estimation of rho. You need to call set_particles() again before proceeding with any background estimation.");
   
   BackgroundEstimatorBase::set_rescaling_class(rescaling_class_in);
 }
-
-
-#ifndef FASTJET_GMBGE_USEFJGRID
-//----------------------------------------------------------------------
-// protected material
-//----------------------------------------------------------------------
-// configure the grid
-void GridMedianBackgroundEstimator::setup_grid() {
-
-  // since we've exchanged the arguments of the grid constructor,
-  // there's a danger of calls with exchanged ymax,spacing arguments -- 
-  // the following check should catch most such situations.
-  assert(_ymax>0 && _ymax - _ymin >= _requested_grid_spacing);
-
-  // this grid-definition code is becoming repetitive -- it should
-  // probably be moved somewhere central...
-  double ny_double = (_ymax-_ymin) / _requested_grid_spacing;
-  _ny = int(ny_double+0.5);
-  _dy = (_ymax-_ymin) / _ny;
-  
-  _nphi = int (twopi / _requested_grid_spacing + 0.5);
-  _dphi = twopi / _nphi;
-
-  // some sanity checking (could throw a fastjet::Error)
-  assert(_ny >= 1 && _nphi >= 1);
-
-  _ntotal = _nphi * _ny;
-  //_scalar_pt.resize(_ntotal);
-  _tile_area = _dy * _dphi;
-}
-
-
-//----------------------------------------------------------------------
-// retrieve the grid tile index for a given PseudoJet
-int GridMedianBackgroundEstimator::tile_index(const PseudoJet & p) const {
-  // directly taking int does not work for values between -1 and 0
-  // so use floor instead
-  // double iy_double = (p.rap() - _ymin) / _dy;
-  // if (iy_double < 0.0) return -1;
-  // int iy = int(iy_double);
-  // if (iy >= _ny) return -1;
-
-  // writing it as below gives a huge speed gain (factor two!). Even
-  // though answers are identical and the routine here is not the
-  // speed-critical step. It's not at all clear why.
-  int iy = int(floor( (p.rap() - _ymin) / _dy ));
-  if (iy < 0 || iy >= _ny) return -1;
-
-  int iphi = int( p.phi()/_dphi );
-  assert(iphi >= 0 && iphi <= _nphi);
-  if (iphi == _nphi) iphi = 0; // just in case of rounding errors
-
-  int index_res = iy*_nphi + iphi;
-  assert (index_res >= 0 && index_res < _ny*_nphi);
-  return index_res;
-}
-#endif // FASTJET_GMBGE_USEFJGRID
 
 
 

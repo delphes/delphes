@@ -6,7 +6,7 @@
 //FJSTARTHEADER
 // $Id: ClusterSequence_N2.cc 1351 2009-01-09 18:03:03Z salam $
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -83,7 +83,6 @@ template<class BJ> void ClusterSequence::_simple_N2_cluster() {
   }
 
   // now run the recombination loop
-  int history_location = n-1;
   while (tail != head) {
 
     // find the minimum of the diJ on this round
@@ -94,7 +93,6 @@ template<class BJ> void ClusterSequence::_simple_N2_cluster() {
     }
     
     // do the recombination between A and B
-    history_location++;
     jetA = & briefjets[diJ_min_jet];
     // GPS mod 2009-02-11
     //jetB = jetA->NN;

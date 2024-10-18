@@ -1,4 +1,4 @@
-// $Id: RecursiveSoftDrop.hh 1192 2018-10-30 16:08:36Z gsoyez $
+// $Id: RecursiveSoftDrop.hh 1431 2024-10-04 12:29:53Z salam $
 //
 // Copyright (c) 2014-, Gavin P. Salam, Gregory Soyez, Jesse Thaler,
 // Kevin Zhou, Frederic Dreyer
@@ -22,6 +22,8 @@
 
 #ifndef __RECURSIVESOFTDROP_HH__
 #define __RECURSIVESOFTDROP_HH__
+
+#include "fastjet/config.h"
 
 // we'll use the native FJ class for reculstering if available
 #if FASTJET_VERSION_NUMBER >= 30100

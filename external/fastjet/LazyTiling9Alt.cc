@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: LazyTiling9Alt.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -568,14 +568,12 @@ void LazyTiling9Alt::run() {
   jets_for_minheap.reserve(n); 
 
   // now run the recombination loop
-  int history_location = n-1;
   while (n > 0) {
 
     double diJ_min = minheap.minval() *_invR2;
     jetA = head + minheap.minloc();
 
     // do the recombination between A and B
-    history_location++;
     jetB = jetA->NN;
 
     if (jetB != NULL) {

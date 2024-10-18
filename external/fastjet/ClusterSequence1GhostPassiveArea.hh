@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence1GhostPassiveArea.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -69,7 +69,7 @@ public:
   /// return an estimate for the number of empty jets -- one uses the
   /// AreaBase one rather than the ActiveArea one (which for which we
   /// do not have the information).
-  virtual double n_empty_jets(const Selector & selector) const FASTJET_OVERRIDE {
+  virtual double n_empty_jets(const Selector & selector) const FASTJET_OVERRIDE{
     return ClusterSequenceAreaBase::n_empty_jets(selector);
   }
 

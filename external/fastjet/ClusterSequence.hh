@@ -2,9 +2,9 @@
 #define __FASTJET_CLUSTERSEQUENCE_HH__
 
 //FJSTARTHEADER
-// $Id: ClusterSequence.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -47,7 +47,7 @@
 #include "fastjet/LimitedWarning.hh"
 #include "fastjet/FunctionOfPseudoJet.hh"
 #include "fastjet/ClusterSequenceStructure.hh"
-
+#include "fastjet/internal/thread_safety_helpers.hh"  // helpers to write code w&wo thread-safety
 #include "fastjet/internal/deprecated.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -299,8 +299,13 @@ class ClusterSequence {
   /// when unused
   bool will_delete_self_when_unused() const {return _deletes_self_when_unused;}
 
+//std::shared_ptr: #ifdef FASTJET_HAVE_THREAD_SAFETY
+//std::shared_ptr:   /// signals that a jet will no longer use the current CS (internal use only)
+//std::shared_ptr:   void release_pseudojet(PseudoJet &jet) const;
+//std::shared_ptr: #else
   /// tell the ClusterSequence it's about to be self deleted (internal use only)
   void signal_imminent_self_deletion() const;
+//std::shared_ptr: #endif
 
   /// returns the scale associated with a jet as required for this
   /// clustering algorithm (kt^2 for the kt-algorithm, 1 for the
@@ -340,6 +345,23 @@ class ClusterSequence {
     _do_iB_recombination_step(jet_i, diB);
   }
 
+  /// return a non-const reference to the jets()[i], to allow plugins to
+  /// modify its contents. 
+  ///
+  /// It can only be called when the plugin is activated.
+  ///
+  /// If you reset the jet (or set it equal to another one) you _must_
+  /// ensure that final jet is given the structure_shared_ptr of the
+  /// original jet, otherwise you will end up with an inconsistent
+  /// ClusterSequence. 
+  ///
+  /// ONLY USE THIS IF YOU ARE SURE YOU KNOW WHAT YOU ARE DOING (contact
+  /// FJ authors if you think you need this but are unsure)
+  PseudoJet & plugin_non_const_jet(unsigned i) {
+    assert(plugin_activated());
+    return _jets[i];
+  }
+
   /// @ingroup extra_info
   /// \class Extras
   /// base class to store extra information that plugins may provide
@@ -368,8 +390,8 @@ class ClusterSequence {
   /// of auto_ptr in C++11
 #ifndef SWIG
 #ifdef FASTJET_HAVE_AUTO_PTR_INTERFACE
-  FASTJET_DEPRECATED_MSG("Please use ClusterSequence::plugin_associate_extras(Extras * extras_in)) instead")
-  inline void plugin_associate_extras(std::auto_ptr<Extras> extras_in){
+  FASTJET_DEPRECATED_MSG("Please use ClusterSequence::plugin_associate_extras(Extras * extras_in)) instead",
+  inline void plugin_associate_extras(std::auto_ptr<Extras> extras_in)){
     _extras.reset(extras_in.release());
   }
 #endif
@@ -409,33 +431,39 @@ public:
   /// 
   /// (see vector _history below).
   struct history_element{
-    int parent1; /// index in _history where first parent of this jet
-                 /// was created (InexistentParent if this jet is an
-                 /// original particle)
+    /// index in _history where first parent of this jet
+    /// was created (InexistentParent if this jet is an
+    /// original particle)
+    int parent1; 
 
-    int parent2; /// index in _history where second parent of this jet
-                 /// was created (InexistentParent if this jet is an
-                 /// original particle); BeamJet if this history entry
-                 /// just labels the fact that the jet has recombined
-                 /// with the beam)
+    /// index in _history where second parent of this jet
+    /// was created (InexistentParent if this jet is an
+    /// original particle); BeamJet if this history entry
+    /// just labels the fact that the jet has recombined
+    /// with the beam)
+    int parent2; 
 
-    int child;   /// index in _history where the current jet is
-		 /// recombined with another jet to form its child. It
-		 /// is Invalid if this jet does not further
-		 /// recombine.
+    /// index in _history where the current jet is
+		/// recombined with another jet to form its child. It
+		/// is Invalid if this jet does not further
+		/// recombine.
+    int child;   
 
-    int jetp_index; /// index in the _jets vector where we will find the
-                 /// PseudoJet object corresponding to this jet
-                 /// (i.e. the jet created at this entry of the
-                 /// history). NB: if this element of the history
-                 /// corresponds to a beam recombination, then
-                 /// jetp_index=Invalid.
+    /// index in the _jets vector where we will find the
+    /// PseudoJet object corresponding to this jet
+    /// (i.e. the jet created at this entry of the
+    /// history). NB: if this element of the history
+    /// corresponds to a beam recombination, then
+    /// jetp_index=Invalid.
+    int jetp_index; 
 
-    double dij;  /// the distance corresponding to the recombination
-		 /// at this stage of the clustering.
+    /// the distance corresponding to the recombination
+    /// at this stage of the clustering.
+    double dij;  
 
-    double max_dij_so_far; /// the largest recombination distance seen
-			   /// so far in the clustering history.
+    /// the largest recombination distance seen
+    /// so far in the clustering history.
+    double max_dij_so_far; 
   };
 
   enum JetType {Invalid=-3, InexistentParent = -2, BeamJet = -1};
@@ -574,11 +602,14 @@ public:
   static std::ostream * fastjet_banner_stream() {return _fastjet_banner_ostr;}
 
 private:
+  
   /// \cond internal_doc
-
   /// contains the actual stream to use for banners 
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+  static std::atomic<std::ostream*> _fastjet_banner_ostr;
+#else
   static std::ostream * _fastjet_banner_ostr;
-
+#endif // FASTJET_HAVE_LIMITED_THREAD_SAFETY
   /// \endcond
 
 protected:
@@ -711,7 +742,11 @@ protected:
   /// object referring to it disappears. It is mutable so as to ensure
   /// that signal_imminent_self_deletion() [const] can make relevant
   /// changes.
+#ifdef FASTJET_HAVE_THREAD_SAFETY
+  mutable std::atomic<bool> _deletes_self_when_unused;
+#else
   mutable bool _deletes_self_when_unused;
+#endif
 
  private:
 
@@ -767,7 +802,7 @@ protected:
 
 
   /// will be set by default to be true for the first run
-  static bool _first_time;
+  static thread_safety_helpers::FirstTimeTrue _first_time;
 
   /// manage warnings related to exclusive jets access
   static LimitedWarning _exclusive_warnings;
@@ -915,6 +950,11 @@ protected:
     double nx, ny, nz;  // our internal storage for fast distance calcs
   };
 
+  /// identical to EEBriefJet, but the corresponding distance
+  /// calculation (_bj_dist) is overloaded to use the more accurate
+  /// cross-product approach
+  class EEAccurateBriefJet : public EEBriefJet { };
+
   /// to help instantiation (fj 2.4.0; did not quite work on gcc 33 and os x 10.3?)
   //void _dummy_N2_cluster_instantiation();
 
@@ -923,6 +963,7 @@ protected:
   void _simple_N2_cluster_BriefJet();
   /// to avoid issues with template instantiation (OS X 10.3, gcc 3.3)
   void _simple_N2_cluster_EEBriefJet();
+  void _simple_N2_cluster_EEAccurateBriefJet();
 };
 
 

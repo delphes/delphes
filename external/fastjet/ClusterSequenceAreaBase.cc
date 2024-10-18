@@ -1,8 +1,8 @@
 
 //FJSTARTHEADER
-// $Id: ClusterSequenceAreaBase.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -150,7 +150,6 @@ void ClusterSequenceAreaBase::_parabolic_pt_per_unit_area(
   _check_selector_good_for_median(selector);
 
   int n=0;
-  int n_excluded = 0;
   double mean_f=0, mean_x2=0, mean_x4=0, mean_fx2=0; 
 
   vector<PseudoJet> incl_jets = inclusive_jets();
@@ -165,14 +164,12 @@ void ClusterSequenceAreaBase::_parabolic_pt_per_unit_area(
       }
       double f = incl_jets[i].perp()/this_area;
       if (exclude_above <= 0.0 || f < exclude_above) {
-	double x = incl_jets[i].rap(); double x2 = x*x;
-	mean_f   += f;
-	mean_x2  += x2;
-	mean_x4  += x2*x2;
-	mean_fx2 += f*x2;
-	n++;
-      } else {
-	n_excluded++;
+        double x = incl_jets[i].rap(); double x2 = x*x;
+        mean_f   += f;
+        mean_x2  += x2;
+        mean_x4  += x2*x2;
+        mean_fx2 += f*x2;
+        n++;
       }
     }
   }
@@ -192,7 +189,6 @@ void ClusterSequenceAreaBase::_parabolic_pt_per_unit_area(
     b = (mean_f*mean_x2 - mean_fx2)/(mean_x2*mean_x2 - mean_x4);
     a = mean_f - b*mean_x2;
   }
-  //cerr << "n_excluded = "<< n_excluded << endl;
 }
 
 
@@ -216,7 +212,7 @@ void ClusterSequenceAreaBase::get_median_rho_and_sigma(
             const vector<PseudoJet> & all_jets,
             const Selector & selector, bool use_area_4vector,
             double & median, double & sigma, double & mean_area,
-	    bool all_are_incl) const {
+            bool all_are_incl) const {
   _get_median_rho_and_sigma(all_jets, selector, use_area_4vector,
                             median, sigma, mean_area, all_are_incl);
 }
@@ -225,7 +221,7 @@ void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
             const vector<PseudoJet> & all_jets,
             const Selector & selector, bool use_area_4vector,
             double & median, double & sigma, double & mean_area,
-	    bool all_are_incl) const {
+            bool all_are_incl) const {
 
   _check_jet_alg_good_for_median();
 
@@ -248,9 +244,9 @@ void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
       }
 
       if (this_area>0) {
-	pt_over_areas.push_back(all_jets[i].perp()/this_area);
+        pt_over_areas.push_back(all_jets[i].perp()/this_area);
       } else {
-	_warnings_zero_area.warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): discarded jet with zero area. Zero-area jets may be due to (i) too large a ghost area (ii) a jet being outside the ghost range (iii) the computation not being done using an appropriate algorithm (kt;C/A).");
+        _warnings_zero_area.warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): discarded jet with zero area. Zero-area jets may be due to (i) too large a ghost area (ii) a jet being outside the ghost range (iii) the computation not being done using an appropriate algorithm (kt;C/A).");
       }
 
       total_area  += this_area;
@@ -306,8 +302,9 @@ void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
   // pt_over_areas array, because we'll often be doing subtraction of
   // -1, negating it, etc. All of these operations go crazy with unsigned ints.
   int pt_over_areas_size = pt_over_areas.size();
-  if (n_empty < -pt_over_areas_size/4.0)
+  if (n_empty < -pt_over_areas_size/4.0) {
     _warnings_empty_area.warn("ClusterSequenceAreaBase::get_median_rho_and_sigma(...): the estimated empty area is suspiciously large and negative and may lead to an over-estimation of rho. This may be due to (i) a rare statistical fluctuation or (ii) too small a range used to estimate the background properties.");
+  }
 
   for (int i = 0; i < 2; i++) {
     double nj_median_pos = 
@@ -318,8 +315,8 @@ void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
  
      // avoid potential overflow issues
       if (int_nj_median+1 > pt_over_areas_size-1){
-	int_nj_median = pt_over_areas_size-2;
-	nj_median_pos = pt_over_areas_size-1;
+        int_nj_median = pt_over_areas_size-2;
+        nj_median_pos = pt_over_areas_size-1;
       }
 
       nj_median_ratio = 
@@ -333,7 +330,7 @@ void ClusterSequenceAreaBase::_get_median_rho_and_sigma(
   median = res[0];
   double error  = res[0] - res[1];
   mean_area = total_area / total_njets;
-  sigma  = error * sqrt(mean_area);
+  sigma  = error * sqrt( max(0.0, mean_area) );
 }
 
 
@@ -365,8 +362,8 @@ vector<PseudoJet> ClusterSequenceAreaBase::_subtracted_jets(const double rho,
 // i.e. not necessarily ordered in pt once subtracted
 vector<PseudoJet> ClusterSequenceAreaBase::subtracted_jets(
                                                  const Selector & selector, 
-						 const double ptmin)
-						 const {
+                                                 const double ptmin)
+                                                 const {
   double rho = _median_pt_per_unit_area_4vector(selector);
   return _subtracted_jets(rho,ptmin);
 }

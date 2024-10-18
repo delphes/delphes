@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: LazyTiling9SeparateGhosts.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -35,7 +35,11 @@ using namespace std;
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
+//#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+//atomic<double> LazyTiling9SeparateGhosts::ghost_pt2_threshold{1e-100}; 
+//#else
 double LazyTiling9SeparateGhosts::ghost_pt2_threshold = 1e-100; 
+//#endif // FASTJET_HAVE_LIMITED_THREAD_SAFETY
 
 LazyTiling9SeparateGhosts::LazyTiling9SeparateGhosts(ClusterSequence & cs) :
   _cs(cs), _jets(cs.jets())

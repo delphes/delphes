@@ -2,9 +2,9 @@
 #define __FASTJET_TOP_TAGGER_BASE_HH__
 
 //FJSTARTHEADER
-// $Id: TopTaggerBase.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,8 +31,8 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include <fastjet/internal/base.hh>
-#include <fastjet/tools/Transformer.hh>
+#include "fastjet/internal/base.hh"
+#include "fastjet/tools/Transformer.hh"
 
 FASTJET_BEGIN_NAMESPACE
 

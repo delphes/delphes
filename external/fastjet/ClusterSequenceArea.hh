@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceArea.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2006-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2006-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -79,16 +79,16 @@ public:
 
 
   /// return the area associated with the given jet
-  virtual double area       (const PseudoJet & jet) const FASTJET_OVERRIDE {
+  virtual double area       (const PseudoJet & jet) const FASTJET_OVERRIDE{
     return _area_base->area(jet);}
 
   /// return the error (uncertainty) associated with the determination
   /// of the area of this jet
-  virtual double area_error (const PseudoJet & jet) const FASTJET_OVERRIDE {
+  virtual double area_error (const PseudoJet & jet) const FASTJET_OVERRIDE{
     return _area_base->area_error(jet);}
 
   /// return the 4-vector area
-  virtual PseudoJet area_4vector(const PseudoJet & jet) const FASTJET_OVERRIDE {
+  virtual PseudoJet area_4vector(const PseudoJet & jet) const FASTJET_OVERRIDE{
     return _area_base->area_4vector(jet);}
 
   // /// return the total area, up to |y|<maxrap, that is free of jets
@@ -109,7 +109,7 @@ public:
   /// The selector needs to have a finite area and be applicable jet by
   /// jet (see the BackgroundEstimator and Subtractor tools for more
   /// advanced usage)
-  virtual double empty_area(const Selector & selector) const FASTJET_OVERRIDE {
+  virtual double empty_area(const Selector & selector) const FASTJET_OVERRIDE{
     return _area_base->empty_area(selector);}
 
   /// return something similar to the number of pure ghost jets
@@ -121,17 +121,17 @@ public:
   /// The selector needs to have a finite area and be applicable jet by
   /// jet (see the BackgroundEstimator and Subtractor tools for more
   /// advanced usage)
-  virtual double n_empty_jets(const Selector & selector) const FASTJET_OVERRIDE {
+  virtual double n_empty_jets(const Selector & selector) const FASTJET_OVERRIDE{
     return _area_base->n_empty_jets(selector);
   }
 
   /// true if a jet is made exclusively of ghosts
-  virtual bool is_pure_ghost(const PseudoJet & jet) const FASTJET_OVERRIDE {
+  virtual bool is_pure_ghost(const PseudoJet & jet) const FASTJET_OVERRIDE{
     return _area_base->is_pure_ghost(jet);
   }
 
   /// true if this ClusterSequence has explicit ghosts
-  virtual bool has_explicit_ghosts() const FASTJET_OVERRIDE {
+  virtual bool has_explicit_ghosts() const FASTJET_OVERRIDE{
     return _area_base->has_explicit_ghosts();
   }
   
@@ -149,7 +149,7 @@ public:
                                         bool use_area_4vector,
                                         double & median, double & sigma,
                                         double & mean_area,
-					bool all_are_incl = false) const FASTJET_OVERRIDE {
+					bool all_are_incl = false) const FASTJET_OVERRIDE{
     _warn_if_range_unsuitable(selector);
     ClusterSequenceAreaBase::_get_median_rho_and_sigma(
                                  all_jets, selector, use_area_4vector,
@@ -163,7 +163,7 @@ public:
   //FASTJET_DEPRECATED_MSG("ClusterSequenceArea::get_median_rho_and_sigma(...) is deprecated since FastJet 3.0. Use the BackgroundEstimator series of tools instead")
   virtual void get_median_rho_and_sigma(const Selector & selector, 
                                         bool use_area_4vector,
-                                        double & median, double & sigma) const FASTJET_OVERRIDE {
+                                        double & median, double & sigma) const FASTJET_OVERRIDE{
     ClusterSequenceAreaBase::_get_median_rho_and_sigma(selector,use_area_4vector,
                                                        median,sigma);
   }
@@ -176,7 +176,7 @@ public:
   virtual void get_median_rho_and_sigma(const Selector & selector, 
                                         bool use_area_4vector,
                                         double & median, double & sigma,
-					double & mean_area) const FASTJET_OVERRIDE {
+					double & mean_area) const FASTJET_OVERRIDE{
     ClusterSequenceAreaBase::_get_median_rho_and_sigma(selector,use_area_4vector,
                                                        median,sigma, mean_area);
   }
@@ -189,7 +189,7 @@ public:
   virtual void parabolic_pt_per_unit_area(double & a, double & b, 
                                           const Selector & selector, 
                                           double exclude_above=-1.0, 
-                                          bool use_area_4vector=false) const FASTJET_OVERRIDE {
+                                          bool use_area_4vector=false) const FASTJET_OVERRIDE{
     return _parabolic_pt_per_unit_area(a,b,selector,exclude_above,use_area_4vector);
   }
 

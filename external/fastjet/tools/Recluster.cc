@@ -1,4 +1,4 @@
-// $Id: Recluster.cc 3629 2014-08-14 17:21:15Z salam $
+// $Id$
 //
 // Copyright (c) 2014, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -21,7 +21,7 @@
 
 #include "fastjet/tools/Recluster.hh"
 #include "fastjet/CompositeJetStructure.hh"
-#include <fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh>
+#include "fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh"
 #include <sstream>
 #include <typeinfo>
 

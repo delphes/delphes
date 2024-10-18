@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: RangeDefinition.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -51,12 +51,12 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 class RangeDefinition {
 public:
   /// default constructor
-  FASTJET_DEPRECATED_MSG("RangeDefinition is deprecated since FastJet 3.0. Use the Selector mechanism instead")
-  RangeDefinition() { _warn_deprecated(); }
+  FASTJET_DEPRECATED_MSG("RangeDefinition is deprecated since FastJet 3.0. Use the Selector mechanism instead",
+  RangeDefinition()) { _warn_deprecated(); }
 
   /// constructor for a range definition given by |y|<rapmax
-  FASTJET_DEPRECATED_MSG("RangeDefinition is deprecated since FastJet 3.0. Use the Selector mechanism instead")
-  RangeDefinition(double rapmax) {  _warn_deprecated(); 
+  FASTJET_DEPRECATED_MSG("RangeDefinition is deprecated since FastJet 3.0. Use the Selector mechanism instead",
+  RangeDefinition(double rapmax)) {  _warn_deprecated(); 
                      assert ( rapmax > 0.0 );
                      _rapmax = rapmax;
 		     _rapmin = -rapmax;

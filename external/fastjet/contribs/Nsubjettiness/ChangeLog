@@ -1,3 +1,22 @@
+2024-02-28 <jthaler>
+   Fixing unsigned int warning in example_advanced_usage.cc
+   Updated NEWS and VERSION getting ready for v2.3.2 release
+2024-02-27 <jthaler>
+   Fixing unsigned int warning in AxesDefinition.hh
+   Updated NEWS and VERSION getting ready for v2.3.1 release
+2024-02-22 <jthaler>
+   Updated README and VERSION getting ready for v2.3.0 release
+   Removed extraneous "-lm" from Makefile
+   Added HalfKT options to AxesDefinition.hh
+   Updated example files with new recommended usage and higher accuracy for OnePass minimization
+   Removed "ee" example file, since it uses ee measure with pp axes (ee axes not available in current version)
+2022-06-13 <jthaler>
+   Removed -std=c++11 flag from makefile
+   Updated MeasureDefinition.cc to remove "static thread_local" (since it
+      doesn't really seem to help with timing)
+2022-06-10 <jthaler>
+   Updated makefile with -std=c++11 flag
+   Updated MeasureDefinition.cc with thread_local for thread safety
 2018-07-06 <jthaler>
    Updated comments in AxesDefinition.hh about role of JetDefinitionWrapper
    Updated AUTHORS with JHEP publication information for XCone

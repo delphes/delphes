@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Subtractor.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -175,9 +175,11 @@ std::string Subtractor::description() const{
 // jet
 PseudoJet Subtractor::_amount_to_subtract(const PseudoJet &jet) const{
   // the "transverse momentum" part
+  BackgroundEstimate bg_estimate;
   double rho;
   if (_bge != 0) {
-    rho = _bge->rho(jet);
+    bg_estimate = _bge->estimate(jet);
+    rho = bg_estimate.rho();
   } else if (_rho != _invalid_rho) {
     rho = _rho;
   } else {
@@ -194,8 +196,9 @@ PseudoJet Subtractor::_amount_to_subtract(const PseudoJet &jet) const{
     double rho_m;
     
     if (_bge != 0) {
-      if (!_bge->has_rho_m()) throw Error("Subtractor::_amount_to_subtract(...): requested subtraction with rho_m from a background estimator, but the estimator does not have rho_m support");
-      rho_m = _bge->rho_m(jet);
+      //if (!_bge->has_rho_m()) throw Error("Subtractor::_amount_to_subtract(...): requested subtraction with rho_m from a background estimator, but the estimator does not have rho_m support");
+      if (!bg_estimate.has_rho_m()) throw Error("Subtractor::_amount_to_subtract(...): requested subtraction with rho_m from a background estimator, but the estimator does not have rho_m support");
+      rho_m = bg_estimate.rho_m();
     } else if (_rho_m != _invalid_rho) {
       rho_m = _rho_m;
     } else {
@@ -203,8 +206,8 @@ PseudoJet Subtractor::_amount_to_subtract(const PseudoJet &jet) const{
     }
     to_subtract += rho_m * PseudoJet(0.0, 0.0, area.pz(), area.E());
   } else if (_bge && 
-             _bge->has_rho_m() && 
-             _bge->rho_m(jet) > rho_m_warning_threshold * rho) {
+             bg_estimate.has_rho_m() && 
+             bg_estimate.rho_m() > rho_m_warning_threshold * rho) {
     _unused_rho_m_warning.warn("Subtractor::_amount_to_subtract(...): Background estimator indicates non-zero rho_m, but use_rho_m()==false in subtractor; consider calling set_use_rho_m(true) to include the rho_m information");
   }
 

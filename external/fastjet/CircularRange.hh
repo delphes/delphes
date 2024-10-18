@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: CircularRange.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -50,28 +50,28 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 class CircularRange : public fastjet::RangeDefinition {
 public:
   /// constructor
-  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
-  CircularRange() {_set_invalid_rapphi();}
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead",
+  CircularRange()) {_set_invalid_rapphi();}
   
   /// initialise CircularRange with a jet
-  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
-  CircularRange(const fastjet::PseudoJet & jet, double distance) {
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead",
+  CircularRange(const fastjet::PseudoJet & jet, double distance)) {
                 _distance = distance;
 		_rapjet = jet.rap();
 		_phijet = jet.phi();
 		_total_area = fastjet::pi*_distance*_distance;  }
 
   /// initialise CircularRange with a (rap,phi) point
-  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
-  CircularRange(double rap, double phi, double distance) {
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead",
+  CircularRange(double rap, double phi, double distance)) {
                 _distance = distance;
 		_rapjet = rap;
 		_phijet = phi;
 		_total_area = fastjet::pi*_distance*_distance;  }
 
   /// initialise CircularRange with just the radius parameter
-  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead")
-  CircularRange(double distance) {
+  FASTJET_DEPRECATED_MSG("CircularRange is deprecated since FastJet 3.0. Use SelectorCircle instead",
+  CircularRange(double distance)) {
                 _set_invalid_rapphi();
                 _distance = distance;
 		_total_area = fastjet::pi*_distance*_distance;  }

@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Transformer.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,9 +31,9 @@
 #ifndef __FASTJET_TRANSFORMER_HH__
 #define __FASTJET_TRANSFORMER_HH__
 
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/FunctionOfPseudoJet.hh>
-#include <fastjet/PseudoJetStructureBase.hh>
+#include "fastjet/PseudoJet.hh"
+#include "fastjet/FunctionOfPseudoJet.hh"
+#include "fastjet/PseudoJetStructureBase.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 

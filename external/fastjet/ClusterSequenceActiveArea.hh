@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceActiveArea.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -73,12 +73,12 @@ public:
 	  const GhostedAreaSpec & ghost_spec,
 	  const bool & writeout_combinations = false) ;
 
-  virtual double area (const PseudoJet & jet) const FASTJET_OVERRIDE {
+  virtual double area (const PseudoJet & jet) const FASTJET_OVERRIDE{
                              return _average_area[jet.cluster_hist_index()];};
   virtual double area_error (const PseudoJet & jet) const FASTJET_OVERRIDE {
                              return _average_area2[jet.cluster_hist_index()];};
 
-  virtual PseudoJet area_4vector (const PseudoJet & jet) const FASTJET_OVERRIDE {
+  virtual PseudoJet area_4vector (const PseudoJet & jet) const FASTJET_OVERRIDE{
                     return _average_area_4vector[jet.cluster_hist_index()];};
 
   /// enum providing a variety of tentative strategies for estimating

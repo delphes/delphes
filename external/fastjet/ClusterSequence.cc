@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequence.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -144,7 +144,11 @@ using namespace std;
 // by default. This requirement reflects the spirit of
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
-std::ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+atomic<ostream *> ClusterSequence::_fastjet_banner_ostr{&cout};
+#else
+ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
+#endif  // FASTJET_HAVE_LIMITED_THREAD_SAFETY
 
 
 // destructor that guarantees proper bookkeeping for the CS Structure
@@ -160,6 +164,10 @@ ClusterSequence::~ClusterSequence () {
     assert(csi != NULL);
     csi->set_associated_cs(NULL);
 
+//std::shared_ptr:     // set_count is not available with CXX11 shared pointers. There
+//std::shared_ptr:     // we'll use a different mechanism for handling self-deleting
+//std::shared_ptr:     // ClusterSequences
+//std::shared_ptr: #ifndef FASTJET_HAVE_THREAD_SAFETY
     // if the user had given the CS responsibility to delete itself,
     // but then deletes the CS themselves, the following lines of
     // code will ensure that the structure_shared_ptr will have
@@ -170,10 +178,41 @@ ClusterSequence::~ClusterSequence () {
       _structure_shared_ptr.set_count(_structure_shared_ptr.use_count() 
 				        + _structure_use_count_after_construction);
     }
+//std::shared_ptr: #endif // FASTJET_HAVE_THREAD_SAFETY
   }
 }
 
-//-----------
+//std::shared_ptr: //-----------
+//std::shared_ptr: #ifdef FASTJET_HAVE_THREAD_SAFETY
+//std::shared_ptr: // signals that a jet will no longer use the current CS
+//std::shared_ptr: void ClusterSequence::release_pseudojet(PseudoJet &jet) const{
+//std::shared_ptr:   // this only applies to self-deleting clusteer seqences
+//std::shared_ptr:   if (!_deletes_self_when_unused) return;
+//std::shared_ptr: 
+//std::shared_ptr:   // we "free" the jet from the CS
+//std::shared_ptr:   //jet.set_structure_shared_ptr(SharedPtr<PseudoJetStructureBase>());
+//std::shared_ptr:   jet.force_reset_structure();
+//std::shared_ptr: 
+//std::shared_ptr:   // and then we can check if we need to delete the CS
+//std::shared_ptr:   if (_structure_shared_ptr.use_count() == _structure_use_count_after_construction){
+//std::shared_ptr:     //CXX11_SELF_DELETE_DBG: cout << "will self-delete CS (use_count=" << _structure_use_count_after_construction << ")" << endl; 
+//std::shared_ptr:     // we need to set delete_self_when unused to false before
+//std::shared_ptr:     // triggering the deletion
+//std::shared_ptr:     //
+//std::shared_ptr:     // This also serves a 2nd purpose: if several threads delete a PJ
+//std::shared_ptr:     // At the same time we end up in a situation where
+//std::shared_ptr:     // "release_pseudojet" frees both their structure pointers and
+//std::shared_ptr:     // both could delete the CS (giving a double-free
+//std::shared_ptr:     // corruption). This is prevented by the construct below (where we
+//std::shared_ptr:     // have made _deletes_self_when_unused atomic)
+//std::shared_ptr:     bool expected = true;
+//std::shared_ptr:     if (_deletes_self_when_unused.compare_exchange_strong(expected, false))
+//std::shared_ptr:       delete this;
+//std::shared_ptr:   }
+//std::shared_ptr: }
+//std::shared_ptr: 
+//std::shared_ptr: #else // FASTJET_HAVE_THREAD_SAFETY
+
 void ClusterSequence::signal_imminent_self_deletion() const {
   // normally if the destructor is called when
   // _deletes_self_when_unused is true, it assumes that it's been
@@ -191,6 +230,8 @@ void ClusterSequence::signal_imminent_self_deletion() const {
   assert(_deletes_self_when_unused);
   _deletes_self_when_unused = false;
 }
+
+//std::shared_ptr: #endif // FASTJET_HAVE_THREAD_SAFETY
 
 //DEP //----------------------------------------------------------------------
 //DEP void ClusterSequence::_initialise_and_run (
@@ -236,8 +277,6 @@ void ClusterSequence::_initialise_and_run_no_decant () {
     return;
   } else if (_jet_algorithm == ee_kt_algorithm ||
 	     _jet_algorithm == ee_genkt_algorithm) {
-    // ignore requested strategy
-    _strategy = N2Plain;
     if (_jet_algorithm == ee_kt_algorithm) {
       // make sure that R is large enough so that "beam" recomb only
       // occurs when a single particle is left
@@ -262,7 +301,14 @@ void ClusterSequence::_initialise_and_run_no_decant () {
       }
       _invR2 = 1.0/_R2;
     }
-    _simple_N2_cluster_EEBriefJet();
+    // choose the appropriate strategy
+    if (_strategy == N2PlainEEAccurate) {
+      _simple_N2_cluster_EEAccurateBriefJet();      
+    } else {
+      // otherwise we revert to the default strategy
+      _strategy = N2Plain;
+      _simple_N2_cluster_EEBriefJet();
+    }
     return;
   } else if (_jet_algorithm == undefined_jet_algorithm) {
     throw Error("A ClusterSequence cannot be created with an uninitialised JetDefinition");
@@ -407,7 +453,7 @@ void ClusterSequence::_initialise_and_run_no_decant () {
 
 
 // these needs to be defined outside the class definition.
-bool ClusterSequence::_first_time = true;
+thread_safety_helpers::FirstTimeTrue ClusterSequence::_first_time;
 LimitedWarning ClusterSequence::_exclusive_warnings;
 
 
@@ -422,8 +468,7 @@ string fastjet_version_string() {
 // prints a banner on the first call
 void ClusterSequence::print_banner() {
 
-  if (!_first_time) {return;}
-  _first_time = false;
+  if (!_first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   ostream * ostr = _fastjet_banner_ostr;
@@ -533,6 +578,8 @@ string ClusterSequence::strategy_string (Strategy strategy_in)  const {
     strategy = "NlnN4pi"; break;
   case N2Plain:
     strategy = "N2Plain"; break;
+  case N2PlainEEAccurate:
+    strategy = "N2PlainEEAccurate"; break;
   case N2Tiled:
     strategy = "N2Tiled"; break;
   case N2MinHeapTiled:
@@ -1494,12 +1541,12 @@ void ClusterSequence::_add_step_to_history (
 
   assert(parent1 >= 0);
   if (_history[parent1].child != Invalid){
-    throw InternalError("trying to recomine an object that has previsously been recombined");
+    throw InternalError("trying to recombine an object that has previously been recombined");
   }
   _history[parent1].child = local_step;
   if (parent2 >= 0) {
     if (_history[parent2].child != Invalid){
-      throw InternalError("trying to recomine an object that has previsously been recombined");
+      throw InternalError("trying to recombine an object that has previously been recombined");
     }
     _history[parent2].child = local_step;
   }
@@ -1748,7 +1795,12 @@ void ClusterSequence::delete_self_when_unused() {
     throw Error("delete_self_when_unused may only be called if at least one object outside the CS (e.g. a jet) is already associated with the CS");
   }
 
+//std::shared_ptr:     // set_count is not available with CXX11 shared pointers. There
+//std::shared_ptr:     // we'll use a different mechanism for handling self-deleting
+//std::shared_ptr:     // ClusterSequences
+//std::shared_ptr: #ifndef FASTJET_HAVE_THREAD_SAFETY
   _structure_shared_ptr.set_count(new_count);
+//std::shared_ptr: #endif // FASTJET_HAVE_THREAD_SAFETY
   _deletes_self_when_unused = true;
 }
 

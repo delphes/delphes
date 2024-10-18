@@ -1,6 +1,5 @@
 // Simple random number generator class taken from nlojet++.
-// Some doxygen-style comments added by Gavin Salam, August 2006.
-// $Id: BasicRandom.hh 1761 2010-09-16 10:43:18Z soyez $
+// $Id$
 //
 //  Copyright (C) 2002 Zoltan Nagy
 //
@@ -17,6 +16,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Changes compared to the original version
+//   2006-08: Some doxygen-style comments added by Gavin Salam
+//   2017-02: The operator() (size_type, pointer, std::vector<int> &);
+//     members have been added to implement thread-safe access to the
+//     generators
+//
+
 #ifndef __FASTJET_BASICRANDOM_HH__
 #define __FASTJET_BASICRANDOM_HH__ 1
 
@@ -25,6 +32,12 @@
 #include <vector>
 #include <cassert>
 #include "fastjet/internal/base.hh"
+
+#include "fastjet/config.h"
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+#include <mutex>
+#endif
+
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -88,6 +101,25 @@ public:
       __res[__i] = __default_random_generator(_M_iseed);
   }
 
+  /// given a pointer __res to the beginning of an array, fill that array
+  /// with __n random numbers
+  ///
+  /// This now acquired an extra argument which allows to retreive the
+  /// set of seeds used for this generation.
+  void operator() (size_type __n, pointer __res, std::vector<int> & __iseed) {
+    // if we have (limited) thread safety, lock things
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+    // is the lock here really necessary or would a spinlock do better?
+    std::lock_guard<std::mutex> guard(_multiple_number_generation_mutex);
+#endif
+    // get the seeds
+    get_status(__iseed);
+
+    // get the numbers
+    for(size_type __i = 0; __i < __n; __i++) 
+      __res[__i] = __default_random_generator(_M_iseed);
+  }
+
   //   (re)initialize the random number generator
   void randomize(void *__iseed) {
     int *__new_seed = (int*) __iseed;
@@ -118,6 +150,9 @@ public:
   
 private:
   int _M_iseed[2];
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+  static std::mutex _multiple_number_generation_mutex;
+#endif
 };
   
 
@@ -148,6 +183,25 @@ public:
   void operator() (size_type __n, pointer __res) {
     for(size_type __i = 0; __i < __n; __i++) 
       __res[__i] = this -> operator()(); 
+  }
+
+  /// given a pointer __res to the beginning of an array, fill that array
+  /// with __n random numbers
+  ///
+  /// This now acquired an extra argument which allows to retreive the
+  /// set of seeds used for this generation.
+  void operator() (size_type __n, pointer __res, std::vector<int> & __iseed) {
+    // if we have (limited) thread safety, lock things
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+    // is the lock here really necessary or would a spinlock do better?
+    std::lock_guard<std::mutex> guard(_multiple_number_generation_mutex);
+#endif
+    // get the seeds
+    get_status(__iseed);
+
+    // get the numbers
+    for(size_type __i = 0; __i < __n; __i++) 
+      __res[__i] = this -> operator()();
   }
 
   ///  (re)initialize the random number generator from an array of seeds
@@ -181,6 +235,9 @@ public:
   
 private:
   int _M_iseed[2];
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+  static std::mutex _multiple_number_generation_mutex;
+#endif
 };
   
 //   globally defined random number generator

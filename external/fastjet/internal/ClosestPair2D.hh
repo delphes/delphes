@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClosestPair2D.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -107,7 +107,6 @@ private:
 
   static const unsigned int _nshift = 3;
 
-  class Point; // will be defined below
 
   /// since sets of three objects will crop up repeatedly, useful
   /// to have a triplet class?
@@ -119,6 +118,8 @@ private:
     T _contents[_nshift];
   };
 
+  // forward declaration
+  class Point;
 
   /// class that will take care of ordering of shuffles for us
   class Shuffle {
@@ -133,6 +134,34 @@ private:
   typedef Tree::circulator        circulator;
   typedef Tree::const_circulator  const_circulator;
 
+  //----------------------------------------------------------------------
+  /// \if internal_doc
+  /// @ingroup internal
+  /// \class ClosestPair2D::Point
+  /// class for representing all info needed about a point
+  /// \endif
+  class Point {
+  public:
+    /// the point's coordinates
+    Coord2D coord;
+    /// a pointer to its closest neighbour in our structure
+    Point * neighbour;
+    /// the corresponding squared distance
+    double  neighbour_dist2;
+    /// circulators for each of the shifts of the shuffles
+    triplet<circulator> circ;
+
+    /// indicates that something special is currently happening to this point
+    unsigned int review_flag;
+
+    /// returns the distance between two of these objects
+    double distance2(const Point & other) const {
+      return coord.distance2(other.coord);
+    };
+
+    /// creates a shuffle for us with a given shift
+    //void set_shuffle(Shuffle & shuffle);
+  };
 
   triplet<SharedPtr<Tree> >  _trees;
   SharedPtr<MinHeap>     _heap;
@@ -185,34 +214,6 @@ private:
 };
 
 
-//----------------------------------------------------------------------
-/// \if internal_doc
-/// @ingroup internal
-/// \class ClosestPair2D::Point
-/// class for representing all info needed about a point
-/// \endif
-class ClosestPair2D::Point {
-public:
-  /// the point's coordinates
-  Coord2D coord;
-  /// a pointer to its closest neighbour in our structure
-  Point * neighbour;
-  /// the corresponding squared distance
-  double  neighbour_dist2;
-  /// circulators for each of the shifts of the shuffles
-  triplet<circulator> circ;
-
-  /// indicates that something special is currently happening to this point
-  unsigned int review_flag;
-
-  /// returns the distance between two of these objects
-  double distance2(const Point & other) const {
-    return coord.distance2(other.coord);
-  };
-
-  /// creates a shuffle for us with a given shift
-  //void set_shuffle(Shuffle & shuffle);
-};
 
 
 //----------------------------------------------------------------------

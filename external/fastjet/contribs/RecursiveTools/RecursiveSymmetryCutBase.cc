@@ -1,4 +1,4 @@
-// $Id: RecursiveSymmetryCutBase.cc 1080 2017-09-28 07:51:37Z gsoyez $
+// $Id: RecursiveSymmetryCutBase.cc 1281 2021-08-16 15:52:43Z salam $
 //
 // Copyright (c) 2014-, Gavin P. Salam, Gregory Soyez, Jesse Thaler
 //
@@ -236,7 +236,12 @@ RecursiveSymmetryCutBase::RecursionStatus
   // and update the tagging decision. Calculate mu^2 regardless, for cases
   // of users not cutting on mu2, but still interested in its value.
   bool use_mu_cut = (_mu_cut != numeric_limits<double>::infinity());
-  mu2 = max(piece1.m2(), piece2.m2())/subjet.m2();
+  if (subjet.m2() > 0) {
+    mu2 = max(piece1.m2(), piece2.m2())/subjet.m2();
+  } else {
+    // use this to signal problems
+    mu2 = -1.0;
+  }  
   if (tagged && use_mu_cut) {
     // first a sanity check -- mu2 won't be sensible if the subjet mass 
     // is negative, so we can't then trust the mu cut - bail out

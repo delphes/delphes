@@ -24,13 +24,22 @@ The key new features are:
     calculation.
   * TauExtras to get complete access to get partitioning and axes information.
   * For clarity, split the example file into an example_basic_usage and
-    example_advanced_usage (and example_advanced_usage_ee for e+e- collisions).
+    example_advanced_usage.
   * In Nsubjettiness, access to seedAxes() and currentAxes() to figure out the
     axes used before and after minimization.
   * In Nsubjettiness, access to currentSubjets() to get the subjet fourvectors.
   * (v2.2)  XConePlugin, which improves on the previous NjettinessPlugin to use
     N-jettiness as a jet finder using the new ConicalGeometric measure.
 
+-- 2.3.2:  (February 27, 2024) Fixing unsigned int warning in
+           example_advanced_usage.cc (thanks Gregory Soyez)
+-- 2.3.1:  (February 27, 2024) Fixing unsigned int warning in AxesDefinition.hh
+           (thanks Gregory Soyez)
+-- 2.3.0:  (February 23, 2024) Changed recommended axes away from OnePass;
+           added HalfKT axes options recommended for beta = 2; updated example
+           files; removed ee testing since ee axes choices are not available
+-- 2.2.6:  (June 13, 2022) Removed "static" for thread safety (thanks Tomek
+           Procter and Andy Buckley)
 -- 2.2.5:  (June 6, 2018) Fixed bug involved undefined pointer for in
            AxesDefinition (thanks Attila Krasznahorkay)
 -- 2.2.4:  (Jun 14, 2016) Fixed bug where multi-pass minimization could yield

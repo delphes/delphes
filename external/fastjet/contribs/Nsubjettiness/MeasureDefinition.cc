@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: MeasureDefinition.cc 943 2016-06-09 00:55:29Z jthaler $
+//  $Id: MeasureDefinition.cc 1316 2022-06-13 16:51:26Z jthaler $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -383,9 +383,8 @@ std::vector<LightLikeAxis> DefaultMeasure::UpdateAxesFast(const std::vector <Lig
                                                           ) const {
    assert(old_axes.size() == N);
    
-   // some storage, declared static to save allocation/re-allocation costs
-   static LightLikeAxis new_axes[N];
-   static fastjet::PseudoJet new_jets[N];
+   LightLikeAxis new_axes[N];
+   fastjet::PseudoJet new_jets[N];
    for (int n = 0; n < N; ++n) {
       new_axes[n].reset(0.0,0.0,0.0,0.0);
       new_jets[n].reset_momentum(0.0,0.0,0.0,0.0);

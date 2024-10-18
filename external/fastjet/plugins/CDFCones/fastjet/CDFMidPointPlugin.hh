@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: CDFMidPointPlugin.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,6 +32,7 @@
 #define __CDFMIDPOINTPLUGIN_HH__
 
 #include "fastjet/JetDefinition.hh"
+#include "fastjet/internal/thread_safety_helpers.hh"  // helpers to write transparent code w&wo C++11 features
 
 // questionable whether this should be in fastjet namespace or not...
 
@@ -171,7 +172,7 @@ private:
   double _overlap_threshold ;
   SplitMergeScale _sm_scale ;
 
-  static bool _first_time;
+  static thread_safety_helpers::FirstTimeTrue _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

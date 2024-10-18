@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: JetDefinition.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -206,7 +206,8 @@ void JetDefinition::set_recombiner(const JetDefinition &other_jet_def){
   _default_recombiner = DefaultRecombiner(external_scheme);
   // and set the _shared_recombiner to the same state
   // as in the other_jet_def, whatever that was
-  _shared_recombiner.reset(other_jet_def._shared_recombiner);
+  _shared_recombiner = other_jet_def._shared_recombiner;
+  //_shared_recombiner.reset(other_jet_def._shared_recombiner);
 
   // NB: it is tempting to go via set_recombiner and then to sort
   // out the shared part, but this would be dangerous in the
