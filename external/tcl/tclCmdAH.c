@@ -186,7 +186,7 @@ Tcl_CaseObjCmd(dummy, interp, objc, objv)
 	    char msg[100];
 	    
 	    arg = Tcl_GetStringFromObj(armPtr, &argLen);
-	    snprintf(msg, sizeof(msg), sizeof(msg), "\n    (\"%.*s\" arm line %d)", argLen, arg,
+	    snprintf(msg, sizeof(msg), "\n    (\"%.*s\" arm line %d)", argLen, arg,
 	            interp->errorLine);
 	    Tcl_AddObjErrorInfo(interp, msg, -1);
 	}
