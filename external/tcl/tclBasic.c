@@ -382,7 +382,7 @@ Tcl_CallWhenDeleted(interp, proc, clientData)
     AssocData *dPtr = (AssocData *) ckalloc(sizeof(AssocData));
     Tcl_HashEntry *hPtr;
 
-    sprintf(buffer, "Assoc Data Key #%d", assocDataCounter);
+    snprintf(buffer, sizeof(buffer), "Assoc Data Key #%d", assocDataCounter);
     assocDataCounter++;
 
     if (iPtr->assocData == (Tcl_HashTable *) NULL) {
@@ -2362,7 +2362,7 @@ Tcl_EvalObj(interp, objPtr)
 		        "invoked \"continue\" outside of a loop", -1);
 	    } else {
 		char buf[50];
-		sprintf(buf, "command returned bad code: %d", result);
+		snprintf(buf, sizeof(buf), "command returned bad code: %d", result);
 		Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
 	    }
 	    result = TCL_ERROR;
@@ -2395,10 +2395,10 @@ Tcl_EvalObj(interp, objPtr)
 	}
 
 	if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-	    sprintf(buf, "\n    while executing\n\"%.*s%s\"",
+	    snprintf(buf, sizeof(buf), "\n    while executing\n\"%.*s%s\"",
 		    length, bytes, ellipsis);
 	} else {
-	    sprintf(buf, "\n    invoked from within\n\"%.*s%s\"",
+	    snprintf(buf, sizeof(buf), "\n    invoked from within\n\"%.*s%s\"",
 		    length, bytes, ellipsis);
 	}
 	Tcl_AddObjErrorInfo(interp, buf, -1);
@@ -3107,7 +3107,7 @@ Tcl_ExprString(interp, string)
 	     */
 	    
 	    if (resultPtr->typePtr == &tclIntType) {
-		sprintf(buf, "%ld", resultPtr->internalRep.longValue);
+		snprintf(buf, sizeof(buf), "%ld", resultPtr->internalRep.longValue);
 		Tcl_SetResult(interp, buf, TCL_VOLATILE);
 	    } else if (resultPtr->typePtr == &tclDoubleType) {
 		Tcl_PrintDouble((Tcl_Interp *) NULL,

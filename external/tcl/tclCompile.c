@@ -1637,7 +1637,7 @@ TclCompileString(interp, string, lastChar, flags, envPtr)
 	    ellipsis = " ...";
 	}
 	
-	sprintf(buf, "\n    while compiling\n\"%.*s%s\"",
+	snprintf(buf, sizeof(buf), "\n    while compiling\n\"%.*s%s\"",
 		numChars, cmdSrcStart, ellipsis);
 	Tcl_AddObjErrorInfo(interp, buf, -1);
     } 
@@ -2228,7 +2228,7 @@ TclCompileQuotes(interp, string, lastChar, termChar, flags, envPtr)
 		if (!envPtr->pushSimpleWords) {
 		    if ((src == lastChar) && (termChar != '\0')) {
 			char buf[40];
-			sprintf(buf, "missing %c", termChar);
+			snprintf(buf, sizeof(buf), "missing %c", termChar);
 			Tcl_ResetResult(interp);
 			Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
 			result = TCL_ERROR;
@@ -2288,7 +2288,7 @@ TclCompileQuotes(interp, string, lastChar, termChar, flags, envPtr)
 
     if ((src == lastChar) && (termChar != '\0')) {
 	char buf[40];
-	sprintf(buf, "missing %c", termChar);
+	snprintf(buf, sizeof(buf), "missing %c", termChar);
 	Tcl_ResetResult(interp);
 	Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
 	result = TCL_ERROR;
@@ -2740,7 +2740,7 @@ TclCompileDollarVar(interp, string, lastChar, flags, envPtr)
 	src += envPtr->termOffset;
 	if (result != TCL_OK) {
 	    char msg[200];
-	    sprintf(msg, "\n    (parsing index for array \"%.*s\")",
+	    snprintf(msg, sizeof(msg), "\n    (parsing index for array \"%.*s\")",
 		    (nameChars > 100? 100 : nameChars), name);
 	    Tcl_AddObjErrorInfo(interp, msg, -1);
 	    goto done;
@@ -3059,7 +3059,7 @@ TclCompileCatchCmd(interp, string, lastChar, flags, envPtr)
     if (result != TCL_OK) {
 	if (result == TCL_ERROR) {
 	    char msg[60];
-	    sprintf(msg, "\n    (\"catch\" body line %d)",
+	    snprintf(msg, sizeof(msg), "\n    (\"catch\" body line %d)",
 		    interp->errorLine);
             Tcl_AddObjErrorInfo(interp, msg, -1);
         }
@@ -3689,7 +3689,7 @@ TclCompileForCmd(interp, string, lastChar, flags, envPtr)
     if (result != TCL_OK) {
 	if (result == TCL_ERROR) {
 	    char msg[60];
-	    sprintf(msg, "\n    (\"for\" body line %d)", interp->errorLine);
+	    snprintf(msg, sizeof(msg), "\n    (\"for\" body line %d)", interp->errorLine);
             Tcl_AddObjErrorInfo(interp, msg, -1);
         }
 	goto done;
@@ -4123,7 +4123,7 @@ TclCompileForeachCmd(interp, string, lastChar, flags, envPtr)
     if (result != TCL_OK) {
 	if (result == TCL_ERROR) {
 	    char msg[60];
-	    sprintf(msg, "\n    (\"foreach\" body line %d)",
+	    snprintf(msg, sizeof(msg), "\n    (\"foreach\" body line %d)",
 		    interp->errorLine);
             Tcl_AddObjErrorInfo(interp, msg, -1);
         }
@@ -4434,7 +4434,7 @@ TclCompileIfCmd(interp, string, lastChar, flags, envPtr)
 	type = CHAR_TYPE(src, lastChar);
 	if (type == TCL_COMMAND_END) {
 	    char buf[100];
-	    sprintf(buf, "wrong # args: no script following \"%.20s\" argument", testSrcStart);
+	    snprintf(buf, sizeof(buf), "wrong # args: no script following \"%.20s\" argument", testSrcStart);
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
 	    result = TCL_ERROR;
@@ -4465,7 +4465,7 @@ TclCompileIfCmd(interp, string, lastChar, flags, envPtr)
 	if (result != TCL_OK) {
 	    if (result == TCL_ERROR) {
 		char msg[60];
-		sprintf(msg, "\n    (\"if\" then script line %d)",
+		snprintf(msg, sizeof(msg), "\n    (\"if\" then script line %d)",
 		        interp->errorLine);
 		Tcl_AddObjErrorInfo(interp, msg, -1);
 	    }
@@ -4568,7 +4568,7 @@ TclCompileIfCmd(interp, string, lastChar, flags, envPtr)
 	if (result != TCL_OK) {
 	    if (result == TCL_ERROR) {
 		char msg[60];
-		sprintf(msg, "\n    (\"if\" else script line %d)",
+		snprintf(msg, sizeof(msg), "\n    (\"if\" else script line %d)",
 		        interp->errorLine);
 		Tcl_AddObjErrorInfo(interp, msg, -1);
 	    }
@@ -4843,7 +4843,7 @@ TclCompileIncrCmd(interp, string, lastChar, flags, envPtr)
 	    elName[elNameChars] = savedChar;
 	    if (result != TCL_OK) {
 		char msg[200];
-		sprintf(msg, "\n    (parsing index for array \"%.*s\")",
+		snprintf(msg, sizeof(msg), "\n    (parsing index for array \"%.*s\")",
 			TclMin(nameChars, 100), name);
 		Tcl_AddObjErrorInfo(interp, msg, -1);
 		goto done;
@@ -5231,7 +5231,7 @@ TclCompileSetCmd(interp, string, lastChar, flags, envPtr)
 	    elName[elNameChars] = savedChar;
 	    if (result != TCL_OK) {
 		char msg[200];
-		sprintf(msg, "\n    (parsing index for array \"%.*s\")",
+		snprintf(msg, sizeof(msg), "\n    (parsing index for array \"%.*s\")",
 			TclMin(nameChars, 100), name);
 		Tcl_AddObjErrorInfo(interp, msg, -1);
 		goto done;
@@ -5496,7 +5496,7 @@ TclCompileWhileCmd(interp, string, lastChar, flags, envPtr)
     if (result != TCL_OK) {
 	if (result == TCL_ERROR) {
 	    char msg[60];
-	    sprintf(msg, "\n    (\"while\" body line %d)", interp->errorLine);
+	    snprintf(msg, sizeof(msg), "\n    (\"while\" body line %d)", interp->errorLine);
             Tcl_AddObjErrorInfo(interp, msg, -1);
         }
 	goto done;

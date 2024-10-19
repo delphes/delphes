@@ -916,7 +916,7 @@ SetBooleanFromAny(interp, objPtr)
 	 */
 	
 	char buf[100];
-	sprintf(buf, "expected boolean value but got \"%.50s\"", string);
+	snprintf(buf, sizeof(buf), "expected boolean value but got \"%.50s\"", string);
 	Tcl_ResetResult(interp);
 	Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
     }
@@ -1145,7 +1145,7 @@ SetDoubleFromAny(interp, objPtr)
 	     */
 	    
 	    char buf[100];
-	    sprintf(buf, "expected floating-point number but got \"%.50s\"",
+	    snprintf(buf, sizeof(buf), "expected floating-point number but got \"%.50s\"",
 	            string);
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
@@ -1448,7 +1448,7 @@ SetIntFromAny(interp, objPtr)
 	     */
 	    
 	    char buf[100];
-	    sprintf(buf, "expected integer but got \"%.50s\"", string);
+	    snprintf(buf, sizeof(buf), "expected integer but got \"%.50s\"", string);
 	    Tcl_ResetResult(interp);
 	    Tcl_AppendToObj(Tcl_GetObjResult(interp), buf, -1);
 	}

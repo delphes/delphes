@@ -60,7 +60,7 @@ static char precisionString[10] = "12";
 				 * variables. */
 static char precisionFormat[10] = "%.12g";
 				/* The format string actually used in calls
-				 * to sprintf. */
+				 * to snprintf. */
 
 
 /*
@@ -209,7 +209,7 @@ TclFindElement(interp, list, listLength, elementPtr, nextPtr, sizePtr,
 			        && (p2 < p+20)) {
 			    p2++;
 			}
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"list element in braces followed by \"%.*s\" instead of space",
 				(int) (p2-p), p);
 			Tcl_SetResult(interp, buf, TCL_VOLATILE);
@@ -270,7 +270,7 @@ TclFindElement(interp, list, listLength, elementPtr, nextPtr, sizePtr,
 				 && (p2 < p+20)) {
 			    p2++;
 			}
-			sprintf(buf,
+			snprintf(buf, sizeof(buf),
 				"list element in quotes followed by \"%.*s\" %s",
 				(int) (p2-p), p, "instead of space");
 			Tcl_SetResult(interp, buf, TCL_VOLATILE);
@@ -2251,7 +2251,7 @@ Tcl_PrintDouble(interp, value, dst)
 {
     char *p;
 
-    sprintf(dst, precisionFormat, value);
+    snprintf(dst, sizeof(dst), precisionFormat, value);
 
     /*
      * If the ASCII result looks like an integer, add ".0" so that it
@@ -2346,7 +2346,7 @@ TclPrecTraceProc(clientData, interp, name1, name2, flags)
 	return "improper value for precision";
     }
     TclFormatInt(precisionString, prec);
-    sprintf(precisionFormat, "%%.%dg", prec);
+    snprintf(precisionFormat, sizeof(precisionFormat), "%%.%dg", prec);
     return (char *) NULL;
 }
 
@@ -2416,7 +2416,8 @@ TclNeedSpace(start, end)
  *	inserted at the start of the buffer. A null character is inserted at
  *	the end of the formatted characters. It is the caller's
  *	responsibility to ensure that enough storage is available. This
- *	procedure has the effect of sprintf(buffer, "%d", n) but is faster.
+ *	procedure has the effect of snprintf(buffer, sizeof(buffer), "%d", n)
+ *  but is faster.
  *
  * Results:
  *	An integer representing the number of characters formatted, not
@@ -2447,7 +2448,7 @@ TclFormatInt(buffer, n)
      */
 
     if (n == -n) {
-	sprintf(buffer, "%ld", n);
+	snprintf(buffer, sizeof(buffer), "%ld", n);
 	return strlen(buffer);
     }
 
