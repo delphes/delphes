@@ -403,7 +403,7 @@ void FastJetFinder::Process()
         outputList = sorted_by_pt(sequence->exclusive_jets(fNJets));
       }
     }
-    catch(fastjet::Error)
+    catch(fastjet::Error &)
     {
       outputList.clear();
     }
