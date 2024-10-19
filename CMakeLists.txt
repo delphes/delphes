@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(Delphes)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DDROP_CGAL")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+add_compile_options(-fPIC -Wall -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL)
 
 # Set the runtime path of the libraries by default but allow to switch it off:
 option(SET_RPATH "Set runtime path of the ${project} libraries?" ON)
