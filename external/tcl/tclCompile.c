@@ -6144,9 +6144,7 @@ LookupCompiledLocal(name, nameChars, createIfNew, flagsIfCreated, procPtr)
     
     if (createIfNew || (name == NULL)) {
 	localIndex = procPtr->numCompiledLocals;
-	localPtr = (CompiledLocal *) ckalloc((unsigned) 
-	        (sizeof(CompiledLocal) - sizeof(localPtr->name)
-		+ nameChars+1));
+	localPtr = (CompiledLocal *) ckalloc(offsetof(CompiledLocal, name) + nameChars + 1);
 	if (procPtr->firstLocalPtr == NULL) {
 	    procPtr->firstLocalPtr = procPtr->lastLocalPtr = localPtr;
 	} else {
