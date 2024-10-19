@@ -52,8 +52,8 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TrackCovariance::TrackCovariance() :
-  fGeometry(0), fCovariance(0), fAcx(0), fItInputArray(0),
-	fElectronScaleFactor(0), fMuonScaleFactor(0), fChargedHadronScaleFactor(0)
+  fElectronScaleFactor(0), fMuonScaleFactor(0), fChargedHadronScaleFactor(0),
+  fGeometry(0), fCovariance(0), fAcx(0), fItInputArray(0)
 {
   fGeometry = new SolGeom();
   fCovariance = new SolGridCov();
