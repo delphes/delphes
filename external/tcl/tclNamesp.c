@@ -2897,7 +2897,7 @@ NamespaceEvalCmd(dummy, interp, objc, objv)
     if (result == TCL_ERROR) {
         char msg[256];
 	
-        sprintf(msg, "\n    (in namespace eval \"%.200s\" script line %d)",
+        snprintf(msg, sizeof(msg), "\n    (in namespace eval \"%.200s\" script line %d)",
             namespacePtr->fullName, interp->errorLine);
         Tcl_AddObjErrorInfo(interp, msg, -1);
     }
@@ -3264,7 +3264,7 @@ NamespaceInscopeCmd(dummy, interp, objc, objv)
     if (result == TCL_ERROR) {
         char msg[256];
 	
-        sprintf(msg,
+        snprintf(msg, sizeof(msg),
 	    "\n    (in namespace inscope \"%.200s\" script line %d)",
             namespacePtr->fullName, interp->errorLine);
         Tcl_AddObjErrorInfo(interp, msg, -1);

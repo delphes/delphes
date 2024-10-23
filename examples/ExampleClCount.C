@@ -43,25 +43,25 @@ void ExampleClCount(Int_t Nev = 1000, Double_t ang = 90., Int_t Opt=0)
 	{
 	case 0:
 	{
-		sprintf(title, "Helium 90 - Isobutane 10");	// He-Isobutane
+		snprintf(title, sizeof(title), "Helium 90 - Isobutane 10");	// He-Isobutane
 		y_min = 1500.; y_max = 3500;
 		break;
 	}
 	case 1:
 	{
-		sprintf(title, "Helium 100");				// pure He
+		snprintf(title, sizeof(title), "Helium 100");				// pure He
 		y_min = 400.; y_max = 1000;
 		break;
 	}
 	case 2:
 	{
-		sprintf(title, "Argon 50 - Ethane 50");		// Argon - Ethane
+		snprintf(title, sizeof(title), "Argon 50 - Ethane 50");		// Argon - Ethane
 		y_min = 6000.; y_max = 8500.;
 		break;
 	}
 	case 3:
 	{
-		sprintf(title, "Argon 100");				// pure Argon
+		snprintf(title, sizeof(title), "Argon 100");				// pure Argon
 		y_min = 4000.; y_max = 6000.;
 		break;
 	}

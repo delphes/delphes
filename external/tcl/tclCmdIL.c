@@ -2511,7 +2511,7 @@ SortCompare(objPtr1, objPtr2, infoPtr)
 	if (objPtr == NULL) {
 	    objPtr = objPtr1;
 	    missingElement:
-	    sprintf(buffer, "%d", infoPtr->index);
+	    snprintf(buffer, sizeof(buffer), "%d", infoPtr->index);
 	    Tcl_AppendStringsToObj(Tcl_GetObjResult(infoPtr->interp),
 			"element ", buffer, " missing from sublist \"",
 			Tcl_GetStringFromObj(objPtr, (int *) NULL),

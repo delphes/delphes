@@ -375,7 +375,7 @@ void H_Beam::printStoppingElements(const vector<H_OpticalElement>& list, const v
 TH2F *  H_Beam::drawProfile(const float s) {
 	/// not a const method because does a propagate to s!
 	char title[50];
-	sprintf(title,"Beam profile at %.2f m",s);
+	snprintf(title, sizeof(title), "Beam profile at %.2f m",s);
 	vector<H_BeamParticle>::iterator particle_i;
 	float xmax, xmin, ymax, ymin;
 	float xx, yy, xborder, yborder;
