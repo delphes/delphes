@@ -2332,17 +2332,6 @@ Tcl_EvalObj(interp, objPtr)
     }
 
     /*
-     * If no commands at all were executed, check for asynchronous
-     * handlers so that they at least get one change to execute.
-     * This is needed to handle event loops written in Tcl with
-     * empty bodies.
-     */
-
-    if ((oldCount == iPtr->cmdCount) && (Tcl_AsyncReady())) {
-	result = Tcl_AsyncInvoke(interp, result);
-    }
-
-    /*
      * Free up any extra resources that were allocated.
      */
 

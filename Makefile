@@ -1834,8 +1834,6 @@ tmp/external/tcl/panic.$(ObjSuf): \
 	external/tcl/panic.c
 tmp/external/tcl/tclAlloc.$(ObjSuf): \
 	external/tcl/tclAlloc.c
-tmp/external/tcl/tclAsync.$(ObjSuf): \
-	external/tcl/tclAsync.c
 tmp/external/tcl/tclBasic.$(ObjSuf): \
 	external/tcl/tclBasic.c
 tmp/external/tcl/tclCkalloc.$(ObjSuf): \
@@ -1858,8 +1856,6 @@ tmp/external/tcl/tclHash.$(ObjSuf): \
 	external/tcl/tclHash.c
 tmp/external/tcl/tclIndexObj.$(ObjSuf): \
 	external/tcl/tclIndexObj.c
-tmp/external/tcl/tclLink.$(ObjSuf): \
-	external/tcl/tclLink.c
 tmp/external/tcl/tclListObj.$(ObjSuf): \
 	external/tcl/tclListObj.c
 tmp/external/tcl/tclNamesp.$(ObjSuf): \
@@ -1872,8 +1868,6 @@ tmp/external/tcl/tclPreserve.$(ObjSuf): \
 	external/tcl/tclPreserve.c
 tmp/external/tcl/tclProc.$(ObjSuf): \
 	external/tcl/tclProc.c
-tmp/external/tcl/tclResolve.$(ObjSuf): \
-	external/tcl/tclResolve.c
 tmp/external/tcl/tclStringObj.$(ObjSuf): \
 	external/tcl/tclStringObj.c
 tmp/external/tcl/tclUtil.$(ObjSuf): \
@@ -1883,7 +1877,6 @@ tmp/external/tcl/tclVar.$(ObjSuf): \
 TCL_OBJ +=  \
 	tmp/external/tcl/panic.$(ObjSuf) \
 	tmp/external/tcl/tclAlloc.$(ObjSuf) \
-	tmp/external/tcl/tclAsync.$(ObjSuf) \
 	tmp/external/tcl/tclBasic.$(ObjSuf) \
 	tmp/external/tcl/tclCkalloc.$(ObjSuf) \
 	tmp/external/tcl/tclCmdAH.$(ObjSuf) \
@@ -1895,14 +1888,12 @@ TCL_OBJ +=  \
 	tmp/external/tcl/tclGet.$(ObjSuf) \
 	tmp/external/tcl/tclHash.$(ObjSuf) \
 	tmp/external/tcl/tclIndexObj.$(ObjSuf) \
-	tmp/external/tcl/tclLink.$(ObjSuf) \
 	tmp/external/tcl/tclListObj.$(ObjSuf) \
 	tmp/external/tcl/tclNamesp.$(ObjSuf) \
 	tmp/external/tcl/tclObj.$(ObjSuf) \
 	tmp/external/tcl/tclParse.$(ObjSuf) \
 	tmp/external/tcl/tclPreserve.$(ObjSuf) \
 	tmp/external/tcl/tclProc.$(ObjSuf) \
-	tmp/external/tcl/tclResolve.$(ObjSuf) \
 	tmp/external/tcl/tclStringObj.$(ObjSuf) \
 	tmp/external/tcl/tclUtil.$(ObjSuf) \
 	tmp/external/tcl/tclVar.$(ObjSuf)
