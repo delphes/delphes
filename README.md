@@ -59,44 +59,6 @@ or
 
 For more detailed documentation, please visit https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
 
-# Installation
-
-## Source distributions
-
-Releases of Delphes are available for download on the [website releases page](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/Releases)
-
-```
-wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.5.0.tar.gz && tar -zxf Delphes-3.5.0.tar.gz && cd Delphes-3.5.0
-```
-
-and also from [GitHub releases](https://github.com/delphes/delphes/releases)
-
-```
-git clone https://github.com/delphes/delphes.git && cd delphes && git checkout 3.5.0
-```
-
-The source code can then be built and installed using either `CMake` or `autotools`.
-Check all the build options available for the build system with the respective commands `cmake <build directory> -LH` or `./configure --help`.
-
-## conda-forge
-
-Delphes is also [distributed on conda-forge](https://github.com/conda-forge/delphes-feedstock) and can be installed in a conda environment with
-
-```
-conda install --channel conda-forge delphes
-```
-
-To run the same Z->ee example in the "quick start" section above in an activated conda environment use the following commands
-
-```
-wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
-gunzip z_ee.hep.gz
-DelphesSTDHEP $CONDA_PREFIX/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
-```
-
-where the `$CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
-The `cards` and `examples` directories of this repository are installed as well under `$CONDA_PREFIX`.
-
 Configure Delphes on lxplus.cern.ch
 ====================================
 
@@ -109,6 +71,29 @@ Configure Delphes on lxplus.cern.ch
 
   make
 ```
+
+Install Delphes from conda-forge
+================================
+
+Delphes is also available as a pre-built binary package from [conda-forge](https://anaconda.org/conda-forge/delphes).
+
+Command to install the package in a conda environment:
+
+```
+  conda install --channel conda-forge delphes
+```
+
+To run the Z->ee example from the "quick start" section above in a conda environment, use the following commands:
+
+```
+  wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
+  gunzip z_ee.hep.gz
+  DelphesSTDHEP $CONDA_PREFIX/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
+```
+
+where the `$CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
+
+The `cards` and `examples` directories from this repository are also installed under `$CONDA_PREFIX`.
 
 Simple analysis using TTree::Draw
 =================================
