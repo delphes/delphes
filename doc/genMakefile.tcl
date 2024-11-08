@@ -128,8 +128,6 @@ proc tclDeps {} {
   set srcObjFiles {}
 
   foreach fileName $source {
-    if {$fileName == "tcl/tclc.c" || $fileName == "tcl/tcl.c"} continue
-
     regsub {\.c} $fileName {} srcName
     set srcObjName $prefix$srcName
 
