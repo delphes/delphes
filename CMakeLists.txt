@@ -71,24 +71,16 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:TrackCovariance>
 )
 
-add_library(DelphesDisplay SHARED
-  $<TARGET_OBJECTS:classes>
-  $<TARGET_OBJECTS:display>
-  $<TARGET_OBJECTS:modules>
-  $<TARGET_OBJECTS:ExRootAnalysis>
-  $<TARGET_OBJECTS:fastjet>
-  $<TARGET_OBJECTS:tcl>
-  $<TARGET_OBJECTS:Hector>
-  $<TARGET_OBJECTS:PUPPI>
-  $<TARGET_OBJECTS:TrackCovariance>
-)
-
-target_link_Libraries(Delphes ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
-target_link_Libraries(DelphesDisplay ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES})
+target_link_libraries(Delphes ${ROOT_LIBRARIES})
 
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
-  target_link_libraries(DelphesDisplay ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
+
+add_library(DelphesDisplay SHARED
+  $<TARGET_OBJECTS:display>
+)
+
+target_link_libraries(DelphesDisplay Delphes)
 
 install(TARGETS Delphes DelphesDisplay DESTINATION lib)
