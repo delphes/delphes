@@ -59,7 +59,7 @@ Command to install the package in a conda environment:
 
   conda install --channel conda-forge delphes
 
-To run the Z->ee example from the "quick start" section above in a conda environment, use the following commands:
+Commands to run the Z->ee example from the "quick start" section above in a conda environment:
 
   wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
   gunzip z_ee.hep.gz
