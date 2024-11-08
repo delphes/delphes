@@ -83,7 +83,7 @@ Command to install the package in a conda environment:
   conda install --channel conda-forge delphes
 ```
 
-To run the Z->ee example from the "quick start" section above in a conda environment, use the following commands:
+Commands to run the Z->ee example from the "quick start" section above in a conda environment:
 
 ```
   wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
@@ -93,7 +93,7 @@ To run the Z->ee example from the "quick start" section above in a conda environ
 
 where the `$CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
 
-The `cards` and `examples` directories from this repository are also installed under `$CONDA_PREFIX`.
+The 'cards' and 'examples' directories from this repository are also installed under `$CONDA_PREFIX`.
 
 Simple analysis using TTree::Draw
 =================================
