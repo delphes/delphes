@@ -1,5 +1,5 @@
 include_directories(
-  ${CMAKE_SOURCE_DIR}/external
+  ${DelphesExternals_INCLUDE_DIR}
   ${ROOT_INCLUDE_DIRS}
 )
 

@@ -1,7 +1,7 @@
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${ROOT_INCLUDE_DIRS}
-  ${DelphesExternals_INCLUDE_DIR} 
+  ${DelphesExternals_INCLUDE_DIR}
 )
 
 file(GLOB sources *.cc)
@@ -10,7 +10,7 @@ list(REMOVE_ITEM headers ${CMAKE_CURRENT_SOURCE_DIR}/ClassesLinkDef.h)
 
 # the macro invocation for ROOT6 ensures that the headers are relocatable
 if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
-  DELPHES_GENERATE_DICTIONARY(ClassesDict 
+  DELPHES_GENERATE_DICTIONARY(ClassesDict
     classes/DelphesModule.h
     classes/DelphesFactory.h
     classes/SortableObject.h
