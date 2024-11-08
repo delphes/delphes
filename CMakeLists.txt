@@ -10,7 +10,7 @@ IF(SET_RPATH)
   # Set up the RPATH so executables find the libraries even when installed in non-default location
   SET(CMAKE_MACOSX_RPATH 1)
   SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
   # Add the automatically determined parts of the RPATH which point to directories outside
@@ -23,12 +23,12 @@ IF(SET_RPATH)
     SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
   ENDIF(${isSystemDir} EQUAL -1)
 ENDIF(SET_RPATH)
-    
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 # Declare ROOT dependency
-find_package(ROOT COMPONENTS EG Eve Geom Gui GuiHtml GenVector Hist Physics Matrix Graf RIO Tree Gpad RGL MathCore)
-include(${ROOT_USE_FILE})
+find_package(ROOT REQUIRED COMPONENTS EG Eve Gui GuiHtml)
+set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
 
 # Declare Pythia8 dependancy
 find_package(Pythia8)
@@ -41,14 +41,14 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 endif()
 
 function(DELPHES_GENERATE_DICTIONARY dictionary)
-  if(${ROOT_VERSION} LESS 6.0)
+  if(${ROOT_VERSION} VERSION_LESS "6.0.0")
     ROOT_GENERATE_DICTIONARY(${dictionary} ${ARGN})
   else()
     ROOT_GENERATE_DICTIONARY(${dictionary} MODULE ${dictionary} ${ARGN})
   endif()
 endfunction()
 
-# Declare position of all other externals needed
+# Define location of all other external dependencies
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
 
 add_subdirectory(classes)
@@ -61,8 +61,8 @@ add_subdirectory(readers)
 add_subdirectory(cards)
 
 add_library(Delphes SHARED
-  $<TARGET_OBJECTS:classes> 
-  $<TARGET_OBJECTS:modules> 
+  $<TARGET_OBJECTS:classes>
+  $<TARGET_OBJECTS:modules>
   $<TARGET_OBJECTS:ExRootAnalysis>
   $<TARGET_OBJECTS:fastjet>
   $<TARGET_OBJECTS:tcl>
