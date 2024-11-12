@@ -121,12 +121,12 @@ Notes:
 - `Electron`is the branch name; `PT` is a variable (leaf) of this branch.
 
 Complete description of all branches can be found in [doc/RootTreeDescription.html](doc/RootTreeDescription.html).
+
 This information is also available [in the workbook](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
 
 # Macro-based analysis
 
-Analysis macro consists of histogram booking, event loop (histogram filling),
-histogram display.
+Analysis macro consists of histogram booking, event loop (histogram filling), histogram display.
 
 Start ROOT and load Delphes shared library:
 
