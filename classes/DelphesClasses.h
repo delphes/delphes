@@ -97,7 +97,7 @@ class HepMCEvent: public Event
 {
 public:
   Int_t ProcessID; // unique signal process id | signal_process_id()
-  Int_t MPI; // number of multi parton interactions | mpi ()
+  Int_t MPI; // number of multi parton interactions | mpi()
 
   Float_t Weight; // weight for the event
   Float_t CrossSection; // cross-section in pb
@@ -267,7 +267,7 @@ public:
   Float_t SumPtChargedPU; // isolation variable
   Float_t SumPt; // isolation variable
 
-  Int_t Status; // 1: prompt -- 2: non prompt -- 3: fake
+  Int_t Status; // 1: prompt, 2: non prompt, 3: fake
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -384,8 +384,8 @@ public:
   Int_t NCharged; // number of charged constituents
   Int_t NNeutrals; // number of neutral constituents
 
-  Float_t NeutralEnergyFraction;  // charged energy fraction
-  Float_t ChargedEnergyFraction;  // neutral energy fraction
+  Float_t NeutralEnergyFraction; // charged energy fraction
+  Float_t ChargedEnergyFraction; // neutral energy fraction
 
   Float_t Beta; // (sum pt of charged pile-up constituents)/(sum pt of charged constituents)
   Float_t BetaStar; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)
@@ -659,21 +659,20 @@ public:
   Float_t Eta; // eta of LLP
   Float_t Phi; // phi of LLP
   Float_t PT; // pt of LLP
-  Float_t Px;// px of LLP
-  Float_t Py;// py of LLP
-  Float_t Pz;// pz of LLP
+  Float_t Px; // px of LLP
+  Float_t Py; // py of LLP
+  Float_t Pz; // pz of LLP
   Float_t E; // E of LLP
   Float_t Ehad; // had energy of LLP
   Float_t Eem; // em energy of LLP
   Float_t pid; // LLP pid
   Float_t T; // LLP decay time-photon travel time
   Float_t X; // LLP decay x
-  Float_t Y; //  LLP decay y
-  Float_t Z; //  LLP decay z
-  Float_t R; //  LLP decay z
+  Float_t Y; // LLP decay y
+  Float_t Z; // LLP decay z
+  Float_t R; // LLP decay z
   Float_t beta; // LLP beta
-  Float_t ctau; //LLP ctau
-
+  Float_t ctau; // LLP ctau
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
@@ -768,9 +767,8 @@ public:
   Float_t MeanSqDeltaR;
   Float_t PTD;
   Float_t FracPt[5];
-  Float_t NeutralEnergyFraction;  // charged energy fraction
-  Float_t ChargedEnergyFraction;  // neutral energy fraction
-
+  Float_t NeutralEnergyFraction; // charged energy fraction
+  Float_t ChargedEnergyFraction; // neutral energy fraction
 
   // Timing information
 
