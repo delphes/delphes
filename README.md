@@ -84,7 +84,7 @@ Command to install the package in a conda environment:
 conda install --channel conda-forge delphes
 ```
 
-Commands to run the Z->ee example from the "quick start" section above in a conda environment:
+Commands to run the Z->ee example from the 'Quick start' section above in a conda environment:
 
 ```
 wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
@@ -92,13 +92,13 @@ gunzip z_ee.hep.gz
 DelphesSTDHEP $CONDA_PREFIX/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
 ```
 
-where the `$CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
+where the `CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
 
-The 'cards' and 'examples' directories from this repository are also installed under `$CONDA_PREFIX`.
+The `cards` and `examples` directories from this repository are also installed under `$CONDA_PREFIX`.
 
 # Simple analysis using TTree::Draw
 
-Now we can start [ROOT](root.cern) and look at the data stored in the output ROOT file.
+Now we can start [ROOT](https://root.cern) and look at the data stored in the output ROOT file.
 
 Start ROOT and load Delphes shared library:
 
@@ -118,11 +118,12 @@ TBrowser browser;
 Notes:
 
 - `Delphes` is the tree name. It can be learned e.g. from TBrowser.
-- `Electron`is the branch name; `PT` is a variable (leaf) of this branch.
+- `Electron` is the branch name.
+- `PT` is a variable (leaf) of this branch.
 
 Complete description of all branches can be found in [doc/RootTreeDescription.html](doc/RootTreeDescription.html).
 
-This information is also available [in the workbook](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
+This information is also available at [this link](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
 
 # Macro-based analysis
 
@@ -182,7 +183,7 @@ Basic analysis macro:
 
 # More advanced macro-based analysis
 
-The 'examples' directory contains ROOT macros [Example1.C](examples/Example1.C), [Example2.C](examples/Example2.C) and [Example3.C](examples/Example3.C).
+The `examples` directory contains ROOT macros [Example1.C](examples/Example1.C), [Example2.C](examples/Example2.C) and [Example3.C](examples/Example3.C).
 
 Here are the commands to run these ROOT macros:
 
