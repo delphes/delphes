@@ -67,8 +67,9 @@ public:
 	Double_t s_ct()   { return TMath::Sqrt(fCov(4, 4)); }
 	//
 	// Track hit management
-	Int_t nHit();
-	Int_t nmHit();
+	Int_t nHit();	// Nr. of layers hit
+	Int_t nmHit();	// Nr. of measurement layers hit
+	Int_t nMeas();	// Nr. of measurements
 	Bool_t HitLayer(Int_t Layer, Double_t &R, Double_t &phi, Double_t &zz);
 	Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh);
 	Int_t HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *&Zh);
