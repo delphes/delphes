@@ -171,6 +171,18 @@ Int_t SolTrack::nmHit()
 	return kmh;
 }
 //
+// # of measurement
+Int_t SolTrack::nMeas()
+{
+	Int_t kmh = 0;
+	Double_t R; Double_t phi; Double_t zz;
+	for (Int_t i = 0; i < fG->Nl(); i++)
+	if (HitLayer(i, R, phi, zz))
+		if (fG->isMeasure(i))kmh += fG->lND(i);
+	//
+	return kmh;
+}
+//
 // List of layers hit with intersections
 Int_t SolTrack::HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh)
 {
