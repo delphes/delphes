@@ -102,7 +102,7 @@ AcceptanceClx::AcceptanceClx(SolGeom* InGeo)
 			// Get number of measurement hits
 			//
 			SolTrack* gTrk = new SolTrack(xv, tp, InGeo);	// Generated track
-			Int_t Mhits = gTrk->nmHit();			// Nr. Measurement hits
+			Int_t Mhits = gTrk->nMeas();			// Nr. Measurements
 			fAcc(ipt, ith) = (Float_t)Mhits;
 		}
 	}
@@ -140,7 +140,7 @@ AcceptanceClx::AcceptanceClx(SolGeom* InGeo)
 						Double_t pz = pt / TMath::Tan(th);
 						TVector3 tp(pt, 0., pz);
 						SolTrack* gTrk = new SolTrack(xv, tp, InGeo);	// Generated track
-						Int_t Mhits = gTrk->nmHit();			// Nr. Measurement hits
+						Int_t Mhits = gTrk->nMeas();			// Nr. Measurements
 						AccPt(i) = (Float_t)Mhits;
 					}
 					SplitPt(ipt, AccPt);
@@ -166,7 +166,7 @@ AcceptanceClx::AcceptanceClx(SolGeom* InGeo)
 						Double_t pz = pt / TMath::Tan(th);
 						TVector3 tp(pt, 0., pz);
 						SolTrack* gTrk = new SolTrack(xv, tp, InGeo);	// Generated track
-						Int_t Mhits = gTrk->nmHit();			// Nr. Measurement hits
+						Int_t Mhits = gTrk->nMeas();			// Nr. Measurements
 						AccTh(i) = (Float_t)Mhits;
 					}
 					SplitTh(ith, AccTh);
