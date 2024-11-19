@@ -79,63 +79,6 @@ VertexMore::~VertexMore()
 //
 // Main method to calculate parameters and covariance from vertex
 //
-Double_t VertexMore::dSdD(Int_t i)	// ***** NOT USED *****
-{
-	// Derivative of phase of ith track wrt D
-	//
-	TVector3 p = GetMomentum(i); 
-	TVectorD xv = fV->GetVtx();
-	Double_t R2 = xv(0)*xv(0)+xv(1)*xv(1);
-	TVectorD par = fV->GetNewPar(i);
-	Double_t D = par(0);
-	Double_t C = par(2);
-	//
-	Double_t A = C*TMath::Sqrt(TMath::Max(0.0,R2-D*D)/(1.+2.*C*D));
-	Double_t Num = -2.*C*C*(D+C*(R2+D*D));
-	Double_t Den = (1.+2.*C*D)*(1.+2.*C*D)*A*TMath::Sqrt(1.-A*A);
-	return Num/Den;
-}
-
-Double_t VertexMore::dSdC(Int_t i)	// ***** NOT USED *****
-{
-	// Derivative of phase of ith track wrt C
-	//
-	//TVector3 p = GetMomentum(i); 
-	TVectorD xv = fV->GetVtx();
-	Double_t R2 = xv(0)*xv(0)+xv(1)*xv(1);
-	TVectorD par = fV->GetNewPar(i);
-	Double_t D = par(0);
-	Double_t C = par(2);
-	//
-	Double_t A = C*TMath::Sqrt(TMath::Max(0.0,R2-D*D)/(1.+2.*C*D));
-	Double_t Num = 2.*A*(1.+C*D);
-	Double_t Den = C*(1.+2.*C*D)*TMath::Sqrt(1.-A*A);
-	return Num/Den;
-}
-
-TMatrixD VertexMore::dPdX(Int_t i)	// ***** NOT USED *****
-{
-	TVectorD par = fV->GetNewPar(i);
-	TVectorD xv = fV->GetVtx();
-	//
-	Double_t C = par(2);
-	Double_t z_0 = par(3);
-	Double_t lm = par(4);
-	//
-	TVector3 p = GetMomentum(i);
-	//
-	TVectorD sx = dsdx(xv, par);
-	//
-	TMatrixD dPX(3,3); dPX.Zero();
-	// px
-	dPX(0,0) = -p(1)*sx(0);	// x
-	dPX(1,0) = -p(1)*sx(1);	// y
-	// py
-	dPX(0,1) =  p(0)*sx(0);	// x
-	dPX(1,1) =  p(0)*sx(1);	// y
-	//
-	return dPX;
-}
 
 TMatrixD VertexMore::dPdAlf(Int_t i)
 {
@@ -189,65 +132,6 @@ TVectorD VertexMore::dPds(Int_t i)
 	}
 	//
 	return dPs;
-}
-//
-TMatrixD VertexMore::dXdAlf(Int_t i)		// *** NOT USED ***
-{
-	TMatrixD dXdPar(5, 3); dXdPar.Zero();
-	TVectorD xv = fV->GetVtx();
-	Double_t R2 = xv(0)*xv(0)+xv(1)*xv(1);
-	TVectorD par = fV->GetNewPar(i);
-	Double_t D = par(0);
-	Double_t ph = par(1);
-	Double_t sf = TMath::Sin(ph);
-	Double_t cf = TMath::Cos(ph);
-	Double_t z0 = par(3);
-	Double_t ct = par(4);
-
-	if(fV->IsCharged(i)){			// Charged
-		//
-		Double_t C = par(2);
-		Double_t s = GetPhase(xv, par);
-		//
-		TVectorD dsdpr = dsdPar(xv, par);
-		Double_t sd = dsdpr(0);
-		Double_t sp0= dsdpr(1);
-		Double_t sc = dsdpr(2);
-		//
-		Double_t sfs= TMath::Sin(s+ph);
-		Double_t cfs= TMath::Cos(s+ph);
-		//
-		// x
-		dXdPar(0, 0) = -sf+cfs*sd;		// D
-		dXdPar(1, 0) = -D*cf+(cfs-cf)/(2.* C);	// phi0
-		dXdPar(2, 0) = -(sfs-sf)/(2.*C*C)+cfs/(2.*C)*sc;	// C
-		// y
-		dXdPar(0, 1) =  cf+sfs*sd;		// D
-		dXdPar(1, 1) = -D*sf+(sfs-sf)/(2.*C);	// phi0
-		dXdPar(2, 1) =  (cfs-cf)/(2.*C*C)+sfs/(2.*C)*sc ;	// C
-		// z
-		dXdPar(2, 2) = -ct*s/(2.*C*C)+ct*s*sc/(2.*C);		// C
-		dXdPar(3, 2) = 	1.;			// z0
-		dXdPar(4, 2) =  s/(2.*C);		// ctg
-	}
-	else{					// Neutral
-		Double_t s = xv(0)*cf+xv(1)*sf;
-		//
-		// x
-		dXdPar(0, 0) = -sf;			// D
-		//dXdPar(1, 0) = -D*cf - s*sf;		// phi0
-		dXdPar(1, 0) = -s*sf;			// phi0
-		// y
-		dXdPar(0, 1) =  cf;			// D
-		//dXdPar(1, 1) = -D*sf + s*cf;		// phi0
-		dXdPar(1, 1) =  s*cf;			// phi0
-		// z
-		dXdPar(1, 2) =  D*ct;			// phi0
-		dXdPar(3, 2) = 	1.;			// z0
-		dXdPar(4, 2) =  s;			// ctg	
-	}
-	//
-	return dXdPar;
 }
 //
 TMatrixD VertexMore::DpDa0(Int_t i, Int_t k)
