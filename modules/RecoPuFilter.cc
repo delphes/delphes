@@ -69,7 +69,6 @@ void RecoPuFilter::Init()
 {
 
   ExRootConfParam param;
-  Size_t i, size;
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
@@ -91,9 +90,6 @@ void RecoPuFilter::Finish()
 void RecoPuFilter::Process()
 {
   Candidate *candidate;
-  Int_t pdgCode;
-  Bool_t pass;
-  Double_t pt;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))

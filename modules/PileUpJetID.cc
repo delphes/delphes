@@ -109,13 +109,6 @@ void PileUpJetID::Process()
     momentum = candidate->Momentum;
     area = candidate->Area;
 
-    float sumT0 = 0.;
-    float sumT1 = 0.;
-    float sumT10 = 0.;
-    float sumT20 = 0.;
-    float sumT30 = 0.;
-    float sumT40 = 0.;
-    float sumWeightsForT = 0.;
     candidate->NTimeHits = 0;
 
     float sumpt = 0.;
@@ -168,37 +161,21 @@ void PileUpJetID::Process()
             pt_ann[i] += pt;
           }
         }
-        float tow_sumT = 0;
         float tow_sumW = 0;
-        for(int i = 0; i < constituent->ECalEnergyTimePairs.size(); i++)
+        for(size_t i = 0; i < constituent->ECalEnergyTimePairs.size(); i++)
         {
           float w = TMath::Sqrt(constituent->ECalEnergyTimePairs[i].first);
           if(fAverageEachTower)
           {
-            tow_sumT += w * constituent->ECalEnergyTimePairs[i].second;
             tow_sumW += w;
           }
           else
           {
-            sumT0 += w * constituent->ECalEnergyTimePairs[i].second;
-            sumT1 += w * gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second, 0.001);
-            sumT10 += w * gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second, 0.010);
-            sumT20 += w * gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second, 0.020);
-            sumT30 += w * gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second, 0.030);
-            sumT40 += w * gRandom->Gaus(constituent->ECalEnergyTimePairs[i].second, 0.040);
-            sumWeightsForT += w;
             candidate->NTimeHits++;
           }
         }
         if(fAverageEachTower && tow_sumW > 0.)
         {
-          sumT0 += tow_sumT;
-          sumT1 += tow_sumW * gRandom->Gaus(tow_sumT / tow_sumW, 0.001);
-          sumT10 += tow_sumW * gRandom->Gaus(tow_sumT / tow_sumW, 0.0010);
-          sumT20 += tow_sumW * gRandom->Gaus(tow_sumT / tow_sumW, 0.0020);
-          sumT30 += tow_sumW * gRandom->Gaus(tow_sumT / tow_sumW, 0.0030);
-          sumT40 += tow_sumW * gRandom->Gaus(tow_sumT / tow_sumW, 0.0040);
-          sumWeightsForT += tow_sumW;
           candidate->NTimeHits++;
         }
       }

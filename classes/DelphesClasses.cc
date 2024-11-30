@@ -339,7 +339,7 @@ Bool_t Candidate::Overlaps(const Candidate *object) const
 
 //------------------------------------------------------------------------------
 
-TObject *Candidate::Clone(const char *newname) const
+TObject *Candidate::Clone(const char * /*newname*/) const
 {
   Candidate *object = fFactory->NewCandidate();
   Copy(*object);
@@ -500,7 +500,7 @@ void Candidate::Copy(TObject &obj) const
 
 //------------------------------------------------------------------------------
 
-void Candidate::Clear(Option_t *option)
+void Candidate::Clear(Option_t * /*option*/)
 {
   int i;
   SetUniqueID(0);

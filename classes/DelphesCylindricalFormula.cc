@@ -33,7 +33,7 @@ DelphesCylindricalFormula::DelphesCylindricalFormula() :
 
 //------------------------------------------------------------------------------
 
-DelphesCylindricalFormula::DelphesCylindricalFormula(const char *name, const char *expression) :
+DelphesCylindricalFormula::DelphesCylindricalFormula(const char * /*name*/, const char * /*expression*/) :
   TFormula()
 {
 }

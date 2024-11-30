@@ -90,12 +90,12 @@ bool DelphesStream::ReadInt(int &value)
   value = strtol(start, &fBuffer, 10);
   if(errno == ERANGE)
   {
-    if(fFirstLongMin && value == LONG_MIN)
+    if(fFirstLongMin && value == INT_MIN)
     {
       fFirstLongMin = false;
       cout << "** WARNING: too large positive value, return " << value << endl;
     }
-    else if(fFirstLongMax && value == LONG_MAX)
+    else if(fFirstLongMax && value == INT_MAX)
     {
       fFirstLongMax = false;
       cout << "** WARNING: too large negative value, return " << value << endl;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(Delphes)
 
-add_compile_options(-fPIC -Wall -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL)
+add_compile_options(-fPIC -Wall -D_FILE_OFFSET_BITS=64 -DDROP_CGAL)
 
 # Set the runtime path of the libraries by default but allow to switch it off:
 option(SET_RPATH "Set runtime path of the ${project} libraries?" ON)

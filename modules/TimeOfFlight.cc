@@ -95,7 +95,7 @@ void TimeOfFlight::Process()
 {
   Candidate *candidate, *particle, *vertex, *constituent, *mother;
   Double_t ti, t_truth, tf;
-  Double_t l, tof, beta, p,  mass;
+  Double_t l, tof, beta;
 
   const Double_t c_light = 2.99792458E8;
 
@@ -111,7 +111,6 @@ void TimeOfFlight::Process()
     const TLorentzVector &candidateInitialPosition = particle->Position;
     const TLorentzVector &candidateInitialPositionSmeared = candidate->InitialPosition;
     const TLorentzVector &candidateFinalPosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = particle->Momentum;
 
     // time at vertex from MC truth
     t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
@@ -161,8 +160,6 @@ void TimeOfFlight::Process()
       break;
   	}
 
-    p = candidateMomentum.P();
-
     // this quantity has already been smeared by another module
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
@@ -175,9 +172,6 @@ void TimeOfFlight::Process()
     beta = l/(c_light*tof);
 
     // calculate particle mass (i.e particle ID)
-    mass = 0.;
-    if (beta<1) mass = p* TMath::Sqrt(1/(beta*beta) - 1);
-
     mother    = candidate;
     candidate = static_cast<Candidate*>(candidate->Clone());
 

@@ -36,12 +36,6 @@
 
 using namespace std;
 
-static const Double_t mm = 1.;
-static const Double_t m = 1000. * mm;
-static const Double_t ns = 1.;
-static const Double_t s = 1.e+9 * ns;
-static const Double_t c_light = 2.99792458e+8 * m / s;
-
 //------------------------------------------------------------------------------
 
 VertexFinder::VertexFinder() :
@@ -81,11 +75,6 @@ void VertexFinder::Finish()
 }
 
 //------------------------------------------------------------------------------
-
-static Bool_t secondAscending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
-{
-  return (pair0.second < pair1.second);
-}
 
 static Bool_t secondDescending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
 {
