@@ -206,7 +206,7 @@ void TrackCountingTauTagging::Process()
   TObjArray *tauArray;
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
-  Int_t pdgCode, charge, i, identifier;
+  Int_t charge, i, identifier;
 
   // select taus
   fFilter->Reset();
@@ -222,7 +222,6 @@ void TrackCountingTauTagging::Process()
   {
     identifier = 0;
     const TLorentzVector &jetMomentum = jet->Momentum;
-    pdgCode = 0;
     charge = 0;
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
@@ -265,7 +264,6 @@ void TrackCountingTauTagging::Process()
       if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
       {
         matchedTau = true;
-        pdgCode = 15;
       }
     }
     if(matchedTau)

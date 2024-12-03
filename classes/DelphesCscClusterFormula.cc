@@ -35,7 +35,7 @@ DelphesCscClusterFormula::DelphesCscClusterFormula() :
 
 //------------------------------------------------------------------------------
 
-DelphesCscClusterFormula::DelphesCscClusterFormula(const char *name, const char *expression) :
+DelphesCscClusterFormula::DelphesCscClusterFormula(const char * /*name*/, const char * /*expression*/) :
   TFormula()
 {
 }

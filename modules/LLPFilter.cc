@@ -134,7 +134,6 @@ void LLPFilter::Process()
 
   Candidate *candidate;
   Int_t pdgCode;
-  Bool_t pass;
   Double_t pt, eta;
   Candidate *tempCandidate;
 
@@ -152,7 +151,6 @@ void LLPFilter::Process()
     //all distance units are in mm
     pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    const TLorentzVector &candidateProdPosition = candidate->Position;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
     pt = candidateMomentum.Pt();
     eta = candidateMomentum.Eta();

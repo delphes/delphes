@@ -432,7 +432,7 @@ void DelphesSTDHEPReader::ReadSTDHEP4()
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
+void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eventNumber*/,
   TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   LHEFEvent *element;

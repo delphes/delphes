@@ -86,20 +86,19 @@ bool DelphesStream::ReadDbl(double &value)
 bool DelphesStream::ReadInt(int &value)
 {
   char *start = fBuffer;
-  errno = 0;
-  value = strtol(start, &fBuffer, 10);
-  if(errno == ERANGE)
+  const long longValue = strtol(start, &fBuffer, 10);
+  value = longValue;
+  if(fFirstLongMin && longValue < INT_MIN)
   {
-    if(fFirstLongMin && value == LONG_MIN)
-    {
-      fFirstLongMin = false;
-      cout << "** WARNING: too large positive value, return " << value << endl;
-    }
-    else if(fFirstLongMax && value == LONG_MAX)
-    {
-      fFirstLongMax = false;
-      cout << "** WARNING: too large negative value, return " << value << endl;
-    }
+    fFirstLongMin = false;
+    value = INT_MIN;
+    cout << "** WARNING: too large positive value, return " << value << endl;
+  }
+  else if(fFirstLongMax && longValue > INT_MAX)
+  {
+    fFirstLongMax = false;
+    value = INT_MAX;
+    cout << "** WARNING: too large negative value, return " << value << endl;
   }
   return start != fBuffer;
 }

@@ -100,8 +100,7 @@ void CscClusterId::Finish()
 void CscClusterId::Process()
 {
   Candidate *candidate;
-  Double_t Ehad, Eem, decayR, decayZ, NStationEff, eta, eta_cut;
-  Int_t avgStation;
+  Double_t Ehad, decayR, decayZ, NStationEff, eta;
   Double_t signPz, cosTheta;
 
   fItInputArray->Reset();
@@ -112,7 +111,6 @@ void CscClusterId::Process()
     decayZ = abs(candidateDecayPosition.Z());
     decayR = sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2));
     Ehad = candidate->Ehad;
-    Eem = candidate->Eem;
 
     cosTheta = TMath::Abs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
