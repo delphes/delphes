@@ -463,15 +463,16 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
   map<int, int >::iterator itVertexMap;
   map<int, pair<int, int> >::iterator itMotherMap;
   map<int, pair<int, int> >::iterator itDaughterMap;
-  int code, counter;
+  size_t i;
+  int j, code, counter;
 
   counter = 0;
-  for(size_t i = 0; i < fVertices.size(); ++i)
+  for(i = 0; i < fVertices.size(); ++i)
   {
     position = fVertices[i].first;
     array = fVertices[i].second;
 
-    for(int j = 0; j < array->GetEntriesFast(); ++j)
+    for(j = 0; j < array->GetEntriesFast(); ++j)
     {
       candidate = static_cast<Candidate *>(array->At(j));
 
@@ -545,9 +546,9 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
     }
   }
 
-  for(int i = 0; i < allParticleOutputArray->GetEntriesFast(); ++i)
+  for(j = 0; j < allParticleOutputArray->GetEntriesFast(); ++j)
   {
-    candidate = static_cast<Candidate *>(allParticleOutputArray->At(i));
+    candidate = static_cast<Candidate *>(allParticleOutputArray->At(j));
 
     itMotherMap = fMotherMap.find(candidate->M1);
     if(itMotherMap == fMotherMap.end())
