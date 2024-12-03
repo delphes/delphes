@@ -37,13 +37,13 @@ or
 
 For more detailed documentation, please visit
 
-  https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
+  https://delphes.github.io/workbook
 
 
 Configure Delphes on lxplus.cern.ch
 ===================================
 
-  git clone git://github.com/delphes/delphes.git Delphes
+  git clone https://github.com/delphes/delphes Delphes
 
   cd Delphes
 
@@ -107,7 +107,7 @@ Complete description of all branches can be found in
 
 This information is also available at
 
-  https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
+  https://delphes.github.io/workbook/root-tree-description
 
 
 Macro-based analysis

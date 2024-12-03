@@ -6,7 +6,7 @@
 
 Delphes is a C++ framework, performing a fast multipurpose detector response simulation.
 
-More details can be found on the Delphes website http://cp3.irmp.ucl.ac.be/projects/delphes
+More details can be found on the Delphes website https://delphes.github.io
 
 # Quick start with Delphes
 
@@ -56,12 +56,12 @@ or
 curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root
 ```
 
-For more detailed documentation, please visit https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
+For more detailed documentation, please visit https://delphes.github.io/workbook
 
 # Configure Delphes on lxplus.cern.ch
 
 ```
-git clone git://github.com/delphes/delphes.git Delphes
+git clone https://github.com/delphes/delphes Delphes
 
 cd Delphes
 
@@ -123,7 +123,7 @@ Notes:
 
 Complete description of all branches can be found in [doc/RootTreeDescription.html](doc/RootTreeDescription.html).
 
-This information is also available at [this link](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
+This information is also available at [this link](https://delphes.github.io/workbook/root-tree-description).
 
 # Macro-based analysis
 
