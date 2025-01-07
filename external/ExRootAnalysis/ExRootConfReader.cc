@@ -48,6 +48,8 @@ ExRootConfReader::~ExRootConfReader()
 void ExRootConfReader::ReadFile(const char *fileName, bool isTop)
 {
   stringstream message;
+  int length;
+  char *buffer;
 
   ifstream inputFileStream(fileName, ios::in | ios::ate);
   if(!inputFileStream.is_open())
@@ -58,15 +60,16 @@ void ExRootConfReader::ReadFile(const char *fileName, bool isTop)
 
   if(isTop) fTopDir = gSystem->DirName(fileName);
 
-  int file_length = inputFileStream.tellg();
+  length = inputFileStream.tellg();
   inputFileStream.seekg(0, ios::beg);
   inputFileStream.clear();
-  char *cmdBuffer = new char[file_length];
-  inputFileStream.read(cmdBuffer, file_length);
+  buffer = new char[length + 1];
+  buffer[length] = 0;
+  inputFileStream.read(buffer, length);
 
   Tcl_Obj *cmdObjPtr = Tcl_NewObj();
-  cmdObjPtr->bytes = cmdBuffer;
-  cmdObjPtr->length = file_length;
+  cmdObjPtr->bytes = buffer;
+  cmdObjPtr->length = length;
 
   Tcl_IncrRefCount(cmdObjPtr);
 
@@ -82,7 +85,7 @@ void ExRootConfReader::ReadFile(const char *fileName, bool isTop)
 
   Tcl_DecrRefCount(cmdObjPtr);
 
-  delete[] cmdBuffer;
+  delete[] buffer;
 }
 
 //------------------------------------------------------------------------------
