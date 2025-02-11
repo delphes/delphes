@@ -71,16 +71,16 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:TrackCovariance>
 )
 
-target_link_libraries(Delphes ${ROOT_LIBRARIES})
+target_link_libraries(Delphes PUBLIC ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
 
 if(PYTHIA8_FOUND)
-  target_link_libraries(Delphes ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
+  target_link_libraries(Delphes PUBLIC ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
 
 add_library(DelphesDisplay SHARED
   $<TARGET_OBJECTS:display>
 )
 
-target_link_libraries(DelphesDisplay Delphes)
+target_link_libraries(DelphesDisplay PUBLIC Delphes ROOT::Geom ROOT::Graf3d ROOT::RGL ROOT::Eve ROOT::GuiHtml)
 
 install(TARGETS Delphes DelphesDisplay DESTINATION lib)
