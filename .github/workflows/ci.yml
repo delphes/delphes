@@ -1,6 +1,18 @@
 name: ci
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -29,3 +41,54 @@ jobs:
           cd build
           cmake ..
           make -j 8
+
+  build-latest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: delphes
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          run-install: false
+
+      - name: Install dependencies
+        run: |
+          pixi init
+          pixi config set --local run-post-link-scripts insecure
+          pixi add cxx-compiler cmake make grep sed root_base curl
+
+      - name: List dependencies
+        run: pixi list
+
+      - name: Build Delphes
+        shell: pixi run bash -e {0}
+        run: |
+          # Make the examples location independent by removing the 'external/' prefix
+          # in includes to instead use the installed versions
+          grep -r -l "external/" delphes/examples/ | xargs sed -i 's|external/||g'
+          CXXFLAGS="${CXXFLAGS}" cmake "${CMAKE_ARGS}" -DCMAKE_INSTALL_PREFIX="${CONDA_PREFIX}" -DPYTHIA8_DATA=$(pythia8-config --datadir) -S delphes -B build
+          cmake build -LH
+          cmake --build build --clean-first --parallel=8
+          cmake --install build
+
+      - name: Run tests
+        shell: pixi run bash -e {0}
+        run: |
+          # N.B.: MUST be http not https
+          curl -LO http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
+          gunzip z_ee.hep.gz
+          DelphesSTDHEP "${CONDA_PREFIX}"/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
+
+          # avoid lots of output to stdout
+          root -l -b -q "${CONDA_PREFIX}"/examples/Example1.C'("delphes_output.root")' &> /dev/null
+          root -l -b -q "${CONDA_PREFIX}"/examples/Example2.C'("delphes_output.root")'
+          root -l -b -q "${CONDA_PREFIX}"/examples/Example3.C'("delphes_output.root")'
+          root -l -b -q "${CONDA_PREFIX}"/examples/Example4.C'("delphes_output.root", "plots.root")'
+          root -l -b -q "${CONDA_PREFIX}"/examples/Example5.C'("delphes_output.root")' &> /dev/null
+          root -l -b -q "${CONDA_PREFIX}"/examples/Example6.C'("delphes_output.root")'
