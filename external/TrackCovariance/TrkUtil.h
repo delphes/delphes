@@ -125,7 +125,7 @@ public:
 	Double_t Nclusters(Double_t bgam);	// mean clusters/meter vs beta*gamma
 	static Double_t Nclusters(Double_t bgam, Int_t Opt);	// mean clusters/meter vs beta*gamma
 	Double_t funcNcl(Double_t *xp, Double_t *par);
-	Double_t TrkLen(TVectorD Par);					// Track length inside chamber
+	Double_t TrkLen(TVectorD Par) const;					// Track length inside chamber
 };
 
 #endif
