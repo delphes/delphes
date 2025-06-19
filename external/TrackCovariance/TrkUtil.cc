@@ -942,7 +942,7 @@ void TrkUtil::SetDchBoundaries(Double_t Rmin, Double_t Rmax, Double_t Zmin, Doub
 }
 //
 // Get Trakck length inside DCH volume
-Double_t TrkUtil::TrkLen(TVectorD Par)
+Double_t TrkUtil::TrkLen(TVectorD Par) const
 {
 	Double_t tLength = 0.0;
 	// Check if geometry is initialized
