@@ -4,7 +4,7 @@
 //FJSTARTHEADER
 // $Id$
 //
-// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -321,6 +321,7 @@ template<class BJ, class I> void NNFJN2Plain<BJ,I>::merge_jets(int iA, int iB,
         diJ[jetI-head] = compute_diJ(jetI); // update diJ...
       }
     }
+    // and check whether jetI is potentially jetB's NN
     if (dist < jetB->NN_dist) { // we need to update B
       if (jetI != jetB) {
         jetB->NN_dist = dist;

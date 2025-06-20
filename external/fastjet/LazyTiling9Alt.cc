@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id$
 //
-// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -29,6 +29,7 @@
 //FJENDHEADER
 
 #include <iomanip>
+#include <algorithm>
 #include "fastjet/internal/LazyTiling9Alt.hh"
 #include "fastjet/internal/TilingExtent.hh"
 using namespace std;

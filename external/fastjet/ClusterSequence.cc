@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id$
 //
-// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -28,6 +28,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
+#include "fastjet/config.h"
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
@@ -105,7 +106,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
  * #fastjet documentation
  * 
  * - For further information and normal documentation, see the main <a
- * href="http://fastjet.fr/">FastJet</a> page.
+ * href="https://fastjet.fr/">FastJet</a> page.
  *
  * \section examples Examples
  *   See our \subpage Examples page
@@ -478,7 +479,7 @@ void ClusterSequence::print_banner() {
   (*ostr) << "#                         FastJet release " << fastjet_version << endl;
   (*ostr) << "#                 M. Cacciari, G.P. Salam and G. Soyez                  \n"; 
   (*ostr) << "#     A software package for jet finding and analysis at colliders      \n";
-  (*ostr) << "#                           http://fastjet.fr                           \n"; 
+  (*ostr) << "#                           https://fastjet.fr                           \n"; 
   (*ostr) << "#	                                                                      \n";
   (*ostr) << "# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package\n";
   (*ostr) << "# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   \n";

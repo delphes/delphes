@@ -1292,6 +1292,7 @@ tmp/external/fastjet/ClosestPair2D.$(ObjSuf): \
 	external/fastjet/internal/ClosestPair2D.hh
 tmp/external/fastjet/ClusterSequence.$(ObjSuf): \
 	external/fastjet/ClusterSequence.$(SrcSuf) \
+	external/fastjet/config.h \
 	external/fastjet/Error.hh \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequence.hh \
@@ -1341,6 +1342,7 @@ tmp/external/fastjet/ClusterSequence_CP2DChan.$(ObjSuf): \
 	external/fastjet/internal/ClosestPair2D.hh
 tmp/external/fastjet/ClusterSequence_Delaunay.$(ObjSuf): \
 	external/fastjet/ClusterSequence_Delaunay.$(SrcSuf) \
+	external/fastjet/config.h \
 	external/fastjet/Error.hh \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/ClusterSequence.hh \
@@ -1365,15 +1367,19 @@ tmp/external/fastjet/CompositeJetStructure.$(ObjSuf): \
 	external/fastjet/CompositeJetStructure.hh
 tmp/external/fastjet/Dnn2piCylinder.$(ObjSuf): \
 	external/fastjet/Dnn2piCylinder.$(SrcSuf) \
+	external/fastjet/config.h \
 	external/fastjet/internal/Dnn2piCylinder.hh
 tmp/external/fastjet/Dnn3piCylinder.$(ObjSuf): \
 	external/fastjet/Dnn3piCylinder.$(SrcSuf) \
+	external/fastjet/config.h \
 	external/fastjet/internal/Dnn3piCylinder.hh
 tmp/external/fastjet/Dnn4piCylinder.$(ObjSuf): \
 	external/fastjet/Dnn4piCylinder.$(SrcSuf) \
+	external/fastjet/config.h \
 	external/fastjet/internal/Dnn4piCylinder.hh
 tmp/external/fastjet/DnnPlane.$(ObjSuf): \
 	external/fastjet/DnnPlane.$(SrcSuf) \
+	external/fastjet/config.h \
 	external/fastjet/internal/DnnPlane.hh
 tmp/external/fastjet/Error.$(ObjSuf): \
 	external/fastjet/Error.$(SrcSuf) \
@@ -2001,6 +2007,7 @@ modules/EnergyScale.h: \
 	classes/DelphesModule.h
 	@touch $@
 external/fastjet/internal/Dnn2piCylinder.hh: \
+	external/fastjet/config.h \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
@@ -2052,6 +2059,7 @@ external/fastjet/tools/GridMedianBackgroundEstimator.hh: \
 	external/fastjet/RectangularGrid.hh
 	@touch $@
 external/fastjet/internal/DnnPlane.hh: \
+	external/fastjet/config.h \
 	external/fastjet/internal/Triangulation.hh \
 	external/fastjet/internal/DynamicNearestNeighbours.hh
 	@touch $@
@@ -2168,6 +2176,7 @@ external/fastjet/GhostedAreaSpec.hh: \
 	external/fastjet/SharedPtr.hh
 	@touch $@
 external/fastjet/internal/Dnn4piCylinder.hh: \
+	external/fastjet/config.h \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
@@ -2334,6 +2343,7 @@ external/fastjet/internal/LazyTiling9SeparateGhosts.hh: \
 	external/fastjet/config.h
 	@touch $@
 external/fastjet/internal/Dnn3piCylinder.hh: \
+	external/fastjet/config.h \
 	external/fastjet/internal/DynamicNearestNeighbours.hh \
 	external/fastjet/internal/DnnPlane.hh \
 	external/fastjet/internal/numconsts.hh
@@ -2367,6 +2377,7 @@ external/fastjet/LimitedWarning.hh: \
 	external/fastjet/internal/thread_safety_helpers.hh
 	@touch $@
 external/fastjet/config.h: \
+	external/fastjet/config_auto.h \
 	external/fastjet/config_win.h
 	@touch $@
 modules/CscClusterId.h: \

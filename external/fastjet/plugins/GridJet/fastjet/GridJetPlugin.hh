@@ -4,7 +4,7 @@
 //FJSTARTHEADER
 // $Id: GridJetPlugin.hh 2267 2011-06-20 15:10:23Z salam $
 //
-// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

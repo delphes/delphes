@@ -6,7 +6,7 @@
 //FJSTARTHEADER
 // $Id: ClusterSequence_N2.cc 1351 2009-01-09 18:03:03Z salam $
 //
-// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -127,41 +127,156 @@ template<class BJ> void ClusterSequence::_simple_N2_cluster() {
 
     // Initialise jetB's NN distance as well as updating it for 
     // other particles.
-    // NB: by having different loops for jetB == or != NULL we could
-    //     perhaps save a few percent (usually avoid one if inside loop),
-    //     but will not do it for now because on laptop fluctuations are
-    //     too large to reliably measure a few percent difference...
+
+    // There are several potential variants of the algorithm below for
+    // updating the NN info and diJ table. Differences affect cases
+    // where jetB is null. Numbers below are for antikt, R=0.4,
+    // Nparticles=50, cf. top-level/development-notes/2025-03-speed and
+    // the percent number indicates the change in runtime relative to
+    // "original" (more negative is better)
+    //
+    // 0: original, i.e. up to FJ version 3.4.3, good compromise in normal conditions, pathological for very small R (cf. 2503.08146)
+    // 1: add extra non-null jetB test in loop             intel/linux:+1%, M2Pro/mac:+2%
+    // 2: two independent loops                            intel/linux:-3%, M2Pro/mac:+2%
+    // 3: proxy jetB_or_A to avoid null test               intel/linux:-1%, M2Pro/mac:-1%
+    //
+    // Note that on intel/linux/gcc(14.2) -O2 v. -O3 tends to be a small difference
+    // while on M2Pro/mac/clang(17) -O3 is about 10% faster than -O2, while gcc is 7% faster and less sensitive to -O2 v. -O3
+    // 
+    // We settle on strategy 2 for the 3.5.X series, starting 2025-05, on the
+    // assumption that intel/linux is the dominant platform for most
+    // very long runs with FJ.
+#define FJ_N2_UPDATE_STRATEGY 2
+
+#if   FJ_N2_UPDATE_STRATEGY==0
     for (BJ * jetI = head; jetI != tail; jetI++) {
       // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
       if (jetI->NN == jetA || jetI->NN == jetB) {
-	_bj_set_NN_nocross(jetI, head, tail);
-	diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
+        _bj_set_NN_nocross(jetI, head, tail);
+        diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
       } 
       // check whether new jetB is closer than jetI's current NN and
       // if need be update things
       if (jetB != NULL) {
-	double dist = _bj_dist(jetI,jetB);
-	if (dist < jetI->NN_dist) {
-	  if (jetI != jetB) {
-	    jetI->NN_dist = dist;
-	    jetI->NN = jetB;
-	    diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
-	  }
-	}
-	if (dist < jetB->NN_dist) {
-	  if (jetI != jetB) {
-	    jetB->NN_dist = dist;
-	    jetB->NN      = jetI;}
-	}
+        double dist = _bj_dist(jetI,jetB);
+        if (dist < jetI->NN_dist) {
+          if (jetI != jetB) {
+            jetI->NN_dist = dist;
+            jetI->NN = jetB;
+            diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
+          }
+        }
+        if (dist < jetB->NN_dist) {
+          if (jetI != jetB) {
+            jetB->NN_dist = dist;
+            jetB->NN      = jetI;}
+        }
+      }
+      // if jetI's NN is the new tail then relabel it so that it becomes jetA
+      if (jetI->NN == tail) {jetI->NN = jetA;}
+    }    
+    if (jetB != NULL) {diJ[jetB-head] = _bj_diJ(jetB);}
+#elif FJ_N2_UPDATE_STRATEGY==1
+    for (BJ * jetI = head; jetI != tail; jetI++) {
+      // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
+      if (jetI->NN == jetA || (jetB && jetI->NN == jetB)) {
+        _bj_set_NN_nocross(jetI, head, tail);
+        diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
+      } 
+      // check whether new jetB is closer than jetI's current NN and
+      // if need be update things
+      if (jetB != NULL) {
+        double dist = _bj_dist(jetI,jetB);
+        if (dist < jetI->NN_dist) {
+          if (jetI != jetB) {
+            jetI->NN_dist = dist;
+            jetI->NN = jetB;
+            diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
+          }
+        }
+        if (dist < jetB->NN_dist) {
+          if (jetI != jetB) {
+            jetB->NN_dist = dist;
+            jetB->NN      = jetI;}
+        }
+      }
+      // if jetI's NN is the new tail then relabel it so that it becomes jetA
+      if (jetI->NN == tail) {jetI->NN = jetA;}
+    }    
+    if (jetB != NULL) {diJ[jetB-head] = _bj_diJ(jetB);}
+#elif FJ_N2_UPDATE_STRATEGY==2
+    if (jetB != NULL){
+      for (BJ * jetI = head; jetI != tail; jetI++) {
+        // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
+        if (jetI->NN == jetA || jetI->NN == jetB) {
+          _bj_set_NN_nocross(jetI, head, tail);
+          diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
+        } 
+        // check whether new jetB is closer than jetI's current NN and
+        // if need be update things
+        double dist = _bj_dist(jetI,jetB);
+        if (dist < jetI->NN_dist) {
+          if (jetI != jetB) {
+            jetI->NN_dist = dist;
+            jetI->NN = jetB;
+            diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
+          }
+        }
+        // and check whether jetI is potentially jetB's NN
+        if (dist < jetB->NN_dist) {
+          if (jetI != jetB) {
+            jetB->NN_dist = dist;
+            jetB->NN      = jetI;}
+        }
+        // if jetI's NN is the new tail then relabel it so that it becomes jetA
+        if (jetI->NN == tail) {jetI->NN = jetA;}
+      }
+      diJ[jetB-head] = _bj_diJ(jetB);
+    } else {
+      // case where jetB == NULL
+      for (BJ * jetI = head; jetI != tail; jetI++) {
+        // see if jetI had jetA as a NN -- if so recalculate the NN
+        if (jetI->NN == jetA) {
+          _bj_set_NN_nocross(jetI, head, tail);
+          diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
+        } 
+        // if jetI's NN is the new tail then relabel it so that it becomes jetA
+        if (jetI->NN == tail) {jetI->NN = jetA;}
+      }
+    }
+#elif FJ_N2_UPDATE_STRATEGY==3
+    auto jetB_or_A = jetB ? jetB : jetA;
+    for (BJ * jetI = head; jetI != tail; jetI++) {
+      // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
+      if (jetI->NN == jetA || jetI->NN == jetB_or_A) {
+        _bj_set_NN_nocross(jetI, head, tail);
+        diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
+      } 
+      // check whether new jetB is closer than jetI's current NN and
+      // if need be update things
+      if (jetB != NULL) {
+        double dist = _bj_dist(jetI,jetB);
+        if (dist < jetI->NN_dist) {
+          if (jetI != jetB) {
+            jetI->NN_dist = dist;
+            jetI->NN = jetB;
+            diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
+          }
+        }
+        if (dist < jetB->NN_dist) {
+          if (jetI != jetB) {
+            jetB->NN_dist = dist;
+            jetB->NN      = jetI;}
+        }
       }
       // if jetI's NN is the new tail then relabel it so that it becomes jetA
       if (jetI->NN == tail) {jetI->NN = jetA;}
     }
-
-    
     if (jetB != NULL) {diJ[jetB-head] = _bj_diJ(jetB);}
-
-
+#else
+#error "unknown N2 update strategy"
+#endif
+#undef FJ_N2_UPDATE_STRATEGY
   }
   
 

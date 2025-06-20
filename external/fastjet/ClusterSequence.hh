@@ -4,7 +4,7 @@
 //FJSTARTHEADER
 // $Id$
 //
-// Copyright (c) 2005-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -72,9 +72,9 @@ class ClusterSequence {
   /// of PseudoJets and clustering them with jet definition specified
   /// by jet_def (which also specifies the clustering strategy)
   template<class L> ClusterSequence (
-			          const std::vector<L> & pseudojets,
-				  const JetDefinition & jet_def,
-				  const bool & writeout_combinations = false);
+                                  const std::vector<L> & pseudojets,
+                                  const JetDefinition & jet_def,
+                                  const bool & writeout_combinations = false);
   
   /// copy constructor for a ClusterSequence
   ClusterSequence (const ClusterSequence & cs) : _deletes_self_when_unused(false) {
@@ -182,7 +182,7 @@ class ClusterSequence {
   ///
   /// This requires nsub ln nsub time
   std::vector<PseudoJet> exclusive_subjets_up_to (const PseudoJet & jet, 
-						  int nsub) const;
+                                                  int nsub) const;
 
   /// returns the dij that was present in the merging nsub+1 -> nsub 
   /// subjets inside this jet.
@@ -259,7 +259,7 @@ class ClusterSequence {
   /// optional comment at the beginning
   void print_jets_for_root(const std::vector<PseudoJet> & jets, 
                            const std::string & filename,
-			   const std::string & comment = "") const;
+                           const std::string & comment = "") const;
 
 // Not yet. Perhaps in a future release.
 //   /// print out all inclusive jets with pt > ptmin
@@ -267,7 +267,7 @@ class ClusterSequence {
 
   /// add on to subjet_vector the constituents of jet (for internal use mainly)
   void add_constituents (const PseudoJet & jet, 
-			 std::vector<PseudoJet> & subjet_vector) const;
+                         std::vector<PseudoJet> & subjet_vector) const;
 
   /// return the enum value of the strategy used to cluster the event
   inline Strategy strategy_used () const {return _strategy;}
@@ -324,7 +324,7 @@ class ClusterSequence {
   /// momentum is assumed to be the 4-vector sum of that of jet_i and
   /// jet_j
   void plugin_record_ij_recombination(int jet_i, int jet_j, double dij, 
-				      int & newjet_k) {
+                                      int & newjet_k) {
     assert(plugin_activated());
     _do_ij_recombination_step(jet_i, jet_j, dij, newjet_k);
   }
@@ -333,8 +333,8 @@ class ClusterSequence {
   /// except that the new jet is attributed the momentum and
   /// user_index of newjet
   void plugin_record_ij_recombination(int jet_i, int jet_j, double dij, 
-				      const PseudoJet & newjet, 
-				      int & newjet_k);
+                                      const PseudoJet & newjet, 
+                                      int & newjet_k);
 
   /// record the fact that there has been a recombination between
   /// jets()[jet_i] and the beam, with the specified diB; when looking
@@ -444,9 +444,9 @@ public:
     int parent2; 
 
     /// index in _history where the current jet is
-		/// recombined with another jet to form its child. It
-		/// is Invalid if this jet does not further
-		/// recombine.
+    /// recombined with another jet to form its child. It
+    /// is Invalid if this jet does not further
+    /// recombine.
     int child;   
 
     /// index in the _jets vector where we will find the
@@ -556,7 +556,7 @@ public:
   /// When specified, the second argument is an action that will be
   /// applied on every jets in the resulting ClusterSequence
   void transfer_from_sequence(const ClusterSequence & from_seq,
-			      const FunctionOfPseudoJet<PseudoJet> * action_on_jets = 0);
+                              const FunctionOfPseudoJet<PseudoJet> * action_on_jets = 0);
 
   /// retrieve a shared pointer to the wrapper to this ClusterSequence
   ///
@@ -625,7 +625,7 @@ protected:
   /// then run the clustering (may be called by various constructors).
   /// It assumes _jets contains the momenta to be clustered.
   void _initialise_and_run (const JetDefinition & jet_def,
-			    const bool & writeout_combinations);
+                            const bool & writeout_combinations);
 
   //// this performs the initialisation, minus the option-decanting
   //// stage; for low multiplicity, initialising a few things in the
@@ -637,8 +637,8 @@ protected:
 //DEP   /// clustering, provided for legacy purposes. The jet finder is that
 //DEP   /// specified in the static member _default_jet_algorithm.
 //DEP   void _initialise_and_run (const double R,
-//DEP 			    const Strategy & strategy,
-//DEP 			    const bool & writeout_combinations);
+//DEP                             const Strategy & strategy,
+//DEP                             const bool & writeout_combinations);
 
   /// fills in the various member variables with "decanted" options from
   /// the jet_definition and writeout_combinations variables
@@ -660,7 +660,7 @@ protected:
   /// jet_j, at distance scale dij; return the index newjet_k of the
   /// result of the recombination of i and j.
   void _do_ij_recombination_step(const int jet_i, const int jet_j, 
-				 const double dij, int & newjet_k);
+                                 const double dij, int & newjet_k);
 
   /// carry out an recombination step in which _jets[jet_i] merges with
   /// the beam, 
@@ -776,13 +776,13 @@ protected:
 
   void _add_step_to_history( //const int step_number,
                             const int parent1, 
-			    const int parent2, const int jetp_index,
-			    const double dij);
+                            const int parent2, const int jetp_index,
+                            const double dij);
 
   /// internal routine associated with the construction of the unique
   /// history order (following children in the tree)
   void _extract_tree_children(int pos, std::valarray<bool> &, 
-		const std::valarray<int> &, std::vector<int> &) const;
+                const std::valarray<int> &, std::vector<int> &) const;
 
   /// internal routine associated with the construction of the unique
   /// history order (following parents in the tree)
@@ -797,8 +797,8 @@ protected:
 
   /// currently used only in the Voronoi based code
   void _add_ktdistance_to_map(const int ii, 
-			      DistMap & DijMap,
-  			      const DynamicNearestNeighbours * DNN);
+                              DistMap & DijMap,
+                                const DynamicNearestNeighbours * DNN);
 
 
   /// will be set by default to be true for the first run
@@ -845,7 +845,7 @@ protected:
   /// set the kinematic and labelling info for jeta so that it corresponds
   /// to _jets[_jets_index]
   template <class J> void _bj_set_jetinfo( J * const jet, 
-						 const int _jets_index) const;
+                                                 const int _jets_index) const;
 
   /// "remove" this jet, which implies updating links of neighbours and
   /// perhaps modifying the tile structure
@@ -853,7 +853,7 @@ protected:
 
   /// return the distance between two BriefJet objects
   template <class J> double _bj_dist(const J * const jeta, 
-			const J * const jetb) const;
+                        const J * const jetb) const;
 
   // return the diJ (multiplied by _R2) for this jet assuming its NN
   // info is correct
@@ -864,7 +864,7 @@ protected:
   /// return a pointer to that jet; otherwise return tail.
   template <class J> inline J * _bj_of_hindex(
                           const int hist_index, 
-			  J * const head, J * const tail) 
+                          J * const head, J * const tail) 
     const {
     J * res;
     for(res = head; res<tail; res++) {
@@ -935,9 +935,9 @@ protected:
   void _initialise_tiles();
   void _print_tiles(TiledJet * briefjets ) const;
   void _add_neighbours_to_tile_union(const int tile_index, 
-		 std::vector<int> & tile_union, int & n_near_tiles) const;
+                 std::vector<int> & tile_union, int & n_near_tiles) const;
   void _add_untagged_neighbours_to_tile_union(const int tile_index, 
-		 std::vector<int> & tile_union, int & n_near_tiles);
+                 std::vector<int> & tile_union, int & n_near_tiles);
 
   //----------------------------------------------------------------------
   /// fundamental structure for e+e- clustering
@@ -994,10 +994,10 @@ template<class L> void ClusterSequence::_transfer_input_jets(
 // // initialise from some generic type... Has to be made available
 // // here in order for it the template aspect of it to work...
 // template<class L> ClusterSequence::ClusterSequence (
-// 			          const std::vector<L> & pseudojets,
-// 				  const double R,
-// 				  const Strategy & strategy,
-// 				  const bool & writeout_combinations) {
+//                                   const std::vector<L> & pseudojets,
+//                                   const double R,
+//                                   const Strategy & strategy,
+//                                   const bool & writeout_combinations) {
 // 
 //   // transfer the initial jets (type L) into our own array
 //   _transfer_input_jets(pseudojets);
@@ -1011,9 +1011,9 @@ template<class L> void ClusterSequence::_transfer_input_jets(
 /// constructor of a jet-clustering sequence from a vector of
 /// four-momenta, with the jet definition specified by jet_def
 template<class L> ClusterSequence::ClusterSequence (
-			          const std::vector<L> & pseudojets,
-				  const JetDefinition & jet_def_in,
-				  const bool & writeout_combinations) :
+                                  const std::vector<L> & pseudojets,
+                                  const JetDefinition & jet_def_in,
+                                  const bool & writeout_combinations) :
   _jet_def(jet_def_in), _writeout_combinations(writeout_combinations),
   _structure_shared_ptr(new ClusterSequenceStructure(this))
 {
@@ -1121,8 +1121,8 @@ template <class J> inline void ClusterSequence::_bj_set_NN_nocross(
     for (J * jetB = head; jetB != jet; jetB++) {
       double dist = _bj_dist(jet,jetB);
       if (dist < NN_dist) {
-	NN_dist = dist;
-	NN = jetB;
+        NN_dist = dist;
+        NN = jetB;
       }
     }
   }
@@ -1130,8 +1130,8 @@ template <class J> inline void ClusterSequence::_bj_set_NN_nocross(
     for (J * jetB = jet+1; jetB != tail; jetB++) {
       double dist = _bj_dist(jet,jetB);
       if (dist < NN_dist) {
-	NN_dist = dist;
-	NN = jetB;
+        NN_dist = dist;
+        NN = jetB;
       }
     }
   }
@@ -1142,7 +1142,7 @@ template <class J> inline void ClusterSequence::_bj_set_NN_nocross(
 
 //----------------------------------------------------------------------
 template <class J> inline void ClusterSequence::_bj_set_NN_crosscheck(J * const jet, 
-		    J * const head, const J * const tail) const {
+                    J * const head, const J * const tail) const {
   double NN_dist = _R2;
   J * NN  = NULL;
   for (J * jetB = head; jetB != tail; jetB++) {
