@@ -21,6 +21,8 @@
  *  Subtract pile-up contribution from tracks.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author J. T. Offermann - Brown University
+ * (J.T.O. adding the sumpt2 vertex option)
  *
  */
 
@@ -78,6 +80,10 @@ void TrackPileUpSubtractor::Init()
 
   fPTMin = GetDouble("PTMin", 0.);
 
+  // determine mode -- do we define the primary vertex using truth-level info (Candidate::IsPU),
+  // or do we define it as the vertex with the largest sum(pt^2) of charged particles?
+  fMode = GetInt("PrimaryVertexMode",0);
+
   // import arrays with output from other modules
 
   ExRootConfParam param = GetParam("InputArray");
@@ -122,18 +128,36 @@ void TrackPileUpSubtractor::Process()
   TObjArray *array;
   Double_t z, zvtx = 0;
   Double_t pt, eta, phi, e;
+  Double_t sumpt2, sumpt2_max = -999.;
 
   // find z position of primary vertex
 
   fItVertexInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
+
+  if(fMode == 1)
   {
-    if(!candidate->IsPU)
+    while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
     {
-      zvtx = candidate->Position.Z();
-      // break;
+      sumpt2 = candidate->SumPT2;
+      if(sumpt2 > sumpt2_max)
+      {
+        sumpt2_max = sumpt2;
+        zvtx = candidate->Position.Z();
+      }
     }
   }
+  else // for now, only 2 options for fMode, hence if/else should probably be OK.
+  {
+    while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
+    {
+      if(!candidate->IsPU)
+      {
+        zvtx = candidate->Position.Z();
+        // break;
+      }
+    }
+}
+
 
   // loop over all input arrays
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)

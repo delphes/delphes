@@ -24,6 +24,7 @@
  *  Subtract pile-up contribution from tracks.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author J. T. Offermann - Brown University
  *
  */
 
@@ -49,6 +50,8 @@ private:
   DelphesFormula *fFormula; //!
 
   Double_t fPTMin;
+
+  Int_t fMode;
 
   std::map<TIterator *, TObjArray *> fInputMap; //!
 
