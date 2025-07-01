@@ -139,6 +139,7 @@ void TrackPileUpSubtractor::Process()
     while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
     {
       sumpt2 = candidate->SumPT2;
+      if(sumpt2 == 0.) sumpt2 = candidate->GenSumPT2; // in some cases, only one or the other is filled (they default to zero)
       if(sumpt2 > sumpt2_max)
       {
         sumpt2_max = sumpt2;
