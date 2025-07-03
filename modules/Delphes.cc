@@ -128,11 +128,6 @@ void Delphes::Init()
   {
     name = param[i].GetString();
 
-    // Allow for handling comments (#) when parsing the ExecutionPath - J. T. Offermann (Brown University)
-    if(name[0] == '#') continue; // special case
-    name = ((TObjString*)name.Tokenize("#")->At(0))->String().Strip(TString::kBoth);
-    if(name.EqualTo("") || name.EqualTo("#")) continue;
-
     itModules = modules->find(name);
     if(itModules != modules->end())
     {
