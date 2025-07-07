@@ -3,6 +3,7 @@
  *  Cluster vertices from tracks using deterministic annealing and timing information
  *
  *  \authors M. Selvaggi, L. Gray
+ *  \author J. T. Offermann
  *
  */
 
@@ -189,10 +190,19 @@ void VertexFinderDA4D::Process()
     double normw = 0.;
     double errtime = 0;
 
-    double meanpos = 0.;
-    double meanerr2 = 0.;
-    double normpos = 0.;
-    double errpos = 0.;
+    double meanpos_x = 0.;
+    double meanpos_y = 0.;
+    double meanpos_z = 0.;
+    double meanerr2_x = 0.;
+    double meanerr2_y = 0.;
+    double meanerr2_z = 0.;
+    double normpos_x = 0.;
+    double normpos_y = 0.;
+    double normpos_z = 0.;
+
+    double errpos_x = 0.;
+    double errpos_y = 0.;
+    double errpos_z = 0.;
 
     double sumpt2 = 0.;
 
@@ -218,16 +228,39 @@ void VertexFinderDA4D::Process()
       normw += inverr;
 
       // compute error position TBC
+
+      const double sin_phi = TMath::Sin(track->Phi);
+      const double cos_phi = TMath::Cos(track->Phi);
+
       const double pt = track->Momentum.Pt();
-      const double z = track->DZ / 10.0;
+      const double x = track->DZ / 10.0;
+      const double y = track->D0 * cos_phi / 10.0;
+      const double z = track->D0 * sin_phi / 10.0;
       const double err_pt = track->ErrorPT;
       const double err_z = track->ErrorDZ;
 
-      const double wi = (pt / (err_pt * err_z)) * (pt / (err_pt * err_z));
-      meanpos += z * wi;
+      const double err_x = TMath::Sqrt(TMath::Sq(cos_phi * track->ErrorD0) + TMath::Sq(sin_phi * track->D0 * track->ErrorPhi));
+      const double err_y = TMath::Sqrt(TMath::Sq(sin_phi * track->ErrorD0) + TMath::Sq(cos_phi * track->D0 * track->ErrorPhi));
 
-      meanerr2 += err_z * err_z * wi;
-      normpos += wi;
+      // TODO: Double-check this. Copying the pattern from wi_z, but admittedly have not
+      //       given this much thought yet. - J. T. Offermann
+      const double wi_x = (pt / (err_pt * err_x)) * (pt / (err_pt * err_y));
+      const double wi_y = (pt / (err_pt * err_x)) * (pt / (err_pt * err_y));
+
+      const double wi_z = (pt / (err_pt * err_z)) * (pt / (err_pt * err_z));
+
+      meanpos_x += x * wi_x;
+      meanpos_y += y * wi_y;
+      meanpos_z += z * wi_z;
+
+      meanerr2_x += err_x * err_x * wi_x;
+      meanerr2_y += err_y * err_y * wi_y;
+      meanerr2_z += err_z * err_z * wi_z;
+
+      normpos_x += wi_x;
+      normpos_y += wi_y;
+      normpos_z += wi_z;
+
       sumpt2 += pt * pt;
 
       // while we are here store cluster index in tracks
@@ -237,12 +270,20 @@ void VertexFinderDA4D::Process()
     meantime = meantime / normw;
     expv_x2 = expv_x2 / normw;
     errtime = TMath::Sqrt((expv_x2 - meantime * meantime) / itr);
-    meanpos = meanpos / normpos;
-    meanerr2 = meanerr2 / normpos;
-    errpos = TMath::Sqrt(meanerr2 / itr);
+    meanpos_z = meanpos_z / normpos_z;
+    meanerr2_z = meanerr2_z / normpos_z;
+    errpos_z = TMath::Sqrt(meanerr2_z / itr);
 
-    candidate->Position.SetXYZT(0.0, 0.0, meanpos * 10.0, meantime * c_light);
-    candidate->PositionError.SetXYZT(0.0, 0.0, errpos * 10.0, errtime * c_light);
+    meanpos_x = meanpos_x / normpos_x;
+    meanerr2_x = meanerr2_x / normpos_x;
+    errpos_x = TMath::Sqrt(meanerr2_x / itr);
+
+    meanpos_y = meanpos_y / normpos_y;
+    meanerr2_y = meanerr2_y / normpos_y;
+    errpos_y = TMath::Sqrt(meanerr2_y / itr);
+
+    candidate->Position.SetXYZT(meanpos_x * 10.0, meanpos_y * 10.0, meanpos_z * 10.0, meantime * c_light);
+    candidate->PositionError.SetXYZT(errpos_x * 10.0, errpos_y * 10.0, errpos_z * 10.0, errtime * c_light);
     candidate->SumPT2 = sumpt2;
     candidate->ClusterNDF = itr;
     candidate->ClusterIndex = ivtx;
