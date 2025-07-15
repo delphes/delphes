@@ -51,7 +51,7 @@ public:
   ~DelphesEventDisplay();
   void EventChanged(Int_t); // *SIGNAL*
 
-private:
+protected:
   void update_html_summary();
   void make_gui();
   void load_event();
