@@ -4,7 +4,7 @@
 // by default, use an automatically generated config_auto.h
 // unless it's a windows machine in which case
 #ifndef WIN32
-#include "config_auto.h"
+#include "fastjet/config_auto.h"
 #else 
 #include "fastjet/config_win.h"
 #endif // WIN32

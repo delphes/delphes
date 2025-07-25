@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id: D0RunIBaseConePlugin.cc 1779 2010-10-25 10:32:59Z soyez $
 //
-// Copyright (c) 2009-2024, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.

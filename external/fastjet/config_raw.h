@@ -1,4 +1,4 @@
-/* include/fastjet/config_raw.h.  Generated from config.h.in by configure.  */
+/* include/config_raw.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* The ATLASCone plugin is enabled */
@@ -65,7 +65,7 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
-/* Define to 1 if you have the `m' library (-lm). */
+/* Define to 1 if you have the 'm' library (-lm). */
 #define HAVE_LIBM 1
 
 /* defined if limited thread-safety has been enabled */
@@ -117,7 +117,7 @@
 #define PACKAGE_NAME "FastJet"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "FastJet 3.4.3"
+#define PACKAGE_STRING "FastJet 3.5.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fastjet"
@@ -126,27 +126,27 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.4.3"
+#define PACKAGE_VERSION "3.5.0"
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
+/* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.4.3"
+#define VERSION "3.5.0"
 
 /* Major version of this package */
 #define VERSION_MAJOR 3
 
 /* Minor version of this package */
-#define VERSION_MINOR 4
+#define VERSION_MINOR 5
 
 /* Version of the package under the form XYYZZ (instead of X.Y.Z) */
-#define VERSION_NUMBER 30403
+#define VERSION_NUMBER 30500
 
 /* Patch version of this package */
-#define VERSION_PATCHLEVEL 3
+#define VERSION_PATCHLEVEL 0
 
 /* Pre-release version of this package */
 /* #undef VERSION_PRERELEASE */
