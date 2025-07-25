@@ -13,11 +13,6 @@ set RandomSeed 123
 #
 #   - removed DenseTrackFilter (not relevant only for pT> 5 TeV jet studies)
 #   - nominal CLD detector tracking efficiency
-#       -  https://indico.cern.ch/event/1064327/contributions/4893180/attachments/2452299/4204992/220601_FCCWeek_CLD_sailer.pdf
-#   - nominal FCChh detector tracking/muon resolution for scenario I
-#   - use DualRedoutCalorimeter module for simplicity:
-#      - ECAL is CMS crystals (test beam)
-#      - HCAL is DualReadout
 #   - BTagging (3WPs) shape based on latest ParticleNet Run II (still private):
 #      - nominal PNet will be scenario II, for scenario I(III) improve(degrade) btagging eff by +/-5%
 #   - TauTagging (3WPs) based on DeepJet CMS:
