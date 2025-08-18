@@ -45,6 +45,8 @@ public:
 
   void SetTreeWriter(ExRootTreeWriter *treeWriter);
 
+  void SetDefaultRngSeed(Int_t seed=1);
+
   DelphesFactory *GetFactory() const { return fFactory; }
 
   void Clear();
@@ -55,6 +57,7 @@ public:
 
 private:
   DelphesFactory *fFactory;
+  Int_t fDefaultSeed = 0;
 
   ClassDef(Delphes, 1)
 };
