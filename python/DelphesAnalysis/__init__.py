@@ -1,6 +1,10 @@
-__all__ = [ "Delphes", 
-            "AnalysisEvent", 
-            "BaseControlPlots", "BaseWeightClass", 
-            "EventSelection", 
-            "EventSelectionControlPlots", 
-            "ControlPlots", "DumpEventInfo" ]
+__all__ = [
+    "Delphes",
+    "AnalysisEvent",
+    "BaseControlPlots",
+    "BaseWeightClass",
+    "EventSelection",
+    "EventSelectionControlPlots",
+    "ControlPlots",
+    "DumpEventInfo",
+]
