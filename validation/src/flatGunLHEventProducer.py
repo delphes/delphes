@@ -9,7 +9,11 @@
 # python flatGunLHEventProducer.py -h
 #
 #################################################################################################
-import os, random, math, argparse, sys
+import os
+import random
+import math
+import argparse
+import sys
 
 allowed_pdgCodes = [
     1,
@@ -130,7 +134,7 @@ def write_init(args):
 # __________________________________________________________
 def write_event(args, px, py, pz, e, m):
     def alpha_s(q):
-        return 12 * math.pi / ((33.0 - 6.0) * math.log(q ** 2 / 0.3 ** 2))
+        return 12 * math.pi / ((33.0 - 6.0) * math.log(q**2 / 0.3**2))
 
     pdg = args.pdg
 
@@ -141,43 +145,16 @@ def write_event(args, px, py, pz, e, m):
 
     out = open(args.output, "a")
     out.write("<event>\n")
-    out.write(
-        " 4      1 +1000. {:.8e} 7.54677100e-03 {:.8e}\n".format(2 * e, alpha_s(e))
-    )
+    out.write(" 4      1 +1000. {:.8e} 7.54677100e-03 {:.8e}\n".format(2 * e, alpha_s(e)))
 
     prefix_antip = dict()
     prefix_antip[0] = ""
     prefix_antip[1] = "-"
 
-    out.write(
-        "       -11 -1    0    0  0    0 {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 1.0000e+00\n".format(
-            p1[0], p1[1], p1[2], p1[3], p1[4]
-        )
-    )
-    out.write(
-        "        11 -1    0    0  0    0 {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 -1.0000e+00\n".format(
-            p2[0], p2[1], p2[2], p2[3], p2[4]
-        )
-    )
-    out.write(
-        "         {}  1    1    2  {}    {} {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 -1.0000e+00\n".format(
-            pdg, color[pdg][0], color[pdg][1], p3[0], p3[1], p3[2], p3[3], p3[4], 0.0
-        )
-    )
-    out.write(
-        "        {}{}  1    1    2  {}    {} {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 1.0000e+00\n".format(
-            prefix_antip[charge[pdg]],
-            pdg,
-            color[pdg][1],
-            color[pdg][0],
-            p4[0],
-            p4[1],
-            p4[2],
-            p4[3],
-            p4[4],
-            0.0,
-        )
-    )
+    out.write("       -11 -1    0    0  0    0 {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 1.0000e+00\n".format(p1[0], p1[1], p1[2], p1[3], p1[4]))
+    out.write("        11 -1    0    0  0    0 {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 -1.0000e+00\n".format(p2[0], p2[1], p2[2], p2[3], p2[4]))
+    out.write("         {}  1    1    2  {}    {} {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 -1.0000e+00\n".format(pdg, color[pdg][0], color[pdg][1], p3[0], p3[1], p3[2], p3[3], p3[4]))
+    out.write("        {}{}  1    1    2  {}    {} {:+.8e} {:+.8e} {:+.8e} {:.8e} {:.8e} 0.0000e+00 1.0000e+00\n".format(prefix_antip[charge[pdg]], pdg, color[pdg][1], color[pdg][0], p4[0], p4[1], p4[2], p4[3], p4[4]))
 
     out.write("</event>\n")
 
@@ -188,37 +165,25 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdg", type=int)
-    parser.add_argument(
-        "--pmin", type=float, help="minimum pt/e [GeV] (default: 1.)", default=1.0
-    )
+    parser.add_argument("--pmin", type=float, help="minimum pt/e [GeV] (default: 1.)", default=1.0)
     parser.add_argument(
         "--pmax",
         type=float,
         help="maximum pt/e [GeV] (default: 50000.)",
         default=50000.0,
     )
-    parser.add_argument(
-        "--etamin", type=float, help="minimum eta (default: -2.5)", default=-6.0
-    )
-    parser.add_argument(
-        "--etamax", type=float, help="maximum eta (default: 2.5)", default=6.0
-    )
+    parser.add_argument("--etamin", type=float, help="minimum eta (default: -2.5)", default=-6.0)
+    parser.add_argument("--etamax", type=float, help="maximum eta (default: 2.5)", default=6.0)
     parser.add_argument(
         "--nevts",
         type=int,
         help="number of events to generate (default: 1000)",
         default=1000,
     )
-    parser.add_argument(
-        "--seed", type=int, help="random seed (default uses cpu time)", default=None
-    )
-    parser.add_argument(
-        "--log", dest="log", help="flat in log pt (default: no)", action="store_true"
-    )
+    parser.add_argument("--seed", type=int, help="random seed (default uses cpu time)", default=None)
+    parser.add_argument("--log", dest="log", help="flat in log pt (default: no)", action="store_true")
     parser.set_defaults(log=False)
-    parser.add_argument(
-        "--output", help="output LHE file (default: events.lhe)", default="events.lhe"
-    )
+    parser.add_argument("--output", help="output LHE file (default: events.lhe)", default="events.lhe")
 
     args = parser.parse_args()
 
@@ -257,9 +222,7 @@ if __name__ == "__main__":
 
         # flat in p or in log(p)
         if args.log:
-            p = math.pow(
-                10, random.uniform(math.log10(args.pmin), math.log10(args.pmax))
-            )
+            p = math.pow(10, random.uniform(math.log10(args.pmin), math.log10(args.pmax)))
         else:
             p = random.uniform(args.pmin, args.pmax)
 
@@ -268,7 +231,7 @@ if __name__ == "__main__":
         px = p * math.sin(theta) * math.cos(phi)
         py = p * math.sin(theta) * math.sin(phi)
         pz = p * math.cos(theta)
-        e = math.sqrt(m ** 2 + p ** 2)
+        e = math.sqrt(m**2 + p**2)
 
         write_event(args, px, py, pz, e, m)
         count += 1

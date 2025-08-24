@@ -1,5 +1,5 @@
 import multiprocessing as mp
-import os, sys
+import os
 import argparse
 import importlib
 from src.utils import LatexReport
@@ -14,6 +14,7 @@ python3 submit.py launch_condor --priority group_u_CMST3.all --queue 1nh
 python3 submit.py --collect
 """
 
+
 # ________________________________________________________________________________
 def main():
     parser = argparse.ArgumentParser()
@@ -23,16 +24,12 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command")
 
-    launch_local = subparsers.add_parser(
-        "launch_local", help="launch locally using multi-processing"
-    )
+    launch_local = subparsers.add_parser("launch_local", help="launch locally using multi-processing")
     launch_local.add_argument("--dry", help="check local submission", action="store_true")
 
     launch_condor = subparsers.add_parser("launch_condor", help="launching on condor")
     launch_condor.add_argument("--dry", help="check condor submission", action="store_true")
-    launch_condor.add_argument(
-        "--priority", help="priority list for condor", default="group_u_CMST3.all"
-    )
+    launch_condor.add_argument("--priority", help="priority list for condor", default="group_u_CMST3.all")
     launch_condor.add_argument(
         "--queue",
         help="queue for condor",
@@ -49,9 +46,7 @@ def main():
     )
 
     collect = subparsers.add_parser("collect", help="collect jobs and plot")
-    collect.add_argument(
-        "--no_hadd", help="collect without hadding", action="store_true", default=False
-    )
+    collect.add_argument("--no_hadd", help="collect without hadding", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -228,9 +223,7 @@ def main():
 
                 jobs_outdir = "{}/particle_gun_{}".format(sample_dir, p.pid)
                 os.chdir("{}".format(jobs_outdir))
-                cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(
-                    jobs_outdir, p.pid, p.pid
-                )
+                cmd_hadd = "cd {}; hadd -f val_{}.root val_{}_*.root".format(jobs_outdir, p.pid, p.pid)
                 os.chdir(homedir)
                 pool.apply_async(run_cmd, args=(cmd_hadd,))
 
