@@ -66,8 +66,8 @@ def print_descendence(particle, all_particles, basespace, list_indexed):
             print_descendence(part, all_particles, basespace, list_indexed)
 
 
-if len(sys.argv) != 3:
-    print(" Usage: Example8.py input_file output_file")
+if len(sys.argv) != 2:
+    print(" Usage: Example8.py input_file")
     sys.exit(1)
 
 ROOT.gSystem.Load("libDelphes")
@@ -79,7 +79,6 @@ except:
     pass
 
 inputFile = sys.argv[1]
-outputFile = sys.argv[2]
 
 # Create chain of root trees
 chain = ROOT.TChain("Delphes")
@@ -147,6 +146,3 @@ for entry in range(0, numberOfEntries):
         basespace = ""
         if i not in list_indexed:
             print_descendence(gen, branchParticle, basespace, list_indexed)
-
-# Show resulting histograms
-out_root = ROOT.TFile(outputFile, "RECREATE")
