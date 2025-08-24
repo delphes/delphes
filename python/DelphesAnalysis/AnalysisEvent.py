@@ -25,7 +25,7 @@ class AnalysisEvent(TChain):
     def __init__(self, inputFiles="", maxEvents=0):
         """Initialize the AnalysisEvent like a standard Event, plus additional features."""
         # initialization of base functionalities
-        TChain.__init__(self, "Delphes", "Delphes")
+        super().__init__("Delphes", "Delphes")
         if isinstance(inputFiles, Iterable) and not isinstance(inputFiles, str):
             for thefile in inputFiles:
                 if path.isfile(thefile):
@@ -126,7 +126,7 @@ class AnalysisEvent(TChain):
         if name not in self._collections:
             raise AttributeError("%r object has no attribute %r" % (type(self).__name__, name))
         if name not in self.vardict:
-            self.vardict[name] = TChain.__getattr__(self, self._collections[name])
+            self.vardict[name] = super().__getattr__(self._collections[name])
         return getattr(self, name)
 
     def addProducer(self, name, producer, **kwargs):
@@ -189,10 +189,10 @@ class AnalysisEvent(TChain):
         if attr in self.__dict__["vardict"]:
             return self.vardict[attr]
         if attr in self._collections:
-            return self.vardict.setdefault(attr, TChain.__getattr__(self, self._collections[attr]))
+            return self.vardict.setdefault(attr, super().__getattr__(self._collections[attr]))
         if attr in self._producers:
             return self.vardict.setdefault(attr, self._producers[attr][0](self, **self._producers[attr][1]))
-        return TChain.__getattr__(self, attr)
+        return super().__getattr__(attr)
 
     def __setattr__(self, name, value):
         """Overloaded setter that puts any new attribute in the volatile dict."""
