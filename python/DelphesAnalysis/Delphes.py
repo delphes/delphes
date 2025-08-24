@@ -1,5 +1,10 @@
+import os
 import ROOT
-import libcppyy as _backend
+
+path = os.getenv("DELPHES_HOME")
+
+ROOT.gInterpreter.AddIncludePath(path)
+ROOT.gInterpreter.AddIncludePath(os.path.join(path, "external"))
 
 ROOT.gSystem.Load("libDelphes")
 
@@ -14,10 +19,7 @@ def _Event__str__(self):
     return theString
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Event").__str__ = _Event__str__
-else:
-    _backend.CreateScopeProxy("Event").__str__ = _Event__str__
+ROOT.Event.__str__ = _Event__str__
 
 
 def _LHCOEvent__str__(self):
@@ -25,10 +27,7 @@ def _LHCOEvent__str__(self):
     return theString
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("LHCOEvent").__str__ = _LHCOEvent__str__
-else:
-    _backend.CreateScopeProxy("LHCOEvent").__str__ = _LHCOEvent__str__
+ROOT.LHCOEvent.__str__ = _LHCOEvent__str__
 
 
 def _LHEFEvent__str__(self):
@@ -40,10 +39,7 @@ def _LHEFEvent__str__(self):
     return hepmcstr
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("LHEFEvent").__str__ = _LHEFEvent__str__
-else:
-    _backend.CreateScopeProxy("LHEFEvent").__str__ = _LHEFEvent__str__
+ROOT.LHEFEvent.__str__ = _LHEFEvent__str__
 
 
 def _HepMCEvent__str__(self):
@@ -60,10 +56,7 @@ def _HepMCEvent__str__(self):
     return hepmcstr
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("HepMCEvent").__str__ = _HepMCEvent__str__
-else:
-    _backend.CreateScopeProxy("HepMCEvent").__str__ = _HepMCEvent__str__
+ROOT.HepMCEvent.__str__ = _HepMCEvent__str__
 
 
 def _GenParticle__str__(self):
@@ -84,10 +77,7 @@ def _GenParticle__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("GenParticle").__str__ = _GenParticle__str__
-else:
-    _backend.CreateScopeProxy("GenParticle").__str__ = _GenParticle__str__
+ROOT.GenParticle.__str__ = _GenParticle__str__
 
 
 def _GenParticle_printDecay(self, db, particles, pre=""):
@@ -102,10 +92,7 @@ def _GenParticle_printDecay(self, db, particles, pre=""):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("GenParticle").printDecay = _GenParticle_printDecay
-else:
-    _backend.CreateScopeProxy("GenParticle").printDecay = _GenParticle_printDecay
+ROOT.GenParticle.printDecay = _GenParticle_printDecay
 
 
 def _MissingET__str__(self):
@@ -114,10 +101,7 @@ def _MissingET__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("MissingET").__str__ = _MissingET__str__
-else:
-    _backend.CreateScopeProxy("MissingET").__str__ = _MissingET__str__
+ROOT.MissingET.__str__ = _MissingET__str__
 
 
 def _ScalarHT__str__(self):
@@ -125,10 +109,7 @@ def _ScalarHT__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("ScalarHT").__str__ = _ScalarHT__str__
-else:
-    _backend.CreateScopeProxy("ScalarHT").__str__ = _ScalarHT__str__
+ROOT.ScalarHT.__str__ = _ScalarHT__str__
 
 
 def _Photon__str__(self):
@@ -136,34 +117,25 @@ def _Photon__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Photon").__str__ = _Photon__str__
-else:
-    _backend.CreateScopeProxy("Photon").__str__ = _Photon__str__
+ROOT.Photon.__str__ = _Photon__str__
 
 
 def _Electron__str__(self):
     thestring = "(Pt,Eta,Phi) =(%f,%f,%f)\n" % (self.PT, self.Eta, self.Phi)
-    thestring += "charge: %d\n" % self.Charge
+    thestring += "Charge: %d\n" % self.Charge
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Electron").__str__ = _Electron__str__
-else:
-    _backend.CreateScopeProxy("Electron").__str__ = _Electron__str__
+ROOT.Electron.__str__ = _Electron__str__
 
 
 def _Muon__str__(self):
     thestring = "(Pt,Eta,Phi) =(%f,%f,%f)\n" % (self.PT, self.Eta, self.Phi)
-    thestring += "charge: %d\n" % self.Charge
+    thestring += "Charge: %d\n" % self.Charge
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Muon").__str__ = _Muon__str__
-else:
-    _backend.CreateScopeProxy("Muon").__str__ = _Muon__str__
+ROOT.Muon.__str__ = _Muon__str__
 
 
 def _Jet__str__(self):
@@ -190,10 +162,7 @@ def _Jet__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Jet").__str__ = _Jet__str__
-else:
-    _backend.CreateScopeProxy("Jet").__str__ = _Jet__str__
+ROOT.Jet.__str__ = _Jet__str__
 
 
 def _Track__str__(self):
@@ -206,10 +175,7 @@ def _Track__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Track").__str__ = _Track__str__
-else:
-    _backend.CreateScopeProxy("Track").__str__ = _Track__str__
+ROOT.Track.__str__ = _Track__str__
 
 
 def _Tower__str__(self):
@@ -219,10 +185,7 @@ def _Tower__str__(self):
     return thestring
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("Tower").__str__ = _Tower__str__
-else:
-    _backend.CreateScopeProxy("Tower").__str__ = _Tower__str__
+ROOT.Tower.__str__ = _Tower__str__
 
 #####################################################
 ### Definition of additional ROOT methods         ###
@@ -230,12 +193,9 @@ else:
 
 
 def _lorentzVector__str__(self):
-    theString = "(pt, eta, phi) = (%f,%f,%f)\n" % (self.Pt(), self.Eta(), self.Phi())
-    theString += "mass = %f, p = %f, mt = %f\n" % (self.M(), self.P(), self.Mt())
+    theString = "(Pt,Eta,Phi) = (%f,%f,%f)\n" % (self.Pt(), self.Eta(), self.Phi())
+    theString += "Mass = %f, P = %f, Mt = %f\n" % (self.M(), self.P(), self.Mt())
     return theString
 
 
-if hasattr(_backend, "MakeRootClass"):
-    _backend.MakeRootClass("TLorentzVector").__str__ = _lorentzVector__str__
-else:
-    _backend.CreateScopeProxy("TLorentzVector").__str__ = _lorentzVector__str__
+ROOT.TLorentzVector.__str__ = _lorentzVector__str__
