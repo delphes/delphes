@@ -175,7 +175,7 @@ for fileName in sys.argv[3:]:
     if fileName.startswith("http://") or fileName.startswith("https://"):
         file = HttpFile(fileName)
     else:
-        file = open(fileName)
+        file = open(fileName, "rb")
 
     zip = zipfile.ZipFile(file)
 
