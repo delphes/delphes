@@ -63,12 +63,12 @@ class HttpFile(object):
 ################################################################################
 
 
-def ConvertInput(name, momentumUnit, lengthUnit, branch, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray):
+def ConvertInput(input, momentumUnit, lengthUnit, branch, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray):
 
     pdg = ROOT.TDatabasePDG.Instance()
 
     data = ProMC_pb2.ProMCEvent()
-    data.ParseFromString(zip.read(name))
+    data.ParseFromString(input)
 
     event = data.event
     particles = data.particles
@@ -175,43 +175,42 @@ for fileName in sys.argv[3:]:
     if fileName.startswith("http://") or fileName.startswith("https://"):
         file = HttpFile(fileName)
     else:
-        file = open(fileName, "rb")
+        file = fileName
 
-    zip = zipfile.ZipFile(file)
+    with zipfile.ZipFile(file) as zf:
 
-    numberOfEvents = len(zip.namelist())
-    if numberOfEvents <= 0:
-        continue
-
-    progressBar = ROOT.ExRootProgressBar(numberOfEvents - 1)
-
-    # retrive information from the header file
-    header = ProMCHeader_pb2.ProMCHeader()
-    header.ParseFromString(zip.read("header"))
-    momentumUnit = float(header.MomentumUnit)
-    lengthUnit = float(header.LengthUnit)
-
-    modularDelphes.Clear()
-    treeWriter.Clear()
-    eventCounter = 0
-    for name in zip.namelist():
-        eventCounter += 1
-        if not name.isdigit():
+        numberOfEvents = len(zf.namelist())
+        if numberOfEvents <= 0:
             continue
 
-        ConvertInput(name, momentumUnit, lengthUnit, branchEvent, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray)
+        progressBar = ROOT.ExRootProgressBar(numberOfEvents - 1)
 
-        modularDelphes.ProcessTask()
-
-        treeWriter.Fill()
+        # retrive information from the header file
+        header = ProMCHeader_pb2.ProMCHeader()
+        header.ParseFromString(zf.read("header"))
+        momentumUnit = float(header.MomentumUnit)
+        lengthUnit = float(header.LengthUnit)
 
         modularDelphes.Clear()
         treeWriter.Clear()
-        progressBar.Update(eventCounter)
+        eventCounter = 0
+        for name in zf.namelist():
+            eventCounter += 1
+            if not name.isdigit():
+                continue
 
-    progressBar.Update(eventCounter, eventCounter, ROOT.kTRUE)
-    progressBar.Finish()
-    zip.close()
+            ConvertInput(zf.read(name), momentumUnit, lengthUnit, branchEvent, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray)
+
+            modularDelphes.ProcessTask()
+
+            treeWriter.Fill()
+
+            modularDelphes.Clear()
+            treeWriter.Clear()
+            progressBar.Update(eventCounter)
+
+        progressBar.Update(eventCounter, eventCounter, ROOT.kTRUE)
+        progressBar.Finish()
 
 modularDelphes.FinishTask()
 treeWriter.Write()
