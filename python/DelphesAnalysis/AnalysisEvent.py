@@ -1,12 +1,14 @@
+import ROOT
+import Delphes
+
 from inspect import getfullargspec
-from ROOT import TChain, TClass, TDatabasePDG
 from collections.abc import Iterable
 from os import path
 from functools import reduce
 
 
-class AnalysisEvent(TChain):
-    """A class that complements fwlite::Events with analysis facilities.
+class AnalysisEvent:
+    """A class that complements ExRootTreeReader with analysis facilities.
     The class provides the following additional functionalities:
       1. instrumentation for event weight
            A set of weight classes can be defined, and the event weight
@@ -25,23 +27,22 @@ class AnalysisEvent(TChain):
     def __init__(self, inputFiles="", maxEvents=0):
         """Initialize the AnalysisEvent like a standard Event, plus additional features."""
         # initialization of base functionalities
-        super().__init__("Delphes", "Delphes")
+        self._chain = ROOT.TChain("Delphes", "Delphes")
         if isinstance(inputFiles, Iterable) and not isinstance(inputFiles, str):
             for thefile in inputFiles:
                 if path.isfile(thefile):
-                    self.AddFile(thefile)
+                    self._chain.AddFile(thefile)
                 else:
                     print("Warning: ", thefile, " do not exist.")
         elif isinstance(inputFiles, str):
             thefile = inputFiles
             if path.isfile(thefile):
-                self.AddFile(thefile)
+                self._chain.AddFile(thefile)
             else:
                 print("Warning: ", thefile, " do not exist.")
         else:
             print("Warning: invalid inputFiles")
-        self.BuildIndex("Event[0].Number")
-        self.SetBranchStatus("*", 0)
+        self._reader = ROOT.ExRootTreeReader(self._chain)
         self._eventCounts = 0
         self._maxEvents = maxEvents
         # additional features:
@@ -50,7 +51,7 @@ class AnalysisEvent(TChain):
         self._weightEngines = {}
         # 2. a list of event products used in the analysis
         self._collections = {}
-        self._branches = dict((b, False) for b in [b.GetName() for b in self.GetListOfBranches()])
+        self._branches = dict((b, None) for b in [b.GetName() for b in self._chain.GetListOfBranches()])
         # 3. a list of "producers" of analysis high-level quantities
         self._producers = {}
         # 4. volatile dictionary. User can add any quantity to the event and it will be
@@ -106,15 +107,13 @@ class AnalysisEvent(TChain):
         if inputTag not in self._branches:
             raise AttributeError("%r object has no branch %r" % (type(self).__name__, inputTag))
         self._collections[name] = inputTag
-        self.SetBranchStatus(inputTag + "*", 1)
-        self._branches[inputTag] = True
+        self._branches[inputTag] = self._reader.UseBranch(inputTag)
 
     def removeCollection(self, name):
         """Forget about the named event collection.
         This method will delete both the product from the cache (if any) and the definition.
         To simply clear the cache, use "del event.name" instead."""
-        self.SetBranchStatus(self._collections[name] + "*", 0)
-        self._branches[self._collections[name]] = False
+        self._branches[self._collections[name]] = None
         del self._collections[name]
         if name in self.vardict:
             delattr(self, name)
@@ -126,7 +125,7 @@ class AnalysisEvent(TChain):
         if name not in self._collections:
             raise AttributeError("%r object has no attribute %r" % (type(self).__name__, name))
         if name not in self.vardict:
-            self.vardict[name] = super().__getattr__(self._collections[name])
+            self.vardict[name] = self._branches[self._collections[name]]
         return getattr(self, name)
 
     def addProducer(self, name, producer, **kwargs):
@@ -156,24 +155,21 @@ class AnalysisEvent(TChain):
 
     def event(self):
         """Event number"""
-        if self._branches["Event"]:
-            return self.Event.At(0).Number
-        else:
-            return 0
+        return self._chain.GetReadEntry()
 
     def to(self, event):
         """Jump to some event"""
-        self.GetEntryWithIndex(event)
+        self._reader.ReadEntry(event)
 
-    def __getitem__(self, index):
+    def __getitem__(self, event):
         """Jump to some event"""
-        self.GetEntryWithIndex(index)
+        self._reader.ReadEntry(event)
         return self
 
     def __iter__(self):
         """Iterator"""
         self._eventCounts = 0
-        while self.GetEntry(self._eventCounts):
+        while self._reader.ReadEntry(self._eventCounts):
             self.vardict.clear()
             self._weightCache.clear()
             yield self
@@ -189,10 +185,10 @@ class AnalysisEvent(TChain):
         if attr in self.__dict__["vardict"]:
             return self.vardict[attr]
         if attr in self._collections:
-            return self.vardict.setdefault(attr, super().__getattr__(self._collections[attr]))
+            return self.vardict.setdefault(attr, self._branches[self._collections[attr]])
         if attr in self._producers:
             return self.vardict.setdefault(attr, self._producers[attr][0](self, **self._producers[attr][1]))
-        return super().__getattr__(attr)
+        raise AttributeError("%r object has no attribute %r" % (type(self).__name__, attr))
 
     def __setattr__(self, name, value):
         """Overloaded setter that puts any new attribute in the volatile dict."""
@@ -222,10 +218,7 @@ class AnalysisEvent(TChain):
         dictjoin = lambda d, j=" => ", s="\n": s.join([j.join((str(k), str(v))) for k, v in d.items()])
         mystring = "=================================================================\n"
         # general information
-        if self._branches["Event"]:
-            mystring += str(self.Event.At(0))
-        else:
-            mystring += "Event %d\n" % self.GetReadEvent()
+        mystring += "Event %d\n" % self._chain.GetReadEntry()
         mystring += "-----------------------------------------------------------------\n"
         # weights
         if len(self._weightCache) == 0:
@@ -239,7 +232,7 @@ class AnalysisEvent(TChain):
         for colname in list(self._collections.keys()):
             collection = self.getCollection(colname)
             if collection.GetEntries() > 0:
-                if collection.At(0).IsA() == TClass.GetClass("HepMCEvent"):
+                if collection.At(0).IsA() == ROOT.TClass.GetClass("HepMCEvent"):
                     pass
                 else:
                     mystring += "*** %s has %d element(s)\n" % (colname, collection.GetEntries())
@@ -272,7 +265,7 @@ class AnalysisEvent(TChain):
         return mystring
 
     def decayTree(self, genparticles):
-        db = TDatabasePDG()
+        db = ROOT.TDatabasePDG()
         theString = ""
         for part in genparticles:
             if part.M1 == -1 and part.M2 == -1:
