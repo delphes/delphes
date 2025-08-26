@@ -32,9 +32,9 @@
 //FJENDHEADER
 
 #include "fastjet/PseudoJet.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/RangeDefinition.hh"  // for initialisation from a RangeDefinition
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 #include <limits>
 #include <cmath>
 
@@ -158,7 +158,7 @@ public:
   /// worker (and so will delete automatically when appropriate).
   Selector(SelectorWorker * worker_in) {_worker.reset(worker_in);}
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   /// ctor from a RangeDefinition
   ///
   /// This is provided for backward compatibility and will be removed in
@@ -169,7 +169,7 @@ public:
   /// the range has gone out of scope. We thus strongly advise against
   /// the direct use of this constructor.
   Selector(const RangeDefinition &range);
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
   /// dummy virtual dtor
   virtual ~Selector(){}
@@ -251,7 +251,7 @@ public:
     return validated_worker()->has_finite_area();
   }
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   /// returns the rapidity-phi area associated with the Selector
   /// (throws InvalidArea if the area does not make sense).
   ///
@@ -271,7 +271,7 @@ public:
   /// case of a Monte Carlo area evaluation.
   ///
   double area(double ghost_area) const;
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
   /// returns a (reference to) the underlying worker's shared pointer
   const SharedPtr<SelectorWorker> & worker() const {return _worker;}
@@ -479,11 +479,11 @@ Selector SelectorPtFractionMin(double fraction);
 /// select PseudoJet with 0 momentum
 Selector SelectorIsZero();
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 /// select objects that are (or are only made of) ghosts.
 /// PseudoJets for which has_area() are considered non-pure-ghost.
 Selector SelectorIsPureGhost();
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 /// @}
 

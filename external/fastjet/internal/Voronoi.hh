@@ -380,7 +380,7 @@ private:
   
   double minDistanceBetweenSites;
 
-  static LimitedWarning _warning_degeneracy;
+  FASTJET_WINDLL static LimitedWarning _warning_degeneracy;
 };
 
 int scomp(const void *p1,const void *p2);

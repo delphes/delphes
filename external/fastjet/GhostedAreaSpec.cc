@@ -42,10 +42,10 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 //#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
 //  thread_local 
 //#endif    
-BasicRandom<double> GhostedAreaSpec::_random_generator;
+FASTJET_WINDLL BasicRandom<double> GhostedAreaSpec::_random_generator;
 
-LimitedWarning GhostedAreaSpec::_warn_fj2_placement_deprecated;
-LimitedWarning GhostedAreaSpec::_warn_fixed_last_seeds_nrepeat_gt_1;
+FASTJET_WINDLL LimitedWarning GhostedAreaSpec::_warn_fj2_placement_deprecated;
+FASTJET_WINDLL LimitedWarning GhostedAreaSpec::_warn_fixed_last_seeds_nrepeat_gt_1;
 
 /// explicit constructor
 GhostedAreaSpec::GhostedAreaSpec(

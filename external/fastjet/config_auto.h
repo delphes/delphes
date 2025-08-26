@@ -184,7 +184,7 @@
 
 /* Define to the full name and version of this package. */
 #ifndef FASTJET_PACKAGE_STRING
-#define FASTJET_PACKAGE_STRING "FastJet 3.5.0"
+#define FASTJET_PACKAGE_STRING "FastJet 3.5.1"
 #endif
 
 /* Define to the one symbol short name of this package. */
@@ -199,7 +199,7 @@
 
 /* Define to the version of this package. */
 #ifndef FASTJET_PACKAGE_VERSION
-#define FASTJET_PACKAGE_VERSION "3.5.0"
+#define FASTJET_PACKAGE_VERSION "3.5.1"
 #endif
 
 /* Define to 1 if all of the C89 standard headers exist (not just the ones
@@ -211,7 +211,7 @@
 
 /* Version number of package */
 #ifndef FASTJET_VERSION
-#define FASTJET_VERSION "3.5.0"
+#define FASTJET_VERSION "3.5.1"
 #endif
 
 /* Major version of this package */
@@ -226,12 +226,12 @@
 
 /* Version of the package under the form XYYZZ (instead of X.Y.Z) */
 #ifndef FASTJET_VERSION_NUMBER
-#define FASTJET_VERSION_NUMBER 30500
+#define FASTJET_VERSION_NUMBER 30501
 #endif
 
 /* Patch version of this package */
 #ifndef FASTJET_VERSION_PATCHLEVEL
-#define FASTJET_VERSION_PATCHLEVEL 0
+#define FASTJET_VERSION_PATCHLEVEL 1
 #endif
 
 /* Pre-release version of this package */

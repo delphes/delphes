@@ -1,4 +1,4 @@
- #ifndef __FASTJET_ERROR_HH__
+#ifndef __FASTJET_ERROR_HH__
 #define __FASTJET_ERROR_HH__
 
 //FJSTARTHEADER
@@ -36,7 +36,7 @@
 #include "fastjet/internal/base.hh"
 #include "fastjet/config.h"
 //#include <exception>
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FASTJET_ONLY_CORE__)
 #include "fastjet/LimitedWarning.hh"
 #endif
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
@@ -97,7 +97,7 @@ public:
 
 private:
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #if defined(FASTJET_HAVE_EXECINFO_H) && defined(FASTJET_HAVE_DEMANGLING_SUPPORT)
   /// demangle a given backtrace symbol
   std::string _demangle(const char* symbol);
@@ -107,19 +107,19 @@ private:
   std::string _message;                ///< error message
 
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-  static std::atomic<bool> _print_errors;           ///< do we print anything?
-  static std::atomic<bool> _print_backtrace;        ///< do we print the backtrace?
-  static std::atomic<std::ostream *> _default_ostr; ///< the output stream (cerr if not set)
-  static std::atomic<std::mutex *> _stream_mutex; ///< the mutex for the output stream (nullptr if not set)
+  FASTJET_WINDLL static std::atomic<bool> _print_errors;           ///< do we print anything?
+  FASTJET_WINDLL static std::atomic<bool> _print_backtrace;        ///< do we print the backtrace?
+  FASTJET_WINDLL static std::atomic<std::ostream *> _default_ostr; ///< the output stream (cerr if not set)
+  FASTJET_WINDLL static std::atomic<std::mutex *> _stream_mutex; ///< the mutex for the output stream (nullptr if not set)
 #else
-  static bool _print_errors;           ///< do we print anything?
-  static bool _print_backtrace;        ///< do we print the backtrace?
-  static std::ostream * _default_ostr; ///< the output stream (cerr if not set)
+  FASTJET_WINDLL static bool _print_errors;           ///< do we print anything?
+  FASTJET_WINDLL static bool _print_backtrace;        ///< do we print the backtrace?
+  FASTJET_WINDLL static std::ostream * _default_ostr; ///< the output stream (cerr if not set)
 #endif // FASTJET_HAVE_LIMITED_THREAD_SAFETY
 
 
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  static LimitedWarning _execinfo_undefined;
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FASTJET_ONLY_CORE__)
+  FASTJET_WINDLL static LimitedWarning _execinfo_undefined;
 #endif
 };
 

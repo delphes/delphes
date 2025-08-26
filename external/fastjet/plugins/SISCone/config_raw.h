@@ -47,7 +47,7 @@
 #define PACKAGE_NAME "SISCone"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "SISCone 3.1.1"
+#define PACKAGE_STRING "SISCone 3.1.2"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "siscone"
@@ -56,7 +56,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.1.1"
+#define PACKAGE_VERSION "3.1.2"
 
 /* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -67,4 +67,4 @@
 #define USES_UNIQUE_PTR_AS_AUTO_PTR /**/
 
 /* Version number of package */
-#define VERSION "3.1.1"
+#define VERSION "3.1.2"

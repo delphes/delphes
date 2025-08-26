@@ -36,9 +36,9 @@ using namespace std;
 
 FASTJET_BEGIN_NAMESPACE     // defined in fastjet/internal/base.hh
 
-const double Subtractor::_invalid_rho = -numeric_limits<double>::infinity();
+FASTJET_TOOLS_WINDLL const double Subtractor::_invalid_rho = -numeric_limits<double>::infinity();
 
-LimitedWarning Subtractor::_unused_rho_m_warning;
+FASTJET_TOOLS_WINDLL LimitedWarning Subtractor::_unused_rho_m_warning;
 
 //----------------------------------------------------------------------
 // ctor

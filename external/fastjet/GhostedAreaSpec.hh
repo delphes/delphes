@@ -349,8 +349,8 @@ private:
   //#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
   //  static thread_local BasicRandom<double> _random_generator;
   //#else
-  static BasicRandom<double> _random_generator;
-  //#endif    
+  FASTJET_WINDLL static BasicRandom<double> _random_generator;
+  //#endif
   //mutable BasicRandom<double> _random_generator;
 
   /// a set of seeds as defined by the end-user
@@ -359,8 +359,8 @@ private:
   // allow for a user-defined random generator
   SharedPtr<BasicRandom<double> > _user_random_generator;
   
-  static LimitedWarning _warn_fj2_placement_deprecated;
-  static LimitedWarning _warn_fixed_last_seeds_nrepeat_gt_1;
+  FASTJET_WINDLL static LimitedWarning _warn_fj2_placement_deprecated;
+  FASTJET_WINDLL static LimitedWarning _warn_fixed_last_seeds_nrepeat_gt_1;
 
   inline double _our_rand() const {
     return _user_random_generator ? (*_user_random_generator)() : _random_generator();}

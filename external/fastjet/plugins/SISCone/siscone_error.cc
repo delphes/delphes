@@ -28,6 +28,6 @@
 
 namespace siscone{
 
-bool Csiscone_error::m_print_errors = true;
+SISCONE_WINDLL bool Csiscone_error::m_print_errors = true;
 
 }

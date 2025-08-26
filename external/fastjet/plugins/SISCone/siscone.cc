@@ -58,8 +58,8 @@ Csiscone::~Csiscone(){
   rerun_allowed = false;
 }
 
-bool Csiscone::init_done=false;
-std::ostream* Csiscone::_banner_ostr = &cout;
+SISCONE_WINDLL bool Csiscone::init_done = false;
+SISCONE_WINDLL std::ostream * Csiscone::_banner_ostr = &cout;
 
 /*
  * compute the jets from a given particle set doing multiple passes

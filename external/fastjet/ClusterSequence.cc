@@ -37,9 +37,9 @@
 #include "fastjet/internal/LazyTiling9Alt.hh"
 #include "fastjet/internal/LazyTiling9.hh"
 #include "fastjet/internal/LazyTiling25.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/internal/LazyTiling9SeparateGhosts.hh"
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 #include<iostream>
 #include<sstream>
 #include<fstream>
@@ -85,7 +85,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
  * \section Tools Selected additional tools
  *
  * - JetMedianBackgroundEstimator: with the help of a Selector, a JetDefinition and
- *   an AreaDefinition, allows one to estimate the background noise density in an event; for a simpler, quicker, effective alternative, use GridMedianBackgroundEstimator
+ *   an AreaDefinition, allows one to estimate the background noise density in an event; for a simpler, quicker, effective alternative, use GridMedianBackgroundEstimator.
  *
  * - Transformer: class from which are derived various tools for
  *   manipulating jets and accessing their substructure. Examples are
@@ -95,7 +95,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
  * \section further_info Further information
  *
  * - Selected classes ordered by topics can be found under the <a
- * href="modules.html">modules</a> tab.
+ * href="topics.html">topics</a> tab.
  *
  * - The complete list of classes is available under the  <a
  * href="annotated.html">classes</a> tab.
@@ -146,9 +146,9 @@ using namespace std;
 // clause 2c of the GNU Public License (v2), under which
 // FastJet and its plugins are distributed.
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-atomic<ostream *> ClusterSequence::_fastjet_banner_ostr{&cout};
+FASTJET_WINDLL atomic<ostream *> ClusterSequence::_fastjet_banner_ostr{&cout};
 #else
-ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
+FASTJET_WINDLL ostream * ClusterSequence::_fastjet_banner_ostr = &cout;
 #endif  // FASTJET_HAVE_LIMITED_THREAD_SAFETY
 
 
@@ -419,7 +419,7 @@ void ClusterSequence::_initialise_and_run_no_decant () {
     _plugin_activated = false;
 
   } else if (_strategy == N2MHTLazy9AntiKtSeparateGhosts) {
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
     // attempt to use an external tiling routine -- it manipulates
     // the CS history via the plugin mechanism
     _plugin_activated = true;
@@ -428,7 +428,7 @@ void ClusterSequence::_initialise_and_run_no_decant () {
     _plugin_activated = false;
 #else 
     throw Error("N2MHTLazy9AntiKtSeparateGhosts strategy not supported with FJCORE");
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
   } else if (_strategy == NlnN) {
     this->_delaunay_cluster();

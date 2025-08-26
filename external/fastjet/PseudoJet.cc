@@ -32,9 +32,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 #include "fastjet/CompositeJetStructure.hh"
 #include<valarray>
 #include<iostream>
@@ -792,7 +792,7 @@ std::vector<PseudoJet> PseudoJet::pieces() const{
 // associated ClusterSequence (See ClusterSequenceAreaBase for details)
 //----------------------------------------------------------------------
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 
 //----------------------------------------------------------------------
 // if possible, return a valid ClusterSequenceAreaBase pointer; otherwise
@@ -841,7 +841,7 @@ bool PseudoJet::is_pure_ghost() const{
   return validated_structure_ptr()->is_pure_ghost(*this);
 }
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 //----------------------------------------------------------------------
 //

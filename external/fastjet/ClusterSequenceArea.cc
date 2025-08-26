@@ -32,8 +32,8 @@
 
 FASTJET_BEGIN_NAMESPACE
 
-LimitedWarning ClusterSequenceArea::_range_warnings;
-LimitedWarning ClusterSequenceArea::_explicit_ghosts_repeats_warnings;
+FASTJET_WINDLL LimitedWarning ClusterSequenceArea::_range_warnings;
+FASTJET_WINDLL LimitedWarning ClusterSequenceArea::_explicit_ghosts_repeats_warnings;
 
 /// print a warning if the range is unsuitable for the current
 /// calculation of the area (e.g. because ghosts do not extend

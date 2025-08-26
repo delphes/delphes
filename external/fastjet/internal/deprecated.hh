@@ -38,7 +38,7 @@
 
 // define a deprecation macro based on the capabilities of the compiler
 // (as determined at configure time).
-#if defined(FASTJET_HAVE_CXX14_DEPRECATED) && (!defined(__FJCORE__))
+#if defined(FASTJET_HAVE_CXX14_DEPRECATED) && (!defined(__FASTJET_ONLY_CORE__))
 #define FASTJET_DEPRECATED(func)              [[deprecated]] func
 #define FASTJET_DEPRECATED_MSG(message,func)  [[deprecated(message)]] func
 #elif defined(FASTJET_HAVE_GNUCXX_DEPRECATED)

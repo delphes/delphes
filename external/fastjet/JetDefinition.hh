@@ -392,7 +392,7 @@ public:
   /// numeric_limits<double>::max(), to leave room for the convention
   /// within PseudoJet of setting unphysical (infinite) rapidities to
   /// +-(MaxRap + abs(pz())), where MaxRap is 10^5.
-  static const double max_allowable_R; //= 1000.0;
+  FASTJET_WINDLL static const double max_allowable_R; //= 1000.0;
 
   /// set the recombination scheme to the one provided
   void set_recombination_scheme(RecombinationScheme);

@@ -205,9 +205,9 @@ protected:
   // 1) that it caused problems on karnak with g++ 4.0.1 and 2) that
   // we anyway like -infinity as a default, and since that's a function,
   // that's not allowed in an include file.
-  static const double _invalid_rho;
+  FASTJET_TOOLS_WINDLL static const double _invalid_rho;
 
-  static LimitedWarning _unused_rho_m_warning;
+  FASTJET_TOOLS_WINDLL static LimitedWarning _unused_rho_m_warning;
 };
 
 FASTJET_END_NAMESPACE

@@ -89,7 +89,7 @@ public:
   virtual std::vector<PseudoJet> pieces(const PseudoJet &jet) const FASTJET_OVERRIDE;
 
   // area-related material
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 
   /// check if it has a well-defined area
   virtual bool has_area() const FASTJET_OVERRIDE;
@@ -134,7 +134,7 @@ public:
     _area_4vector_ptr = 0;
   }
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 protected:
   std::vector<PseudoJet> _pieces;  ///< the pieces building the jet

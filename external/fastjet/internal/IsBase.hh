@@ -61,7 +61,7 @@ FASTJET_BEGIN_NAMESPACE
 /// \endif
 template<typename T, T _t>
 struct integral_type{
-  static const T value = _t;         ///< the value (only member carrying info)
+  FASTJET_WINDLL static const T value = _t;         ///< the value (only member carrying info)
   typedef T value_type;		     ///< a typedef for the type T
   typedef integral_type<T,_t> type;  ///< a typedef for the whole structure
 };

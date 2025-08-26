@@ -606,9 +606,9 @@ private:
   /// \cond internal_doc
   /// contains the actual stream to use for banners 
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-  static std::atomic<std::ostream*> _fastjet_banner_ostr;
+  FASTJET_WINDLL static std::atomic<std::ostream*> _fastjet_banner_ostr;
 #else
-  static std::ostream * _fastjet_banner_ostr;
+  FASTJET_WINDLL static std::ostream * _fastjet_banner_ostr;
 #endif // FASTJET_HAVE_LIMITED_THREAD_SAFETY
   /// \endcond
 
@@ -802,15 +802,15 @@ protected:
 
 
   /// will be set by default to be true for the first run
-  static thread_safety_helpers::FirstTimeTrue _first_time;
+  FASTJET_WINDLL static thread_safety_helpers::FirstTimeTrue _first_time;
 
   /// manage warnings related to exclusive jets access
-  static LimitedWarning _exclusive_warnings;
+  FASTJET_WINDLL static LimitedWarning _exclusive_warnings;
 
   /// the limited warning member for notification of user that 
   /// their requested strategy has been overridden (usually because
   /// they have R>2pi and not all strategies work then)
-  static LimitedWarning _changed_strategy_warning;
+  FASTJET_WINDLL static LimitedWarning _changed_strategy_warning;
 
   //----------------------------------------------------------------------
   /// the fundamental structure which contains the minimal info about
@@ -895,7 +895,7 @@ protected:
 
   /// number of neighbours that a tile will have (rectangular geometry
   /// gives 9 neighbours).
-  static const int n_tile_neighbours = 9;
+  FASTJET_WINDLL static const int n_tile_neighbours = 9;
   //----------------------------------------------------------------------
   /// The fundamental structures to be used for the tiled N^2 algorithm
   /// (see CCN27-44 for some discussion of pattern of tiling)
