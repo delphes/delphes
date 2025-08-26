@@ -78,7 +78,7 @@ def ConvertInput(input, momentumUnit, lengthUnit, branch, factory, allParticleOu
     element.Number = event.Number if event.Number else 0
     element.ProcessID = event.Process_ID if event.Process_ID else 0
     element.MPI = event.MPI if event.MPI else 0
-    #  element.Weight = event.Weight if event.Weight else 0
+    element.Weight = event.Weight if event.Weight else 0
     element.Scale = event.Scale if event.Scale else 0
     element.AlphaQED = event.Alpha_QED if event.Alpha_QED else 0
     element.AlphaQCD = event.Alpha_QCD if event.Alpha_QCD else 0
@@ -106,7 +106,6 @@ def ConvertInput(input, momentumUnit, lengthUnit, branch, factory, allParticleOu
         candidate = factory.NewCandidate()
 
         candidate.PID = pid
-        pdgCode = ROOT.TMath.Abs(candidate.PID)
 
         candidate.Status = status
 
@@ -123,13 +122,15 @@ def ConvertInput(input, momentumUnit, lengthUnit, branch, factory, allParticleOu
         candidate.Position.SetXYZT(x, y, z, t)
 
         pdgParticle = pdg.GetParticle(pid)
-        if pdgParticle == None:
-            candidate.Charge = -999
-            continue
-        else:
-            candidate.Charge = int(pdgParticle.Charge() / 3.0)
+
+        candidate.Charge = int(pdgParticle.Charge() / 3.0) if pdgParticle else -999
 
         allParticleOutputArray.Add(candidate)
+
+        if not pdgParticle:
+            continue
+
+        pdgCode = abs(pid)
 
         if status == 1:
             stableParticleOutputArray.Add(candidate)
