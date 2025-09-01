@@ -10,6 +10,17 @@ More details can be found on the Delphes website https://delphes.github.io .
 
 This is a fork of Delphes that introduces a blind calorimeter feature, allowing users to define insensitive bins in the calorimeter. This extension is useful for studying detector performance and carrying out customized analyses within Delphes.
 
+# Overview of New Feature
+
+The main addition is the **`SimpleBlindCalorimeter`** module.  
+It functions similarly to the existing **`SimpleCalorimeter`** module, with one key difference:  
+
+- A new parameter **`InsensitiveEtaPhiBins`** can be defined.  
+- Bins specified in this parameter will **not register any particles, tower hits, or tracks**.  
+
+An example usage of this module can be found in the **`delphes_card_CMS_Blind.tcl`** card.  
+
+
 # Quick start with Delphes
 
 Commands to get the code:
@@ -46,12 +57,3 @@ Command line parameters:
 
 For more detailed documentation, please visit https://delphes.github.io/workbook
 
-# Quick Overview of the New Feature
-
-The main addition is the **`SimpleBlindCalorimeter`** module.  
-It functions similarly to the existing **`SimpleCalorimeter`** module, with one key difference:  
-
-- A new parameter **`InsensitiveEtaPhiBins`** can be defined.  
-- Bins specified in this parameter will **not register any particles, tower hits, or tracks**.  
-
-An example usage of this module can be found in the **`delphes_card_CMS_Blind.tcl`** card.  
