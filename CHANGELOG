@@ -1,3 +1,13 @@
+3.5.0_1:
+- Added first version of SimpleBlindCalorimeter.cc
+- Added first version of SimpleBlindCalorimeter.h 
+- Modified the Makefile to include the new SimpleBlindCalorimeter module
+- Modified the modules/ModulesLinkDef.h to include the new SimpleBlindCalorimeter module
+- Added a new example card delphes_card_CMS_BLIND.tcl that includes the SimpleBlindCalorimeter module
+
+
+
+
 3.5.0:
 
 - fixed validation code

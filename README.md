@@ -2,11 +2,13 @@
 [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/delphes.svg)](https://anaconda.org/conda-forge/delphes)
 
-# Delphes
+# Delphes-BlindCalorimeter
 
 Delphes is a C++ framework, performing a fast multipurpose detector response simulation.
 
-More details can be found on the Delphes website https://delphes.github.io
+More details can be found on the Delphes website https://delphes.github.io .
+
+This is a fork of Delphes that introduces a blind calorimeter feature, allowing users to define insensitive bins in the calorimeter. This extension is useful for studying detector performance and carrying out customized analyses within Delphes.
 
 # Quick start with Delphes
 
@@ -42,158 +44,14 @@ Command line parameters:
   with no input_file, or when input_file is -, read standard input.
 ```
 
-Let's simulate some Z->ee events:
-
-```
-wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
-gunzip z_ee.hep.gz
-./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
-```
-
-or
-
-```
-curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root
-```
-
 For more detailed documentation, please visit https://delphes.github.io/workbook
 
-# Configure Delphes on lxplus.cern.ch
+# Quick Overview of the New Feature
 
-```
-git clone https://github.com/delphes/delphes Delphes
+The main addition is the **`SimpleBlindCalorimeter`** module.  
+It functions similarly to the existing **`SimpleCalorimeter`** module, with one key difference:  
 
-cd Delphes
+- A new parameter **`InsensitiveEtaPhiBins`** can be defined.  
+- Bins specified in this parameter will **not register any particles, tower hits, or tracks**.  
 
-source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
-
-make
-```
-
-# Install Delphes from conda-forge
-
-Delphes is also available as a pre-built binary package from [conda-forge](https://anaconda.org/conda-forge/delphes).
-
-The scripts used to build this package are available at
-
-https://github.com/conda-forge/delphes-feedstock
-
-Command to install the package in a conda environment:
-
-```
-conda install --channel conda-forge delphes
-```
-
-Commands to run the Z->ee example from the 'Quick start' section above in a conda environment:
-
-```
-wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
-gunzip z_ee.hep.gz
-DelphesSTDHEP $CONDA_PREFIX/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
-```
-
-where the `CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
-
-The `cards` and `examples` directories from this repository are also installed under `$CONDA_PREFIX`.
-
-# Simple analysis using TTree::Draw
-
-Now we can start [ROOT](https://root.cern) and look at the data stored in the output ROOT file.
-
-Start ROOT and load Delphes shared library:
-
-```
-root -l
-gSystem->Load("libDelphes");
-```
-
-Open ROOT file and do some basic analysis using Draw or TBrowser:
-
-```
-TFile *f = TFile::Open("delphes_output.root");
-f->Get("Delphes")->Draw("Electron.PT");
-TBrowser browser;
-```
-
-Notes:
-
-- `Delphes` is the tree name. It can be learned e.g. from TBrowser.
-- `Electron` is the branch name.
-- `PT` is a variable (leaf) of this branch.
-
-Complete description of all branches can be found in [doc/RootTreeDescription.html](doc/RootTreeDescription.html).
-
-This information is also available at [this link](https://delphes.github.io/workbook/root-tree-description).
-
-# Macro-based analysis
-
-Analysis macro consists of histogram booking, event loop (histogram filling), histogram display.
-
-Start ROOT and load Delphes shared library:
-
-```
-root -l
-gSystem->Load("libDelphes");
-```
-
-Basic analysis macro:
-
-```
-{
-  // Create chain of root trees
-  TChain chain("Delphes");
-  chain.Add("delphes_output.root");
-
-  // Create object of class ExRootTreeReader
-  ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-  Long64_t numberOfEntries = treeReader->GetEntries();
-
-  // Get pointers to branches used in this analysis
-  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
-
-  // Book histograms
-  TH1 *histElectronPT = new TH1F("electron pt", "electron P_{T}", 50, 0.0, 100.0);
-
-  // Loop over all events
-  for(Int_t entry = 0; entry < numberOfEntries; ++entry)
-  {
-
-    // Load selected branches with data from specified event
-    treeReader->ReadEntry(entry);
-
-    // If event contains at least 1 electron
-    if(branchElectron->GetEntries() > 0)
-    {
-      // Take first electron
-      Electron *electron = (Electron*) branchElectron->At(0);
-
-      // Plot electron transverse momentum
-      histElectronPT->Fill(electron->PT);
-
-      // Print electron transverse momentum
-      cout << electron->PT << endl;
-    }
-
-  }
-
-  // Show resulting histograms
-  histElectronPT->Draw();
-}
-```
-
-# More advanced macro-based analysis
-
-The `examples` directory contains ROOT macros [Example1.C](examples/Example1.C), [Example2.C](examples/Example2.C) and [Example3.C](examples/Example3.C).
-
-Here are the commands to run these ROOT macros:
-
-```
-root -l
-.X examples/Example1.C("delphes_output.root");
-```
-
-or
-
-```
-root -l examples/Example1.C'("delphes_output.root")'
-```
+An example usage of this module can be found in the **`delphes_card_CMS_Blind.tcl`** card.  

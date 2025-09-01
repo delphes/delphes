@@ -2,7 +2,7 @@
 #
 # Makefile for ExRootAnalysis
 #
-# Author: P. Demin - UCL, Louvain-la-Neuve
+# Author: P. Demin - UCL, Louvain-la-Neuve, A. Chattopadhyay - UPRM
 #
 # multi-platform configuration is taken from ROOT (root/test/Makefile.arch)
 #
@@ -379,6 +379,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TimeSmearing.h \
 	modules/TimeOfFlight.h \
 	modules/SimpleCalorimeter.h \
+	modules/SimpleBlindCalorimeter.h \
 	modules/DenseTrackFilter.h \
 	modules/Calorimeter.h \
 	modules/DualReadoutCalorimeter.h \
@@ -991,6 +992,15 @@ tmp/modules/SimpleCalorimeter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/SimpleBlindCalorimeter.$(ObjSuf): \
+	modules/SimpleBlindCalorimeter.$(SrcSuf) \
+	modules/SimpleBlindCalorimeter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/StatusPidFilter.$(ObjSuf): \
 	modules/StatusPidFilter.$(SrcSuf) \
 	modules/StatusPidFilter.h \
@@ -1251,6 +1261,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/PileUpMerger.$(ObjSuf) \
 	tmp/modules/RecoPuFilter.$(ObjSuf) \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
+	tmp/modules/SimpleBlindCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
 	tmp/modules/TaggingParticlesSkimmer.$(ObjSuf) \
 	tmp/modules/TauTagging.$(ObjSuf) \
@@ -2309,6 +2320,9 @@ modules/ClusterCounting.h: \
 	classes/DelphesModule.h
 	@touch $@
 modules/SimpleCalorimeter.h: \
+	classes/DelphesModule.h
+	@touch $@
+modules/SimpleBlindCalorimeter.h: \
 	classes/DelphesModule.h
 	@touch $@
 external/fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh: \

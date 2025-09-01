@@ -42,6 +42,7 @@
 #include "modules/TimeSmearing.h"
 #include "modules/TimeOfFlight.h"
 #include "modules/SimpleCalorimeter.h"
+#include "modules/SimpleBlindCalorimeter.h"
 #include "modules/DenseTrackFilter.h"
 #include "modules/Calorimeter.h"
 #include "modules/DualReadoutCalorimeter.h"
@@ -106,6 +107,7 @@
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class TimeOfFlight+;
 #pragma link C++ class SimpleCalorimeter+;
+#pragma link C++ class SimpleBlindCalorimeter+;
 #pragma link C++ class DenseTrackFilter+;
 #pragma link C++ class Calorimeter+;
 #pragma link C++ class DualReadoutCalorimeter+;
