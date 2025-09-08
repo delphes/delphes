@@ -208,7 +208,7 @@ module Merger TrackMerger {
 #   ECAL
 #############
 
-module SimpleBlindCalorimeter ECal {
+module SimpleCalorimeter ECal {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray TrackMerger/tracks
 
@@ -273,9 +273,27 @@ module SimpleBlindCalorimeter ECal {
   }
 
 
-  # Build InsensitiveEtaPhiBins 
+  # Build InsensitiveEtaPhiBins for eta,phi in the barrel |eta| < 1.5
+
+  # Define Phi bins for insensitive ECAL
+  set PhiBins {}
+  for {set i -180} {$i <= 180} {incr i} {
+      add PhiBins [expr {$i * $pi/180.0}]
+  }
+
+  # Define eta bins for insensitivity: 0.02 unit in eta up to eta = 1.5 (barrel)
+  set etaBins {}
+  for {set i -85} {$i <= 86} {incr i} {
+    add etaBins [expr {$i * 0.0174}]
+  }
+
 
   set InsensitiveEtaPhiBins {}
+  foreach eta $etaBins {
+      foreach phi $PhiBins {
+          add InsensitiveEtaPhiBins [list $eta $phi]
+      }
+  }
 
 
 
@@ -316,7 +334,7 @@ module SimpleBlindCalorimeter ECal {
 #   HCAL
 #############
 
-module SimpleBlindCalorimeter HCal {
+module SimpleCalorimeter HCal {
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray ECal/eflowTracks
 
@@ -364,7 +382,6 @@ module SimpleBlindCalorimeter HCal {
     add EtaPhiBins $eta $PhiBins
   }
   
-
   # Building Insensitivity for 5-degree towers
   
   # Build PhiBins for 5-degree towers
@@ -385,9 +402,6 @@ module SimpleBlindCalorimeter HCal {
           add InsensitiveEtaPhiBins [list $eta $phi]
       }
   }
-
-
-
 
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
   add EnergyFraction {0} {1.0}

@@ -12,13 +12,12 @@ This is a fork of Delphes that introduces a blind calorimeter feature, allowing 
 
 # Overview of New Feature
 
-The main addition is the **`SimpleBlindCalorimeter`** module.  
-It functions similarly to the existing **`SimpleCalorimeter`** module, with one key difference:  
+The following feature is added to the **`SimpleCalorimeter`** module: 
 
 - A new parameter **`InsensitiveEtaPhiBins`** can be defined.  
-- Bins specified in this parameter will **not register any particles, tower hits, or tracks**.  
+- Bins specified in this parameter will **not register any particles, hits, or tracks**.  
 
-An example usage of this module can be found in the **`delphes_card_CMS_Blind.tcl`** card.  
+An example usage of this module can be found in the **`delphes_card_CMS_blind.tcl`** card.  
 
 
 # Quick start with Delphes

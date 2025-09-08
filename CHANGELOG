@@ -1,3 +1,9 @@
+3.5.0_2:
+- Meged SimpleBlindCalorimeter module into the SimpleCalorimeter module
+- Reverted the Makefile to its 3.5.0 version
+- Reverted the modules/ModulesLinkDef.h to its 3.5.0 version
+- Renamed the example card delphes_card_CMS_blind.tcl that demonstrates the blinding feature of the module
+
 3.5.0_1:
 - Added first version of SimpleBlindCalorimeter.cc
 - Added first version of SimpleBlindCalorimeter.h 
