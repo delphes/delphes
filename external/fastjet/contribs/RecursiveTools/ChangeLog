@@ -1,3 +1,49 @@
+2024-10-04 Fri  <gavin.salam@physics.ox.ac.uk>
+
+	* VERSION:
+	* NEWS:
+	prepared for release of version 2.0.3
+
+	* RecursiveSoftDrop.hh:
+	added missing #include "fastjet/config.h"; without it the wrong
+	Recluster.hh was being used (contrib rather than fastjet/tools)
+	which was inconsistent with derivation from SoftDrop. This was
+	the cause of a bug reported at https://bugs.gentoo.org/863278 
+	and followed up by Eli Schwartz. 
+
+	* Recluster.hh:
+	* example_recluster.cc:
+	added comments labelling this contrib/s Recluster.hh as deprecated
+	(but did not explicitly add C++ deprecation warnings yet). Use
+	fastjet::Recluster from "fastjet/tools/Recluster.hh" instead
+	(available since fj 3.1.0).
+
+2024-02-22  Jesse Thaler  <jthaler@jthaler.net>
+
+	* Makefile
+	Removing extraneous "-lm"
+
+	* NEWS:
+	* VERSION:
+	Changed version to 2.0.2 in preparation for release.
+
+	* example_recursive_softdrop.cc
+	* example_recursive_softdrop.ref
+	Added "fixed" and "setprecision" to output
+
+2021-08-21 Sat  <gavin.salam@physics.ox.ac.uk>
+
+	* NEWS:
+	* VERSION:
+	Changed version to 2.0.1 in preparation for release.
+
+2021-08-16 Mon  <gavin.salam@physics.ox.ac.uk>
+
+	* RecursiveSymmetryCutBase.cc:
+	added fix for issue signalled by Pierre-Antoine Delsart 
+	(rare divide by zero in calculation of mu2; now mu2 gets set to -1
+	when the parent mass is <= 0)
+
 2018-11-02  Jesse Thaler  <jthaler@jthaler.net>
 
 	* AUTHORS:  updated journal for RecursiveSoftDrop

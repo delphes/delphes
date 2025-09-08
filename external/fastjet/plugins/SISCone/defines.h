@@ -21,13 +21,41 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 401                                                          $//
-// $Date:: 2016-05-19 16:44:37 +0200 (Thu, 19 May 2016)                     $//
+// $Revision::                                                              $//
+// $Date::                                                                  $//
 ///////////////////////////////////////////////////////////////////////////////
 
 //! \file defines.h
 #ifndef __DEFINES_H__
 #define __DEFINES_H__
+
+// Required definitions for exporting static variables in windows builds.
+// This is only needed for static data variables since we use
+// the CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON automation when building with cmake.
+// That automation handles all member functions.
+// So, when making a static variable please add in the beginning of a variable
+// definition, like a keyword. It is very important to use the visibility relevant
+// to the library you are working in, see below for possibilities!
+// e.g.: SISCONE_WINDLL static bool verbosity; // inside a SomeClass.h, for instance
+// Similarly for declarations you must prefix the appropriate WINDLL
+// e.g. SISCONE_WINDLL static bool SomeClass::verbosity = true; // in SomeClass.cc
+#ifdef _WIN32
+    #if defined(siscone_EXPORTS)
+        #define SISCONE_WINDLL __declspec(dllexport) // Export when building the DLL
+    #else
+        #define SISCONE_WINDLL __declspec(dllimport) // Import when using the DLL
+    #endif
+
+    #if defined(siscone_spherical_EXPORTS)
+        #define SISCONE_SPHERICAL_WINDLL __declspec(dllexport) // Export when building the DLL
+    #else
+        #define SISCONE_SPHERICAL_WINDLL __declspec(dllimport) // Import when using the DLL
+    #endif
+#else
+    // For Linux/macOS
+    #define SISCONE_WINDLL
+    #define SISCONE_SPHERICAL_WINDLL
+#endif
 
 /// program name
 // we get "SISCone" by calling

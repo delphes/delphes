@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceArea.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2006-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2006-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,8 +32,8 @@
 
 FASTJET_BEGIN_NAMESPACE
 
-LimitedWarning ClusterSequenceArea::_range_warnings;
-LimitedWarning ClusterSequenceArea::_explicit_ghosts_repeats_warnings;
+FASTJET_WINDLL LimitedWarning ClusterSequenceArea::_range_warnings;
+FASTJET_WINDLL LimitedWarning ClusterSequenceArea::_explicit_ghosts_repeats_warnings;
 
 /// print a warning if the range is unsuitable for the current
 /// calculation of the area (e.g. because ghosts do not extend

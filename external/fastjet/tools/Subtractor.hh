@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Subtractor.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -62,7 +62,7 @@ FASTJET_BEGIN_NAMESPACE     // defined in fastjet/internal/base.hh
 class Subtractor : public Transformer{
 public:
   /// define a subtractor based on a BackgroundEstimator
-  Subtractor(BackgroundEstimatorBase * bge) : 
+  Subtractor(const BackgroundEstimatorBase * bge) : 
     _bge(bge), _rho(-1.0) { set_defaults(); }
 
   /// define a subtractor that uses a fixed value of rho, the background
@@ -90,6 +90,11 @@ public:
   /// compatibility with FastJet 3.0 and is highly likely to change in
   /// a future release of FastJet
   void set_defaults();
+
+  void set_background_estimator(const BackgroundEstimatorBase * bge) {
+    _bge = bge;
+    _rho = _invalid_rho;
+  }
 
   /// when 'use_rho_m' is true, include in the subtraction the
   /// correction from rho_m, the purely longitudinal,
@@ -179,7 +184,7 @@ protected:
 
   /// the tool used to estimate the background
   /// if has to be mutable in case its underlying selector takes a reference jet
-  mutable BackgroundEstimatorBase * _bge;
+  const BackgroundEstimatorBase * _bge;
   /// the fixed value of rho and/or rho_m to use if the user has selected that option
   double _rho, _rho_m;
 
@@ -200,9 +205,9 @@ protected:
   // 1) that it caused problems on karnak with g++ 4.0.1 and 2) that
   // we anyway like -infinity as a default, and since that's a function,
   // that's not allowed in an include file.
-  static const double _invalid_rho;
+  FASTJET_TOOLS_WINDLL static const double _invalid_rho;
 
-  static LimitedWarning _unused_rho_m_warning;
+  FASTJET_TOOLS_WINDLL static LimitedWarning _unused_rho_m_warning;
 };
 
 FASTJET_END_NAMESPACE

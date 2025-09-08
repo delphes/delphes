@@ -29,7 +29,7 @@ awk '
 
   /^ *class /{
     print_line(name, comment, even, 1);
-    even = 0;
+    even = 1;
     name = "";
     comment = "";
     split($2, a, ":");

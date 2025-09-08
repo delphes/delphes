@@ -35,6 +35,8 @@ New in v2.2 are new measures used in the XCone jet algorithm, described in:
    Jesse Thaler and Thomas F. Wilkason.
    arXiv:1508.01518.
 
+Version 2.3 retains the interface but introduces new recommended axis choices.
+
 --------------------------------------------------------------------------------
 Core Classes
 --------------------------------------------------------------------------------
@@ -94,7 +96,7 @@ parameter choices, do this:
     PseudoJet this_jet = /*from your favorite jet algorithm*/;
     double beta = 1.0;
     NsubjettinessRatio nSub21(2,1,
-                              OnePass_WTA_KT_Axes(),
+                              WTA_KT_Axes(),
                               UnnormalizedMeasure(beta));
     double tau21 = nSub21(this_jet);
 
@@ -108,10 +110,14 @@ recommended. Arguments in parentheses are parameters that the user must set.
 
 Axes can be found using standard recursive clustering procedures.  New in v2 is
 the option to use the "winner-take-all" recombination scheme:
-(*) KT_Axes          // exclusive kt axes
+(*) HalfKT_Axes      // generalized p = 1/2 kt axes
+                        (best for beta = 2)
+    KT_Axes          // exclusive kt axes
     CA_Axes          // exclusive ca axes
     AntiKT_Axes(R0)  // inclusive hardest axes with antikt, R0 = radius
+    WTA_HalfKT_Axes  // exclusive p = 1/2 with winner-take-all recombination
 (*) WTA_KT_Axes      // exclusive kt with winner-take-all recombination
+                        (best for beta = 1)
     WTA_CA_Axes      // exclusive ca with winner-take-all recombination
 
 New in v2.2 are generalized recombination/clustering schemes:
@@ -135,11 +141,15 @@ These modes are not recommended for reasons of speed.
 
 Starting from any set of seed axes, one can run a minimization routine to find
 a (local) minimum of N-(sub)jettiness.  Note that the one-pass minimization
-routine is tied to the choice of MeasureDefinition.
-(*) OnePass_KT_Axes          // one-pass minimization from kt starting point
+routine is tied to the choice of MeasureDefinition.  These are no longer
+recommended because of numerical challenges of ensuring that the minimization
+has actual converged (which can differ depending on the compute platform)
+    OnePass_HalfKT_Axes      // one-pass minimization from p = 1/2 starting point
+    OnePass_KT_Axes          // one-pass minimization from kt starting point
     OnePass_CA_Axes          // one-pass min. from ca starting point
     OnePass_AntiKT(R0)       // one-pass min. from antikt starting point,R0=rad
-(*) OnePass_WTA_KT_Axes      // one-pass min. from wta_kt starting point
+    OnePass_WTA_HalfKT_Axes  // one-pass min. from wta_halfkt starting point
+    OnePass_WTA_KT_Axes      // one-pass min. from wta_kt starting point
     OnePass_WTA_CA_Axes      // one-pass min. from wta_ca starting point
     OnePass_GenET_GenKT_Axes(delta, p, R0 = inf) // one-pass min. from GenET/KT
     OnePass_WTA_GenKT_Axes(p, R0 = inf)          // one-pass min from WTA/GenKT
@@ -168,7 +178,8 @@ use in each pass, accuracy is how close to the minimum one tries to get, and
 noise_range is how much in rapidity/azimuth the random axes are jiggled.
 
 For most cases, running with OnePass_KT_Axes or OnePass_WTA_KT_Axes gives
-reasonable results (and the results are IRC safe).  Because it uses random
+reasonable results (and the results are IRC safe if the minimization converges,
+though as mentioned above, this is not guaranteed).  Because it uses random
 number seeds, MultiPass_Axes is not IRC safe (and the code is rather slow).
 Note that for the minimization routines, beta = 1.1 is faster than beta = 1,
 with comparable performance.
@@ -179,7 +190,7 @@ MeasureDefinition  [NjettinessDefinition.hh]
 
 The value of N-(sub)jettiness depends crucially on the choice of measure.  Each
 measure has a different number of parameters, so one has to be careful when
-switching between measures  The one indicated by (*) is the one recommended for
+switching between measures.  The one indicated by (*) is the one recommended for
 use by users new to Nsubjettiness.
 
 The original N-subjettiness measures are:
@@ -245,7 +256,7 @@ beta = 1:  aka broadening/girth/width measure
 
 beta = 2:  aka thrust/mass measure
    the axes behave like the "mean" in that they point along the jet momentum
-   kt_axes are approximately the same as minimizing beta = 2 measure
+   halfkt_axes are approximately the same as minimizing beta = 2 measure
 
 N.B. The minimization routines are only valid for 1 < beta < 3.
 
@@ -381,9 +392,12 @@ Known Issues
 
 -- The MultiPass_Axes mode gives different answers on different runs, since
    random numbers are used.
+-- While OnePass modes will give the same answers on different runs on the same
+   compute platform, answers can be different on different machines due to
+   floating point rounding changing when the minimization stops.
 -- For the default measures, in rare cases, one pass minimization can give a 
    larger value of Njettiness than without minimization. The reason is due 
-   to the fact that axes in default measure are not defined as light-like
+   to the fact that axes in default measure are not defined as light-like.
 -- Nsubjettiness is not thread safe, since there are mutables in Njettiness.
 -- If the AxesDefinition does not find N axes, then it adds zero vectors to the
    list of axes to get the total up to N.  This can lead to unpredictable

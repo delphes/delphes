@@ -2,9 +2,9 @@
 #define __D0RUNIICONEPLUGIN_HH__
 
 //FJSTARTHEADER
-// $Id: D0RunIIConePlugin.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,6 +32,7 @@
 //FJENDHEADER
 
 #include "fastjet/JetDefinition.hh"
+#include "fastjet/internal/thread_safety_helpers.hh"  // helpers to write transparent code w&wo C++11 features
 
 // questionable whether this should be in fastjet namespace or not...
 
@@ -144,19 +145,19 @@ private:
 
   // here are the variables for the default parameters of the D0 Run II Cone algorithm.
   // They are set in the .cc file 
-  const static double _DEFAULT_split_ratio             ;// = 0.5  ; // overlap threshold
-  const static double _DEFAULT_far_ratio               ;// = 0.5  ;
-  const static double _DEFAULT_Et_min_ratio            ;// = 0.5  ;
-  const static bool   _DEFAULT_kill_duplicate          ;// = true ;
-  const static double _DEFAULT_duplicate_dR            ;// = 0.005; 
-  const static double _DEFAULT_duplicate_dPT           ;// = 0.01 ; 
-  const static double _DEFAULT_search_factor           ;// = 1.0  ; 
-  const static double _DEFAULT_pT_min_leading_protojet ;// = 0.   ; 
-  const static double _DEFAULT_pT_min_second_protojet  ;// = 0.   ;
-  const static int    _DEFAULT_merge_max               ;// = 10000; 
-  const static double _DEFAULT_pT_min_nomerge          ;// = 0.   ;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_split_ratio             ;// = 0.5  ; // overlap threshold
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_far_ratio               ;// = 0.5  ;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_Et_min_ratio            ;// = 0.5  ;
+  FASTJET_PLUGINS_WINDLL const static bool   _DEFAULT_kill_duplicate          ;// = true ;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_duplicate_dR            ;// = 0.005;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_duplicate_dPT           ;// = 0.01 ;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_search_factor           ;// = 1.0  ;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_pT_min_leading_protojet ;// = 0.   ;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_pT_min_second_protojet  ;// = 0.   ;
+  FASTJET_PLUGINS_WINDLL const static int    _DEFAULT_merge_max               ;// = 10000;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_pT_min_nomerge          ;// = 0.   ;
 
-  static bool _first_time;
+  FASTJET_PLUGINS_WINDLL static thread_safety_helpers::FirstTimeTrue _first_time;
 
   /// print a banner for reference to the 3rd-party code
   void _print_banner(std::ostream *ostr) const;

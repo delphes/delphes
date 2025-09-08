@@ -37,19 +37,46 @@ or
 
 For more detailed documentation, please visit
 
-  https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
+  https://delphes.github.io/workbook
 
 
 Configure Delphes on lxplus.cern.ch
-====================================
+===================================
 
-  git clone git://github.com/delphes/delphes.git Delphes
+  git clone https://github.com/delphes/delphes Delphes
 
   cd Delphes
 
   source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
 
   make
+
+
+Install Delphes from conda-forge
+================================
+
+Delphes is also available as a pre-built binary package from conda-forge.
+
+The scripts used to build this package are available at
+
+  https://github.com/conda-forge/delphes-feedstock
+
+Command to install the package in a conda environment:
+
+  conda install --channel conda-forge delphes
+
+Commands to run the Z->ee example from the 'Quick start' section above
+in a conda environment:
+
+  wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
+  gunzip z_ee.hep.gz
+  DelphesSTDHEP $CONDA_PREFIX/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
+
+where the CONDA_PREFIX environment variable is automatically set when
+the conda environment is activated.
+
+The 'cards' and 'examples' directories from this repository are also installed
+under $CONDA_PREFIX.
 
 
 Simple analysis using TTree::Draw
@@ -68,9 +95,11 @@ Open ROOT file and do some basic analysis using Draw or TBrowser:
   f->Get("Delphes")->Draw("Electron.PT");
   TBrowser browser;
 
-Note 1: Delphes - tree name, it can be learned e.g. from TBrowser
+Notes:
 
-Note 2: Electron - branch name; PT - variable (leaf) of this branch
+- Delphes is the tree name. It can be learned e.g. from TBrowser.
+- Electron is the branch name.
+- PT is a variable (leaf) of this branch.
 
 Complete description of all branches can be found in
 
@@ -78,7 +107,8 @@ Complete description of all branches can be found in
 
 This information is also available at
 
-  https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
+  https://delphes.github.io/workbook/root-tree-description
+
 
 Macro-based analysis
 ====================
@@ -138,7 +168,8 @@ Basic analysis macro:
 More advanced macro-based analysis
 ==================================
 
-The 'examples' directory contains ROOT macros Example1.C, Example2.C and Example3.C.
+The 'examples' directory contains ROOT macros Example1.C, Example2.C and
+Example3.C.
 
 Here are the commands to run these ROOT macros:
 

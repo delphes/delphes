@@ -34,7 +34,7 @@ DelphesFormula::DelphesFormula() :
 
 //------------------------------------------------------------------------------
 
-DelphesFormula::DelphesFormula(const char *name, const char *expression) :
+DelphesFormula::DelphesFormula(const char * /*name*/, const char * /*expression*/) :
   TFormula()
 {
 }

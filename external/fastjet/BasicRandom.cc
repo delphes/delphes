@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: BasicRandom.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,9 +31,12 @@
 //   nlo includes
 #include "fastjet/internal/BasicRandom.hh"
 
-
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+FASTJET_WINDLL std::mutex BasicRandom<int>::_multiple_number_generation_mutex;
+FASTJET_WINDLL std::mutex BasicRandom<double>::_multiple_number_generation_mutex;
+#endif
 
 //
 //                   random number generator
@@ -56,8 +59,8 @@ int __default_random_generator(int *__iseed)
 }
 
 //   global defined random number generator
-BasicRandom<int>     _G_random_int;
-BasicRandom<double>  _G_random_double;
+FASTJET_WINDLL BasicRandom<int>     _G_random_int;
+FASTJET_WINDLL BasicRandom<double>  _G_random_double;
 
 
 FASTJET_END_NAMESPACE

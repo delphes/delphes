@@ -1,4 +1,6 @@
-import ROOT, os, sys
+import ROOT
+import os
+import sys
 import importlib
 
 ROOT.gSystem.Load("libDelphes")

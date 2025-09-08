@@ -1,114 +1,139 @@
-[![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml) [![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
+[![CI](https://github.com/delphes/delphes/actions/workflows/ci.yml/badge.svg)](https://github.com/delphes/delphes/actions/workflows/ci.yml)
+[![DOI](https://zenodo.org/badge/21390046.svg)](https://zenodo.org/badge/latestdoi/21390046)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/delphes.svg)](https://anaconda.org/conda-forge/delphes)
 
-Delphes
-=======
+# Delphes
 
 Delphes is a C++ framework, performing a fast multipurpose detector response simulation.
 
-More details can be found on the Delphes website http://cp3.irmp.ucl.ac.be/projects/delphes
+More details can be found on the Delphes website https://delphes.github.io
 
-Quick start with Delphes
-========================
+# Quick start with Delphes
 
 Commands to get the code:
 
 ```
-  wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.5.0.tar.gz
+wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.5.0.tar.gz
 
-  tar -zxf Delphes-3.5.0.tar.gz
+tar -zxf Delphes-3.5.0.tar.gz
 ```
 
 Commands to compile the code:
 
 ```
-  cd Delphes-3.5.0
+cd Delphes-3.5.0
 
-  make
+make
 ```
 
 Finally, we can run Delphes:
 
 ```
-  ./DelphesHepMC3
+./DelphesHepMC3
 ```
 
 Command line parameters:
 
 ```
-  ./DelphesHepMC3 config_file output_file [input_file(s)]
-    config_file - configuration file in Tcl format
-    output_file - output file in ROOT format,
-    input_file(s) - input file(s) in HepMC format,
-    with no input_file, or when input_file is -, read standard input.
+./DelphesHepMC3 config_file output_file [input_file(s)]
+  config_file - configuration file in Tcl format
+  output_file - output file in ROOT format,
+  input_file(s) - input file(s) in HepMC format,
+  with no input_file, or when input_file is -, read standard input.
 ```
 
 Let's simulate some Z->ee events:
 
 ```
-  wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
-  gunzip z_ee.hep.gz
-  ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
+wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
+gunzip z_ee.hep.gz
+./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
 ```
 
 or
 
 ```
-  curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root
+curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP cards/delphes_card_CMS.tcl delphes_output.root
 ```
 
-For more detailed documentation, please visit https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
+For more detailed documentation, please visit https://delphes.github.io/workbook
 
-Configure Delphes on lxplus.cern.ch
-====================================
+# Configure Delphes on lxplus.cern.ch
 
 ```
-  git clone git://github.com/delphes/delphes.git Delphes
+git clone https://github.com/delphes/delphes Delphes
 
-  cd Delphes
+cd Delphes
 
-  source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
 
-  make
+make
 ```
 
-Simple analysis using TTree::Draw
-=================================
+# Install Delphes from conda-forge
 
-Now we can start [ROOT](root.cern) and look at the data stored in the output ROOT file.
+Delphes is also available as a pre-built binary package from [conda-forge](https://anaconda.org/conda-forge/delphes).
+
+The scripts used to build this package are available at
+
+https://github.com/conda-forge/delphes-feedstock
+
+Command to install the package in a conda environment:
+
+```
+conda install --channel conda-forge delphes
+```
+
+Commands to run the Z->ee example from the 'Quick start' section above in a conda environment:
+
+```
+wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
+gunzip z_ee.hep.gz
+DelphesSTDHEP $CONDA_PREFIX/cards/delphes_card_CMS.tcl delphes_output.root z_ee.hep
+```
+
+where the `CONDA_PREFIX` environment variable is automatically set when the conda environment is activated.
+
+The `cards` and `examples` directories from this repository are also installed under `$CONDA_PREFIX`.
+
+# Simple analysis using TTree::Draw
+
+Now we can start [ROOT](https://root.cern) and look at the data stored in the output ROOT file.
 
 Start ROOT and load Delphes shared library:
 
 ```
-  root -l
-  gSystem->Load("libDelphes");
+root -l
+gSystem->Load("libDelphes");
 ```
 
 Open ROOT file and do some basic analysis using Draw or TBrowser:
 
 ```
-  TFile *f = TFile::Open("delphes_output.root");
-  f->Get("Delphes")->Draw("Electron.PT");
-  TBrowser browser;
+TFile *f = TFile::Open("delphes_output.root");
+f->Get("Delphes")->Draw("Electron.PT");
+TBrowser browser;
 ```
 
 Notes:
-* ```Delphes``` is the tree name. It can be learned e.g. from TBrowser.
-* ```Electron```is the branch name; ```PT``` is a variable (leaf) of this branch.
+
+- `Delphes` is the tree name. It can be learned e.g. from TBrowser.
+- `Electron` is the branch name.
+- `PT` is a variable (leaf) of this branch.
 
 Complete description of all branches can be found in [doc/RootTreeDescription.html](doc/RootTreeDescription.html).
-This information is also available [in the workbook](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
 
-Macro-based analysis
-====================
+This information is also available at [this link](https://delphes.github.io/workbook/root-tree-description).
 
-Analysis macro consists of histogram booking, event loop (histogram filling),
-histogram display.
+# Macro-based analysis
+
+Analysis macro consists of histogram booking, event loop (histogram filling), histogram display.
 
 Start ROOT and load Delphes shared library:
 
 ```
-  root -l
-  gSystem->Load("libDelphes");
+root -l
+gSystem->Load("libDelphes");
 ```
 
 Basic analysis macro:
@@ -156,20 +181,19 @@ Basic analysis macro:
 }
 ```
 
-More advanced macro-based analysis
-==================================
+# More advanced macro-based analysis
 
-The 'examples' directory contains ROOT macros [Example1.C](examples/Example1.C), [Example2.C](examples/Example2.C) and [Example3.C](examples/Example3.C).
+The `examples` directory contains ROOT macros [Example1.C](examples/Example1.C), [Example2.C](examples/Example2.C) and [Example3.C](examples/Example3.C).
 
 Here are the commands to run these ROOT macros:
 
 ```
-  root -l
-  .X examples/Example1.C("delphes_output.root");
+root -l
+.X examples/Example1.C("delphes_output.root");
 ```
 
 or
 
 ```
-  root -l examples/Example1.C'("delphes_output.root")'
+root -l examples/Example1.C'("delphes_output.root")'
 ```

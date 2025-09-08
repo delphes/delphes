@@ -3,7 +3,7 @@
 #
 #  By Z.Drasal(CERN) on: 2017-04-06.14:31:32
 #
-set ResolutionFormula {   3 * ( (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 0.0000 && energy < 1.0000) * (0.00315864) + \
+set ResolutionFormula {   1.5 * ( (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 0.0000 && energy < 1.0000) * (0.00315864) + \
    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 1.0000 && energy < 2.0000) * (0.003159 + (energy-1.000000)* 0.000007) + \
    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 2.0000 && energy < 5.0000) * (0.003166 + (energy-2.000000)* 0.000011) + \
    (abs(eta) >= 0.0000 && abs(eta) < 0.1000) * (energy >= 5.0000 && energy < 10.0000) * (0.003198 + (energy-5.000000)* 0.000012) + \

@@ -128,8 +128,6 @@ proc tclDeps {} {
   set srcObjFiles {}
 
   foreach fileName $source {
-    if {$fileName == "tcl/tclc.c" || $fileName == "tcl/tcl.c"} continue
-
     regsub {\.c} $fileName {} srcName
     set srcObjName $prefix$srcName
 
@@ -197,7 +195,7 @@ ROOT_MAJOR := $(shell $(RC) --version | cut -d'.' -f1)
 SrcSuf = cc
 PcmSuf = _rdict.pcm
 
-CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
+CXXFLAGS += $(ROOTCFLAGS) -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG
 DISPLAY_LIBS = $(shell $(RC) --evelibs) -lGuiHtml
 

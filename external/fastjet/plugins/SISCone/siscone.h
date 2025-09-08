@@ -21,8 +21,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 401                                                          $//
-// $Date:: 2016-05-19 16:44:37 +0200 (Thu, 19 May 2016)                     $//
+// $Revision::                                                              $//
+// $Date::                                                                  $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __SISCONE_H__
@@ -117,7 +117,7 @@ class Csiscone : public Cstable_cones, public Csplit_merge{
   std::vector<std::vector<Cmomentum> > protocones_list;
 
   // random number initialisation
-  static bool init_done;      ///< check random generator initialisation
+  SISCONE_WINDLL static bool init_done;      ///< check random generator initialisation
 
 #ifdef DEBUG_STABLE_CONES
   int nb_hash_cones_total, nb_hash_occupied_total;
@@ -144,7 +144,7 @@ class Csiscone : public Cstable_cones, public Csplit_merge{
 
  private:
   bool rerun_allowed;         ///< is recompute_jets allowed ?
-  static std::ostream * _banner_ostr; ///< stream to use for banners
+  SISCONE_WINDLL static std::ostream * _banner_ostr; ///< stream to use for banners
 
   /// ensure things are initialised
   void _initialise_if_needed();

@@ -4,7 +4,7 @@
 //FJSTARTHEADER
 // $Id: D0RunIBaseConePlugin.hh 1778 2010-10-25 10:02:58Z soyez $
 //
-// Copyright (c) 2009-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -141,16 +141,16 @@ protected:
 
   // here are the variables for the default parameters of the D0 Run I Cone algorithm.
   // They are set in the .cc file 
-  const static double _DEFAULT_SPLifr                  ;  // = 0.5; //shared Et fraction threshold
-  const static double _DEFAULT_TWOrad                  ;  // = 0.; //minimum Delta_R separation between cones
-  const static bool   _DEFAULT_D0_Angle                ;  // = false;
-  const static bool   _DEFAULT_Increase_Delta_R        ;  // = true;
-  const static bool   _DEFAULT_Kill_Far_Clusters       ;  // = true;
-  const static bool   _DEFAULT_Jet_Et_Min_On_Iter      ;  // = true;
-  const static double _DEFAULT_Far_Ratio               ;  // = 0.5;
-  const static double _DEFAULT_Eitem_Negdrop           ;  // = -1.0;
-  const static double _DEFAULT_Et_Min_Ratio            ;  // = 0.5;
-  const static double _DEFAULT_Thresh_Diff_Et          ;  // = 0.01;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_SPLifr                  ;  // = 0.5; //shared Et fraction threshold
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_TWOrad                  ;  // = 0.; //minimum Delta_R separation between cones
+  FASTJET_PLUGINS_WINDLL const static bool   _DEFAULT_D0_Angle                ;  // = false;
+  FASTJET_PLUGINS_WINDLL const static bool   _DEFAULT_Increase_Delta_R        ;  // = true;
+  FASTJET_PLUGINS_WINDLL const static bool   _DEFAULT_Kill_Far_Clusters       ;  // = true;
+  FASTJET_PLUGINS_WINDLL const static bool   _DEFAULT_Jet_Et_Min_On_Iter      ;  // = true;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_Far_Ratio               ;  // = 0.5;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_Eitem_Negdrop           ;  // = -1.0;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_Et_Min_Ratio            ;  // = 0.5;
+  FASTJET_PLUGINS_WINDLL const static double _DEFAULT_Thresh_Diff_Et          ;  // = 0.01;
 };
 
 

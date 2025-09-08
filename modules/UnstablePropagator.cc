@@ -114,12 +114,8 @@ void UnstablePropagator::Process()
 
   if (fDebug) cout<< "-------------   new event -----------------" << endl;
 
-  int i = -1;
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
-
-    i++;
-
     particlePosition = candidate->Position;
     particleMomentum = candidate->Momentum;
 
@@ -297,12 +293,11 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
 {
 
   TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
-  Double_t px, py, pz, pt, pt2, e, q;
+  Double_t px, py, pz, pt, e, q;
   Double_t x, y, z, t, r;
-  Double_t x_c, y_c, r_c, phi_0;
+  Double_t x_c, y_c, phi_0;
   Double_t x_t, y_t, z_t, r_t, phi_t;
   Double_t gammam, omega;
-  Double_t l;
   Double_t vz;
   Double_t tof, lof;
 
@@ -321,7 +316,6 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
   py = particleMomentum.Py();
   pz = particleMomentum.Pz();
   pt = particleMomentum.Pt();
-  pt2 = particleMomentum.Perp2();
   e = particleMomentum.E();
 
   // propagation flight and time of flight
@@ -355,10 +349,9 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
     x_t = x + px * t;
     y_t = y + py * t;
     z_t = z + pz * t;
-    l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
+    // Double_t l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
     //if (fDebug) cout << "propagated neutral length: "<<l<<endl;
     particlePosition.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
-
   }
   else
   {
@@ -378,7 +371,6 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
     // 2. helix axis coordinates
     x_c = x + r * TMath::Sin(phi_0);
     y_c = y - r * TMath::Cos(phi_0);
-    r_c = TMath::Hypot(x_c, y_c);
 
     vz = pz * c_light / e;
 
@@ -392,7 +384,7 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
     r_t = TMath::Hypot(x_t, y_t);
 
     // lenght of the path from production to tracker
-    l = t * TMath::Hypot(vz, r * omega);
+    // l = t * TMath::Hypot(vz, r * omega);
     //if (fDebug) cout << "propagated to: X: "<<x_t<<" Y: "<<y_t<<" Z: "<<z_t<<"  length: "<<l<<endl;
 
     if(r_t > 0.0)

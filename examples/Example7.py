@@ -1,25 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
-
 import ROOT
 
-try:
-  input = raw_input
-except:
-  pass
-
-if len(sys.argv) < 2:
-  print(" Usage: Example1.py input_file")
-  sys.exit(1)
+if len(sys.argv) != 2:
+    print(" Usage: Example7.py input_file")
+    sys.exit(1)
 
 ROOT.gSystem.Load("libDelphes")
 
 try:
-  ROOT.gInterpreter.Declare('#include "classes/DelphesClasses.h"')
-  ROOT.gInterpreter.Declare('#include "external/ExRootAnalysis/ExRootTreeReader.h"')
+    ROOT.gInterpreter.Declare('#include "classes/DelphesClasses.h"')
+    ROOT.gInterpreter.Declare('#include "external/ExRootAnalysis/ExRootTreeReader.h"')
 except:
-  pass
+    pass
 
 inputFile = sys.argv[1]
 
@@ -32,10 +26,10 @@ treeReader = ROOT.ExRootTreeReader(chain)
 numberOfEntries = treeReader.GetEntries()
 
 # Get pointers to branches used in this analysis
-branchJet      = treeReader.UseBranch("JetPUPPITight")
+branchJet = treeReader.UseBranch("JetPUPPITight")
 branchElectron = treeReader.UseBranch("ElectronMedium")
-branchWeight   = treeReader.UseBranch("Weight")
-branchEvent    = treeReader.UseBranch("Event")
+branchWeight = treeReader.UseBranch("Weight")
+branchEvent = treeReader.UseBranch("Event")
 
 # Book histograms
 histJetPT = ROOT.TH1F("jet_pt", "jet P_{T}", 100, 0.0, 1000.0)
@@ -43,50 +37,49 @@ histElectronPT = ROOT.TH1F("Electron_pt", "electron P_{T}", 100, 0.0, 1000.0)
 
 # Loop over all events
 for entry in range(0, numberOfEntries):
-  # Load selected branches with data from specified event
-  treeReader.ReadEntry(entry)
+    # Load selected branches with data from specified event
+    treeReader.ReadEntry(entry)
 
-  ## main MC event weight
-  w =  branchEvent[0].Weight
+    ## main MC event weight
+    w = branchEvent[0].Weight
 
-  ## read lhe event weight
-  for weight in branchWeight:  
-    lhe_weight = weight.Weight 
-    ## do stuff ... 
-    ## print lhe_weight
-    
-  # If event contains at least 1 jet
-  if branchJet.GetEntries() > 0:
-    # Take first jet
-    jet = branchJet.At(0)
+    ## read lhe event weight
+    for weight in branchWeight:
+        lhe_weight = weight.Weight
+        ## do stuff ...
+        ## print lhe_weight
 
-    ## 0 - Loose , 1 - Medium, 2 - Tight
-    wp = 1
+    # If event contains at least 1 jet
+    if branchJet.GetEntries() > 0:
+        # Take first jet
+        jet = branchJet.At(0)
 
-    BtagOk = ( jet.BTag & (1 << wp) )
-    pt = jet.PT
-    eta = abs(jet.Eta)
+        ## 0 - Loose , 1 - Medium, 2 - Tight
+        wp = 1
 
-    # Plot jet transverse momentum
-    if (BtagOk and pt > 30. and eta < 5.):
-        histJetPT.Fill(jet.PT, w)
+        BtagOk = jet.BTag & (1 << wp)
+        pt = jet.PT
+        eta = abs(jet.Eta)
 
+        # Plot jet transverse momentum
+        if BtagOk and pt > 30.0 and eta < 5.0:
+            histJetPT.Fill(jet.PT, w)
 
-  # If event contains at least 1 electron
-  if branchElectron.GetEntries() > 0:
-    # Take first electron
-    electron = branchElectron.At(0)
+    # If event contains at least 1 electron
+    if branchElectron.GetEntries() > 0:
+        # Take first electron
+        electron = branchElectron.At(0)
 
-    pt = electron.PT
-    eta = abs(electron.Eta)
+        pt = electron.PT
+        eta = abs(electron.Eta)
 
-    ## looseCut = 0.3, mediumCut = 0.2, tightCut = 0.1
-    IsoCut = 0.2
-    IsoOk = electron.IsolationVar < IsoCut
+        ## looseCut = 0.3, mediumCut = 0.2, tightCut = 0.1
+        IsoCut = 0.2
+        IsoOk = electron.IsolationVar < IsoCut
 
-    # Plot electron transverse momentum
-    if (IsoOk and pt > 10. and eta < 5.):
-        histElectronPT.Fill(electron.PT, w)
+        # Plot electron transverse momentum
+        if IsoOk and pt > 10.0 and eta < 5.0:
+            histElectronPT.Fill(electron.PT, w)
 
 
 # Show resulting histograms

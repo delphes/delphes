@@ -2,9 +2,9 @@
 #define __FASTJET_NNFJN2PLAIN_HH__
 
 //FJSTARTHEADER
-// $Id: NNFJN2Plain.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include <fastjet/NNBase.hh>
+#include "fastjet/NNBase.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -321,6 +321,7 @@ template<class BJ, class I> void NNFJN2Plain<BJ,I>::merge_jets(int iA, int iB,
         diJ[jetI-head] = compute_diJ(jetI); // update diJ...
       }
     }
+    // and check whether jetI is potentially jetB's NN
     if (dist < jetB->NN_dist) { // we need to update B
       if (jetI != jetB) {
         jetB->NN_dist = dist;

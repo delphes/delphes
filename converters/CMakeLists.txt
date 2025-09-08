@@ -1,6 +1,7 @@
 include_directories(
   ${CMAKE_SOURCE_DIR}
-  ${DelphesExternals_INCLUDE_DIR} 
+  ${ROOT_INCLUDE_DIRS}
+  ${DelphesExternals_INCLUDE_DIR}
 )
 
 # add all executables as targets

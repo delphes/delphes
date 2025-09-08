@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Dnn2piCylinder.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -28,6 +28,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
+#include "fastjet/config.h"
 
 #ifndef DROP_CGAL // in case we do not have the code for CGAL
 #ifndef __FASTJET_DNN2PICYLINDER_HH__
@@ -95,7 +96,7 @@ class Dnn2piCylinder : public DynamicNearestNeighbours {
  private:
 
   // our extras to help us navigate, find distance, etc.
-  const static int INEXISTENT_VERTEX=-3;
+  FASTJET_WINDLL const static int INEXISTENT_VERTEX=-3;
 
   bool _verbose;
 

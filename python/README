@@ -3,7 +3,7 @@ AnalysisEvent.py -> main event class
 EventSelection.py -> definition of event categories. Must be complemented for a real analysis
 BaseControlPlots.py -> to be subclassed for each part of the analysis. Std schema: beginJob, process, endJob
 BaseWeightClass.py -> to be subclassed for each event weight
-ControlPlots.py -> main program. 
+ControlPlots.py -> main program.
 DumpEventInfo.py -> dump info about a given event.
 CPconfig.py -> definition of all the components of the analysis. It sources a file provided with the configuration of each analysis.
 
@@ -28,14 +28,15 @@ In the present directory, there are two examples:
 Commands (starting in Delphes ROOT directory):
 
 # setup path
-. ./DelphesEnv.sh
+. DelphesEnv.sh
 cd python
+
 # run the analysis
-DelphesAnalysis/ControlPlots.py -i ../files/ -o controlPlots_demo.root --all -c topConfig.py
+python3 DelphesAnalysis/ControlPlots.py -i ../files/ -o controlPlots_demo.root --all -c topConfig.py
+
 # dump a list of events in category 5 (ttbar candidates)
 export DelphesAnalysisCfg="topConfig.py"
-python DelphesAnalysis/DumpEventList.py 5 ../delphes_output.root 
+python3 DelphesAnalysis/DumpEventList.py 5 ../delphes_output.root
+
 # for each of them, print details
-for i in `cat eventlist.txt| cut -d' ' -f 2`; { python DelphesAnalysis/DumpEventInfo.py $i ../delphes_output.root; }
-
-
+for i in `cat eventlist.txt| cut -d' ' -f 2`; { python3 DelphesAnalysis/DumpEventInfo.py $i ../delphes_output.root; }

@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Error.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,7 +32,7 @@
 #include "fastjet/config.h"
 #include <sstream>
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // printing the stack would need execinfo
 #ifdef FASTJET_HAVE_EXECINFO_H
 #include <execinfo.h>
@@ -42,21 +42,29 @@
 #include <cxxabi.h>
 #endif // FASTJET_HAVE_DEMANGLING_SUPPORT
 #endif // FASTJET_HAVE_EXECINFO_H
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 using namespace std;
 
-bool Error::_print_errors = true;
-bool Error::_print_backtrace = false;
-ostream * Error::_default_ostr = & cerr;
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  LimitedWarning Error::_execinfo_undefined;
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+FASTJET_WINDLL atomic<bool> Error::_print_errors{true};
+FASTJET_WINDLL atomic<bool> Error::_print_backtrace{false};
+FASTJET_WINDLL atomic<ostream *> Error::_default_ostr{& cerr};
+FASTJET_WINDLL atomic<mutex *>   Error::_stream_mutex{nullptr};
+#else
+FASTJET_WINDLL bool Error::_print_errors = true;
+FASTJET_WINDLL bool Error::_print_backtrace = false;
+FASTJET_WINDLL ostream * Error::_default_ostr = & cerr;
+#endif  // FASTJET_HAVE_LIMITED_THREAD_SAFETY
+
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FASTJET_ONLY_CORE__)
+FASTJET_WINDLL LimitedWarning Error::_execinfo_undefined;
 #endif
 
 //----------------------------------------------------------------------
-#ifndef __FJCORE__ 
+#ifndef __FASTJET_ONLY_CORE__ 
 
 // demangling only is included, i.e. --enable-demangling is specified
 // at configure time, execinfo.h is present and the GNU C++ ABI is
@@ -105,18 +113,23 @@ string Error::_demangle(const char* symbol) {
   return symbol;
 }
 #endif  // FASTJET_HAVE_DEMANGLING_SUPPORT && FASTJET_HAVE_EXECINFO_H
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 
 //----------------------------------------------------------------------
 Error::Error(const std::string & message_in) {
   _message = message_in; 
 
-  if (_print_errors && _default_ostr){
+  // Thread-safety note: 
+  //   get the ostream once and for all (avoids that another thread
+  //   comes and changes that somewhere in the processing after the
+  //   test
+  ostream* ostr = _default_ostr;
+  if (_print_errors && ostr){
     ostringstream oss;
     oss << "fastjet::Error:  "<< message_in << endl;
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
     // only print the stack if execinfo is available and stack enabled
 #ifdef FASTJET_HAVE_EXECINFO_H
     if (_print_backtrace){
@@ -138,26 +151,25 @@ Error::Error(const std::string & message_in) {
       free(messages);
     }
 #endif  // FASTJET_HAVE_EXECINFO_H
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
-    *_default_ostr << oss.str();
-    // get something written to file even 
-    // if the program aborts
-    _default_ostr->flush(); 
-
-    // // output error message either to cerr or to the user-set stream
-    // if (_default_ostr) { *_default_ostr << oss.str();
-    //                       // get something written to file even 
-    // 			  // if the program aborts
-    //                       _default_ostr->flush(); }
-    // else               { std::cerr << oss.str(); }
-    
+#ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
+    if (_stream_mutex){
+      std::lock_guard<std::mutex> guard(*_stream_mutex);
+      *ostr << oss.str();
+      ostr->flush(); // get something written to file even if the program aborts
+    } else
+#endif //  FASTJET_HAVE_LIMITED_THREAD_SAFETY
+    {
+      *ostr << oss.str();
+      ostr->flush(); // get something written to file even if the program aborts
+    }
   }
 }
 
 //----------------------------------------------------------------------
 void Error::set_print_backtrace(bool enabled) {
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FASTJET_ONLY_CORE__)
   if (enabled) {
     _execinfo_undefined.warn("Error::set_print_backtrace(true) will not work with this build of FastJet");
   }

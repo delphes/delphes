@@ -337,7 +337,7 @@ Tcl_InfoObjCmd(clientData, interp, objc, objv)
     Tcl_Obj *CONST objv[];	/* Argument objects. */
 {
     static char *subCmds[] = {
-       "args", "body", "cmdcount", "commands",
+	     "args", "body", "cmdcount", "commands",
 	     "complete", "default", "exists", "globals",
 	     "level", "library",
 	     "locals", "nameofexecutable", "patchlevel", "procs",
@@ -346,7 +346,7 @@ Tcl_InfoObjCmd(clientData, interp, objc, objv)
     enum ISubCmdIdx {
 	    IArgsIdx, IBodyIdx, ICmdCountIdx, ICommandsIdx,
 	    ICompleteIdx, IDefaultIdx, IExistsIdx, IGlobalsIdx,
-      ILevelIdx, ILibraryIdx,
+	    ILevelIdx, ILibraryIdx,
 	    ILocalsIdx, INameOfExecutableIdx, IPatchLevelIdx, IProcsIdx,
 	    IScriptIdx, ISharedLibExtensionIdx, ITclVersionIdx, IVarsIdx
     } index;

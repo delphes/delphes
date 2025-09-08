@@ -390,9 +390,7 @@ TclCreateProc(interp, nsPtr, procName, argsPtr, bodyPtr, procPtrPtr)
              * local variables for the argument. 
              */
 
-            localPtr = (CompiledLocal *) ckalloc((unsigned) 
-                    (sizeof(CompiledLocal) - sizeof(localPtr->name)
-                            + nameLength+1));
+            localPtr = (CompiledLocal *) ckalloc(offsetof(CompiledLocal, name) + nameLength + 1);
             if (procPtr->firstLocalPtr == NULL) {
                 procPtr->firstLocalPtr = procPtr->lastLocalPtr = localPtr;
             } else {

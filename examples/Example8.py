@@ -1,12 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
 import sys
-import ROOT, math
-from collections import OrderedDict
-from ROOT import TLorentzVector
-import array
+import ROOT
 
-
-# _______________________________________________________________________________
 def print_part(p, all_particles, basespace):
     print(
         "{}i: {}, PID: {}, Q: {}, Status: {}, E: {:.2e}, Eta: {:.2e}, Phi: {:.2e}, X: {:.2e}, Y: {:.2e}, Z: {:.2e}, D1: {}, D2: {}".format(
@@ -27,7 +23,6 @@ def print_part(p, all_particles, basespace):
     )
 
 
-# _______________________________________________________________________________
 def print_descendence(particle, all_particles, basespace, list_indexed):
 
     print_part(particle, all_particles, basespace)
@@ -71,9 +66,8 @@ def print_descendence(particle, all_particles, basespace, list_indexed):
             print_descendence(part, all_particles, basespace, list_indexed)
 
 
-# _______________________________________________________________________________
-if len(sys.argv) < 2:
-    print(" Usage: Example1.py input_file")
+if len(sys.argv) != 2:
+    print(" Usage: Example8.py input_file")
     sys.exit(1)
 
 ROOT.gSystem.Load("libDelphes")
@@ -85,7 +79,6 @@ except:
     pass
 
 inputFile = sys.argv[1]
-outputFile = sys.argv[2]
 
 # Create chain of root trees
 chain = ROOT.TChain("Delphes")
@@ -115,9 +108,7 @@ for entry in range(0, numberOfEntries):
     i = -1
 
     if debug:
-        print(
-            "---------------------------------------------------------------------------------------"
-        )
+        print("--------------------------------------------------------------------------------")
         print("")
 
     ###  first produce 3 lists: higgs daughters stable, z daughters stables, all stable particles
@@ -155,6 +146,3 @@ for entry in range(0, numberOfEntries):
         basespace = ""
         if i not in list_indexed:
             print_descendence(gen, branchParticle, basespace, list_indexed)
-
-# Show resulting histograms
-out_root = ROOT.TFile(outputFile, "RECREATE")

@@ -26,24 +26,5 @@
 #define _TCLUNIXPORT
 
 #include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
-/*
- * Define access mode constants if they aren't already defined.
- */
-
-#ifndef F_OK
-#    define F_OK 00
-#endif
-#ifndef X_OK
-#    define X_OK 01
-#endif
-#ifndef W_OK
-#    define W_OK 02
-#endif
-#ifndef R_OK
-#    define R_OK 04
-#endif
 
 #endif /* _TCLUNIXPORT */

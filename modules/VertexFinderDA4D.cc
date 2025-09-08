@@ -356,7 +356,7 @@ vector<Candidate *> VertexFinderDA4D::vertices()
 
   vector<track_t> tks;
   track_t tr;
-  Double_t z, dz, t, l, dt, d0, d0error;
+  Double_t z, dz, t, dt, d0, d0error;
 
   // loop over input tracks
   fItInputArray->Reset();
@@ -374,7 +374,6 @@ vector<Candidate *> VertexFinderDA4D::vertices()
     // TBC: the time is in ns for now TBC
     //t = candidate->Position.T()/c_light;
     t = candidate->InitialPosition.T() / c_light;
-    l = candidate->L / c_light;
     double pt = candidate->Momentum.Pt();
     double eta = candidate->Momentum.Eta();
     double phi = candidate->Momentum.Phi();
@@ -678,11 +677,9 @@ static void dump(const double beta, const vector<vertex_t> &y, const vector<trac
 
   cout << endl
        << "                                                              pk=";
-  double sumpk = 0;
   for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
   {
     //cout <<  setw(8) <<  setprecision(3) <<  fixed << k->pk;
-    sumpk += k->pk;
   }
   cout << endl;
 
@@ -696,12 +693,11 @@ static void dump(const double beta, const vector<vertex_t> &y, const vector<trac
     {
       F -= log(tks[i].Z) / beta;
     }
-    double tz = tks[i].z;
-    double tt = tks[i].t;
+    // double tz = tks[i].z;
+    // double tt = tks[i].t;
     //cout <<  setw (3)<< i << ")" <<  setw (8) << fixed << setprecision(4)<<  tz << " +/-" <<  setw (6)<< sqrt(tks[i].dz2)
     //     << setw(8) << fixed << setprecision(4) << tt << " +/-" << setw(6) << std::sqrt(tks[i].dt2)  ;
 
-    double sump = 0.;
     for(vector<vertex_t>::const_iterator k = y.begin(); k != y.end(); k++)
     {
       if((tks[i].pi > 0) && (tks[i].Z > 0))
@@ -717,7 +713,6 @@ static void dump(const double beta, const vector<vertex_t> &y, const vector<trac
           cout << "    .   ";
         }
         E += p * Eik(tks[i], *k);
-        sump += p;
       }
       else
       {

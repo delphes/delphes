@@ -89,7 +89,7 @@ OldCalorimeter::~OldCalorimeter()
 void OldCalorimeter::Init()
 {
   ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
-  Long_t i, j, k, size, sizeEtaBins, sizePhiBins, sizeFractions;
+  Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
   Double_t ecalFraction, hcalFraction;
   TBinMap::iterator itEtaBin;
   set<Double_t>::iterator itPhiBin;
@@ -142,7 +142,6 @@ void OldCalorimeter::Init()
   for(i = 0; i < size / 2; ++i)
   {
     paramFractions = param[i * 2 + 1];
-    sizeFractions = paramFractions.GetSize();
 
     ecalFraction = paramFractions[0].GetDouble();
     hcalFraction = paramFractions[1].GetDouble();

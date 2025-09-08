@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: Selector.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,9 +32,9 @@
 #include <sstream>
 #include <algorithm>
 #include "fastjet/Selector.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/GhostedAreaSpec.hh"  // for area support
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 using namespace std;
 
@@ -184,7 +184,7 @@ void Selector::sift(const std::vector<PseudoJet> & jets,
   }
 }
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // area using default ghost area
 double Selector::area() const{
   return area(gas::def_ghost_area);
@@ -207,7 +207,7 @@ double Selector::area(double ghost_area) const{
   // check what passes the selection
   return ghost_spec.ghost_area() * ((*this)(ghosts)).size();
 }
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 
 //----------------------------------------------------------------------
@@ -1395,7 +1395,7 @@ Selector SelectorIsZero(){
 
 
 //----------------------------------------------------------------------
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 /// helper for selecting the pure ghost
 class SW_IsPureGhost : public SelectorWorker {
 public:
@@ -1475,7 +1475,7 @@ protected:
 Selector::Selector(const RangeDefinition &range) {
   _worker.reset(new SW_RangeDefinition(range));
 }
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 
 // operators applying directly on a Selector

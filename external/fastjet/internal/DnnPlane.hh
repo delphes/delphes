@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: DnnPlane.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -28,6 +28,8 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
+
+#include "fastjet/config.h"
 
 #ifndef DROP_CGAL // in case we do not have the code for CGAL
 
@@ -105,8 +107,8 @@ private:
   //set<Vertex_handle> _vertex_set;
   bool _verbose;
 
-  //static const bool _crash_on_coincidence = true;
-  static const bool _crash_on_coincidence = false;
+  //FASTJET_WINDLL static const bool _crash_on_coincidence = true;
+  FASTJET_WINDLL static const bool _crash_on_coincidence = false;
 
   Triangulation _TR; /// CGAL object for dealing with triangulations
 
@@ -220,7 +222,7 @@ private:
   /// if a distance between a point and 2 others is smaller than this
   /// and the distance between the two points is also smaller than this
   /// then use CGAL to compare the distances. 
-  static const double DISTANCE_FOR_CGAL_CHECKS;  
+  FASTJET_WINDLL static const double DISTANCE_FOR_CGAL_CHECKS;
 
 
   /// small routine to check if if a vertex handle is not null.

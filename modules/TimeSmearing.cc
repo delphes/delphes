@@ -51,7 +51,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fItInputArray(0), fResolutionFormula(0)
+  fResolutionFormula(0), fItInputArray(0)
 {
 	fResolutionFormula = new DelphesFormula;
 }

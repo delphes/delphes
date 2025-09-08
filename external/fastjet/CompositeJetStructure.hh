@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: CompositeJetStructure.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,11 +32,11 @@
 #ifndef __FASTJET_COMPOSITEJET_STRUCTURE_HH__
 #define __FASTJET_COMPOSITEJET_STRUCTURE_HH__
 
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/PseudoJetStructureBase.hh>
+#include "fastjet/PseudoJet.hh"
+#include "fastjet/PseudoJetStructureBase.hh"
 
 // to have access to the recombiner we need to include the JetDefinition header
-#include <fastjet/JetDefinition.hh>
+#include "fastjet/JetDefinition.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -89,7 +89,7 @@ public:
   virtual std::vector<PseudoJet> pieces(const PseudoJet &jet) const FASTJET_OVERRIDE;
 
   // area-related material
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 
   /// check if it has a well-defined area
   virtual bool has_area() const FASTJET_OVERRIDE;
@@ -134,7 +134,7 @@ public:
     _area_4vector_ptr = 0;
   }
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 protected:
   std::vector<PseudoJet> _pieces;  ///< the pieces building the jet

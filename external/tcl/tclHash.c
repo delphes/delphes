@@ -504,8 +504,7 @@ StringCreate(tablePtr, key, newPtr)
      */
 
     *newPtr = 1;
-    hPtr = (Tcl_HashEntry *) ckalloc((unsigned)
-	    (sizeof(Tcl_HashEntry) + strlen(key) - (sizeof(hPtr->key) -1)));
+    hPtr = (Tcl_HashEntry *) ckalloc(offsetof(Tcl_HashEntry, key) + strlen(key) + 1);
     hPtr->tablePtr = tablePtr;
     hPtr->bucketPtr = &(tablePtr->buckets[index]);
     hPtr->nextPtr = *hPtr->bucketPtr;

@@ -2,9 +2,9 @@
 #define __FASTJET_NNFJN2TILED_HH__
 
 //FJSTARTHEADER
-// $Id: NNFJN2Tiled.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2016-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2016-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -31,8 +31,8 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include <fastjet/NNBase.hh>
-#include <fastjet/internal/TilingExtent.hh>
+#include "fastjet/NNBase.hh"
+#include "fastjet/internal/TilingExtent.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -236,7 +236,7 @@ private:
 
   /// number of neighbours that a tile will have (rectangular geometry
   /// gives 9 neighbours).
-  static const int n_tile_neighbours = 9;
+  FASTJET_WINDLL static const int n_tile_neighbours = 9;
   //----------------------------------------------------------------------
   /// The fundamental structures to be used for the tiled N^2 algorithm
   /// (see CCN27-44 for some discussion of pattern of tiling)

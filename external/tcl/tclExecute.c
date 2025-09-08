@@ -720,9 +720,6 @@ TclExecuteByteCode(interp, codePtr)
 		DECACHE_STACK_INFO();
 		result = (*cmdPtr->objProc)(cmdPtr->objClientData, interp,
 					    objc, objv);
-		if (Tcl_AsyncReady()) {
-		    result = Tcl_AsyncInvoke(interp, result);
-		}
 		CACHE_STACK_INFO();
 
 		/*

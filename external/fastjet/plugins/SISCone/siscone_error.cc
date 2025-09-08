@@ -20,14 +20,14 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 123                                                          $//
-// $Date:: 2007-03-01 02:52:16 +0100 (Thu, 01 Mar 2007)                     $//
+// $Revision::                                                              $//
+// $Date::                                                                  $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "siscone_error.h"
 
 namespace siscone{
 
-bool Csiscone_error::m_print_errors = true;
+SISCONE_WINDLL bool Csiscone_error::m_print_errors = true;
 
 }

@@ -20,8 +20,8 @@ awk '
     print "    body { font-family: sans-serif; max-width: 800px; line-height: 1.4; margin-left: auto; margin-right: auto; padding: 0em 1em 3em 1em; }"
     print "    h1 { font-weight: normal; }"
     print "    td, th { border: 1px solid #d3d3d3; padding: 0.1em 0.3em; }"
-    print "    th { text-align: left; background-color: #f5f5f5; }"
-    print "    tr.even td { background-color: #f5f5f5; }"
+    print "    th { text-align: left; }"
+    print "    tr.odd td { background-color: #f5f5f5; }"
     print "    tr.class td { font-weight: bold; padding-top: 1em; }"
     print "  </style>"
     print "</head>"
@@ -51,7 +51,7 @@ awk '
 
   /^ *class /{
     print_line(name, comment, even, 1);
-    even = 0;
+    even = 1;
     name = "";
     comment = "";
     split($2, a, ":");

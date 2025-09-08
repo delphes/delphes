@@ -4,20 +4,22 @@ Matteo Cacciari
 Gavin P. Salam
 Gregory Soyez
 
-See http://fastjet.fr/ for further details, and the FastJet manual
-at http://arxiv.org/abs/1111.6097
+See https://fastjet.fr/ for further details, and the FastJet manual
+at https://arxiv.org/abs/1111.6097
 
 ----------------------------------------------------------------------
 
 Many people have provided bug reports, suggestions for development,
 documentation and in some cases explicit code for plugin
-algorithms. We would in particular like to thank
+algorithms and the build system. We would in particular like to thank
 
 Vanya Belyaev
 Andy Buckley
 Timothy Chan
 Pierre-Antoine Delsart
 Olivier Devillers
+Matthew Feickert
+Lindsey Gray
 Robert Harris
 Joey Huston
 Sue Ann Koay
@@ -25,6 +27,7 @@ Andreas Oehler
 Sal Rappoccio
 Juan Rojo
 Sebastian Sapeta
+Henry Schreiner
 Mike Seymour
 Jessie Shelton
 Torbjorn Sjostrand
@@ -35,6 +38,10 @@ Jesse Thaler
 Chris Vermilion
 Markus Wobisch 
 Christopher Young
+
+Further details are given in the ChangeLog file. If you have contributed
+something and your name has been accidentally left out of the above list
+please let us know.
 
 ----------------------------------------------------------------------
 

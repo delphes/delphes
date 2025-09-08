@@ -4038,16 +4038,14 @@ TclCompileForeachCmd(interp, string, lastChar, flags, envPtr)
      * pointing to the ForeachInfo structure in the compilation environment.
      */
 
-    infoPtr = (ForeachInfo *) ckalloc((unsigned)
-	    (sizeof(ForeachInfo) + (numLists * sizeof(ForeachVarList *))));
+    infoPtr = (ForeachInfo *) ckalloc(offsetof(ForeachInfo, varLists) + numLists * sizeof(ForeachVarList *));
     infoPtr->numLists = numLists;
     infoPtr->firstListTmp = firstListTmp;
     infoPtr->loopIterNumTmp = loopIterNumTmp;
     for (i = 0;  i < numLists;  i++) {
 	ForeachVarList *varListPtr;
 	numVars = varcList[i];
-	varListPtr = (ForeachVarList *) ckalloc((unsigned)
-	        sizeof(ForeachVarList) + numVars*sizeof(int));
+	varListPtr = (ForeachVarList *) ckalloc(offsetof(ForeachVarList, varIndexes) + numVars * sizeof(int));
 	varListPtr->numVars = numVars;
 	for (j = 0;  j < numVars;  j++) {
 	    char *varName = varvList[i][j];
@@ -4259,8 +4257,7 @@ DupForeachInfo(clientData)
     int numLists = srcPtr->numLists;
     int numVars, i, j;
     
-    dupPtr = (ForeachInfo *) ckalloc((unsigned)
-	    (sizeof(ForeachInfo) + (numLists * sizeof(ForeachVarList *))));
+    dupPtr = (ForeachInfo *) ckalloc(offsetof(ForeachInfo, varLists) + numLists * sizeof(ForeachVarList *));
     dupPtr->numLists = numLists;
     dupPtr->firstListTmp = srcPtr->firstListTmp;
     dupPtr->loopIterNumTmp = srcPtr->loopIterNumTmp;
@@ -4268,8 +4265,7 @@ DupForeachInfo(clientData)
     for (i = 0;  i < numLists;  i++) {
 	srcListPtr = srcPtr->varLists[i];
 	numVars = srcListPtr->numVars;
-	dupListPtr = (ForeachVarList *) ckalloc((unsigned)
-	        sizeof(ForeachVarList) + numVars*sizeof(int));
+	dupListPtr = (ForeachVarList *) ckalloc(offsetof(ForeachVarList, varIndexes) + numVars * sizeof(int));
 	dupListPtr->numVars = numVars;
 	for (j = 0;  j < numVars;  j++) {
 	    dupListPtr->varIndexes[j] =	srcListPtr->varIndexes[j];
@@ -6144,9 +6140,7 @@ LookupCompiledLocal(name, nameChars, createIfNew, flagsIfCreated, procPtr)
     
     if (createIfNew || (name == NULL)) {
 	localIndex = procPtr->numCompiledLocals;
-	localPtr = (CompiledLocal *) ckalloc((unsigned) 
-	        (sizeof(CompiledLocal) - sizeof(localPtr->name)
-		+ nameChars+1));
+	localPtr = (CompiledLocal *) ckalloc(offsetof(CompiledLocal, name) + nameChars + 1);
 	if (procPtr->firstLocalPtr == NULL) {
 	    procPtr->firstLocalPtr = procPtr->lastLocalPtr = localPtr;
 	} else {

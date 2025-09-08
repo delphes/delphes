@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: CompositeJetStructure.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -28,7 +28,7 @@
 //----------------------------------------------------------------------
 //FJENDHEADER
 
-#include <fastjet/CompositeJetStructure.hh>
+#include "fastjet/CompositeJetStructure.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -47,7 +47,7 @@ CompositeJetStructure::CompositeJetStructure(const std::vector<PseudoJet> & init
 					     const JetDefinition::Recombiner * recombiner)
   : _pieces(initial_pieces){
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   // deal with area support (cache the area if needed)
   //--------------------------------------------------
   // check if all the pieces have area, in which case store it
@@ -122,7 +122,7 @@ std::vector<PseudoJet> CompositeJetStructure::pieces(const PseudoJet & /*jet*/) 
 }
 
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // area-related material
 
 // check if it has a well-defined area
@@ -175,7 +175,7 @@ bool CompositeJetStructure::is_pure_ghost(const PseudoJet & /*reference*/) const
   return true;
 }
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 
 FASTJET_END_NAMESPACE      // defined in fastjet/internal/base.hh

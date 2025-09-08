@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: LazyTiling25.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -29,6 +29,7 @@
 //FJENDHEADER
 
 #include <iomanip>
+#include <algorithm>
 #include "fastjet/internal/LazyTiling25.hh"
 #include "fastjet/internal/TilingExtent.hh"
 using namespace std;
@@ -40,10 +41,10 @@ LazyTiling25::LazyTiling25(ClusterSequence & cs) :
   _cs(cs), _jets(cs.jets())
   //, _minheap(_jets.size()) 
 {
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   _ncall = 0; // gps tmp
   _ncall_dtt = 0; // gps tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
   _Rparam = cs.jet_def().R();
   _R2 = _Rparam * _Rparam;
   _invR2 = 1.0 / _R2;
@@ -394,12 +395,12 @@ inline void LazyTiling25::_add_untagged_neighbours_to_tile_union_using_max_info(
 //----------------------------------------------------------------------
 /// returns a particle's distance to the edge of the specified tile
 inline double LazyTiling25::_distance_to_tile(const TiledJet * bj, const Tile25 * tile) 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
    {
   _ncall_dtt++; // GPS tmp
 #else
   const {
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
   // Note the careful way of checking the minimum potential deta:
   // unlike the phi case below, we don't calculate the distance to the
   // centre and subtract spacing/2. This is because of issue of
@@ -604,9 +605,9 @@ void LazyTiling25::run() {
     }
   }
 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   cout << "intermediate ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
 
   // GPS debugging
   // _print_tiles(briefjets);
@@ -625,14 +626,12 @@ void LazyTiling25::run() {
   jets_for_minheap.reserve(n); 
 
   // now run the recombination loop
-  int history_location = n-1;
   while (n > 0) {
 
     double diJ_min = minheap.minval() *_invR2;
     jetA = head + minheap.minloc();
 
     // do the recombination between A and B
-    history_location++;
     jetB = jetA->NN;
 
     if (jetB != NULL) {
@@ -779,9 +778,9 @@ void LazyTiling25::run() {
 
   // final cleaning up;
   delete[] briefjets;
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   cout << "ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
 
 }
 

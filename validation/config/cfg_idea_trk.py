@@ -6,11 +6,7 @@ from src.utils import (
     Particle,
     Slices1D,
     EfficiencyParticleBlock,
-    EfficiencyTaggingBlock,
     ResolutionBlock,
-    ResolutionHisto,
-    ResolutionPlot,
-    Text,
 )
 
 ## provide relative path to the directory
@@ -50,7 +46,7 @@ elog_min = pmin
 elog_max = pmax
 
 nbins_theta = nbins
-theta_min = 0.
+theta_min = 0.0
 theta_max = 90
 
 nbins_eta = nbins
@@ -98,15 +94,9 @@ obs_phi = Observable("phi", "Phi", "\phi", " [rad]", 500, -0.001, 0.001, "abs")
 obs_theta = Observable("theta", "Theta", "\\theta", "[°]", 500, -0.01, 0.01, "abs")
 
 ## covariance matrix
-obs_corr_d0phi = Observable(
-    "corr_d0phi", "CorrD0Phi", "\\rho(d_0, \phi)", "", 100, -1.0, 1.0, "mean"
-)
-obs_corr_d0c = Observable(
-    "corr_d0c", "CorrD0C", "\\rho(d_0, C)", "", 100, -1.0, 1.0, "mean"
-)
-obs_corr_d0dz = Observable(
-    "corr_d0dz", "CorrD0DZ", "\\rho(d_0, d_z)", "", 100, -1.0, 1.0, "mean"
-)
+obs_corr_d0phi = Observable("corr_d0phi", "CorrD0Phi", "\\rho(d_0, \phi)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0c = Observable("corr_d0c", "CorrD0C", "\\rho(d_0, C)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0dz = Observable("corr_d0dz", "CorrD0DZ", "\\rho(d_0, d_z)", "", 100, -1.0, 1.0, "mean")
 obs_corr_d0ctgtheta = Observable(
     "corr_d0ctgtheta",
     "CorrD0CtgTheta",
@@ -117,12 +107,8 @@ obs_corr_d0ctgtheta = Observable(
     1.0,
     "mean",
 )
-obs_corr_phic = Observable(
-    "corr_phic", "CorrPhiC", "\\rho(\phi, C)", "", 100, -1.0, 1.0, "mean"
-)
-obs_corr_phidz = Observable(
-    "corr_phidz", "CorrPhiDZ", "\\rho(\phi, d_z)", "", 100, -1.0, 1.0, "mean"
-)
+obs_corr_phic = Observable("corr_phic", "CorrPhiC", "\\rho(\phi, C)", "", 100, -1.0, 1.0, "mean")
+obs_corr_phidz = Observable("corr_phidz", "CorrPhiDZ", "\\rho(\phi, d_z)", "", 100, -1.0, 1.0, "mean")
 obs_corr_phictgtheta = Observable(
     "corr_phictgtheta",
     "CorrPhiCtgTheta",
@@ -133,9 +119,7 @@ obs_corr_phictgtheta = Observable(
     1.0,
     "mean",
 )
-obs_corr_cdz = Observable(
-    "corr_cdz", "CorrCDZ", "\\rho(C, d_z)", "", 100, -1.0, 1.0, "mean"
-)
+obs_corr_cdz = Observable("corr_cdz", "CorrCDZ", "\\rho(C, d_z)", "", 100, -1.0, 1.0, "mean")
 obs_corr_cctgtheta = Observable(
     "corr_cctgtheta",
     "CorrCCtgTheta",

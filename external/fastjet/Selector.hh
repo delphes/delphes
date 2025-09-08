@@ -2,9 +2,9 @@
 #define __FASTJET_SELECTOR_HH__
 
 //FJSTARTHEADER
-// $Id: Selector.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2009-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2009-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -32,9 +32,9 @@
 //FJENDHEADER
 
 #include "fastjet/PseudoJet.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/RangeDefinition.hh"  // for initialisation from a RangeDefinition
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 #include <limits>
 #include <cmath>
 
@@ -158,7 +158,7 @@ public:
   /// worker (and so will delete automatically when appropriate).
   Selector(SelectorWorker * worker_in) {_worker.reset(worker_in);}
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   /// ctor from a RangeDefinition
   ///
   /// This is provided for backward compatibility and will be removed in
@@ -169,7 +169,7 @@ public:
   /// the range has gone out of scope. We thus strongly advise against
   /// the direct use of this constructor.
   Selector(const RangeDefinition &range);
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
   /// dummy virtual dtor
   virtual ~Selector(){}
@@ -251,7 +251,7 @@ public:
     return validated_worker()->has_finite_area();
   }
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   /// returns the rapidity-phi area associated with the Selector
   /// (throws InvalidArea if the area does not make sense).
   ///
@@ -271,7 +271,7 @@ public:
   /// case of a Monte Carlo area evaluation.
   ///
   double area(double ghost_area) const;
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
   /// returns a (reference to) the underlying worker's shared pointer
   const SharedPtr<SelectorWorker> & worker() const {return _worker;}
@@ -330,14 +330,14 @@ public:
 protected:
   /// Helper for copying selector workers if needed
   ///
-  /// The following is needed if we want to modify a selectors that
+  /// The following is needed if we want to modify a selector that
   /// shares a worker with another selector. In that case, we need to
   /// get another copy of the worker to avoid interferences
   ///
   /// Note that any non-const operation has to call this to behave
   /// correctly w.r.t shared workers!
   void _copy_worker_if_needed(){
-    // do nothing if there's a sinlge user of the worker
+    // do nothing if there's a single user of the worker
     if (_worker.unique()) return;
 
     // call the worker's copy
@@ -479,11 +479,11 @@ Selector SelectorPtFractionMin(double fraction);
 /// select PseudoJet with 0 momentum
 Selector SelectorIsZero();
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 /// select objects that are (or are only made of) ghosts.
 /// PseudoJets for which has_area() are considered non-pure-ghost.
 Selector SelectorIsPureGhost();
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 /// @}
 

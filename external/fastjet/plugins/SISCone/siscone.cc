@@ -20,8 +20,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 403                                                          $//
-// $Date:: 2016-05-19 16:52:05 +0200 (Thu, 19 May 2016)                     $//
+// $Revision::                                                              $//
+// $Date::                                                                  $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "config.h"
@@ -58,8 +58,8 @@ Csiscone::~Csiscone(){
   rerun_allowed = false;
 }
 
-bool Csiscone::init_done=false;
-std::ostream* Csiscone::_banner_ostr = &cout;
+SISCONE_WINDLL bool Csiscone::init_done = false;
+SISCONE_WINDLL std::ostream * Csiscone::_banner_ostr = &cout;
 
 /*
  * compute the jets from a given particle set doing multiple passes

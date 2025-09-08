@@ -28,6 +28,7 @@
  */
 
 #include <stdio.h>
+#include <stddef.h>
 
 #ifndef _TCL
 #include "tcl.h"
@@ -519,6 +520,14 @@ typedef struct Var {
  *----------------------------------------------------------------
  */
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#   define TCLFLEXARRAY
+#elif defined(__GNUC__) && (__GNUC__ > 2)
+#   define TCLFLEXARRAY 0
+#else
+#   define TCLFLEXARRAY 1
+#endif
+
 /*
  * Forward declaration to prevent an error when the forward reference to
  * Command is encountered in the Proc and ImportRef types declared below.
@@ -564,7 +573,7 @@ typedef struct CompiledLocal {
 				 * is marked by a unique ClientData tag
 				 * during compilation, and that same tag
 				 * is used to find the variable at runtime. */
-    char name[4];		/* Name of the local variable starts here.
+    char name[TCLFLEXARRAY];	/* Name of the local variable starts here.
 				 * If the name is NULL, this will just be
 				 * '\0'. The actual size of this field will
 				 * be large enough to hold the name. MUST

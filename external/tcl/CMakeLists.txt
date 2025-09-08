@@ -1,4 +1,4 @@
-include_directories(${CMAKE_SOURCE_DIR}/external)
+include_directories(${DelphesExternals_INCLUDE_DIR})
 
 file(GLOB sources *.c)
 

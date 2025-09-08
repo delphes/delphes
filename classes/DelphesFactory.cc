@@ -58,7 +58,7 @@ DelphesFactory::~DelphesFactory()
 
 //------------------------------------------------------------------------------
 
-void DelphesFactory::Clear(Option_t *option)
+void DelphesFactory::Clear(Option_t * /*option*/)
 {
   set<TObject *>::iterator itPool;
   for(itPool = fPool.begin(); itPool != fPool.end(); ++itPool)

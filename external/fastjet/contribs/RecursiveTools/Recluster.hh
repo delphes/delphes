@@ -1,7 +1,7 @@
 #ifndef __FASTJET_CONTRIB_TOOLS_RECLUSTER_HH__
 #define __FASTJET_CONTRIB_TOOLS_RECLUSTER_HH__
 
-// $Id: Recluster.hh 723 2014-07-30 09:11:01Z gsoyez $
+// $Id: Recluster.hh 1431 2024-10-04 12:29:53Z salam $
 //
 // Copyright (c) 2014-, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
@@ -34,7 +34,10 @@ namespace contrib{
 
 //----------------------------------------------------------------------
 /// \class Recluster
-/// Class that helps reclustering a jet with a new jet definition
+/// Class that helps reclustering a jet with a new jet definition. 
+///
+/// **This class is DEPRECATED and you are advised to use the
+/// fastjet::Recluster class instead, from "fastjet/tools/Recluster.hh".**
 ///
 /// The result of the reclustering is returned as a single PseudoJet
 /// with a CompositeJet structure. The pieces of that PseudoJet will

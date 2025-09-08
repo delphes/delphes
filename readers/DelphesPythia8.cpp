@@ -244,10 +244,6 @@ int main(int argc, char *argv[])
 
   Pythia8::Pythia *pythia = 0;
 
-  // for matching
-  Pythia8::CombineMatchingInput *combined = 0;
-  Pythia8::UserHooks *matching = 0;
-
   if(argc != 4)
   {
     cout << " Usage: " << appName << " config_file"
@@ -297,20 +293,26 @@ int main(int argc, char *argv[])
     // Initialize Pythia
     pythia = new Pythia8::Pythia;
 
+    if(pythia == NULL)
+    {
+      throw runtime_error("can't create Pythia instance");
+    }
+
     // jet matching
 #if PYTHIA_VERSION_INTEGER < 8300
+    Pythia8::CombineMatchingInput *combined = 0;
+    Pythia8::UserHooks *matching = 0;
+
     matching = combined->getHook(*pythia);
     if(!matching)
     {
       throw runtime_error("can't do matching");
     }
     pythia->setUserHooksPtr(matching);
+#else
+    Pythia8::CombineMatchingInput combined;
+    combined.setHook(*pythia);
 #endif
-
-    if(pythia == NULL)
-    {
-      throw runtime_error("can't create Pythia instance");
-    }
 
     // Read in commands from configuration file
     if(!pythia->readFile(argv[2]))

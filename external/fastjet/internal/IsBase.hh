@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: IsBase.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -61,7 +61,7 @@ FASTJET_BEGIN_NAMESPACE
 /// \endif
 template<typename T, T _t>
 struct integral_type{
-  static const T value = _t;         ///< the value (only member carrying info)
+  FASTJET_WINDLL static const T value = _t;         ///< the value (only member carrying info)
   typedef T value_type;		     ///< a typedef for the type T
   typedef integral_type<T,_t> type;  ///< a typedef for the whole structure
 };

@@ -321,7 +321,7 @@ bool DelphesHepMC2Reader::ReadBlock(DelphesFactory *factory,
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC2Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
+void DelphesHepMC2Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eventNumber*/,
   TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   HepMCEvent *element;

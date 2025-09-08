@@ -98,7 +98,6 @@ void DecayFilter::Process()
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
   const Double_t c = TMath::C(); // [m/s]
   Double_t m, t, p, bgct, L, l;
-  Bool_t hasDecayed = kFALSE;
   
   // loop over all input candidates
   fItInputArray->Reset();

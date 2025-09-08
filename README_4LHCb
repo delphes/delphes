@@ -1,7 +1,7 @@
 Delphes 4 LHCb
 ==============
 
-The card "delphes_card_LHCb.tcl" contains a preliminary parametrization of the LHCb detector. 
+The card "delphes_card_LHCb.tcl" contains a preliminary parametrization of the LHCb detector.
 
 - ParticlePropagator
 
@@ -24,20 +24,20 @@ performance.
 - IdentificationMap
 
 This module is a recent addition in order to map particle misidentification rates
-and reconstruction efficiencies. 
+and reconstruction efficiencies.
 
-An example is given in the card but can be expanded if needed. 
+An example is given in the card but can be expanded if needed.
 
 - ECAL/HCAL
 
 Calorimeter modules are used to parametrize the energy response and angular
-resolution of neutral objects such as photons/neutral hadrons. 
+resolution of neutral objects such as photons/neutral hadrons.
 
-- TreeWriter 
+- TreeWriter
 
-user specifies here which collections are stored in the output. 
+user specifies here which collections are stored in the output.
 By default tracks, neutral hadrons and photons are stored in this card.
-Tracks contain muons, electrons, and charged hadrons. 
+Tracks contain muons, electrons, and charged hadrons.
 
 
 Quick start with Delphes
@@ -47,28 +47,25 @@ Quick start with Delphes
 
   make
 
-2) Simulate p p -> b b~ events 
+2) Simulate p p -> b b~ events
 
   wget http://cp3.irmp.ucl.ac.be/downloads/pp_bb.hep.gz
   gunzip pp_bb.hep.gz
   ./DelphesSTDHEP cards/delphes_card_LHCb.tcl delphes_output.root pp_bb.hep
 
 
-For more details, please visit:
+For more detailed documentation, please visit
 
-  https://cp3.irmp.ucl.ac.be/projects/delphes
+  https://delphes.github.io/workbook
 
 
 Configure Delphes on lxplus.cern.ch
-====================================
+===================================
 
-git clone git://github.com/delphes/delphes.git Delphes
+  git clone https://github.com/delphes/delphes Delphes
 
-cd Delphes
+  cd Delphes
 
-source  /afs/cern.ch/sw/lcg/external/gcc/4.9.3/x86_64-slc6/setup.sh
+  source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-el9-gcc12-opt/setup.sh
 
-source /afs/cern.ch/sw/lcg/app/releases/ROOT/6.06.00/x86_64-slc6-gcc49-opt/root/bin/thisroot.sh
-
-make
-
+  make

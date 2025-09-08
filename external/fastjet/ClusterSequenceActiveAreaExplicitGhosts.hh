@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: ClusterSequenceActiveAreaExplicitGhosts.hh 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -35,8 +35,8 @@
 #include "fastjet/ClusterSequenceAreaBase.hh"
 #include "fastjet/GhostedAreaSpec.hh"
 #include "fastjet/LimitedWarning.hh"
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 #include <cstdio>
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -147,7 +147,7 @@ private:
   // things related to checks for dangerous particles
   double _max_ghost_perp2;
   bool   _has_dangerous_particles; 
-  static LimitedWarning _warnings;
+  FASTJET_WINDLL static LimitedWarning _warnings;
 
   //static int _n_warn_dangerous_particles;
   //static const int _max_warn_dangerous_particles = 5;

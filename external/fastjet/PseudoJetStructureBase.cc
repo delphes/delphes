@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: PseudoJetStructureBase.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2005-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -33,9 +33,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 using namespace std;
 
@@ -77,7 +77,7 @@ const ClusterSequence * PseudoJetStructureBase::validated_cs() const{
   throw Error("This PseudoJet structure is not associated with a valid ClusterSequence");
 }
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // if the jet has valid area information then return a pointer to
 // the associated ClusterSequenceAreaBase object; otherwise throw an error
 //
@@ -198,7 +198,7 @@ std::vector<PseudoJet> PseudoJetStructureBase::pieces(const PseudoJet & /*refere
 // the following ones require a computation of the area in the
 // parent ClusterSequence (See ClusterSequenceAreaBase for details)
 //------------------------------------------------------------------
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 
 // return the jet (scalar) area.
 //
@@ -228,6 +228,6 @@ PseudoJet PseudoJetStructureBase::area_4vector(const PseudoJet & /*reference*/) 
 bool PseudoJetStructureBase::is_pure_ghost(const PseudoJet & /*reference*/) const{
   throw Error("This PseudoJet structure has no implementation for is_pure_ghost");
 }
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 FASTJET_END_NAMESPACE

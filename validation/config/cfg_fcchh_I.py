@@ -469,9 +469,7 @@ eff_btag_plots = EfficiencyTaggingBlock("Jet", "b-tag", mom, eta, gen_cond_btag,
 
 eff_ctag_plots = EfficiencyTaggingBlock("Jet", "c-tag", mom, eta, gen_cond_ctag, [4, 5, 6], "BTag", eff_tag_plots)
 
-eff_tautag_plots = EfficiencyTaggingBlock(
-    "Jet", "tau-tag", mom, eta, gen_cond_tautag, [0, 1, 2], "TauTag", eff_tag_plots
-)
+eff_tautag_plots = EfficiencyTaggingBlock("Jet", "tau-tag", mom, eta, gen_cond_tautag, [0, 1, 2], "TauTag", eff_tag_plots)
 
 eff_tag_dict = dict()
 eff_tag_dict["b-tag"] = eff_btag_plots

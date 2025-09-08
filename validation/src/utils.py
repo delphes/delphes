@@ -1,14 +1,11 @@
-import sys, os
+import os
 import numpy as np
 from array import array
 import ROOT
 import math
 from collections import OrderedDict
-from ROOT import TVector3, TLorentzVector, TVectorD, TMath
+from ROOT import TVector3, TVectorD, TMath
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-import pandas as pd
-import matplotlib
 
 # matplotlib.use("tkagg")
 
@@ -262,9 +259,7 @@ class ResolutionPlot:
                     value = mean
                     value_err = mean_err
 
-                debug_str = "{} {}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(
-                    h.histogram_names[bin], h.observable.opt, x, value, value_err
-                )
+                debug_str = "{} {}: x={:.2f}, mode={:.2f}, sigma={:.2f}".format(h.histogram_names[bin], h.observable.opt, x, value, value_err)
 
                 final_histogram.SetBinContent(i, value)
                 final_histogram.SetBinError(i, value_err)
@@ -929,7 +924,7 @@ class LatexReport:
                     new_batch_size = round(batch_size / 2)
                 if i != 0 and i % new_batch_size == 0:
                     tex_line += "\n" + r"\end{figure}" + "\n" + r"\end{frame}"
-                    tex_line += "\n" + beginFrame(" cont'd")
+                    tex_line += "\n" + self.begin_frame(" cont'd")
             elif len(figures) > 9:
                 plots_per_page = round(float(len(figure_dict)) / 2)
                 if i != 0 and plots_per_page and i % plots_per_page == 0:
@@ -950,7 +945,7 @@ class LatexReport:
 
         print("\n {} file is created!\n".format(texfile_path))
 
-        print("Creating pdf file... ".format(pdffile_path))
+        print("Creating pdf file... ")
 
         os.system("pdflatex {}".format(texfile_path))
         os.system("rm *.aux *.log *.toc *.snm *.nav ")
@@ -1262,9 +1257,9 @@ def get_genTheta(part):
     # return arccotan(get_genTrackParam(part)[4])
     # return part.P4().Theta()
     if abs(part.Eta) > 10:
-        return math.copysign(1, part.Eta) /180
+        return math.copysign(1, part.Eta) / 180
     else:
-        return 2 * math.atan(math.exp(-part.Eta))*180/3.1416
+        return 2 * math.atan(math.exp(-part.Eta)) * 180 / 3.1416
 
 
 # _______________________________________________________________________________
@@ -1275,10 +1270,10 @@ def get_recoTheta(part):
     if hasattr(part, "CtgTheta"):
         # return arccotan(part.CtgTheta)
         # return part.P4().Theta()
-        return 2 * math.atan(math.exp(-part.Eta))*180/3.1416
+        return 2 * math.atan(math.exp(-part.Eta)) * 180 / 3.1416
     else:
         # return part.P4().Theta()
-        return 2 * math.atan(math.exp(-part.Eta))*180/3.1416
+        return 2 * math.atan(math.exp(-part.Eta)) * 180 / 3.1416
 
 
 # _______________________________________________________________________________
@@ -1310,7 +1305,7 @@ def get_genC(part):
 
 
 def get_recoC(part):
-    return returnC(part.Charge, part.PT)
+    return getC(part.Charge, part.PT)
 
 
 # _______________________________________________________________________________

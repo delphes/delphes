@@ -43,7 +43,7 @@
 #include "JetDistances.hh"
 #include "CommonUtils.hh"
 
-#include <fastjet/internal/base.hh>
+#include "fastjet/internal/base.hh"
 
 FASTJET_BEGIN_NAMESPACE
 

@@ -8,10 +8,9 @@
 #
 #  Analytical formula
 
-## degrading by a factor 2 wrt to scenario I
 
 set ResolutionFormula {
-2* (
+
 ( abs(eta) >= 0 && abs(eta) <= 1 ) *
 
     (sqrt(1e-5/sin(2*atan(exp(-abs(eta))))^2 + (
@@ -419,5 +418,5 @@ set ResolutionFormula {
    (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 100.0000 && energy < 1000.0000) * (0.075097 + (energy-100.000000)* 0.000243) + \
    (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 1000.0000 && energy < 10000.0000) * (0.294198 + (energy-1000.000000)* 0.000280) + \
    (abs(eta) >= 5.9000 && abs(eta) < 6.0000) * (energy >= 10000.0000) * (2.814894*energy/10000.000000)
-   )
+
 }

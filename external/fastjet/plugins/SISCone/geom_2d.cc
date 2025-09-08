@@ -20,8 +20,8 @@
 // along with this program; if not, write to the Free Software               //
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA //
 //                                                                           //
-// $Revision:: 171                                                          $//
-// $Date:: 2007-06-19 16:26:05 +0200 (Tue, 19 Jun 2007)                     $//
+// $Revision::                                                              $//
+// $Date::                                                                  $//
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "geom_2d.h"
@@ -44,8 +44,8 @@ using namespace std;
 
 // static member default init
 //----------------------------
-double Ceta_phi_range::eta_min = -100.0;
-double Ceta_phi_range::eta_max = 100.0;
+SISCONE_WINDLL double Ceta_phi_range::eta_min = -100.0;
+SISCONE_WINDLL double Ceta_phi_range::eta_max = 100.0;
 
 // default ctor
 //--------------

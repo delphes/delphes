@@ -29,11 +29,11 @@ typedef struct {
     char *errMsg;		/* Error message returned from Tcl command,
 				 * or NULL.  Malloc'ed. */
     int length;			/* Number of non-NULL chars. in command. */
-    char command[4];		/* Space for Tcl command to invoke.  Actual
+    char command[TCLFLEXARRAY];	/* Space for Tcl command to invoke.  Actual
 				 * size will be as large as necessary to
 				 * hold command.  This field must be the
 				 * last in the structure, so that it can
-				 * be larger than 4 bytes. */
+				 * be larger than 1 byte. */
 } TraceVarInfo;
 
 /*
@@ -1116,8 +1116,7 @@ Tcl_TraceCmd(dummy, interp, argc, argv)
 	}
 
 	length = strlen(argv[4]);
-	tvarPtr = (TraceVarInfo *) ckalloc((unsigned)
-		(sizeof(TraceVarInfo) - sizeof(tvarPtr->command) + length + 1));
+	tvarPtr = (TraceVarInfo *) ckalloc(offsetof(TraceVarInfo, command) + length + 1);
 	tvarPtr->flags = flags;
 	tvarPtr->errMsg = NULL;
 	tvarPtr->length = length;

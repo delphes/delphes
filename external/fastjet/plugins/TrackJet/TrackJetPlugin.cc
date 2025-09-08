@@ -1,7 +1,7 @@
 //FJSTARTHEADER
-// $Id: TrackJetPlugin.cc 4442 2020-05-05 07:50:11Z soyez $
+// $Id$
 //
-// Copyright (c) 2007-2020, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2007-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -58,6 +58,7 @@
 #include "fastjet/TrackJetPlugin.hh"
 
 // other stuff
+#include <algorithm>
 #include <list>
 #include <memory>
 #include <cmath>
@@ -88,7 +89,7 @@ public:
 // implementation of the TrackJet plugin
 //------------------------------------------------------------------
 
-bool TrackJetPlugin::_first_time = true;
+thread_safety_helpers::FirstTimeTrue TrackJetPlugin::_first_time;
 
 string TrackJetPlugin::description () const {
   ostringstream desc;
@@ -155,27 +156,27 @@ void TrackJetPlugin::run_clustering(ClusterSequence & clust_seq) const {
       // check if the particle is within a distance R of the jet
       double distance2 = current_track.plain_distance(current_particle_track);
       if (distance2 <= _radius2){
-	// add the particle to the jet
-	PseudoJet new_track;
-	PseudoJet new_jet;
-	_jet_recombiner.recombine(current_jet, current_particle, new_jet);
-	_track_recombiner.recombine(current_track, current_particle_track, new_track);
+        // add the particle to the jet
+        PseudoJet new_track;
+        PseudoJet new_jet;
+        _jet_recombiner.recombine(current_jet, current_particle, new_jet);
+        _track_recombiner.recombine(current_track, current_particle_track, new_track);
 
-	int new_jet_index;
-	clust_seq.plugin_record_ij_recombination(current_jet_index, *index_it, distance2, new_jet, new_jet_index);
+        int new_jet_index;
+        clust_seq.plugin_record_ij_recombination(current_jet_index, *index_it, distance2, new_jet, new_jet_index);
 
-	current_jet = new_jet;
-	current_track = new_track;
-	current_jet_index = new_jet_index;
+        current_jet = new_jet;
+        current_track = new_track;
+        current_jet_index = new_jet_index;
 
-	// particle has been clustered so remove it from the list
-	sorted_pt_index.erase(index_it);
+        // particle has been clustered so remove it from the list
+        sorted_pt_index.erase(index_it);
 
-	// and don't forget to start again from the beginning
-	//  as the jet axis may have changed
-	index_it = sorted_pt_index.begin();
+        // and don't forget to start again from the beginning
+        //  as the jet axis may have changed
+        index_it = sorted_pt_index.begin();
       } else {
-	index_it++;
+        index_it++;
       }
     }
 
@@ -187,8 +188,7 @@ void TrackJetPlugin::run_clustering(ClusterSequence & clust_seq) const {
 
 // print a banner for reference to the 3rd-party code
 void TrackJetPlugin::_print_banner(ostream *ostr) const{
-  if (! _first_time) return;
-  _first_time=false;
+  if (! _first_time()) return;
 
   // make sure the user has not set the banner stream to NULL
   if (!ostr) return;  
