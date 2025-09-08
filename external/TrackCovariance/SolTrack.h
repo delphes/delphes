@@ -28,7 +28,6 @@ private:
 	//
 	TMatrixDSym fCov;		// Full covariance matrix
 	//
-	//
 public:
 	//
 	// Constructors
@@ -57,7 +56,10 @@ public:
 	// Covariance
 	TMatrixDSym Cov()		{ return fCov; }
 	// Track parameter covariance calculation
+	void OldCovCalc(Bool_t Res, Bool_t MS);
 	void CovCalc(Bool_t Res, Bool_t MS);
+	// Track parameter covariance calculation with Kalman filter
+	void KalmanCov(Bool_t Res, Bool_t MS, Double_t mass = 0.13957021);
 	// Parameter errors
 	Double_t s_D()    { return TMath::Sqrt(fCov(0, 0)); }
 	Double_t s_phi0() { return TMath::Sqrt(fCov(1, 1)); }
@@ -67,12 +69,19 @@ public:
 	Double_t s_ct()   { return TMath::Sqrt(fCov(4, 4)); }
 	//
 	// Track hit management
-	Int_t nHit();
-	Int_t nmHit();
+	Int_t nHit();	// Nr. of layers hit
+	Int_t nmHit();	// Nr. of measurement layers hit
+	Int_t nMeas();	// Nr. of measurements
 	Bool_t HitLayer(Int_t Layer, Double_t &R, Double_t &phi, Double_t &zz);
 	Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh);
+	Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&phh, Double_t *&zhh);
 	Int_t HitListXYZ(Int_t *&ihh, Double_t *&Xh, Double_t *&Yh, Double_t *&Zh);
 	Int_t FirstHit(Double_t &Xfirst, Double_t &Yfirst, Double_t &Zfirst);	// First hit position
+	//
+	// Derivatives
+	TMatrixD DparDp(TVector3 xv, TVector3 pv); // Derivatives of parameters wrt track momentum
+	TVectorD DpDthetaRphi(Double_t Phase); // Derivative of momentum wrt MS transvers angle
+	TVectorD DpDthetaLng(Double_t Phase);  // Derivative of momentum wrt MS longitudinal angle
 	//
 	// Track graph
 	TGraph *TrkPlot();	// Graph with R-z plot of track trajectory

@@ -35,6 +35,17 @@ TrkUtil::~TrkUtil()
 	fZmax = 0.0;				// Higher	DCH z
 }
 //
+// Utility for scalar product V1^T*M*V2
+//
+Double_t TrkUtil::Scalar(TVectorD V1, TVectorD V2, TMatrixDSym M)
+{
+	Int_t Nv1 = V1.GetNoElements();	// Get V1 length
+	// Store in matrix
+	TMatrixD V1m(1,Nv1,V1.GetMatrixArray());
+	TVectorD Vout = V1m*(M*V2);
+	return Vout(0);
+}
+//
 // Distance between two lines
 //
 void TrkUtil::LineDistance(TVector3 x0, TVector3 y0, TVector3 dirx, TVector3 diry, Double_t &sx, Double_t &sy, Double_t &distance)
@@ -397,7 +408,7 @@ TMatrixDSym TrkUtil::RegInv(TMatrixDSym& Min)
 		Double_t det = R(0, 0) * R(1, 1) - R(0, 1) * R(1, 0);
 		if (det == 0)
 		{
-			std::cout << "VertexFit::RegInv: null determinant for N = 2" << std::endl;
+			std::cout << "TrkUtil::RegInv: null determinant for N = 2" << std::endl;
 			Rinv.Zero();	// Return null matrix
 		}
 		else
@@ -532,6 +543,32 @@ TVector3 TrkUtil::Xtrack(TVectorD par, Double_t s)
 	//
 	TVector3 Xt(x, y, z);
 	return Xt;
+}
+//
+// Momentum trajectory
+//
+//
+TVector3 TrkUtil::Ptrack(TVectorD Par, Double_t s)
+{
+	if (fBz == 0.0)std::cout << "TrkUtil::Ptrack: Warning Bz not set" << std::endl;
+	//
+	return Ptrack(Par, s, fBz);
+}
+TVector3 TrkUtil::Ptrack(TVectorD par, Double_t s, Double_t Bz)
+{
+	//
+	// unpack parameters
+	Double_t p0 = par(1);
+	Double_t C = par(2);
+	Double_t ct = par(4);
+	//
+	Double_t pt = Bz * cSpeed() / TMath::Abs(2 * C);
+	Double_t px = pt * TMath::Cos(s + p0);
+	Double_t py = pt * TMath::Sin(s + p0);
+	Double_t pz = pt * ct;
+	//
+	TVector3 Ptot(px, py, pz);
+	return Ptot;
 }
 //
 // Phase
@@ -942,7 +979,7 @@ void TrkUtil::SetDchBoundaries(Double_t Rmin, Double_t Rmax, Double_t Zmin, Doub
 }
 //
 // Get Trakck length inside DCH volume
-Double_t TrkUtil::TrkLen(TVectorD Par) const
+Double_t TrkUtil::TrkLen(TVectorD Par)
 {
 	Double_t tLength = 0.0;
 	// Check if geometry is initialized
@@ -1105,25 +1142,25 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	//     = 3: pure Argon
 	//
 	//
-	const Int_t Npt = 19;
+	const Int_t Npt = 18;
 	Double_t bg[Npt] = { 0.5, 0.8, 1., 2., 3., 4., 5., 8., 10.,
-	12., 15., 20., 50., 100., 200., 500., 1000., 10000., 20000.};
+	12., 15., 20., 50., 100., 200., 500., 1000., 10000. };
 	//
 	// He 90 - Isobutane 10
 	Double_t ncl_He_Iso[Npt] = { 42.94, 23.6,18.97,12.98,12.2,12.13,
-	12.24,12.73,13.03,13.29,13.63,14.08,15.56,16.43,16.8,16.95,16.98, 16.98, 16.98};
+	12.24,12.73,13.03,13.29,13.63,14.08,15.56,16.43,16.8,16.95,16.98, 16.98 };
 	//
 	// pure He
 	Double_t ncl_He[Npt] = { 11.79,6.5,5.23,3.59,3.38,3.37,3.4,3.54,3.63,
-				3.7,3.8,3.92,4.33,4.61,4.78,4.87,4.89, 4.89, 4.89};
+				3.7,3.8,3.92,4.33,4.61,4.78,4.87,4.89, 4.89 };
 	//
 	// Argon 50 - Ethane 50
 	Double_t ncl_Ar_Eth[Npt] = { 130.04,71.55,57.56,39.44,37.08,36.9,
-	37.25,38.76,39.68,40.49,41.53,42.91,46.8,48.09,48.59,48.85,48.93,48.93, 48.93};
+	37.25,38.76,39.68,40.49,41.53,42.91,46.8,48.09,48.59,48.85,48.93,48.93 };
 	//
 	// pure Argon
 	Double_t ncl_Ar[Npt] = { 88.69,48.93,39.41,27.09,25.51,25.43,25.69,
-	26.78,27.44,28.02,28.77,29.78,32.67,33.75,34.24,34.57,34.68, 34.68, 34.68};
+	26.78,27.44,28.02,28.77,29.78,32.67,33.75,34.24,34.57,34.68, 34.68 };
 	//
 	Double_t ncl[Npt];
 	switch (Opt)
