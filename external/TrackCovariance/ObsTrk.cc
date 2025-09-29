@@ -110,12 +110,11 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t mass, SolGeom *G)
 	//
 	FillGen();
 	//
-	SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
+	SolTrack trk(fGenX, fGenP, fG);
 	Bool_t Res = kTRUE;	// Turn resolution on
 	Bool_t MS  = kTRUE; // Turn multiple scattering on
-	trk->KalmanCov(Res, MS, mass);
-	fCov = trk->Cov();
-	//fCov = CovCalc(fGenPar);
+	trk.KalmanCov(Res, MS, mass);
+	fCov = trk.Cov();
 	fCovMm = CovToMm(fCov);
 	fCovACTS = CovToACTS(fObsPar, fCov);
 	fCovILC = CovToILC(fCov);
