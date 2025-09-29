@@ -90,7 +90,6 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t mass, SolGeom *G)
 	fB = G->B();
 	SetB(fB);
 	fG = G;
-	fGC = GC;
 	fGenX = x;
 	fGenP = p;
 	fGenQ = Q;
@@ -114,7 +113,8 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t mass, SolGeom *G)
 	SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
 	Bool_t Res = kTRUE;	// Turn resolution on
 	Bool_t MS  = kTRUE; // Turn multiple scattering on
-	fCov = trk->KalmanCov(Res, MS, mass);
+	trk->KalmanCov(Res, MS, mass);
+	fCov = trk->Cov();
 	//fCov = CovCalc(fGenPar);
 	fCovMm = CovToMm(fCov);
 	fCovACTS = CovToACTS(fObsPar, fCov);
