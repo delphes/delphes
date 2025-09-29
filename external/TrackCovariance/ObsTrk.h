@@ -63,6 +63,7 @@ public:
 	// x(3) track origin, p(3) track momentum at origin, Q charge, B magnetic field in Tesla
 	ObsTrk(TVector3 x, TVector3 p, Double_t Q, SolGridCov *GC, SolGeom *G);	// Initialize and generate smeared 
 	ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G);	// Initialize and generate smeared track
+	ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t mass, *G);	// Kalman version with no grid
 	// Destructor
 	~ObsTrk();
 	//

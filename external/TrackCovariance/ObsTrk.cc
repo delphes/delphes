@@ -7,6 +7,7 @@
 #include <iostream>
 #include "SolGeom.h"
 #include "SolGridCov.h"
+#include "SolTrack.h"
 #include "ObsTrk.h"
 //
 // Constructors
@@ -74,6 +75,47 @@ ObsTrk::ObsTrk(Double_t *x, Double_t *p, Double_t Q, SolGridCov* GC, SolGeom *G)
 	FillGen();
 	//
 	fCov = CovCalc(fGenPar);
+	fCovMm = CovToMm(fCov);
+	fCovACTS = CovToACTS(fObsPar, fCov);
+	fCovILC = CovToILC(fCov);
+	//
+	fObsDone = kFALSE;
+}
+//
+// Kalman version with alwys direct calculation
+// Grid is not needed!
+//
+ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t mass, SolGeom *G)
+{
+	fB = G->B();
+	SetB(fB);
+	fG = G;
+	fGC = GC;
+	fGenX = x;
+	fGenP = p;
+	fGenQ = Q;
+	fEflag = kFALSE;		// Electron flag
+	fEscale = 1.;			// Electron scale
+	fGenPar.ResizeTo(5);
+	fGenParMm.ResizeTo(5);
+	fGenParACTS.ResizeTo(6);
+	fGenParILC.ResizeTo(5);
+	fObsPar.ResizeTo(5);
+	fObsParMm.ResizeTo(5);
+	fObsParACTS.ResizeTo(6);
+	fObsParILC.ResizeTo(5);
+	fCov.ResizeTo(5, 5);
+	fCovMm.ResizeTo(5, 5);
+	fCovACTS.ResizeTo(6, 6);
+	fCovILC.ResizeTo(5, 5);
+	//
+	FillGen();
+	//
+	SolTrack* trk = new SolTrack(fGenX, fGenP, fG);
+	Bool_t Res = kTRUE;	// Turn resolution on
+	Bool_t MS  = kTRUE; // Turn multiple scattering on
+	fCov = trk->KalmanCov(Res, MS, mass);
+	//fCov = CovCalc(fGenPar);
 	fCovMm = CovToMm(fCov);
 	fCovACTS = CovToACTS(fObsPar, fCov);
 	fCovILC = CovToILC(fCov);
