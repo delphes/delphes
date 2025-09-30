@@ -1185,7 +1185,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	//***********************************
 	//
 	// Starting large covariance	
-	Double_t CovDiag[5] = { 1000.,1000.,1000., 1000.,1000.};
+	Double_t CovDiag[5] = { 10.,10.,10., 10.,10.};
 	for(Int_t i=0; i<5; i++) fCov(i,i)= CovDiag[i]; 
 	//
 	// Loop on all layers starting with last measurement layer
@@ -1196,7 +1196,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 		Int_t i = ih[ii];			// True layer number
 		//std::cout<<"Main loop: ii= "<<ii<<", true layer = "<<i<<std::endl;
 		if (fG->isMeasure(i)){			// Measurement layer
-			TMatrixDSym CovInv(TMatrixDSym::kInverted,fCov);
+			TMatrixDSym CovInv = RegInv(fCov);
 			Double_t Ri = rh[ii];
 			Double_t zi = zh[ii];
 			Int_t ityp  = fG->lTyp(i);	// Layer type Barrel or Z
@@ -1304,7 +1304,23 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	// Check covariance matrix ********************
 	//*********************************************
 	TDecompChol Chl(fCov,1.e-12);
-	if (!Chl.Decompose()) std::cout << "SolTrack::KalmanCov: Error matrix not positive definite." << std::endl;
+	if (!Chl.Decompose()) {
+		std::cout << "SolTrack::KalmanCov: Error matrix not positive definite."<<std::endl;
+		TMatrixDSym NormCov(5); TVectorD diag(5);
+		std::cout<<"OldfCov:"; fCov.Print();
+		for(Int_t i=0;i<5;i++)diag(i) = TMath::Sqrt(fCov(i,i));
+		for(Int_t i=0;i<5;i++){
+			for(Int_t j=0;j<5;j++)NormCov(i,j) = fCov(i,j)/(diag(i)*diag(j));
+		}
+		std::cout<<"Norm Cov"; NormCov.Print();
+		TMatrixDSym NormCovRec = MakePosDef(NormCov);
+		std::cout<<"Recovered normalized cov matrix;"; NormCovRec.Print();
+		for(Int_t i=0;i<5;i++){
+			for(Int_t j=0;j<5;j++)fCov(i,j) = NormCovRec(i,j)*diag(i)*diag(j);
+		}
+		std::cout<<"New fCov:"; fCov.Print();
+
+	}
 	//else std::cout<<"Kalman calculation successful"<<std::endl;
 	//
 	// Cleanup
