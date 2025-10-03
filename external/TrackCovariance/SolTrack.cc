@@ -3,6 +3,7 @@
 #include "SolTrack.h"
 #include <TString.h>
 #include <TMath.h>
+#include <TRandom.h>
 #include <TMatrixD.h>
 #include <TMatrixDSym.h>
 #include <TDecompChol.h>
@@ -1195,7 +1196,10 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 		//
 		Int_t i = ih[ii];			// True layer number
 		//std::cout<<"Main loop: ii= "<<ii<<", true layer = "<<i<<std::endl;
-		if (fG->isMeasure(i)){			// Measurement layer
+		Double_t Eff = fG->GetEfficiency(i);	// Layer efficiency
+		Double_t Rnd = gRandom->Rndm();
+		if (fG->isMeasure(i) && Rnd<Eff){			// Measurement layer
+			//std::cout<<"Track pt= "<<pt()<<", Layer "<<i<<", Efficiency "<<100*Eff<<"%"<<std::endl;
 			TMatrixDSym CovInv = RegInv(fCov);
 			Double_t Ri = rh[ii];
 			Double_t zi = zh[ii];
@@ -1299,6 +1303,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 		// Update track covariance
 		fCov += CovMS;
 	}
+	//std::cout<<"Covariance matrix:"; fCov.Print();
 	//
 	//*********************************************
 	// Check covariance matrix ********************
@@ -1321,7 +1326,6 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 		std::cout<<"New fCov:"; fCov.Print();
 
 	}
-	//else std::cout<<"Kalman calculation successful"<<std::endl;
 	//
 	// Cleanup
 	delete [] zh;
