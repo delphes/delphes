@@ -123,13 +123,15 @@ module Efficiency ChargedHadronTrackingEfficiency {
   # add EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for charged hadrons
-  set EfficiencyFormula { 
-                         (pt <= 0.5)   * (0.00) +
-                         (abs(eta) <= 1.5) * (pt > 0.5   && pt <= 5.0)   * (0.85) +
-                         (abs(eta) <= 1.5) * (pt > 5.0)                  * (0.90) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.5   && pt <= 5.0)   * (0.75) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0)                  * (0.80) +
-                         (abs(eta) > 2.5)                                                  * (0.00)}
+  # set EfficiencyFormula { 
+  #                       (pt <= 0.5)   * (0.00) +
+  #                       (abs(eta) <= 1.5) * (pt > 0.5   && pt <= 5.0)   * (0.85) +
+  #                       (abs(eta) <= 1.5) * (pt > 5.0)                  * (0.90) +
+  #                       (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.5   && pt <= 5.0)   * (0.75) +
+  #                       (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0)                  * (0.80) +
+  #                       (abs(eta) > 2.5)                                                  * (0.00)}
+  
+  source tracking/chargedHadrons.tcl
 }
 
 ##############################
