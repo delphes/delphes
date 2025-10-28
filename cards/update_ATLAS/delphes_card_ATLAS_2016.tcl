@@ -221,7 +221,8 @@ module MomentumSmearing MuonMomentumSmearing {
   # ID Muons: id_muons_pt_res.tcl
   # MS Muons: ms_muons_pt_res.tcl
   # cb Muons: cb_muons_pt_res.tcl
-
+  # https://cds.cern.ch/record/2844624/files/document.pdf
+  
   source muons/cb_muons_pt_res.tcl
 }
 
