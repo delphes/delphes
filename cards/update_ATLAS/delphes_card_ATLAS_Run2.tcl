@@ -127,8 +127,7 @@ module Efficiency ChargedHadronTrackingEfficiency {
 }
 
 ##############################
-# Electron tracking efficiency (https://arxiv.org/pdf/1908.00005, Figure 17)
-#                              (https://cds.cern.ch/record/2868520/files/ANA-EGAM-2021-01-PAPER.pdf, Figure 2) 
+# Electron tracking efficiency
 ##############################
 
 module Efficiency ElectronTrackingEfficiency {
@@ -142,7 +141,7 @@ module Efficiency ElectronTrackingEfficiency {
 }
 
 ##########################
-# Muon tracking efficiency (https://cds.cern.ch/record/2746302/files/Aad2021_Article_MuonReconstructionAndIdentific.pdf, Figure 12)
+# Muon tracking efficiency
 ##########################
 
 module Efficiency MuonTrackingEfficiency {
@@ -162,7 +161,7 @@ module Efficiency MuonTrackingEfficiency {
 }
 
 ########################################
-# Momentum resolution for charged tracks (https://arxiv.org/pdf/1201.4704. Figure 2)
+# Momentum resolution for charged tracks
 ########################################
 
 module MomentumSmearing ChargedHadronMomentumSmearing {
