@@ -113,7 +113,7 @@ module ParticlePropagator ParticlePropagator {
 }
 
 ####################################
-# Charged hadron tracking efficiency (https://arxiv.org/pdf/1704.07983, Figure 14)
+# Charged hadron tracking efficiency
 ####################################
 
 module Efficiency ChargedHadronTrackingEfficiency {
@@ -137,7 +137,7 @@ module Efficiency ElectronTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for electrons
-  source tracking/electron.tcl
+  source tracking/eleMuon_loose.tcl
 }
 
 ##########################
@@ -151,13 +151,7 @@ module Efficiency MuonTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for muons
-  set EfficiencyFormula {
-            (pt <= 0.5)   * (0.00) +
-            (abs(eta) <= 1.5) * (pt > 0.5   && pt <= 5.0)   * (0.85) +
-            (abs(eta) <= 1.5) * (pt > 5.0)                  * (0.90) +
-            (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.5   && pt <= 5.0)   * (0.75) +
-            (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 5.0)                  * (0.80) +
-            (abs(eta) > 2.5)                                                  * (0.00)}
+  source tracking/elecMuon_loose.tcl
 }
 
 ########################################
