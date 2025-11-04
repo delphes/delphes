@@ -34,8 +34,8 @@
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-std::mutex BasicRandom<int>::_multiple_number_generation_mutex;
-std::mutex BasicRandom<double>::_multiple_number_generation_mutex;
+FASTJET_WINDLL std::mutex BasicRandom<int>::_multiple_number_generation_mutex;
+FASTJET_WINDLL std::mutex BasicRandom<double>::_multiple_number_generation_mutex;
 #endif
 
 //
@@ -59,8 +59,8 @@ int __default_random_generator(int *__iseed)
 }
 
 //   global defined random number generator
-BasicRandom<int>     _G_random_int;
-BasicRandom<double>  _G_random_double;
+FASTJET_WINDLL BasicRandom<int>     _G_random_int;
+FASTJET_WINDLL BasicRandom<double>  _G_random_double;
 
 
 FASTJET_END_NAMESPACE

@@ -121,21 +121,21 @@ private:
 
   typedef std::pair<std::string, thread_safety_helpers::AtomicCounter<unsigned int> > Summary;
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-  static std::atomic<int> _max_warn_default;
-  static std::atomic<std::ostream *> _default_ostr;
-  static std::atomic<std::mutex *> _stream_mutex;
-  static std::mutex _global_warnings_summary_mutex;
+  FASTJET_WINDLL static std::atomic<int> _max_warn_default;
+  FASTJET_WINDLL static std::atomic<std::ostream *> _default_ostr;
+  FASTJET_WINDLL static std::atomic<std::mutex *> _stream_mutex;
+  FASTJET_WINDLL static std::mutex _global_warnings_summary_mutex;
   std::atomic<Summary*> _this_warning_summary;
 #else
-  static int _max_warn_default;
-  static std::ostream * _default_ostr;
+  FASTJET_WINDLL static int _max_warn_default;
+  FASTJET_WINDLL static std::ostream * _default_ostr;
   Summary* _this_warning_summary;
 #endif // FASTJET_HAVE_LIMITED_THREAD_SAFETY
 
   // Note that this is updated internally and we use a mutex for the
   // thread-safe version. So no other specific treatment is needed at
   // this level.
-  static std::list< Summary > _global_warnings_summary;
+  FASTJET_WINDLL static std::list< Summary > _global_warnings_summary;
  
 };
 

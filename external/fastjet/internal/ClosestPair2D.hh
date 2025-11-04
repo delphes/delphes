@@ -105,7 +105,7 @@ private:
 	      const Coord2D & left_corner, const Coord2D & right_corner,
 	      const unsigned int max_size);
 
-  static const unsigned int _nshift = 3;
+  FASTJET_WINDLL static const unsigned int _nshift = 3;
 
 
   /// since sets of three objects will crop up repeatedly, useful
@@ -172,9 +172,9 @@ private:
   std::vector<Point *>   _points_under_review;
 
   // different statuses for review
-  static const unsigned int _remove_heap_entry = 1;
-  static const unsigned int _review_heap_entry = 2;
-  static const unsigned int _review_neighbour  = 4;
+  FASTJET_WINDLL static const unsigned int _remove_heap_entry = 1;
+  FASTJET_WINDLL static const unsigned int _review_heap_entry = 2;
+  FASTJET_WINDLL static const unsigned int _review_neighbour  = 4;
 
   /// add a label to a point as to the nature of review needed
   /// (includes adding it to list of points needing review) [doesn't

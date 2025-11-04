@@ -236,7 +236,7 @@ private:
 
   /// number of neighbours that a tile will have (rectangular geometry
   /// gives 9 neighbours).
-  static const int n_tile_neighbours = 9;
+  FASTJET_WINDLL static const int n_tile_neighbours = 9;
   //----------------------------------------------------------------------
   /// The fundamental structures to be used for the tiled N^2 algorithm
   /// (see CCN27-44 for some discussion of pattern of tiling)

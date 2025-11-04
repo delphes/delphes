@@ -169,7 +169,7 @@ protected:
 private:
   double _rapmin,_rapmax,_phimin,_phimax,_phispan;
 
-  static LimitedWarning _warnings_deprecated;
+  FASTJET_WINDLL static LimitedWarning _warnings_deprecated;
 
   /// the use of RangeDefinition is deprecated since FastJet version
   /// 3.0 onwards. Please use Selector instead.  

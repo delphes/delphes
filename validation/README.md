@@ -7,7 +7,7 @@ The script requires a configuration file.
 To run locally using python multiprocessing:
 
 ```
-python3 submit.py  --config config/cfg_fcchh_I.py launch_local
+python3 submit.py --config config/cfg_fcchh_I.py launch_local
 ```
 
 To run on condor:
@@ -25,9 +25,9 @@ python3 submit.py --config config/cfg_fcchh_I.py --collect
 Configuration file
 ==================
 
-Examples can be found in the ```config``` directory. The validation will run on the card specified under the variable ```card```.
+Examples can be found in the `config` directory. The validation will run on the card specified under the variable `card`.
 
-In order to run properly, the following collections have to be defined in the ```TreeWriter``` section of the card:
+In order to run properly, the following collections have to be defined in the `TreeWriter` section of the card:
 ```
 "Particle", "Track", "Tower", "EFlowTrack", "EFlowPhoton", "EFlowNeutralHadron", "Electron", "Muon", "Photon", "PFJet", "Jet", "CaloJet", "GenJet"
 ```

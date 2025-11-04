@@ -37,7 +37,7 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 using namespace std;
 
-const double JetDefinition::max_allowable_R = 1000.0;
+FASTJET_WINDLL const double JetDefinition::max_allowable_R = 1000.0;
 
 //----------------------------------------------------------------------
 // [NB: implementation was getting complex, so in 2.4-devel moved it

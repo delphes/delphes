@@ -28,8 +28,9 @@
 #ifndef __SISCONE_ERROR_H__
 #define __SISCONE_ERROR_H__
 
-#include<iostream>
-#include<string>
+#include <iostream>
+#include <string>
+#include "defines.h"
 
 namespace siscone{
 
@@ -57,7 +58,7 @@ public:
 
 private:
   std::string m_message;       ///< the error message
-  static bool m_print_errors;  ///< do we print error messages?
+  SISCONE_WINDLL static bool m_print_errors;  ///< do we print error messages?
 };
 
 }

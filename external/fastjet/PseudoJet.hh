@@ -56,10 +56,10 @@ const double MaxRap = 1e5;
 const double pseudojet_invalid_phi = -100.0;
 const double pseudojet_invalid_rap = -1e200;
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // forward definition
 class ClusterSequenceAreaBase;
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 /// @ingroup basic_classes
 /// \class PseudoJet
@@ -577,7 +577,7 @@ class PseudoJet {
   /// shorthand for validated_cluster_sequence()
   const ClusterSequence * validated_cs() const;
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   inline const ClusterSequenceAreaBase * validated_cluster_sequence_area_base() const {
@@ -586,7 +586,7 @@ class PseudoJet {
 
   /// shorthand for validated_cluster_sequence_area_base()
   const ClusterSequenceAreaBase * validated_csab() const;
-#endif  //  __FJCORE__
+#endif  //  __FASTJET_ONLY_CORE__
 
   //\}
 
@@ -798,7 +798,7 @@ class PseudoJet {
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 
   /// check if it has a defined area
   virtual bool has_area() const;
@@ -820,7 +820,7 @@ class PseudoJet {
   /// throws an Error if there is no support for area in the parent CS
   virtual bool is_pure_ghost() const;
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
   //\} --- end of jet structure -------------------------------------
 
 

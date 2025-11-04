@@ -110,7 +110,7 @@ private:
   double _distance;
 
   /// value for phi that marks it as invalid
-  const static double _invalid_phi = -1000.0;
+  FASTJET_WINDLL const static double _invalid_phi = -1000.0;
   /// set internal phi so as to mark things as invalid
   void _set_invalid_rapphi() {_phijet = _invalid_phi;}
   /// true if rap,phi are valid (tests only phi)

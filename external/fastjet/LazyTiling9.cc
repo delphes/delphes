@@ -48,10 +48,10 @@ LazyTiling9::LazyTiling9(ClusterSequence & cs) :
   _cs(cs), _jets(cs.jets())
   //, _minheap(_jets.size()) 
 {
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   _ncall = 0; // gps tmp
   _ncall_dtt = 0; // gps tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
   _Rparam = cs.jet_def().R();
   _R2 = _Rparam * _Rparam;
   _invR2 = 1.0 / _R2;
@@ -378,12 +378,12 @@ inline void LazyTiling9::_add_untagged_neighbours_to_tile_union_using_max_info(
 //----------------------------------------------------------------------
 /// returns a particle's distance to the edge of the specified tile
 inline double LazyTiling9::_distance_to_tile(const TiledJet * bj, const Tile2 * tile) 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
    {
   _ncall_dtt++; // GPS tmp
 #else
   const {
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
   // Note the careful way of checking the minimum potential deta:
   // unlike the phi case below, we don't calculate the distance to the
   // centre and subtract spacing/2. This is because of issue of
@@ -607,9 +607,9 @@ void LazyTiling9::run() {
     }
   }
 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   cout << "intermediate ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
 
   vector<double> diJs(n);
   for (int i = 0; i < n; i++) {
@@ -741,9 +741,9 @@ void LazyTiling9::run() {
 
   // final cleaning up;
   delete[] briefjets;
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   cout << "ncall, dtt = " << _ncall << " " << _ncall_dtt << endl; // GPS tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
 
 }
 

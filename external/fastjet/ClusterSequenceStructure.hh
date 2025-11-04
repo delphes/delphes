@@ -99,11 +99,11 @@ public:
   /// pointer to it; otherwise throw an error
   virtual const ClusterSequence * validated_cs() const FASTJET_OVERRIDE;
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
   /// if the jet has valid area information then return a pointer to
   /// the associated ClusterSequenceAreaBase object; otherwise throw an error
   virtual const ClusterSequenceAreaBase * validated_csab() const FASTJET_OVERRIDE;
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
   /// set the associated csw
   virtual void set_associated_cs(const ClusterSequence * new_cs){
@@ -242,7 +242,7 @@ public:
   // the following ones require a computation of the area in the
   // parent ClusterSequence (See ClusterSequenceAreaBase for details)
   //------------------------------------------------------------------
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 
   /// check if it has a defined area
   virtual bool has_area() const FASTJET_OVERRIDE;
@@ -264,7 +264,7 @@ public:
   /// throws an Error if there is no support for area in the parent CS
   virtual bool is_pure_ghost(const PseudoJet &reference) const FASTJET_OVERRIDE;
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
   //\} --- end of jet structure -------------------------------------
 
 protected:

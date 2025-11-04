@@ -33,9 +33,9 @@
 #include "fastjet/Error.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 #include "fastjet/ClusterSequenceAreaBase.hh"
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 #include <iostream>
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
@@ -263,7 +263,7 @@ vector<PseudoJet> ClusterSequenceStructure::pieces(const PseudoJet &reference) c
 // associated ClusterSequence (See ClusterSequenceAreaBase for details)
 //----------------------------------------------------------------------
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // if possible, return a valid ClusterSequenceAreaBase pointer; otherwise
 // throw an error
 const ClusterSequenceAreaBase * ClusterSequenceStructure::validated_csab() const {
@@ -303,7 +303,7 @@ bool ClusterSequenceStructure::is_pure_ghost(const PseudoJet &reference) const{
   return validated_csab()->is_pure_ghost(reference);
 }
 
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 
 

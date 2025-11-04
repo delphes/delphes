@@ -43,19 +43,19 @@ FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 using namespace std;
 using namespace d0;
 
-const double D0RunIIConePlugin::_DEFAULT_split_ratio              = 0.5  ; // overlap threshold
-const double D0RunIIConePlugin::_DEFAULT_far_ratio                = 0.5  ;
-const double D0RunIIConePlugin::_DEFAULT_Et_min_ratio             = 0.5  ;
-const bool   D0RunIIConePlugin::_DEFAULT_kill_duplicate           = true ;
-const double D0RunIIConePlugin::_DEFAULT_duplicate_dR             = 0.005; 
-const double D0RunIIConePlugin::_DEFAULT_duplicate_dPT            = 0.01 ; 
-const double D0RunIIConePlugin::_DEFAULT_search_factor            = 1.0  ; 
-const double D0RunIIConePlugin::_DEFAULT_pT_min_leading_protojet  = 0.   ; 
-const double D0RunIIConePlugin::_DEFAULT_pT_min_second_protojet   = 0.   ;
-const int    D0RunIIConePlugin::_DEFAULT_merge_max                = 10000; 
-const double D0RunIIConePlugin::_DEFAULT_pT_min_nomerge           = 0.   ;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_split_ratio              = 0.5  ; // overlap threshold
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_far_ratio                = 0.5  ;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_Et_min_ratio             = 0.5  ;
+FASTJET_PLUGINS_WINDLL const bool   D0RunIIConePlugin::_DEFAULT_kill_duplicate           = true ;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_duplicate_dR             = 0.005;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_duplicate_dPT            = 0.01 ;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_search_factor            = 1.0  ;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_pT_min_leading_protojet  = 0.   ;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_pT_min_second_protojet   = 0.   ;
+FASTJET_PLUGINS_WINDLL const int    D0RunIIConePlugin::_DEFAULT_merge_max                = 10000;
+FASTJET_PLUGINS_WINDLL const double D0RunIIConePlugin::_DEFAULT_pT_min_nomerge           = 0.   ;
 
-thread_safety_helpers::FirstTimeTrue D0RunIIConePlugin::_first_time;
+FASTJET_PLUGINS_WINDLL thread_safety_helpers::FirstTimeTrue D0RunIIConePlugin::_first_time;
 
 string D0RunIIConePlugin::description () const {
   ostringstream desc;

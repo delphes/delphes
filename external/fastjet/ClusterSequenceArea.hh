@@ -207,8 +207,8 @@ private:
 
   SharedPtr<ClusterSequenceAreaBase> _area_base;
   AreaDefinition _area_def;
-  static LimitedWarning _range_warnings;
-  static LimitedWarning _explicit_ghosts_repeats_warnings;
+  FASTJET_WINDLL static LimitedWarning _range_warnings;
+  FASTJET_WINDLL static LimitedWarning _explicit_ghosts_repeats_warnings;
 
   // the following set of private methods are all deprecated. Their
   // role is simply to hide the corresponding methods (without the

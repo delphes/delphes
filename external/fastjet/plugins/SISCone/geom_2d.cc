@@ -44,8 +44,8 @@ using namespace std;
 
 // static member default init
 //----------------------------
-double Ceta_phi_range::eta_min = -100.0;
-double Ceta_phi_range::eta_max = 100.0;
+SISCONE_WINDLL double Ceta_phi_range::eta_min = -100.0;
+SISCONE_WINDLL double Ceta_phi_range::eta_max = 100.0;
 
 // default ctor
 //--------------

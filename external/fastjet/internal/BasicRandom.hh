@@ -151,7 +151,7 @@ public:
 private:
   int _M_iseed[2];
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-  static std::mutex _multiple_number_generation_mutex;
+  FASTJET_WINDLL static std::mutex _multiple_number_generation_mutex;
 #endif
 };
   
@@ -236,13 +236,13 @@ public:
 private:
   int _M_iseed[2];
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-  static std::mutex _multiple_number_generation_mutex;
+  FASTJET_WINDLL static std::mutex _multiple_number_generation_mutex;
 #endif
 };
   
 //   globally defined random number generator
-extern BasicRandom<int>     _G_random_int;
-extern BasicRandom<double>  _G_random_double;
+FASTJET_WINDLL extern BasicRandom<int>     _G_random_int;
+FASTJET_WINDLL extern BasicRandom<double>  _G_random_double;
 
 
 FASTJET_END_NAMESPACE

@@ -1,7 +1,7 @@
 #ifndef __FASTJET_LAZYTILING9_HH__
 #define __FASTJET_LAZYTILING9_HH__
 
-//#define INSTRUMENT2 1
+//#define FASTJET_INSTRUMENT2 1
 
 //FJSTARTHEADER
 // $Id$
@@ -128,10 +128,10 @@ protected:
   const std::vector<PseudoJet> & _jets;
   std::vector<Tile2> _tiles;
 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
   int _ncall; // GPS tmp
   int _ncall_dtt; // GPS tmp
-#endif // INSTRUMENT2
+#endif // FASTJET_INSTRUMENT2
 
   double _Rparam, _R2, _invR2;
   double _tiles_eta_min, _tiles_eta_max;
@@ -170,7 +170,7 @@ protected:
   void _add_untagged_neighbours_to_tile_union_using_max_info(const TiledJet * const jet, 
 		 std::vector<int> & tile_union, int & n_near_tiles);
   double _distance_to_tile(const TiledJet * bj, const Tile2 *) 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
     ;
 #else
     const;
@@ -204,7 +204,7 @@ protected:
   //----------------------------------------------------------------------
   template <class J> inline double _bj_dist(
                 const J * const jetA, const J * const jetB) 
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
     {
     _ncall++; // GPS tmp
 #else
@@ -220,7 +220,7 @@ protected:
   //----------------------------------------------------------------------
   template <class J> inline double _bj_dist_not_periodic(
                 const J * const jetA, const J * const jetB)
-#ifdef INSTRUMENT2
+#ifdef FASTJET_INSTRUMENT2
     {
     _ncall++; // GPS tmp
 #else

@@ -53,16 +53,16 @@ using namespace d0runi;
 //                                         //
 /////////////////////////////////////////////
 
-const double D0RunIBaseConePlugin::_DEFAULT_SPLifr             = 0.5; //shared Et fraction threshold
-const double D0RunIBaseConePlugin::_DEFAULT_TWOrad             = 0.; 
-const bool   D0RunIBaseConePlugin::_DEFAULT_D0_Angle           = false;
-const bool   D0RunIBaseConePlugin::_DEFAULT_Increase_Delta_R   = true;
-const bool   D0RunIBaseConePlugin::_DEFAULT_Kill_Far_Clusters  = true;
-const bool   D0RunIBaseConePlugin::_DEFAULT_Jet_Et_Min_On_Iter = true;
-const double D0RunIBaseConePlugin::_DEFAULT_Far_Ratio          = 0.5;
-const double D0RunIBaseConePlugin::_DEFAULT_Eitem_Negdrop      = -1.0;
-const double D0RunIBaseConePlugin::_DEFAULT_Et_Min_Ratio       = 0.5;
-const double D0RunIBaseConePlugin::_DEFAULT_Thresh_Diff_Et     = 0.01;
+FASTJET_PLUGINS_WINDLL const double D0RunIBaseConePlugin::_DEFAULT_SPLifr             = 0.5; //shared Et fraction threshold
+FASTJET_PLUGINS_WINDLL const double D0RunIBaseConePlugin::_DEFAULT_TWOrad             = 0.;
+FASTJET_PLUGINS_WINDLL const bool   D0RunIBaseConePlugin::_DEFAULT_D0_Angle           = false;
+FASTJET_PLUGINS_WINDLL const bool   D0RunIBaseConePlugin::_DEFAULT_Increase_Delta_R   = true;
+FASTJET_PLUGINS_WINDLL const bool   D0RunIBaseConePlugin::_DEFAULT_Kill_Far_Clusters  = true;
+FASTJET_PLUGINS_WINDLL const bool   D0RunIBaseConePlugin::_DEFAULT_Jet_Et_Min_On_Iter = true;
+FASTJET_PLUGINS_WINDLL const double D0RunIBaseConePlugin::_DEFAULT_Far_Ratio          = 0.5;
+FASTJET_PLUGINS_WINDLL const double D0RunIBaseConePlugin::_DEFAULT_Eitem_Negdrop      = -1.0;
+FASTJET_PLUGINS_WINDLL const double D0RunIBaseConePlugin::_DEFAULT_Et_Min_Ratio       = 0.5;
+FASTJET_PLUGINS_WINDLL const double D0RunIBaseConePlugin::_DEFAULT_Thresh_Diff_Et     = 0.01;
 
 
 // for the real work, we write a template class that decides which

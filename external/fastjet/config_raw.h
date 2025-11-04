@@ -117,7 +117,7 @@
 #define PACKAGE_NAME "FastJet"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "FastJet 3.5.0"
+#define PACKAGE_STRING "FastJet 3.5.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fastjet"
@@ -126,7 +126,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.5.0"
+#define PACKAGE_VERSION "3.5.1"
 
 /* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -134,7 +134,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.5.0"
+#define VERSION "3.5.1"
 
 /* Major version of this package */
 #define VERSION_MAJOR 3
@@ -143,10 +143,10 @@
 #define VERSION_MINOR 5
 
 /* Version of the package under the form XYYZZ (instead of X.Y.Z) */
-#define VERSION_NUMBER 30500
+#define VERSION_NUMBER 30501
 
 /* Patch version of this package */
-#define VERSION_PATCHLEVEL 0
+#define VERSION_PATCHLEVEL 1
 
 /* Pre-release version of this package */
 /* #undef VERSION_PRERELEASE */

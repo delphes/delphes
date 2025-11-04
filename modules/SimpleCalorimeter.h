@@ -26,6 +26,7 @@
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author A. Chattopadhyay - UPRM 
  *
  */
 
@@ -89,6 +90,14 @@ private:
   std::vector<Double_t> fTowerFractions;
 
   std::vector<Double_t> fTrackFractions;
+
+  // Insensitive bins stored as integer indices (etaBin, phiBin) 
+  std::set< std::pair<Short_t, Short_t> > fInsensitiveBinSet;
+
+  // Flag telling whether the *current* tower is insensitive or not
+  inline bool IsTowerInsensitive(Short_t etaBin, Short_t phiBin) const {
+    return fInsensitiveBinSet.find(std::make_pair(etaBin, phiBin)) != fInsensitiveBinSet.end();
+  }
 
   DelphesFormula *fResolutionFormula; //!
 

@@ -93,7 +93,7 @@ class Dnn3piCylinder : public DynamicNearestNeighbours {
  private:
 
   // our extras to help us navigate, find distance, etc.
-  const static int INEXISTENT_VERTEX=-3;
+  FASTJET_WINDLL const static int INEXISTENT_VERTEX=-3;
 
   bool _verbose;
 

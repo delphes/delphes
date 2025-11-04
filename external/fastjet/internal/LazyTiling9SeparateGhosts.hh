@@ -100,7 +100,7 @@ public:
   /// risk (this is an internal part of fastjet).In a similar spirit,
   /// the interface to access this valus might also change in a future
   /// release of FastJet.
-  static double ghost_pt2_threshold;
+  FASTJET_WINDLL static double ghost_pt2_threshold;
 
 protected:
   ClusterSequence & _cs;

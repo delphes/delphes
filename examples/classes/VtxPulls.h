@@ -6,6 +6,7 @@
 #include <TH1.h>
 #include <TCanvas.h>
 #include <TStyle.h>
+#include "external/TrackCovariance/TrkUtil.h"
 #include "external/TrackCovariance/VertexFit.h"
 #include "external/TrackCovariance/VertexMore.h"
 

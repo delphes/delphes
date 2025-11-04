@@ -32,7 +32,7 @@
 #include "fastjet/config.h"
 #include <sstream>
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
 // printing the stack would need execinfo
 #ifdef FASTJET_HAVE_EXECINFO_H
 #include <execinfo.h>
@@ -42,29 +42,29 @@
 #include <cxxabi.h>
 #endif // FASTJET_HAVE_DEMANGLING_SUPPORT
 #endif // FASTJET_HAVE_EXECINFO_H
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 using namespace std;
 
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
-atomic<bool> Error::_print_errors{true};
-atomic<bool> Error::_print_backtrace{false};
-atomic<ostream *> Error::_default_ostr{& cerr};
-atomic<mutex *>   Error::_stream_mutex{nullptr};
+FASTJET_WINDLL atomic<bool> Error::_print_errors{true};
+FASTJET_WINDLL atomic<bool> Error::_print_backtrace{false};
+FASTJET_WINDLL atomic<ostream *> Error::_default_ostr{& cerr};
+FASTJET_WINDLL atomic<mutex *>   Error::_stream_mutex{nullptr};
 #else
-bool Error::_print_errors = true;
-bool Error::_print_backtrace = false;
-ostream * Error::_default_ostr = & cerr;
+FASTJET_WINDLL bool Error::_print_errors = true;
+FASTJET_WINDLL bool Error::_print_backtrace = false;
+FASTJET_WINDLL ostream * Error::_default_ostr = & cerr;
 #endif  // FASTJET_HAVE_LIMITED_THREAD_SAFETY
 
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
-  LimitedWarning Error::_execinfo_undefined;
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FASTJET_ONLY_CORE__)
+FASTJET_WINDLL LimitedWarning Error::_execinfo_undefined;
 #endif
 
 //----------------------------------------------------------------------
-#ifndef __FJCORE__ 
+#ifndef __FASTJET_ONLY_CORE__ 
 
 // demangling only is included, i.e. --enable-demangling is specified
 // at configure time, execinfo.h is present and the GNU C++ ABI is
@@ -113,7 +113,7 @@ string Error::_demangle(const char* symbol) {
   return symbol;
 }
 #endif  // FASTJET_HAVE_DEMANGLING_SUPPORT && FASTJET_HAVE_EXECINFO_H
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 
 //----------------------------------------------------------------------
@@ -129,7 +129,7 @@ Error::Error(const std::string & message_in) {
     ostringstream oss;
     oss << "fastjet::Error:  "<< message_in << endl;
 
-#ifndef __FJCORE__
+#ifndef __FASTJET_ONLY_CORE__
     // only print the stack if execinfo is available and stack enabled
 #ifdef FASTJET_HAVE_EXECINFO_H
     if (_print_backtrace){
@@ -151,7 +151,7 @@ Error::Error(const std::string & message_in) {
       free(messages);
     }
 #endif  // FASTJET_HAVE_EXECINFO_H
-#endif  // __FJCORE__
+#endif  // __FASTJET_ONLY_CORE__
 
 #ifdef FASTJET_HAVE_LIMITED_THREAD_SAFETY
     if (_stream_mutex){
@@ -169,7 +169,7 @@ Error::Error(const std::string & message_in) {
 
 //----------------------------------------------------------------------
 void Error::set_print_backtrace(bool enabled) {
-#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FJCORE__)
+#if (!defined(FASTJET_HAVE_EXECINFO_H)) || defined(__FASTJET_ONLY_CORE__)
   if (enabled) {
     _execinfo_undefined.warn("Error::set_print_backtrace(true) will not work with this build of FastJet");
   }

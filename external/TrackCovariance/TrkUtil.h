@@ -28,7 +28,8 @@ protected:
 	//
 	void SetB(Double_t Bz) { fBz = Bz; };
 	TVectorD XPtoPar(TVector3 x, TVector3 p, Double_t Q);
-	TVector3 ParToP(TVectorD Par);
+	TVector3 ParToP(TVectorD Par);			// Momenta at min. approach
+	TVector3 Ptrack(TVectorD par, Double_t s);	// Momenta at phase s
 	TMatrixDSym RegInv(TMatrixDSym& Min);		// Regularized matrix inversion
 	//
 	// Track trajectory derivatives
@@ -55,6 +56,8 @@ protected:
 	TVectorD ParToILC(TVectorD Par);		// Parameter conversion
 	TMatrixDSym CovToILC(TMatrixDSym Cov);	// Covariance conversion
 	//
+	// Utility
+	Double_t Scalar(TVectorD V1, TVectorD V2, TMatrixDSym M);
 
 public:
 	//
@@ -89,6 +92,7 @@ public:
 	// Track trajectory
 	//
 	static TVector3 Xtrack(TVectorD par, Double_t s);	// Parametric track trajectory
+	static TVector3 Ptrack(TVectorD par, Double_t s, Double_t Bz);	// Parametric momentum trajectory
 	static TVector3 Xtrack_N(TVectorD par, Double_t s);	// Parametric track trajectory neutrals (D, phi0, pt, z0, ctg)
 	TVectorD derRphi_R(TVectorD par, Double_t R);		// Derivatives of R-phi at constant R
 	TVectorD derZ_R(TVectorD par, Double_t R);		// Derivatives of z at constant R
@@ -125,7 +129,7 @@ public:
 	Double_t Nclusters(Double_t bgam);	// mean clusters/meter vs beta*gamma
 	static Double_t Nclusters(Double_t bgam, Int_t Opt);	// mean clusters/meter vs beta*gamma
 	Double_t funcNcl(Double_t *xp, Double_t *par);
-	Double_t TrkLen(TVectorD Par) const;					// Track length inside chamber
+	Double_t TrkLen(TVectorD Par) const;	 				// Track length inside chamber
 };
 
 #endif

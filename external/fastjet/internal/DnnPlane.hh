@@ -107,8 +107,8 @@ private:
   //set<Vertex_handle> _vertex_set;
   bool _verbose;
 
-  //static const bool _crash_on_coincidence = true;
-  static const bool _crash_on_coincidence = false;
+  //FASTJET_WINDLL static const bool _crash_on_coincidence = true;
+  FASTJET_WINDLL static const bool _crash_on_coincidence = false;
 
   Triangulation _TR; /// CGAL object for dealing with triangulations
 
@@ -222,7 +222,7 @@ private:
   /// if a distance between a point and 2 others is smaller than this
   /// and the distance between the two points is also smaller than this
   /// then use CGAL to compare the distances. 
-  static const double DISTANCE_FOR_CGAL_CHECKS;  
+  FASTJET_WINDLL static const double DISTANCE_FOR_CGAL_CHECKS;
 
 
   /// small routine to check if if a vertex handle is not null.
