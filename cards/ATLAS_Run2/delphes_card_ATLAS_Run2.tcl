@@ -529,12 +529,13 @@ module Isolation PhotonIsolation {
   set RhoInputArray Rho/rho
 
   set OutputArray photons
+  # Loose 0.2, Tight 
+  set DeltaRMax 0.2
 
-  set DeltaRMax 0.5
-
-  set PTMin 0.5
-
-  set PTRatioMax 0.12
+  set PTMin 1.0
+  # https://arxiv.org/pdf/1908.00005, Table 3
+  # Loose 0.05 Tight: 0.05
+  set PTRatioMax 0.05
 }
 
 #####################
@@ -565,11 +566,13 @@ module Isolation ElectronIsolation {
 
   set OutputArray electrons
 
-  set DeltaRMax 0.5
+  # DeltaMax = 0.3 or 0.2
+  set DeltaRMax 0.2
 
-  set PTMin 0.5
-
-  set PTRatioMax 0.12
+  set PTMin 1.0
+  # https://arxiv.org/pdf/2308.13362
+  # Loose 0.15 Tight: 0.06
+  set PTRatioMax 0.15
 }
 
 #################
@@ -583,12 +586,9 @@ module Efficiency MuonEfficiency {
   # set EfficiencyFormula {efficiency as a function of eta and pt}
 
   # efficiency formula for muons
-  set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-                                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.7) * (pt > 10.0)  * (0.85) +
-                         (abs(eta) > 2.7)                                   * (0.00)}
-}
+  source efficiency/muon_loose.tcl
 
+}
 ################
 # Muon isolation
 ################
@@ -600,11 +600,12 @@ module Isolation MuonIsolation {
 
   set OutputArray muons
 
-  set DeltaRMax 0.5
-
-  set PTMin 0.5
-
-  set PTRatioMax 0.25
+  # https://cds.cern.ch/record/2746302/files/Aad2021_Article_MuonReconstructionAndIdentific.pdf
+  set DeltaRMax 0.3
+  
+  set PTMin 1.0
+  # Loose (0.3), Tight (0.15)
+  set PTRatioMax 0.3
 }
 
 ###################
