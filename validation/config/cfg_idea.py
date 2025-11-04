@@ -18,19 +18,19 @@ card = "validation_delphes_card_IDEA.tcl"
 name = os.path.basename(card.replace(".tcl", ""))
 
 ## run parameters:
-njobs = 100
+njobs = 500
 nevts_per_job = 25000
 
 #
-pmin = 0.1
-pmax = 200.0
+pmin = 1
+pmax = 100.0
 log = True
 etamin = -3.0
 etamax = 3.0
-ecm = 400.0
+ecm = 200.0
 
 # plotting parameters
-nbins = 100
+nbins = 50
 
 nbins_plin = nbins
 plin_min = 0.0
@@ -50,8 +50,8 @@ elog_min = pmin
 elog_max = pmax
 
 nbins_theta = nbins
-theta_min = 0.1
-theta_max = 3.14
+theta_min = 0.
+theta_max = 90
 
 nbins_eta = nbins
 eta_min = -3.0
@@ -71,17 +71,18 @@ bins_elogf = compute_bins(elog_min, elog_max, nbins_elog, 2, "log")
 bins_jetelinf = compute_bins(20.0, elin_max, nbins_elin, 2, "lin")
 bins_jetelogf = compute_bins(20.0, elog_max, nbins_elog, 2, "log")
 
-bins_thetalinc = [(1.4, 1.8), (0.6, 1.0), (0.1, 0.5)]
+bins_thetalinc = [(85, 95), (40, 50), (0, 10)]
+#bins_thetalinc = [(90, 60), (10, 20)]
 bins_plogc = [
     (0.5, 1.5),
     (5, 15),
-    (20, 50),
+    (50, 150),
 ]
 
 bins_jetplogc = [
     (20, 50),
     (50, 100),
-    (100, 500),
+    #(100, 500),
 ]
 
 bins_elogc = bins_plogc
@@ -95,24 +96,66 @@ obs_e = Observable("e", "E", "E", "[GeV]", 500, 0.5, 1.5, "rel")
 obs_d0 = Observable("d0", "D0", "d_0", "[mm]", 500, -0.2, 0.2, "abs")
 obs_dz = Observable("dz", "DZ", "d_z", "[mm]", 500, -0.2, 0.2, "abs")
 obs_phi = Observable("phi", "Phi", "\phi", " [rad]", 500, -0.001, 0.001, "abs")
-obs_theta = Observable("theta", "Theta", "\\theta", "[rad]", 500, -0.001, 0.001, "abs")
+obs_theta = Observable("theta", "Theta", "\\theta", "[°]", 500, -0.01, 0.01, "abs")
 
 ## covariance matrix
-obs_corr_d0phi = Observable("corr_d0phi", "CorrD0Phi", "\\rho(d_0, \phi)", "", 100, -1.0, 1.0, "mean")
-obs_corr_d0c = Observable("corr_d0c", "CorrD0C", "\\rho(d_0, C)", "", 100, -1.0, 1.0, "mean")
-obs_corr_d0dz = Observable("corr_d0dz", "CorrD0DZ", "\\rho(d_0, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_d0phi = Observable(
+    "corr_d0phi", "CorrD0Phi", "\\rho(d_0, \phi)", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_d0c = Observable(
+    "corr_d0c", "CorrD0C", "\\rho(d_0, C)", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_d0dz = Observable(
+    "corr_d0dz", "CorrD0DZ", "\\rho(d_0, d_z)", "", 100, -1.0, 1.0, "mean"
+)
 obs_corr_d0ctgtheta = Observable(
-    "corr_d0ctgtheta", "CorrD0CtgTheta", "\\rho(d_0, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+    "corr_d0ctgtheta",
+    "CorrD0CtgTheta",
+    "\\rho(d_0, ctg(\\theta))",
+    "",
+    100,
+    -1.0,
+    1.0,
+    "mean",
 )
-obs_corr_phic = Observable("corr_phic", "CorrPhiC", "\\rho(\phi, C)", "", 100, -1.0, 1.0, "mean")
-obs_corr_phidz = Observable("corr_phidz", "CorrPhiDZ", "\\rho(\phi, d_z)", "", 100, -1.0, 1.0, "mean")
+obs_corr_phic = Observable(
+    "corr_phic", "CorrPhiC", "\\rho(\phi, C)", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_phidz = Observable(
+    "corr_phidz", "CorrPhiDZ", "\\rho(\phi, d_z)", "", 100, -1.0, 1.0, "mean"
+)
 obs_corr_phictgtheta = Observable(
-    "corr_phictgtheta", "CorrPhiCtgTheta", "\\rho(\phi, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+    "corr_phictgtheta",
+    "CorrPhiCtgTheta",
+    "\\rho(\phi, ctg(\\theta))",
+    "",
+    100,
+    -1.0,
+    1.0,
+    "mean",
 )
-obs_corr_cdz = Observable("corr_cdz", "CorrCDZ", "\\rho(C, d_z)", "", 100, -1.0, 1.0, "mean")
-obs_corr_cctgtheta = Observable("corr_cctgtheta", "CorrCCtgTheta", "\\rho(C, ctg(\\theta))", "", 100, -1.0, 1.0, "mean")
+obs_corr_cdz = Observable(
+    "corr_cdz", "CorrCDZ", "\\rho(C, d_z)", "", 100, -1.0, 1.0, "mean"
+)
+obs_corr_cctgtheta = Observable(
+    "corr_cctgtheta",
+    "CorrCCtgTheta",
+    "\\rho(C, ctg(\\theta))",
+    "",
+    100,
+    -1.0,
+    1.0,
+    "mean",
+)
 obs_corr_dzctgtheta = Observable(
-    "corr_dzctgtheta", "CorrDZCtgTheta", "\\rho(d_z, ctg(\\theta))", "", 100, -1.0, 1.0, "mean"
+    "corr_dzctgtheta",
+    "CorrDZCtgTheta",
+    "\\rho(d_z, ctg(\\theta))",
+    "",
+    100,
+    -1.0,
+    1.0,
+    "mean",
 )
 
 
@@ -302,8 +345,8 @@ reso_eletrk_e = ResolutionHisto(
     "Track",
     obs_e,
     elogf,
-    {obs_theta: (0.73, 1.57)},
-    "track, 0 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "track, 50 < $\\theta$ < 130",
 )
 
 reso_elecalo_e = ResolutionHisto(
@@ -311,8 +354,8 @@ reso_elecalo_e = ResolutionHisto(
     "Tower",
     obs_e,
     elogf,
-    {obs_theta: (0.73, 1.57)},
-    "calo, 0 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "calo, 50 < $\\theta$ < 130",
 )
 
 reso_elepf_e = ResolutionHisto(
@@ -320,8 +363,8 @@ reso_elepf_e = ResolutionHisto(
     "EFlowTrack",
     obs_e,
     elogf,
-    {obs_theta: (0.73, 1.57)},
-    "particle-flow, 0 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "particle-flow, 50 < $\\theta$ < 130",
 )
 
 reso_ele_pftest_histos = [reso_eletrk_e, reso_elecalo_e, reso_elepf_e]
@@ -332,8 +375,8 @@ reso_pitrk_e = ResolutionHisto(
     "Track",
     obs_e,
     elogf,
-    {obs_theta: (0.73, 1.57)},
-    "track, 0.73 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "track, 50 < $\\theta$ < 130",
 )
 
 reso_picalo_e = ResolutionHisto(
@@ -341,8 +384,8 @@ reso_picalo_e = ResolutionHisto(
     "Tower",
     obs_e,
     elogf,
-    {obs_theta: (0.73, 1.57)},
-    "calo, 0.73 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "calo, 50 < $\\theta$ < 130",
 )
 
 reso_pipf_e = ResolutionHisto(
@@ -350,8 +393,8 @@ reso_pipf_e = ResolutionHisto(
     "EFlowTrack",
     obs_e,
     elogf,
-    {obs_theta: (0.73, 1.57)},
-    "particle-flow, 0.73 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "particle-flow, 50 < $\\theta$ < 130",
 )
 
 reso_pi_pftest_histos = [reso_pitrk_e, reso_picalo_e, reso_pipf_e]
@@ -363,8 +406,8 @@ reso_jetcalo_e = ResolutionHisto(
     "CaloJet",
     obs_e,
     ejetlogf,
-    {obs_theta: (0.73, 1.57)},
-    "calo, 0.73 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "calo, 50 < $\\theta$ < 130",
 )
 
 reso_jetpf_e = ResolutionHisto(
@@ -372,8 +415,8 @@ reso_jetpf_e = ResolutionHisto(
     "PFJet",
     obs_e,
     ejetlogf,
-    {obs_theta: (0.73, 1.57)},
-    "particle-flow, 0.73 < $\\theta$ < 1.57",
+    {obs_theta: (50, 130)},
+    "particle-flow, 50 < $\\theta$ < 130",
 )
 
 reso_jet_pftest_histos = [reso_jetcalo_e, reso_jetpf_e]

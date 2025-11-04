@@ -12,8 +12,20 @@ import matplotlib
 
 # matplotlib.use("tkagg")
 
-plt.rcParams["font.family"] = "serif"
-plt.rcParams["axes.labelweight"] = "bold"
+# plt.rcParams["font.family"] = "serif"
+# plt.rcParams["axes.labelweight"] = "bold"
+
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif")
+
+# Set font sizes
+plt.rcParams.update(
+    {
+        "font.size": 17,  # General font size
+        "axes.labelsize": 22,   # Axis label font size
+    }
+)
+
 
 from ROOT import gROOT
 
@@ -125,7 +137,6 @@ class ResolutionHisto:
             for obs, bin2 in slice.items():
                 histname += "{}{}_{}".format(obs.name, bin2[0], bin2[1])
 
-            # print(histname)
             self.histogram_names[bin] = histname
 
     def construct(self):
@@ -173,8 +184,31 @@ class ResolutionHisto:
 
 
 # _______________________________________________________________________________
-""" ResolutionPlot class """
+""" Limit class """
+class Limit:
+    def __init__(self, xmin, xmax, ymin, ymax):
+        self.xmin = xmin
+        self.xmax = xmax
+        self.ymin = ymin
+        self.ymax = ymax
 
+    def set_xmin(self, xmin):
+        self.xmin = xmin
+
+    def set_xmax(self, xmax):
+        self.xmax = xmax
+    
+    def set_ymin(self, ymin):
+        self.ymin = ymin
+    
+    def set_ymax(self, ymax):
+        self.ymax = ymax
+
+    def print(self):
+        print("xmin: {}, xmax: {}, ymin: {}, ymax: {}".format(self.xmin, self.xmax, self.ymin, self.ymax))
+
+# _______________________________________________________________________________
+""" ResolutionPlot class """
 
 class ResolutionPlot:
     def __init__(
@@ -182,11 +216,13 @@ class ResolutionPlot:
         name,
         res_histos,
         text,
+        limit=None,
     ):
         self.name = name
         self.res_histos = res_histos
         self.text = text
         self.datasets_reso = []
+        self.limit = limit
 
     def construct(self, pid):
         for hist in self.res_histos:
@@ -231,11 +267,19 @@ class ResolutionPlot:
 
                 ## extract resolution
                 # sigma = getEffSigma(hist, wmin=0.0, wmax=2.0, epsilon=0.01)
-                # sigma = getEffSigma2(hist)
-                # sigma = hist.GetRMS()
+                #sigma = getEffSigma2(hist)
+                sigma = hist.GetRMS()
+                
+                #if self.name == "reso_ele_pftest_e":
+                # if "EFlowTrack" in h.histogram_names[bin]:
+                #     sigma = getSigmaGaus(hist, 1.0)
 
                 sigma = getSigmaGaus(hist, 1.0)
+
+                #print(h.histogram_names[bin], mode, sigma)
+                
                 sigma_err = hist.GetRMSError()
+                sigma_err = 1e-04
                 mean = hist.GetMean()
                 mean_err = hist.GetMeanError()
 
@@ -266,6 +310,7 @@ class ResolutionPlot:
                     h.histogram_names[bin], h.observable.opt, x, value, value_err
                 )
 
+                #print(debug_str)
                 final_histogram.SetBinContent(i, value)
                 final_histogram.SetBinError(i, value_err)
                 i += 1
@@ -299,6 +344,13 @@ class ResolutionPlot:
 
         plot_reso.add_text(self.text)
         plot_reso.set_xmin(self.res_histos[0].binning.bins[0][0])
+
+        if self.limit:
+            plot_reso.set_xmin(self.limit.xmin)
+            plot_reso.set_xmax(self.limit.xmax)
+            plot_reso.set_ymin(self.limit.ymin)
+            plot_reso.set_ymax(self.limit.ymax)
+    
         plot_reso.plot()
 
         print("plotted {}".format(self.plot_path))
@@ -309,44 +361,72 @@ class ResolutionPlot:
 """ ResolutionBlock function """
 
 
-def ResolutionBlock(particle_list, branch, observables, bins_mom, bins_eta, reso_plots):
+def ResolutionBlock(particle_list, branch, observables, bins_mom, bins_eta, reso_plots, limitDictMom=None, limitDictEta=None):
     reso_dict = dict()
     for obs in observables:
         for p in particle_list:
             reso_pt = []
             for bin in bins_eta[1].bins:
+
                 res_histo_pt = ResolutionHisto(
                     p,
                     branch,
                     obs,
                     bins_mom[0],
                     {bins_eta[1].obs: bin},
-                    "{} < ${}$ < {}".format(bin[0], bins_eta[1].obs.label, bin[1]),
+                    r"{} $<$ ${}$ $<$ {}".format(bin[0], bins_eta[1].obs.label, bin[1]),
                 )
                 reso_pt.append(res_histo_pt)
+
+            limit = None
+            if limitDictMom:
+                limit = limitDictMom[obs][p]
+
+            # FIXME
+            title = r"{} {} \\[10pt] ${}$ resolution".format(p.label, branch.lower(), obs.label)
+            #print(reso_pt)
             reso_pt_plot = ResolutionPlot(
                 "reso_{}_{}_{}_pt".format(branch.lower(), p.name, obs.name),
                 reso_pt,
-                Text("", (0.5, 0.5)),
+                Text(title, (0.25, 0.8)),
+                limit
             )
+
             reso_dict[(p, obs, "pt")] = reso_pt_plot
             reso_plots.append(reso_pt_plot)
 
             reso_eta = []
             for bin in bins_mom[1].bins:
+
+                minmom = bin[0]
+                maxmom = bin[1]
+                unit = "GeV"
+                if maxmom > 1e3:
+                    minmom = f"{minmom / 1e3:.0f}"
+                    maxmom = f"{maxmom / 1e3:.0f}"
+                    unit = "TeV"
+                
+                legend = r"{} $<$ ${}$ $<$ {} {}".format(minmom, bins_mom[1].obs.label, maxmom, unit)
+
                 res_histo_eta = ResolutionHisto(
                     p,
                     branch,
                     obs,
                     bins_eta[0],
                     {bins_mom[1].obs: bin},
-                    "{} < ${}$ < {}".format(bin[0], bins_mom[1].obs.label, bin[1]),
+                    legend,
                 )
                 reso_eta.append(res_histo_eta)
+            
+            limit = None
+            if limitDictEta:
+                limit = limitDictEta[obs][p]
+
             reso_eta_plot = ResolutionPlot(
                 "reso_{}_{}_{}_eta".format(branch.lower(), p.name, obs.name),
                 reso_eta,
-                Text("", (0.5, 0.5)),
+                Text(title, (0.25, 0.8)),
+                limit,
             )
             reso_dict[(p, obs, "eta")] = reso_eta_plot
             reso_plots.append(reso_eta_plot)
@@ -427,10 +507,11 @@ class EfficiencyHisto:
 
 
 class EfficiencyPlot1D:
-    def __init__(self, name, eff_histos, text):
+    def __init__(self, name, eff_histos, text, limit=None):
         self.name = name
         self.eff_histos = eff_histos
         self.text = text
+        self.limit = limit
 
     def construct(self, pid):
         for hist in self.eff_histos:
@@ -488,6 +569,14 @@ class EfficiencyPlot1D:
 
         plot_eff = PlotHisto1D(self.datasets, self.plot_path, self.x_label, self.y_label)
         plot_eff.set_xscale(self.eff_histos[0].binning.scale)
+
+        if self.limit:
+            # print(f"setting limits for {self.plot_path}")
+            # print(self.limit.xmin, self.limit.xmax, self.limit.ymin, self.limit.ymax)
+            plot_eff.set_xmin(self.limit.xmin)
+            plot_eff.set_xmax(self.limit.xmax)
+            plot_eff.set_ymin(self.limit.ymin)
+            plot_eff.set_ymax(self.limit.ymax)
 
         # text.set_weight("bold")
         plot_eff.add_text(self.text)
@@ -571,7 +660,7 @@ class EfficiencyTaggingHisto:
 
 
 # _______________________________________________________________________________
-def EfficiencyParticleBlock(particle_list, branch, mom, eta, eff_plots):
+def EfficiencyParticleBlock(particle_list, branch, mom, eta, eff_plots, limitDictMom=None, limitDictEta=None):
     eff_dict = OrderedDict()
     for p in particle_list:
 
@@ -582,34 +671,60 @@ def EfficiencyParticleBlock(particle_list, branch, mom, eta, eff_plots):
                 branch,
                 mom[0],
                 {eta[1].obs: bin},
-                "{} < ${}$ < {}".format(bin[0], eta[1].obs.label, bin[1]),
+                r"{} $<$ ${}$ $<$ {}".format(bin[0], eta[1].obs.label, bin[1]),
             )
             eff_pt_histos.append(eff_histo)
 
+        limit = None
+        if limitDictMom:
+            limit = limitDictMom[p]
+
+        
+        title = r"{} {} efficiency".format(p.label, branch.lower())
+        if "Iso" in branch:
+            title = r"{} efficiency".format(p.label)
         eff_pt_plot = EfficiencyPlot1D(
             "eff_{}_{}_{}".format(branch.lower(), p.name, mom[0].obs.name),
             eff_pt_histos,
-            Text("", (0.5, 0.5)),
+            Text(title, (0.25, 0.85)),
+            limit,
         )
+
 
         eff_dict[(p, "pt")] = eff_pt_plot
         eff_plots.append(eff_pt_plot)
 
         eff_eta_histos = []
         for bin in mom[1].bins:
+
+            minmom = bin[0]
+            maxmom = bin[1]
+            unit = "GeV"
+            if maxmom > 1e3:
+                minmom = f"{minmom / 1e3:.0f}"
+                maxmom = f"{maxmom / 1e3:.0f}"
+                unit = "TeV"
+            
+            legend = r"{} $<$ ${}$ $<$ {} {}".format(minmom, mom[1].obs.label, maxmom, unit)
+
             eff_histo = EfficiencyHisto(
                 p,
                 branch,
                 eta[0],
                 {mom[1].obs: bin},
-                "{} < ${}$ < {}".format(bin[0], mom[1].obs.label, bin[1]),
+                legend
             )
             eff_eta_histos.append(eff_histo)
+
+        limit = None
+        if limitDictEta:
+            limit = limitDictEta[p]
 
         eff_eta_plot = EfficiencyPlot1D(
             "eff_{}_{}_{}".format(branch.lower(), p.name, eta[0].obs.name),
             eff_eta_histos,
-            Text("", (0.5, 0.5)),
+            Text(title, (0.25, 0.85)),
+            limit,
         )
         eff_dict[(p, "eta")] = eff_eta_plot
         eff_plots.append(eff_eta_plot)
@@ -618,7 +733,7 @@ def EfficiencyParticleBlock(particle_list, branch, mom, eta, eff_plots):
 
 
 # _______________________________________________________________________________
-def EfficiencyTaggingBlock(jet_coll, flavor_tag, mom, eta, gen_cond, wps, tag_flag, eff_tag_plots):
+def EfficiencyTaggingBlock(jet_coll, flavor_tag, mom, eta, gen_cond, wps, tag_flag, eff_tag_plots, limitDictMom=None, limitDictEta=None):
 
     eff_tag_dict = dict()
     for part, cond in gen_cond.items():
@@ -632,19 +747,133 @@ def EfficiencyTaggingBlock(jet_coll, flavor_tag, mom, eta, gen_cond, wps, tag_fl
                     "p.{} & (1 << {})".format(tag_flag, wp),  # reco condition
                     mom[0],
                     {eta[1].obs: etabin},
-                    "{} < ${}$ < {}".format(etabin[0], eta[1].obs.label, etabin[1]),
+                    "{} $<$ ${}$ $<$ {}".format(etabin[0], eta[1].obs.label, etabin[1]),
                 )
                 eff_tag_pt_histos.append(eff_tag_pt)
+
+            limit = None
+            if limitDictMom:
+                limit = limitDictMom[part][wp]
+
+            #print(part.pid, cond, wp)
+
+            def get_tag_title(part, cond, wp):
+                """
+                Returns a LaTeX title string with two lines, based on:
+                - part.pid: the true jet flavor (5 for b, 4 for c, 15 for tau, <4 for light)
+                - cond: a condition string (e.g. "p.Flavor == 5", "p.TauFlavor == 15", "p.Flavor < 4", etc.)
+                - wp: the working point. For non-tau jets, {0,1,2} imply the b-tag algorithm and {4,5,6} the c-tag algorithm.
+                
+                Logic:
+                * If the condition string mentions "TauFlavor", force the algorithm to "tau-tag".
+                * Otherwise, if part.pid == 15 we also assume a tau (and use "tau-tag"), else choose:
+                    - For wp in [0,1,2]: use "b-tag"
+                    - For wp in [4,5,6]: use "c-tag"
+                
+                For non-tau jets:
+                    - For "b-tag": if part.pid==5 → "efficiency"; if part.pid==4 → "c-mistag"; otherwise → "light-mistag"
+                    - For "c-tag": if part.pid==4 → "efficiency"; if part.pid==5 → "b-mistag"; otherwise → "light-mistag"
+                
+                For tau jets ("tau-tag"):
+                    - If cond contains "==" and the parsed value is 15 → "efficiency"
+                    - If cond contains "==" and the parsed value is 0, or if cond contains "<" → "light-mistag"
+                    - Otherwise, fallback to "mistag".
+                
+                The working point (wp) is mapped to a descriptive string.
+                
+                The final title is formatted as two lines:
+                    <algorithm> - <WP string>
+                    
+                    <label>
+                """
+                # Force tau-tag if condition indicates TauFlavor
+                if "TauFlavor" in cond:
+                    algo = "tau-tag"
+                else:
+                    # For non-tau jets, use part.pid and wp to determine algo.
+                    if part.pid == 15:
+                        algo = "tau-tag"
+                    else:
+                        if wp in [0, 1, 2]:
+                            algo = "b-tag"
+                        elif wp in [4, 5, 6]:
+                            algo = "c-tag"
+                        else:
+                            algo = "b-tag"  # default fallback
+
+                # Determine label based on the algorithm.
+                if algo == "tau-tag":
+                    # For tau-tag, use condition string to decide
+                    if "==" in cond:
+                        try:
+                            cond_val = int(cond.split("==")[-1].strip())
+                        except ValueError:
+                            cond_val = None
+                        if cond_val == 15:
+                            label = "efficiency"
+                        elif cond_val == 0:
+                            label = "light-mistag"
+                        else:
+                            label = "mistag"
+                    elif "<" in cond:
+                        label = "light-mistag"
+                    else:
+                        label = "mistag"
+                else:
+                    # For non-tau jets, base the label solely on part.pid.
+                    if algo == "b-tag":
+                        if part.pid == 5:
+                            label = "efficiency"
+                        elif part.pid == 4:
+                            label = "c-mistag"
+                        else:
+                            label = "light-mistag"
+                    elif algo == "c-tag":
+                        if part.pid == 4:
+                            label = "efficiency"
+                        elif part.pid == 5:
+                            label = "b-mistag"
+                        else:
+                            label = "light-mistag"
+                    else:
+                        label = "mistag"
+
+                # Map working point (wp) to a descriptive string.
+                wp_map = {
+                    0: "loose WP", 1: "medium WP", 2: "tight WP",
+                    4: "loose WP", 5: "medium WP", 6: "tight WP"
+                }
+                wp_str = wp_map.get(wp, f"wp{wp}")
+
+                # Build the final title as two lines.
+                title = f"{algo} - {wp_str}\n\n{label}"
+                return title
+
+            title = get_tag_title(part, cond, wp)
+            #print(title)
+
             eff_tag_pt_plot = EfficiencyPlot1D(
                 "eff_{}_{}_{}_pt".format(flavor_tag, part.name, wp),
                 eff_tag_pt_histos,
-                Text("", (0.5, 0.5)),
+                Text(title, (0.25, 0.8)),
+                limit
             )
             eff_tag_dict[(part, wp, "pt")] = eff_tag_pt_plot
             eff_tag_plots.append(eff_tag_pt_plot)
 
             eff_tag_eta_histos = []
             for ptbin in mom[1].bins:
+
+                minmom = ptbin[0]
+                maxmom = ptbin[1]
+                unit = "GeV"
+                if maxmom > 1e3:
+                    minmom = f"{minmom / 1e3:.0f}"
+                    maxmom = f"{maxmom / 1e3:.0f}"
+                    unit = "TeV"
+                
+                legend = r"{} $<$ ${}$ $<$ {} {}".format(minmom, mom[1].obs.label, maxmom, unit)   
+
                 eff_tag_eta = EfficiencyTaggingHisto(
                     part,
                     jet_coll,
@@ -652,14 +881,19 @@ def EfficiencyTaggingBlock(jet_coll, flavor_tag, mom, eta, gen_cond, wps, tag_fl
                     "p.{} & (1 << {})".format(tag_flag, wp),  # reco condition
                     eta[0],
                     {mom[1].obs: ptbin},
-                    "{} < ${}$ < {}".format(ptbin[0], mom[1].obs.label, ptbin[1]),
+                    legend,
                 )
                 eff_tag_eta_histos.append(eff_tag_eta)
 
+            limit = None
+            if limitDictEta:
+                limit = limitDictEta[part][wp]
+                
             eff_tag_eta_plot = EfficiencyPlot1D(
                 "eff_{}_{}_{}_eta".format(flavor_tag, part.name, wp),
                 eff_tag_eta_histos,
-                Text("", (0.5, 0.5)),
+                Text(title, (0.25, 0.8)),
+                limit
             )
             eff_tag_dict[(part, wp, "eta")] = eff_tag_eta_plot
             eff_tag_plots.append(eff_tag_eta_plot)
@@ -770,38 +1004,61 @@ class PlotHisto1D:
             )
             """
             ax.errorbar(x, y, yerr=yerr, fmt="o", label="{}".format(sample.label), linewidth=2)
+            #ax.plot(x, y, label="{}".format(sample.label), linewidth=2)
 
         # Create new legend handles but use the colors from the existing ones
 
+        # Assume ax is already created and plots are drawn.
         handles, labels = ax.get_legend_handles_labels()
-        # new_handles = [Line2D([], [], c=h.get_edgecolor()) for h in handles]
         fontsize = self.size
-        ax.legend(
-            # handles=new_handles,
+
+        # Place the legend explicitly in the upper right.
+        legend = ax.legend(
             labels=labels,
             frameon=False,
-            loc=self.leg_loc,
+            loc="upper right",
+            bbox_to_anchor=(0.98, 0.98),
             fontsize=fontsize,
         )
 
-        # add text to plot
-        for text in self.text:
-            # weight = text.weight
-            size = self.size
+        # Use a tight layout so everything has enough room.
+        fig.tight_layout()
+
+        # Draw the canvas so that positions are updated.
+        fig.canvas.draw()
+
+        # Get legend bounding box in axes coordinates.
+        legend_bbox = legend.get_window_extent(fig.canvas.get_renderer())
+        legend_bbox = legend_bbox.transformed(ax.transAxes.inverted())
+
+        # Add text annotations, adjusting if necessary.
+        for text_obj in self.text:
+            text_loc = list(text_obj.location)  # (x, y) in axes coords
+            # Check if this text overlaps with the legend.
+            if legend_bbox.contains(text_loc[0], text_loc[1]):
+                # Adjust the text's y location to be below the legend.
+                text_loc[1] = legend_bbox.y0 - 0.05  # adjust the offset as needed
             ax.text(
-                text.location[0],
-                text.location[1],
-                text.content,
+                text_loc[0],
+                text_loc[1],
+                text_obj.content,
                 verticalalignment="center",
                 horizontalalignment="center",
+                multialignment="center",
                 transform=ax.transAxes,
                 weight="bold",
-                fontsize=size,
+                fontsize=fontsize,
             )
 
         ax.set_xlabel(self.title_x, fontsize=self.size)
         ax.set_ylabel(self.title_y, fontsize=self.size)
 
+        if hasattr(self, "xmin") and hasattr(self, "xmax"):
+            ax.set_xlim(self.xmin, self.xmax)
+
+        if hasattr(self, "ymin") and hasattr(self, "ymax"):
+            ax.set_ylim(self.ymin, self.ymax)
+    
         ax.tick_params(axis="both", labelsize=14)
         ax.grid(linestyle="dashed")
         fig.tight_layout()
@@ -809,6 +1066,7 @@ class PlotHisto1D:
         ax.set_xscale(self.xscale)
         ax.set_yscale(self.yscale)
         fig.savefig(fig_file)
+        print("saved figure {}".format(fig_file))
         fig.clf()
         ax.cla()
         plt.close("all")
