@@ -183,9 +183,7 @@ module MomentumSmearing ElectronMomentumSmearing {
 
   # resolution formula for electrons
   # based on arXiv:1405.6569
-  set ResolutionFormula {                  (abs(eta) <= 0.5) * (pt > 0.1) * sqrt(0.03^2 + pt^2*1.3e-3^2) +
-                         (abs(eta) > 0.5 && abs(eta) <= 1.5) * (pt > 0.1) * sqrt(0.05^2 + pt^2*1.7e-3^2) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1) * sqrt(0.15^2 + pt^2*3.1e-3^2)}
+  source resolution/muon_momentum.tcl
 }
 
 ###############################
@@ -661,7 +659,7 @@ module BTagging BTagging {
   # default efficiency formula (misidentification rate)
   # add EfficiencyFormula {0} {0.002+7.3e-06*pt}
   source tagging/b_tag_77.tcl
-  
+
   # efficiency formula for c-jets (misidentification rate)
   # add EfficiencyFormula {4} {0.20*tanh(0.02*pt)*(1/(1+0.0034*pt))}
 
