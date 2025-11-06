@@ -56,8 +56,14 @@ private:
 
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
+  
   Double_t fTowerEnergy;
+  Double_t fNeutralEnergy;
   Double_t fTrackEnergy;
+
+  Double_t fTowerEnergyFromPU;
+  Double_t fTrackEnergyFromPU;
+  Double_t fNeutralEnergyFromPU;
 
   Double_t fTowerTime;
   Double_t fTrackTime;

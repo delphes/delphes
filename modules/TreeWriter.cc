@@ -435,7 +435,12 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Particle = particle;
 
     entry->VertexIndex = candidate->ClusterIndex;
+
+    entry->IsPU = candidate->IsPU;
+    entry->IsRecoPU = candidate->IsRecoPU;
+    entry->HardEnergyFraction = candidate->IsPU ? 0.0 : 1.0;
   }
+
 }
 
 //------------------------------------------------------------------------------
@@ -484,6 +489,11 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->NTimeHits = candidate->NTimeHits;
 
+    entry->IsPU = candidate->IsPU;
+    entry->IsRecoPU = candidate->IsRecoPU;
+
+    entry->HardEnergyFraction = candidate->BetaStar;
+
     FillParticles(candidate, &entry->Particles);
   }
 }
@@ -520,6 +530,15 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->IsRecoPU = candidate->IsRecoPU;
 
     entry->Charge = candidate->Charge;
+
+    if (TMath::Abs(entry->Charge) > 0.)
+    {
+      entry->HardEnergyFraction = entry->IsPU ? 0.0 : 1.0;
+    }
+    else
+    {
+      entry->HardEnergyFraction = candidate->BetaStar;
+    }
 
     entry->EtaOuter = eta;
     entry->PhiOuter = position.Phi();

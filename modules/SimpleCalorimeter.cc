@@ -160,7 +160,6 @@ void SimpleCalorimeter::Init()
 
   // Prompt to let user know how many insensitive bins were saved
   std::cout << "SimpleBlindCalorimeter: insensitive bins saved = " << fInsensitiveBinSet.size() << std::endl;
-  
 
   // read energy fractions for different particles
   param = GetParam("EnergyFraction");
@@ -251,6 +250,7 @@ void SimpleCalorimeter::Process()
   fItParticleInputArray->Reset();
   number = -1;
   fTowerRmax=0.;
+
   while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
   {
     const TLorentzVector &particlePosition = particle->Position;
@@ -370,7 +370,6 @@ void SimpleCalorimeter::Process()
 
           // create new tower
           fTower = factory->NewCandidate();
-
           phiBin = (towerHit >> 32) & 0x000000000000FFFFLL;
           etaBin = (towerHit >> 48) & 0x000000000000FFFFLL;
 
@@ -393,9 +392,13 @@ void SimpleCalorimeter::Process()
           fTowerEdges[3] = (*phiBins)[phiBin];
 
           fTowerEnergy = 0.0;
-
           fTrackEnergy = 0.0;
+          fNeutralEnergy = 0.0;
           fTrackSigma = 0.0;
+
+          fTowerEnergyFromPU = 0.0;
+          fTrackEnergyFromPU = 0.0;
+          fNeutralEnergyFromPU = 0.0;
 
           fTowerTime = 0.0;
           fTrackTime = 0.0;
@@ -411,11 +414,11 @@ void SimpleCalorimeter::Process()
       // We already handled it above; fTower == nullptr if insensitive
       // This prevents skipping hits that are already stored in fTowerHits
 
+
       // check for track hits
       if(flags & 1)
       {
           ++fTowerTrackHits;
-
           track = static_cast<Candidate *>(fTrackInputArray->At(number));
           momentum = track->Momentum;
           position = track->Position;
@@ -430,6 +433,10 @@ void SimpleCalorimeter::Process()
 
             // compute total charged energy
             fTrackEnergy += energy;
+
+            // compute energy contribution from PU tracks
+            if (track->IsPU) fTrackEnergyFromPU += energy;
+          
             sigma = fResolutionFormula->Eval(0.0, fTowerEta, 0.0, momentum.E());
             if(sigma / momentum.E() < track->TrackResolution)
                 energyGuess = energy;
@@ -445,6 +452,24 @@ void SimpleCalorimeter::Process()
           }
         continue;
       }
+      else
+      {
+
+        particle = static_cast<Candidate *>(fParticleInputArray->At(number));
+        momentum = particle->Momentum;
+
+        energy = momentum.E() * fTrackFractions[number];
+
+        if(fTrackFractions[number] > 1.0E-9)
+        {
+            // compute total neutral energy
+            fNeutralEnergy += energy;
+            if (particle->IsPU) fNeutralEnergyFromPU += energy;
+        }     
+      }
+
+    // fill current tower
+    energy = momentum.E() * fTowerFractions[number];
 
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
@@ -452,6 +477,7 @@ void SimpleCalorimeter::Process()
     particle = static_cast<Candidate *>(fParticleInputArray->At(number));
     momentum = particle->Momentum;
     position = particle->Position;
+
 
     // fill current tower
     energy = momentum.E() * fTowerFractions[number];
@@ -462,12 +488,14 @@ void SimpleCalorimeter::Process()
         fTowerTimeWeight += energy * energy;
         fTower->AddCandidate(particle);
         fTower->Position = position;
+        if (particle->IsPU) fTowerEnergyFromPU += energy; 
     }
 
-    } 
+  } 
 
-    // finalize last tower (only if it was sensitive)
-    if(fTower) FinalizeTower();
+  // finalize last tower (only if it was sensitive)
+  if(fTower) FinalizeTower();
+    
 }
 
 //------------------------------------------------------------------------------
@@ -480,6 +508,8 @@ void SimpleCalorimeter::FinalizeTower()
   Double_t time;
 
   Double_t weightTrack, weightCalo, bestEnergyEstimate, rescaleFactor;
+
+  Double_t hardEnergyFraction;
 
   TLorentzVector momentum;
   TFractionMap::iterator itFractionMap;
@@ -531,7 +561,11 @@ void SimpleCalorimeter::FinalizeTower()
   fTower->Edges[2] = fTowerEdges[2];
   fTower->Edges[3] = fTowerEdges[3];
 
-  // fill SimpleCalorimeter towers
+  hardEnergyFraction = (fTowerEnergy > 1.0E-09) ? (fTowerEnergy - fTowerEnergyFromPU) / fTowerEnergy : 1.0;
+  
+  fTower->BetaStar = hardEnergyFraction;
+
+  // fill  SimpleCalorimeter towers
   if(energy > 0.0) fTowerOutputArray->Add(fTower);
 
   // e-flow candidates
@@ -556,6 +590,15 @@ void SimpleCalorimeter::FinalizeTower()
     tower->PID = (fIsEcal) ? 22 : 0;
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
+
+    // compute hard energy fraction for tower
+    hardEnergyFraction = (fNeutralEnergy > 1.0E-09) ? (fNeutralEnergy - fNeutralEnergyFromPU) / (fNeutralEnergy) : 1.0;
+
+    if (hardEnergyFraction < 0.5) tower->IsPU = 1;
+    else tower->IsPU = 0;
+
+    tower->BetaStar = hardEnergyFraction;
+    
     fEFlowTowerOutputArray->Add(tower);
 
     fItTowerTrackArray->Reset();
@@ -572,6 +615,7 @@ void SimpleCalorimeter::FinalizeTower()
   // if neutral excess is not significant, rescale eflow tracks, such that the total charged equals the best measurement given by the calorimeter and tracking
   else if(fTrackEnergy > 0.0)
   {
+
     weightTrack = (fTrackSigma > 0.0) ? 1 / (fTrackSigma * fTrackSigma) : 0.0;
     weightCalo = (sigma > 0.0) ? 1 / (sigma * sigma) : 0.0;
 
@@ -588,6 +632,7 @@ void SimpleCalorimeter::FinalizeTower()
       fEFlowTrackOutputArray->Add(track);
     }
   }
+
 }
 
 //------------------------------------------------------------------------------
