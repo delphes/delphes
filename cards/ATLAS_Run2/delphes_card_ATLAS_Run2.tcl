@@ -33,7 +33,10 @@ set ExecutionPath {
   GenMissingET
   
   Rho
+  
   FastJetFinder
+  FatJetFinder
+
   JetPileUpSubtractor
 
   JetEnergyScale
@@ -276,7 +279,7 @@ module Calorimeter Calorimeter {
   }
 
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
-  add EnergyFraction {0} {0.0 1.0}
+  add EnergyFraction {0} {0.0 0.0}
   # energy fractions for e, gamma and pi0
   add EnergyFraction {11} {1.0 0.0}
   add EnergyFraction {22} {1.0 0.0}
@@ -434,13 +437,14 @@ module PdgCodeFilter NeutrinoFilter {
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray NeutrinoFilter/filteredParticles
+  # set InputArray NeutrinoFilter/filteredParticles
+  set InputArray EFlowMerger/eflow
 
   set OutputArray jets
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.6
+  set ParameterR 0.4
 
   set JetPTMin 20.0
 }
@@ -461,12 +465,13 @@ module Merger GenMissingET {
 ############
 
 module FastJetFinder FastJetFinder {
-  set InputArray Calorimeter/towers
+  # set InputArray Calorimeter/towers
+  set InputArray EFlowMerger/eflow
 
   set OutputArray jets
 
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
-  set AreaAlgorithm 5
+  # set AreaAlgorithm 5
 
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
@@ -474,6 +479,35 @@ module FastJetFinder FastJetFinder {
 
   set JetPTMin 20.0
 }
+
+##################
+# Fat Jet finder
+##################
+
+module FastJetFinder FatJetFinder {
+  set InputArray EFlowMerger/eflow
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 1.0
+
+  set ComputeNsubjettiness 1
+  set Beta 1.0
+  set AxisMode 4
+
+  set ComputeTrimming 1
+  set RTrim 0.2
+  set PtFracTrim 0.05
+
+  # Optional grooming used in study (not essential)
+  set ComputeSoftDrop 0
+  set ComputePruning 0
+
+  set JetPTMin 250.0
+}
+
 
 ###########################
 # Jet Pile-Up Subtraction
@@ -742,6 +776,10 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/photons Photon Photon
   add Branch UniqueObjectFinder/muons Muon Muon
+
+  add Branch FatJetFinder/jets FatJet Jet
+  add Branch FastJetFinder/jets SmallJet Jet
+
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
