@@ -546,10 +546,7 @@ module Efficiency ElectronEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # efficiency formula for electrons
-  set EfficiencyFormula {                                      (pt <= 10.0) * (0.00) +
-                                           (abs(eta) <= 1.5) * (pt > 10.0)  * (0.95) +
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 10.0)  * (0.85) +
-                         (abs(eta) > 2.5)                                   * (0.00)}
+  source efficiency/electron_medium.tcl
 }
 
 ####################
@@ -662,13 +659,14 @@ module BTagging BTagging {
   # based on ATL-PHYS-PUB-2015-022
 
   # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.002+7.3e-06*pt}
-
+  # add EfficiencyFormula {0} {0.002+7.3e-06*pt}
+  source tagging/b_tag_77.tcl
+  
   # efficiency formula for c-jets (misidentification rate)
-  add EfficiencyFormula {4} {0.20*tanh(0.02*pt)*(1/(1+0.0034*pt))}
+  # add EfficiencyFormula {4} {0.20*tanh(0.02*pt)*(1/(1+0.0034*pt))}
 
   # efficiency formula for b-jets
-  add EfficiencyFormula {5} {0.80*tanh(0.003*pt)*(30/(1+0.086*pt))}
+  # add EfficiencyFormula {5} {0.80*tanh(0.003*pt)*(30/(1+0.086*pt))}
 }
 
 #############
