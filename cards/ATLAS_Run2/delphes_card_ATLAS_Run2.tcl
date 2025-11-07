@@ -6,8 +6,6 @@
 # TODO: add ATLAS based ip smearing
 
 set ExecutionPath {
-
-  PileUpMerger
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -22,7 +20,7 @@ set ExecutionPath {
   TrackSmearing
   Calorimeter
   ElectronFilter
-  TrackPileUpSubtractor
+
   NeutralTowerMerger
   EFlowMergerAllTracks
   EFlowMerger
@@ -68,37 +66,37 @@ set ExecutionPath {
 # PileUp Merger
 ###############
 
-module PileUpMerger PileUpMerger {
-  set InputArray Delphes/stableParticles
+# module PileUpMerger PileUpMerger {
+  # set InputArray Delphes/stableParticles
 
-  set ParticleOutputArray stableParticles
-  set VertexOutputArray vertices
+  # set ParticleOutputArray stableParticles
+  # set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  set PileUpFile MinBias.pileup
+  # set PileUpFile MinBias.pileup
 
   # average expected pile up
+  # from https://atlas.web.cern.ch/Atlas/GROUPS/DATAPREPARATION/PublicPlots/2016/DataSummary/figs/mu_2016.pdf
 
-  set MeanPileUp 30 # from https://atlas.web.cern.ch/Atlas/GROUPS/DATAPREPARATION/PublicPlots/2016/DataSummary/figs/mu_2016.pdf
-
+  # set MeanPileUp 30 
   # maximum spread in the beam direction in m
-  set ZVertexSpread 0.25
+  # set ZVertexSpread 0.25
 
   # maximum spread in time in s
-  set TVertexSpread 800E-12
+  # set TVertexSpread 800E-12
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
-  set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
-
-
-}
+  # set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
+# }
 
 #################################
 # Propagate particles in cylinder (https://cds.cern.ch/record/331063/files/ATLAS-TDR-4-Volume-I.pdf. Chapter 1.2.2) 
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray PileUpMerger/stableParticles
+  # set InputArray PileUpMerger/stableParticles
+
+  set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -140,7 +138,7 @@ module Efficiency ElectronTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for electrons
-  source tracking/eleMuon_loose.tcl
+  source tracking/elecMuon_loose.tcl
 }
 
 ##########################
@@ -572,13 +570,16 @@ module Isolation PhotonIsolation {
 #####################
 
 module Efficiency ElectronEfficiency {
-  set InputArray TrackPileUpSubtractor/electrons
+  # set InputArray TrackPileUpSubtractor/electrons
+  set InputArray ElectronFilter/electrons
   set OutputArray electrons
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # efficiency formula for electrons
+  
   source efficiency/electron_medium.tcl
+
 }
 
 ####################
@@ -606,13 +607,14 @@ module Isolation ElectronIsolation {
 #################
 
 module Efficiency MuonEfficiency {
-  set InputArray TrackPileUpSubtractor/muons
+  # set InputArray TrackPileUpSubtractor/muons
+  set InputArray MuonMomentumSmearing/muons
   set OutputArray muons
 
   # set EfficiencyFormula {efficiency as a function of eta and pt}
 
   # efficiency formula for muons
-  source efficiency/muon_loose.tcl
+  source efficiency/muon_medium.tcl
 
 }
 ################
@@ -688,17 +690,9 @@ module BTagging BTagging {
   # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
   # gluon's PDG code has the lowest priority
 
-  # based on ATL-PHYS-PUB-2015-022
-
-  # default efficiency formula (misidentification rate)
-  # add EfficiencyFormula {0} {0.002+7.3e-06*pt}
-  source tagging/b_tag_77.tcl
-
-  # efficiency formula for c-jets (misidentification rate)
-  # add EfficiencyFormula {4} {0.20*tanh(0.02*pt)*(1/(1+0.0034*pt))}
-
-  # efficiency formula for b-jets
-  # add EfficiencyFormula {5} {0.80*tanh(0.003*pt)*(30/(1+0.086*pt))}
+  add EfficiencyFormula {0} {0.00677 + 2.1e-06*pt}
+  add EfficiencyFormula {4} {0.186*tanh(0.60700*pt)*(1/(1 + 0.00097*pt))}
+  add EfficiencyFormula {5} {2.993*tanh(0.00181*pt)*(30/(1 + 0.18066*pt))}
 }
 
 #############
@@ -783,6 +777,6 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
-  add Branch PileUpMerger/vertices Vertex Vertex
+  # add Branch PileUpMerger/vertices Vertex Vertex
 
 }
