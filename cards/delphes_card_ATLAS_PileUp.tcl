@@ -448,8 +448,9 @@ module PdgCodeFilter NeutrinoFilter {
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray NeutrinoFilter/filteredParticles
-
+  # set InputArray NeutrinoFilter/filteredParticles
+  set InputArray EFlowMerger/eflow
+  
   set OutputArray jets
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt

@@ -6,6 +6,8 @@
 # TODO: add ATLAS based ip smearing
 
 set ExecutionPath {
+  
+  PileUpMerger
   ParticlePropagator
 
   ChargedHadronTrackingEfficiency
@@ -20,7 +22,7 @@ set ExecutionPath {
   TrackSmearing
   Calorimeter
   ElectronFilter
-
+  TrackPileUpSubtractor
   NeutralTowerMerger
   EFlowMergerAllTracks
   EFlowMerger
@@ -31,12 +33,9 @@ set ExecutionPath {
   GenMissingET
   
   Rho
-  
   FastJetFinder
   FatJetFinder
-
   JetPileUpSubtractor
-
   JetEnergyScale
 
   PhotonEfficiency
@@ -66,37 +65,37 @@ set ExecutionPath {
 # PileUp Merger
 ###############
 
-# module PileUpMerger PileUpMerger {
-  # set InputArray Delphes/stableParticles
+module PileUpMerger PileUpMerger {
+  set InputArray Delphes/stableParticles
 
-  # set ParticleOutputArray stableParticles
-  # set VertexOutputArray vertices
+  set ParticleOutputArray stableParticles
+  set VertexOutputArray vertices
 
   # pre-generated minbias input file
-  # set PileUpFile MinBias.pileup
+  set PileUpFile /home/aegis/Titan0/pythia2/pythia8245/examples/Research/MiniBias.pileup
 
   # average expected pile up
   # from https://atlas.web.cern.ch/Atlas/GROUPS/DATAPREPARATION/PublicPlots/2016/DataSummary/figs/mu_2016.pdf
 
-  # set MeanPileUp 30 
+  set MeanPileUp 30 
   # maximum spread in the beam direction in m
-  # set ZVertexSpread 0.25
+  set ZVertexSpread 0.25
 
   # maximum spread in time in s
-  # set TVertexSpread 800E-12
+  set TVertexSpread 800E-12
 
   # vertex smearing formula f(z,t) (z,t need to be respectively given in m,s)
-  # set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
-# }
+  set VertexDistributionFormula {exp(-(t^2/160e-12^2/2))*exp(-(z^2/0.053^2/2))}
+}
 
 #################################
 # Propagate particles in cylinder (https://cds.cern.ch/record/331063/files/ATLAS-TDR-4-Volume-I.pdf. Chapter 1.2.2) 
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  # set InputArray PileUpMerger/stableParticles
+  set InputArray PileUpMerger/stableParticles
 
-  set InputArray Delphes/stableParticles
+  # set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -184,7 +183,7 @@ module MomentumSmearing ElectronMomentumSmearing {
 
   # resolution formula for electrons
   # based on arXiv:1405.6569
-  source resolution/muon_momentum.tcl
+  source resolution/electron_momentum.tcl
 }
 
 ###############################
@@ -203,7 +202,7 @@ module MomentumSmearing MuonMomentumSmearing {
   # cb Muons: cb_muons_pt_res.tcl
   # https://cds.cern.ch/record/2844624/files/document.pdf
   
-  source muons/cb_muons_pt_res.tcl
+  source resolution/muons/cb_muons_pt_res.tcl
 }
 
 ##############
@@ -463,8 +462,8 @@ module Merger GenMissingET {
 ############
 
 module FastJetFinder FastJetFinder {
-  # set InputArray Calorimeter/towers
-  set InputArray EFlowMerger/eflow
+  set InputArray Calorimeter/towers
+  # set InputArray EFlowMerger/eflow
 
   set OutputArray jets
 
@@ -473,7 +472,7 @@ module FastJetFinder FastJetFinder {
 
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.6
+  set ParameterR 0.4
 
   set JetPTMin 20.0
 }
@@ -483,7 +482,8 @@ module FastJetFinder FastJetFinder {
 ##################
 
 module FastJetFinder FatJetFinder {
-  set InputArray EFlowMerger/eflow
+  set InputArray Calorimeter/towers
+  # set InputArray EFlowMerger/eflow
 
   set OutputArray jets
 
@@ -570,8 +570,8 @@ module Isolation PhotonIsolation {
 #####################
 
 module Efficiency ElectronEfficiency {
-  # set InputArray TrackPileUpSubtractor/electrons
-  set InputArray ElectronFilter/electrons
+  set InputArray TrackPileUpSubtractor/electrons
+  # set InputArray ElectronFilter/electrons
   set OutputArray electrons
 
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
@@ -607,8 +607,8 @@ module Isolation ElectronIsolation {
 #################
 
 module Efficiency MuonEfficiency {
-  # set InputArray TrackPileUpSubtractor/muons
-  set InputArray MuonMomentumSmearing/muons
+  set InputArray TrackPileUpSubtractor/muons
+  # set InputArray MuonMomentumSmearing/muons
   set OutputArray muons
 
   # set EfficiencyFormula {efficiency as a function of eta and pt}
@@ -777,6 +777,6 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
-  # add Branch PileUpMerger/vertices Vertex Vertex
+  add Branch PileUpMerger/vertices Vertex Vertex
 
 }
