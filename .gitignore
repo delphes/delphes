@@ -22,3 +22,7 @@ root2lhco
 root2pileup
 stdhep2pileup
 tmp
+# cards/ATLAS_Run2/data/
+# cards/ATLAS_Run2/images/
+validation/src/__pycache__/
+.gitignore
