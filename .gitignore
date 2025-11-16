@@ -26,3 +26,4 @@ cards/ATLAS_Run2/data/
 cards/ATLAS_Run2/images/
 validation/src/__pycache__/
 .gitignore
+cards/ATLAS_Run2/parameter_fits.ipynb
