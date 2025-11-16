@@ -1,9 +1,8 @@
 #######################################
 # Order of execution of various modules
 #######################################
-# Has pileup, more accurate tracking efficiencys, impact parameter smearing (still cms)
-# and finally, eta/phi smearing! Based on ID TDR for ATLAS.
-# TODO: add ATLAS based ip smearing
+# Improved updated the parametric fit from the delphes_ATLAS_PileUp Card 
+# Presentation, data, and code for the fits of the updates can be seen here: https://zenodo.org/records/17622130
 
 set ExecutionPath {
   
