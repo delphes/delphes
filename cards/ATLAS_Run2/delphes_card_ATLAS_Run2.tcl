@@ -122,7 +122,7 @@ module Efficiency ChargedHadronTrackingEfficiency {
   # add EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for charged hadrons
-  source tracking/chargedHadrons.tcl
+  source ATLAS_Run2/tracking/chargedHadrons.tcl
 }
 
 ##############################
@@ -136,7 +136,7 @@ module Efficiency ElectronTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for electrons
-  source tracking/elecMuon_loose.tcl
+  source ATLAS_Run2/tracking/elecMuon_loose.tcl
 }
 
 ##########################
@@ -150,7 +150,7 @@ module Efficiency MuonTrackingEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # tracking efficiency formula for muons
-  source tracking/elecMuon_loose.tcl
+  source ATLAS_Run2/tracking/elecMuon_loose.tcl
 }
 
 ########################################
@@ -182,7 +182,7 @@ module MomentumSmearing ElectronMomentumSmearing {
 
   # resolution formula for electrons
   # based on arXiv:1405.6569
-  source resolution/electron_momentum.tcl
+  source ATLAS_Run2/resolution/electron_momentum.tcl
 }
 
 ###############################
@@ -201,7 +201,7 @@ module MomentumSmearing MuonMomentumSmearing {
   # cb Muons: cb_muons_pt_res.tcl
   # https://cds.cern.ch/record/2844624/files/document.pdf
   
-  source resolution/muons/cb_muons_pt_res.tcl
+  source ATLAS_Run2/resolution/muons/cb_muons_pt_res.tcl
 }
 
 ##############
@@ -542,7 +542,7 @@ module Efficiency PhotonEfficiency {
   # set EfficiencyFormula {efficiency formula as a function of eta and pt}
 
   # efficiency formula for photons
-  source efficiency/photon.tcl
+  source ATLAS_Run2/efficiency/photon.tcl
 }
 
 ##################
@@ -577,7 +577,7 @@ module Efficiency ElectronEfficiency {
 
   # efficiency formula for electrons
   
-  source efficiency/electron_medium.tcl
+  source ATLAS_Run2/efficiency/electron_medium.tcl
 
 }
 
@@ -613,7 +613,7 @@ module Efficiency MuonEfficiency {
   # set EfficiencyFormula {efficiency as a function of eta and pt}
 
   # efficiency formula for muons
-  source efficiency/muon_medium.tcl
+  source ATLAS_Run2/efficiency/muon_medium.tcl
 
 }
 ################
