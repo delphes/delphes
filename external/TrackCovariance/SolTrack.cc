@@ -839,6 +839,7 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 		}
 		else{
 			thms[ii] = 0.;
+			Caa[ii] = new TMatrixDSym(5);
 			Caa[ii]->Zero();
 		}
 		//
