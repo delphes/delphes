@@ -29,7 +29,8 @@ SolGeom::SolGeom()
   fstLayL = new Double_t[fNlMax]; // Stereo angle (rad) - 0(pi/2) = axial(z) layer - Lower side
   fsgLayU = new Double_t[fNlMax]; // Resolution Upper side (meters) - 0 = no measurement
   fsgLayL = new Double_t[fNlMax]; // Resolution Lower side (meters) - 0 = no measurement
-  fflLay = new Bool_t[fNlMax];    // measurement flag = T, scattering only = F
+  //fflLay = new Bool_t[fNlMax];    // measurement flag = T, scattering only = F
+  fflLay = new Double_t[fNlMax];    // measurement layer efficiency. 0 for scattering only.
   //
   // Load geometry info in SolGeom.h
   //
@@ -53,7 +54,8 @@ void SolGeom::Read(const char *data)
   Double_t stLayL;
   Double_t sgLayU;
   Double_t sgLayL;
-  Int_t flLay;
+  //Int_t flLay;
+  Double_t flLay;
 
   stringstream data_stream(data);
   string line;
@@ -84,7 +86,7 @@ void SolGeom::Read(const char *data)
     fNlay++;
     if (tyLay == 1) fBlay++;
     if (tyLay == 2) fFlay++;
-    if (flLay == 1) fNm++;
+    if (flLay > 0.0) fNm++;
   }
 //
 // Define inner box for fast tracking
