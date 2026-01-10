@@ -117,7 +117,6 @@ TauTagging::~TauTagging()
 void TauTagging::Init()
 {
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
-  ExRootConfParam param;
   DelphesFormula *formula;
   Int_t i, size;
 
@@ -126,16 +125,16 @@ void TauTagging::Init()
   fDeltaR = GetDouble("DeltaR", 0.5);
 
   // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
+  const auto param = GetParam("EfficiencyFormula");
+  size = param->GetSize();
 
   fEfficiencyMap.clear();
   for(i = 0; i < size / 2; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i * 2 + 1].GetString());
+    formula->Compile((*param)[i * 2 + 1]->GetString());
 
-    fEfficiencyMap[param[i * 2].GetInt()] = formula;
+    fEfficiencyMap[(*param)[i * 2]->GetInt()] = formula;
   }
 
   // set default efficiency formula

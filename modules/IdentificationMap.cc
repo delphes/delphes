@@ -68,21 +68,20 @@ IdentificationMap::~IdentificationMap()
 void IdentificationMap::Init()
 {
   TMisIDMap::iterator itEfficiencyMap;
-  ExRootConfParam param;
   DelphesFormula *formula;
   Int_t i, size, pdg;
 
   // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
+  const auto param = GetParam("EfficiencyFormula");
+  size = param->GetSize();
 
   fEfficiencyMap.clear();
   for(i = 0; i < size / 3; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i * 3 + 2].GetString());
-    pdg = param[i * 3].GetInt();
-    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i * 3 + 1].GetInt(), formula)));
+    formula->Compile((*param)[i * 3 + 2]->GetString());
+    pdg = (*param)[i * 3]->GetInt();
+    fEfficiencyMap.insert(make_pair(pdg, make_pair((*param)[i * 3 + 1]->GetInt(), formula)));
   }
 
   // set default efficiency formula

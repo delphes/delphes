@@ -76,14 +76,14 @@ void ExampleModule::Init()
 
   fFormula->Compile(GetString("EfficiencyFormula", "0.4"));
 
-  ExRootConfParam param = GetParam("ArrayParam");
+  const auto param = GetParam("ArrayParam");
   Long_t i, size;
   fArrayParam.clear();
 
-  size = param.GetSize();
+  size = param->GetSize();
   for(i = 0; i < size; ++i)
   {
-    fArrayParam.push_back(param[i].GetDouble());
+    fArrayParam.push_back((*param)[i]->GetDouble());
   }
 
   // import input array(s)

@@ -33,7 +33,7 @@
 #pragma link C++ class ExRootFilter+;
 
 #pragma link C++ class ExRootProgressBar+;
-#pragma link C++ class ExRootConfReader+;
+#pragma link C++ class ExRootTclConfReader+;
 #pragma link C++ class ExRootConfParam+;
 #pragma link C++ class ExRootTask+;
 

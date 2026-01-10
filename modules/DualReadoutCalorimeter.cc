@@ -93,38 +93,37 @@ DualReadoutCalorimeter::~DualReadoutCalorimeter()
 
   if(fTowerTrackArray) delete fTowerTrackArray;
   if(fItTowerTrackArray) delete fItTowerTrackArray;
-
 }
 
 //------------------------------------------------------------------------------
 
 void DualReadoutCalorimeter::Init()
 {
-  ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
+  std::unique_ptr<ExRootConfParam> param, paramEtaBins, paramPhiBins, paramFractions;
   Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
   Double_t ecalFraction, hcalFraction;
   TBinMap::iterator itEtaBin;
-  set< Double_t >::iterator itPhiBin;
-  vector< Double_t > *phiBins;
+  set<Double_t>::iterator itPhiBin;
+  vector<Double_t> *phiBins;
 
   // read eta and phi bins
   param = GetParam("EtaPhiBins");
-  size = param.GetSize();
+  size = param->GetSize();
   fBinMap.clear();
   fEtaBins.clear();
   fPhiBins.clear();
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
-    paramEtaBins = param[i*2];
-    sizeEtaBins = paramEtaBins.GetSize();
-    paramPhiBins = param[i*2 + 1];
-    sizePhiBins = paramPhiBins.GetSize();
+    paramEtaBins = (*param)[i * 2];
+    sizeEtaBins = paramEtaBins->GetSize();
+    paramPhiBins = (*param)[i * 2 + 1];
+    sizePhiBins = paramPhiBins->GetSize();
 
     for(j = 0; j < sizeEtaBins; ++j)
     {
       for(k = 0; k < sizePhiBins; ++k)
       {
-        fBinMap[paramEtaBins[j].GetDouble()].insert(paramPhiBins[k].GetDouble());
+        fBinMap[(*paramEtaBins)[j]->GetDouble()].insert((*paramPhiBins)[k]->GetDouble());
       }
     }
   }
@@ -145,24 +144,24 @@ void DualReadoutCalorimeter::Init()
 
   // read energy fractions for different particles
   param = GetParam("EnergyFraction");
-  size = param.GetSize();
+  size = param->GetSize();
 
   // set default energy fractions values
   fFractionMap.clear();
   fFractionMap[0] = make_pair(0.0, 1.0);
 
-  for(i = 0; i < size/2; ++i)
+  for(i = 0; i < size / 2; ++i)
   {
-    paramFractions = param[i*2 + 1];
+    paramFractions = (*param)[i * 2 + 1];
 
-    ecalFraction = paramFractions[0].GetDouble();
-    hcalFraction = paramFractions[1].GetDouble();
+    ecalFraction = (*paramFractions)[0]->GetDouble();
+    hcalFraction = (*paramFractions)[1]->GetDouble();
 
-    fFractionMap[param[i*2].GetInt()] = make_pair(ecalFraction, hcalFraction);
+    fFractionMap[(*param)[i * 2]->GetInt()] = make_pair(ecalFraction, hcalFraction);
   }
 
   // read min E value for timing measurement in ECAL
-  fTimingEnergyMin = GetDouble("TimingEnergyMin",4.);
+  fTimingEnergyMin = GetDouble("TimingEnergyMin", 4.);
   // For timing
   // So far this flag needs to be false
   // Curved extrapolation not supported

@@ -16,7 +16,7 @@
 class TClass;
 class TFolder;
 
-class ExRootTask: public TTask
+class ExRootTask : public TTask
 {
 public:
   ExRootTask();
@@ -46,7 +46,7 @@ public:
   double GetDouble(const char *name, double defaultValue, int index = -1);
   bool GetBool(const char *name, bool defaultValue, int index = -1);
   const char *GetString(const char *name, const char *defaultValue, int index = -1);
-  ExRootConfParam GetParam(const char *name);
+  std::unique_ptr<ExRootConfParam> GetParam(const char *name);
   const ExRootConfReader::ExRootTaskMap *GetModules();
 
   void SetFolder(TFolder *folder) { fFolder = folder; }

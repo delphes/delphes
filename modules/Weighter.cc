@@ -80,7 +80,6 @@ Weighter::~Weighter()
 
 void Weighter::Init()
 {
-  ExRootConfParam param, paramCodes;
   Int_t i, j, size, sizeCodes;
   Int_t code;
   TIndexStruct index;
@@ -94,13 +93,13 @@ void Weighter::Init()
   fWeightMap[index] = 1.0;
 
   // read weights
-  param = GetParam("Weight");
-  size = param.GetSize();
+  const auto param = GetParam("Weight");
+  size = param->GetSize();
   for(i = 0; i < size / 2; ++i)
   {
-    paramCodes = param[i * 2];
-    sizeCodes = paramCodes.GetSize();
-    weight = param[i * 2 + 1].GetDouble();
+    const auto paramCodes = (*param)[i * 2];
+    sizeCodes = paramCodes->GetSize();
+    weight = (*param)[i * 2 + 1]->GetDouble();
 
     if(sizeCodes < 1 || sizeCodes > 4)
     {
@@ -111,7 +110,7 @@ void Weighter::Init()
 
     for(j = 0; j < sizeCodes; ++j)
     {
-      code = paramCodes[j].GetInt();
+      code = (*paramCodes)[j]->GetInt();
       index.codes[j] = code;
       fWeightSet.insert(code);
     }

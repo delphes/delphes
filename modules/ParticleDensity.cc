@@ -77,22 +77,24 @@ void ParticleDensity::Init()
 
   // create multiplicity histogram
 
-  ExRootConfParam paramEta = GetParam("EtaBins");
-  const Long_t sizeEta = paramEta.GetSize();
+  const auto paramEta = GetParam("EtaBins");
+  const Long_t sizeEta = paramEta->GetSize();
   Int_t nbinsEta = sizeEta - 1;
   Float_t binsEta[sizeEta];
-  for (Int_t i = 0; i < sizeEta; ++i) {
-    binsEta[i] = paramEta[i].GetDouble();
+  for(Int_t i = 0; i < sizeEta; ++i)
+  {
+    binsEta[i] = (*paramEta)[i]->GetDouble();
   }
-  
-  ExRootConfParam paramPhi = GetParam("PhiBins");
-  const Long_t sizePhi = paramPhi.GetSize();
+
+  const auto paramPhi = GetParam("PhiBins");
+  const Long_t sizePhi = paramPhi->GetSize();
   Int_t nbinsPhi = sizePhi - 1;
   Float_t binsPhi[sizePhi];
-  for (Int_t i = 0; i < sizePhi; ++i) {
-    binsPhi[i] = paramPhi[i].GetDouble();
+  for(Int_t i = 0; i < sizePhi; ++i)
+  {
+    binsPhi[i] = (*paramPhi)[i]->GetDouble();
   }
-  
+
   fHisto = new TH2F("hParticleDensity", ";#eta;#varphi;d^{2}N/d#etad#varphi", nbinsEta, binsEta, nbinsPhi, binsPhi);
 
   fUseMomentumVector = GetBool("UseMomentumVector", false);

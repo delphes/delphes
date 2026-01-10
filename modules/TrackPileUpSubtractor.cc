@@ -80,18 +80,18 @@ void TrackPileUpSubtractor::Init()
 
   // import arrays with output from other modules
 
-  ExRootConfParam param = GetParam("InputArray");
+  const auto param = GetParam("InputArray");
   Long_t i, size;
   const TObjArray *array;
   TIterator *iterator;
 
-  size = param.GetSize();
+  size = param->GetSize();
   for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i * 2].GetString());
+    array = ImportArray((*param)[i * 2]->GetString());
     iterator = array->MakeIterator();
 
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
+    fInputMap[iterator] = ExportArray((*param)[i * 2 + 1]->GetString());
   }
 }
 

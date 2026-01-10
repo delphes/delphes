@@ -45,57 +45,57 @@ void RunPUPPI::Init()
   fMinPuppiWeight = GetDouble("MinPuppiWeight", 0.01);
   fUseExp = GetBool("UseExp", false);
   // read eta min ranges
-  ExRootConfParam param = GetParam("EtaMinBin");
+  auto param = GetParam("EtaMinBin");
   fEtaMinBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fEtaMinBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fEtaMinBin.push_back((*param)[iMap]->GetDouble());
   // read eta max ranges
   param = GetParam("EtaMaxBin");
   fEtaMaxBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fEtaMaxBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fEtaMaxBin.push_back((*param)[iMap]->GetDouble());
   // read pt min value
   param = GetParam("PtMinBin");
   fPtMinBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fPtMinBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fPtMinBin.push_back((*param)[iMap]->GetDouble());
   // read cone size
   param = GetParam("ConeSizeBin");
   fConeSizeBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fConeSizeBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fConeSizeBin.push_back((*param)[iMap]->GetDouble());
   // read RMS min pt
   param = GetParam("RMSPtMinBin");
   fRMSPtMinBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fRMSPtMinBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fRMSPtMinBin.push_back((*param)[iMap]->GetDouble());
   // read RMS scale factor
   param = GetParam("RMSScaleFactorBin");
   fRMSScaleFactorBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fRMSScaleFactorBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fRMSScaleFactorBin.push_back((*param)[iMap]->GetDouble());
   // read neutral pt min cut
   param = GetParam("NeutralMinEBin");
   fNeutralMinEBin.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fNeutralMinEBin.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fNeutralMinEBin.push_back((*param)[iMap]->GetDouble());
   // read neutral pt min slope
   param = GetParam("NeutralPtSlope");
   fNeutralPtSlope.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fNeutralPtSlope.push_back(param[iMap].GetDouble());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fNeutralPtSlope.push_back((*param)[iMap]->GetDouble());
   // read apply chs
   //param = GetParam("ApplyCHS");
   //fApplyCHS.clear();
-  //for(int iMap = 0; iMap < param.GetSize(); ++iMap) fApplyCHS.push_back(param[iMap].GetBool());
+  //for(int iMap = 0; iMap < param->GetSize(); ++iMap) fApplyCHS.push_back((*param)[iMap]->GetBool());
   // read use charged
   param = GetParam("UseCharged");
   fUseCharged.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fUseCharged.push_back(param[iMap].GetBool());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fUseCharged.push_back((*param)[iMap]->GetBool());
   // read apply chs correction
   param = GetParam("ApplyLowPUCorr");
   fApplyLowPUCorr.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fApplyLowPUCorr.push_back(param[iMap].GetBool());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fApplyLowPUCorr.push_back((*param)[iMap]->GetBool());
   // read metric id
   param = GetParam("MetricId");
   fMetricId.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fMetricId.push_back(param[iMap].GetInt());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fMetricId.push_back((*param)[iMap]->GetInt());
   // scheme for combining
   param = GetParam("CombId");
   fCombId.clear();
-  for(int iMap = 0; iMap < param.GetSize(); ++iMap) fCombId.push_back(param[iMap].GetInt());
+  for(int iMap = 0; iMap < param->GetSize(); ++iMap) fCombId.push_back((*param)[iMap]->GetInt());
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "puppiParticles"));
   fOutputTrackArray = ExportArray(GetString("OutputArrayTracks", "puppiTracks"));

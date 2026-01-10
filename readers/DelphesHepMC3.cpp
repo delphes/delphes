@@ -38,6 +38,7 @@
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
+#include "ExRootAnalysis/ExRootTclConfReader.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
@@ -63,7 +64,6 @@ int main(int argc, char *argv[])
   TStopwatch readStopWatch, procStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
-  ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
     branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
-    confReader = new ExRootConfReader;
+    const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: handle other steering formats
     confReader->ReadFile(argv[1]);
 
     maxEvents = confReader->GetInt("::MaxEvents", 0);
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     }
 
     modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
+    modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
@@ -225,7 +225,6 @@ int main(int argc, char *argv[])
 
     delete reader;
     delete modularDelphes;
-    delete confReader;
     delete treeWriter;
     delete outputFile;
 

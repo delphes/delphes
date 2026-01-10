@@ -43,7 +43,7 @@
 #include "display/Delphes3DGeometry.h"
 
 #include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootConfReader.h"
+#include "external/ExRootAnalysis/ExRootTclConfReader.h"
 
 using namespace std;
 
@@ -92,7 +92,7 @@ void Delphes3DGeometry::readFile(const char *configFile,
   const char *MuonEfficiency, const char *Calorimeters)
 {
 
-  ExRootConfReader *confReader = new ExRootConfReader;
+  const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: introduce other parsers
   confReader->ReadFile(configFile);
 
   tk_radius_ = confReader->GetDouble(Form("%s::Radius", ParticlePropagator), 1.0) * 100.; // tk_radius
@@ -173,15 +173,15 @@ void Delphes3DGeometry::readFile(const char *configFile,
   for(std::vector<std::string>::const_iterator calo = calorimeters_.begin(); calo != calorimeters_.end(); ++calo)
   {
     set<pair<Double_t, Int_t> > caloBinning;
-    ExRootConfParam paramEtaBins, paramPhiBins;
-    ExRootConfParam param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
-    Int_t size = param.GetSize();
+    std::unique_ptr<ExRootConfParam> paramEtaBins, paramPhiBins;
+    const auto param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
+    Int_t size = param->GetSize();
     for(int i = 0; i < size / 2; ++i)
     {
-      paramEtaBins = param[i * 2];
-      paramPhiBins = param[i * 2 + 1];
-      assert(paramEtaBins.GetSize() == 1);
-      caloBinning.insert(std::make_pair(paramEtaBins[0].GetDouble(), paramPhiBins.GetSize() - 1));
+      paramEtaBins = (*param)[i * 2];
+      paramPhiBins = (*param)[i * 2 + 1];
+      assert(paramEtaBins->GetSize() == 1);
+      caloBinning.insert(std::make_pair((*paramEtaBins)[0]->GetDouble(), paramPhiBins->GetSize() - 1));
     }
     caloBinning_[*calo] = caloBinning;
   }
@@ -198,8 +198,6 @@ void Delphes3DGeometry::readFile(const char *configFile,
 
   muonSystem_radius_ = tk_radius_ + contingency_ + (contingency_ + calo_barrel_thickness_) * calorimeters_.size() + muonSystem_thickn_;
   muonSystem_length_ = tk_length_ + contingency_ + (contingency_ + calo_endcap_thickness_) * calorimeters_.size() + muonSystem_thickn_;
-
-  delete confReader;
 }
 
 TGeoVolume *Delphes3DGeometry::getDetector(bool withTowers)

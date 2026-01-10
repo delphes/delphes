@@ -77,7 +77,6 @@ SimpleCalorimeter::~SimpleCalorimeter()
 
 void SimpleCalorimeter::Init()
 {
-  ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
   Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
   Double_t fraction;
   TBinMap::iterator itEtaBin;
@@ -85,23 +84,23 @@ void SimpleCalorimeter::Init()
   vector<Double_t> *phiBins;
 
   // read eta and phi bins
-  param = GetParam("EtaPhiBins");
-  size = param.GetSize();
+  auto param = GetParam("EtaPhiBins");
+  size = param->GetSize();
   fBinMap.clear();
   fEtaBins.clear();
   fPhiBins.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    paramEtaBins = param[i * 2];
-    sizeEtaBins = paramEtaBins.GetSize();
-    paramPhiBins = param[i * 2 + 1];
-    sizePhiBins = paramPhiBins.GetSize();
+    const auto paramEtaBins = (*param)[i * 2];
+    sizeEtaBins = paramEtaBins->GetSize();
+    const auto paramPhiBins = (*param)[i * 2 + 1];
+    sizePhiBins = paramPhiBins->GetSize();
 
     for(j = 0; j < sizeEtaBins; ++j)
     {
       for(k = 0; k < sizePhiBins; ++k)
       {
-        fBinMap[paramEtaBins[j].GetDouble()].insert(paramPhiBins[k].GetDouble());
+        fBinMap[(*paramEtaBins)[j]->GetDouble()].insert((*paramPhiBins)[k]->GetDouble());
       }
     }
   }
@@ -124,18 +123,19 @@ void SimpleCalorimeter::Init()
   fInsensitiveBinSet.clear();
 
   // Get insensitive bin parameters
-  ExRootConfParam blindParam = GetParam("InsensitiveEtaPhiBins");
-  Long_t nBlind = blindParam.GetSize();
+  const auto blindParam = GetParam("InsensitiveEtaPhiBins");
+  Long_t nBlind = blindParam->GetSize();
 
   // Loop over blind eta-phi pairs
-  for (Long_t ib = 0; ib < nBlind; ++ib) {
-    ExRootConfParam pairParam = blindParam[ib];
-    if (pairParam.GetSize() < 2) continue;
+  for(Long_t ib = 0; ib < nBlind; ++ib)
+  {
+    const auto pairParam = (*blindParam)[ib];
+    if(pairParam->GetSize() < 2) continue;
 
-    double etaEdge = pairParam[0].GetDouble();
-    double phiEdge = pairParam[1].GetDouble();
+    double etaEdge = (*pairParam)[0]->GetDouble();
+    double phiEdge = (*pairParam)[1]->GetDouble();
 
-    // Find closest eta bin index (using bin centers) 
+    // Find closest eta bin index (using bin centers)
     auto itEta = std::min_element(fEtaBins.begin(), fEtaBins.end(),
                                   [etaEdge](double a, double b) {
                                       return std::abs(a - etaEdge) < std::abs(b - etaEdge);
@@ -163,7 +163,7 @@ void SimpleCalorimeter::Init()
 
   // read energy fractions for different particles
   param = GetParam("EnergyFraction");
-  size = param.GetSize();
+  size = param->GetSize();
 
   // set default energy fractions values
   fFractionMap.clear();
@@ -171,9 +171,9 @@ void SimpleCalorimeter::Init()
 
   for(i = 0; i < size / 2; ++i)
   {
-    paramFractions = param[i * 2 + 1];
-    fraction = paramFractions[0].GetDouble();
-    fFractionMap[param[i * 2].GetInt()] = fraction;
+    const auto paramFractions = (*param)[i * 2 + 1];
+    fraction = (*paramFractions)[0]->GetDouble();
+    fFractionMap[(*param)[i * 2]->GetInt()] = fraction;
   }
 
   // read min E value for towers to be saved

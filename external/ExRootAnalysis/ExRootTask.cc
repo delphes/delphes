@@ -8,7 +8,7 @@
  */
 
 #include "ExRootAnalysis/ExRootTask.h"
-#include "ExRootAnalysis/ExRootConfReader.h"
+#include "ExRootAnalysis/ExRootTclConfReader.h"
 
 #include "TClass.h"
 #include "TFolder.h"
@@ -190,7 +190,7 @@ const ExRootConfReader::ExRootTaskMap *ExRootTask::GetModules()
 
 //------------------------------------------------------------------------------
 
-ExRootConfParam ExRootTask::GetParam(const char *name)
+std::unique_ptr<ExRootConfParam> ExRootTask::GetParam(const char *name)
 {
   if(fConfReader)
   {
@@ -198,7 +198,7 @@ ExRootConfParam ExRootTask::GetParam(const char *name)
   }
   else
   {
-    return ExRootConfParam(TString(GetName()) + "::" + name, 0, 0);
+    return std::make_unique<ExRootTclConfParam>(TString(GetName()) + "::" + name); //FIXME do not support plain retrieval
   }
 }
 

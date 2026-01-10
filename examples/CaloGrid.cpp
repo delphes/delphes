@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "ExRootAnalysis/ExRootConfReader.h"
+#include "ExRootAnalysis/ExRootTclConfReader.h"
 #include "classes/DelphesClasses.h"
 #include "display/Delphes3DGeometry.h"
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
   TString card(argv[1]);
 
-  ExRootConfReader *confReader = new ExRootConfReader;
+  const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: handle other parsers
   confReader->ReadFile(card);
 
   std::vector<std::string> calorimeters_;
@@ -90,17 +90,15 @@ int main(int argc, char *argv[])
 
     //first entry is eta bin, second is number of phi bins
     set<pair<Double_t, Int_t> > caloBinning;
-    ExRootConfParam paramEtaBins, paramPhiBins;
-    ExRootConfParam param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
-    Int_t size = param.GetSize();
+    const auto param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
+    Int_t size = param->GetSize();
 
     for(int i = 0; i < size / 2; ++i)
     {
-      paramEtaBins = param[i * 2];
-      paramPhiBins = param[i * 2 + 1];
-      assert(paramEtaBins.GetSize() == 1);
+      const auto paramEtaBins = (*param)[i * 2], paramPhiBins = (*param)[i * 2 + 1];
+      assert(paramEtaBins->GetSize() == 1);
 
-      caloBinning.insert(std::make_pair(paramEtaBins[0].GetDouble(), paramPhiBins.GetSize() - 1));
+      caloBinning.insert(std::make_pair((*paramEtaBins)[0]->GetDouble(), paramPhiBins->GetSize() - 1));
     }
     caloBinning_[*calo] = caloBinning;
 

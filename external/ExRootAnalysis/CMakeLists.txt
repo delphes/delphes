@@ -17,6 +17,7 @@ if (NOT ${ROOT_VERSION} VERSION_LESS "6.0.0")
     ExRootAnalysis/ExRootProgressBar.h
     ExRootAnalysis/ExRootResult.h
     ExRootAnalysis/ExRootTask.h
+    ExRootAnalysis/ExRootTclConfReader.h
     ExRootAnalysis/ExRootTreeBranch.h
     ExRootAnalysis/ExRootTreeReader.h
     ExRootAnalysis/ExRootTreeWriter.h

@@ -68,28 +68,27 @@ JetFakeParticle::~JetFakeParticle()
 void JetFakeParticle::Init()
 {
   TFakeMap::iterator itEfficiencyMap;
-  ExRootConfParam param;
   DelphesFormula *formula;
   Int_t i, size, pdgCode;
 
   // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
+  const auto param = GetParam("EfficiencyFormula");
+  size = param->GetSize();
 
   fEfficiencyMap.clear();
 
   for(i = 0; i < size / 2; ++i)
   {
     formula = new DelphesFormula;
-    formula->Compile(param[i * 2 + 1].GetString());
-    pdgCode = param[i * 2].GetInt();
+    formula->Compile((*param)[i * 2 + 1]->GetString());
+    pdgCode = (*param)[i * 2]->GetInt();
 
     if(TMath::Abs(pdgCode) != 11 && TMath::Abs(pdgCode) != 13 && TMath::Abs(pdgCode) != 22)
     {
       throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
     }
 
-    fEfficiencyMap[param[i * 2].GetInt()] = formula;
+    fEfficiencyMap[pdgCode] = formula;
   }
 
   // set default efficiency formula

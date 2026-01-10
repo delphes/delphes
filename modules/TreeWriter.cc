@@ -90,19 +90,19 @@ void TreeWriter::Init()
   // read branch configuration and
   // import array with output from filter/classifier/jetfinder modules
 
-  ExRootConfParam param = GetParam("Branch");
+  auto param = GetParam("Branch");
   Long_t i, size;
   TString branchName, branchClassName, branchInputArray;
   TClass *branchClass;
   TObjArray *array;
   ExRootTreeBranch *branch;
 
-  size = param.GetSize();
+  size = param->GetSize();
   for(i = 0; i < size / 3; ++i)
   {
-    branchInputArray = param[i * 3].GetString();
-    branchName = param[i * 3 + 1].GetString();
-    branchClassName = param[i * 3 + 2].GetString();
+    branchInputArray = (*param)[i * 3]->GetString();
+    branchName = (*param)[i * 3 + 1]->GetString();
+    branchClassName = (*param)[i * 3 + 2]->GetString();
 
     branchClass = gROOT->GetClass(branchClassName);
 
@@ -129,11 +129,11 @@ void TreeWriter::Init()
   TString infoName;
   Double_t infoValue;
 
-  size = param.GetSize();
+  size = param->GetSize();
   for(i = 0; i < size / 2; ++i)
   {
-    infoName = param[i * 2].GetString();
-    infoValue = param[i * 2 + 1].GetDouble();
+    infoName = (*param)[i * 2]->GetString();
+    infoValue = (*param)[i * 2 + 1]->GetDouble();
 
     AddInfo(infoName, infoValue);
   }

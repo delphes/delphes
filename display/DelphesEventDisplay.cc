@@ -60,7 +60,7 @@
 #include "display/DelphesPlotSummary.h"
 
 #include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootConfReader.h"
+#include "external/ExRootAnalysis/ExRootTclConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 
 DelphesEventDisplay::DelphesEventDisplay()
@@ -191,19 +191,19 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 // function that parses the config to extract the branches of interest and prepare containers
 void DelphesEventDisplay::readConfig(const char *configFile, std::vector<DelphesBranchBase *> &elements)
 {
-  ExRootConfReader *confReader = new ExRootConfReader;
+  const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: introduce other parsers
   confReader->ReadFile(configFile);
-  ExRootConfParam branches = confReader->GetParam("TreeWriter::Branch");
-  Int_t nBranches = branches.GetSize() / 3;
+  const auto branches = confReader->GetParam("TreeWriter::Branch");
+  Int_t nBranches = branches->GetSize() / 3;
   DelphesBranchElement<TEveTrackList> *tlist;
   DelphesBranchElement<DelphesCaloData> *clist;
   DelphesBranchElement<TEveElementList> *elist;
   // first loop with all but tracks
   for(Int_t b = 0; b < nBranches; ++b)
   {
-    TString input = branches[b * 3].GetString();
-    TString name = branches[b * 3 + 1].GetString();
-    TString className = branches[b * 3 + 2].GetString();
+    TString input = (*branches)[b * 3]->GetString();
+    TString name = (*branches)[b * 3 + 1]->GetString();
+    TString className = (*branches)[b * 3 + 2]->GetString();
     if(className == "Tower")
     {
       if(input.Contains("eflow", TString::kIgnoreCase) || name.Contains("eflow", TString::kIgnoreCase)) continue; //no eflow
@@ -269,9 +269,9 @@ void DelphesEventDisplay::readConfig(const char *configFile, std::vector<Delphes
   // second loop for tracks
   for(Int_t b = 0; b < nBranches; ++b)
   {
-    TString input = branches[b * 3].GetString();
-    TString name = branches[b * 3 + 1].GetString();
-    TString className = branches[b * 3 + 2].GetString();
+    TString input = (*branches)[b * 3]->GetString();
+    TString name = (*branches)[b * 3 + 1]->GetString();
+    TString className = (*branches)[b * 3 + 2]->GetString();
     if(className == "Track")
     {
       if(input.Contains("eflow", TString::kIgnoreCase) || name.Contains("eflow", TString::kIgnoreCase)) continue; //no eflow
