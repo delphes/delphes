@@ -99,7 +99,7 @@ void LLPFilter::Init()
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
-  fParticleInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
+  fParticleInputArray =  ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItParticleInputArray = fParticleInputArray->MakeIterator();
 
   const auto param = GetParam("PdgCode");

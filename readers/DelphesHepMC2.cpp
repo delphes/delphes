@@ -37,8 +37,8 @@
 #include "classes/DelphesHepMC2Reader.h"
 #include "modules/Delphes.h"
 
+#include "ExRootAnalysis/ExRootConfReader.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTclConfReader.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
@@ -106,8 +106,7 @@ int main(int argc, char *argv[])
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
     branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
-    const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: handle other steering formats
-    confReader->ReadFile(argv[1]);
+    const auto confReader = ExRootConfReader::ReadConf(argv[1]);
 
     maxEvents = confReader->GetInt("::MaxEvents", 0);
     skipEvents = confReader->GetInt("::SkipEvents", 0);

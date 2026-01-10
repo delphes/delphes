@@ -43,7 +43,7 @@
 #include "display/Delphes3DGeometry.h"
 
 #include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootTclConfReader.h"
+#include "external/ExRootAnalysis/ExRootConfReader.h"
 
 using namespace std;
 
@@ -92,8 +92,7 @@ void Delphes3DGeometry::readFile(const char *configFile,
   const char *MuonEfficiency, const char *Calorimeters)
 {
 
-  const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: introduce other parsers
-  confReader->ReadFile(configFile);
+  const auto confReader = ExRootConfReader::ReadConf(configFile);
 
   tk_radius_ = confReader->GetDouble(Form("%s::Radius", ParticlePropagator), 1.0) * 100.; // tk_radius
   tk_length_ = confReader->GetDouble(Form("%s::HalfLength", ParticlePropagator), 3.0) * 100.; // tk_length

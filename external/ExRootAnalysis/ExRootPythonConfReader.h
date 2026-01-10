@@ -42,7 +42,6 @@ public:
   ~ExRootPythonConfReader();
 
   void ReadFile(const char *fileName, bool isTop = true) override;
-
   std::unique_ptr<ExRootConfParam> GetParam(const char *name) override;
 
 private:

@@ -41,7 +41,8 @@ class ExRootConfReader : public TNamed
 public:
   typedef std::map<TString, TString> ExRootTaskMap;
 
-  ExRootConfReader();
+  static std::unique_ptr<ExRootConfReader> ReadConf(const char *filename);
+
   virtual ~ExRootConfReader() = default;
 
   virtual void ReadFile(const char *fileName, bool isTop = true) = 0;
@@ -61,8 +62,9 @@ public:
   const char *GetTopDir() const { return fTopDir; }
 
 protected:
-  const char *fTopDir; //!
+  ExRootConfReader();
 
+  const char *fTopDir; //!
   ExRootTaskMap fModules; //!
 };
 

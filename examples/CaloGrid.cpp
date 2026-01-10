@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "ExRootAnalysis/ExRootTclConfReader.h"
+#include "ExRootAnalysis/ExRootConfReader.h"
 #include "classes/DelphesClasses.h"
 #include "display/Delphes3DGeometry.h"
 
@@ -34,10 +34,7 @@ int main(int argc, char *argv[])
     return 0;
   }
 
-  TString card(argv[1]);
-
-  const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: handle other parsers
-  confReader->ReadFile(card);
+  const auto confReader = ExRootConfReader::ReadConf(argv[1]);
 
   std::vector<std::string> calorimeters_;
   std::map<std::string, std::set<std::pair<Double_t, Int_t> > > caloBinning_;

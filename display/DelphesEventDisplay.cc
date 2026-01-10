@@ -60,7 +60,7 @@
 #include "display/DelphesPlotSummary.h"
 
 #include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootTclConfReader.h"
+#include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 
 DelphesEventDisplay::DelphesEventDisplay()
@@ -191,8 +191,7 @@ DelphesEventDisplay::DelphesEventDisplay(const char *configFile, const char *inp
 // function that parses the config to extract the branches of interest and prepare containers
 void DelphesEventDisplay::readConfig(const char *configFile, std::vector<DelphesBranchBase *> &elements)
 {
-  const auto confReader = std::make_unique<ExRootTclConfReader>(); //TODO: introduce other parsers
-  confReader->ReadFile(configFile);
+  const auto confReader = ExRootConfReader::ReadConf(configFile);
   const auto branches = confReader->GetParam("TreeWriter::Branch");
   Int_t nBranches = branches->GetSize() / 3;
   DelphesBranchElement<TEveTrackList> *tlist;

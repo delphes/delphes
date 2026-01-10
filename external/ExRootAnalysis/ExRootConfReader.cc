@@ -7,7 +7,8 @@
  *
  */
 
-#include "ExRootAnalysis/ExRootConfReader.h"
+#include "ExRootAnalysis/ExRootPythonConfReader.h"
+#include "ExRootAnalysis/ExRootTclConfReader.h"
 
 #include "TSystem.h"
 
@@ -22,6 +23,28 @@ using namespace std;
 ExRootConfReader::ExRootConfReader() :
   fTopDir(0)
 {
+}
+
+//------------------------------------------------------------------------------
+
+std::unique_ptr<ExRootConfReader> ExRootConfReader::ReadConf(const char *fileName)
+{
+  if(const size_t str_len = strlen(fileName); // first check if we have a .tcl extension
+    str_len >= strlen(".tcl") && (0 == strcmp(fileName + (str_len - strlen(".tcl")), ".tcl")))
+  {
+    auto reader = std::make_unique<ExRootTclConfReader>();
+    reader->ReadFile(fileName);
+    return reader;
+  }
+  else if(str_len >= strlen(".py") && (0 == strcmp(fileName + (str_len - strlen(".py")), ".py")))
+  {
+    auto reader = std::make_unique<ExRootPythonConfReader>();
+    reader->ReadFile(fileName);
+    return reader;
+  }
+  ostringstream message;
+  message << "Unsupported extension for input configuration card '" << fileName << "'.";
+  throw runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------
