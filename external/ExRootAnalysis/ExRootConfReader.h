@@ -54,6 +54,7 @@ public:
   const char *GetString(const char *name, const char *defaultValue, int index = -1);
 
   virtual std::unique_ptr<ExRootConfParam> GetParam(const char *name) = 0;
+  virtual std::unique_ptr<ExRootConfParam> GetGlobalParam(const char *name);
 
   const ExRootTaskMap *GetModules() const { return &fModules; }
 

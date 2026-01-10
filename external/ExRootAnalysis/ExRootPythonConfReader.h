@@ -29,8 +29,8 @@ public:
   std::unique_ptr<ExRootConfParam> operator[](int index) override;
 
 private:
-  const char *fName; //!
-  _object *fObject;
+  const char *fName{"\0"}; //!
+  _object *fObject{nullptr};
 };
 
 //------------------------------------------------------------------------------

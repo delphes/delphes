@@ -53,10 +53,7 @@ int ExRootConfReader::GetInt(const char *name, int defaultValue, int index)
 {
   auto object = GetParam(name);
   if(index >= 0)
-  {
     object = (*object)[index];
-  }
-
   return object->GetInt(defaultValue);
 }
 
@@ -66,10 +63,7 @@ long ExRootConfReader::GetLong(const char *name, long defaultValue, int index)
 {
   auto object = GetParam(name);
   if(index >= 0)
-  {
     object = (*object)[index];
-  }
-
   return object->GetLong(defaultValue);
 }
 
@@ -79,10 +73,7 @@ double ExRootConfReader::GetDouble(const char *name, double defaultValue, int in
 {
   auto object = GetParam(name);
   if(index >= 0)
-  {
     object = (*object)[index];
-  }
-
   return object->GetDouble(defaultValue);
 }
 
@@ -92,10 +83,7 @@ bool ExRootConfReader::GetBool(const char *name, bool defaultValue, int index)
 {
   auto object = GetParam(name);
   if(index >= 0)
-  {
     object = (*object)[index];
-  }
-
   return object->GetBool(defaultValue);
 }
 
@@ -105,12 +93,13 @@ const char *ExRootConfReader::GetString(const char *name, const char *defaultVal
 {
   auto object = GetParam(name);
   if(index >= 0)
-  {
     object = (*object)[index];
-  }
-
   return object->GetString(defaultValue);
 }
+
+//------------------------------------------------------------------------------
+
+std::unique_ptr<ExRootConfParam> ExRootConfReader::GetGlobalParam(const char *name) { return GetParam(name); }
 
 //------------------------------------------------------------------------------
 

@@ -108,8 +108,8 @@ int main(int argc, char *argv[])
 
     const auto confReader = ExRootConfReader::ReadConf(argv[1]);
 
-    maxEvents = confReader->GetInt("::MaxEvents", 0);
-    skipEvents = confReader->GetInt("::SkipEvents", 0);
+    maxEvents = confReader->GetGlobalParam("MaxEvents")->GetInt(0);
+    skipEvents = confReader->GetGlobalParam("SkipEvents")->GetInt(0);
 
     if(maxEvents < 0)
     {

@@ -118,10 +118,10 @@ void Delphes::Init()
   const ExRootConfReader::ExRootTaskMap *modules = confReader->GetModules();
   ExRootConfReader::ExRootTaskMap::const_iterator itModules;
 
-  const auto param = confReader->GetParam("::ExecutionPath");
+  const auto param = confReader->GetGlobalParam("ExecutionPath");
   Long_t i, size = param->GetSize();
 
-  gRandom->SetSeed(confReader->GetInt("::RandomSeed", 0));
+  gRandom->SetSeed(confReader->GetGlobalParam("RandomSeed")->GetInt(0));
 
   for(i = 0; i < size; ++i)
   {

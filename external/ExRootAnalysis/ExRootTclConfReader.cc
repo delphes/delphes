@@ -98,6 +98,10 @@ std::unique_ptr<ExRootConfParam> ExRootTclConfReader::GetParam(const char *name)
 
 //------------------------------------------------------------------------------
 
+std::unique_ptr<ExRootConfParam> ExRootTclConfReader::GetGlobalParam(const char *name) { return GetParam((std::string{"::"} + name).c_str()); }
+
+//------------------------------------------------------------------------------
+
 int ModuleObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   ExRootTclConfReader *reader = static_cast<ExRootTclConfReader *>(clientData);

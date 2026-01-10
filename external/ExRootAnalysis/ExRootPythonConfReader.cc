@@ -12,7 +12,6 @@
 #include <Python.h>
 #include <TSystem.h>
 
-#include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -24,12 +23,12 @@ ExRootPythonConfReader::ExRootPythonConfReader() : fConfig(new PyConfig)
 {
 #if PY_VERSION_HEX >= 0x03080000
   PyConfig_InitPythonConfig(fConfig);
-  fConfig->parser_debug = 1;
-  fConfig->verbose = 1;
+  fConfig->parser_debug = 0;
+  fConfig->verbose = 0;
   Py_InitializeFromConfig(fConfig);
 #else
-  Py_DebugFlag = 1;
-  Py_VerboseFlag = 1;
+  Py_DebugFlag = 0;
+  Py_VerboseFlag = 0;
   Py_InitializeEx(1);
 #endif
 }
@@ -62,9 +61,7 @@ std::unique_ptr<ExRootConfParam> ExRootPythonConfReader::GetParam(const char *na
 {
   if(PyObject_HasAttrString(fModule, name) == 1)
     return std::make_unique<ExRootPythonConfParam>(name, PyObject_GetAttrString(fModule, name));
-  std::ostringstream message;
-  message << "Failed to retrieve the parameter '" << name << "' from configuration.";
-  throw std::runtime_error(message.str());
+  return std::make_unique<ExRootPythonConfParam>(name, nullptr);
 }
 
 //------------------------------------------------------------------------------
@@ -79,20 +76,14 @@ ExRootPythonConfParam::ExRootPythonConfParam(const char *name, PyObject *object)
 int ExRootPythonConfParam::GetInt(int defaultValue)
 {
   if(!fObject)
-  {
-    std::ostringstream message;
-    message << "parameter '" << fName << "' is not a valid object." << std::endl;
-    throw std::runtime_error(message.str());
-  }
-  int result = defaultValue;
+    return defaultValue;
   if(fObject && !PyLong_Check(fObject))
   {
     std::ostringstream message;
     message << "parameter '" << fName << "' is not an integer." << std::endl;
     throw std::runtime_error(message.str());
   }
-  result = PyLong_AsLongLong(fObject);
-  return result;
+  return PyLong_AsLongLong(fObject);
 }
 
 //------------------------------------------------------------------------------
@@ -100,20 +91,14 @@ int ExRootPythonConfParam::GetInt(int defaultValue)
 long ExRootPythonConfParam::GetLong(long defaultValue)
 {
   if(!fObject)
-  {
-    std::ostringstream message;
-    message << "parameter '" << fName << "' is not a valid object." << std::endl;
-    throw std::runtime_error(message.str());
-  }
-  long result = defaultValue;
+    return defaultValue;
   if(fObject && !PyLong_Check(fObject))
   {
     std::ostringstream message;
     message << "parameter '" << fName << "' is not an long integer." << std::endl;
     throw std::runtime_error(message.str());
   }
-  result = PyLong_AsLongLong(fObject);
-  return result;
+  return PyLong_AsLongLong(fObject);
 }
 
 //------------------------------------------------------------------------------
