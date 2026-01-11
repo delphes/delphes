@@ -37,7 +37,6 @@
 #include "classes/DelphesLHEFReader.h"
 #include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootConfReader.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
