@@ -79,9 +79,6 @@ void ExRootPythonConfReader::ReadFile(const char *fileName, bool isTop)
     message << "Failed to retrieve the Python attributes search method for the configuration file at '" << fileName << "'" << std::endl;
     throw std::runtime_error(message.str());
   }
-  /*ExRootPythonConfParam params("dir", PyObject_CallNoArgs(PyObject_GetAttrString(fModule, "__dir__")), true);
-  for(size_t i = 0; i < params.GetSize(); ++i)
-    std::cout << i << "=" << dynamic_cast<ExRootPythonConfParam *>(params[i].get())->GetObject() << " ----> " << params[i]->GetString() << std::endl;*/
   for(long i = 0; i < execution_path->GetSize(); ++i)
   {
     const auto module_name = (*execution_path)[i]->GetString(),
@@ -215,7 +212,8 @@ std::unique_ptr<ExRootConfParam> ExRootPythonConfParam::GetParam(const char *par
   if(!fObject)
   {
     std::ostringstream message;
-    message << "parameter '" << fName << "' is not a valid object." << std::endl;
+    message << "Parameter '" << fName << "' is not a valid object. "
+            << "Cannot retrieve a sub-parameters '" << paramName << "' from it." << std::endl;
     throw std::runtime_error(message.str());
   }
   if(PyDict_Check(fObject) == 1) // we are in a dictionary, we can try to retrieve an element with key
@@ -237,9 +235,9 @@ int ExRootPythonConfParam::GetSize()
 {
   if(!fObject)
   {
-    std::ostringstream message;
-    message << "parameter '" << fName << "' is not a valid object." << std::endl;
-    throw std::runtime_error(message.str());
+    std::cout << "WARNING: Parameter '" << fName << "' is not a valid object. "
+              << "Cannot retrieve its size." << std::endl;
+    return 0;
   }
   if(PySequence_Check(fObject))
     return PySequence_Size(fObject);
