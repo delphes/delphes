@@ -98,7 +98,7 @@ std::unique_ptr<ExRootConfParam> ExRootTclConfReader::GetParam(const char *name)
 
 //------------------------------------------------------------------------------
 
-std::unique_ptr<ExRootConfParam> ExRootTclConfReader::GetGlobalParam(const char *name) { return GetParam((std::string{"::"} + name).c_str()); }
+std::unique_ptr<ExRootConfParam> ExRootTclConfReader::GetGlobalParam(const char *name) { return GetParam(TString("::") + name); }
 
 //------------------------------------------------------------------------------
 
@@ -243,13 +243,27 @@ int ExRootTclConfParam::GetSize()
 
 std::unique_ptr<ExRootConfParam> ExRootTclConfParam::operator[](int index)
 {
-  stringstream message;
   Tcl_Obj *object = 0;
   if(fObject && TCL_OK != Tcl_ListObjIndex(fTclInterp, fObject, index, &object))
   {
+    stringstream message;
     message << "parameter '" << fName << "' is not a list." << endl;
     message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
     throw runtime_error(message.str());
   }
   return std::make_unique<ExRootTclConfParam>(fName, object, fTclInterp);
+}
+
+std::unique_ptr<ExRootConfParam> ExRootTclConfParam::GetParam(const char *paramName) const
+{
+  //Tcl_Obj *object = 0;
+  //if(fObject && TCL_OK != Tcl_DictObjGet(fTclInterp, fObject, paramName, &object))
+  //TODO: bump version of TCL to enable dictionary objects parsing
+  {
+    stringstream message;
+    message << "parameter '" << fName << "' is not a dictionary." << endl;
+    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
+    throw runtime_error(message.str());
+  }
+  //return std::make_unique<ExRootTclConfParam>(fName, object, fTclInterp);
 }

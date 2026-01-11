@@ -29,6 +29,7 @@ public:
 
   virtual int GetSize() = 0;
   virtual std::unique_ptr<ExRootConfParam> operator[](int index) = 0;
+  virtual std::unique_ptr<ExRootConfParam> GetParam(const char *paramName) const = 0;
 
 protected:
   const char *fName; //!

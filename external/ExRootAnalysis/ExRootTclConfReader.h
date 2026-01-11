@@ -27,6 +27,7 @@ public:
 
   int GetSize() override;
   std::unique_ptr<ExRootConfParam> operator[](int index) override;
+  std::unique_ptr<ExRootConfParam> GetParam(const char *paramName) const override;
 
 private:
   const char *fName; //!

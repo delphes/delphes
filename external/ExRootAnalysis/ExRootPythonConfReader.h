@@ -17,7 +17,8 @@ struct _object;
 class ExRootPythonConfParam : public ExRootConfParam
 {
 public:
-  explicit ExRootPythonConfParam(const char *name = nullptr, _object *object = nullptr);
+  explicit ExRootPythonConfParam(const char *name = nullptr, _object *object = nullptr, bool wrapOnly = false);
+  ~ExRootPythonConfParam();
 
   int GetInt(int defaultValue) override;
   long GetLong(long defaultValue) override;
@@ -27,10 +28,13 @@ public:
 
   int GetSize() override;
   std::unique_ptr<ExRootConfParam> operator[](int index) override;
+  std::unique_ptr<ExRootConfParam> GetParam(const char *paramName) const override;
+  _object *GetObject() const { return fObject; }
 
 private:
   const char *fName{"\0"}; //!
   _object *fObject{nullptr};
+  const bool fWrapOnly{false};
 };
 
 //------------------------------------------------------------------------------
