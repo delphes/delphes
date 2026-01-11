@@ -8,6 +8,7 @@
 # 30.1.2018 hammad add Muon Filter module
 #######################################
 
+import Config.Core as delphes
 import math
 
 
@@ -15,8 +16,7 @@ import math
 # Propagate particles in cylinder
 #################################
 
-ParticlePropagator = dict(
-    type = "ParticlePropagator",
+ParticlePropagator = delphes.Module("ParticlePropagator",
     InputArray = "Delphes/stableParticles",
     OutputArray = "stableParticles",
     ChargedHadronOutputArray = "chargedHadrons",
@@ -37,8 +37,7 @@ ParticlePropagator = dict(
 # Charged hadron tracking efficiency
 ####################################
 
-ChargedHadronTrackingEfficiency = dict(
-    type = "Efficiency",
+ChargedHadronTrackingEfficiency = delphes.Module("Efficiency",
     InputArray = "ParticlePropagator/chargedHadrons",
     OutputArray = "chargedHadrons",
 
@@ -54,8 +53,7 @@ ChargedHadronTrackingEfficiency = dict(
 # Electron tracking efficiency
 ##############################
 
-ElectronTrackingEfficiency = dict(
-    type = "Efficiency",
+ElectronTrackingEfficiency = delphes.Module("Efficiency",
     InputArray = "ParticlePropagator/electrons",
     OutputArray = "electrons",
 
@@ -71,8 +69,7 @@ ElectronTrackingEfficiency = dict(
 # Muon tracking efficiency
 ##########################
 
-MuonTrackingEfficiency = dict(
-    type = "Efficiency",
+MuonTrackingEfficiency = delphes.Module("Efficiency",
     InputArray = "ParticlePropagator/muons",
     OutputArray = "muons",
 
@@ -87,8 +84,7 @@ MuonTrackingEfficiency = dict(
 # Momentum resolution for charged tracks
 ########################################
 
-ChargedHadronMomentumSmearing = dict(
-    type = "MomentumSmearing",
+ChargedHadronMomentumSmearing = delphes.Module("MomentumSmearing",
     InputArray = "ChargedHadronTrackingEfficiency/chargedHadrons",
     OutputArray = "chargedHadrons",
 
@@ -113,8 +109,7 @@ ChargedHadronMomentumSmearing = dict(
 # Energy resolution for electrons
 #################################
 
-ElectronMomentumSmearing = dict(
-    type = "MomentumSmearing",
+ElectronMomentumSmearing = delphes.Module("MomentumSmearing",
     InputArray = "ElectronTrackingEfficiency/electrons",
     OutputArray = "electrons",
 
@@ -140,8 +135,7 @@ ElectronMomentumSmearing = dict(
 # Momentum resolution for muons
 ###############################
 
-MuonMomentumSmearing = dict(
-    type = "MomentumSmearing",
+MuonMomentumSmearing = delphes.Module("MomentumSmearing",
     InputArray = "MuonTrackingEfficiency/muons",
     OutputArray = "muons",
 
@@ -167,8 +161,7 @@ MuonMomentumSmearing = dict(
 # Track merger
 ##############
 
-TrackMerger = dict(
-    type = "Merger",
+TrackMerger = delphes.Module("Merger",
     InputArray = [
         "ChargedHadronMomentumSmearing/chargedHadrons",
         "ElectronMomentumSmearing/electrons",
@@ -181,8 +174,7 @@ TrackMerger = dict(
 # LHeC Calorimeter
 ##################
 
-Calorimeter = dict(
-    type = "Calorimeter",
+Calorimeter = delphes.Module("Calorimeter",
     ParticleInputArray = "ParticlePropagator/stableParticles",
     TrackInputArray = "TrackMerger/tracks",
 
@@ -267,8 +259,7 @@ for eta in [-4.700, -4.675, -4.650, -4.625, -4.600, -4.575, -4.550, -4.525,
 # Energy flow merger
 ####################
 
-EFlowMerger = dict(
-    type = "Merger",
+EFlowMerger = delphes.Module("Merger",
     # add InputArray InputArray
     # exchange UK:  25.7.16 change back to all eflowtracks!
     #  add InputArray ImpactParameterSmearing/tracks
@@ -285,8 +276,7 @@ EFlowMerger = dict(
 # Photon efficiency
 ###################
 
-PhotonEfficiency = dict(
-    type = "Efficiency",
+PhotonEfficiency = delphes.Module("Efficiency",
     #  set InputArray Calorimeter/eflowPhotons
     # 21.7.16 use photons
     InputArray = "Calorimeter/photons",
@@ -311,8 +301,7 @@ PhotonEfficiency = dict(
 # Photon isolation
 ##################
 
-PhotonIsolation = dict(
-    type = "Isolation",
+PhotonIsolation = delphes.Module("Isolation",
     CandidateInputArray = "PhotonEfficiency/photons",
     IsolationInputArray = "EFlowMerger/eflow",
     OutputArray = "photons",
@@ -325,8 +314,7 @@ PhotonIsolation = dict(
 # Electron filter
 #################
 
-ElectronFilter = dict(
-    type = "PdgCodeFilter",
+ElectronFilter = delphes.Module("PdgCodeFilter",
     InputArray = "Calorimeter/eflowTracks",
     OutputArray = "electrons",
     Invert = True,
@@ -337,8 +325,7 @@ ElectronFilter = dict(
 # Muon filter
 #################
 
-MuonFilter = dict(
-    type = "PdgCodeFilter",
+MuonFilter = delphes.Module("PdgCodeFilter",
     InputArray = "Calorimeter/eflowTracks",
     OutputArray = "muons",
     Invert = True,
@@ -349,8 +336,7 @@ MuonFilter = dict(
 # Electron efficiency
 #####################
 
-ElectronEfficiency = dict(
-    type = "Efficiency",
+ElectronEfficiency = delphes.Module("Efficiency",
     InputArray = "ElectronFilter/electrons",
     OutputArray = "electrons",
 
@@ -373,8 +359,7 @@ ElectronEfficiency = dict(
 # Electron isolation
 ####################
 
-ElectronIsolation = dict(
-    type = "Isolation",
+ElectronIsolation = delphes.Module("Isolation",
     CandidateInputArray = "ElectronEfficiency/electrons",
     IsolationInputArray = "EFlowMerger/eflow",
     OutputArray = "electrons",
@@ -387,8 +372,7 @@ ElectronIsolation = dict(
 # Muon efficiency
 #################
 
-MuonEfficiency = dict(
-    type = "Efficiency",
+MuonEfficiency = delphes.Module("Efficiency",
     #InputArray = "MuonMomentumSmearing/muons",  #FIXME correct?
     InputArray = "MuonFilter/muons",
     OutputArray = "muons",
@@ -405,8 +389,7 @@ MuonEfficiency = dict(
 # Muon isolation
 ################
 
-MuonIsolation = dict(
-    type = "Isolation",
+MuonIsolation = delphes.Module("Isolation",
     CandidateInputArray = "MuonEfficiency/muons",
     IsolationInputArray = "EFlowMerger/eflow",
     OutputArray = "muons",
@@ -419,8 +402,7 @@ MuonIsolation = dict(
 # Missing ET merger
 ###################
 
-MissingET = dict(
-    type = "Merger",
+MissingET = delphes.Module("Merger",
     InputArray = ["EFlowMerger/eflow"],
     MomentumOutputArray = "momentum",
 )
@@ -429,8 +411,7 @@ MissingET = dict(
 # Scalar HT merger
 ##################
 
-ScalarHT = dict(
-    type = "Merger",
+ScalarHT = delphes.Module("Merger",
     InputArray = [
         "UniqueObjectFinder/jets",
         "UniqueObjectFinder/electrons",
@@ -444,8 +425,7 @@ ScalarHT = dict(
 # MC truth jet finder
 #####################
 
-GenJetFinder = dict(
-    type = "FastJetFinder",
+GenJetFinder = delphes.Module("FastJetFinder",
     InputArray = "Delphes/stableParticles",
     OutputArray = "jets",
 
@@ -477,8 +457,7 @@ FastJetFinder = dict(
 # Jet Energy Scale
 ##################
 
-JetEnergyScale = dict(
-    type = "EnergyScale",
+JetEnergyScale = delphes.Module("EnergyScale",
     InputArray = "FastJetFinder/jets",
     OutputArray = "jets",
     ScaleFormula = "1.00",  # scale formula for jets
@@ -488,8 +467,7 @@ JetEnergyScale = dict(
 # GenJet Flavor Association
 ########################
 
-GenJetFlavorAssociation = dict(
-    type = "JetFlavorAssociation",
+GenJetFlavorAssociation = delphes.Module("JetFlavorAssociation",
     PartonInputArray = "Delphes/partons",
     ParticleInputArray = "Delphes/allParticles",
     ParticleLHEFInputArray = "Delphes/allParticlesLHEF",
@@ -504,8 +482,7 @@ GenJetFlavorAssociation = dict(
 # Jet Flavor Association
 ########################
 
-JetFlavorAssociation = dict(
-    type = "JetFlavorAssociation",
+JetFlavorAssociation = delphes.Module("JetFlavorAssociation",
     PartonInputArray = "Delphes/partons",
     ParticleInputArray = "Delphes/allParticles",
     ParticleLHEFInputArray = "Delphes/allParticlesLHEF",
@@ -519,8 +496,7 @@ JetFlavorAssociation = dict(
 ###########
 # b-tagging
 ###########
-GenBTagging = dict(
-    type = "BTagging",
+GenBTagging = delphes.Module("BTagging",
     PartonInputArray = "Delphes/partons",
     JetInputArray = "GenJetFinder/jets",
     BitNumber = 0,
@@ -534,19 +510,18 @@ GenBTagging = dict(
 
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsBTV
     # default efficiency formula (misidentification rate)
-    EfficiencyFormula = {
-        0: "0.001",
-        4: "0.05",  # efficiency formula for c-jets (misidentification rate)
-        5: "0.75",  # efficiency formula for b-jets
-    },
+    EfficiencyFormula = [
+        0, "0.001",
+        4, "0.05",  # efficiency formula for c-jets (misidentification rate)
+        5, "0.75",  # efficiency formula for b-jets
+    ],
 )
 
 ####################
 # standard B-tagging
 ## ATTENTION : idealised values - use for cross check only
 ####################
-BTagging = dict(
-    type = "BTagging",
+BTagging = delphes.Module("BTagging",
     PartonInputArray = "Delphes/partons",
     JetInputArray = "JetEnergyScale/jets",
     BitNumber = 0,
@@ -560,15 +535,14 @@ BTagging = dict(
 
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsBTV
     # default efficiency formula (misidentification rate)
-    EfficiencyFormula = {
-        0: "0.001",
-        4: "0.05",  # efficiency formula for c-jets (misidentification rate)
-        5: "0.75",  # efficiency formula for b-jets
-    },
+    EfficiencyFormula = [
+        0, "0.001",
+        4, "0.05",  # efficiency formula for c-jets (misidentification rate)
+        5, "0.75",  # efficiency formula for b-jets
+    ],
 )
 
-TauTagging = dict(
-    type = "TauTagging",
+TauTagging = delphes.Module("TauTagging",
     ParticleInputArray = "Delphes/allParticles",
     PartonInputArray = "Delphes/partons",
     JetInputArray = "JetEnergyScale/jets",
@@ -580,14 +554,13 @@ TauTagging = dict(
     # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
 
     # default efficiency formula (misidentification rate)
-    EfficiencyFormula = {
-        0: "0.001",
-        15: "0.4",  # efficiency formula for tau-jets
-    }
+    EfficiencyFormula = [
+        0, "0.001",
+        15, "0.4",  # efficiency formula for tau-jets
+    ],
 )
 
-GenTauTagging = dict(
-    type = "TauTagging",
+GenTauTagging = delphes.Module("TauTagging",
     ParticleInputArray = "Delphes/allParticles",
     PartonInputArray = "Delphes/partons",
     JetInputArray = "GenJetFinder/jets",
@@ -599,26 +572,25 @@ GenTauTagging = dict(
     # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
 
     # default efficiency formula (misidentification rate)
-    EfficiencyFormula = {
-        0: "0.001",
-        15: "0.4",  # efficiency formula for tau-jets
-    },
+    EfficiencyFormula = [
+        0, "0.001",
+        15, "0.4",  # efficiency formula for tau-jets
+    ],
 )
 
 #####################################################
 # Find uniquely identified photons/electrons/tau/jets
 #####################################################
 
-UniqueObjectFinder = dict(
-    type = "UniqueObjectFinder",
+UniqueObjectFinder = delphes.Module("UniqueObjectFinder",
     # earlier arrays take precedence over later ones
     # add InputArray InputArray OutputArray
-    InputArray = {
-        "PhotonIsolation/photons": "photons",
-        "ElectronIsolation/electrons": "electrons",
-        "MuonIsolation/muons": "muons",
-        "JetEnergyScale/jets": "jets",
-    }
+    InputArray = [
+        "PhotonIsolation/photons", "photons",
+        "ElectronIsolation/electrons", "electrons",
+        "MuonIsolation/muons", "muons",
+        "JetEnergyScale/jets", "jets",
+    ]
 )
 
 ##################
@@ -629,24 +601,23 @@ UniqueObjectFinder = dict(
 # if needed (for jet constituent or other studies), uncomment the relevant
 # "add Branch ..." lines.
 
-TreeWriter = dict(
-    type = "TreeWriter",
+TreeWriter = delphes.Module("TreeWriter",
     # add Branch InputArray BranchName BranchClass
-    Branch = {
-        "Delphes/allParticles": ["Particle", "GenParticle"],
-        #"TrackMerger/tracks": ["Track", "Track"],
-        #"Calorimeter/towers": ["Tower", "Tower"],
-        #"Calorimeter/eflowTracks": ["EFlowTrack", "Track"],
-        #"Calorimeter/eflowPhotons": [EFlowPhoton", "Tower"],
-        #"Calorimeter/eflowNeutralHadrons": ["EFlowNeutralHadron", "Tower"],
-        "GenJetFinder/jets": ["GenJet", "Jet"],
-        "UniqueObjectFinder/jets": ["Jet", "Jet"],
-        "UniqueObjectFinder/electrons": ["Electron", "Electron"],
-        "UniqueObjectFinder/photons": ["Photon", "Photon"],
-        "UniqueObjectFinder/muons": ["Muon", "Muon"],
-        "MissingET/momentum": ["MissingET", "MissingET"],
-        "ScalarHT/energy": ["ScalarHT", "ScalarHT"],
-    }
+    Branch = [
+        "Delphes/allParticles", "Particle", "GenParticle",
+        #"TrackMerger/tracks", ["Track", "Track"],
+        #"Calorimeter/towers", ["Tower", "Tower"],
+        #"Calorimeter/eflowTracks", ["EFlowTrack", "Track"],
+        #"Calorimeter/eflowPhotons", [EFlowPhoton", "Tower"],
+        #"Calorimeter/eflowNeutralHadrons", ["EFlowNeutralHadron", "Tower"],
+        "GenJetFinder/jets", "GenJet", "Jet",
+        "UniqueObjectFinder/jets", "Jet", "Jet",
+        "UniqueObjectFinder/electrons", "Electron", "Electron",
+        "UniqueObjectFinder/photons", "Photon", "Photon",
+        "UniqueObjectFinder/muons", "Muon", "Muon",
+        "MissingET/momentum", "MissingET", "MissingET",
+        "ScalarHT/energy", "ScalarHT", "ScalarHT",
+    ]
 )
 
 ExecutionPath = [
@@ -696,5 +667,5 @@ ExecutionPath = [
     "ScalarHT",
 
     "TreeWriter",
-  #"TrackCountingBTagging",  # exclude since it adds also an entry to Jet->BTag
+    #"TrackCountingBTagging",  # exclude since it adds also an entry to Jet->BTag
 ]
