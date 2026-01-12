@@ -185,15 +185,13 @@ Calorimeter = delphes.Module("Calorimeter",
     EFlowPhotonOutputArray = "eflowPhotons",
     EFlowNeutralHadronOutputArray = "eflowNeutralHadrons",
 
-    pi = math.pi,
+    # lists of the edges of each tower in eta and phi
+    # each list starts with the lower edge of the first tower
+    # the list ends with the higher edged of the last tower
 
-  # lists of the edges of each tower in eta and phi
-  # each list starts with the lower edge of the first tower
-  # the list ends with the higher edged of the last tower
-
-  # use a delta_phi=0.025 for 2*phi range == 252 cells
-  # use a delta_eta-0.025 for eta = -5 to 5 == 400 cells
-  # Uta 22.12.16 use eta range from Peter Kostka -4.7 - 5.2
+    # use a delta_phi=0.025 for 2*phi range == 252 cells
+    # use a delta_eta-0.025 for eta = -5 to 5 == 400 cells
+    # Uta 22.12.16 use eta range from Peter Kostka -4.7 - 5.2
     PhiBins = [i * math.pi / 126. for i in range(-126, 127)],
     EtaPhiBins = [],
 
