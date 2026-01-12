@@ -74,7 +74,6 @@ int main(int argc, char *argv[])
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0;
-  ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   GenParticle *gen;
@@ -121,11 +120,10 @@ int main(int argc, char *argv[])
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
 
-    confReader = new ExRootConfReader;
-    confReader->ReadFile(argv[1]);
+    const auto confReader = ExRootConfReader::ReadConf(argv[1]);
 
     modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
+    modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetTreeWriter(treeWriter);
 
     TChain *chain = new TChain("Delphes");
@@ -255,7 +253,6 @@ int main(int argc, char *argv[])
     cout << "** Exiting..." << endl;
 
     delete modularDelphes;
-    delete confReader;
     delete treeWriter;
     delete outputFile;
     delete chain;

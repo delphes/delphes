@@ -94,7 +94,6 @@ void FastJetFinder::Init()
 {
   JetDefinition::Plugin *plugin = 0;
   JetDefinition::Recombiner *recomb = 0;
-  ExRootConfParam param;
   Long_t i, size;
   Double_t etaMin, etaMax;
   TEstimatorStruct estimatorStruct;
@@ -270,14 +269,14 @@ void FastJetFinder::Init()
   {
     // read eta ranges
 
-    param = GetParam("RhoEtaRange");
-    size = param.GetSize();
+    const auto param = GetParam("RhoEtaRange");
+    size = param->GetSize();
 
     fEstimators.clear();
     for(i = 0; i < size / 2; ++i)
     {
-      etaMin = param[i * 2].GetDouble();
-      etaMax = param[i * 2 + 1].GetDouble();
+      etaMin = (*param)[i * 2]->GetDouble();
+      etaMax = (*param)[i * 2 + 1]->GetDouble();
       estimatorStruct.estimator = new JetMedianBackgroundEstimator(SelectorRapRange(etaMin, etaMax), *fDefinition, *fAreaDefinition);
       estimatorStruct.etaMin = etaMin;
       estimatorStruct.etaMax = etaMax;

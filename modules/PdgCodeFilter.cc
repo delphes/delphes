@@ -67,7 +67,6 @@ PdgCodeFilter::~PdgCodeFilter()
 void PdgCodeFilter::Init()
 {
 
-  ExRootConfParam param;
   Size_t i, size;
 
   // PT threshold
@@ -88,15 +87,15 @@ void PdgCodeFilter::Init()
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
-  param = GetParam("PdgCode");
-  size = param.GetSize();
+  const auto param = GetParam("PdgCode");
+  size = param->GetSize();
 
   // read PdgCodes to be filtered out from the data card
 
   fPdgCodes.clear();
   for(i = 0; i < size; ++i)
   {
-    fPdgCodes.push_back(param[i].GetInt());
+    fPdgCodes.push_back((*param)[i]->GetInt());
   }
 
   // create output array

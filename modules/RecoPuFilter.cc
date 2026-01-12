@@ -67,9 +67,6 @@ RecoPuFilter::~RecoPuFilter()
 
 void RecoPuFilter::Init()
 {
-
-  ExRootConfParam param;
-
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();

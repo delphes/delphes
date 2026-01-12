@@ -306,7 +306,6 @@ int main(int argc, char *argv[])
   TStopwatch eventStopWatch;
   ExRootTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
-  ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
@@ -350,24 +349,23 @@ int main(int argc, char *argv[])
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
     branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
-    confReader = new ExRootConfReader;
-    confReader->ReadFile(argv[1]);
-    
-    maxEvents = confReader->GetInt("::MaxEvents", 0);
-    skipEvents = confReader->GetInt("::SkipEvents", 0);
-    
+    const auto confReader = ExRootConfReader::ReadConf(configFile);
+
+    maxEvents = confReader->GetGlobalParam("MaxEvents")->GetInt(0);
+    skipEvents = confReader->GetGlobalParam("SkipEvents")->GetInt(0);
+
     if(maxEvents < 0)
     {
       throw runtime_error("MaxEvents must be zero or positive");
     }
-    
+
     if(skipEvents < 0)
     {
       throw runtime_error("SkipEvents must be zero or positive");
     }
 
     modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
+    modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
@@ -434,7 +432,6 @@ int main(int argc, char *argv[])
     cout << "** Exiting..." << endl;
 
     delete modularDelphes;
-    delete confReader;
     delete treeWriter;
     delete outputFile;
 

@@ -66,30 +66,29 @@ DenseTrackFilter::~DenseTrackFilter()
 
 void DenseTrackFilter::Init()
 {
-  ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
   Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
   TBinMap::iterator itEtaBin;
   set<Double_t>::iterator itPhiBin;
   vector<Double_t> *phiBins;
 
   // read eta and phi bins
-  param = GetParam("EtaPhiBins");
-  size = param.GetSize();
+  const auto param = GetParam("EtaPhiBins");
+  size = param->GetSize();
   fBinMap.clear();
   fEtaBins.clear();
   fPhiBins.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    paramEtaBins = param[i * 2];
-    sizeEtaBins = paramEtaBins.GetSize();
-    paramPhiBins = param[i * 2 + 1];
-    sizePhiBins = paramPhiBins.GetSize();
+    const auto paramEtaBins = (*param)[i * 2];
+    sizeEtaBins = paramEtaBins->GetSize();
+    const auto paramPhiBins = (*param)[i * 2 + 1];
+    sizePhiBins = paramPhiBins->GetSize();
 
     for(j = 0; j < sizeEtaBins; ++j)
     {
       for(k = 0; k < sizePhiBins; ++k)
       {
-        fBinMap[paramEtaBins[j].GetDouble()].insert(paramPhiBins[k].GetDouble());
+        fBinMap[(*paramEtaBins)[j]->GetDouble()].insert((*paramPhiBins)[k]->GetDouble());
       }
     }
   }

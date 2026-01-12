@@ -65,7 +65,6 @@ ConstituentFilter::~ConstituentFilter()
 
 void ConstituentFilter::Init()
 {
-  ExRootConfParam param;
   Long_t i, size;
   const TObjArray *array;
   TIterator *iterator;
@@ -74,24 +73,24 @@ void ConstituentFilter::Init()
 
   // import input array(s)
 
-  param = GetParam("JetInputArray");
-  size = param.GetSize();
+  auto param = GetParam("JetInputArray");
+  size = param->GetSize();
   for(i = 0; i < size; ++i)
   {
-    array = ImportArray(param[i].GetString());
+    array = ImportArray((*param)[i]->GetString());
     iterator = array->MakeIterator();
 
     fInputList.push_back(iterator);
   }
 
   param = GetParam("ConstituentInputArray");
-  size = param.GetSize();
+  size = param->GetSize();
   for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i * 2].GetString());
+    array = ImportArray((*param)[i * 2]->GetString());
     iterator = array->MakeIterator();
 
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
+    fInputMap[iterator] = ExportArray((*param)[i * 2 + 1]->GetString());
   }
 }
 

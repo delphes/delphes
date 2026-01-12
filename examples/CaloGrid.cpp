@@ -34,10 +34,7 @@ int main(int argc, char *argv[])
     return 0;
   }
 
-  TString card(argv[1]);
-
-  ExRootConfReader *confReader = new ExRootConfReader;
-  confReader->ReadFile(card);
+  const auto confReader = ExRootConfReader::ReadConf(argv[1]);
 
   std::vector<std::string> calorimeters_;
   std::map<std::string, std::set<std::pair<Double_t, Int_t> > > caloBinning_;
@@ -90,17 +87,15 @@ int main(int argc, char *argv[])
 
     //first entry is eta bin, second is number of phi bins
     set<pair<Double_t, Int_t> > caloBinning;
-    ExRootConfParam paramEtaBins, paramPhiBins;
-    ExRootConfParam param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
-    Int_t size = param.GetSize();
+    const auto param = confReader->GetParam(Form("%s::EtaPhiBins", calo->c_str()));
+    Int_t size = param->GetSize();
 
     for(int i = 0; i < size / 2; ++i)
     {
-      paramEtaBins = param[i * 2];
-      paramPhiBins = param[i * 2 + 1];
-      assert(paramEtaBins.GetSize() == 1);
+      const auto paramEtaBins = (*param)[i * 2], paramPhiBins = (*param)[i * 2 + 1];
+      assert(paramEtaBins->GetSize() == 1);
 
-      caloBinning.insert(std::make_pair(paramEtaBins[0].GetDouble(), paramPhiBins.GetSize() - 1));
+      caloBinning.insert(std::make_pair((*paramEtaBins)[0]->GetDouble(), paramPhiBins->GetSize() - 1));
     }
     caloBinning_[*calo] = caloBinning;
 

@@ -156,8 +156,7 @@ treeWriter = ROOT.ExRootTreeWriter(outputFile, "Delphes")
 
 branchEvent = treeWriter.NewBranch("Event", ROOT.HepMCEvent.Class())
 
-confReader = ROOT.ExRootConfReader()
-confReader.ReadFile(sys.argv[1])
+confReader = ROOT.ExRootConfReader.ReadConf(sys.argv[1])
 
 modularDelphes = ROOT.Delphes("Delphes")
 modularDelphes.SetConfReader(confReader)

@@ -134,8 +134,6 @@ JetFlavorAssociation::~JetFlavorAssociation()
 
 void JetFlavorAssociation::Init()
 {
-  ExRootConfParam param;
-
   fDeltaR = GetDouble("DeltaR", 0.5);
 
   fPartonClassifier->fPTMin = GetDouble("PartonPTMin", 0.0);

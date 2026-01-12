@@ -89,22 +89,22 @@ FastJetGridMedianEstimator::~FastJetGridMedianEstimator()
 
 void FastJetGridMedianEstimator::Init()
 {
-  ExRootConfParam param;
+  std::unique_ptr<ExRootConfParam> param;
   Long_t i, size;
   Double_t drap, dphi, rapMin, rapMax;
 
   // read rapidity ranges
 
   param = GetParam("GridRange");
-  size = param.GetSize();
+  size = param->GetSize();
 
   fEstimators.clear();
   for(i = 0; i < size / 4; ++i)
   {
-    rapMin = param[i * 4].GetDouble();
-    rapMax = param[i * 4 + 1].GetDouble();
-    drap = param[i * 4 + 2].GetDouble();
-    dphi = param[i * 4 + 3].GetDouble();
+    rapMin = (*param)[i * 4]->GetDouble();
+    rapMax = (*param)[i * 4 + 1]->GetDouble();
+    drap = (*param)[i * 4 + 2]->GetDouble();
+    dphi = (*param)[i * 4 + 3]->GetDouble();
     fEstimators.push_back(new GridMedianBackgroundEstimator(rapMin, rapMax, drap, dphi));
   }
 

@@ -69,8 +69,6 @@ LLPFilter::~LLPFilter()
 
 void LLPFilter::Init()
 {
-
-  ExRootConfParam param;
   Size_t i, size;
 
   // PT threshold
@@ -104,16 +102,15 @@ void LLPFilter::Init()
   fParticleInputArray =  ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItParticleInputArray = fParticleInputArray->MakeIterator();
 
-
-  param = GetParam("PdgCode");
-  size = param.GetSize();
+  const auto param = GetParam("PdgCode");
+  size = param->GetSize();
 
   // read PdgCodes to be filtered out from the data card
 
   fPdgCodes.clear();
   for(i = 0; i < size; ++i)
   {
-    fPdgCodes.push_back(param[i].GetInt());
+    fPdgCodes.push_back((*param)[i]->GetInt());
   }
 
   // create output array

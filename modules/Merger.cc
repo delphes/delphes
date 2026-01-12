@@ -68,15 +68,15 @@ void Merger::Init()
 {
   // import arrays with output from other modules
 
-  ExRootConfParam param = GetParam("InputArray");
+  const auto param = GetParam("InputArray");
   Long_t i, size;
   const TObjArray *array;
   TIterator *iterator;
 
-  size = param.GetSize();
+  size = param->GetSize();
   for(i = 0; i < size; ++i)
   {
-    array = ImportArray(param[i].GetString());
+    array = ImportArray((*param)[i]->GetString());
     iterator = array->MakeIterator();
 
     fInputList.push_back(iterator);

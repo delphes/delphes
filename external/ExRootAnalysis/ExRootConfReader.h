@@ -3,7 +3,7 @@
 
 /** \class ExRootConfReader
  *
- *  Class handling output ROOT tree
+ *  Class handling input steering card
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -12,49 +12,50 @@
 #include "TNamed.h"
 
 #include <map>
+#include <memory>
 #include <utility>
-
-struct Tcl_Obj;
-struct Tcl_Interp;
 
 class ExRootConfParam
 {
 public:
-  ExRootConfParam(const char *name = 0, Tcl_Obj *object = 0, Tcl_Interp *interp = 0);
+  explicit ExRootConfParam(const char *name = 0);
+  virtual ~ExRootConfParam() = default;
 
-  int GetInt(int defaultValue = 0);
-  long GetLong(long defaultValue = 0);
-  double GetDouble(double defaultValue = 0.0);
-  bool GetBool(bool defaultValue = false);
-  const char *GetString(const char *defaultValue = "");
+  virtual int GetInt(int defaultValue = 0) = 0;
+  virtual long GetLong(long defaultValue = 0) = 0;
+  virtual double GetDouble(double defaultValue = 0.0) = 0;
+  virtual bool GetBool(bool defaultValue = false) = 0;
+  virtual const char *GetString(const char *defaultValue = "") = 0;
 
-  int GetSize();
-  ExRootConfParam operator[](int index);
+  virtual int GetSize() = 0;
+  virtual std::unique_ptr<ExRootConfParam> operator[](int index) = 0;
+  virtual std::unique_ptr<ExRootConfParam> GetParam(const char *paramName) const = 0;
 
-private:
+protected:
   const char *fName; //!
-  Tcl_Obj *fObject; //!
-  Tcl_Interp *fTclInterp; //!
 };
 
 //------------------------------------------------------------------------------
 
-class ExRootConfReader: public TNamed
+class ExRootConfReader : public TNamed
 {
 public:
   typedef std::map<TString, TString> ExRootTaskMap;
 
-  ExRootConfReader();
-  ~ExRootConfReader();
+  static std::unique_ptr<ExRootConfReader> ReadConf(const char *filename);
 
-  void ReadFile(const char *fileName, bool isTop = true);
+  virtual ~ExRootConfReader() = default;
+
+  virtual void ReadFile(const char *fileName, bool isTop = true) = 0;
 
   int GetInt(const char *name, int defaultValue, int index = -1);
   long GetLong(const char *name, long defaultValue, int index = -1);
   double GetDouble(const char *name, double defaultValue, int index = -1);
   bool GetBool(const char *name, bool defaultValue, int index = -1);
   const char *GetString(const char *name, const char *defaultValue, int index = -1);
-  ExRootConfParam GetParam(const char *name);
+
+  virtual std::unique_ptr<ExRootConfParam> GetParam(const char *name) = 0;
+  virtual std::unique_ptr<ExRootConfParam> GetGlobalParam(const char *name);
 
   const ExRootTaskMap *GetModules() const { return &fModules; }
 
@@ -62,14 +63,11 @@ public:
 
   const char *GetTopDir() const { return fTopDir; }
 
-private:
+protected:
+  ExRootConfReader();
+
   const char *fTopDir; //!
-
-  Tcl_Interp *fTclInterp; //!
-
   ExRootTaskMap fModules; //!
-
-  ClassDef(ExRootConfReader, 1)
 };
 
 #endif
