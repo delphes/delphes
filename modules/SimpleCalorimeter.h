@@ -56,7 +56,7 @@ private:
 
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
-  
+
   Double_t fTowerEnergy;
   Double_t fNeutralEnergy;
   Double_t fTrackEnergy;
@@ -97,11 +97,12 @@ private:
 
   std::vector<Double_t> fTrackFractions;
 
-  // Insensitive bins stored as integer indices (etaBin, phiBin) 
-  std::set< std::pair<Short_t, Short_t> > fInsensitiveBinSet;
+  // Insensitive bins stored as integer indices (etaBin, phiBin)
+  std::set<std::pair<Short_t, Short_t> > fInsensitiveBinSet;
 
   // Flag telling whether the *current* tower is insensitive or not
-  inline bool IsTowerInsensitive(Short_t etaBin, Short_t phiBin) const {
+  inline bool IsTowerInsensitive(Short_t etaBin, Short_t phiBin) const
+  {
     return fInsensitiveBinSet.find(std::make_pair(etaBin, phiBin)) != fInsensitiveBinSet.end();
   }
 
