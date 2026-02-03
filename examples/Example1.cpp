@@ -53,7 +53,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-  char *appName = "Example1";
+  char appName[] = "Example1";
 
   if(argc != 2)
   {

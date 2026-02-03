@@ -76,7 +76,7 @@ private:
 
   TDatabasePDG *fPDG;
 
-  int fEventNumber, fMPI, fProcessID, fSignalCode, fVertexCounter, fParticleCounter;
+  int fEventNumber, fMPI, fProcessID, fVertexCounter, fParticleCounter;
   double fScale, fAlphaQCD, fAlphaQED;
 
   double fMomentumCoefficient, fPositionCoefficient;

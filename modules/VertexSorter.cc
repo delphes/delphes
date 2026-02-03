@@ -39,12 +39,6 @@
 
 using namespace std;
 
-static const Double_t mm = 1.;
-static const Double_t m = 1000. * mm;
-static const Double_t ns = 1.;
-static const Double_t s = 1.e+9 * ns;
-static const Double_t c_light = 2.99792458e+8 * m / s;
-
 //------------------------------------------------------------------------------
 
 VertexSorter::VertexSorter() :
