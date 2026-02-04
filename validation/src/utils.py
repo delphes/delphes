@@ -1176,18 +1176,6 @@ class LatexReport:
         tex_line = "\n"
         plots_per_page = False
         for figure in figures:
-            if plt == "resolution":
-                new_batch_size = batch_size
-                if batch_size > 9:  # at max. 9 figures can be displayed per page
-                    new_batch_size = round(batch_size / 2)
-                if i != 0 and i % new_batch_size == 0:
-                    tex_line += "\n" + r"\end{figure}" + "\n" + r"\end{frame}"
-                    tex_line += "\n" + self.begin_frame(" cont'd")
-            elif len(figures) > 9:
-                plots_per_page = round(float(len(figure_dict)) / 2)
-                if i != 0 and plots_per_page and i % plots_per_page == 0:
-                    tex_line += "\n" + r"\end{figure}" + "\n" + r"\end{frame}"
-                    tex_line += "\n" + self.begin_frame(" cont'd")
             tex_line += self.subfigure(figure, "") + "\n"
         tex_line += r"\end{figure}" + "\n" + r"\end{frame}" + "\n" + r"\newpage" + 2 * "\n"
         self.tex_lines += tex_line
