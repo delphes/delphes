@@ -1,3 +1,22 @@
+3.5.1:
+
+- added multiple improvements to the track covariance code (thanks to Franco Bedeschi)
+- fixed behavior of ClusterCounting for high values of beta*gamma (#158)
+- added Kalman filter to track covariance (#170)
+- added pileup energy fraction computation for neutrals and towers from pileup and non-pileup vertices
+- added mass and external vertex constraints to vertex fitting
+- added support for insensitive regions to SimpleCalorimeter (#168)
+- added Durham e+e- kT clustering algorithm
+- added c-tagging support
+- added Pythia8 event weights
+- added CSC cluster modules, classes and a detector card for LLP studies (#103)
+- added ALEPH, DELPHI, L3, OPAL detector cards (#140, #141, #142, #143)
+- added FCC-hh Scenario II card with track covariance (#127)
+- updated IDEA card with dual readout + crystal calorimeter, optimized particle flow parameters, updated tracker geometry
+- updated ATLAS pileup card with more realistic track efficiency and smearing (#124)
+- updated FastJet library to 3.5.1 and FastJet Contrib library to 1.056
+- adapted Python code to Python 3
+
 3.5.0:
 
 - fixed validation code
