@@ -82,8 +82,6 @@ private:
   Int_t fIntParam[kIntParamSize];
   Double_t fDblParam[kDblParamSize];
 
-  Long64_t fTriggerWord, fEventNumber;
-
   ExRootTreeReader *fTreeReader;
   FILE *fOutputFile;
 
@@ -110,7 +108,7 @@ private:
 //------------------------------------------------------------------------------
 
 LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string jetBranchName) :
-  fTriggerWord(0), fEventNumber(1), fTreeReader(0), fOutputFile(0),
+  fTreeReader(0), fOutputFile(0),
   fBranchEvent(0), fBranchTrack(0), fBranchTower(0), fBranchPhoton(0),
   fBranchElectron(0), fBranchMuon(0), fBranchJet(0), fBranchMissingET(0)
 {
@@ -339,7 +337,6 @@ void LHCOWriter::AnalyseMuons()
 void LHCOWriter::AnalyseTauJets()
 {
   Jet *element;
-  Track *track;
   Int_t counter;
 
   fItJet->Reset();

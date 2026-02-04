@@ -29,7 +29,6 @@ void Example1(const char *inputFile)
   // Get pointers to branches used in this analysis
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
   TClonesArray *branchElectron = treeReader->UseBranch("Electron");
-  TClonesArray *branchEvent = treeReader->UseBranch("Event");
 
   // Book histograms
   TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 100, 0.0, 100.0);

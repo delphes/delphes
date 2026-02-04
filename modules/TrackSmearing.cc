@@ -154,7 +154,6 @@ void TrackSmearing::Finish()
 
 void TrackSmearing::Process()
 {
-  Int_t iCandidate = 0;
   TLorentzVector beamSpotPosition;
   Candidate *candidate, *mother;
   Double_t pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
@@ -397,8 +396,6 @@ void TrackSmearing::Process()
 
     candidate->AddCandidate(mother);
     fOutputArray->Add(candidate);
-
-    iCandidate++;
   }
 }
 
