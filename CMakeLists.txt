@@ -71,7 +71,7 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:TrackCovariance>
 )
 
-target_link_libraries(Delphes PUBLIC ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
+target_link_libraries(Delphes PUBLIC ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG ROOT::ROOTNTuple)
 
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes PUBLIC ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
