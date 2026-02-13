@@ -27,13 +27,13 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class AngularSmearing: public DelphesModule
+class AngularSmearing : public DelphesModule
 {
 public:
   AngularSmearing();
@@ -47,11 +47,8 @@ private:
   DelphesFormula *fFormulaEta; //!
   DelphesFormula *fFormulaPhi; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(AngularSmearing, 1)
 };

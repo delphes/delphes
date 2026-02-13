@@ -74,19 +74,6 @@ using namespace fastjet::contrib;
 
 //------------------------------------------------------------------------------
 
-FastJetGridMedianEstimator::FastJetGridMedianEstimator() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-FastJetGridMedianEstimator::~FastJetGridMedianEstimator()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void FastJetGridMedianEstimator::Init()
 {
   ExRootConfParam param;
@@ -109,51 +96,38 @@ void FastJetGridMedianEstimator::Init()
   }
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "Calorimeter/towers"), fInputArray);
+  // create output array
+  GetFactory()->EventModel()->Book(fRhoOutputArray, GetString("RhoOutputArray", "rho"));
 }
 
 //------------------------------------------------------------------------------
 
 void FastJetGridMedianEstimator::Finish()
 {
-  vector<GridMedianBackgroundEstimator *>::iterator itEstimators;
-
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
-  {
+  for(auto itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
     if(*itEstimators) delete *itEstimators;
-  }
-
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void FastJetGridMedianEstimator::Process()
 {
-  Candidate *candidate;
   TLorentzVector momentum;
   Int_t number;
   Double_t rho = 0;
   PseudoJet jet;
   vector<PseudoJet> inputList, outputList;
 
-  vector<GridMedianBackgroundEstimator *>::iterator itEstimators;
-  ;
-
   DelphesFactory *factory = GetFactory();
 
   inputList.clear();
 
   // loop over input objects
-  fItInputArray->Reset();
   number = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    momentum = candidate->Momentum;
+    momentum = candidate.Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
     inputList.push_back(jet);
@@ -162,16 +136,16 @@ void FastJetGridMedianEstimator::Process()
 
   // compute rho and store it
 
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
+  for(auto &estimator : fEstimators)
   {
-    (*itEstimators)->set_particles(inputList);
+    estimator->set_particles(inputList);
 
-    rho = (*itEstimators)->rho();
+    rho = estimator->rho();
 
-    candidate = factory->NewCandidate();
+    auto *candidate = factory->NewCandidate();
     candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
-    candidate->Edges[0] = (*itEstimators)->rapmin();
-    candidate->Edges[1] = (*itEstimators)->rapmax();
-    fRhoOutputArray->Add(candidate);
+    candidate->Edges[0] = estimator->rapmin();
+    candidate->Edges[1] = estimator->rapmax();
+    fRhoOutputArray->emplace_back(*candidate);
   }
 }

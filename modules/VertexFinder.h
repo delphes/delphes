@@ -9,16 +9,16 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 #include <string>
 #include <vector>
 
-class TObjArray;
-class TIterator;
+class Candidate;
 
-class VertexFinder: public DelphesModule
+class VertexFinder : public DelphesModule
 {
 public:
   VertexFinder();
@@ -42,11 +42,9 @@ private:
   Int_t fMinNDF;
   Int_t fGrowSeeds;
 
-  TObjArray *fInputArray;
-  TIterator *fItInputArray;
-
-  TObjArray *fOutputArray;
-  TObjArray *fVertexOutputArray;
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fVertexOutputArray; //!
 
   std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
   std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;

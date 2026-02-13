@@ -30,15 +30,15 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class ExRootSTLVectorFilter;
 
-class ExRootFilter;
+class Candidate;
 class TauTaggingPartonClassifier;
 
-class TaggingParticlesSkimmer: public DelphesModule
+class TaggingParticlesSkimmer : public DelphesModule
 {
 public:
   TaggingParticlesSkimmer();
@@ -54,14 +54,11 @@ private:
 
   TauTaggingPartonClassifier *fClassifier; //!
 
-  ExRootFilter *fFilter;
+  ExRootSTLVectorFilter *fFilter;
 
-  TIterator *fItPartonInputArray; //!
-
-  const TObjArray *fPartonInputArray; //!
-  const TObjArray *fParticleInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fPartonInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(TaggingParticlesSkimmer, 1)
 };

@@ -55,7 +55,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpMergerPythia8::PileUpMergerPythia8() :
-  fFunction(0), fPythia(0), fItInputArray(0)
+  fFunction(0), fPythia(0)
 {
   fFunction = new DelphesTF2;
 }
@@ -95,12 +95,11 @@ void PileUpMergerPythia8::Init()
   fPythia->readFile(fileName);
 
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
 
   // create output arrays
-  fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
+  GetFactory()->EventModel()->Book(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
+  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -121,12 +120,9 @@ void PileUpMergerPythia8::Process()
   Float_t px, py, pz, e;
   Double_t dz, dphi, dt;
   Int_t numberOfEvents, event, numberOfParticles, i;
-  Candidate *candidate, *vertex;
   DelphesFactory *factory;
 
   const Double_t c_light = 2.99792458E8;
-
-  fItInputArray->Reset();
 
   // --- Deal with primary vertex first  ------
 
@@ -136,16 +132,16 @@ void PileUpMergerPythia8::Process()
   dz *= 1.0E3; // necessary in order to make z in mm
   vx = 0.0;
   vy = 0.0;
-  numberOfParticles = fInputArray->GetEntriesFast();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  numberOfParticles = fInputArray->size();
+  for(auto &candidate : *fInputArray)
   {
-    vx += candidate->Position.X();
-    vy += candidate->Position.Y();
-    z = candidate->Position.Z();
-    t = candidate->Position.T();
-    candidate->Position.SetZ(z + dz);
-    candidate->Position.SetT(t + dt);
-    fParticleOutputArray->Add(candidate);
+    vx += candidate.Position.X();
+    vy += candidate.Position.Y();
+    z = candidate.Position.Z();
+    t = candidate.Position.T();
+    candidate.Position.SetZ(z + dz);
+    candidate.Position.SetT(t + dt);
+    fParticleOutputArray->emplace_back(candidate);
   }
 
   if(numberOfParticles > 0)
@@ -156,9 +152,9 @@ void PileUpMergerPythia8::Process()
 
   factory = GetFactory();
 
-  vertex = factory->NewCandidate();
+  auto *vertex = factory->NewCandidate();
   vertex->Position.SetXYZT(vx, vy, dz, dt);
-  fVertexOutputArray->Add(vertex);
+  fVertexOutputArray->emplace_back(*vertex);
 
   // --- Then with pile-up vertices  ------
 
@@ -177,8 +173,7 @@ void PileUpMergerPythia8::Process()
 
   for(event = 0; event < numberOfEvents; ++event)
   {
-    while(!fPythia->next())
-      ;
+    while(!fPythia->next());
 
     // --- Pile-up vertex smearing
 
@@ -210,7 +205,7 @@ void PileUpMergerPythia8::Process()
       z = particle.zProd();
       t = particle.tProd();
 
-      candidate = factory->NewCandidate();
+      auto *candidate = factory->NewCandidate();
 
       candidate->PID = pid;
 
@@ -234,7 +229,7 @@ void PileUpMergerPythia8::Process()
       vx += candidate->Position.X();
       vy += candidate->Position.Y();
 
-      fParticleOutputArray->Add(candidate);
+      fParticleOutputArray->emplace_back(*candidate);
     }
 
     if(numberOfParticles > 0)
@@ -243,11 +238,11 @@ void PileUpMergerPythia8::Process()
       vy /= numberOfParticles;
     }
 
-    vertex = factory->NewCandidate();
+    auto *vertex = factory->NewCandidate();
     vertex->Position.SetXYZT(vx, vy, dz, dt);
     vertex->IsPU = 1;
 
-    fVertexOutputArray->Add(vertex);
+    fVertexOutputArray->emplace_back(*vertex);
   }
 }
 

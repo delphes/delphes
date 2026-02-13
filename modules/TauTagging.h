@@ -23,26 +23,27 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
 #include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
+
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class ExRootFilter;
+class ExRootSTLVectorFilter;
 class TauTaggingPartonClassifier;
 
-class TauTagging: public DelphesModule
+class TauTagging : public DelphesModule
 {
 public:
   TauTagging();
@@ -63,33 +64,28 @@ private:
 
   TauTaggingPartonClassifier *fClassifier; //!
 
-  ExRootFilter *fFilter;
+  ExRootSTLVectorFilter *fFilter;
 
-  TIterator *fItPartonInputArray; //!
-
-  TIterator *fItJetInputArray; //!
-
-  const TObjArray *fParticleInputArray; //!
-
-  const TObjArray *fPartonInputArray; //!
-
-  const TObjArray *fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  InputHandle<std::vector<Candidate> > fPartonInputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
 
   ClassDef(TauTagging, 1)
 };
 
 //------------------------------------------------------------------------------
 
-class TauTaggingPartonClassifier: public ExRootClassifier
+class TauTaggingPartonClassifier : public ExRootClassifier
 {
 public:
-  TauTaggingPartonClassifier(const TObjArray *array);
+  explicit TauTaggingPartonClassifier(const std::vector<Candidate> &array) :
+    fParticleInputArray(array) {}
 
   Int_t GetCategory(TObject *object);
 
   Double_t fEtaMax, fPTMin;
 
-  const TObjArray *fParticleInputArray;
+  const std::vector<Candidate> &fParticleInputArray;
 };
 
 #endif

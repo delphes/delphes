@@ -1,6 +1,6 @@
 /** \class BeamSpotFilter
  *
- *  Extracts beam spot 
+ *  Extracts beam spot
  *
  *  \author Michele Selvaggi
  *
@@ -16,66 +16,29 @@
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-BeamSpotFilter::BeamSpotFilter() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-BeamSpotFilter::~BeamSpotFilter()
-{
-}
-
 //------------------------------------------------------------------------------
 
 void BeamSpotFilter::Init()
 {
-
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "filteredParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void BeamSpotFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void BeamSpotFilter::Process()
 {
-  Candidate *candidate;
-  Bool_t passed = false;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())) && !passed)
+  for(const auto &candidate : *fInputArray)
   {
-    if(candidate->IsPU == 0) passed = true;
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
+    if(candidate.IsPU == 0) break;
   }
 }

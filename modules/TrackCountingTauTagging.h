@@ -5,7 +5,7 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  $Date: 2013-02-22 01:01:36 +0100 (Fri, 22 Feb 2013) $
  *  $Revision: 926 $
@@ -15,17 +15,18 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class ExRootFilter;
+class ExRootSTLVectorFilter;
 class TrackCountingTauTaggingPartonClassifier;
 
-class TrackCountingTauTagging: public DelphesModule
+class TrackCountingTauTagging : public DelphesModule
 {
 public:
   TrackCountingTauTagging();
@@ -46,21 +47,12 @@ private:
 
   TrackCountingTauTaggingPartonClassifier *fClassifier; //!
 
-  ExRootFilter *fFilter;
+  ExRootSTLVectorFilter *fFilter;
 
-  TIterator *fItPartonInputArray; //!
-
-  TIterator *fItTrackInputArray; //!
-
-  TIterator *fItJetInputArray; //!
-
-  const TObjArray *fParticleInputArray; //!
-
-  const TObjArray *fTrackInputArray; //!
-
-  const TObjArray *fPartonInputArray; //!
-
-  const TObjArray *fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fPartonInputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
 
   ClassDef(TrackCountingTauTagging, 1)
 };

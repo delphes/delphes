@@ -9,15 +9,14 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <vector>
 
-class TObjArray;
-class TIterator;
 class Candidate;
 
-class VertexFinderDA4D: public DelphesModule
+class VertexFinderDA4D : public DelphesModule
 {
 public:
   VertexFinderDA4D();
@@ -27,7 +26,7 @@ public:
   void Process();
   void Finish();
 
-  void clusterize(const TObjArray &tracks, TObjArray &clusters);
+  void clusterize(const std::vector<Candidate> &tracks, std::vector<Candidate> &clusters);
   std::vector<Candidate *> vertices();
 
 private:
@@ -45,11 +44,9 @@ private:
   Double_t fD0CutOff;
   Double_t fDtCutOff; // for when the beamspot has time
 
-  TObjArray *fInputArray;
-  TIterator *fItInputArray;
-
-  TObjArray *fOutputArray;
-  TObjArray *fVertexOutputArray;
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fVertexOutputArray; //!
 
   ClassDef(VertexFinderDA4D, 1)
 };

@@ -27,30 +27,26 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TObjArray;
+class Candidate;
 
-class TruthVertexFinder: public DelphesModule
+class TruthVertexFinder : public DelphesModule
 {
 public:
-  TruthVertexFinder();
-  ~TruthVertexFinder();
+  TruthVertexFinder() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-
   Double_t fResolution; //!
 
-  TIterator *fItInputArray; //!
-  TIterator *fItOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fVertexOutputArray; //!
 
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fVertexOutputArray; //!
   ClassDef(TruthVertexFinder, 1)
 };
 

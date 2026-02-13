@@ -27,13 +27,13 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class ImpactParameterSmearing: public DelphesModule
+class ImpactParameterSmearing : public DelphesModule
 {
 public:
   ImpactParameterSmearing();
@@ -46,11 +46,8 @@ public:
 private:
   DelphesFormula *fFormula; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(ImpactParameterSmearing, 1)
 };

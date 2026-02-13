@@ -53,7 +53,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpMerger::PileUpMerger() :
-  fFunction(0), fReader(0), fItInputArray(0)
+  fFunction(0), fReader(0)
 {
   fFunction = new DelphesTF2;
 }
@@ -92,12 +92,11 @@ void PileUpMerger::Init()
   fReader = new DelphesPileUpReader(fileName);
 
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
 
   // create output arrays
-  fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
+  GetFactory()->EventModel()->Book(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
+  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -119,12 +118,9 @@ void PileUpMerger::Process()
   Double_t dz, dphi, dt, sumpt2, dz0, dt0;
   Int_t numberOfEvents, event, numberOfParticles;
   Long64_t allEntries, entry;
-  Candidate *candidate, *vertex;
   DelphesFactory *factory;
 
   const Double_t c_light = 2.99792458E8;
-
-  fItInputArray->Reset();
 
   // --- Deal with primary vertex first  ------
 
@@ -141,20 +137,20 @@ void PileUpMerger::Process()
   vx = 0.0;
   vy = 0.0;
 
-  numberOfParticles = fInputArray->GetEntriesFast();
+  numberOfParticles = fInputArray->size();
   nch = 0;
   sumpt2 = 0.0;
 
   factory = GetFactory();
-  vertex = factory->NewCandidate();
+  auto *vertex = factory->NewCandidate();
 
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(auto &candidate : *fInputArray)
   {
-    vx += candidate->Position.X();
-    vy += candidate->Position.Y();
-    z = candidate->Position.Z();
-    t = candidate->Position.T();
-    pt = candidate->Momentum.Pt();
+    vx += candidate.Position.X();
+    vy += candidate.Position.Y();
+    z = candidate.Position.Z();
+    t = candidate.Position.T();
+    pt = candidate.Momentum.Pt();
 
     // take postion and time from first stable particle
     if(dz0 < -999999.0)
@@ -163,18 +159,18 @@ void PileUpMerger::Process()
       dt0 = t;
 
     // cancel any possible offset in position and time the input file
-    candidate->Position.SetZ(z - dz0 + dz);
-    candidate->Position.SetT(t - dt0 + dt);
+    candidate.Position.SetZ(z - dz0 + dz);
+    candidate.Position.SetT(t - dt0 + dt);
 
-    candidate->IsPU = 0;
+    candidate.IsPU = 0;
 
-    fParticleOutputArray->Add(candidate);
+    fParticleOutputArray->emplace_back(candidate);
 
-    if(TMath::Abs(candidate->Charge) > 1.0E-9)
+    if(TMath::Abs(candidate.Charge) > 1.0E-9)
     {
       nch++;
       sumpt2 += pt * pt;
-      vertex->AddCandidate(candidate);
+      vertex->AddCandidate(&candidate);
     }
   }
 
@@ -190,7 +186,7 @@ void PileUpMerger::Process()
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
   vertex->GenSumPT2 = sumpt2;
-  fVertexOutputArray->Add(vertex);
+  fVertexOutputArray->emplace_back(*vertex);
 
   // --- Then with pile-up vertices  ------
 
@@ -237,11 +233,11 @@ void PileUpMerger::Process()
     sumpt2 = 0.0;
 
     //factory = GetFactory();
-    vertex = factory->NewCandidate();
+    auto *vertex = factory->NewCandidate();
 
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {
-      candidate = factory->NewCandidate();
+      auto *candidate = factory->NewCandidate();
 
       candidate->PID = pid;
 
@@ -274,7 +270,7 @@ void PileUpMerger::Process()
         vertex->AddCandidate(candidate);
       }
 
-      fParticleOutputArray->Add(candidate);
+      fParticleOutputArray->emplace_back(*candidate);
     }
 
     if(numberOfParticles > 0)
@@ -294,7 +290,7 @@ void PileUpMerger::Process()
 
     vertex->IsPU = 1;
 
-    fVertexOutputArray->Add(vertex);
+    fVertexOutputArray->emplace_back(*vertex);
   }
 }
 

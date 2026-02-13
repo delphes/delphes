@@ -27,15 +27,15 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class TrackPileUpSubtractor: public DelphesModule
+class TrackPileUpSubtractor : public DelphesModule
 {
 public:
   TrackPileUpSubtractor();
@@ -50,13 +50,10 @@ private:
 
   Double_t fPTMin;
 
-  std::map<TIterator *, TObjArray *> fInputMap; //!
+  InputHandle<std::vector<Candidate> > fVertexInputArray; //!
+  std::vector<std::pair<InputHandle<std::vector<Candidate> >, OutputHandle<std::vector<Candidate> > > > fInputMap; //!
 
   ClassDef(TrackPileUpSubtractor, 1)
-
-    TIterator *fItVertexInputArray; //!
-
-  const TObjArray *fVertexInputArray; //!
 };
 
 #endif

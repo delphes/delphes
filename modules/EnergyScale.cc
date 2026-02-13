@@ -52,7 +52,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 EnergyScale::EnergyScale() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -72,44 +72,37 @@ void EnergyScale::Init()
 
   fFormula->Compile(GetString("ScaleFormula", "0.0"));
 
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  // import input array(s)
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void EnergyScale::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void EnergyScale::Process()
 {
-  Candidate *candidate;
   TLorentzVector momentum;
   Double_t scale;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    momentum = candidate->Momentum;
+    momentum = candidate.Momentum;
 
     scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
 
     if(scale > 0.0) momentum *= scale;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
+    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    new_candidate->Momentum = momentum;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(*new_candidate);
   }
 }
 

@@ -27,9 +27,10 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TObjArray;
+class Candidate;
 class DelphesTF2;
 
 namespace Pythia8
@@ -37,7 +38,7 @@ namespace Pythia8
 class Pythia;
 };
 
-class PileUpMergerPythia8: public DelphesModule
+class PileUpMergerPythia8 : public DelphesModule
 {
 public:
   PileUpMergerPythia8();
@@ -65,12 +66,9 @@ private:
 
   Pythia8::Pythia *fPythia; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fParticleOutputArray; //!
-  TObjArray *fVertexOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fParticleOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fVertexOutputArray; //!
 
   ClassDef(PileUpMergerPythia8, 1)
 };

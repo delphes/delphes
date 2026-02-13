@@ -27,13 +27,14 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TObjArray;
+class Candidate;
 class DelphesPileUpReader;
 class DelphesTF2;
 
-class PileUpMerger: public DelphesModule
+class PileUpMerger : public DelphesModule
 {
 public:
   PileUpMerger();
@@ -59,12 +60,9 @@ private:
 
   DelphesPileUpReader *fReader; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fParticleOutputArray; //!
-  TObjArray *fVertexOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fParticleOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fVertexOutputArray; //!
 
   ClassDef(PileUpMerger, 1)
 };

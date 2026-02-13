@@ -52,7 +52,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 AngularSmearing::AngularSmearing() :
-  fFormulaEta(0), fFormulaPhi(0), fItInputArray(0)
+  fFormulaEta(0), fFormulaPhi(0)
 {
   fFormulaEta = new DelphesFormula;
   fFormulaPhi = new DelphesFormula;
@@ -76,33 +76,28 @@ void AngularSmearing::Init()
   fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void AngularSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void AngularSmearing::Process()
 {
-  Candidate *candidate, *mother;
+  Candidate *mother = nullptr;
   Double_t pt, eta, phi, e, m;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const TLorentzVector &candidateMomentum = candidate.Momentum;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();
@@ -110,17 +105,17 @@ void AngularSmearing::Process()
     m = candidateMomentum.M();
 
     // apply smearing formula for eta,phi
-    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, candidate));
-    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, candidate));
+    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, &candidate));
+    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, &candidate));
 
     if(pt <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-    candidate->AddCandidate(mother);
+    mother = &candidate;
+    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    new_candidate->AddCandidate(mother);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(*new_candidate);
   }
 }
 

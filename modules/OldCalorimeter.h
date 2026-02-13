@@ -14,6 +14,7 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
@@ -24,7 +25,7 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class OldCalorimeter: public DelphesModule
+class OldCalorimeter : public DelphesModule
 {
 public:
   OldCalorimeter();
@@ -59,32 +60,18 @@ private:
   DelphesFormula *fECalResolutionFormula; //!
   DelphesFormula *fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  OutputHandle<std::vector<Candidate> > fTowerOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fPhotonOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowTrackOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowTowerOutputArray; //!
 
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fTrackInputArray; //!
-
-  TObjArray *fTowerOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
-
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowTowerOutputArray; //!
-
-  TObjArray *fTowerECalArray; //!
-  TIterator *fItTowerECalArray; //!
-
-  TObjArray *fTowerHCalArray; //!
-  TIterator *fItTowerHCalArray; //!
-
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
-
-  TObjArray *fTowerECalTrackArray; //!
-  TIterator *fItTowerECalTrackArray; //!
-
-  TObjArray *fTowerHCalTrackArray; //!
-  TIterator *fItTowerHCalTrackArray; //!
+  std::vector<Candidate> fTowerECalArray; //!
+  std::vector<Candidate> fTowerHCalArray; //!
+  std::vector<Candidate> fTowerTrackArray; //!
+  std::vector<Candidate> fTowerECalTrackArray; //!
+  std::vector<Candidate> fTowerHCalTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

@@ -27,13 +27,13 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class TimeSmearing: public DelphesModule
+class TimeSmearing : public DelphesModule
 {
 public:
   TimeSmearing();
@@ -44,15 +44,11 @@ public:
   void Finish();
 
 private:
-
   DelphesFormula *fResolutionFormula;
   Int_t fVertexTimeMode;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(TimeSmearing, 1)
 };

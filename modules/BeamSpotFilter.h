@@ -5,22 +5,21 @@
 
 /** \class BeamSpotFilter
  *
- *  Extracts beam spot 
+ *  Extracts beam spot
  *
  *  \author Michele Selvaggi
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class BeamSpotFilter: public DelphesModule
+class BeamSpotFilter : public DelphesModule
 {
 public:
-  BeamSpotFilter();
-  ~BeamSpotFilter();
+  BeamSpotFilter() = default;
 
   void Init();
   void Process();
@@ -29,11 +28,8 @@ public:
 private:
   Float_t fPassedOne;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(BeamSpotFilter, 1)
 };

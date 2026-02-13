@@ -22,7 +22,7 @@
 /** \class ParticlePropagator
  *
  *  Propagates charged and neutral particles
- *  from a given vertex to a cylinder defined by its radius, 
+ *  from a given vertex to a cylinder defined by its radius,
  *  its half-length, centered at (0,0,0) and with its axis
  *  oriented along the z-axis.
  *
@@ -30,17 +30,15 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TClonesArray;
-class TIterator;
-class TLorentzVector;
+class Candidate;
 
-class ParticlePropagator: public DelphesModule
+class ParticlePropagator : public DelphesModule
 {
 public:
-  ParticlePropagator();
-  ~ParticlePropagator();
+  ParticlePropagator() = default;
 
   void Init();
   void Process();
@@ -50,16 +48,13 @@ private:
   Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
   Double_t fBz;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-  const TObjArray *fBeamSpotInputArray; //!
-
-  TObjArray *fOutputArray; //!
-  TObjArray *fNeutralOutputArray; //!
-  TObjArray *fChargedHadronOutputArray; //!
-  TObjArray *fElectronOutputArray; //!
-  TObjArray *fMuonOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  InputHandle<std::vector<Candidate> > fBeamSpotInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fNeutralOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fChargedHadronOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fElectronOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fMuonOutputArray; //!
 
   ClassDef(ParticlePropagator, 1)
 };

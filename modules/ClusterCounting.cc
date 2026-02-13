@@ -1,4 +1,4 @@
-   /*
+/*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2020  Universite catholique de Louvain (UCLouvain), Belgium
  *
@@ -27,14 +27,15 @@
  *
  */
 
-#include "modules/ClusterCounting.h"
-#include "classes/DelphesClasses.h"
 #include "TrackCovariance/TrkUtil.h"
+#include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
+#include "modules/ClusterCounting.h"
 
 #include "TLorentzVector.h"
-#include "TVectorD.h"
 #include "TMath.h"
 #include "TObjArray.h"
+#include "TVectorD.h"
 
 #include <iostream>
 #include <sstream>
@@ -62,13 +63,13 @@ void ClusterCounting::Init()
 {
 
   // geometric acceptance
-  fRmin  = GetDouble("Rmin", 0.);
-  fRmax  = GetDouble("Rmax", 0.);
-  fZmin  = GetDouble("Zmin", 0.);
-  fZmax  = GetDouble("Zmax", 0.);
+  fRmin = GetDouble("Rmin", 0.);
+  fRmax = GetDouble("Rmax", 0.);
+  fZmin = GetDouble("Zmin", 0.);
+  fZmax = GetDouble("Zmax", 0.);
 
   // magnetic field
-  fBz    = GetDouble("Bz", 0.);
+  fBz = GetDouble("Bz", 0.);
 
   // gas mix option: 0
   // 0:  Helium 90 - Isobutane 10
@@ -82,57 +83,51 @@ void ClusterCounting::Init()
   fTrackUtil->SetDchBoundaries(fRmin, fRmax, fZmin, fZmax);
   fTrackUtil->SetGasMix(fGasOption);
 
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  // import input array(s)
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void ClusterCounting::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void ClusterCounting::Process()
 {
-  Candidate *candidate, *mother, *particle;
   Double_t mass, trackLength, Ncl;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(auto &candidate : *fInputArray)
   {
+    // converting to meters
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
 
     // converting to meters
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
-
-    // converting to meters
-    const TLorentzVector &candidatePosition = particle->Position*1e-03;
+    const TLorentzVector &candidatePosition = particle->Position * 1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
-		TVectorD Par = TrkUtil::XPtoPar(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz);
+    TVectorD Par = TrkUtil::XPtoPar(candidatePosition.Vect(), candidateMomentum.Vect(), candidate.Charge, fBz);
     mass = candidateMomentum.M();
 
     trackLength = fTrackUtil->TrkLen(Par);
 
-    mother    = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    auto *mother = &candidate;
+    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
 
     Ncl = 0.;
-    if (fTrackUtil->IonClusters(Ncl, mass, Par))
+    if(fTrackUtil->IonClusters(Ncl, mass, Par))
     {
-      candidate->Nclusters = Ncl;
-      candidate->dNdx = (trackLength > 0.) ? Ncl/trackLength : -1;
+      new_candidate->Nclusters = Ncl;
+      new_candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
     }
 
-    candidate->AddCandidate(mother);
+    new_candidate->AddCandidate(mother);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(*new_candidate);
   }
 }
 

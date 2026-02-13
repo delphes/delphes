@@ -28,18 +28,16 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TClonesArray;
-class TIterator;
 class TLorentzVector;
 class Candidate;
 
-class UnstablePropagator: public DelphesModule
+class UnstablePropagator : public DelphesModule
 {
 public:
-  UnstablePropagator();
-  ~UnstablePropagator();
+  UnstablePropagator() = default;
 
   void Init();
   void Process();
@@ -51,11 +49,9 @@ private:
   Double_t fLmin; // minimum
 
   Bool_t fDebug;
-  TIterator *fItInputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
 
-  const TObjArray *fInputArray; //!
-
-  std::vector < Int_t > DaughterIndices(Candidate *candidate);
+  std::vector<Int_t> DaughterIndices(Candidate *candidate);
   void PrintPart(TString prefix, Candidate *candidate);
   Double_t FlightDistance(Candidate *mother, Candidate *daughter);
   Int_t Index(Candidate *candidate);

@@ -52,7 +52,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 ImpactParameterSmearing::ImpactParameterSmearing() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -73,36 +73,29 @@ void ImpactParameterSmearing::Init()
   fFormula->Compile(GetString("ResolutionFormula", "0.0"));
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
-
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void ImpactParameterSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void ImpactParameterSmearing::Process()
 {
-  Candidate *candidate, *particle, *mother;
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(auto &candidate : *fInputArray) //TODO: ensure const safety
   {
 
     // take momentum before smearing (otherwise apply double smearing on d0)
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
 
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
@@ -115,9 +108,9 @@ void ImpactParameterSmearing::Process()
     py = candidateMomentum.Py();
 
     // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
-    xd = candidate->Xd;
-    yd = candidate->Yd;
-    zd = candidate->Zd;
+    xd = candidate.Xd;
+    yd = candidate.Yd;
+    zd = candidate.Zd;
 
     // calculate smeared values
     sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
@@ -134,18 +127,16 @@ void ImpactParameterSmearing::Process()
     dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
-    mother = candidate;
+    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    new_candidate->Xd = xd;
+    new_candidate->Yd = yd;
+    new_candidate->Zd = zd;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Xd = xd;
-    candidate->Yd = yd;
-    candidate->Zd = zd;
+    new_candidate->D0 = d0;
+    new_candidate->ErrorD0 = dd0;
 
-    candidate->D0 = d0;
-    candidate->ErrorD0 = dd0;
-
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(&candidate); // ensure parentage
+    fOutputArray->emplace_back(*new_candidate);
   }
 }
 

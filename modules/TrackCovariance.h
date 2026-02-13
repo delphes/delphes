@@ -28,17 +28,17 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
 class SolGeom;
 class SolGridCov;
 class AcceptanceClx;
 class DelphesFormula;
 
-class TrackCovariance: public DelphesModule
+class TrackCovariance : public DelphesModule
 {
 public:
   TrackCovariance();
@@ -61,11 +61,8 @@ private:
 
   AcceptanceClx *fAcx;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(TrackCovariance, 1)
 };

@@ -27,22 +27,21 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 #include <vector>
 
-class TObjArray;
-class TIterator;
+class Candidate;
 
 namespace fastjet
 {
 class GridMedianBackgroundEstimator;
 }
 
-class FastJetGridMedianEstimator: public DelphesModule
+class FastJetGridMedianEstimator : public DelphesModule
 {
 public:
-  FastJetGridMedianEstimator();
-  ~FastJetGridMedianEstimator();
+  FastJetGridMedianEstimator() = default;
 
   void Init();
   void Process();
@@ -51,11 +50,8 @@ public:
 private:
   std::vector<fastjet::GridMedianBackgroundEstimator *> fEstimators; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fRhoOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fRhoOutputArray; //!
 
   ClassDef(FastJetGridMedianEstimator, 1)
 };

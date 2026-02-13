@@ -27,17 +27,15 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-#include <map>
+class Candidate;
 
-class TObjArray;
-
-class TrackCountingBTagging: public DelphesModule
+class TrackCountingBTagging : public DelphesModule
 {
 public:
-  TrackCountingBTagging();
-  ~TrackCountingBTagging();
+  TrackCountingBTagging() = default;
 
   void Init();
   void Process();
@@ -53,11 +51,8 @@ private:
   Int_t fNtracks;
   Bool_t fUse3D;
 
-  TIterator *fItTrackInputArray; //!
-  TIterator *fItJetInputArray; //!
-
-  const TObjArray *fTrackInputArray; //!
-  const TObjArray *fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
 
   ClassDef(TrackCountingBTagging, 1)
 };

@@ -26,6 +26,8 @@
  *
  */
 
+#include "ExRootAnalysis/ExRootSTLVectorFilter.h"
+
 #include "modules/TauTagging.h"
 
 #include "classes/DelphesClasses.h"
@@ -48,21 +50,13 @@
 using namespace std;
 
 //------------------------------------------------------------------------------
-TauTaggingPartonClassifier::TauTaggingPartonClassifier(const TObjArray *array) :
-  fParticleInputArray(array)
-{
-}
-
-//------------------------------------------------------------------------------
 
 Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 {
   Candidate *tau = static_cast<Candidate *>(object);
-  Candidate *daughter1 = 0;
-  Candidate *daughter2 = 0;
 
   const TLorentzVector &momentum = tau->Momentum;
-  Int_t pdgCode, i, j;
+  Int_t pdgCode;
 
   pdgCode = TMath::Abs(tau->PID);
   if(pdgCode != 15) return -1;
@@ -73,24 +67,24 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D2 < tau->D1) return -1;
 
-  if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+  if(tau->D1 >= static_cast<int>(fParticleInputArray.size()) || tau->D2 >= static_cast<int>(fParticleInputArray.size()))
   {
     throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
   }
 
-  for(i = tau->D1; i <= tau->D2; ++i)
+  for(int i = tau->D1; i <= tau->D2; ++i)
   {
-    daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
-    pdgCode = TMath::Abs(daughter1->PID);
+    const auto &daughter1 = fParticleInputArray.at(i);
+    pdgCode = TMath::Abs(daughter1.PID);
     //if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
     //  return -1;
     if(pdgCode == 24)
     {
-      if(daughter1->D1 < 0) return -1;
-      for(j = daughter1->D1; j <= daughter1->D2; ++j)
+      if(daughter1.D1 < 0) return -1;
+      for(int j = daughter1.D1; j <= daughter1.D2; ++j)
       {
-        daughter2 = static_cast<Candidate *>(fParticleInputArray->At(j));
-        pdgCode = TMath::Abs(daughter2->PID);
+        const auto &daughter2 = fParticleInputArray.at(j);
+        pdgCode = TMath::Abs(daughter2.PID);
         if(pdgCode == 11 || pdgCode == 13) return -1;
       }
     }
@@ -101,8 +95,7 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 //------------------------------------------------------------------------------
 
 TauTagging::TauTagging() :
-  fClassifier(0), fFilter(0),
-  fItPartonInputArray(0), fItJetInputArray(0)
+  fClassifier(0), fFilter(0)
 {
 }
 
@@ -149,20 +142,15 @@ void TauTagging::Init()
   }
 
   // import input array(s)
+  GetFactory()->EventModel()->Attach(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
+  GetFactory()->EventModel()->Attach(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray);
+  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
 
-  fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
-
-  fClassifier = new TauTaggingPartonClassifier(fParticleInputArray);
+  fClassifier = new TauTaggingPartonClassifier(*fParticleInputArray);
   fClassifier->fPTMin = GetDouble("TauPTMin", 1.0);
   fClassifier->fEtaMax = GetDouble("TauEtaMax", 2.5);
 
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
-
-  fFilter = new ExRootFilter(fPartonInputArray);
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+  fFilter = new ExRootSTLVectorFilter(*fPartonInputArray);
 }
 
 //------------------------------------------------------------------------------
@@ -174,8 +162,6 @@ void TauTagging::Finish()
 
   if(fFilter) delete fFilter;
   if(fClassifier) delete fClassifier;
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
 
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
   {
@@ -188,25 +174,20 @@ void TauTagging::Finish()
 
 void TauTagging::Process()
 {
-  Candidate *jet, *tau, *daughter, *part;
   TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e, eff;
-  TObjArray *tauArray;
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
-  Int_t pdgCode, charge, i;
+  Int_t pdgCode, charge;
 
   // select taus
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier, 0);
+  const auto tauArray = fFilter->GetSubArray(fClassifier, 0);
 
   // loop over all input jets
-  fItJetInputArray->Reset();
-
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(auto &jet : *fJetInputArray)
   {
-
-    const TLorentzVector &jetMomentum = jet->Momentum;
+    const TLorentzVector &jetMomentum = jet.Momentum;
     pdgCode = 0;
     charge = gRandom->Uniform() > 0.5 ? 1 : -1;
     eta = jetMomentum.Eta();
@@ -215,57 +196,55 @@ void TauTagging::Process()
     e = jetMomentum.E();
 
     // loop over all input taus
-    if(tauArray)
+    if(!tauArray.empty())
     {
-      TIter itTauArray(tauArray);
-      while((tau = static_cast<Candidate *>(itTauArray.Next())))
+      for(const auto &tau : tauArray)
       {
-        if(tau->D1 < 0) continue;
+        if(tau.D1 < 0) continue;
 
-        if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+        if(tau.D1 >= static_cast<int>(fParticleInputArray->size()) || tau.D2 >= static_cast<int>(fParticleInputArray->size()))
         {
           throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
         }
 
         tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
 
-        for(i = tau->D1; i <= tau->D2; ++i)
+        for(int i = tau.D1; i <= tau.D2; ++i)
         {
-          daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
-          if(TMath::Abs(daughter->PID) == 16) continue;
-          tauMomentum += daughter->Momentum;
+          const auto &daughter = fParticleInputArray->at(i);
+          if(TMath::Abs(daughter.PID) == 16) continue;
+          tauMomentum += daughter.Momentum;
         }
 
         if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
         {
           pdgCode = 15;
-          charge = tau->Charge;
+          charge = tau.Charge;
         }
       }
     }
 
     // fake electrons and muons
 
-    if (pdgCode == 0)
+    if(pdgCode == 0)
     {
 
       Double_t drMin = fDeltaR;
-      fItPartonInputArray->Reset();
-      while((part = static_cast<Candidate *>(fItPartonInputArray->Next())))
+      for(const auto &part : *fPartonInputArray)
       {
-        if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13)
+        if(TMath::Abs(part.PID) == 11 || TMath::Abs(part.PID) == 13)
         {
-            tauMomentum = part->Momentum;
-            if (tauMomentum.Pt() < fClassifier->fPTMin) continue;
-            if (TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
+          tauMomentum = part.Momentum;
+          if(tauMomentum.Pt() < fClassifier->fPTMin) continue;
+          if(TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
 
-            Double_t dr = jetMomentum.DeltaR(tauMomentum);
-            if( dr < drMin)
-            {
-               drMin = dr;
-               pdgCode = TMath::Abs(part->PID);
-               charge = part->Charge;
-            }
+          Double_t dr = jetMomentum.DeltaR(tauMomentum);
+          if(dr < drMin)
+          {
+            drMin = dr;
+            pdgCode = TMath::Abs(part.PID);
+            charge = part.Charge;
+          }
         }
       }
     }
@@ -280,12 +259,12 @@ void TauTagging::Process()
 
     // apply an efficency formula
     eff = formula->Eval(pt, eta, phi, e);
-    jet->TauFlavor = pdgCode;
-    jet->TauTag |= (gRandom->Uniform() <= eff) << fBitNumber;
-    jet->TauWeight = eff;
+    jet.TauFlavor = pdgCode;
+    jet.TauTag |= (gRandom->Uniform() <= eff) << fBitNumber;
+    jet.TauWeight = eff;
 
     // set tau charge
-    jet->Charge = charge;
+    jet.Charge = charge;
   }
 }
 

@@ -69,9 +69,7 @@ TrackPileUpSubtractor::~TrackPileUpSubtractor()
 void TrackPileUpSubtractor::Init()
 {
   // import input array
-
-  fVertexInputArray = ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"));
-  fItVertexInputArray = fVertexInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("VertexInputArray", "PileUpMerger/vertices"), fVertexInputArray);
 
   // read resolution formula in m
   fFormula->Compile(GetString("ZVertexResolution", "0.001"));
@@ -81,17 +79,12 @@ void TrackPileUpSubtractor::Init()
   // import arrays with output from other modules
 
   ExRootConfParam param = GetParam("InputArray");
-  Long_t i, size;
-  const TObjArray *array;
-  TIterator *iterator;
 
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
+  for(Long_t i = 0; i < param.GetSize() / 2; ++i)
   {
-    array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
-
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
+    auto &[input_collection, output_collection] = fInputMap.emplace_back();
+    GetFactory()->EventModel()->Attach(param[i * 2].GetString(), input_collection);
+    GetFactory()->EventModel()->Book(output_collection, param[i * 2 + 1].GetString());
   }
 }
 
@@ -99,53 +92,32 @@ void TrackPileUpSubtractor::Init()
 
 void TrackPileUpSubtractor::Finish()
 {
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  TIterator *iterator;
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-
-    if(iterator) delete iterator;
-  }
-
-  if(fItVertexInputArray) delete fItVertexInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void TrackPileUpSubtractor::Process()
 {
-  Candidate *candidate, *particle;
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  TIterator *iterator;
-  TObjArray *array;
   Double_t z, zvtx = 0;
   Double_t pt, eta, phi, e;
 
   // find z position of primary vertex
-
-  fItVertexInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
+  for(const auto &candidate : *fVertexInputArray)
   {
-    if(!candidate->IsPU)
+    if(!candidate.IsPU)
     {
-      zvtx = candidate->Position.Z();
+      zvtx = candidate.Position.Z();
       // break;
     }
   }
 
   // loop over all input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
+  for(const auto &[input_collection, output_collection] : fInputMap)
   {
-    iterator = itInputMap->first;
-    array = itInputMap->second;
-
     // loop over all candidates
-    iterator->Reset();
-    while((candidate = static_cast<Candidate *>(iterator->Next())))
+    for(auto &candidate : *input_collection)
     {
-      particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+      auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
       const TLorentzVector &candidateMomentum = particle->Momentum;
 
       eta = candidateMomentum.Eta();
@@ -158,14 +130,14 @@ void TrackPileUpSubtractor::Process()
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
 
-      if(candidate->Charge != 0 && candidate->IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
+      if(candidate.Charge != 0 && candidate.IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
       {
-        candidate->IsRecoPU = 1;
+        candidate.IsRecoPU = 1;
       }
       else
       {
-        candidate->IsRecoPU = 0;
-        if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
+        candidate.IsRecoPU = 0;
+        if(candidate.Momentum.Pt() > fPTMin) output_collection->emplace_back(candidate);
       }
     }
   }

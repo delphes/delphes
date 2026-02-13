@@ -28,17 +28,16 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class IdentificationMap: public DelphesModule
+class IdentificationMap : public DelphesModule
 {
 public:
-  IdentificationMap();
-  ~IdentificationMap();
+  IdentificationMap() = default;
 
   void Init();
   void Process();
@@ -49,11 +48,8 @@ private:
 
   TMisIDMap fEfficiencyMap; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(IdentificationMap, 1)
 };

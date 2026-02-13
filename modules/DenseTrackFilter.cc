@@ -51,19 +51,6 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DenseTrackFilter::DenseTrackFilter() :
-  fItTrackInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-DenseTrackFilter::~DenseTrackFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void DenseTrackFilter::Init()
 {
   ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
@@ -111,13 +98,13 @@ void DenseTrackFilter::Init()
   // Eta x Phi smearing to be applied
   fEtaPhiRes = GetDouble("EtaPhiRes", 0.003);
 
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMergerProp/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
-
-  fTrackOutputArray = ExportArray(GetString("TrackOutputArray", "tracks"));
-  fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
-  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons"));
-  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons"));
+  // import input arrays
+  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "TrackMergerProp/tracks"), fTrackInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fTrackOutputArray, GetString("TrackOutputArray", "tracks"));
+  GetFactory()->EventModel()->Book(fChargedHadronOutputArray, GetString("ChargedHadronOutputArray", "chargedHadrons"));
+  GetFactory()->EventModel()->Book(fElectronOutputArray, GetString("ElectronOutputArray", "electrons"));
+  GetFactory()->EventModel()->Book(fMuonOutputArray, GetString("MuonOutputArray", "muons"));
 }
 
 //------------------------------------------------------------------------------
@@ -125,7 +112,6 @@ void DenseTrackFilter::Init()
 void DenseTrackFilter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  if(fItTrackInputArray) delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;
@@ -136,7 +122,6 @@ void DenseTrackFilter::Finish()
 
 void DenseTrackFilter::Process()
 {
-  Candidate *track;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
@@ -152,11 +137,10 @@ void DenseTrackFilter::Process()
   fTowerHits.clear();
 
   // loop over all tracks
-  fItTrackInputArray->Reset();
   number = -1;
-  while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  for(const auto &track : *fTrackInputArray)
   {
-    const TLorentzVector &trackPosition = track->Position;
+    const TLorentzVector &trackPosition = track.Position;
     ++number;
 
     // find eta bin [1, fEtaBins.size - 1]
@@ -186,7 +170,7 @@ void DenseTrackFilter::Process()
 
   // loop over all hits
   towerEtaPhi = 0;
-  fBestTrack = 0;
+  fBestTrack = nullptr;
   ptmax = 0.0;
   fTowerTrackHits = 0;
 
@@ -194,7 +178,7 @@ void DenseTrackFilter::Process()
   {
     towerHit = (*itTowerHits);
     flags = (towerHit >> 24) & 0x00000000000000FFLL;
-    number = (towerHit)&0x0000000000FFFFFFLL;
+    number = (towerHit) & 0x0000000000FFFFFFLL;
     hitEtaPhi = towerHit >> 32;
 
     if(towerEtaPhi != hitEtaPhi)
@@ -207,20 +191,20 @@ void DenseTrackFilter::Process()
 
       ptmax = 0.0;
       fTowerTrackHits = 0;
-      fBestTrack = 0;
+      fBestTrack = nullptr;
     }
     // check for track hits
 
     if(flags & 1)
     {
       ++fTowerTrackHits;
-      track = static_cast<Candidate *>(fTrackInputArray->At(number));
-      momentum = track->Momentum;
+      const auto &track = fTrackInputArray->at(number);
+      momentum = track.Momentum;
 
       if(momentum.Pt() > ptmax)
       {
         ptmax = momentum.Pt();
-        fBestTrack = track;
+        fBestTrack = const_cast<Candidate *>(&track);
       }
       continue;
     }
@@ -234,8 +218,6 @@ void DenseTrackFilter::Process()
 
 void DenseTrackFilter::FillTrack()
 {
-
-  Candidate *candidate, *track;
   Double_t pt, eta, phi, m;
   Int_t numberOfCandidates;
 
@@ -245,8 +227,8 @@ void DenseTrackFilter::FillTrack()
   numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
   if(numberOfCandidates < 1) return;
 
-  track = static_cast<Candidate *>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
-  candidate = static_cast<Candidate *>(track->Clone());
+  auto *track = static_cast<Candidate *>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
+  auto *candidate = static_cast<Candidate *>(track->Clone());
   pt = candidate->Momentum.Pt();
   eta = candidate->Momentum.Eta();
   phi = candidate->Momentum.Phi();
@@ -257,16 +239,16 @@ void DenseTrackFilter::FillTrack()
   candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
   candidate->AddCandidate(track);
 
-  fTrackOutputArray->Add(candidate);
+  fTrackOutputArray->emplace_back(*candidate);
   switch(TMath::Abs(candidate->PID))
   {
   case 11:
-    fElectronOutputArray->Add(candidate);
+    fElectronOutputArray->emplace_back(*candidate);
     break;
   case 13:
-    fMuonOutputArray->Add(candidate);
+    fMuonOutputArray->emplace_back(*candidate);
     break;
   default:
-    fChargedHadronOutputArray->Add(candidate);
+    fChargedHadronOutputArray->emplace_back(*candidate);
   }
 }

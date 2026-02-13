@@ -49,17 +49,7 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-UniqueObjectFinder::UniqueObjectFinder()
-{
-}
-
-//------------------------------------------------------------------------------
-
-UniqueObjectFinder::~UniqueObjectFinder()
-{
-}
+//TODO: large refactoring of this code with change of memory management. A thorough validation is required!
 
 //------------------------------------------------------------------------------
 
@@ -72,18 +62,15 @@ void UniqueObjectFinder::Init()
 
   ExRootConfParam param = GetParam("InputArray");
   Long_t i, size;
-  const TObjArray *array;
-  TIterator *iterator;
 
   fInputMap.clear();
 
   size = param.GetSize();
   for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
-
-    fInputMap.push_back(make_pair(iterator, ExportArray(param[i * 2 + 1].GetString())));
+    auto &[input_collection, output_collection] = fInputMap.emplace_back();
+    GetFactory()->EventModel()->Attach(param[i * 2].GetString(), input_collection);
+    GetFactory()->EventModel()->Book(output_collection, param[i * 2 + 1].GetString());
   }
 }
 
@@ -91,39 +78,21 @@ void UniqueObjectFinder::Init()
 
 void UniqueObjectFinder::Finish()
 {
-  vector<pair<TIterator *, TObjArray *> >::iterator itInputMap;
-  TIterator *iterator;
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-
-    if(iterator) delete iterator;
-  }
 }
 
 //------------------------------------------------------------------------------
 
 void UniqueObjectFinder::Process()
 {
-  Candidate *candidate;
-  vector<pair<TIterator *, TObjArray *> >::iterator itInputMap;
-  TIterator *iterator;
-  TObjArray *array;
-
   // loop over all input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
+  for(const auto &[input_collection, output_collection] : fInputMap)
   {
-    iterator = itInputMap->first;
-    array = itInputMap->second;
-
     // loop over all candidates
-    iterator->Reset();
-    while((candidate = static_cast<Candidate *>(iterator->Next())))
+    for(const auto &candidate : *input_collection)
     {
-      if(Unique(candidate, itInputMap))
+      if(Unique(&candidate, fInputMap.begin()))
       {
-        array->Add(candidate);
+        output_collection->emplace_back(candidate);
       }
     }
   }
@@ -131,32 +100,24 @@ void UniqueObjectFinder::Process()
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector<pair<TIterator *, TObjArray *> >::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(const Candidate *candidate, InputMap::iterator itInputMap)
 {
-  Candidate *previousCandidate;
-  vector<pair<TIterator *, TObjArray *> >::iterator previousItInputMap;
-  TObjArray *array;
-
   // loop over previous arrays
-  for(previousItInputMap = fInputMap.begin(); previousItInputMap != itInputMap; ++previousItInputMap)
+  for(auto &[input_collection, output_collection] : fInputMap)
   {
-    array = previousItInputMap->second;
-    TIter iterator(array);
-
     // loop over all candidates
-    iterator.Reset();
-    while((previousCandidate = static_cast<Candidate *>(iterator.Next())))
+    for(const auto &other_candidate : *output_collection)
     {
       if(fUseUniqueID)
       {
-        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID())
+        if(candidate->GetUniqueID() == other_candidate.GetUniqueID())
         {
           return kFALSE;
         }
       }
       else
       {
-        if(candidate->Overlaps(previousCandidate))
+        if(candidate->Overlaps(&other_candidate))
         {
           return kFALSE;
         }

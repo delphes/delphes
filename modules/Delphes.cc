@@ -57,8 +57,7 @@
 
 using namespace std;
 
-Delphes::Delphes(const char *name) :
-  fFactory(0)
+Delphes::Delphes(const char *name)
 {
   TFolder *folder;
 

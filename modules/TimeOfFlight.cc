@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /** \class TimeOfFlight
+/** \class TimeOfFlight
   *
   *  Calculates Time-Of-Flight
   *
@@ -48,18 +48,6 @@
 #include <stdexcept>
 
 using namespace std;
-//------------------------------------------------------------------------------
-
-TimeOfFlight::TimeOfFlight() :
-  fItInputArray(0), fItVertexInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-TimeOfFlight::~TimeOfFlight()
-{
-}
 
 //------------------------------------------------------------------------------
 
@@ -70,30 +58,26 @@ void TimeOfFlight::Init()
   fVertexTimeMode = GetInt("VertexTimeMode", 0);
 
   // import track input array
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "MuonMomentumSmearing/muons"), fInputArray);
 
   // import vertex input array
-  fVertexInputArray = ImportArray(GetString("VertexInputArray", "TruthVertexFinder/vertices"));
-  fItVertexInputArray = fVertexInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("VertexInputArray", "TruthVertexFinder/vertices"), fVertexInputArray);
 
   // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void TimeOfFlight::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-  if(fItVertexInputArray) delete fItVertexInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void TimeOfFlight::Process()
 {
-  Candidate *candidate, *particle, *vertex, *constituent, *mother;
+  Candidate *constituent;
   Double_t ti, t_truth, tf;
   Double_t l, tof, beta;
 
@@ -102,63 +86,58 @@ void TimeOfFlight::Process()
   // first compute momenta of vertices based on reconstructed tracks
   ComputeVertexMomenta();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(auto &candidate : *fInputArray) //TODO: ensure const-qualification of consumers
   {
 
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
 
     const TLorentzVector &candidateInitialPosition = particle->Position;
-    const TLorentzVector &candidateInitialPositionSmeared = candidate->InitialPosition;
-    const TLorentzVector &candidateFinalPosition = candidate->Position;
+    const TLorentzVector &candidateInitialPositionSmeared = candidate.InitialPosition;
+    const TLorentzVector &candidateFinalPosition = candidate.Position;
 
     // time at vertex from MC truth
     t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
 
     // various options on how to calculate the vertex time
-    ti=0;
-    switch (fVertexTimeMode)
-	  {
-    	case 0:
-    	{
-        // assume ti from MC truth
-        // most aggressive, we are cheating and assume we can perfectly reconstruct time of primary and secondary vertices
-        ti = t_truth;
-        break;
-    	}
-    	case 1:
-    	{
-        // always assume t=0, most conservative assumption
-        // reasonable assumption for particles originating from PV, if beamSpot has small time spread compared to timing resolution
-        // probably bad assumption for particles from highly displaced vertices (i.e Ks)
-        ti=0;
-        break;
-    	}
-    	case 2:
-    	{
-        // same as 2 but attempt at estimate beta from vertex mass and momentum
-        beta = 1.;
-        fItVertexInputArray->Reset();
-        while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
-        {
-          TIter itGenParts(vertex->GetCandidates());
-          itGenParts.Reset();
-
-          while((constituent = static_cast<Candidate *>(itGenParts.Next())))
-          {
-            if (particle == constituent)
-            {
-              beta = vertex->Momentum.Beta();
-              break;
-            }
-          }
-        } // end vertex  loop
-
-        // track displacement to be possibily replaced by vertex fitted position
-        ti = candidateInitialPositionSmeared.Vect().Mag() * 1.0E-3 /(beta*c_light);
-      }
+    ti = 0;
+    switch(fVertexTimeMode)
+    {
+    case 0: {
+      // assume ti from MC truth
+      // most aggressive, we are cheating and assume we can perfectly reconstruct time of primary and secondary vertices
+      ti = t_truth;
       break;
-  	}
+    }
+    case 1: {
+      // always assume t=0, most conservative assumption
+      // reasonable assumption for particles originating from PV, if beamSpot has small time spread compared to timing resolution
+      // probably bad assumption for particles from highly displaced vertices (i.e Ks)
+      ti = 0;
+      break;
+    }
+    case 2: {
+      // same as 2 but attempt at estimate beta from vertex mass and momentum
+      beta = 1.;
+      for(auto &vertex : *fVertexInputArray) //TODO: ensure const-qualification of consumers
+      {
+        TIter itGenParts(vertex.GetCandidates());
+        itGenParts.Reset();
+
+        while((constituent = static_cast<Candidate *>(itGenParts.Next())))
+        {
+          if(particle == constituent)
+          {
+            beta = vertex.Momentum.Beta();
+            break;
+          }
+        }
+      } // end vertex  loop
+
+      // track displacement to be possibily replaced by vertex fitted position
+      ti = candidateInitialPositionSmeared.Vect().Mag() * 1.0E-3 / (beta * c_light);
+    }
+    break;
+    }
 
     // this quantity has already been smeared by another module
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
@@ -166,23 +145,22 @@ void TimeOfFlight::Process()
     // calculate time-of-flight
     tof = tf - ti;
     // path length of the full helix
-    l = candidate->L * 1.0E-3;
+    l = candidate.L * 1.0E-3;
 
     // particle velocity
-    beta = l/(c_light*tof);
+    beta = l / (c_light * tof);
 
     // calculate particle mass (i.e particle ID)
-    mother    = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
 
     // update time at vertex based on option
-    candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
+    new_candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
 
     // update particle mass based on TOF-based PID (commented for now, assume this calculation is done offline)
-    //candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
+    //new_candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(&candidate); // keep parentage
+    fOutputArray->emplace_back(*new_candidate);
   }
 }
 
@@ -190,27 +168,21 @@ void TimeOfFlight::Process()
 
 void TimeOfFlight::ComputeVertexMomenta()
 {
-  Candidate *track, *constituent, *particle, *vertex;
+  Candidate *constituent;
 
-  fItVertexInputArray->Reset();
-  while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
+  for(auto &vertex : *fVertexInputArray)
   {
-
-    TIter itGenParts(vertex->GetCandidates());
+    TIter itGenParts(vertex.GetCandidates());
     itGenParts.Reset();
 
     while((constituent = static_cast<Candidate *>(itGenParts.Next())))
     {
-      fItInputArray->Reset();
-      while((track = static_cast<Candidate *>(fItInputArray->Next())))
+      for(auto &track : *fInputArray)
       {
         // get gen part that generated track
-        particle = static_cast<Candidate *>(track->GetCandidates()->At(0));
-        if (particle == constituent)
-        {
-          vertex->Momentum += track->Momentum;
-        }
-
+        auto *particle = static_cast<Candidate *>(track.GetCandidates()->At(0));
+        if(particle == constituent)
+          vertex.Momentum += track.Momentum;
       } // end track loop
     } // end vertex consitutent loop
   } // end vertex  loop

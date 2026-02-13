@@ -30,14 +30,15 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TObjArray;
+class ExRootSTLVectorFilter;
 
-class ExRootFilter;
+class Candidate;
 class IsolationClassifier;
 
-class Isolation: public DelphesModule
+class Isolation : public DelphesModule
 {
 public:
   Isolation();
@@ -64,21 +65,12 @@ private:
 
   IsolationClassifier *fClassifier; //!
 
-  ExRootFilter *fFilter;
+  ExRootSTLVectorFilter *fFilter;
 
-  TIterator *fItIsolationInputArray; //!
-
-  TIterator *fItCandidateInputArray; //!
-
-  TIterator *fItRhoInputArray; //!
-
-  const TObjArray *fIsolationInputArray; //!
-
-  const TObjArray *fCandidateInputArray; //!
-
-  const TObjArray *fRhoInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fIsolationInputArray; //!
+  InputHandle<std::vector<Candidate> > fCandidateInputArray; //!
+  InputHandle<std::vector<Candidate> > fRhoInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(Isolation, 1)
 };

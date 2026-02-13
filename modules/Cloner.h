@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef Clone_h
-#define Clone_h
+#ifndef Cloner_h
+#define Cloner_h
 
 /** \class Clone
  *
@@ -27,27 +27,23 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-#include <deque>
+class Candidate;
 
-class TObjArray;
-
-class Cloner: public DelphesModule
+class Cloner : public DelphesModule
 {
 public:
-  Cloner();
-  ~Cloner();
+  Cloner() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(Cloner, 1)
 };

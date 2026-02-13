@@ -26,21 +26,21 @@
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *  \author A. Chattopadhyay - UPRM 
+ *  \author A. Chattopadhyay - UPRM
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 #include <set>
 #include <vector>
 
-class TObjArray;
-class DelphesFormula;
 class Candidate;
+class DelphesFormula;
 
-class SimpleCalorimeter: public DelphesModule
+class SimpleCalorimeter : public DelphesModule
 {
 public:
   SimpleCalorimeter();
@@ -108,19 +108,13 @@ private:
 
   DelphesFormula *fResolutionFormula; //!
 
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  OutputHandle<std::vector<Candidate> > fTowerOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowTrackOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowTowerOutputArray; //!
 
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fTrackInputArray; //!
-
-  TObjArray *fTowerOutputArray; //!
-
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowTowerOutputArray; //!
-
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
+  std::vector<Candidate> fTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

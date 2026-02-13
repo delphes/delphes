@@ -27,13 +27,13 @@
  *  \author Christina Wang
  *
  */
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesCscClusterFormula;
 
-class CscClusterId: public DelphesModule
+class CscClusterId : public DelphesModule
 {
 public:
   CscClusterId();
@@ -48,11 +48,8 @@ private:
   DelphesCscClusterFormula *fEtaFormula; //!
   Double_t fEtaCutMax;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(CscClusterId, 1)
 };

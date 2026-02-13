@@ -28,14 +28,13 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
-
+class Candidate;
 class TrkUtil;
 
-class ClusterCounting: public DelphesModule
+class ClusterCounting : public DelphesModule
 {
 public:
   ClusterCounting();
@@ -46,22 +45,18 @@ public:
   void Finish();
 
 private:
-
   Double_t fRmin;
-	Double_t fRmax;
-	Double_t fZmin;
-	Double_t fZmax;
+  Double_t fRmax;
+  Double_t fZmin;
+  Double_t fZmax;
   Double_t fBz;
 
   Int_t fGasOption;
 
   TrkUtil *fTrackUtil;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(ClusterCounting, 1)
 };

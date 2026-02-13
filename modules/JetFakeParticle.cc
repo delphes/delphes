@@ -52,19 +52,6 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-JetFakeParticle::JetFakeParticle() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-JetFakeParticle::~JetFakeParticle()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void JetFakeParticle::Init()
 {
   TFakeMap::iterator itEfficiencyMap;
@@ -103,24 +90,19 @@ void JetFakeParticle::Init()
   }
 
   // import input array
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
 
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "fakeElectrons"));
-  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "fakeMuons"));
-  fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "fakePhotons"));
-  fJetOutputArray = ExportArray(GetString("JetOutputArray", "jets"));
+  // create output arrays
+  GetFactory()->EventModel()->Book(fElectronOutputArray, GetString("ElectronOutputArray", "fakeElectrons"));
+  GetFactory()->EventModel()->Book(fMuonOutputArray, GetString("MuonOutputArray", "fakeMuons"));
+  GetFactory()->EventModel()->Book(fPhotonOutputArray, GetString("PhotonOutputArray", "fakePhotons"));
+  GetFactory()->EventModel()->Book(fJetOutputArray, GetString("JetOutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void JetFakeParticle::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-
   TFakeMap::iterator itEfficiencyMap;
   DelphesFormula *formula;
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
@@ -134,7 +116,6 @@ void JetFakeParticle::Finish()
 
 void JetFakeParticle::Process()
 {
-  Candidate *candidate, *fake = 0;
   Double_t pt, eta, phi, e;
   TFakeMap::iterator itEfficiencyMap;
   DelphesFormula *formula;
@@ -142,10 +123,9 @@ void JetFakeParticle::Process()
 
   Double_t p, r, rs, total;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const TLorentzVector &candidateMomentum = candidate.Momentum;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();
@@ -153,7 +133,7 @@ void JetFakeParticle::Process()
 
     r = gRandom->Uniform();
     total = 0.0;
-    fake = 0;
+    Candidate *fake = nullptr;
 
     // loop over map for this jet
     for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
@@ -165,15 +145,15 @@ void JetFakeParticle::Process()
 
       if(total <= r && r < total + p)
       {
-        fake = static_cast<Candidate *>(candidate->Clone());
+        fake = static_cast<Candidate *>(candidate.Clone());
 
         // convert jet
 
         if(TMath::Abs(pdgCodeOut) == 11 || TMath::Abs(pdgCodeOut) == 13)
         {
-          if(candidate->Charge != 0)
+          if(candidate.Charge != 0)
           {
-            fake->Charge = candidate->Charge / TMath::Abs(candidate->Charge);
+            fake->Charge = candidate.Charge / TMath::Abs(candidate.Charge);
           }
           else
           {
@@ -184,9 +164,9 @@ void JetFakeParticle::Process()
 
         if(TMath::Abs(pdgCodeOut) == 22) fake->PID = 22;
 
-        if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->Add(fake);
-        if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->Add(fake);
-        if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->Add(fake);
+        if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->emplace_back(*fake);
+        if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->emplace_back(*fake);
+        if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->emplace_back(*fake);
 
         break;
       }
@@ -194,7 +174,7 @@ void JetFakeParticle::Process()
       total += p;
     }
 
-    if(!fake) fJetOutputArray->Add(candidate);
+    if(!fake) fJetOutputArray->emplace_back(candidate);
   }
 }
 

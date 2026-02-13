@@ -30,16 +30,15 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class StatusPidFilter: public DelphesModule
+class StatusPidFilter : public DelphesModule
 {
 public:
-  StatusPidFilter();
-  ~StatusPidFilter();
+  StatusPidFilter() = default;
 
   void Init();
   void Process();
@@ -50,11 +49,8 @@ private:
 
   Bool_t fRequireNotPileup; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(StatusPidFilter, 1)
 };

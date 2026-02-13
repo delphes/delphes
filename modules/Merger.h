@@ -28,29 +28,28 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <vector>
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class Merger: public DelphesModule
+class Merger : public DelphesModule
 {
 public:
-  Merger();
-  ~Merger();
+  Merger() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-  std::vector<TIterator *> fInputList; //!
+  std::vector<InputHandle<std::vector<Candidate> > > fInputList; //!
 
-  TObjArray *fOutputArray; //!
-  TObjArray *fMomentumOutputArray; //!
-  TObjArray *fEnergyOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fMomentumOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEnergyOutputArray; //!
 
   ClassDef(Merger, 1)
 };

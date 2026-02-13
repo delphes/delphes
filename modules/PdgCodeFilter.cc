@@ -51,19 +51,6 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PdgCodeFilter::PdgCodeFilter() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-PdgCodeFilter::~PdgCodeFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void PdgCodeFilter::Init()
 {
 
@@ -85,8 +72,7 @@ void PdgCodeFilter::Init()
   fCharge = GetInt("Charge", 1);
 
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
 
   param = GetParam("PdgCode");
   size = param.GetSize();
@@ -100,41 +86,38 @@ void PdgCodeFilter::Init()
   }
 
   // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "filteredParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void PdgCodeFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void PdgCodeFilter::Process()
 {
-  Candidate *candidate;
   Int_t pdgCode;
   Bool_t pass;
   Double_t pt;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    pdgCode = candidate->PID;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    pdgCode = candidate.PID;
+    const TLorentzVector &candidateMomentum = candidate.Momentum;
     pt = candidateMomentum.Pt();
 
     if(pt < fPTMin) continue;
-    if(fRequireStatus && (candidate->Status != fStatus)) continue;
-    if(fRequireCharge && (candidate->Charge != fCharge)) continue;
-    if(fRequireNotPileup && (candidate->IsPU > 0)) continue;
+    if(fRequireStatus && (candidate.Status != fStatus)) continue;
+    if(fRequireCharge && (candidate.Charge != fCharge)) continue;
+    if(fRequireNotPileup && (candidate.IsPU > 0)) continue;
 
     pass = kTRUE;
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
 
     if(fInvert) pass = !pass;
-    if(pass) fOutputArray->Add(candidate);
+    if(pass) fOutputArray->emplace_back(candidate);
   }
 }

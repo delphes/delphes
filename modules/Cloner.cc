@@ -43,50 +43,29 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Cloner::Cloner() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-Cloner::~Cloner()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void Cloner::Init()
 {
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void Cloner::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void Cloner::Process()
 {
-  Candidate *candidate;
-
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    fOutputArray->Add(candidate);
+    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    fOutputArray->emplace_back(*new_candidate);
   }
 }
 

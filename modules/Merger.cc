@@ -52,68 +52,33 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Merger::Merger()
-{
-}
-
-//------------------------------------------------------------------------------
-
-Merger::~Merger()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void Merger::Init()
 {
   // import arrays with output from other modules
 
   ExRootConfParam param = GetParam("InputArray");
-  Long_t i, size;
-  const TObjArray *array;
-  TIterator *iterator;
 
-  size = param.GetSize();
-  for(i = 0; i < size; ++i)
-  {
-    array = ImportArray(param[i].GetString());
-    iterator = array->MakeIterator();
-
-    fInputList.push_back(iterator);
-  }
+  for(Long_t i = 0; i < param.GetSize(); ++i)
+    GetFactory()->EventModel()->Attach(param[i].GetString(), fInputList.emplace_back());
 
   // create output arrays
-
-  fOutputArray = ExportArray(GetString("OutputArray", "candidates"));
-
-  fMomentumOutputArray = ExportArray(GetString("MomentumOutputArray", "momentum"));
-
-  fEnergyOutputArray = ExportArray(GetString("EnergyOutputArray", "energy"));
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "candidates"));
+  GetFactory()->EventModel()->Book(fMomentumOutputArray, GetString("MomentumOutputArray", "momentum"));
+  GetFactory()->EventModel()->Book(fEnergyOutputArray, GetString("EnergyOutputArray", "energy"));
 }
 
 //------------------------------------------------------------------------------
 
 void Merger::Finish()
 {
-  vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
-
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
-  {
-    iterator = *itInputList;
-    if(iterator) delete iterator;
-  }
 }
 
 //------------------------------------------------------------------------------
 
 void Merger::Process()
 {
-  Candidate *candidate;
   TLorentzVector momentum;
   Double_t sumPT, sumE;
-  vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
 
   DelphesFactory *factory = GetFactory();
 
@@ -122,37 +87,30 @@ void Merger::Process()
   sumE = 0;
 
   // loop over all input arrays
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
+  for(const auto &input_collection : fInputList)
   {
-    iterator = *itInputList;
-
     // loop over all candidates
-    iterator->Reset();
-    while((candidate = static_cast<Candidate *>(iterator->Next())))
+    for(const auto &candidate : *input_collection)
     {
-      const TLorentzVector &candidateMomentum = candidate->Momentum;
+      const TLorentzVector &candidateMomentum = candidate.Momentum;
 
       momentum += candidateMomentum;
       sumPT += candidateMomentum.Pt();
       sumE += candidateMomentum.E();
 
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
     }
   }
 
-  candidate = factory->NewCandidate();
+  auto *momentum_candidate = factory->NewCandidate();
+  momentum_candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  momentum_candidate->Momentum = momentum;
+  fMomentumOutputArray->emplace_back(*momentum_candidate);
 
-  candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  candidate->Momentum = momentum;
-
-  fMomentumOutputArray->Add(candidate);
-
-  candidate = factory->NewCandidate();
-
-  candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  candidate->Momentum.SetPtEtaPhiE(sumPT, 0.0, 0.0, sumE);
-
-  fEnergyOutputArray->Add(candidate);
+  auto *energy_candidate = factory->NewCandidate();
+  energy_candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  energy_candidate->Momentum.SetPtEtaPhiE(sumPT, 0.0, 0.0, sumE);
+  fEnergyOutputArray->emplace_back(*energy_candidate);
 }
 
 //------------------------------------------------------------------------------

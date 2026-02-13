@@ -65,19 +65,6 @@ bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) cons
 
 //------------------------------------------------------------------------------
 
-Weighter::Weighter() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-Weighter::~Weighter()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void Weighter::Init()
 {
   ExRootConfParam param, paramCodes;
@@ -122,27 +109,21 @@ void Weighter::Init()
   }
 
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "weight"));
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "weight"));
 }
 
 //------------------------------------------------------------------------------
 
 void Weighter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void Weighter::Process()
 {
-  Candidate *candidate;
   Int_t i;
   TIndexStruct index;
   Double_t weight;
@@ -153,14 +134,13 @@ void Weighter::Process()
 
   // loop over all particles
   fCodeSet.clear();
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    if(candidate->Status != 3) continue;
+    if(candidate.Status != 3) continue;
 
-    if(fWeightSet.find(candidate->PID) == fWeightSet.end()) continue;
+    if(fWeightSet.find(candidate.PID) == fWeightSet.end()) continue;
 
-    fCodeSet.insert(candidate->PID);
+    fCodeSet.insert(candidate.PID);
   }
 
   // find default weight value
@@ -186,9 +166,9 @@ void Weighter::Process()
     }
   }
 
-  candidate = factory->NewCandidate();
+  auto *candidate = factory->NewCandidate();
   candidate->Momentum.SetPtEtaPhiE(weight, 0.0, 0.0, weight);
-  fOutputArray->Add(candidate);
+  fOutputArray->emplace_back(*candidate);
 }
 
 //------------------------------------------------------------------------------

@@ -28,20 +28,19 @@
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 #include <set>
 #include <vector>
 
-class TObjArray;
-class DelphesFormula;
 class Candidate;
+class DelphesFormula;
 
-class DualReadoutCalorimeter: public DelphesModule
+class DualReadoutCalorimeter : public DelphesModule
 {
 public:
-
   DualReadoutCalorimeter();
   ~DualReadoutCalorimeter();
 
@@ -50,9 +49,8 @@ public:
   void Finish();
 
 private:
-
-  typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
-  typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
+  typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
   Candidate *fTower;
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
@@ -88,41 +86,31 @@ private:
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
 
-  std::vector < Double_t > fEtaBins;
-  std::vector < std::vector < Double_t >* > fPhiBins;
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
 
-  std::vector < Long64_t > fTowerHits;
+  std::vector<Long64_t> fTowerHits;
 
-  std::vector < Double_t > fECalTowerFractions;
-  std::vector < Double_t > fHCalTowerFractions;
+  std::vector<Double_t> fECalTowerFractions;
+  std::vector<Double_t> fHCalTowerFractions;
 
-  std::vector < Double_t > fECalTrackFractions;
-  std::vector < Double_t > fHCalTrackFractions;
+  std::vector<Double_t> fECalTrackFractions;
+  std::vector<Double_t> fHCalTrackFractions;
 
   DelphesFormula *fECalResolutionFormula; //!
   DelphesFormula *fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  OutputHandle<std::vector<Candidate> > fTowerOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fPhotonOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowTrackOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowPhotonOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fEFlowNeutralHadronOutputArray; //!
 
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fTrackInputArray; //!
-
-  TObjArray *fTowerOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
-
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowPhotonOutputArray; //!
-  TObjArray *fEFlowNeutralHadronOutputArray; //!
-
-  TObjArray *fECalTowerTrackArray; //!
-  TIterator *fItECalTowerTrackArray; //!
-
-  TObjArray *fHCalTowerTrackArray; //!
-  TIterator *fItHCalTowerTrackArray; //!
-
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
+  std::vector<Candidate> fECalTowerTrackArray; //!
+  std::vector<Candidate> fHCalTowerTrackArray; //!
+  std::vector<Candidate> fTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

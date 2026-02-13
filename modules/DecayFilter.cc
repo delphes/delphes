@@ -18,7 +18,7 @@
 
 /** \class DecayFilter
  *
- *  This module randomly generates decays along the particle trajectory length 
+ *  This module randomly generates decays along the particle trajectory length
  *  according to actual particle decay length, taking into account for the boost
  *  and using ROOT TDatabasePDG as a source for the particle lifetime.
  *
@@ -42,11 +42,11 @@
 #include "ExRootAnalysis/ExRootResult.h"
 
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
 #include "TFormula.h"
 #include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
+#include "TParticlePDG.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -59,76 +59,59 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DecayFilter::DecayFilter() :
-  fItInputArray(0)
-{}
-
-//------------------------------------------------------------------------------
-
-DecayFilter::~DecayFilter()
-{}
-
-//------------------------------------------------------------------------------
-
 void DecayFilter::Init()
 {
-
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void DecayFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void DecayFilter::Process()
 {
-  Candidate *candidate;
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
   const Double_t c = TMath::C(); // [m/s]
   Double_t m, t, p, bgct, L, l;
-  
+
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     // get particle information from PDG
-    TParticlePDG *pdg = pdgdb->GetParticle(candidate->PID);
-    if (!pdg) { // don't know this particle
-      fOutputArray->Add(candidate);
+    TParticlePDG *pdg = pdgdb->GetParticle(candidate.PID);
+    if(!pdg)
+    { // don't know this particle
+      fOutputArray->emplace_back(candidate);
       continue;
-    }    
+    }
     m = pdg->Mass();
     t = pdg->Lifetime(); // [s]
-    if (t == 0.) { // does not decay
-      fOutputArray->Add(candidate);
+    if(t == 0.)
+    { // does not decay
+      fOutputArray->emplace_back(candidate);
       continue;
     }
 
     // compute boosted decay length (beta gamma c tau)
-    p = candidate->P;
+    p = candidate.P;
     bgct = p / m * c * t; // [m]
 
     // get full trajectory length and generate random decay length
-    L = candidate->L * 1.0E-3; // [m]
+    L = candidate.L * 1.0E-3; // [m]
     l = gRandom->Exp(bgct);
 
     // if random decay happens before end of trajectory, reject track
-    if (l < L) continue;
+    if(l < L) continue;
 
     // else particle did not decay within the trajectory
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

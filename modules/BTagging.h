@@ -23,24 +23,24 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
+#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class BTagging: public DelphesModule
+class BTagging : public DelphesModule
 {
 public:
-  BTagging();
-  ~BTagging();
+  BTagging() = default;
 
   void Init();
   void Process();
@@ -53,9 +53,7 @@ private:
   std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
 #endif
 
-  TIterator *fItJetInputArray; //!
-
-  const TObjArray *fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
 
   ClassDef(BTagging, 1)
 };

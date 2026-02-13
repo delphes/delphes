@@ -52,7 +52,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 ExampleModule::ExampleModule() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -87,40 +87,33 @@ void ExampleModule::Init()
   }
 
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void ExampleModule::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void ExampleModule::Process()
 {
-  Candidate *candidate;
   TLorentzVector candidatePosition, candidateMomentum;
 
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    candidatePosition = candidate->Position;
-    candidateMomentum = candidate->Momentum;
+    candidatePosition = candidate.Position;
+    candidateMomentum = candidate.Momentum;
 
     // apply an efficency formula
     if(gRandom->Uniform() <= fFormula->Eval(candidateMomentum.Pt(), candidatePosition.Eta()))
     {
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
     }
   }
 }

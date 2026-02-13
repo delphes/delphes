@@ -37,7 +37,7 @@ class ExRootTreeWriter;
 
 class DelphesFactory;
 
-class Delphes: public DelphesModule
+class Delphes : public DelphesModule
 {
 public:
   Delphes(const char *name = "Delphes");
@@ -54,7 +54,7 @@ public:
   virtual void Finish();
 
 private:
-  DelphesFactory *fFactory;
+  DelphesFactory *fFactory{nullptr};
 
   ClassDef(Delphes, 1)
 };

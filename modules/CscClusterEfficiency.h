@@ -19,7 +19,8 @@
 #ifndef CscClusterEfficiency_h
 #define CscClusterEfficiency_h
 
-
+#include "classes/DelphesModel.h"
+#include "classes/DelphesModule.h"
 
 /** \class CscClusterEfficiency
  *
@@ -29,13 +30,11 @@
  *  \author Christina Wang
  *
  */
-#include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesCscClusterFormula;
 
-class CscClusterEfficiency: public DelphesModule
+class CscClusterEfficiency : public DelphesModule
 {
 public:
   CscClusterEfficiency();
@@ -48,11 +47,8 @@ public:
 private:
   DelphesCscClusterFormula *fFormula; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(CscClusterEfficiency, 1)
 };
