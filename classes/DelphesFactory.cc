@@ -25,8 +25,8 @@
  *
  */
 
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
@@ -38,7 +38,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 DelphesFactory::DelphesFactory(const char *name) :
-  TNamed(name, ""), fObjArrays(0)
+  TNamed(name, ""), fRunModel("run"), fEventModel("events")
 {
   fObjArrays = new ExRootTreeBranch("PermanentObjArrays", TObjArray::Class(), 0);
 }

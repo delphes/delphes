@@ -48,27 +48,28 @@ public:
 
   /// Book a memory segment, and attach it to a given field identified by a collection name and a description
   template <typename T>
-  OutputHandle<T> book(std::string_view collection_name, std::string_view description = "")
+  void Book(OutputHandle<T> &handle, std::string_view collection_name, std::string_view description = "")
   {
-    if(const auto collection_name_str = std::string{collection_name}; !fields_.insert(collection_name_str).second)
+    const auto collection_name_str = std::string{collection_name};
+    if(!fields_.insert(collection_name_str).second)
       throwBookingFailure(collection_name, "Collection name already exists");
-    else if(field_types_.count(collection_name_str) == 0)
+    if(field_types_.count(collection_name_str) == 0)
       field_types_[collection_name_str] = RField<T>::TypeName();
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 36, 0)
-    return OutputHandle<T>{model_->MakeField<T>(collection_name, description)};
+    handle = OutputHandle<T>{model_->MakeField<T>(collection_name_str, std::string{description})};
 #else
-    return OutputHandle<T>{model_->MakeField<T>({collection_name, description})};
+    handle = OutputHandle<T>{model_->MakeField<T>({collection_name_str, std::string{description}})};
   };
 #endif
   }
 
   /// Attach a memory segment to a given field identified by a collection name
   template <typename T>
-  InputHandle<T> Attach(std::string_view collection_name) const
+  void Attach(std::string_view collection_name, InputHandle<T> &handle) const
   {
     try
     {
-      return Entry().GetPtr<T>(collection_name);
+      handle = Entry().GetPtr<T>(collection_name);
     }
     catch(const RException &except)
     {
