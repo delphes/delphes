@@ -27,6 +27,8 @@
  *
  */
 
+#include "DelphesFactory.h"
+#include "DelphesModel.h"
 #include "ExRootAnalysis/ExRootTask.h"
 
 class TClass;
@@ -40,7 +42,7 @@ class ExRootTreeWriter;
 
 class DelphesFactory;
 
-class DelphesModule: public ExRootTask
+class DelphesModule : public ExRootTask
 {
 public:
   DelphesModule();
@@ -49,6 +51,13 @@ public:
   virtual void Init();
   virtual void Process();
   virtual void Finish();
+
+  template <typename T>
+  void ExportArray(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
+  {
+    auto module_field_name = std::string{GetName()} + "/" + std::string{field_name};
+    GetFactory()->EventModel()->Book(handle, module_field_name, description);
+  }
 
   TObjArray *ImportArray(const char *name);
   TObjArray *ExportArray(const char *name);
