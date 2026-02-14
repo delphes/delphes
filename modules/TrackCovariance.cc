@@ -172,7 +172,10 @@ void TrackCovariance::Process()
     new_candidate->InitialPosition.SetXYZT(track.GetObsX().X() * 1e03, track.GetObsX().Y() * 1e03, track.GetObsX().Z() * 1e03, candidatePosition.T() * 1e03);
 
     // save full covariance 5x5 matrix internally (D0, phi, Curvature, dz, ctg(theta))
-    new_candidate->TrackCovariance = track.GetCov();
+    const auto track_covariance_matrix = track.GetCov();
+    const auto *track_covariance = track_covariance_matrix.GetMatrixArray();
+    const auto num_track_covariance_elements = track_covariance_matrix.GetNoElements();
+    std::copy(&track_covariance[0], &track_covariance[num_track_covariance_elements], std::back_inserter(new_candidate->TrackCovariance));
 
     pt = new_candidate->Momentum.Pt();
     p = new_candidate->Momentum.P();

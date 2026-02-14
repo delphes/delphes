@@ -521,7 +521,7 @@ void Candidate::Clear(Option_t * /*option*/)
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   DecayPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  TrackCovariance.Zero();
+  TrackCovariance.clear();
   L = 0.0;
   ErrorT = 0.0;
   D0 = 0.0;

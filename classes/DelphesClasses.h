@@ -796,8 +796,8 @@ public:
   Float_t SumPt;
 
   // ACTS compliant 6x6 track covariance (D0, phi, Curvature, dz, ctg(theta))
-
-  TMatrixDSym TrackCovariance;
+  std::vector<double> TrackCovariance;
+  //TMatrixDSym TrackCovariance;
 
   // vertex variables
 

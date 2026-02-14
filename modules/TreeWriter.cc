@@ -368,16 +368,18 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
     entry->ErrorCtgTheta = candidate.ErrorCtgTheta;
 
     // add some offdiagonal covariance matrix elements
-    entry->ErrorD0Phi = candidate.TrackCovariance(0, 1) * 1.e3;
-    entry->ErrorD0C = candidate.TrackCovariance(0, 2);
-    entry->ErrorD0DZ = candidate.TrackCovariance(0, 3) * 1.e6;
-    entry->ErrorD0CtgTheta = candidate.TrackCovariance(0, 4) * 1.e3;
-    entry->ErrorPhiC = candidate.TrackCovariance(1, 2) * 1.e-3;
-    entry->ErrorPhiDZ = candidate.TrackCovariance(1, 3) * 1.e3;
-    entry->ErrorPhiCtgTheta = candidate.TrackCovariance(1, 4);
-    entry->ErrorCDZ = candidate.TrackCovariance(2, 3);
-    entry->ErrorCCtgTheta = candidate.TrackCovariance(2, 4) * 1.e-3;
-    entry->ErrorDZCtgTheta = candidate.TrackCovariance(3, 4) * 1.e3;
+    const auto covariance_dimensions = std::sqrt(candidate.TrackCovariance.size()); //FIXME: reasonable?
+    TMatrixDSym trackCovariance(covariance_dimensions, candidate.TrackCovariance.data());
+    entry->ErrorD0Phi = trackCovariance(0, 1) * 1.e3;
+    entry->ErrorD0C = trackCovariance(0, 2);
+    entry->ErrorD0DZ = trackCovariance(0, 3) * 1.e6;
+    entry->ErrorD0CtgTheta = trackCovariance(0, 4) * 1.e3;
+    entry->ErrorPhiC = trackCovariance(1, 2) * 1.e-3;
+    entry->ErrorPhiDZ = trackCovariance(1, 3) * 1.e3;
+    entry->ErrorPhiCtgTheta = trackCovariance(1, 4);
+    entry->ErrorCDZ = trackCovariance(2, 3);
+    entry->ErrorCCtgTheta = trackCovariance(2, 4) * 1.e-3;
+    entry->ErrorDZCtgTheta = trackCovariance(3, 4) * 1.e3;
 
     entry->Xd = candidate.Xd;
     entry->Yd = candidate.Yd;
@@ -543,16 +545,18 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const s
     entry->ErrorCtgTheta = candidate.ErrorCtgTheta;
 
     // add some offdiagonal covariance matrix elements
-    entry->ErrorD0Phi = candidate.TrackCovariance(0, 1);
-    entry->ErrorD0C = candidate.TrackCovariance(0, 2);
-    entry->ErrorD0DZ = candidate.TrackCovariance(0, 3);
-    entry->ErrorD0CtgTheta = candidate.TrackCovariance(0, 4);
-    entry->ErrorPhiC = candidate.TrackCovariance(1, 2);
-    entry->ErrorPhiDZ = candidate.TrackCovariance(1, 3);
-    entry->ErrorPhiCtgTheta = candidate.TrackCovariance(1, 4);
-    entry->ErrorCDZ = candidate.TrackCovariance(2, 3);
-    entry->ErrorCCtgTheta = candidate.TrackCovariance(2, 4);
-    entry->ErrorDZCtgTheta = candidate.TrackCovariance(3, 4);
+    const auto covariance_dimensions = std::sqrt(candidate.TrackCovariance.size()); //FIXME: reasonable?
+    TMatrixDSym trackCovariance(covariance_dimensions, candidate.TrackCovariance.data());
+    entry->ErrorD0Phi = trackCovariance(0, 1);
+    entry->ErrorD0C = trackCovariance(0, 2);
+    entry->ErrorD0DZ = trackCovariance(0, 3);
+    entry->ErrorD0CtgTheta = trackCovariance(0, 4);
+    entry->ErrorPhiC = trackCovariance(1, 2);
+    entry->ErrorPhiDZ = trackCovariance(1, 3);
+    entry->ErrorPhiCtgTheta = trackCovariance(1, 4);
+    entry->ErrorCDZ = trackCovariance(2, 3);
+    entry->ErrorCCtgTheta = trackCovariance(2, 4);
+    entry->ErrorDZCtgTheta = trackCovariance(3, 4);
 
     entry->Xd = candidate.Xd;
     entry->Yd = candidate.Yd;
