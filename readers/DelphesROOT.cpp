@@ -42,6 +42,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModel.h"
 #include "classes/DelphesStream.h"
 #include "modules/Delphes.h"
 
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
 
   const Double_t c_light = 2.99792458E8;
 
-  TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
 
@@ -131,9 +132,9 @@ int main(int argc, char *argv[])
     TChain *chain = new TChain("Delphes");
 
     factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    factory->EventModel()->Book(allParticleOutputArray, "allParticles");
+    factory->EventModel()->Book(stableParticleOutputArray, "stableParticles");
+    factory->EventModel()->Book(partonOutputArray, "partons");
 
     modularDelphes->InitTask();
 
@@ -216,17 +217,17 @@ int main(int argc, char *argv[])
           candidate->Charge = gen->Charge;
           candidate->Mass = gen->Mass;
 
-          allParticleOutputArray->Add(candidate);
+          allParticleOutputArray->emplace_back(*candidate);
 
           pdgCode = TMath::Abs(gen->PID);
 
           if(gen->Status == 1)
           {
-            stableParticleOutputArray->Add(candidate);
+            stableParticleOutputArray->emplace_back(*candidate);
           }
           else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
           {
-            partonOutputArray->Add(candidate);
+            partonOutputArray->emplace_back(*candidate);
           }
         }
 

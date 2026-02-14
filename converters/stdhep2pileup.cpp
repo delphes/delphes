@@ -60,9 +60,7 @@ int main(int argc, char *argv[])
   stringstream message;
   FILE *inputFile = 0;
   DelphesFactory *factory = 0;
-  TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  TIterator *itParticle = 0;
-  Candidate *candidate = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   DelphesPileUpWriter *writer = 0;
   DelphesSTDHEPReader *reader = 0;
   Int_t i;
@@ -91,11 +89,9 @@ int main(int argc, char *argv[])
     writer = new DelphesPileUpWriter(argv[1]);
 
     factory = new DelphesFactory("ObjectFactory");
-    allParticleOutputArray = factory->NewPermanentArray();
-    stableParticleOutputArray = factory->NewPermanentArray();
-    partonOutputArray = factory->NewPermanentArray();
-
-    itParticle = stableParticleOutputArray->MakeIterator();
+    factory->EventModel()->Book(allParticleOutputArray, "allParticles");
+    factory->EventModel()->Book(stableParticleOutputArray, "stableParticles");
+    factory->EventModel()->Book(partonOutputArray, "partons");
 
     reader = new DelphesSTDHEPReader;
 
@@ -141,20 +137,18 @@ int main(int argc, char *argv[])
       eventCounter = 0;
       factory->Clear();
       reader->Clear();
-      while(reader->ReadBlock(factory, allParticleOutputArray,
-              stableParticleOutputArray, partonOutputArray)
+      while(reader->ReadBlock(factory, *allParticleOutputArray, *stableParticleOutputArray, *partonOutputArray)
         && !interrupted)
       {
         if(reader->EventReady())
         {
           ++eventCounter;
 
-          itParticle->Reset();
-          while((candidate = static_cast<Candidate *>(itParticle->Next())))
+          for(const auto &candidate : *stableParticleOutputArray)
           {
-            const TLorentzVector &position = candidate->Position;
-            const TLorentzVector &momentum = candidate->Momentum;
-            writer->WriteParticle(candidate->PID,
+            const TLorentzVector &position = candidate.Position;
+            const TLorentzVector &momentum = candidate.Momentum;
+            writer->WriteParticle(candidate.PID,
               position.X(), position.Y(), position.Z(), position.T(),
               momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
           }

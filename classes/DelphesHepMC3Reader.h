@@ -52,9 +52,9 @@ public:
   bool EventReady();
 
   bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
@@ -66,9 +66,9 @@ private:
 
   void AnalyzeParticle(DelphesFactory *factory);
 
-  void FinalizeParticles(TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  void FinalizeParticles(std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   FILE *fInputFile;
 

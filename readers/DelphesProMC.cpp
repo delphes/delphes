@@ -39,6 +39,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModel.h"
 #include "classes/DelphesStream.h"
 #include "modules/Delphes.h"
 
@@ -56,8 +57,8 @@ using namespace std;
 
 void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
   ExRootTreeBranch *branch, DelphesFactory *factory,
-  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray, TStopwatch *readStopWatch, TStopwatch *procStopWatch)
+  std::vector<Candidate> &allParticleOutputArray, std::vector<Candidate> &stableParticleOutputArray, std::vector<Candidate> &partonOutputArray,
+  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   Int_t i;
 
@@ -141,17 +142,17 @@ void ConvertInput(ProMCEvent &event, double momentumUnit, double positionUnit,
 
     candidate->Position.SetXYZT(x, y, z, t);
 
-    allParticleOutputArray->Add(candidate);
+    allParticleOutputArray.emplace_back(*candidate);
 
     if(!pdgParticle) continue;
 
     if(status == 1)
     {
-      stableParticleOutputArray->Add(candidate);
+      stableParticleOutputArray.emplace_back(*candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
-      partonOutputArray->Add(candidate);
+      partonOutputArray.emplace_back(*candidate);
     }
   }
 }
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
-  TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
   double momentumUnit = 1.0, positionUnit = 1.0;
@@ -225,9 +226,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    factory->EventModel()->Book(allParticleOutputArray, "allParticles");
+    factory->EventModel()->Book(stableParticleOutputArray, "stableParticles");
+    factory->EventModel()->Book(partonOutputArray, "partons");
 
     modularDelphes->InitTask();
 
@@ -272,8 +273,8 @@ int main(int argc, char *argv[])
         procStopWatch.Start();
         ConvertInput(event, momentumUnit, positionUnit,
           branchEvent, factory,
-          allParticleOutputArray, stableParticleOutputArray,
-          partonOutputArray, &readStopWatch, &procStopWatch);
+          *allParticleOutputArray, *stableParticleOutputArray, *partonOutputArray,
+          &readStopWatch, &procStopWatch);
         modularDelphes->ProcessTask();
         procStopWatch.Stop();
 

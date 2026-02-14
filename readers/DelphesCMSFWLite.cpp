@@ -41,6 +41,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModel.h"
 #include "classes/DelphesStream.h"
 #include "modules/Delphes.h"
 
@@ -64,8 +65,9 @@ using namespace std;
 
 void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
   ExRootTreeBranch *branchEvent, ExRootTreeBranch *branchWeight,
-  DelphesFactory *factory, TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray, Bool_t firstEvent)
+  DelphesFactory *factory,
+  std::vector<Candidate> &allParticleOutputArray, std::vector<Candidate> &stableParticleOutputArray, std::vector<Candidate> &partonOutputArray,
+  Bool_t firstEvent)
 {
 
   fwlite::Handle<GenEventInfoProduct> handleGenEventInfo;
@@ -208,20 +210,20 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     candidate->Position.SetXYZT(x * 10.0, y * 10.0, z * 10.0, 0.0);
 
-    allParticleOutputArray->Add(candidate);
+    allParticleOutputArray.emplace_back(*candidate);
 
     if(!pdgParticle) continue;
 
     if(status == 1)
     {
       // Prevent duplicated particle.
-      if(!isMiniAOD) stableParticleOutputArray->Add(candidate);
-      if (pdgCode == 11 || pdgCode == 13) partonOutputArray->Add(candidate);
+      if(!isMiniAOD) stableParticleOutputArray.emplace_back(*candidate);
+      if(pdgCode == 11 || pdgCode == 13) partonOutputArray.emplace_back(*candidate);
     }
     //else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
     {
-      partonOutputArray->Add(candidate);
+      partonOutputArray.emplace_back(*candidate);
     }
   }
 
@@ -275,7 +277,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
 
     candidate->Position.SetXYZT(x * 10.0, y * 10.0, z * 10.0, 0.0);
 
-    allParticleOutputArray->Add(candidate);
+    allParticleOutputArray.emplace_back(*candidate);
 
     if(!pdgParticle) continue;
 
@@ -309,7 +311,7 @@ int main(int argc, char *argv[])
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
-  TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   Int_t i, maxEvents, skipEvents;
   Long64_t eventCounter, numberOfEvents;
   Bool_t firstEvent = kTRUE;
@@ -352,15 +354,15 @@ int main(int argc, char *argv[])
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
-    
+
     maxEvents = confReader->GetInt("::MaxEvents", 0);
     skipEvents = confReader->GetInt("::SkipEvents", 0);
-    
+
     if(maxEvents < 0)
     {
       throw runtime_error("MaxEvents must be zero or positive");
     }
-    
+
     if(skipEvents < 0)
     {
       throw runtime_error("SkipEvents must be zero or positive");
@@ -371,9 +373,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    factory->EventModel()->Book(allParticleOutputArray, "allParticles");
+    factory->EventModel()->Book(stableParticleOutputArray, "stableParticles");
+    factory->EventModel()->Book(partonOutputArray, "partons");
 
     modularDelphes->InitTask();
 
@@ -403,11 +405,12 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       treeWriter->Clear();
 
-      for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || eventCounter-skipEvents < maxEvents); ++event)
+      for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || eventCounter - skipEvents < maxEvents); ++event)
       {
-        if(eventCounter >= skipEvents){
+        if(eventCounter >= skipEvents)
+        {
           ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
-            allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
+            *allParticleOutputArray, *stableParticleOutputArray, *partonOutputArray, firstEvent);
           modularDelphes->ProcessTask();
 
           firstEvent = kFALSE;

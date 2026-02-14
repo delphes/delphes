@@ -32,10 +32,11 @@
 #include <utility>
 #include <vector>
 
-class TObjArray;
 class TStopwatch;
 class TDatabasePDG;
 class ExRootTreeBranch;
+
+class Candidate;
 class DelphesFactory;
 
 class DelphesLHEFReader
@@ -50,9 +51,9 @@ public:
   bool EventReady();
 
   bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
@@ -61,9 +62,9 @@ public:
 
 private:
   void AnalyzeParticle(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   FILE *fInputFile;
 
