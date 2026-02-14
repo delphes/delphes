@@ -96,7 +96,7 @@ void DenseTrackFilter::Init()
   fEtaPhiRes = GetDouble("EtaPhiRes", 0.003);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "TrackMergerProp/tracks"), fTrackInputArray);
+  ImportArray(GetString("TrackInputArray", "TrackMergerProp/tracks"), fTrackInputArray);
   // create output arrays
   ExportArray(fTrackOutputArray, GetString("TrackOutputArray", "tracks"));
   ExportArray(fChargedHadronOutputArray, GetString("ChargedHadronOutputArray", "chargedHadrons"));

@@ -140,16 +140,16 @@ void JetFlavorAssociation::Init()
   fParticleLHEFClassifier->fEtaMax = GetDouble("PartonEtaMax", 2.5);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray); // I/O
-  GetFactory()->EventModel()->Attach(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
+  ImportArray(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray); // I/O
+  ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
   try
   {
-    GetFactory()->EventModel()->Attach(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"), fParticleLHEFInputArray);
+    ImportArray(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"), fParticleLHEFInputArray);
   }
   catch(runtime_error &e)
   {
   }
-  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray);
 
   fPartonFilter = new ExRootSTLVectorFilter(*fPartonInputArray);
   if(fParticleLHEFInputArray)

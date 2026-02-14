@@ -106,7 +106,7 @@ void Weighter::Init()
   }
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "weight"));
 }

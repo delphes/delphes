@@ -20,7 +20,7 @@
 void BeamSpotFilter::Init()
 {
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
   // create output array
   ExportArray(fOutputArray, GetString("OutputArray", "filteredParticles"));
 }

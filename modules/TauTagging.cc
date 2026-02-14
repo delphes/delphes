@@ -139,9 +139,9 @@ void TauTagging::Init()
   }
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
-  GetFactory()->EventModel()->Attach(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray);
-  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
+  ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
+  ImportArray(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
 
   fClassifier = new TauTaggingPartonClassifier(*fParticleInputArray);
   fClassifier->fPTMin = GetDouble("TauPTMin", 1.0);

@@ -23,9 +23,9 @@ using namespace fastjet;
 void RunPUPPI::Init()
 {
   // input collection
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "Calorimeter/towers"), fTrackInputArray);
-  GetFactory()->EventModel()->Attach(GetString("NeutralInputArray", "Calorimeter/towers"), fNeutralInputArray);
-  GetFactory()->EventModel()->Attach(GetString("PVInputArray", "PV"), fPVInputArray);
+  ImportArray(GetString("TrackInputArray", "Calorimeter/towers"), fTrackInputArray);
+  ImportArray(GetString("NeutralInputArray", "Calorimeter/towers"), fNeutralInputArray);
+  ImportArray(GetString("PVInputArray", "PV"), fPVInputArray);
   // puppi parameters
   fApplyNoLep = GetBool("UseNoLep", true);
   fMinPuppiWeight = GetDouble("MinPuppiWeight", 0.01);

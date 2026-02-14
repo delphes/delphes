@@ -121,11 +121,11 @@ void TrackSmearing::Init()
   fApplyToPileUp = GetBool("ApplyToPileUp", true);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // import beamspot
   try
   {
-    GetFactory()->EventModel()->Attach(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"), fBeamSpotInputArray);
+    ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"), fBeamSpotInputArray);
   }
   catch(runtime_error &e)
   {

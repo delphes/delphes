@@ -53,8 +53,8 @@ void JetPileUpSubtractor::Init()
   fJetPTMin = GetDouble("JetPTMin", 20.0);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray);
-  GetFactory()->EventModel()->Attach(GetString("RhoInputArray", "Rho/rho"), fRhoInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray);
+  ImportArray(GetString("RhoInputArray", "Rho/rho"), fRhoInputArray);
 
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "jets"));

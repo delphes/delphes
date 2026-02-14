@@ -87,7 +87,7 @@ void JetFakeParticle::Init()
   }
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  ImportArray(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
 
   // create output arrays
   ExportArray(fElectronOutputArray, GetString("ElectronOutputArray", "fakeElectrons"));

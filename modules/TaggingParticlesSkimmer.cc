@@ -72,8 +72,8 @@ void TaggingParticlesSkimmer::Init()
   fEtaMax = GetDouble("EtaMax", 2.5);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/partons"), fPartonInputArray);
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fParticleInputArray);
+  ImportArray(GetString("InputArray", "Delphes/partons"), fPartonInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fParticleInputArray);
 
   // create output array
   ExportArray(fOutputArray, GetString("OutputArray", "taggingParticles"));

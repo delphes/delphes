@@ -72,10 +72,10 @@ void ParticlePropagator::Init()
   fHalfLengthMax = GetDouble("HalfLengthMax", fHalfLength);
 
   // import array with output from filter/classifier module
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
   try
   { // import beamspot
-    GetFactory()->EventModel()->Attach(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"), fBeamSpotInputArray);
+    ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"), fBeamSpotInputArray);
   }
   catch(runtime_error &e)
   {

@@ -53,8 +53,8 @@ void LeptonDressing::Init()
   fDeltaR = GetDouble("DeltaRMax", 0.4);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("DressingInputArray", "Calorimeter/photons"), fDressingInputArray);
-  GetFactory()->EventModel()->Attach(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"), fCandidateInputArray);
+  ImportArray(GetString("DressingInputArray", "Calorimeter/photons"), fDressingInputArray);
+  ImportArray(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"), fCandidateInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "electrons"));
 }

@@ -80,7 +80,7 @@ void IdentificationMap::Init()
   }
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // create output array
   ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }

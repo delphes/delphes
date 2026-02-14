@@ -70,7 +70,7 @@ void Efficiency::Init()
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
 
   // switch to compute efficiency based on momentum vector eta, phi
   fUseMomentumVector = GetBool("UseMomentumVector", false);

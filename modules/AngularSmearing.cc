@@ -73,7 +73,7 @@ void AngularSmearing::Init()
   fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
 
   // create output array
   ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
@@ -89,7 +89,6 @@ void AngularSmearing::Finish()
 
 void AngularSmearing::Process()
 {
-  Candidate *mother = nullptr;
   Double_t pt, eta, phi, e, m;
 
   for(const auto &candidate : *fInputArray)

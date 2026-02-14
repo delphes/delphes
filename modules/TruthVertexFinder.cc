@@ -53,7 +53,7 @@ void TruthVertexFinder::Init()
 {
   fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
   // create output array
   ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }

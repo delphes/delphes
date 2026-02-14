@@ -58,7 +58,7 @@ void VertexFinder::Init()
   fGrowSeeds = GetInt("GrowSeeds", 1);
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackSmearing/tracks"), fInputArray); // I/O
+  ImportArray(GetString("InputArray", "TrackSmearing/tracks"), fInputArray); // I/O
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
   ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));

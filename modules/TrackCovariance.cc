@@ -92,7 +92,7 @@ void TrackCovariance::Init()
   fAcx = fCovariance->AccPnt();
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
+  ImportArray(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }

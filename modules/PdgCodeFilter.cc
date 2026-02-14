@@ -69,7 +69,7 @@ void PdgCodeFilter::Init()
   fCharge = GetInt("Charge", 1);
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
 
   param = GetParam("PdgCode");
   size = param.GetSize();

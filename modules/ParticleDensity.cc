@@ -52,7 +52,7 @@ using namespace std;
 void ParticleDensity::Init()
 {
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray); // I/O
+  ImportArray(GetString("InputArray", "FastJetFinder/jets"), fInputArray); // I/O
   // create output array
   ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 

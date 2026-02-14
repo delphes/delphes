@@ -126,7 +126,7 @@ void VertexFinderDA4D::Init()
   fD0CutOff /= 10.0;
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackSmearing/tracks"), fInputArray);
+  ImportArray(GetString("InputArray", "TrackSmearing/tracks"), fInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
   ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));

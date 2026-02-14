@@ -81,7 +81,7 @@ void PhotonConversions::Init()
   fConversionMap->Compile(GetString("ConversionMap", "0.0"));
 
   // import array with output from filter/classifier module
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
 
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));

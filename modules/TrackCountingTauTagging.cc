@@ -146,10 +146,10 @@ void TrackCountingTauTagging::Init()
   }
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
-  GetFactory()->EventModel()->Attach(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray);
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "TrackMerger/tracks"), fTrackInputArray);
-  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
+  ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"), fParticleInputArray);
+  ImportArray(GetString("PartonInputArray", "Delphes/partons"), fPartonInputArray);
+  ImportArray(GetString("TrackInputArray", "TrackMerger/tracks"), fTrackInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
 
   fClassifier = new TrackCountingTauTaggingPartonClassifier(*fParticleInputArray);
   fClassifier->fPTMin = GetDouble("TauPTMin", 1.0);

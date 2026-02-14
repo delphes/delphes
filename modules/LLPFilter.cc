@@ -81,8 +81,8 @@ void LLPFilter::Init()
   fCharge = GetInt("Charge", 1);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray); // I/O
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fParticleInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray); // I/O
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fParticleInputArray);
 
   param = GetParam("PdgCode");
   size = param.GetSize();

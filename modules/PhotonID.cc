@@ -78,10 +78,10 @@ void PhotonID::Init()
   fFakeFormula->Compile(GetString("FakeFormula", "1.0"));
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("InputPhotonArray", "PhotonIsolation/photons"), fInputPhotonArray);
+  ImportArray(GetString("InputPhotonArray", "PhotonIsolation/photons"), fInputPhotonArray);
 
   // use filtered collection for speed
-  GetFactory()->EventModel()->Attach(GetString("InputGenArray", "GenParticleFilter/filteredParticles"), fInputGenArray);
+  ImportArray(GetString("InputGenArray", "GenParticleFilter/filteredParticles"), fInputGenArray);
 
   // min pt to be considered, make sure this threshold is higher than threshold in particle filter
   fPTMin = GetDouble("PTMin", 10.0);

@@ -76,7 +76,7 @@ void CscClusterId::Init()
   fEtaCutMax = GetDouble("EtaCutMax", 999.0);
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // create output array
   ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }

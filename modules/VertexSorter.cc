@@ -49,15 +49,15 @@ void VertexSorter::Init()
   fMethod = GetString("Method", "BTV");
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "VertexFinder/vertices"), fInputArray);
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "VertexFinder/tracks"), fTrackInputArray);
+  ImportArray(GetString("InputArray", "VertexFinder/vertices"), fInputArray);
+  ImportArray(GetString("TrackInputArray", "VertexFinder/tracks"), fTrackInputArray);
 
   if(const auto jet_input_array_label = string(GetString("JetInputArray", "")); !jet_input_array_label.empty())
-    GetFactory()->EventModel()->Attach(jet_input_array_label, fJetInputArray);
+    ImportArray(jet_input_array_label, fJetInputArray);
 
   try
   { // import beamspot
-    GetFactory()->EventModel()->Attach(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"), fBeamSpotInputArray);
+    ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"), fBeamSpotInputArray);
   }
   catch(runtime_error &e)
   {

@@ -56,7 +56,7 @@ void Merger::Init()
   ExRootConfParam param = GetParam("InputArray");
 
   for(Long_t i = 0; i < param.GetSize(); ++i)
-    GetFactory()->EventModel()->Attach(param[i].GetString(), fInputList.emplace_back());
+    ImportArray(param[i].GetString(), fInputList.emplace_back());
 
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "candidates"));

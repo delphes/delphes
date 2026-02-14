@@ -58,13 +58,13 @@ void ConstituentFilter::Init()
 
   param = GetParam("JetInputArray");
   for(Long_t i = 0; i < param.GetSize(); ++i)
-    GetFactory()->EventModel()->Attach(param[i].GetString(), fInputList.emplace_back());
+    ImportArray(param[i].GetString(), fInputList.emplace_back());
 
   param = GetParam("ConstituentInputArray");
   for(Long_t i = 0; i < param.GetSize() / 2; ++i)
   {
     auto &[input_collection, output_collection] = fInputMap.emplace_back();
-    GetFactory()->EventModel()->Attach(param[i * 2].GetString(), input_collection);
+    ImportArray(param[i * 2].GetString(), input_collection);
     ExportArray(output_collection, param[i * 2 + 1].GetString());
   }
 }

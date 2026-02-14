@@ -53,6 +53,11 @@ public:
   virtual void Finish();
 
   template <typename T>
+  void ImportArray(std::string_view field_name, OutputHandle<T> &handle)
+  {
+    GetFactory()->EventModel()->Attach(field_name, handle);
+  }
+  template <typename T>
   void ExportArray(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
   {
     auto module_field_name = std::string{GetName()} + "/" + std::string{field_name};

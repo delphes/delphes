@@ -156,8 +156,8 @@ void DualReadoutCalorimeter::Init()
   fHCalResolutionFormula->Compile(GetString("HCalResolutionFormula", "0"));
 
   // import array with output from other modules
-  GetFactory()->EventModel()->Attach(GetString("ParticleInputArray", "ParticlePropagator/particles"), fParticleInputArray);
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
+  ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"), fParticleInputArray);
+  ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
 
   // create output arrays
   ExportArray(fTowerOutputArray, GetString("TowerOutputArray", "towers"));

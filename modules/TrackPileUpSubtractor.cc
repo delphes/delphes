@@ -66,7 +66,7 @@ TrackPileUpSubtractor::~TrackPileUpSubtractor()
 void TrackPileUpSubtractor::Init()
 {
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("VertexInputArray", "PileUpMerger/vertices"), fVertexInputArray);
+  ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"), fVertexInputArray);
 
   // read resolution formula in m
   fFormula->Compile(GetString("ZVertexResolution", "0.001"));
@@ -80,7 +80,7 @@ void TrackPileUpSubtractor::Init()
   for(Long_t i = 0; i < param.GetSize() / 2; ++i)
   {
     auto &[input_collection, output_collection] = fInputMap.emplace_back();
-    GetFactory()->EventModel()->Attach(param[i * 2].GetString(), input_collection);
+    ImportArray(param[i * 2].GetString(), input_collection);
     ExportArray(output_collection, param[i * 2 + 1].GetString());
   }
 }

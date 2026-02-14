@@ -48,9 +48,9 @@ void PileUpJetID::Init()
   fAverageEachTower = false; // for timing
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
-  GetFactory()->EventModel()->Attach(GetString("NeutralInputArray", "ParticlePropagator/tracks"), fNeutralInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
+  ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
+  ImportArray(GetString("NeutralInputArray", "ParticlePropagator/tracks"), fNeutralInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "jets"));
   ExportArray(fNeutralsInPassingJets, GetString("NeutralsInPassingJets", "eflowtowers"));

@@ -93,7 +93,7 @@ void FastJetGridMedianEstimator::Init()
   }
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Calorimeter/towers"), fInputArray);
+  ImportArray(GetString("InputArray", "Calorimeter/towers"), fInputArray);
   // create output array
   ExportArray(fRhoOutputArray, GetString("RhoOutputArray", "rho"));
 }

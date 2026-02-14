@@ -73,7 +73,7 @@ void UnstablePropagator::Init()
   fHalfLengthMax = GetDouble("HalfLengthMax", fHalfLength);
 
   // import array with output from filter/classifier module
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
 }
 
 //------------------------------------------------------------------------------

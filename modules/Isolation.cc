@@ -107,10 +107,10 @@ void Isolation::Init()
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("IsolationInputArray", "Delphes/partons"), fIsolationInputArray);
-  GetFactory()->EventModel()->Attach(GetString("CandidateInputArray", "Calorimeter/electrons"), fCandidateInputArray); // I/O
+  ImportArray(GetString("IsolationInputArray", "Delphes/partons"), fIsolationInputArray);
+  ImportArray(GetString("CandidateInputArray", "Calorimeter/electrons"), fCandidateInputArray); // I/O
   if(const auto rho_input_label = std::string{GetString("RhoInputArray", "")}; !rho_input_label.empty())
-    GetFactory()->EventModel()->Attach(rho_input_label, fRhoInputArray);
+    ImportArray(rho_input_label, fRhoInputArray);
 
   fFilter = new ExRootSTLVectorFilter(*fIsolationInputArray);
 

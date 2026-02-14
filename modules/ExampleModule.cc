@@ -84,7 +84,7 @@ void ExampleModule::Init()
   }
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  ImportArray(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }

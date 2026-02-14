@@ -283,7 +283,7 @@ void FastJetFinder::Init()
   }
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Calorimeter/towers"), fInputArray);
+  ImportArray(GetString("InputArray", "Calorimeter/towers"), fInputArray);
 
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "jets"));

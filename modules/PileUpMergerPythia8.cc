@@ -93,7 +93,7 @@ void PileUpMergerPythia8::Init()
   fPythia->readFile(fileName);
 
   // import input array
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
 
   // create output arrays
   ExportArray(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));

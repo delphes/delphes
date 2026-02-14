@@ -81,7 +81,7 @@ void ClusterCounting::Init()
   fTrackUtil->SetGasMix(fGasOption);
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
+  ImportArray(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }

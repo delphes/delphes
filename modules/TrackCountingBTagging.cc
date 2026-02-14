@@ -57,8 +57,8 @@ void TrackCountingBTagging::Init()
   fUse3D = GetBool("Use3D", false);
 
   // import input arrays
-  GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "Calorimeter/eflowTracks"), fTrackInputArray);
-  GetFactory()->EventModel()->Attach(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
+  ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"), fTrackInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
 }
 
 //------------------------------------------------------------------------------

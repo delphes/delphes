@@ -66,7 +66,7 @@ void UniqueObjectFinder::Init()
   for(i = 0; i < size / 2; ++i)
   {
     auto &[input_collection, output_collection] = fInputMap.emplace_back();
-    GetFactory()->EventModel()->Attach(param[i * 2].GetString(), input_collection);
+    ImportArray(param[i * 2].GetString(), input_collection);
     ExportArray(output_collection, param[i * 2 + 1].GetString());
   }
 }

@@ -70,7 +70,7 @@ void CscClusterEfficiency::Init()
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
   // import input array(s)
-  GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // create output arrays
   ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
