@@ -32,9 +32,7 @@
 #include "ExRootAnalysis/ExRootTask.h"
 
 class TClass;
-class TObject;
 class TFolder;
-class TClonesArray;
 
 class ExRootResult;
 class ExRootTreeBranch;
@@ -63,9 +61,6 @@ public:
     auto module_field_name = std::string{GetName()} + "/" + std::string{field_name};
     GetFactory()->EventModel()->Book(handle, module_field_name, description);
   }
-
-  TObjArray *ImportArray(const char *name);
-  TObjArray *ExportArray(const char *name);
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
   void AddInfo(const char *name, Double_t value);
