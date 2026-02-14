@@ -27,7 +27,6 @@
 #include "modules/TruthVertexFinder.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
@@ -38,7 +37,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -57,7 +55,7 @@ void TruthVertexFinder::Init()
   // import input array
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
   // create output array
-  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -72,7 +70,6 @@ void TruthVertexFinder::Process()
 {
   Int_t nvtx = -1;
   Float_t pt;
-  DelphesFactory *factory = GetFactory();
 
   ROOT::Math::XYZTVector vertexPosition(0., 0., 0., 0.);
 
@@ -106,7 +103,7 @@ void TruthVertexFinder::Process()
     // else fill new vertex
     if(!old_vertex)
     {
-      auto *vertex = factory->NewCandidate();
+      auto *vertex = GetFactory()->NewCandidate();
       vertex->Position = candidatePosition;
       vertex->ClusterIndex = nvtx;
 

@@ -1,7 +1,6 @@
 #ifndef RunPUPPI_h
 #define RunPUPPI_h
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 #include <vector>
 

@@ -27,7 +27,6 @@
 #include "modules/AngularSmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -78,7 +76,7 @@ void AngularSmearing::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
 
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
@@ -94,7 +92,7 @@ void AngularSmearing::Process()
   Candidate *mother = nullptr;
   Double_t pt, eta, phi, e, m;
 
-  for(auto &candidate : *fInputArray)
+  for(const auto &candidate : *fInputArray)
   {
     const auto &candidateMomentum = candidate.Momentum;
     eta = candidateMomentum.Eta();
@@ -104,17 +102,16 @@ void AngularSmearing::Process()
     m = candidateMomentum.M();
 
     // apply smearing formula for eta,phi
-    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, &candidate));
-    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, &candidate));
+    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, const_cast<Candidate *>(&candidate))); //TODO: const-qualified version?
+    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, const_cast<Candidate *>(&candidate)));
 
     if(pt <= 0.0) continue;
 
-    mother = &candidate;
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    new_candidate->Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
-    new_candidate->AddCandidate(mother);
+    auto new_candidate = candidate;
+    new_candidate.Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // preserve parentage
 
-    fOutputArray->emplace_back(*new_candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

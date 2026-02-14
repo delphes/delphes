@@ -30,12 +30,7 @@
 
 #include "classes/DelphesModule.h"
 
-class TFolder;
-class TObjArray;
-
 class ExRootTreeWriter;
-
-class DelphesFactory;
 
 class Delphes : public DelphesModule
 {

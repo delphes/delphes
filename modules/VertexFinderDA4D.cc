@@ -7,7 +7,6 @@
  */
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesPileUpReader.h"
 #include "modules/VertexFinderDA4D.h"
@@ -20,7 +19,6 @@
 #include "TFormula.h"
 #include "TMath.h"
 #include "TMatrixT.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include "TVector3.h"
@@ -130,8 +128,8 @@ void VertexFinderDA4D::Init()
   // import input array
   GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackSmearing/tracks"), fInputArray);
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
-  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------

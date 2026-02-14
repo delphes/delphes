@@ -27,7 +27,6 @@
 #include "modules/ImpactParameterSmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -74,7 +72,7 @@ void ImpactParameterSmearing::Init()
   // import input array
   GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
@@ -90,11 +88,11 @@ void ImpactParameterSmearing::Process()
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
-  for(auto &candidate : *fInputArray) //TODO: ensure const safety
+  for(const auto &candidate : *fInputArray) //TODO: ensure const safety
   {
 
     // take momentum before smearing (otherwise apply double smearing on d0)
-    auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(const_cast<Candidate &>(candidate).GetCandidates()->At(0));
 
     const auto &candidateMomentum = particle->Momentum;
 
@@ -126,16 +124,16 @@ void ImpactParameterSmearing::Process()
     dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    new_candidate->Xd = xd;
-    new_candidate->Yd = yd;
-    new_candidate->Zd = zd;
+    auto new_candidate = candidate;
+    new_candidate.Xd = xd;
+    new_candidate.Yd = yd;
+    new_candidate.Zd = zd;
 
-    new_candidate->D0 = d0;
-    new_candidate->ErrorD0 = dd0;
+    new_candidate.D0 = d0;
+    new_candidate.ErrorD0 = dd0;
 
-    new_candidate->AddCandidate(&candidate); // ensure parentage
-    fOutputArray->emplace_back(*new_candidate);
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

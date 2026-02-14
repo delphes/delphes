@@ -27,7 +27,6 @@
 #include "modules/PileUpMergerPythia8.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
@@ -40,7 +39,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include <Math/RotationZ.h>
@@ -98,8 +96,8 @@ void PileUpMergerPythia8::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
-  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
+  ExportArray(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -120,7 +118,6 @@ void PileUpMergerPythia8::Process()
   Float_t px, py, pz, e;
   Double_t dz, dphi, dt;
   Int_t numberOfEvents, event, numberOfParticles, i;
-  DelphesFactory *factory;
 
   const Double_t c_light = 2.99792458E8;
 
@@ -150,7 +147,7 @@ void PileUpMergerPythia8::Process()
     vy /= numberOfParticles;
   }
 
-  factory = GetFactory();
+  auto *factory = GetFactory();
 
   auto *vertex = factory->NewCandidate();
   vertex->Position.SetXYZT(vx, vy, dz, dt);

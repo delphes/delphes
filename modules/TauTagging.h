@@ -32,7 +32,6 @@
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>

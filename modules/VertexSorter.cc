@@ -11,7 +11,6 @@
 #include "modules/VertexSorter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesPileUpReader.h"
 
@@ -23,7 +22,6 @@
 #include "TFormula.h"
 #include "TMath.h"
 #include "TMatrixT.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include "TVector3.h"
@@ -66,7 +64,7 @@ void VertexSorter::Init()
   }
 
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "clusters"));
+  ExportArray(fOutputArray, GetString("OutputArray", "clusters"));
 }
 
 //------------------------------------------------------------------------------

@@ -28,7 +28,6 @@
 #include "modules/Merger.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -38,7 +37,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -61,9 +59,9 @@ void Merger::Init()
     GetFactory()->EventModel()->Attach(param[i].GetString(), fInputList.emplace_back());
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "candidates"));
-  GetFactory()->EventModel()->Book(fMomentumOutputArray, GetString("MomentumOutputArray", "momentum"));
-  GetFactory()->EventModel()->Book(fEnergyOutputArray, GetString("EnergyOutputArray", "energy"));
+  ExportArray(fOutputArray, GetString("OutputArray", "candidates"));
+  ExportArray(fMomentumOutputArray, GetString("MomentumOutputArray", "momentum"));
+  ExportArray(fEnergyOutputArray, GetString("EnergyOutputArray", "energy"));
 }
 
 //------------------------------------------------------------------------------

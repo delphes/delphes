@@ -28,7 +28,6 @@
 #include "modules/IdentificationMap.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -38,7 +37,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -84,7 +82,7 @@ void IdentificationMap::Init()
   // import input array
   GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
@@ -142,9 +140,9 @@ void IdentificationMap::Process()
       if(total <= r && r < total + p)
       {
         // change PID of particle
-        auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-        if(pdgCodeOut != 0) new_candidate->PID = charge * pdgCodeOut;
-        fOutputArray->emplace_back(*new_candidate);
+        auto new_candidate = candidate;
+        if(pdgCodeOut != 0) new_candidate.PID = charge * pdgCodeOut;
+        fOutputArray->emplace_back(new_candidate);
         break;
       }
 

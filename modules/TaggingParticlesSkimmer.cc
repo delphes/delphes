@@ -31,7 +31,6 @@
 #include "modules/TauTagging.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -41,7 +40,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -78,7 +76,7 @@ void TaggingParticlesSkimmer::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fParticleInputArray);
 
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "taggingParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "taggingParticles"));
 
   fClassifier = new TauTaggingPartonClassifier(*fParticleInputArray);
   fClassifier->fPTMin = GetDouble("PTMin", 15.0);
@@ -126,10 +124,9 @@ void TaggingParticlesSkimmer::Process()
       tauMomentum += daughter.Momentum;
     }
 
-    auto *new_candidate = static_cast<Candidate *>(tau.Clone());
-    new_candidate->Momentum = tauMomentum;
-
-    fOutputArray->emplace_back(*new_candidate);
+    auto new_candidate = tau;
+    new_candidate.Momentum = tauMomentum;
+    fOutputArray->emplace_back(new_candidate);
   }
 
   // then add all other partons (except tau's to avoid double counting)

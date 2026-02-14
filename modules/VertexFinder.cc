@@ -7,7 +7,6 @@
  */
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesPileUpReader.h"
 #include "modules/VertexFinder.h"
@@ -20,7 +19,6 @@
 #include "TFormula.h"
 #include "TMath.h"
 #include "TMatrixT.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include "TVector3.h"
@@ -62,8 +60,8 @@ void VertexFinder::Init()
   // import input array
   GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackSmearing/tracks"), fInputArray); // I/O
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
-  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -149,17 +147,13 @@ void VertexFinder::Process()
 
   for(vector<pair<UInt_t, Double_t> >::const_iterator cluster = clusterSumPT2.begin(); cluster != clusterSumPT2.end(); cluster++)
   {
-    DelphesFactory *factory = GetFactory();
-    auto *new_candidate = factory->NewCandidate();
-
-    new_candidate->ClusterIndex = cluster->first;
-    new_candidate->ClusterNDF = clusterIDToInt.at(cluster->first).at("ndf");
-    new_candidate->ClusterSigma = fSigma;
-    new_candidate->SumPT2 = cluster->second;
-    new_candidate->Position.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("z"), 0.0);
-    new_candidate->PositionError.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("ez"), 0.0);
-
-    fVertexOutputArray->emplace_back(*new_candidate);
+    auto &new_candidate = fVertexOutputArray->emplace_back();
+    new_candidate.ClusterIndex = cluster->first;
+    new_candidate.ClusterNDF = clusterIDToInt.at(cluster->first).at("ndf");
+    new_candidate.ClusterSigma = fSigma;
+    new_candidate.SumPT2 = cluster->second;
+    new_candidate.Position.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("z"), 0.0);
+    new_candidate.PositionError.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("ez"), 0.0);
   }
 }
 

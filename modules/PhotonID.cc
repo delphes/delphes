@@ -29,7 +29,6 @@
 #include "modules/PhotonID.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -39,7 +38,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -92,7 +90,7 @@ void PhotonID::Init()
   fRelIsoMax = GetDouble("fRelIsoMax", 0.3);
 
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "photons"));
+  ExportArray(fOutputArray, GetString("OutputArray", "photons"));
 }
 
 //------------------------------------------------------------------------------
@@ -113,8 +111,8 @@ void PhotonID::Process()
 
   for(const auto &candidate : *fInputPhotonArray)
   {
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    new_candidate->AddCandidate(const_cast<Candidate *>(&candidate));
+    auto new_candidate = candidate;
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate));
 
     const auto &candidatePosition = candidate.Position;
     const auto &candidateMomentum = candidate.Momentum;
@@ -128,20 +126,20 @@ void PhotonID::Process()
     //cout<< "              ---- photon -----: "<<pt<<","<<eta<<","<<phi<<endl;
 
     // find out if photon matches does not match photon in gen collection and apply fae efficiency
-    if(isFake(new_candidate))
+    if(isFake(&new_candidate))
     {
       //cout<<"                    Fake!"<<endl;
 
       if(gRandom->Uniform() > fFakeFormula->Eval(pt, eta, phi, e)) continue;
       //cout<<"                    passed"<<endl;
-      new_candidate->Status = 3;
-      fOutputArray->emplace_back(*new_candidate);
+      new_candidate.Status = 3;
+      fOutputArray->emplace_back(new_candidate);
     }
 
     // if matches photon in gen collection
     else
     {
-      relIso = new_candidate->IsolationVar;
+      relIso = new_candidate.IsolationVar;
       isolated = (relIso < 0.3);
       //cout<<"                    Prompt!:   "<<relIso<<endl;
 
@@ -151,8 +149,8 @@ void PhotonID::Process()
         //cout<<"                       isolated!:   "<<relIso<<endl;
         if(gRandom->Uniform() > fPromptFormula->Eval(pt, eta, phi, e)) continue;
         //cout<<"                       passed"<<endl;
-        new_candidate->Status = 1;
-        fOutputArray->emplace_back(*new_candidate);
+        new_candidate.Status = 1;
+        fOutputArray->emplace_back(new_candidate);
       }
 
       // if non-isolated apply non-prompt formula
@@ -161,8 +159,8 @@ void PhotonID::Process()
         //cout<<"                       non-isolated!:   "<<relIso<<endl;
         if(gRandom->Uniform() > fNonPromptFormula->Eval(pt, eta, phi, e)) continue;
         //cout<<"                       passed"<<endl;
-        new_candidate->Status = 2;
-        fOutputArray->emplace_back(*new_candidate);
+        new_candidate.Status = 2;
+        fOutputArray->emplace_back(new_candidate);
       }
     }
   }

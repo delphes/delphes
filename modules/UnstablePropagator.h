@@ -28,7 +28,6 @@
  *
  */
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <Math/Vector4D.h>

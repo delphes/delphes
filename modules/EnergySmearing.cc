@@ -27,7 +27,6 @@
 #include "modules/EnergySmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -74,7 +72,7 @@ void EnergySmearing::Init()
   // import input array(s)
   GetFactory()->EventModel()->Attach(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
@@ -105,16 +103,14 @@ void EnergySmearing::Process()
 
     if(energy <= 0.0) continue;
 
-    auto *mother = const_cast<Candidate *>(&candidate); //TODO: ensure const-qualification
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    auto new_candidate = candidate;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
-    new_candidate->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
-    new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
-    new_candidate->AddCandidate(mother);
-
-    fOutputArray->emplace_back(*new_candidate);
+    new_candidate.Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
+    new_candidate.TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); //TODO: ensure const-qualification
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

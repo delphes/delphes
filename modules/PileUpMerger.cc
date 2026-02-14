@@ -27,7 +27,6 @@
 #include "modules/PileUpMerger.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
@@ -38,7 +37,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include <Math/RotationZ.h>
@@ -95,8 +93,8 @@ void PileUpMerger::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
-  GetFactory()->EventModel()->Book(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
+  ExportArray(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------

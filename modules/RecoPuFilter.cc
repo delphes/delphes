@@ -28,7 +28,6 @@
 #include "modules/RecoPuFilter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 
 //------------------------------------------------------------------------------
 
@@ -37,7 +36,7 @@ void RecoPuFilter::Init()
   // import input array
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/allParticles"), fInputArray);
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "filteredParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "filteredParticles"));
 }
 
 //------------------------------------------------------------------------------

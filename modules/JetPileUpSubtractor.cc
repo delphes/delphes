@@ -27,7 +27,6 @@
 #include "modules/JetPileUpSubtractor.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -59,7 +57,7 @@ void JetPileUpSubtractor::Init()
   GetFactory()->EventModel()->Attach(GetString("RhoInputArray", "Rho/rho"), fRhoInputArray);
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
@@ -102,10 +100,9 @@ void JetPileUpSubtractor::Process()
 
     if(momentum.Pt() <= fJetPTMin) continue;
 
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    new_candidate->Momentum = momentum;
-
-    fOutputArray->emplace_back(*new_candidate);
+    auto new_candidate = candidate;
+    new_candidate.Momentum = momentum;
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

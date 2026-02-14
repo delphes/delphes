@@ -27,7 +27,6 @@
 #include "modules/LeptonDressing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -58,7 +56,7 @@ void LeptonDressing::Init()
   GetFactory()->EventModel()->Attach(GetString("DressingInputArray", "Calorimeter/photons"), fDressingInputArray);
   GetFactory()->EventModel()->Attach(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"), fCandidateInputArray);
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "electrons"));
+  ExportArray(fOutputArray, GetString("OutputArray", "electrons"));
 }
 
 //------------------------------------------------------------------------------
@@ -90,12 +88,10 @@ void LeptonDressing::Process()
       }
     }
 
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-
-    new_candidate->Momentum += momentum;
-    new_candidate->AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
-
-    fOutputArray->emplace_back(*new_candidate);
+    auto new_candidate = candidate;
+    new_candidate.Momentum += momentum;
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

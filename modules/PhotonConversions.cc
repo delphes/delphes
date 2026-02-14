@@ -29,7 +29,6 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCylindricalFormula.h"
-#include "classes/DelphesFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -39,7 +38,6 @@
 #include "TF1.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include "TVector3.h"
@@ -86,7 +84,7 @@ void PhotonConversions::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------

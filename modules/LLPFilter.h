@@ -31,7 +31,6 @@
  *
  */
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 #include <vector>
 

@@ -14,14 +14,12 @@
  *
  */
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 #include <map>
 #include <set>
 #include <vector>
 
-class TObjArray;
 class DelphesFormula;
 class Candidate;
 

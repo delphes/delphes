@@ -30,7 +30,6 @@
 #include "modules/ParticlePropagator.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -40,7 +39,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -84,11 +82,11 @@ void ParticlePropagator::Init()
   }
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "stableParticles"));
-  GetFactory()->EventModel()->Book(fNeutralOutputArray, GetString("NeutralOutputArray", "neutralParticles"));
-  GetFactory()->EventModel()->Book(fChargedHadronOutputArray, GetString("ChargedHadronOutputArray", "chargedHadrons"));
-  GetFactory()->EventModel()->Book(fElectronOutputArray, GetString("ElectronOutputArray", "electrons"));
-  GetFactory()->EventModel()->Book(fMuonOutputArray, GetString("MuonOutputArray", "muons"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
+  ExportArray(fNeutralOutputArray, GetString("NeutralOutputArray", "neutralParticles"));
+  ExportArray(fChargedHadronOutputArray, GetString("ChargedHadronOutputArray", "chargedHadrons"));
+  ExportArray(fElectronOutputArray, GetString("ElectronOutputArray", "electrons"));
+  ExportArray(fMuonOutputArray, GetString("MuonOutputArray", "muons"));
 }
 
 //------------------------------------------------------------------------------
@@ -167,16 +165,16 @@ void ParticlePropagator::Process()
 
     if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
     {
-      auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+      auto new_candidate = candidate;
 
-      new_candidate->InitialPosition = particlePosition;
-      new_candidate->Position = particlePosition;
-      new_candidate->L = 0.0;
+      new_candidate.InitialPosition = particlePosition;
+      new_candidate.Position = particlePosition;
+      new_candidate.L = 0.0;
 
-      new_candidate->Momentum = particleMomentum;
-      new_candidate->AddCandidate(&candidate); // preserve parentage
+      new_candidate.Momentum = particleMomentum;
+      new_candidate.AddCandidate(&candidate); // preserve parentage
 
-      fOutputArray->emplace_back(*new_candidate);
+      fOutputArray->emplace_back(new_candidate);
     }
     else if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
     {
@@ -194,16 +192,16 @@ void ParticlePropagator::Process()
 
       l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
 
-      auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+      auto new_candidate = candidate;
 
-      new_candidate->InitialPosition = particlePosition;
-      new_candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
-      new_candidate->L = l * 1.0E3;
+      new_candidate.InitialPosition = particlePosition;
+      new_candidate.Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
+      new_candidate.L = l * 1.0E3;
 
-      new_candidate->Momentum = particleMomentum;
-      new_candidate->AddCandidate(&candidate); // preserve parentage
+      new_candidate.Momentum = particleMomentum;
+      new_candidate.AddCandidate(&candidate); // preserve parentage
 
-      fOutputArray->emplace_back(*new_candidate);
+      fOutputArray->emplace_back(new_candidate);
 
       if(TMath::Abs(q) > 1.0E-9)
       {
@@ -314,32 +312,32 @@ void ParticlePropagator::Process()
           particle->Phi = caParticleMomentum.Phi();
         }
 
-        auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+        auto new_candidate = candidate;
 
-        new_candidate->InitialPosition = particlePosition;
-        new_candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * c_light * 1.0E3);
+        new_candidate.InitialPosition = particlePosition;
+        new_candidate.Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * c_light * 1.0E3);
 
-        new_candidate->Momentum = caParticleMomentum;
+        new_candidate.Momentum = caParticleMomentum;
 
-        new_candidate->L = l * 1.0E3;
+        new_candidate.L = l * 1.0E3;
 
-        new_candidate->Xd = xd * 1.0E3;
-        new_candidate->Yd = yd * 1.0E3;
-        new_candidate->Zd = zd * 1.0E3;
+        new_candidate.Xd = xd * 1.0E3;
+        new_candidate.Yd = yd * 1.0E3;
+        new_candidate.Zd = zd * 1.0E3;
 
-        new_candidate->AddCandidate(&candidate); // preserve parentage
+        new_candidate.AddCandidate(&candidate); // preserve parentage
 
-        fOutputArray->emplace_back(*new_candidate);
-        switch(TMath::Abs(new_candidate->PID))
+        fOutputArray->emplace_back(new_candidate);
+        switch(TMath::Abs(new_candidate.PID))
         {
         case 11:
-          fElectronOutputArray->emplace_back(*new_candidate);
+          fElectronOutputArray->emplace_back(new_candidate);
           break;
         case 13:
-          fMuonOutputArray->emplace_back(*new_candidate);
+          fMuonOutputArray->emplace_back(new_candidate);
           break;
         default:
-          fChargedHadronOutputArray->emplace_back(*new_candidate);
+          fChargedHadronOutputArray->emplace_back(new_candidate);
         }
       }
     }

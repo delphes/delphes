@@ -28,7 +28,6 @@
 #include "modules/Delphes.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -41,7 +40,6 @@
 #include "TFolder.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TROOT.h"
 #include "TRandom3.h"
 #include "TString.h"

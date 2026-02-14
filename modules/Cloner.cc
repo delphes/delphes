@@ -27,7 +27,6 @@
 #include "modules/Cloner.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -48,7 +47,7 @@ void Cloner::Init()
   // import input array(s)
   GetFactory()->EventModel()->Attach(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
@@ -63,10 +62,7 @@ void Cloner::Process()
 {
   // loop over all input candidates
   for(const auto &candidate : *fInputArray)
-  {
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    fOutputArray->emplace_back(*new_candidate);
-  }
+    fOutputArray->emplace_back(candidate); // invoke copy constructor
 }
 
 //------------------------------------------------------------------------------

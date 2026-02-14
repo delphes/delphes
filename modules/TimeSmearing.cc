@@ -27,7 +27,6 @@
 #include "modules/TimeSmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -75,7 +73,7 @@ void TimeSmearing::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "MuonMomentumSmearing/muons"), fInputArray);
 
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
@@ -108,12 +106,12 @@ void TimeSmearing::Process()
     timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
     tf_smeared = gRandom->Gaus(tf, timeResolution);
 
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    auto new_candidate = candidate;
 
-    new_candidate->Position.SetE(tf_smeared * 1.0E3 * c_light);
-    new_candidate->ErrorT = timeResolution * 1.0E3 * c_light;
+    new_candidate.Position.SetE(tf_smeared * 1.0E3 * c_light);
+    new_candidate.ErrorT = timeResolution * 1.0E3 * c_light;
 
-    new_candidate->AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
-    fOutputArray->emplace_back(*new_candidate);
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }

@@ -27,7 +27,6 @@
  *
  */
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 class Candidate;

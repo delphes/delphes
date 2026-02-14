@@ -19,7 +19,6 @@
 #ifndef CscClusterEfficiency_h
 #define CscClusterEfficiency_h
 
-#include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
 /** \class CscClusterEfficiency

@@ -29,11 +29,9 @@
 
 #include "TrackCovariance/TrkUtil.h"
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "modules/ClusterCounting.h"
 
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TVectorD.h"
 
 #include <iostream>
@@ -85,7 +83,7 @@ void ClusterCounting::Init()
   // import input array(s)
   GetFactory()->EventModel()->Attach(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "tracks"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
@@ -100,10 +98,10 @@ void ClusterCounting::Process()
 {
   Double_t mass, trackLength, Ncl;
 
-  for(auto &candidate : *fInputArray)
+  for(const auto &candidate : *fInputArray)
   {
     // converting to meters
-    auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(const_cast<Candidate &>(candidate).GetCandidates()->At(0));
 
     // converting to meters
     const auto &candidatePosition = particle->Position * 1e-03;
@@ -118,19 +116,18 @@ void ClusterCounting::Process()
 
     trackLength = fTrackUtil->TrkLen(Par);
 
-    auto *mother = &candidate;
-    auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
+    auto new_candidate = candidate;
 
     Ncl = 0.;
     if(fTrackUtil->IonClusters(Ncl, mass, Par))
     {
-      new_candidate->Nclusters = Ncl;
-      new_candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
+      new_candidate.Nclusters = Ncl;
+      new_candidate.dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
     }
 
-    new_candidate->AddCandidate(mother);
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // preserve parentage
 
-    fOutputArray->emplace_back(*new_candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

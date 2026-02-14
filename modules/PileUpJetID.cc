@@ -10,7 +10,6 @@
 #include "modules/PileUpJetID.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -19,7 +18,6 @@
 
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 //#include "TDatabasePDG.h"
@@ -35,7 +33,6 @@ using namespace std;
 
 void PileUpJetID::Init()
 {
-
   fJetPTMin = GetDouble("JetPTMin", 20.0);
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
@@ -55,8 +52,8 @@ void PileUpJetID::Init()
   GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
   GetFactory()->EventModel()->Attach(GetString("NeutralInputArray", "ParticlePropagator/tracks"), fNeutralInputArray);
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
-  GetFactory()->EventModel()->Book(fNeutralsInPassingJets, GetString("NeutralsInPassingJets", "eflowtowers"));
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
+  ExportArray(fNeutralsInPassingJets, GetString("NeutralsInPassingJets", "eflowtowers"));
 }
 
 //------------------------------------------------------------------------------

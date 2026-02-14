@@ -7,7 +7,6 @@
 #include "fastjet/PseudoJet.hh"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include <algorithm>
@@ -84,9 +83,9 @@ void RunPUPPI::Init()
   fCombId.clear();
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fCombId.push_back(param[iMap].GetInt());
   // create output array
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "puppiParticles"));
-  GetFactory()->EventModel()->Book(fOutputTrackArray, GetString("OutputArrayTracks", "puppiTracks"));
-  GetFactory()->EventModel()->Book(fOutputNeutralArray, GetString("OutputArrayNeutrals", "puppiNeutrals"));
+  ExportArray(fOutputArray, GetString("OutputArray", "puppiParticles"));
+  ExportArray(fOutputTrackArray, GetString("OutputArrayTracks", "puppiTracks"));
+  ExportArray(fOutputNeutralArray, GetString("OutputArrayNeutrals", "puppiNeutrals"));
   // Create algorithm list for puppi
   std::vector<AlgoObj> puppiAlgo;
   if(puppiAlgo.empty())
@@ -141,10 +140,6 @@ void RunPUPPI::Finish()
 
 void RunPUPPI::Process()
 {
-  Candidate *particle;
-
-  //DelphesFactory *factory = GetFactory();
-
   // loop over input objects
 
   std::vector<Candidate *> InputParticles;
@@ -166,7 +161,7 @@ void RunPUPPI::Process()
     curRecoObj.eta = momentum.Eta();
     curRecoObj.phi = momentum.Phi();
     curRecoObj.m = momentum.M();
-    particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0)); //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
+    const auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0)); //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
     //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
     if(candidate.IsRecoPU and candidate.Charge != 0)
     { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
@@ -217,7 +212,7 @@ void RunPUPPI::Process()
     curRecoObj.phi = momentum.Phi();
     curRecoObj.m = momentum.M();
     curRecoObj.charge = 0;
-    particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
+    const auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
     if(candidate.Charge == 0)
     {
       curRecoObj.id = 0; // neutrals have id==0

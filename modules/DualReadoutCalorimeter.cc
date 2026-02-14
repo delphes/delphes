@@ -33,7 +33,6 @@
 #include "modules/DualReadoutCalorimeter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -43,7 +42,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -162,11 +160,11 @@ void DualReadoutCalorimeter::Init()
   GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fTowerOutputArray, GetString("TowerOutputArray", "towers"));
-  GetFactory()->EventModel()->Book(fPhotonOutputArray, GetString("PhotonOutputArray", "photons"));
-  GetFactory()->EventModel()->Book(fEFlowTrackOutputArray, GetString("EFlowTrackOutputArray", "eflowTracks"));
-  GetFactory()->EventModel()->Book(fEFlowPhotonOutputArray, GetString("EFlowPhotonOutputArray", "eflowPhotons"));
-  GetFactory()->EventModel()->Book(fEFlowNeutralHadronOutputArray, GetString("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
+  ExportArray(fTowerOutputArray, GetString("TowerOutputArray", "towers"));
+  ExportArray(fPhotonOutputArray, GetString("PhotonOutputArray", "photons"));
+  ExportArray(fEFlowTrackOutputArray, GetString("EFlowTrackOutputArray", "eflowTracks"));
+  ExportArray(fEFlowPhotonOutputArray, GetString("EFlowPhotonOutputArray", "eflowPhotons"));
+  ExportArray(fEFlowNeutralHadronOutputArray, GetString("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
 }
 
 //------------------------------------------------------------------------------
@@ -660,9 +658,9 @@ void DualReadoutCalorimeter::FinalizeTower()
     // now clone tracks
     for(const auto &track : fTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track.Clone());
-      new_track->AddCandidate(const_cast<Candidate *>(&track)); // parentage
-      fEFlowTrackOutputArray->emplace_back(*new_track);
+      auto new_track = track;
+      new_track.AddCandidate(const_cast<Candidate *>(&track)); // parentage
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 
@@ -684,11 +682,11 @@ void DualReadoutCalorimeter::FinalizeTower()
     //rescale tracks
     for(const auto &track : fTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track.Clone());
-      new_track->AddCandidate(const_cast<Candidate *>(&track)); // parentage
-      new_track->Momentum = ROOT::Math::PtEtaPhiMVector(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
-      if(debug) cout << "  track Momentum: " << new_track->PID << ", " << new_track->Momentum.Pt() << ", " << new_track->Momentum.Eta() << ", " << new_track->Momentum.M() << endl;
-      fEFlowTrackOutputArray->emplace_back(*new_track);
+      auto new_track = track;
+      new_track.AddCandidate(const_cast<Candidate *>(&track)); // parentage
+      new_track.Momentum = ROOT::Math::PtEtaPhiMVector(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
+      if(debug) cout << "  track Momentum: " << new_track.PID << ", " << new_track.Momentum.Pt() << ", " << new_track.Momentum.Eta() << ", " << new_track.Momentum.M() << endl;
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 }

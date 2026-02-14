@@ -27,7 +27,6 @@
 #include "modules/FastJetFinder.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,7 +36,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include <Math/VectorUtil.h>
@@ -288,9 +286,9 @@ void FastJetFinder::Init()
   GetFactory()->EventModel()->Attach(GetString("InputArray", "Calorimeter/towers"), fInputArray);
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fOutputArray, GetString("OutputArray", "jets"));
-  GetFactory()->EventModel()->Book(fRhoOutputArray, GetString("RhoOutputArray", "rho"));
-  GetFactory()->EventModel()->Book(fConstituentsOutputArray, GetString("ConstituentsOutputArray", "constituents"));
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
+  ExportArray(fRhoOutputArray, GetString("RhoOutputArray", "rho"));
+  ExportArray(fConstituentsOutputArray, GetString("ConstituentsOutputArray", "constituents"));
 }
 
 //------------------------------------------------------------------------------

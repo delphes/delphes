@@ -15,7 +15,6 @@
 #include "modules/OldCalorimeter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -25,7 +24,6 @@
 #include "TDatabasePDG.h"
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -133,10 +131,10 @@ void OldCalorimeter::Init()
   GetFactory()->EventModel()->Attach(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
 
   // create output arrays
-  GetFactory()->EventModel()->Book(fTowerOutputArray, GetString("TowerOutputArray", "towers"));
-  GetFactory()->EventModel()->Book(fPhotonOutputArray, GetString("PhotonOutputArray", "photons"));
-  GetFactory()->EventModel()->Book(fEFlowTrackOutputArray, GetString("EFlowTrackOutputArray", "eflowTracks"));
-  GetFactory()->EventModel()->Book(fEFlowTowerOutputArray, GetString("EFlowTowerOutputArray", "eflowTowers"));
+  ExportArray(fTowerOutputArray, GetString("TowerOutputArray", "towers"));
+  ExportArray(fPhotonOutputArray, GetString("PhotonOutputArray", "photons"));
+  ExportArray(fEFlowTrackOutputArray, GetString("EFlowTrackOutputArray", "eflowTracks"));
+  ExportArray(fEFlowTowerOutputArray, GetString("EFlowTowerOutputArray", "eflowTowers"));
 }
 
 //------------------------------------------------------------------------------
