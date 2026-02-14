@@ -275,6 +275,10 @@ Candidate::Candidate() :
 
 //------------------------------------------------------------------------------
 
+Candidate::Candidate(const Candidate &oth) { oth.Copy(*this); }
+
+//------------------------------------------------------------------------------
+
 void Candidate::AddCandidate(Candidate *object)
 {
   if(!fArray) fArray = fFactory->NewArray();

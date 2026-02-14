@@ -699,6 +699,7 @@ class Candidate : public SortableObject
 
 public:
   Candidate();
+  Candidate(const Candidate &);
 
   Int_t PID;
 
