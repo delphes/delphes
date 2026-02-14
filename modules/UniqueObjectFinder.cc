@@ -81,48 +81,32 @@ void UniqueObjectFinder::Finish()
 
 void UniqueObjectFinder::Process()
 {
-  // loop over all input arrays
   for(const auto &[input_collection, output_collection] : fInputMap)
-  {
     output_collection->clear();
-    // loop over all candidates
-    for(const auto &candidate : *input_collection)
-    {
-      if(Unique(&candidate, fInputMap.begin()))
-      {
-        output_collection->emplace_back(candidate);
-      }
-    }
-  }
+
+  for(auto itInputMap = fInputMap.cbegin(); itInputMap != fInputMap.cend(); ++itInputMap) // loop over all input arrays
+    for(const auto &candidate : *(itInputMap->first)) // loop over all candidates
+      if(Unique(&candidate, itInputMap))
+        itInputMap->second->emplace_back(candidate);
 }
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(const Candidate *candidate, InputMap::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(const Candidate *candidate, InputMap::const_iterator itInputMap)
 {
-  // loop over previous arrays
-  for(auto &[input_collection, output_collection] : fInputMap)
-  {
-    // loop over all candidates
-    for(const auto &other_candidate : *output_collection)
-    {
+  if(!candidate) return kTRUE;
+  for(auto previousItInputMap = fInputMap.cbegin(); previousItInputMap != itInputMap; ++previousItInputMap) // loop over previous arrays
+    for(const auto &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
       if(fUseUniqueID)
       {
-        if(candidate->GetUniqueID() == other_candidate.GetUniqueID())
-        {
+        if(candidate && candidate->GetUniqueID() == previousCandidate.GetUniqueID())
           return kFALSE;
-        }
       }
       else
       {
-        if(candidate->Overlaps(&other_candidate))
-        {
+        if(candidate && candidate->Overlaps(&previousCandidate))
           return kFALSE;
-        }
       }
-    }
-  }
-
   return kTRUE;
 }
 

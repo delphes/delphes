@@ -48,7 +48,7 @@ private:
 
   using InputMap = std::vector<std::pair<InputHandle<std::vector<Candidate> >, OutputHandle<std::vector<Candidate> > > >;
 
-  Bool_t Unique(const Candidate *candidate, InputMap::iterator itInputMap);
+  Bool_t Unique(const Candidate *candidate, InputMap::const_iterator itInputMap);
 
   InputMap fInputMap; //!
 
