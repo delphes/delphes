@@ -51,18 +51,6 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TreeWriter::TreeWriter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-TreeWriter::~TreeWriter()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void TreeWriter::Init()
 {
   fClassMap[GenParticle::Class()] = &TreeWriter::ProcessParticles;
@@ -94,7 +82,7 @@ void TreeWriter::Init()
   ExRootTreeBranch *branch;
 
   size = param.GetSize();
-  std::vector<InputHandle<std::vector<Candidate> > > input_collections(size / 3);
+  fInputCollections.clear();
   for(i = 0; i < size / 3; ++i)
   {
     branchInputArray = param[i * 3].GetString();
@@ -116,10 +104,11 @@ void TreeWriter::Init()
       continue;
     }
 
-    ImportArray(branchInputArray, input_collections.at(i));
+    auto &input_collection = fInputCollections.emplace_back();
+    ImportArray(branchInputArray, input_collection);
     branch = NewBranch(branchName, branchClass);
 
-    fBranchMap.insert(make_pair(branch, make_pair(itClassMap->second, *input_collections.at(i))));
+    fBranchMap.insert(make_pair(branch, make_pair(itClassMap->second, input_collection.get())));
   }
 
   param = GetParam("Info");
@@ -182,19 +171,17 @@ void TreeWriter::FillParticles(const Candidate &candidate, TRefArray *array)
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signPz, cosTheta, eta, rapidity;
 
   const Double_t c_light = 2.99792458E8;
 
   // loop over all particles
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
-
-    std::cout << "entry created at " << ":" << candidate.PID << "?" << candidate.Mass << std::endl;
 
     auto *entry = static_cast<GenParticle *>(branch->NewEntry());
 
@@ -243,7 +230,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const std::vector<Ca
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   const Double_t c_light = 2.99792458E8;
 
@@ -256,7 +243,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const std::vector<Can
   Candidate::fgCompare = compare;
 
   // loop over all vertices
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     index = candidate.ClusterIndex;
     ndf = candidate.ClusterNDF;
@@ -304,13 +291,13 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const std::vector<Can
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signz, cosTheta, eta, p, ctgTheta, phi, m;
   const Double_t c_light = 2.99792458E8;
 
   // loop over all tracks
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &position = candidate.Position;
 
@@ -416,13 +403,13 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signPz, cosTheta, eta;
   const Double_t c_light = 2.99792458E8;
 
   // loop over all towers
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
@@ -467,13 +454,13 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const std::vector<Candi
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t e, pt, signz, cosTheta, eta, p, ctgTheta, phi, m;
   const Double_t c_light = 2.99792458E8;
 
   // loop over all tracks
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &position = candidate.Position;
 
@@ -600,7 +587,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const s
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signPz, cosTheta, eta;
   const Double_t c_light = 2.99792458E8;
@@ -608,7 +595,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const std::vector<Cand
   //array->Sort(); //FIXME
 
   // loop over all photons
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
@@ -646,7 +633,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const std::vector<Cand
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signPz, cosTheta, eta;
   const Double_t c_light = 2.99792458E8;
@@ -654,7 +641,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const std::vector<Ca
   //array->Sort(); //FIXME
 
   // loop over all electrons
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
@@ -696,7 +683,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const std::vector<Ca
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signPz, cosTheta, eta;
 
@@ -705,7 +692,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const std::vector<Candid
   //array->Sort(); //FIXME
 
   // loop over all muons
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
@@ -749,7 +736,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const std::vector<Candid
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t pt, signPz, cosTheta, eta;
   Double_t ecalEnergy, hcalEnergy;
@@ -759,7 +746,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candida
   //array->Sort(); //FIXME
 
   // loop over all jets
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
@@ -855,12 +842,12 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candida
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessMissingET(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessMissingET(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   // get the first entry
-  if(!array.empty())
+  if(!array->empty())
   {
-    const auto &momentum = array.at(0).Momentum;
+    const auto &momentum = array->at(0).Momentum;
 
     auto *entry = static_cast<MissingET *>(branch->NewEntry());
     entry->Eta = (-momentum).Eta();
@@ -870,7 +857,7 @@ void TreeWriter::ProcessMissingET(ExRootTreeBranch *branch, const std::vector<Ca
 }
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   Double_t signPz, cosTheta, eta;
 
@@ -879,7 +866,7 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const std::vector<C
   //array->Sort(); //FIXME
 
   // loop over all clusters
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.DecayPosition;
@@ -918,12 +905,12 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const std::vector<C
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   // get the first entry
-  if(!array.empty())
+  if(!array->empty())
   {
-    const auto &momentum = array.at(0).Momentum;
+    const auto &momentum = array->at(0).Momentum;
     auto *entry = static_cast<ScalarHT *>(branch->NewEntry());
     entry->HT = momentum.Pt();
   }
@@ -931,10 +918,10 @@ void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, const std::vector<Can
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessRho(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessRho(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   // loop over all rho
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &momentum = candidate.Momentum;
 
@@ -947,12 +934,12 @@ void TreeWriter::ProcessRho(ExRootTreeBranch *branch, const std::vector<Candidat
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   // get the first entry
-  if(!array.empty())
+  if(!array->empty())
   {
-    const auto &momentum = array.at(0).Momentum;
+    const auto &momentum = array->at(0).Momentum;
     auto *entry = static_cast<Weight *>(branch->NewEntry());
     entry->Weight = momentum.E();
   }
@@ -960,10 +947,10 @@ void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const std::vector<Candi
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, const std::vector<Candidate> &array)
+void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, const std::vector<Candidate> *array)
 {
   // loop over all roman pot hits
-  for(const auto &candidate : array)
+  for(const auto &candidate : *array)
   {
     const auto &position = candidate.Position;
     const auto &momentum = candidate.Momentum;
