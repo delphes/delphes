@@ -67,8 +67,6 @@ void PileUpJetID::Finish()
 
 void PileUpJetID::Process()
 {
-  Candidate *constituent;
-
   // loop over all input candidates
   for(auto &candidate : *fJetInputArray)
   {
@@ -91,8 +89,7 @@ void PileUpJetID::Process()
 
     if(fUseConstituents)
     {
-      TIter itConstituents(candidate.GetCandidates());
-      while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+      for(const auto &constituent : candidate.GetCandidates())
       {
         float pt = constituent->Momentum.Pt();
         float dr = candidate.Momentum.DeltaR(constituent->Momentum);
@@ -267,8 +264,7 @@ void PileUpJetID::Process()
     {
       if(fUseConstituents)
       {
-        TIter itConstituents(candidate.GetCandidates());
-        while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+        for(const auto &constituent : candidate.GetCandidates())
         {
           if(constituent->Charge == 0 && constituent->Momentum.Pt() > fNeutralPTMin)
           {

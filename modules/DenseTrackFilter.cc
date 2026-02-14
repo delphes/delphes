@@ -220,10 +220,10 @@ void DenseTrackFilter::FillTrack()
   // saving track with highest pT that hit the tower
   if(fTowerTrackHits < 1) return;
 
-  numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
+  numberOfCandidates = fBestTrack->GetCandidates().size();
   if(numberOfCandidates < 1) return;
 
-  auto *track = static_cast<Candidate *>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
+  auto *track = static_cast<Candidate *>(fBestTrack->GetCandidates().at(numberOfCandidates - 1));
   auto *candidate = static_cast<Candidate *>(track->Clone());
   pt = candidate->Momentum.Pt();
   eta = candidate->Momentum.Eta();

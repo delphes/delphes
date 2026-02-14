@@ -92,7 +92,7 @@ void ImpactParameterSmearing::Process()
   {
 
     // take momentum before smearing (otherwise apply double smearing on d0)
-    auto *particle = static_cast<Candidate *>(const_cast<Candidate &>(candidate).GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates().at(0));
 
     const auto &candidateMomentum = particle->Momentum;
 

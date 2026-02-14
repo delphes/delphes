@@ -85,13 +85,10 @@ void ConstituentFilter::Process()
     // loop over all jets
     for(auto &jet : *input_collection) //TODO: ensure cons-qualification
     {
-      TIter itConstituents(jet.GetCandidates());
-
       if(jet.Momentum.Pt() <= fJetPTMin) continue;
 
-      Candidate *constituent = nullptr;
       // loop over all constituents
-      while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+      for(const auto &constituent : jet.GetCandidates())
       {
         // set the IsConstituent flag
         constituent->IsConstituent = 1;

@@ -123,13 +123,13 @@ void ParticlePropagator::Process()
 
   for(auto &candidate : *fInputArray) //TODO: ensure a const-qualified version cannot be used
   {
-    if(candidate.GetCandidates()->GetEntriesFast() == 0)
+    if(candidate.GetCandidates().empty())
     {
       particle = &candidate;
     }
     else
     {
-      particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
+      particle = static_cast<Candidate *>(candidate.GetCandidates().at(0));
     }
 
     const auto &particlePosition = particle->Position;

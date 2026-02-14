@@ -841,8 +841,8 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  void AddCandidate(Candidate *object);
-  TObjArray *GetCandidates();
+  void AddCandidate(const Candidate *object);
+  const std::vector<Candidate *> &GetCandidates() const;
 
   Bool_t Overlaps(const Candidate *object) const;
 
@@ -852,7 +852,7 @@ public:
 
 private:
   DelphesFactory *fFactory; //!
-  TObjArray *fArray; //!
+  std::vector<Candidate *> fArray; //!
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 

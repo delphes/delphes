@@ -146,49 +146,38 @@ void TreeWriter::Finish()
 
 void TreeWriter::FillParticles(const Candidate &candidate, TRefArray *array)
 {
-  TIter it1(const_cast<Candidate &>(candidate).GetCandidates());
-  set<Candidate *> s;
-  set<Candidate *>::iterator it3;
-  it1.Reset();
-  s.clear();
+  std::set<const Candidate *> s;
   array->Clear();
 
-  Candidate *it_candidate = nullptr;
-  while((it_candidate = static_cast<Candidate *>(it1.Next())))
-  {
-    TIter it2(it_candidate->GetCandidates());
+  //FIXME: shall we refactor this such that only the end nodes are inserted to the output array?
 
+  for(const auto &it_candidate : candidate.GetCandidates())
+  {
     // particle
-    if(it_candidate->GetCandidates()->GetEntriesFast() == 0)
+    if(it_candidate->GetCandidates().empty())
     {
       s.insert(it_candidate);
       continue;
     }
 
     // track
-    it_candidate = static_cast<Candidate *>(it_candidate->GetCandidates()->At(0));
-    if(it_candidate->GetCandidates()->GetEntriesFast() == 0)
+    if(it_candidate->GetCandidates().at(0)->GetCandidates().empty())
     {
-      s.insert(const_cast<Candidate *>(&candidate));
+      s.insert(&candidate);
       continue;
     }
 
     // tower
-    it2.Reset();
-    while((it_candidate = static_cast<Candidate *>(it2.Next())))
+    for(const auto &it2_candidate : it_candidate->GetCandidates())
     {
-      it_candidate = static_cast<Candidate *>(it_candidate->GetCandidates()->At(0));
-      if(it_candidate->GetCandidates()->GetEntriesFast() == 0)
-      {
+      auto *it3_candidate = static_cast<Candidate *>(it2_candidate->GetCandidates().at(0));
+      if(it3_candidate->GetCandidates().empty())
         s.insert(it_candidate);
-      }
     }
   }
 
-  for(it3 = s.begin(); it3 != s.end(); ++it3)
-  {
-    array->Add(*it3);
-  }
+  for(auto &it : s)
+    array->Add(const_cast<Candidate *>(it));
 }
 
 //------------------------------------------------------------------------------
@@ -205,11 +194,13 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const std::vector<Ca
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
 
+    std::cout << "entry created at " << ":" << candidate.PID << "?" << candidate.Mass << std::endl;
+
     auto *entry = static_cast<GenParticle *>(branch->NewEntry());
 
-    entry->SetBit(kIsReferenced);
-    std::cout << "entry created" << candidate.PID << "?" << candidate.Mass << std::endl;
-    entry->SetUniqueID(candidate.GetUniqueID());
+    //FIXME: should we restore these?
+    //entry->SetBit(kIsReferenced);
+    //entry->SetUniqueID(candidate.GetUniqueID());
 
     pt = momentum.Pt();
     cosTheta = TMath::Abs(std::cos(momentum.Theta()));
@@ -267,7 +258,6 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const std::vector<Can
   // loop over all vertices
   for(const auto &candidate : array)
   {
-
     index = candidate.ClusterIndex;
     ndf = candidate.ClusterNDF;
     sigma = candidate.ClusterSigma;
@@ -306,14 +296,9 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const std::vector<Can
     entry->ErrorZ = zError;
     entry->ErrorT = tError;
 
-    TIter itConstituents(const_cast<Candidate &>(candidate).GetCandidates());
-    itConstituents.Reset();
     entry->Constituents.Clear();
-    Candidate *constituent = nullptr;
-    while((constituent = static_cast<Candidate *>(itConstituents.Next())))
-    {
+    for(const auto &constituent : candidate.GetCandidates())
       entry->Constituents.Add(constituent);
-    }
   }
 }
 
@@ -409,7 +394,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
     entry->C = candidate.C;
     entry->Mass = m;
 
-    auto *particle = static_cast<Candidate *>(const_cast<Candidate &>(candidate).GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates().at(0));
     //const auto &initialPosition = particle->Position;
     const auto &initialPosition = candidate.InitialPosition;
 
@@ -625,7 +610,6 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const std::vector<Cand
   // loop over all photons
   for(const auto &candidate : array)
   {
-    TIter it1(const_cast<Candidate &>(candidate).GetCandidates());
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
 
@@ -706,7 +690,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const std::vector<Ca
 
     entry->EhadOverEem = 0.0;
 
-    entry->Particle = const_cast<Candidate &>(candidate).GetCandidates()->At(0);
+    entry->Particle = candidate.GetCandidates().at(0);
   }
 }
 
@@ -759,7 +743,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const std::vector<Candid
 
     entry->Charge = candidate.Charge;
 
-    entry->Particle = const_cast<Candidate &>(candidate).GetCandidates()->At(0);
+    entry->Particle = candidate.GetCandidates().at(0);
   }
 }
 
@@ -777,8 +761,6 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candida
   // loop over all jets
   for(const auto &candidate : array)
   {
-    TIter itConstituents(const_cast<Candidate &>(candidate).GetCandidates());
-
     const auto &momentum = candidate.Momentum;
     const auto &position = candidate.Position;
 
@@ -817,12 +799,10 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candida
 
     entry->Charge = candidate.Charge;
 
-    itConstituents.Reset();
-    entry->Constituents.Clear();
     ecalEnergy = 0.0;
     hcalEnergy = 0.0;
-    Candidate *constituent = nullptr;
-    while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+    entry->Constituents.Clear();
+    for(const auto &constituent : candidate.GetCandidates())
     {
       entry->Constituents.Add(constituent);
       ecalEnergy += constituent->Eem;
@@ -1001,7 +981,7 @@ void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, const std::vector<Ca
     entry->Y = position.Y();
     entry->S = position.Z();
 
-    entry->Particle = const_cast<Candidate &>(candidate).GetCandidates()->At(0);
+    entry->Particle = candidate.GetCandidates().at(0);
   }
 }
 

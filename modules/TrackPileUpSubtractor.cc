@@ -114,7 +114,7 @@ void TrackPileUpSubtractor::Process()
     // loop over all candidates
     for(auto &candidate : *input_collection)
     {
-      auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
+      auto *particle = static_cast<Candidate *>(candidate.GetCandidates().at(0));
       const auto &candidateMomentum = particle->Momentum;
 
       eta = candidateMomentum.Eta();

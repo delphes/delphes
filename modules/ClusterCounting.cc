@@ -101,7 +101,7 @@ void ClusterCounting::Process()
   for(const auto &candidate : *fInputArray)
   {
     // converting to meters
-    auto *particle = static_cast<Candidate *>(const_cast<Candidate &>(candidate).GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates().at(0));
 
     // converting to meters
     const auto &candidatePosition = particle->Position * 1e-03;
