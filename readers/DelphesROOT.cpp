@@ -132,9 +132,9 @@ int main(int argc, char *argv[])
     TChain *chain = new TChain("Delphes");
 
     factory = modularDelphes->GetFactory();
-    factory->EventModel()->Book(allParticleOutputArray, "allParticles");
-    factory->EventModel()->Book(stableParticleOutputArray, "stableParticles");
-    factory->EventModel()->Book(partonOutputArray, "partons");
+    modularDelphes->ExportArray(allParticleOutputArray, "allParticles");
+    modularDelphes->ExportArray(stableParticleOutputArray, "stableParticles");
+    modularDelphes->ExportArray(partonOutputArray, "partons");
 
     modularDelphes->InitTask();
 

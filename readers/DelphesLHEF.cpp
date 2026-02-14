@@ -127,9 +127,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    factory->EventModel()->Book(allParticleOutputArray, "Delphes/allParticles");
-    factory->EventModel()->Book(stableParticleOutputArray, "Delphes/stableParticles");
-    factory->EventModel()->Book(partonOutputArray, "Delphes/partons");
+    modularDelphes->ExportArray(allParticleOutputArray, "allParticles");
+    modularDelphes->ExportArray(stableParticleOutputArray, "stableParticles");
+    modularDelphes->ExportArray(partonOutputArray, "partons");
 
     reader = new DelphesLHEFReader;
 

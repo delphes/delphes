@@ -284,9 +284,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    factory->EventModel()->Book(allParticleOutputArray, "allParticles");
-    factory->EventModel()->Book(stableParticleOutputArray, "stableParticles");
-    factory->EventModel()->Book(partonOutputArray, "partons");
+    modularDelphes->ExportArray(allParticleOutputArray, "allParticles");
+    modularDelphes->ExportArray(stableParticleOutputArray, "stableParticles");
+    modularDelphes->ExportArray(partonOutputArray, "partons");
 
     // Initialize Pythia
     pythia = new Pythia8::Pythia;
@@ -340,9 +340,9 @@ int main(int argc, char *argv[])
         branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
         branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
 
-        factory->EventModel()->Book(allParticleOutputArrayLHEF, "allParticlesLHEF");
-        factory->EventModel()->Book(stableParticleOutputArrayLHEF, "stableParticlesLHEF");
-        factory->EventModel()->Book(partonOutputArrayLHEF, "partonsLHEF");
+        modularDelphes->ExportArray(allParticleOutputArrayLHEF, "allParticlesLHEF");
+        modularDelphes->ExportArray(stableParticleOutputArrayLHEF, "stableParticlesLHEF");
+        modularDelphes->ExportArray(partonOutputArrayLHEF, "partonsLHEF");
       }
     }
 
