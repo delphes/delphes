@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -122,7 +121,6 @@ void DenseTrackFilter::Finish()
 
 void DenseTrackFilter::Process()
 {
-  TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
@@ -140,7 +138,7 @@ void DenseTrackFilter::Process()
   number = -1;
   for(const auto &track : *fTrackInputArray)
   {
-    const TLorentzVector &trackPosition = track.Position;
+    const auto &trackPosition = track.Position;
     ++number;
 
     // find eta bin [1, fEtaBins.size - 1]
@@ -199,7 +197,7 @@ void DenseTrackFilter::Process()
     {
       ++fTowerTrackHits;
       const auto &track = fTrackInputArray->at(number);
-      momentum = track.Momentum;
+      const auto &momentum = track.Momentum;
 
       if(momentum.Pt() > ptmax)
       {
@@ -236,7 +234,7 @@ void DenseTrackFilter::FillTrack()
 
   eta = gRandom->Gaus(eta, fEtaPhiRes);
   phi = gRandom->Gaus(phi, fEtaPhiRes);
-  candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+  candidate->Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
   candidate->AddCandidate(track);
 
   fTrackOutputArray->emplace_back(*candidate);

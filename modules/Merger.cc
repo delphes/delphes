@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -77,12 +76,11 @@ void Merger::Finish()
 
 void Merger::Process()
 {
-  TLorentzVector momentum;
   Double_t sumPT, sumE;
 
   DelphesFactory *factory = GetFactory();
 
-  momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+  ROOT::Math::PxPyPzEVector momentum;
   sumPT = 0;
   sumE = 0;
 
@@ -92,7 +90,7 @@ void Merger::Process()
     // loop over all candidates
     for(const auto &candidate : *input_collection)
     {
-      const TLorentzVector &candidateMomentum = candidate.Momentum;
+      const auto &candidateMomentum = candidate.Momentum;
 
       momentum += candidateMomentum;
       sumPT += candidateMomentum.Pt();
@@ -109,7 +107,7 @@ void Merger::Process()
 
   auto *energy_candidate = factory->NewCandidate();
   energy_candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  energy_candidate->Momentum.SetPtEtaPhiE(sumPT, 0.0, 0.0, sumE);
+  energy_candidate->Momentum = ROOT::Math::PtEtaPhiEVector(sumPT, 0.0, 0.0, sumE);
   fEnergyOutputArray->emplace_back(*energy_candidate);
 }
 

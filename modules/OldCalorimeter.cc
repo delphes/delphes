@@ -24,7 +24,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -155,7 +154,6 @@ void OldCalorimeter::Finish()
 
 void OldCalorimeter::Process()
 {
-  TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
@@ -180,7 +178,7 @@ void OldCalorimeter::Process()
   number = -1;
   for(const auto &particle : *fParticleInputArray)
   {
-    const TLorentzVector &particlePosition = particle.Position;
+    const auto &particlePosition = particle.Position;
     ++number;
 
     pdgCode = TMath::Abs(particle.PID);
@@ -227,7 +225,7 @@ void OldCalorimeter::Process()
   number = -1;
   for(const auto &track : *fTrackInputArray)
   {
-    const TLorentzVector &trackPosition = track.Position;
+    const auto &trackPosition = track.Position;
     ++number;
 
     pdgCode = TMath::Abs(track.PID);
@@ -353,7 +351,7 @@ void OldCalorimeter::Process()
 
     //FIXME: potential bug of non-scoped particle pointer spotted: check whether this changes anything
     auto &particle = fParticleInputArray->at(number);
-    momentum = particle.Momentum;
+    const auto &momentum = particle.Momentum;
 
     // check for ECAL hits
     if(flags & 2)
@@ -415,8 +413,8 @@ void OldCalorimeter::FinalizeTower()
 
   pt = energy / TMath::CosH(eta);
 
-  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
-  fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+  fTower->Position = ROOT::Math::PtEtaPhiEVector(1.0, eta, phi, 0.0);
+  fTower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;
 
@@ -465,8 +463,8 @@ void OldCalorimeter::FinalizeTower()
 
         pt = hcalEnergy / TMath::CosH(eta);
 
-        tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
-        tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
+        tower->Position = ROOT::Math::PtEtaPhiEVector(1.0, eta, phi, 0.0);
+        tower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, hcalEnergy);
         tower->Eem = 0.0;
         tower->Ehad = hcalEnergy;
 
@@ -494,8 +492,8 @@ void OldCalorimeter::FinalizeTower()
 
         pt = ecalEnergy / TMath::CosH(eta);
 
-        tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
-        tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
+        tower->Position = ROOT::Math::PtEtaPhiEVector(1.0, eta, phi, 0.0);
+        tower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, ecalEnergy);
         tower->Eem = ecalEnergy;
         tower->Ehad = 0.0;
 

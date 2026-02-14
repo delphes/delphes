@@ -23,7 +23,6 @@
 #include "TRandom3.h"
 #include "TString.h"
 //#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
 
 #include <algorithm>
 #include <iostream>
@@ -72,14 +71,10 @@ void PileUpJetID::Finish()
 void PileUpJetID::Process()
 {
   Candidate *constituent;
-  TLorentzVector momentum, area;
 
   // loop over all input candidates
   for(auto &candidate : *fJetInputArray)
   {
-    momentum = candidate.Momentum;
-    area = candidate.Area;
-
     candidate.NTimeHits = 0;
 
     float sumpt = 0.;

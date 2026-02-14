@@ -48,7 +48,7 @@ public:
     tk_Bz_ = Bz;
   }
   virtual void ReadBranch() = 0;
-  virtual std::vector<TLorentzVector> GetVectors() = 0;
+  virtual std::vector<ROOT::Math::XYZTVector> GetVectors() = 0;
 
 protected:
   TString name_;
@@ -60,7 +60,7 @@ protected:
 
 // concrete implementations. EveContainer can be a TrackList, ElementList or CaloData.
 template <typename EveContainer>
-class DelphesBranchElement: public DelphesBranchBase
+class DelphesBranchElement : public DelphesBranchBase
 {
 public:
   // constructor
@@ -85,7 +85,7 @@ public:
   }
 
   // resets the collection (before moving to the next event)
-  virtual void Reset(){};
+  virtual void Reset() {};
 
   // template class name
   virtual const char *GetClassName() { return data_->ClassName(); }
@@ -94,9 +94,9 @@ public:
   virtual void ReadBranch() {}
 
   // return the vector for all elements
-  virtual std::vector<TLorentzVector> GetVectors()
+  virtual std::vector<ROOT::Math::XYZTVector> GetVectors()
   {
-    std::vector<TLorentzVector> v;
+    std::vector<ROOT::Math::XYZTVector> v;
     return v;
   }
 
@@ -114,7 +114,7 @@ void DelphesBranchElement<DelphesCaloData>::Reset();
 template <>
 void DelphesBranchElement<DelphesCaloData>::ReadBranch();
 template <>
-std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::GetVectors();
+std::vector<ROOT::Math::XYZTVector> DelphesBranchElement<DelphesCaloData>::GetVectors();
 
 // special case for element lists
 template <>
@@ -124,7 +124,7 @@ void DelphesBranchElement<TEveElementList>::Reset();
 template <>
 void DelphesBranchElement<TEveElementList>::ReadBranch();
 template <>
-std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors();
+std::vector<ROOT::Math::XYZTVector> DelphesBranchElement<TEveElementList>::GetVectors();
 
 // special case for track lists
 template <>
@@ -136,7 +136,7 @@ void DelphesBranchElement<TEveTrackList>::Reset();
 template <>
 void DelphesBranchElement<TEveTrackList>::ReadBranch();
 template <>
-std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors();
+std::vector<ROOT::Math::XYZTVector> DelphesBranchElement<TEveTrackList>::GetVectors();
 
 #endif // CINT, CLING
 

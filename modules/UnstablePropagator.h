@@ -31,7 +31,8 @@
 #include "classes/DelphesModel.h"
 #include "classes/DelphesModule.h"
 
-class TLorentzVector;
+#include <Math/Vector4D.h>
+
 class Candidate;
 
 class UnstablePropagator : public DelphesModule
@@ -57,7 +58,7 @@ private:
   Int_t Index(Candidate *candidate);
   void ComputeChainFlightDistances(TString prefix, Candidate *candidate);
   void PropagateAndUpdateChain(TString prefix, Candidate *candidate);
-  TLorentzVector PropagatedPosition(Candidate *candidate);
+  ROOT::Math::XYZTVector PropagatedPosition(Candidate *candidate);
 
   ClassDef(UnstablePropagator, 1)
 };

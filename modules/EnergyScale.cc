@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -88,12 +87,11 @@ void EnergyScale::Finish()
 
 void EnergyScale::Process()
 {
-  TLorentzVector momentum;
   Double_t scale;
 
   for(const auto &candidate : *fInputArray)
   {
-    momentum = candidate.Momentum;
+    auto momentum = candidate.Momentum;
 
     scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
 

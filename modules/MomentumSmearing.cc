@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -96,8 +95,8 @@ void MomentumSmearing::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
 
@@ -124,7 +123,7 @@ void MomentumSmearing::Process()
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    new_candidate->Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
     //new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
     new_candidate->TrackResolution = res;
     new_candidate->AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage

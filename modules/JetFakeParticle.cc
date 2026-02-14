@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -125,7 +124,7 @@ void JetFakeParticle::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();

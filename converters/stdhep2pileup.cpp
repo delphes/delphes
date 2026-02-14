@@ -27,7 +27,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFile.h"
-#include "TLorentzVector.h"
 #include "TObjArray.h"
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
@@ -146,8 +145,8 @@ int main(int argc, char *argv[])
 
           for(const auto &candidate : *stableParticleOutputArray)
           {
-            const TLorentzVector &position = candidate.Position;
-            const TLorentzVector &momentum = candidate.Momentum;
+            const auto &position = candidate.Position;
+            const auto &momentum = candidate.Momentum;
             writer->WriteParticle(candidate.PID,
               position.X(), position.Y(), position.Z(), position.T(),
               momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());

@@ -19,7 +19,6 @@
 #include "TDatabasePDG.h"
 #include "TFile.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TProfile2D.h"
@@ -149,7 +148,6 @@ void TrackSmearing::Finish()
 void TrackSmearing::Process()
 {
   Int_t iCandidate = 0;
-  TLorentzVector beamSpotPosition;
   Double_t pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
   Double_t x, y, z, t, px, py, pz, theta;
   Double_t q, r;
@@ -162,9 +160,8 @@ void TrackSmearing::Process()
              *ctgThetaErrorHist = NULL,
              *phiErrorHist = NULL;
 
-  if(!fBeamSpotInputArray || fBeamSpotInputArray->empty())
-    beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  else
+  ROOT::Math::XYZTVector beamSpotPosition;
+  if(fBeamSpotInputArray && !fBeamSpotInputArray->empty())
   {
     const auto &beamSpotCandidate = fBeamSpotInputArray->at(0);
     beamSpotPosition = beamSpotCandidate.Position;
@@ -209,8 +206,8 @@ void TrackSmearing::Process()
   for(auto &candidate : *fInputArray) //TODO: ensure const-qualification of consumers
   {
 
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.InitialPosition;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.InitialPosition;
 
     pt = momentum.Pt();
     eta = momentum.Eta();
@@ -337,14 +334,14 @@ void TrackSmearing::Process()
 
     // -- solve for delta: d0' = ( (x+delta)*py' - (y+delta)*px' )/pt'
 
-    new_candidate->InitialPosition.SetX(x + ((px * y - py * x + d0 * pt) / (py - px)));
-    new_candidate->InitialPosition.SetY(y + ((px * y - py * x + d0 * pt) / (py - px)));
+    new_candidate->InitialPosition.SetPx(x + ((px * y - py * x + d0 * pt) / (py - px)));
+    new_candidate->InitialPosition.SetPy(y + ((px * y - py * x + d0 * pt) / (py - px)));
     x = new_candidate->InitialPosition.X();
     y = new_candidate->InitialPosition.Y();
-    new_candidate->InitialPosition.SetZ(z + ((pz * (px * (x - beamSpotPosition.X()) + py * (y - beamSpotPosition.Y())) + pt * pt * (dz - z)) / (pt * pt)));
+    new_candidate->InitialPosition.SetPz(z + ((pz * (px * (x - beamSpotPosition.X()) + py * (y - beamSpotPosition.Y())) + pt * pt * (dz - z)) / (pt * pt)));
     z = new_candidate->InitialPosition.Z();
 
-    new_candidate->InitialPosition.SetT(t);
+    new_candidate->InitialPosition.SetE(t);
 
     // update closest approach
     x *= 1.0E-3;

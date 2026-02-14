@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -72,18 +71,16 @@ void LeptonDressing::Finish()
 
 void LeptonDressing::Process()
 {
-  TLorentzVector momentum;
-
   // loop over all input candidate
   for(const auto &candidate : *fCandidateInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
 
     // loop over all input tracks
-    momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+    ROOT::Math::XYZTVector momentum;
     for(const auto &dressing : *fDressingInputArray)
     {
-      const TLorentzVector &dressingMomentum = dressing.Momentum;
+      const auto &dressingMomentum = dressing.Momentum;
       if(dressingMomentum.Pt() > 0.1)
       {
         if(candidateMomentum.DeltaR(dressingMomentum) <= fDeltaR)

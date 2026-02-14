@@ -38,7 +38,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
@@ -200,7 +199,6 @@ void SimpleCalorimeter::Finish()
 
 void SimpleCalorimeter::Process()
 {
-  TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
@@ -230,12 +228,12 @@ void SimpleCalorimeter::Process()
 
   for(const auto &particle : *fParticleInputArray)
   {
-    const TLorentzVector &particlePosition = particle.Position;
+    const auto &particlePosition = particle.Position;
     ++number;
 
     // compute maximum radius (needed in FinalizeTower to assess whether barrel or endcap tower)
-    if(particlePosition.Perp() > fTowerRmax)
-      fTowerRmax = particlePosition.Perp();
+    if(const auto perp = std::sqrt(particlePosition.Perp2()); perp > fTowerRmax)
+      fTowerRmax = perp;
 
     pdgCode = TMath::Abs(particle.PID);
 
@@ -282,7 +280,7 @@ void SimpleCalorimeter::Process()
   number = -1;
   for(const auto &track : *fTrackInputArray)
   {
-    const TLorentzVector &trackPosition = track.Position;
+    const auto &trackPosition = track.Position;
     ++number;
 
     pdgCode = TMath::Abs(track.PID);
@@ -397,8 +395,8 @@ void SimpleCalorimeter::Process()
     {
       ++fTowerTrackHits;
       const auto &track = fTrackInputArray->at(number);
-      momentum = track.Momentum;
-      position = track.Position;
+      const auto &momentum = track.Momentum;
+      const auto &position = track.Position;
 
       energy = momentum.E() * fTrackFractions[number];
 
@@ -432,7 +430,7 @@ void SimpleCalorimeter::Process()
     else
     {
       const auto &particle = fParticleInputArray->at(number);
-      momentum = particle.Momentum;
+      const auto &momentum = particle.Momentum;
 
       energy = momentum.E() * fTrackFractions[number];
 
@@ -444,15 +442,12 @@ void SimpleCalorimeter::Process()
       }
     }
 
-    // fill current tower
-    energy = momentum.E() * fTowerFractions[number];
-
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
 
     const auto &particle = fParticleInputArray->at(number);
-    momentum = particle.Momentum;
-    position = particle.Position;
+    const auto &momentum = particle.Momentum;
+    const auto &position = particle.Position;
 
     // fill current tower
     energy = momentum.E() * fTowerFractions[number];
@@ -483,7 +478,6 @@ void SimpleCalorimeter::FinalizeTower()
 
   Double_t hardEnergyFraction;
 
-  TLorentzVector momentum;
   TFractionMap::iterator itFractionMap;
 
   if(!fTower) return;
@@ -522,9 +516,9 @@ void SimpleCalorimeter::FinalizeTower()
     r = fTower->Position.Pt();
   }
 
-  fTower->Position.SetPtEtaPhiE(r, eta, phi, time);
-  fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
-  fTower->L = fTower->Position.Vect().Mag();
+  fTower->Position = ROOT::Math::PtEtaPhiEVector(r, eta, phi, time);
+  fTower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
+  fTower->L = std::sqrt(fTower->Position.Vect().Mag2());
 
   fTower->Eem = (!fIsEcal) ? 0 : energy;
   fTower->Ehad = (fIsEcal) ? 0 : energy;
@@ -563,7 +557,7 @@ void SimpleCalorimeter::FinalizeTower()
     tower->Ehad = (fIsEcal) ? 0 : neutralEnergy;
     tower->PID = (fIsEcal) ? 22 : 0;
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
+    tower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, neutralEnergy);
 
     // compute hard energy fraction for tower
     hardEnergyFraction = (fNeutralEnergy > 1.0E-09) ? (fNeutralEnergy - fNeutralEnergyFromPU) / (fNeutralEnergy) : 1.0;
@@ -599,7 +593,7 @@ void SimpleCalorimeter::FinalizeTower()
     {
       auto *new_track = static_cast<Candidate *>(track.Clone());
       new_track->AddCandidate(const_cast<Candidate *>(&track)); // preserve parentage
-      new_track->Momentum.SetPtEtaPhiM(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
+      new_track->Momentum = ROOT::Math::PtEtaPhiMVector(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
       fEFlowTrackOutputArray->emplace_back(*new_track);
     }
   }

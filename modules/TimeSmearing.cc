@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -97,9 +96,8 @@ void TimeSmearing::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-
-    const TLorentzVector &candidateFinalPosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidateFinalPosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
 
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
@@ -112,7 +110,7 @@ void TimeSmearing::Process()
 
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
 
-    new_candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
+    new_candidate->Position.SetE(tf_smeared * 1.0E3 * c_light);
     new_candidate->ErrorT = timeResolution * 1.0E3 * c_light;
 
     new_candidate->AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage

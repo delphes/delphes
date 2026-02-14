@@ -39,7 +39,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -69,7 +68,7 @@ public:
 Int_t IsolationClassifier::GetCategory(TObject *object)
 {
   Candidate *track = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = track->Momentum;
+  const auto &momentum = track->Momentum;
 
   if(momentum.Pt() < fPTMin) return -1;
 
@@ -145,7 +144,7 @@ void Isolation::Process()
   // loop over all input jets
   for(auto &candidate : *fCandidateInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = TMath::Abs(candidateMomentum.Eta());
 
     // find rho
@@ -164,7 +163,7 @@ void Isolation::Process()
 
     for(const auto &isolation : isolationArray)
     {
-      const TLorentzVector &isolationMomentum = isolation.Momentum;
+      const auto &isolationMomentum = isolation.Momentum;
 
       if(fUseMiniCone)
       {

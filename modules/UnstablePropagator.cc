@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -89,7 +88,6 @@ void UnstablePropagator::Finish()
 
 void UnstablePropagator::Process()
 {
-  TLorentzVector particlePosition, particleMomentum;
   Double_t pt2, q;
   Double_t lof, x, y, z;
 
@@ -97,8 +95,8 @@ void UnstablePropagator::Process()
 
   for(auto &candidate : *fInputArray) //TODO: ensure const-qualification in consumer methods
   {
-    particlePosition = candidate.Position;
-    particleMomentum = candidate.Momentum;
+    const auto particlePosition = candidate.Position;
+    const auto particleMomentum = candidate.Momentum;
 
     x = particlePosition.X() * 1.0E-3;
     y = particlePosition.Y() * 1.0E-3;
@@ -194,8 +192,8 @@ std::vector<Int_t> UnstablePropagator::DaughterIndices(Candidate *candidate)
 // returns flight distance in mm
 Double_t UnstablePropagator::FlightDistance(Candidate *mother, Candidate *daughter)
 {
-  TVector3 vector = mother->Position.Vect() - daughter->Position.Vect();
-  return vector.Mag();
+  const auto vector = mother->Position.Vect() - daughter->Position.Vect();
+  return std::sqrt(vector.Mag2());
 }
 
 //------------------------------------------------------------------------------
@@ -234,7 +232,6 @@ void UnstablePropagator::ComputeChainFlightDistances(TString prefix, Candidate *
 void UnstablePropagator::PropagateAndUpdateChain(TString prefix, Candidate *candidate)
 {
   Candidate *mother;
-  TLorentzVector updatedPosition;
   mother = candidate;
   std::vector<Int_t> drange = DaughterIndices(mother);
 
@@ -251,7 +248,7 @@ void UnstablePropagator::PropagateAndUpdateChain(TString prefix, Candidate *cand
   }
   else
   {
-    updatedPosition = PropagatedPosition(mother);
+    const auto updatedPosition = PropagatedPosition(mother);
     for(unsigned long i = 0; i < drange.size(); i++)
     {
       auto &daughter = fInputArray->at(drange.at(i));
@@ -266,10 +263,9 @@ void UnstablePropagator::PropagateAndUpdateChain(TString prefix, Candidate *cand
 
 //------------------------------------------------------------------------------
 
-TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
+ROOT::Math::XYZTVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
 {
 
-  TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, e, q;
   Double_t x, y, z, t, r;
   Double_t x_c, y_c, phi_0;
@@ -280,8 +276,8 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
 
   const Double_t c_light = 2.99792458E8;
 
-  particlePosition = candidate->Position;
-  particleMomentum = candidate->Momentum;
+  auto particlePosition = candidate->Position;
+  const auto particleMomentum = candidate->Momentum;
 
   x = particlePosition.X() * 1.0E-3;
   y = particlePosition.Y() * 1.0E-3;

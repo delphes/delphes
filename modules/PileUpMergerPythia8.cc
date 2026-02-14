@@ -39,11 +39,11 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/RotationZ.h>
 
 #include <algorithm>
 #include <iostream>
@@ -139,8 +139,8 @@ void PileUpMergerPythia8::Process()
     vy += candidate.Position.Y();
     z = candidate.Position.Z();
     t = candidate.Position.T();
-    candidate.Position.SetZ(z + dz);
-    candidate.Position.SetT(t + dt);
+    candidate.Position.SetPz(z + dz);
+    candidate.Position.SetE(t + dt);
     fParticleOutputArray->emplace_back(candidate);
   }
 
@@ -218,13 +218,13 @@ void PileUpMergerPythia8::Process()
       candidate->IsPU = 1;
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
-      candidate->Momentum.RotateZ(dphi);
+      candidate->Momentum = ROOT::Math::RotationZ(dphi) * candidate->Momentum;
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
       candidate->Position.SetXYZT(x, y, z + dz, t + dt);
-      candidate->Position.RotateZ(dphi);
-      candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
+      candidate->Position = ROOT::Math::RotationZ(dphi) * candidate->Position;
+      candidate->Position += ROOT::Math::XYZTVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
       vx += candidate->Position.X();
       vy += candidate->Position.Y();

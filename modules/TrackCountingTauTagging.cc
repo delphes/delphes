@@ -25,7 +25,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -59,7 +58,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 {
   Candidate *tau = static_cast<Candidate *>(object);
 
-  const TLorentzVector &momentum = tau->Momentum;
+  const auto &momentum = tau->Momentum;
   Int_t pdgCode, i, j;
 
   pdgCode = TMath::Abs(tau->PID);
@@ -182,7 +181,6 @@ void TrackCountingTauTagging::Finish()
 
 void TrackCountingTauTagging::Process()
 {
-  TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e;
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
@@ -198,7 +196,7 @@ void TrackCountingTauTagging::Process()
   for(auto &jet : *fJetInputArray)
   {
     identifier = 0;
-    const TLorentzVector &jetMomentum = jet.Momentum;
+    const auto &jetMomentum = jet.Momentum;
     charge = 0;
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
@@ -227,7 +225,7 @@ void TrackCountingTauTagging::Process()
         throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
       }
 
-      tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+      ROOT::Math::XYZTVector tauMomentum(0.0, 0.0, 0.0, 0.0);
 
       for(int i = tau.D1; i <= tau.D2; ++i)
       {

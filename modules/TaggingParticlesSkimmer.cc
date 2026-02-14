@@ -40,7 +40,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -100,7 +99,6 @@ void TaggingParticlesSkimmer::Finish()
 
 void TaggingParticlesSkimmer::Process()
 {
-  TLorentzVector tauMomentum;
   Double_t pt, eta;
   Int_t pdgCode;
 
@@ -120,8 +118,7 @@ void TaggingParticlesSkimmer::Process()
       throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
     }
 
-    tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-
+    ROOT::Math::XYZTVector tauMomentum;
     for(int i = tau.D1; i <= tau.D2; ++i)
     {
       const auto &daughter = fParticleInputArray->at(i);

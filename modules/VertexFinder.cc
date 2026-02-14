@@ -18,7 +18,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TMatrixT.h"
 #include "TObjArray.h"

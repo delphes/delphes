@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -106,7 +105,7 @@ void PdgCodeFilter::Process()
   for(const auto &candidate : *fInputArray)
   {
     pdgCode = candidate.PID;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
     pt = candidateMomentum.Pt();
 
     if(pt < fPTMin) continue;

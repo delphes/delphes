@@ -40,7 +40,6 @@
 #include "TDatabasePDG.h"
 #include "TFolder.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TROOT.h"

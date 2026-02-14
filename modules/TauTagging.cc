@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -55,7 +54,7 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 {
   Candidate *tau = static_cast<Candidate *>(object);
 
-  const TLorentzVector &momentum = tau->Momentum;
+  const auto &momentum = tau->Momentum;
   Int_t pdgCode;
 
   pdgCode = TMath::Abs(tau->PID);
@@ -174,7 +173,6 @@ void TauTagging::Finish()
 
 void TauTagging::Process()
 {
-  TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e, eff;
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
@@ -187,7 +185,7 @@ void TauTagging::Process()
   // loop over all input jets
   for(auto &jet : *fJetInputArray)
   {
-    const TLorentzVector &jetMomentum = jet.Momentum;
+    const auto &jetMomentum = jet.Momentum;
     pdgCode = 0;
     charge = gRandom->Uniform() > 0.5 ? 1 : -1;
     eta = jetMomentum.Eta();
@@ -207,7 +205,7 @@ void TauTagging::Process()
           throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
         }
 
-        tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+        ROOT::Math::PxPyPzEVector tauMomentum;
 
         for(int i = tau.D1; i <= tau.D2; ++i)
         {
@@ -228,6 +226,7 @@ void TauTagging::Process()
 
     if(pdgCode == 0)
     {
+      ROOT::Math::PxPyPzEVector tauMomentum;
 
       Double_t drMin = fDeltaR;
       for(const auto &part : *fPartonInputArray)

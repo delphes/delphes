@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -67,7 +66,7 @@ Int_t PartonClassifier::GetCategory(TObject *object)
   // select parton in the parton list
 
   Candidate *parton = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = parton->Momentum;
+  const auto &momentum = parton->Momentum;
   Int_t pdgCode;
 
   // inside the eta && momentum range (be a little bit larger that the tracking coverage
@@ -97,7 +96,7 @@ Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
   // select parton in the parton list
 
   Candidate *particleLHEF = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = particleLHEF->Momentum;
+  const auto &momentum = particleLHEF->Momentum;
   Int_t pdgCode;
 
   // inside the eta && momentum range (be a little bit larger that the tracking coverage

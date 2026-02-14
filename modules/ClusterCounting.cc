@@ -32,7 +32,6 @@
 #include "classes/DelphesFactory.h"
 #include "modules/ClusterCounting.h"
 
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TVectorD.h"
@@ -107,10 +106,14 @@ void ClusterCounting::Process()
     auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
 
     // converting to meters
-    const TLorentzVector &candidatePosition = particle->Position * 1e-03;
-    const TLorentzVector &candidateMomentum = particle->Momentum;
+    const auto &candidatePosition = particle->Position * 1e-03;
+    const auto &candidateMomentum = particle->Momentum;
 
-    TVectorD Par = TrkUtil::XPtoPar(candidatePosition.Vect(), candidateMomentum.Vect(), candidate.Charge, fBz);
+    double candidatePositionVect[3], candidateMomentumVect[3];
+    candidatePosition.Vect().GetCoordinates(candidatePositionVect);
+    candidateMomentum.Vect().GetCoordinates(candidateMomentumVect);
+
+    TVectorD Par = TrkUtil::XPtoPar(TVector3(candidatePositionVect), TVector3(candidateMomentumVect), candidate.Charge, fBz);
     mass = candidateMomentum.M();
 
     trackLength = fTrackUtil->TrkLen(Par);

@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -110,8 +109,8 @@ void IdentificationMap::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();

@@ -36,7 +36,6 @@
 #include <stdio.h>
 
 #include "TDatabasePDG.h"
-#include "TLorentzVector.h"
 #include "TObjArray.h"
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
@@ -472,7 +471,7 @@ void DelphesHepMC2Reader::FinalizeParticles(std::vector<Candidate> &allParticleO
       {
         candidate.D1 = -1;
         candidate.D2 = -1;
-        const TLorentzVector &decayPosition = candidate.Position;
+        const auto &decayPosition = candidate.Position;
         candidate.DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }
       else
@@ -480,7 +479,7 @@ void DelphesHepMC2Reader::FinalizeParticles(std::vector<Candidate> &allParticleO
         candidate.D1 = itDaughterMap->second.first;
         candidate.D2 = itDaughterMap->second.second;
         const auto &candidateDaughter = allParticleOutputArray.at(candidate.D1);
-        const TLorentzVector &decayPosition = candidateDaughter.Position;
+        const auto &decayPosition = candidateDaughter.Position;
         candidate.DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }
     }

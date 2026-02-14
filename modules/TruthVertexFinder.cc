@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -75,14 +74,14 @@ void TruthVertexFinder::Process()
   Float_t pt;
   DelphesFactory *factory = GetFactory();
 
-  TLorentzVector vertexPosition(0., 0., 0., 0.);
+  ROOT::Math::XYZTVector vertexPosition(0., 0., 0., 0.);
 
   nvtx = 0;
   for(const auto &candidate : *fInputArray)
   {
 
-    const TLorentzVector &candidatePosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
 
     pt = candidateMomentum.Pt();
 
@@ -90,7 +89,7 @@ void TruthVertexFinder::Process()
     Bool_t old_vertex = false;
     for(auto &vertex : *fVertexOutputArray)
     {
-      const TLorentzVector &vertexPosition = vertex.Position;
+      const auto &vertexPosition = vertex.Position;
       // check whether spatial difference is < 1 um, in that case assume it is the same vertex
       if(TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
       {

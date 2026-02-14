@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -167,7 +166,7 @@ void Weighter::Process()
   }
 
   auto *candidate = factory->NewCandidate();
-  candidate->Momentum.SetPtEtaPhiE(weight, 0.0, 0.0, weight);
+  candidate->Momentum = ROOT::Math::PtEtaPhiEVector(weight, 0.0, 0.0, weight);
   fOutputArray->emplace_back(*candidate);
 }
 

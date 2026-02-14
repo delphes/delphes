@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -183,7 +182,6 @@ void Calorimeter::Finish()
 void Calorimeter::Process()
 {
   Candidate *particle, *track;
-  TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
@@ -217,8 +215,8 @@ void Calorimeter::Process()
     ++number;
 
     // compute maximum radius (needed in FinalizeTower to assess whether barrel or endcap tower)
-    if(particlePosition.Perp() > fTowerRmax)
-      fTowerRmax = particlePosition.Perp();
+    if(const auto perp = std::sqrt(particlePosition.Perp2()); perp > fTowerRmax)
+      fTowerRmax = perp;
 
     pdgCode = TMath::Abs(particle.PID);
 
@@ -362,8 +360,7 @@ void Calorimeter::Process()
       ++fTowerTrackHits;
 
       track = &fTrackInputArray->at(number);
-      momentum = track->Momentum;
-      position = track->Position;
+      const auto &momentum = track->Momentum;
 
       ecalEnergy = momentum.E() * fECalTrackFractions[number];
       hcalEnergy = momentum.E() * fHCalTrackFractions[number];
@@ -414,8 +411,8 @@ void Calorimeter::Process()
     if(flags & 2) ++fTowerPhotonHits;
 
     particle = &fParticleInputArray->at(number);
-    momentum = particle->Momentum;
-    position = particle->Position;
+    const auto &momentum = particle->Momentum;
+    const auto &position = particle->Position;
 
     // fill current tower
     ecalEnergy = momentum.E() * fECalTowerFractions[number];
@@ -453,7 +450,6 @@ void Calorimeter::FinalizeTower()
 
   Double_t weightTrack, weightCalo, bestEnergyEstimate, rescaleFactor;
 
-  TLorentzVector momentum;
   TFractionMap::iterator itFractionMap;
 
   Float_t weight, sumWeightedTime, sumWeight;
@@ -501,21 +497,21 @@ void Calorimeter::FinalizeTower()
   }
 
   // check whether barrel or endcap tower
-  if(fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
+  if(fTower->Position.Perp2() < fTowerRmax * fTowerRmax && TMath::Abs(eta) > 0.)
     r = fTower->Position.Z() / TMath::SinH(eta);
   else
     r = fTower->Position.Pt();
 
   if(sumWeight > 0.0)
   {
-    fTower->Position.SetPtEtaPhiE(r, eta, phi, sumWeightedTime / sumWeight);
+    fTower->Position = ROOT::Math::PtEtaPhiEVector(r, eta, phi, sumWeightedTime / sumWeight);
   }
   else
   {
-    fTower->Position.SetPtEtaPhiE(r, eta, phi, 999999.9);
+    fTower->Position = ROOT::Math::PtEtaPhiEVector(r, eta, phi, 999999.9);
   }
 
-  fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+  fTower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;
 
@@ -552,7 +548,7 @@ void Calorimeter::FinalizeTower()
     auto *tower = static_cast<Candidate *>(fTower->Clone());
     pt = ecalNeutralEnergy / TMath::CosH(eta);
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalNeutralEnergy);
+    tower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, ecalNeutralEnergy);
     tower->Eem = ecalNeutralEnergy;
     tower->Ehad = 0.0;
     tower->PID = 22;
@@ -594,7 +590,7 @@ void Calorimeter::FinalizeTower()
     auto *tower = static_cast<Candidate *>(fTower->Clone());
     pt = hcalNeutralEnergy / TMath::CosH(eta);
 
-    tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalNeutralEnergy);
+    tower->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, hcalNeutralEnergy);
     tower->Ehad = hcalNeutralEnergy;
     tower->Eem = 0.0;
 
@@ -624,7 +620,7 @@ void Calorimeter::FinalizeTower()
       auto *new_track = static_cast<Candidate *>(track.Clone());
       new_track->AddCandidate(const_cast<Candidate *>(&track)); // keep parentage
       new_track->Momentum *= rescaleFactor;
-      new_track->Momentum.SetPtEtaPhiM(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
+      new_track->Momentum = ROOT::Math::PtEtaPhiMVector(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
 
       fEFlowTrackOutputArray->emplace_back(*new_track);
     }

@@ -38,7 +38,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -117,8 +116,8 @@ void PhotonID::Process()
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
     new_candidate->AddCandidate(const_cast<Candidate *>(&candidate));
 
-    const TLorentzVector &candidatePosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
@@ -173,13 +172,13 @@ void PhotonID::Process()
 
 Bool_t PhotonID::isFake(const Candidate *obj)
 {
-  const TLorentzVector &mom_rec = obj->Momentum;
+  const auto &mom_rec = obj->Momentum;
 
   Bool_t matches = false;
 
   for(const auto &gen : *fInputGenArray)
   {
-    const TLorentzVector &mom_gen = gen.Momentum;
+    const auto &mom_gen = gen.Momentum;
     Int_t status = gen.Status;
     Int_t pdgCode = TMath::Abs(gen.PID);
     Float_t dPtOverPt = TMath::Abs((mom_gen.Pt() - mom_rec.Pt()) / mom_rec.Pt());

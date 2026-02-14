@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -118,7 +117,7 @@ void TrackPileUpSubtractor::Process()
     for(auto &candidate : *input_collection)
     {
       auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
-      const TLorentzVector &candidateMomentum = particle->Momentum;
+      const auto &candidateMomentum = particle->Momentum;
 
       eta = candidateMomentum.Eta();
       pt = candidateMomentum.Pt();

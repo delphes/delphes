@@ -39,7 +39,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -103,7 +102,6 @@ void ParticlePropagator::Finish()
 void ParticlePropagator::Process()
 {
   Candidate *particle;
-  TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, pt2, e, q;
   Double_t x, y, z, t, r;
   Double_t x_c, y_c, r_c, phi_0;
@@ -118,11 +116,8 @@ void ParticlePropagator::Process()
 
   const Double_t c_light = 2.99792458E8;
 
-  if(!fBeamSpotInputArray || fBeamSpotInputArray->empty())
-  {
-    beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  }
-  else
+  ROOT::Math::XYZTVector beamSpotPosition;
+  if(fBeamSpotInputArray && !fBeamSpotInputArray->empty())
   {
     const auto &beamSpotCandidate = fBeamSpotInputArray->at(0);
     beamSpotPosition = beamSpotCandidate.Position;
@@ -139,8 +134,8 @@ void ParticlePropagator::Process()
       particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
     }
 
-    particlePosition = particle->Position;
-    particleMomentum = particle->Momentum;
+    const auto &particlePosition = particle->Position;
+    const auto &particleMomentum = particle->Momentum;
 
     x = particlePosition.X() * 1.0E-3;
     y = particlePosition.Y() * 1.0E-3;
@@ -271,12 +266,12 @@ void ParticlePropagator::Process()
       px = pt * TMath::Cos(phid);
       py = pt * TMath::Sin(phid);
 
-      particleMomentum.SetPtEtaPhiE(pt, particleMomentum.Eta(), phid, particleMomentum.E());
+      const auto caParticleMomentum = ROOT::Math::PtEtaPhiEVector(pt, particleMomentum.Eta(), phid, particleMomentum.E());
 
       // calculate additional track parameters (correct for beamspot position)
       d0 = ((xd - bsx) * py - (yd - bsy) * px) / pt;
       dz = zd - bsz;
-      ctgTheta = 1.0 / TMath::Tan(particleMomentum.Theta());
+      ctgTheta = 1.0 / TMath::Tan(caParticleMomentum.Theta());
 
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
@@ -313,10 +308,10 @@ void ParticlePropagator::Process()
         {
           particle->D0 = d0 * 1.0E3;
           particle->DZ = dz * 1.0E3;
-          particle->P = particleMomentum.P();
+          particle->P = caParticleMomentum.P();
           particle->PT = pt;
           particle->CtgTheta = ctgTheta;
-          particle->Phi = particleMomentum.Phi();
+          particle->Phi = caParticleMomentum.Phi();
         }
 
         auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
@@ -324,7 +319,7 @@ void ParticlePropagator::Process()
         new_candidate->InitialPosition = particlePosition;
         new_candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * c_light * 1.0E3);
 
-        new_candidate->Momentum = particleMomentum;
+        new_candidate->Momentum = caParticleMomentum;
 
         new_candidate->L = l * 1.0E3;
 

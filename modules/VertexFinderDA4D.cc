@@ -18,7 +18,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TMatrixT.h"
 #include "TObjArray.h"
@@ -152,7 +151,6 @@ void VertexFinderDA4D::Process()
   //fInputArray->Sort();
   //FIXME: do we need something along std::sort(fInputArray->begin(), fInputArray->end()); ?
 
-  TLorentzVector pos, mom;
   if(fVerbose)
   {
     cout << " start processing vertices ..." << endl;
@@ -160,9 +158,7 @@ void VertexFinderDA4D::Process()
     //loop over input tracks
     for(const auto &candidate : *fInputArray)
     {
-      pos = candidate.InitialPosition;
-      mom = candidate.Momentum;
-
+      const auto mom = candidate.Momentum;
       cout << "pt: " << mom.Pt() << ", eta: " << mom.Eta() << ", phi: " << mom.Phi() << ", z: " << candidate.DZ / 10 << endl;
     }
   }

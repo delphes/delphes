@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -92,7 +91,7 @@ void CscClusterEfficiency::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateDecayPosition = candidate.DecayPosition;
+    const auto &candidateDecayPosition = candidate.DecayPosition;
     decayZ = abs(candidateDecayPosition.Z());
     decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
     Ehad = candidate.Ehad;

@@ -16,11 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "display/DelphesPlotSummary.h"
 #include "TRootEmbeddedCanvas.h"
+#include "display/DelphesPlotSummary.h"
 #include <algorithm>
 
-bool vecsorter(TLorentzVector i, TLorentzVector j) { return (i.Pt() > j.Pt()); }
+bool vecsorter(ROOT::Math::XYZTVector i, ROOT::Math::XYZTVector j) { return (i.Pt() > j.Pt()); }
 
 DelphesPlotSummary::DelphesPlotSummary(TEveWindowTab *tab) :
   tab_(tab) {}
@@ -123,26 +123,28 @@ void DelphesPlotSummary::FillSample(ExRootTreeReader *treeReader, Int_t event_id
     treeReader->ReadEntry(i);
     for(std::vector<DelphesBranchBase *>::iterator element = elements_->begin(); element < elements_->end(); ++element)
     {
-      std::vector<TLorentzVector> vectors = (*element)->GetVectors();
+      std::vector<ROOT::Math::XYZTVector> vectors = (*element)->GetVectors();
       std::sort(vectors.begin(), vectors.end(), vecsorter);
       std::vector<TH1F *> histograms = histograms_[(*element)->GetName()];
-      for(std::vector<TLorentzVector>::iterator it = vectors.begin(); it < vectors.end(); ++it)
+      size_t j = 0;
+      for(const auto &vec : vectors)
       {
-        histograms[0]->Fill(it->Pt());
-        histograms[1]->Fill(it->Eta());
-        histograms[2]->Fill(it->Phi());
-        if(it == vectors.begin())
+        histograms[0]->Fill(vec.Pt());
+        histograms[1]->Fill(vec.Eta());
+        histograms[2]->Fill(vec.Phi());
+        if(j == 0)
         {
-          histograms[3]->Fill(it->Pt());
-          histograms[4]->Fill(it->Eta());
-          histograms[5]->Fill(it->Phi());
+          histograms[3]->Fill(vec.Pt());
+          histograms[4]->Fill(vec.Eta());
+          histograms[5]->Fill(vec.Phi());
         }
-        if(it == vectors.begin() + 1)
+        else if(j == 1)
         {
-          histograms[6]->Fill(it->Pt());
-          histograms[7]->Fill(it->Eta());
-          histograms[8]->Fill(it->Phi());
+          histograms[6]->Fill(vec.Pt());
+          histograms[7]->Fill(vec.Eta());
+          histograms[8]->Fill(vec.Phi());
         }
+        ++j;
       }
     }
     Progress(int(100 * i / entries));
@@ -197,7 +199,7 @@ void DelphesPlotSummary::FillEvent()
   // loop over the elements and fill markers with event data
   for(std::vector<DelphesBranchBase *>::iterator element = elements_->begin(); element < elements_->end(); ++element)
   {
-    std::vector<TLorentzVector> vectors = (*element)->GetVectors();
+    auto vectors = (*element)->GetVectors();
     std::sort(vectors.begin(), vectors.end(), vecsorter);
     std::vector<TH1F *> hv = eventProfiles_[(*element)->GetName()];
     TH1F *h1 = hv[0];
@@ -207,29 +209,31 @@ void DelphesPlotSummary::FillEvent()
     TH1F *h3 = hv[2];
     h1->Reset();
     std::vector<TMarker *> mv = eventMarkers_[(*element)->GetName()];
-    for(std::vector<TLorentzVector>::iterator it = vectors.begin(); it < vectors.end(); ++it)
+    size_t i = 0;
+    for(const auto &vec : vectors)
     {
-      h1->Fill(it->Pt());
-      h2->Fill(it->Eta());
-      h3->Fill(it->Phi());
-      if(it == vectors.begin())
+      h1->Fill(vec.Pt());
+      h2->Fill(vec.Eta());
+      h3->Fill(vec.Phi());
+      if(i == 0)
       {
-        mv[0]->SetX(it->Pt());
+        mv[0]->SetX(vec.Pt());
         mv[0]->SetMarkerSize(3);
-        mv[1]->SetX(it->Eta());
+        mv[1]->SetX(vec.Eta());
         mv[1]->SetMarkerSize(3);
-        mv[2]->SetX(it->Phi());
+        mv[2]->SetX(vec.Phi());
         mv[2]->SetMarkerSize(3);
       }
-      if(it == vectors.begin() + 1)
+      else if(i == 1)
       {
-        mv[3]->SetX(it->Pt());
+        mv[3]->SetX(vec.Pt());
         mv[3]->SetMarkerSize(3);
-        mv[4]->SetX(it->Eta());
+        mv[4]->SetX(vec.Eta());
         mv[4]->SetMarkerSize(3);
-        mv[5]->SetX(it->Phi());
+        mv[5]->SetX(vec.Phi());
         mv[5]->SetMarkerSize(3);
       }
+      ++i;
     }
   }
 }

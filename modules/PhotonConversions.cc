@@ -38,7 +38,6 @@
 #include "TDatabasePDG.h"
 #include "TF1.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -102,7 +101,6 @@ void PhotonConversions::Finish()
 
 void PhotonConversions::Process()
 {
-  TLorentzVector candidatePosition, candidateMomentum;
   TVector3 pos_i;
   Double_t px, py, pz, pt, pt2, e, eta, phi;
   Double_t x, y, z, t;
@@ -122,8 +120,8 @@ void PhotonConversions::Process()
     }
     else
     {
-      candidatePosition = candidate.Position;
-      candidateMomentum = candidate.Momentum;
+      const auto &candidatePosition = candidate.Position;
+      const auto &candidateMomentum = candidate.Momentum;
       x = candidatePosition.X() * 1.0E-3;
       y = candidatePosition.Y() * 1.0E-3;
       z = candidatePosition.Z() * 1.0E-3;
@@ -217,8 +215,8 @@ void PhotonConversions::Process()
           ep->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
           em->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
 
-          ep->Momentum.SetPtEtaPhiE(x1 * pt, eta, phi, x1 * e);
-          em->Momentum.SetPtEtaPhiE(x2 * pt, eta, phi, x2 * e);
+          ep->Momentum = ROOT::Math::PtEtaPhiEVector(x1 * pt, eta, phi, x1 * e);
+          em->Momentum = ROOT::Math::PtEtaPhiEVector(x2 * pt, eta, phi, x2 * e);
 
           ep->PID = -11;
           em->PID = 11;

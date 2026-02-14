@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -73,15 +72,14 @@ void JetPileUpSubtractor::Finish()
 
 void JetPileUpSubtractor::Process()
 {
-  TLorentzVector momentum, area;
   Double_t eta = 0.0;
   Double_t rho = 0.0;
 
   // loop over all input candidates
   for(const auto &candidate : *fJetInputArray)
   {
-    momentum = candidate.Momentum;
-    area = candidate.Area;
+    auto momentum = candidate.Momentum;
+    const auto &area = candidate.Area;
     eta = momentum.Eta();
 
     // find rho

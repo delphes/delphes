@@ -37,7 +37,6 @@
 
 #include "TFormula.h"
 #include "TH2F.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"

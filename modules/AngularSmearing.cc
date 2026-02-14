@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -97,7 +96,7 @@ void AngularSmearing::Process()
 
   for(auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();
@@ -112,7 +111,7 @@ void AngularSmearing::Process()
 
     mother = &candidate;
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    new_candidate->Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
     new_candidate->AddCandidate(mother);
 
     fOutputArray->emplace_back(*new_candidate);

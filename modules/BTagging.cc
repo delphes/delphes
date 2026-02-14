@@ -34,7 +34,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -110,7 +109,7 @@ void BTagging::Process()
   // loop over all input jets
   for(auto &jet : *fJetInputArray)
   {
-    const TLorentzVector &jetMomentum = jet.Momentum;
+    const auto &jetMomentum = jet.Momentum;
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
     pt = jetMomentum.Pt();

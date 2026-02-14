@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -92,8 +91,8 @@ void EnergySmearing::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
 
     pt = candidatePosition.Pt();
     eta = candidatePosition.Eta();
@@ -111,7 +110,7 @@ void EnergySmearing::Process()
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
-    new_candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+    new_candidate->Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
     new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
     new_candidate->AddCandidate(mother);
 

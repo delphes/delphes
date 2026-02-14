@@ -339,7 +339,7 @@ void LHCOWriter::AnalyseMuons()
 void LHCOWriter::AnalyseTauJets()
 {
   Jet *element;
-  Track *track;
+  //Track *track;
   Int_t counter;
 
   fItJet->Reset();

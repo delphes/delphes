@@ -36,7 +36,6 @@
 #include <stdio.h>
 
 #include "TDatabasePDG.h"
-#include "TLorentzVector.h"
 #include "TObjArray.h"
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
@@ -387,7 +386,7 @@ void DelphesHepMC3Reader::AnalyzeWeight(ExRootTreeBranch *branch)
 void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate)
 {
   int index;
-  TLorentzVector *position;
+  ROOT::Math::XYZTVector *position = nullptr;
   TObjArray *array;
   vector<int>::iterator itParticle;
   map<int, int>::iterator itVertexMap;
@@ -401,9 +400,8 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
     fOutVertexMap[code] = index;
     if(candidate && code > 0) fInVertexMap[code] = index;
 
-    position = factory->New<TLorentzVector>();
     array = factory->NewArray();
-    position->SetXYZT(0.0, 0.0, 0.0, 0.0);
+    position = new ROOT::Math::XYZTVector(0.0, 0.0, 0.0, 0.0);
     fVertices.push_back(make_pair(position, array));
   }
   else
@@ -454,7 +452,6 @@ void DelphesHepMC3Reader::FinalizeParticles(std::vector<Candidate> &allParticleO
   std::vector<Candidate> &stableParticleOutputArray,
   std::vector<Candidate> &partonOutputArray)
 {
-  TLorentzVector *position;
   TParticlePDG *pdgParticle;
   int pdgCode;
   map<int, int>::iterator itVertexMap;
@@ -466,7 +463,7 @@ void DelphesHepMC3Reader::FinalizeParticles(std::vector<Candidate> &allParticleO
   counter = 0;
   for(i = 0; i < fVertices.size(); ++i)
   {
-    position = fVertices[i].first;
+    auto *position = fVertices[i].first;
     auto *array = fVertices[i].second;
 
     for(j = 0; j < array->GetEntriesFast(); ++j)
@@ -569,7 +566,7 @@ void DelphesHepMC3Reader::FinalizeParticles(std::vector<Candidate> &allParticleO
       {
         candidate.D1 = -1;
         candidate.D2 = -1;
-        const TLorentzVector &decayPosition = candidate.Position;
+        const auto &decayPosition = candidate.Position;
         candidate.DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }
       else
@@ -577,7 +574,7 @@ void DelphesHepMC3Reader::FinalizeParticles(std::vector<Candidate> &allParticleO
         candidate.D1 = itDaughterMap->second.first;
         candidate.D2 = itDaughterMap->second.second;
         const auto &candidateDaughter = allParticleOutputArray.at(candidate.D1);
-        const TLorentzVector &decayPosition = candidateDaughter.Position;
+        const auto &decayPosition = candidateDaughter.Position;
         candidate.DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }
     }

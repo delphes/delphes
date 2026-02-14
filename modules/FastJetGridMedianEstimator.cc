@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -113,7 +112,6 @@ void FastJetGridMedianEstimator::Finish()
 
 void FastJetGridMedianEstimator::Process()
 {
-  TLorentzVector momentum;
   Int_t number;
   Double_t rho = 0;
   PseudoJet jet;
@@ -127,7 +125,7 @@ void FastJetGridMedianEstimator::Process()
   number = 0;
   for(const auto &candidate : *fInputArray)
   {
-    momentum = candidate.Momentum;
+    const auto momentum = candidate.Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
     inputList.push_back(jet);
@@ -143,7 +141,7 @@ void FastJetGridMedianEstimator::Process()
     rho = estimator->rho();
 
     auto *candidate = factory->NewCandidate();
-    candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
+    candidate->Momentum = ROOT::Math::PtEtaPhiEVector(rho, 0.0, 0.0, rho);
     candidate->Edges[0] = estimator->rapmin();
     candidate->Edges[1] = estimator->rapmax();
     fRhoOutputArray->emplace_back(*candidate);

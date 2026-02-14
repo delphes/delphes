@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TROOT.h"
 #include "TRandom3.h"
@@ -204,8 +203,8 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const std::vector<Ca
   // loop over all particles
   for(const auto &candidate : array)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
 
     auto *entry = static_cast<GenParticle *>(branch->NewEntry());
 
@@ -213,7 +212,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const std::vector<Ca
     entry->SetUniqueID(candidate.GetUniqueID());
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
     rapidity = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Rapidity());
@@ -328,9 +327,9 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
   // loop over all tracks
   for(const auto &candidate : array)
   {
-    const TLorentzVector &position = candidate.Position;
+    const auto &position = candidate.Position;
 
-    cosTheta = TMath::Abs(position.CosTheta());
+    cosTheta = TMath::Abs(std::cos(position.Theta()));
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
 
@@ -388,7 +387,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
     entry->YFirstHit = candidate.YFirstHit;
     entry->ZFirstHit = candidate.ZFirstHit;
 
-    const TLorentzVector &momentum = candidate.Momentum;
+    const auto &momentum = candidate.Momentum;
 
     pt = momentum.Pt();
     p = momentum.P();
@@ -396,7 +395,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
     m = momentum.M();
     ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : momentum.Eta());
 
@@ -409,8 +408,8 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const std::vector<Candi
     entry->Mass = m;
 
     auto *particle = static_cast<Candidate *>(const_cast<Candidate &>(candidate).GetCandidates()->At(0));
-    //const TLorentzVector &initialPosition = particle->Position;
-    const TLorentzVector &initialPosition = candidate.InitialPosition;
+    //const auto &initialPosition = particle->Position;
+    const auto &initialPosition = candidate.InitialPosition;
 
     entry->X = initialPosition.X();
     entry->Y = initialPosition.Y();
@@ -438,11 +437,11 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const std::vector<Candi
   // loop over all towers
   for(const auto &candidate : array)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -489,9 +488,9 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const s
   // loop over all tracks
   for(const auto &candidate : array)
   {
-    const TLorentzVector &position = candidate.Position;
+    const auto &position = candidate.Position;
 
-    cosTheta = TMath::Abs(position.CosTheta());
+    cosTheta = TMath::Abs(std::cos(position.Theta()));
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
 
@@ -563,7 +562,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const s
     entry->YFirstHit = candidate.YFirstHit;
     entry->ZFirstHit = candidate.ZFirstHit;
 
-    const TLorentzVector &momentum = candidate.Momentum;
+    const auto &momentum = candidate.Momentum;
 
     e = momentum.E();
     pt = momentum.Pt();
@@ -572,7 +571,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const s
     m = momentum.M();
     ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : momentum.Eta());
 
@@ -585,7 +584,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const s
     entry->C = candidate.C;
     entry->Mass = m;
 
-    const TLorentzVector &initialPosition = candidate.InitialPosition;
+    const auto &initialPosition = candidate.InitialPosition;
 
     entry->X = initialPosition.X();
     entry->Y = initialPosition.Y();
@@ -623,11 +622,11 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const std::vector<Cand
   for(const auto &candidate : array)
   {
     TIter it1(const_cast<Candidate &>(candidate).GetCandidates());
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -669,11 +668,11 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const std::vector<Ca
   // loop over all electrons
   for(const auto &candidate : array)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -720,11 +719,11 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const std::vector<Candid
   // loop over all muons
   for(const auto &candidate : array)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -776,11 +775,11 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const std::vector<Candida
   {
     TIter itConstituents(const_cast<Candidate &>(candidate).GetCandidates());
 
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -877,7 +876,7 @@ void TreeWriter::ProcessMissingET(ExRootTreeBranch *branch, const std::vector<Ca
   // get the first entry
   if(!array.empty())
   {
-    const TLorentzVector &momentum = array.at(0).Momentum;
+    const auto &momentum = array.at(0).Momentum;
 
     auto *entry = static_cast<MissingET *>(branch->NewEntry());
     entry->Eta = (-momentum).Eta();
@@ -898,10 +897,10 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const std::vector<C
   // loop over all clusters
   for(const auto &candidate : array)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &position = candidate.DecayPosition;
+    const auto &momentum = candidate.Momentum;
+    const auto &position = candidate.DecayPosition;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -940,7 +939,7 @@ void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, const std::vector<Can
   // get the first entry
   if(!array.empty())
   {
-    const TLorentzVector &momentum = array.at(0).Momentum;
+    const auto &momentum = array.at(0).Momentum;
     auto *entry = static_cast<ScalarHT *>(branch->NewEntry());
     entry->HT = momentum.Pt();
   }
@@ -953,7 +952,7 @@ void TreeWriter::ProcessRho(ExRootTreeBranch *branch, const std::vector<Candidat
   // loop over all rho
   for(const auto &candidate : array)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
+    const auto &momentum = candidate.Momentum;
 
     auto *entry = static_cast<Rho *>(branch->NewEntry());
     entry->Rho = momentum.E();
@@ -969,7 +968,7 @@ void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const std::vector<Candi
   // get the first entry
   if(!array.empty())
   {
-    const TLorentzVector &momentum = array.at(0).Momentum;
+    const auto &momentum = array.at(0).Momentum;
     auto *entry = static_cast<Weight *>(branch->NewEntry());
     entry->Weight = momentum.E();
   }
@@ -982,8 +981,8 @@ void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, const std::vector<Ca
   // loop over all roman pot hits
   for(const auto &candidate : array)
   {
-    const TLorentzVector &position = candidate.Position;
-    const TLorentzVector &momentum = candidate.Momentum;
+    const auto &position = candidate.Position;
+    const auto &momentum = candidate.Momentum;
 
     auto *entry = static_cast<HectorHit *>(branch->NewEntry());
 

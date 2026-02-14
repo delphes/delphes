@@ -39,7 +39,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -126,8 +125,8 @@ void LLPFilter::Process()
 
     //all distance units are in mm
     pdgCode = candidate.PID;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
-    const TLorentzVector &candidateDecayPosition = candidate.DecayPosition;
+    const auto &candidateMomentum = candidate.Momentum;
+    const auto &candidateDecayPosition = candidate.DecayPosition;
     pt = candidateMomentum.Pt();
     eta = candidateMomentum.Eta();
     if(pt < fPTMin) continue;
@@ -150,7 +149,7 @@ void LLPFilter::Process()
       if(abs(daughterPdg) == 12 || abs(daughterPdg) == 14 || abs(daughterPdg) == 16 || abs(daughterPdg) == 13) continue; // ignore neutrinos and muons
       if(abs(daughterPdg) > 1000000) continue; //ignore BSM particles
 
-      const TLorentzVector &daughterMomentum = daughter.Momentum;
+      const auto &daughterMomentum = daughter.Momentum;
 
       // look for mother until find LLP or reach the top of the tree
       tempCandidate = &daughter;

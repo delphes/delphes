@@ -38,7 +38,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -99,13 +98,13 @@ void CscClusterId::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &momentum = candidate.Momentum;
-    const TLorentzVector &candidateDecayPosition = candidate.DecayPosition;
+    const auto &momentum = candidate.Momentum;
+    const auto &candidateDecayPosition = candidate.DecayPosition;
     decayZ = abs(candidateDecayPosition.Z());
     decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
     Ehad = candidate.Ehad;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = TMath::Abs(std::cos(momentum.Theta()));
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 

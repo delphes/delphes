@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -91,9 +90,9 @@ void TimeOfFlight::Process()
 
     auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
 
-    const TLorentzVector &candidateInitialPosition = particle->Position;
-    const TLorentzVector &candidateInitialPositionSmeared = candidate.InitialPosition;
-    const TLorentzVector &candidateFinalPosition = candidate.Position;
+    const auto &candidateInitialPosition = particle->Position;
+    const auto &candidateInitialPositionSmeared = candidate.InitialPosition;
+    const auto &candidateFinalPosition = candidate.Position;
 
     // time at vertex from MC truth
     t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
@@ -134,7 +133,7 @@ void TimeOfFlight::Process()
       } // end vertex  loop
 
       // track displacement to be possibily replaced by vertex fitted position
-      ti = candidateInitialPositionSmeared.Vect().Mag() * 1.0E-3 / (beta * c_light);
+      ti = std::sqrt(candidateInitialPositionSmeared.Vect().Mag2()) * 1.0E-3 / (beta * c_light);
     }
     break;
     }
@@ -154,7 +153,7 @@ void TimeOfFlight::Process()
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
 
     // update time at vertex based on option
-    new_candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
+    new_candidate->InitialPosition.SetE(ti * 1.0E3 * c_light);
 
     // update particle mass based on TOF-based PID (commented for now, assume this calculation is done offline)
     //new_candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);

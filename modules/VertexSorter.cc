@@ -21,7 +21,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TMatrixT.h"
 #include "TObjArray.h"
@@ -120,14 +119,14 @@ void VertexSorter::Process()
         continue;
       if(candidate.ClusterIndex < 0)
         continue;
-      TLorentzVector p(candidate.Momentum.Px(), candidate.Momentum.Py(), candidate.Momentum.Pz(), candidate.Momentum.E());
+      ROOT::Math::PxPyPzEVector p(candidate.Momentum.Px(), candidate.Momentum.Py(), candidate.Momentum.Pz(), candidate.Momentum.E());
       Bool_t isInJet = false;
 
       for(const auto &jetCandidate : *fJetInputArray)
       {
         if(jetCandidate.Momentum.Pt() < 30.0)
           continue;
-        TLorentzVector q(jetCandidate.Momentum.Px(), jetCandidate.Momentum.Py(), jetCandidate.Momentum.Pz(), jetCandidate.Momentum.E());
+        ROOT::Math::PxPyPzEVector q(jetCandidate.Momentum.Px(), jetCandidate.Momentum.Py(), jetCandidate.Momentum.Pz(), jetCandidate.Momentum.E());
 
         if(p.DeltaR(q) > 0.4)
           continue;

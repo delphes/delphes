@@ -41,7 +41,6 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 
@@ -126,15 +125,19 @@ void TrackCovariance::Process()
     auto *particle = static_cast<Candidate *>(candidate.GetCandidates()->At(0));
 
     // converting to meters
-    const TLorentzVector &candidatePosition = particle->Position * 1e-03;
-    const TLorentzVector &candidateMomentum = particle->Momentum;
+    const auto &candidatePosition = particle->Position * 1e-03;
+    const auto &candidateMomentum = particle->Momentum;
 
-    Bool_t inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
+    double candidatePositionVect[3], candidateMomentumVect[3];
+    candidatePosition.Vect().GetCoordinates(candidatePositionVect);
+    candidateMomentum.Vect().GetCoordinates(candidateMomentumVect);
+
+    Bool_t inside = TrkUtil::IsInside(candidatePositionVect, Rin, ZinNeg, ZinPos); // Check if in inner box
     Bool_t Accept = kTRUE;
     if(inside)
-      Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
+      Accept = fCovariance->IsAccepted(candidateMomentumVect);
     else
-      Accept = fCovariance->IsAccepted(candidatePosition.Vect(), candidateMomentum.Vect(), fGeometry);
+      Accept = fCovariance->IsAccepted(candidatePositionVect, candidateMomentumVect, fGeometry);
     if(!Accept) continue;
 
     mass = candidateMomentum.M();
@@ -144,7 +147,7 @@ void TrackCovariance::Process()
     //ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate.Charge, fCovariance, fGeometry);
     //
     // Try Kalman without any grid
-    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate.Charge, mass, fGeometry);
+    ObsTrk track(candidatePositionVect, candidateMomentumVect, candidate.Charge, mass, fGeometry);
 
     // apply rescaling factors to resolution
     if(TMath::Abs(candidate.PID) == 11)
@@ -162,7 +165,8 @@ void TrackCovariance::Process()
 
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
 
-    new_candidate->Momentum.SetVectM(track.GetObsP(), mass);
+    const auto track_obs_p = track.GetObsP();
+    new_candidate->Momentum.SetCoordinates(track_obs_p.X(), track_obs_p.Y(), track_obs_p.Z(), mass);
 
     // converting back to mm
     new_candidate->InitialPosition.SetXYZT(track.GetObsX().X() * 1e03, track.GetObsX().Y() * 1e03, track.GetObsX().Z() * 1e03, candidatePosition.T() * 1e03);
@@ -190,7 +194,7 @@ void TrackCovariance::Process()
     new_candidate->C = track.GetObsPar()[2] * 1e-03;
     new_candidate->DZ = track.GetObsPar()[3] * 1e03;
     new_candidate->CtgTheta = track.GetObsPar()[4];
-    new_candidate->P = track.GetObsP().Mag();
+    new_candidate->P = std::sqrt(track.GetObsP().Mag2());
     new_candidate->PT = pt;
     new_candidate->Charge = q;
 

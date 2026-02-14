@@ -31,7 +31,6 @@
 #include "classes/DelphesFormula.h"
 
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -85,7 +84,7 @@ void TrackCountingBTagging::Process()
   // loop over all input jets
   for(auto &jet : *fJetInputArray)
   {
-    const TLorentzVector &jetMomentum = jet.Momentum;
+    const auto &jetMomentum = jet.Momentum;
     jpx = jetMomentum.Px();
     jpy = jetMomentum.Py();
     jpz = jetMomentum.Pz();
@@ -96,7 +95,7 @@ void TrackCountingBTagging::Process()
     for(const auto &track : *fTrackInputArray)
     {
       if(count >= fNtracks) break;
-      const TLorentzVector &trkMomentum = track.Momentum;
+      const auto &trkMomentum = track.Momentum;
       tpt = trkMomentum.Pt();
       if(tpt < fPtMin) continue;
 

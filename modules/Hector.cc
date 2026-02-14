@@ -36,7 +36,6 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TRandom3.h"
@@ -114,8 +113,8 @@ void Hector::Process()
 
   for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate.Position;
-    const TLorentzVector &candidateMomentum = candidate.Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     pz = candidateMomentum.Pz();
 
     if(TMath::Abs(candidateMomentum.Eta()) <= fEtaMin || TMath::Sign(pz, Double_t(fDirection)) != pz) continue;
@@ -150,8 +149,8 @@ void Hector::Process()
     particle.propagate(fDistance);
 
     auto *new_candidate = static_cast<Candidate *>(candidate.Clone());
-    new_candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
-    new_candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
+    new_candidate->Position = ROOT::Math::XYZTVector(particle.getX(), particle.getY(), particle.getS(), time);
+    new_candidate->Momentum = ROOT::Math::PxPyPzEVector(particle.getTX(), particle.getTY(), 0.0, particle.getE());
     new_candidate->AddCandidate(const_cast<Candidate *>(&candidate)); // preserve parentage
     fOutputArray->emplace_back(*new_candidate);
   }

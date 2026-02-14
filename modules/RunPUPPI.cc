@@ -142,7 +142,6 @@ void RunPUPPI::Finish()
 void RunPUPPI::Process()
 {
   Candidate *particle;
-  TLorentzVector momentum;
 
   //DelphesFactory *factory = GetFactory();
 
@@ -161,7 +160,7 @@ void RunPUPPI::Process()
   // Loop on charge track candidate
   for(auto &candidate : *fTrackInputArray) //TODO: check if const GetCandidates getter is possible
   {
-    momentum = candidate.Momentum;
+    const auto momentum = candidate.Momentum;
     RecoObj curRecoObj;
     curRecoObj.pt = momentum.Pt();
     curRecoObj.eta = momentum.Eta();
@@ -211,7 +210,7 @@ void RunPUPPI::Process()
   // Loop on neutral calo cells
   for(auto &candidate : *fNeutralInputArray) //TODO: check for const-qualified GetCandidates
   {
-    momentum = candidate.Momentum;
+    const auto momentum = candidate.Momentum;
     RecoObj curRecoObj;
     curRecoObj.pt = momentum.Pt();
     curRecoObj.eta = momentum.Eta();
