@@ -129,6 +129,8 @@ void Weighter::Process()
 
   DelphesFactory *factory = GetFactory();
 
+  fOutputArray->clear();
+
   // loop over all particles
   fCodeSet.clear();
   for(const auto &candidate : *fInputArray)

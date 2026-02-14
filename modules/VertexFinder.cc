@@ -81,6 +81,9 @@ static Bool_t secondDescending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double
 
 void VertexFinder::Process()
 {
+  fOutputArray->clear();
+  fVertexOutputArray->clear();
+
   // Clear the track and cluster maps before starting
   trackIDToDouble.clear();
   trackIDToInt.clear();

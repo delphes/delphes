@@ -144,6 +144,10 @@ void RunPUPPI::Process()
 
   std::vector<Candidate *> InputParticles;
 
+  fOutputArray->clear();
+  fOutputTrackArray->clear();
+  fOutputNeutralArray->clear();
+
   // take the leading vertex
   float PVZ = 0.;
   if(!fPVInputArray->empty())

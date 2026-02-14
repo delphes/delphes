@@ -120,6 +120,9 @@ void PileUpMerger::Process()
 
   const Double_t c_light = 2.99792458E8;
 
+  fParticleOutputArray->clear();
+  fVertexOutputArray->clear();
+
   // --- Deal with primary vertex first  ------
 
   fFunction->GetRandom2(dz, dt);

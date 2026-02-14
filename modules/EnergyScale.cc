@@ -87,6 +87,7 @@ void EnergyScale::Process()
 {
   Double_t scale;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     auto momentum = candidate.Momentum;

@@ -96,6 +96,8 @@ void VertexSorter::Process()
   vector<pair<Int_t, Double_t> > sortedClusterIDs;
   vector<pair<Int_t, Double_t> >::const_iterator itSortedClusterIDs;
 
+  fOutputArray->clear();
+
   for(size_t iCluster = 0; iCluster < fInputArray->size(); iCluster++)
   {
     const auto &cluster = fInputArray->at(iCluster);

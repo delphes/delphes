@@ -408,6 +408,10 @@ int main(int argc, char *argv[])
         modularDelphes->Clear();
         treeWriter->Clear();
 
+        stableParticleOutputArray->clear();
+        allParticleOutputArray->clear();
+        partonOutputArray->clear();
+
         readStopWatch.Start();
         progressBar.Update(eventCounter);
       }

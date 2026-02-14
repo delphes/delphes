@@ -238,6 +238,10 @@ int main(int argc, char *argv[])
         modularDelphes->Clear();
         treeWriter->Clear();
 
+        stableParticleOutputArray->clear();
+        allParticleOutputArray->clear();
+        partonOutputArray->clear();
+
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
       }

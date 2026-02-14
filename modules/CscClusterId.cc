@@ -94,6 +94,7 @@ void CscClusterId::Process()
   Double_t Ehad, decayR, decayZ, NStationEff, eta;
   Double_t signPz, cosTheta;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     const auto &momentum = candidate.Momentum;

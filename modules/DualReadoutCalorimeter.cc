@@ -200,6 +200,14 @@ void DualReadoutCalorimeter::Process()
   vector<Long64_t>::iterator itTowerHits;
 
   DelphesFactory *factory = GetFactory();
+
+  fTowerOutputArray->clear();
+  fPhotonOutputArray->clear();
+
+  fEFlowTrackOutputArray->clear();
+  fEFlowPhotonOutputArray->clear();
+  fEFlowNeutralHadronOutputArray->clear();
+
   fTowerHits.clear();
   fECalTowerFractions.clear();
   fHCalTowerFractions.clear();

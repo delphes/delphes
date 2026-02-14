@@ -168,6 +168,12 @@ void OldCalorimeter::Process()
   vector<Long64_t>::iterator itTowerHits;
 
   DelphesFactory *factory = GetFactory();
+
+  fTowerOutputArray->clear();
+  fPhotonOutputArray->clear();
+  fEFlowTrackOutputArray->clear();
+  fEFlowTowerOutputArray->clear();
+
   fTowerHits.clear();
   fECalFractions.clear();
   fHCalFractions.clear();

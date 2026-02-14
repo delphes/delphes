@@ -110,6 +110,7 @@ void PhotonConversions::Process()
   Double_t rate, p_conv, x1, x2;
   Bool_t converted;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     if(candidate.PID != 22)

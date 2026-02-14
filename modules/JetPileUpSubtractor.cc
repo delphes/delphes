@@ -73,6 +73,8 @@ void JetPileUpSubtractor::Process()
   Double_t eta = 0.0;
   Double_t rho = 0.0;
 
+  fOutputArray->clear();
+
   // loop over all input candidates
   for(const auto &candidate : *fJetInputArray)
   {

@@ -78,6 +78,7 @@ void DecayFilter::Process()
   const Double_t c = TMath::C(); // [m/s]
   Double_t m, t, p, bgct, L, l;
 
+  fOutputArray->clear();
   // loop over all input candidates
   for(const auto &candidate : *fInputArray)
   {

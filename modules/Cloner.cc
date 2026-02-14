@@ -60,6 +60,7 @@ void Cloner::Finish()
 
 void Cloner::Process()
 {
+  fOutputArray->clear();
   // loop over all input candidates
   for(const auto &candidate : *fInputArray)
     fOutputArray->emplace_back(candidate); // invoke copy constructor

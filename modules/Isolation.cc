@@ -139,6 +139,7 @@ void Isolation::Process()
   fFilter->Reset();
   const auto isolationArray = fFilter->GetSubArray(fClassifier, 0);
 
+  fOutputArray->clear();
   // loop over all input jets
   for(auto &candidate : *fCandidateInputArray)
   {

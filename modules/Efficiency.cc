@@ -91,6 +91,7 @@ void Efficiency::Process()
 {
   Double_t pt, eta, phi, e;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     const auto &candidatePosition = candidate.Position;

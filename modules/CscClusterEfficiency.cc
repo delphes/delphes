@@ -87,6 +87,7 @@ void CscClusterEfficiency::Process()
 {
   Double_t Ehad, Eem, decayR, decayZ;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     const auto &candidateDecayPosition = candidate.DecayPosition;

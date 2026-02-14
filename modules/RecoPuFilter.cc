@@ -49,6 +49,7 @@ void RecoPuFilter::Finish()
 
 void RecoPuFilter::Process()
 {
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     if(candidate.IsRecoPU) continue;

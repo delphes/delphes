@@ -99,7 +99,6 @@ void ParticlePropagator::Finish()
 
 void ParticlePropagator::Process()
 {
-  Candidate *particle;
   Double_t px, py, pz, pt, pt2, e, q;
   Double_t x, y, z, t, r;
   Double_t x_c, y_c, r_c, phi_0;
@@ -114,6 +113,12 @@ void ParticlePropagator::Process()
 
   const Double_t c_light = 2.99792458E8;
 
+  fOutputArray->clear();
+  fNeutralOutputArray->clear();
+  fChargedHadronOutputArray->clear();
+  fElectronOutputArray->clear();
+  fMuonOutputArray->clear();
+
   ROOT::Math::XYZTVector beamSpotPosition;
   if(fBeamSpotInputArray && !fBeamSpotInputArray->empty())
   {
@@ -123,6 +128,7 @@ void ParticlePropagator::Process()
 
   for(auto &candidate : *fInputArray) //TODO: ensure a const-qualified version cannot be used
   {
+    Candidate *particle = nullptr;
     if(candidate.GetCandidates().empty())
     {
       particle = &candidate;

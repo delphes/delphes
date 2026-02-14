@@ -178,6 +178,13 @@ void Calorimeter::Finish()
 
 void Calorimeter::Process()
 {
+  fTowerOutputArray->clear();
+  fPhotonOutputArray->clear();
+
+  fEFlowTrackOutputArray->clear();
+  fEFlowPhotonOutputArray->clear();
+  fEFlowNeutralHadronOutputArray->clear();
+
   Candidate *particle, *track;
   Short_t etaBin, phiBin, flags;
   Int_t number;

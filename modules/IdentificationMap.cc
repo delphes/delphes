@@ -105,6 +105,7 @@ void IdentificationMap::Process()
 
   Double_t p, r, total;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     const auto &candidatePosition = candidate.Position;

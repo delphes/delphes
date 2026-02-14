@@ -79,6 +79,8 @@ void TimeOfFlight::Process()
 
   const Double_t c_light = 2.99792458E8;
 
+  fOutputArray->clear();
+
   // first compute momenta of vertices based on reconstructed tracks
   ComputeVertexMomenta();
 

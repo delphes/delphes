@@ -145,6 +145,9 @@ void VertexFinderDA4D::Process()
   std::vector<Candidate> ClusterArray;
   Int_t ivtx = 0;
 
+  fOutputArray->clear();
+  fVertexOutputArray->clear();
+
   //fInputArray->Sort();
   //FIXME: do we need something along std::sort(fInputArray->begin(), fInputArray->end()); ?
 

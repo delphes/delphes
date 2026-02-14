@@ -88,6 +88,7 @@ void ImpactParameterSmearing::Process()
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray) //TODO: ensure const safety
   {
 

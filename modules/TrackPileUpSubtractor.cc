@@ -98,6 +98,9 @@ void TrackPileUpSubtractor::Process()
   Double_t z, zvtx = 0;
   Double_t pt, eta, phi, e;
 
+  for(const auto &[input_collection, output_collection] : fInputMap)
+    output_collection->clear();
+
   // find z position of primary vertex
   for(const auto &candidate : *fVertexInputArray)
   {

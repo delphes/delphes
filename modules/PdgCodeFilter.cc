@@ -100,6 +100,7 @@ void PdgCodeFilter::Process()
   Bool_t pass;
   Double_t pt;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     pdgCode = candidate.PID;

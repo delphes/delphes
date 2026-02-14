@@ -35,6 +35,7 @@ void BeamSpotFilter::Finish()
 
 void BeamSpotFilter::Process()
 {
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     fOutputArray->emplace_back(candidate);

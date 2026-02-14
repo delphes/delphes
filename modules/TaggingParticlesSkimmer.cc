@@ -100,6 +100,8 @@ void TaggingParticlesSkimmer::Process()
   Double_t pt, eta;
   Int_t pdgCode;
 
+  fOutputArray->clear();
+
   // first select hadronic taus and replace them by visible part
   fFilter->Reset();
   const auto tauArray = fFilter->GetSubArray(fClassifier, 0);

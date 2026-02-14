@@ -79,6 +79,9 @@ void ConstituentFilter::Finish()
 
 void ConstituentFilter::Process()
 {
+  for(const auto &[input_collection, output_collection] : fInputMap)
+    output_collection->clear();
+
   // loop over all jet input arrays
   for(const auto &input_collection : fInputList)
   {

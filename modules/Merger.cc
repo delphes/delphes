@@ -82,6 +82,10 @@ void Merger::Process()
   sumPT = 0;
   sumE = 0;
 
+  fOutputArray->clear();
+  fMomentumOutputArray->clear();
+  fEnergyOutputArray->clear();
+
   // loop over all input arrays
   for(const auto &input_collection : fInputList)
   {

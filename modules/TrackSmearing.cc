@@ -158,6 +158,8 @@ void TrackSmearing::Process()
              *ctgThetaErrorHist = NULL,
              *phiErrorHist = NULL;
 
+  fOutputArray->clear();
+
   ROOT::Math::XYZTVector beamSpotPosition;
   if(fBeamSpotInputArray && !fBeamSpotInputArray->empty())
   {

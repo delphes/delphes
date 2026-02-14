@@ -68,12 +68,13 @@ void TruthVertexFinder::Finish()
 
 void TruthVertexFinder::Process()
 {
-  Int_t nvtx = -1;
   Float_t pt;
 
   ROOT::Math::XYZTVector vertexPosition(0., 0., 0., 0.);
 
-  nvtx = 0;
+  fVertexOutputArray->clear();
+
+  size_t nvtx = 0;
   for(const auto &candidate : *fInputArray)
   {
 

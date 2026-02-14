@@ -426,6 +426,10 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       if(reader) reader->Clear();
 
+      stableParticleOutputArray->clear();
+      allParticleOutputArray->clear();
+      partonOutputArray->clear();
+
       readStopWatch.Start();
       progressBar.Update(eventCounter, eventCounter);
     }

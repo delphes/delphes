@@ -117,6 +117,7 @@ void FastJetGridMedianEstimator::Process()
 
   DelphesFactory *factory = GetFactory();
 
+  fRhoOutputArray->clear();
   inputList.clear();
 
   // loop over input objects

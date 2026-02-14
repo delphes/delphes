@@ -115,6 +115,8 @@ void LLPFilter::Process()
 
   Int_t daughterPdg;
 
+  fOutputArray->clear();
+
   // loop over particles to find LLP
   int index = -1;
   for(auto &candidate : *fInputArray)

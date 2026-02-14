@@ -116,6 +116,8 @@ void TrackCovariance::Process()
   Double_t ZinPos = fGeometry->GetZminPos();
   Double_t ZinNeg = fGeometry->GetZminNeg();
 
+  fOutputArray->clear();
+
   for(const auto &candidate : *fInputArray) //TODO: ensure const-qualification of consumers
   {
 

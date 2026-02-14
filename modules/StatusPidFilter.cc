@@ -168,6 +168,8 @@ void StatusPidFilter::Process()
   Int_t status, pdgCode;
   Bool_t pass;
 
+  fOutputArray->clear();
+
   for(const auto &candidate : *fInputArray)
   {
     status = candidate.Status;

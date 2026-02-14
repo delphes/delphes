@@ -98,6 +98,7 @@ void ClusterCounting::Process()
 {
   Double_t mass, trackLength, Ncl;
 
+  fOutputArray->clear();
   for(const auto &candidate : *fInputArray)
   {
     // converting to meters

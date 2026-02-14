@@ -200,6 +200,10 @@ int main(int argc, char *argv[])
             treeWriter->Fill();
 
             treeWriter->Clear();
+
+            allParticleOutputArray->clear();
+            stableParticleOutputArray->clear();
+            partonOutputArray->clear();
           }
 
           modularDelphes->Clear();

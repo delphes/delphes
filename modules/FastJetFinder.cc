@@ -336,6 +336,10 @@ void FastJetFinder::Process()
 
   DelphesFactory *factory = GetFactory();
 
+  fOutputArray->clear();
+  fRhoOutputArray->clear();
+  fConstituentsOutputArray->clear();
+
   inputList.clear();
 
   // loop over input objects

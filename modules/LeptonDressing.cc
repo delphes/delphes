@@ -69,6 +69,8 @@ void LeptonDressing::Finish()
 
 void LeptonDressing::Process()
 {
+  fOutputArray->clear();
+
   // loop over all input candidate
   for(const auto &candidate : *fCandidateInputArray)
   {

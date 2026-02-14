@@ -67,6 +67,9 @@ void PileUpJetID::Finish()
 
 void PileUpJetID::Process()
 {
+  fOutputArray->clear();
+  fNeutralsInPassingJets->clear();
+
   // loop over all input candidates
   for(auto &candidate : *fJetInputArray)
   {

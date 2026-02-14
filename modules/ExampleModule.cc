@@ -99,6 +99,7 @@ void ExampleModule::Finish()
 
 void ExampleModule::Process()
 {
+  fOutputArray->clear(); // clear the output collection for each event
   // loop over all input candidates
   for(const auto &candidate : *fInputArray)
   {
