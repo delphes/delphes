@@ -24,7 +24,7 @@
 
 /** \class DelphesModel
  *
- *  Collection of collections model
+ *  Collection of fields model
  *
  *  \author L. Forthomme - AGH, Krakow
  *  \note Shamelessly (self-)stolen from the TDAnalyser memory management layout
@@ -33,10 +33,10 @@
 
 using namespace ROOT; // from ROOT v6.36 on, default namespace
 using namespace ROOT::Experimental;
-/// Handle to retrieve collections from a data model
+/// Handle to retrieve fields from a data model
 template <typename T>
 using InputHandle = std::shared_ptr<T>;
-/// Handle to store collections into a data model
+/// Handle to store fields into a data model
 template <typename T>
 using OutputHandle = std::shared_ptr<T>;
 
@@ -46,34 +46,47 @@ public:
   explicit DelphesModel(std::string_view model_name);
   ~DelphesModel();
 
-  /// Book a memory segment, and attach it to a given field identified by a collection name and a description
-  template <typename T>
-  void Book(OutputHandle<T> &handle, std::string_view collection_name, std::string_view description = "")
+  class FieldName
   {
-    const auto collection_name_str = std::string{collection_name};
-    if(!fields_.insert(collection_name_str).second)
-      throwBookingFailure(collection_name, "Collection name already exists");
-    if(field_types_.count(collection_name_str) == 0)
-      field_types_[collection_name_str] = RField<T>::TypeName();
+  public:
+    explicit FieldName(std::string_view label);
+
+    const std::string &FieldLabel() const { return field_label_; }
+
+  private:
+    std::string label_;
+    std::string field_label_;
+  };
+
+  /// Book a memory segment, and attach it to a given field identified by a field name and a description
+  template <typename T>
+  void Book(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
+  {
+    const auto field_name_str = std::string{field_name};
+    if(!fields_.insert(field_name_str).second)
+      throwBookingFailure(field_name, "Field name already exists");
+    if(field_types_.count(field_name_str) == 0)
+      field_types_[field_name_str] = RField<T>::TypeName();
+    const auto field_label = FieldName(field_name).FieldLabel();
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 36, 0)
-    handle = OutputHandle<T>{model_->MakeField<T>(collection_name_str, std::string{description})};
+    handle = OutputHandle<T>{model_->MakeField<T>(field_label, std::string{description})};
 #else
-    handle = OutputHandle<T>{model_->MakeField<T>({collection_name_str, std::string{description}})};
+    handle = OutputHandle<T>{model_->MakeField<T>({field_label, std::string{description}})};
   };
 #endif
   }
 
-  /// Attach a memory segment to a given field identified by a collection name
+  /// Attach a memory segment to a given field identified by a field name
   template <typename T>
-  void Attach(std::string_view collection_name, InputHandle<T> &handle) const
+  void Attach(std::string_view field_name, InputHandle<T> &handle) const
   {
     try
     {
-      handle = Entry().GetPtr<T>(collection_name);
+      handle = Entry().GetPtr<T>(FieldName(field_name).FieldLabel());
     }
     catch(const RException &except)
     {
-      throwAttachingFailure(collection_name, except.GetError().GetReport());
+      throwAttachingFailure(field_name, except.GetError().GetReport());
       throw;
     }
   }
@@ -85,7 +98,7 @@ private:
   void throwBookingFailure(std::string_view, std::string_view details = "") const noexcept(false);
   void throwAttachingFailure(std::string_view, std::string_view details = "") const noexcept(false);
 
-  const std::string name_; ///< payload collections name (run, event/trigger)
+  const std::string name_; ///< fields collection name (run, event/trigger)
   RNTupleModel *model_{nullptr}; ///< RNTuple data model
   bool model_released_{false}; ///< has the model property been given to a writer?
   REntry *entry_{nullptr}; ///< default entry associated to the data model

@@ -29,7 +29,7 @@ const REntry &DelphesModel::Entry() const
   {
     std::cout << "Entry was not specified in module, using the default one from '" << name_ << "' model." << std::endl;
     if(!model_)
-      throw std::runtime_error(std::string{"Base model for '"} + name_ + "' payloads collection was already released.");
+      throw std::runtime_error(std::string{"Base model for '"} + name_ + "' fields collection was already released.");
     return model_->GetDefaultEntry();
   }
   return *entry_;
@@ -41,29 +41,42 @@ REntry &DelphesModel::Entry()
   {
     std::cout << "Non-const-qualified '" << name_ << "' entry is nonexistent. Building a new one from the model." << std::endl;
     if(!model_)
-      throw std::runtime_error(std::string{"Base model for '"} + name_ + "' payloads collection was already released.");
+      throw std::runtime_error(std::string{"Base model for '"} + name_ + "' fields collection was already released.");
     entry_ = model_->CreateEntry().release();
   }
   return *entry_;
 }
 
-void DelphesModel::throwBookingFailure(std::string_view collection_name, std::string_view details) const noexcept(false)
+void DelphesModel::throwBookingFailure(std::string_view field_name, std::string_view details) const noexcept(false)
 {
   std::ostringstream os;
-  os << "Failed to book '" << name_ << "' collection with name '" << collection_name
-     << "'." + (!details.empty() ? std::string{"\nDetails: "} + std::string{details} : std::string{});
+  os << "Failed to book '" << name_ << "' field with name '" << field_name << "'.";
+  if(!details.empty())
+    os << "\nDetails: " << details;
   throw std::runtime_error(os.str());
 }
 
-void DelphesModel::throwAttachingFailure(std::string_view collection_name, std::string_view details) const noexcept(false)
+void DelphesModel::throwAttachingFailure(std::string_view field_name, std::string_view details) const noexcept(false)
 {
   std::stringstream os;
-  os << "Failed to attach memory segment to '" << name_ << "' collection with '"
-     << collection_name << "' label.\n"
+  os << "Failed to attach memory segment to '" << name_ << "' field with '" << field_name << "' label.\n"
      << "List of fields registered:";
   for(const auto &value : Entry())
     os << "\n - '" << value.GetField().GetFieldName() << "' of type '" << value.GetField().GetTypeName() << "'";
   if(!details.empty())
     os << "\nDetails: " << details;
   throw std::runtime_error(os.str());
+}
+
+DelphesModel::FieldName::FieldName(std::string_view field_label) : label_(field_label)
+{
+  // one-liner with C++23
+  //field_label_ = label_ | std::views::split("/") | std::views::join_with("__") | std::ranges::to<std::string>();
+  field_label_ = label_;
+  auto &&pos = field_label_.find("/", size_t{});
+  while(pos != std::string::npos)
+  {
+    field_label_.replace(pos, 1, "__");
+    pos = field_label_.find("/", pos + 2);
+  }
 }
