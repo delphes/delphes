@@ -133,7 +133,7 @@ void ImpactParameterSmearing::Process()
     new_candidate.D0 = d0;
     new_candidate.ErrorD0 = dd0;
 
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    new_candidate.AddCandidate(&candidate); // ensure parentage
     fOutputArray->emplace_back(new_candidate);
   }
 }

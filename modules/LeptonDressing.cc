@@ -92,7 +92,7 @@ void LeptonDressing::Process()
 
     auto new_candidate = candidate;
     new_candidate.Momentum += momentum;
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    new_candidate.AddCandidate(&candidate); // ensure parentage
     fOutputArray->emplace_back(new_candidate);
   }
 }

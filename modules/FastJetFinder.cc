@@ -469,7 +469,7 @@ void FastJetFinder::Process()
       charge += constituent.Charge;
 
       fConstituentsOutputArray->emplace_back(constituent);
-      candidate->AddCandidate(const_cast<Candidate *>(&constituent));
+      candidate->AddCandidate(&constituent);
     }
 
     candidate->Momentum = momentum;

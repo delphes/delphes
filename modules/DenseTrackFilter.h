@@ -48,7 +48,7 @@ public:
 private:
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fBestTrack;
+  const Candidate *fBestTrack{nullptr};
 
   Int_t fTowerTrackHits;
 

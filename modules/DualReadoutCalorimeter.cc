@@ -436,7 +436,7 @@ void DualReadoutCalorimeter::Process()
     fTowerTime += (ecalEnergy + hcalEnergy) * position.T(); //sigma_t ~ 1/sqrt(E)
     fTowerTimeWeight += ecalEnergy + hcalEnergy;
 
-    fTower->AddCandidate(const_cast<Candidate *>(&particle));
+    fTower->AddCandidate(&particle); // keep parentage
     fTower->Position = position;
   }
 
@@ -663,7 +663,7 @@ void DualReadoutCalorimeter::FinalizeTower()
     for(const auto &track : fTowerTrackArray)
     {
       auto new_track = track;
-      new_track.AddCandidate(const_cast<Candidate *>(&track)); // parentage
+      new_track.AddCandidate(&track); // keep parentage
       fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
@@ -687,7 +687,7 @@ void DualReadoutCalorimeter::FinalizeTower()
     for(const auto &track : fTowerTrackArray)
     {
       auto new_track = track;
-      new_track.AddCandidate(const_cast<Candidate *>(&track)); // parentage
+      new_track.AddCandidate(&track); // keep parentage
       new_track.Momentum = ROOT::Math::PtEtaPhiMVector(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
       if(debug) cout << "  track Momentum: " << new_track.PID << ", " << new_track.Momentum.Pt() << ", " << new_track.Momentum.Eta() << ", " << new_track.Momentum.M() << endl;
       fEFlowTrackOutputArray->emplace_back(new_track);

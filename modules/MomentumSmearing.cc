@@ -125,7 +125,7 @@ void MomentumSmearing::Process()
     new_candidate.Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
     //new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
     new_candidate.TrackResolution = res;
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    new_candidate.AddCandidate(&candidate); // ensure parentage
 
     fOutputArray->emplace_back(new_candidate);
   }

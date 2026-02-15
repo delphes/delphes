@@ -149,21 +149,14 @@ void TrackCovariance::Process()
     // Try Kalman without any grid
     ObsTrk track(candidatePositionVect, candidateMomentumVect, candidate.Charge, mass, fGeometry);
 
-    auto &non_const_candidate = const_cast<Candidate &>(candidate); //TODO: ensure const-qualification for the formula evaluator
-
     // apply rescaling factors to resolution
+    auto &non_const_candidate = const_cast<Candidate &>(candidate); //TODO: ensure const-qualification for the formula evaluator
     if(TMath::Abs(candidate.PID) == 11)
-    {
       track.SetScale(fElectronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), &non_const_candidate));
-    }
     else if(TMath::Abs(candidate.PID) == 13)
-    {
       track.SetScale(fMuonScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), &non_const_candidate));
-    }
     else
-    {
       track.SetScale(fChargedHadronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), &non_const_candidate));
-    }
 
     auto new_candidate = candidate;
 
@@ -221,7 +214,7 @@ void TrackCovariance::Process()
     //new_candidate->TrackResolution = dpt / pt;
     new_candidate.TrackResolution = dp / p;
 
-    new_candidate.AddCandidate(&non_const_candidate); // mother particle
+    new_candidate.AddCandidate(&candidate); // mother particle
 
     fOutputArray->emplace_back(new_candidate);
   }

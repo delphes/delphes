@@ -92,7 +92,7 @@ void TruthVertexFinder::Process()
       if(TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
       {
         old_vertex = true;
-        vertex.AddCandidate(const_cast<Candidate *>(&candidate)); //TODO: ensure const-qualification
+        vertex.AddCandidate(&candidate); // keep parentage
         if(TMath::Abs(candidate.Charge) > 0)
         {
           vertex.ClusterNDF += 1;

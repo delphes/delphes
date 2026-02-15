@@ -150,7 +150,7 @@ void Hector::Process()
     auto new_candidate = candidate;
     new_candidate.Position = ROOT::Math::XYZTVector(particle.getX(), particle.getY(), particle.getS(), time);
     new_candidate.Momentum = ROOT::Math::PxPyPzEVector(particle.getTX(), particle.getTY(), 0.0, particle.getE());
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // preserve parentage
+    new_candidate.AddCandidate(&candidate); // preserve parentage
     fOutputArray->emplace_back(new_candidate);
   }
 }

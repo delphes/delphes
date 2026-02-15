@@ -126,7 +126,7 @@ void ClusterCounting::Process()
       new_candidate.dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
     }
 
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // preserve parentage
+    new_candidate.AddCandidate(&candidate); // preserve parentage
 
     fOutputArray->emplace_back(new_candidate);
   }

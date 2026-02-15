@@ -153,7 +153,7 @@ void TimeOfFlight::Process()
     // update particle mass based on TOF-based PID (commented for now, assume this calculation is done offline)
     //new_candidate.Momentum.SetVectM(candidateMomentum.Vect(), mass);
 
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // keep parentage
+    new_candidate.AddCandidate(&candidate); // keep parentage
     fOutputArray->emplace_back(new_candidate);
   }
 }

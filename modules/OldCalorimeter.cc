@@ -463,7 +463,7 @@ void OldCalorimeter::FinalizeTower()
         auto *tower = factory->NewCandidate();
 
         for(const auto &particle : fTowerHCalArray)
-          tower->AddCandidate(const_cast<Candidate *>(&particle));
+          tower->AddCandidate(&particle); // keep parentage
 
         pt = hcalEnergy / TMath::CosH(eta);
 
@@ -492,7 +492,7 @@ void OldCalorimeter::FinalizeTower()
         auto *tower = factory->NewCandidate();
 
         for(const auto &particle : fTowerECalArray)
-          tower->AddCandidate(const_cast<Candidate *>(&particle));
+          tower->AddCandidate(&particle); // keep parentage
 
         pt = ecalEnergy / TMath::CosH(eta);
 

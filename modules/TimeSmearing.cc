@@ -113,7 +113,7 @@ void TimeSmearing::Process()
     new_candidate.Position.SetE(tf_smeared * 1.0E3 * c_light);
     new_candidate.ErrorT = timeResolution * 1.0E3 * c_light;
 
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // ensure parentage
+    new_candidate.AddCandidate(&candidate); // ensure parentage
     fOutputArray->emplace_back(new_candidate);
   }
 }

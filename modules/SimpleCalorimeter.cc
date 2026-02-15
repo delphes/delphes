@@ -459,7 +459,7 @@ void SimpleCalorimeter::Process()
       fTowerEnergy += energy;
       fTowerTime += energy * energy * position.T(); //sigma_t ~ 1/E
       fTowerTimeWeight += energy * energy;
-      fTower->AddCandidate(const_cast<Candidate *>(&particle));
+      fTower->AddCandidate(&particle); // preserve parentage
       fTower->Position = position;
       if(particle.IsPU) fTowerEnergyFromPU += energy;
     }
@@ -577,7 +577,7 @@ void SimpleCalorimeter::FinalizeTower()
     for(const auto &track : fTowerTrackArray)
     {
       auto new_track = track;
-      new_track.AddCandidate(const_cast<Candidate *>(&track)); // preserve parentage
+      new_track.AddCandidate(&track); // preserve parentage
       fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
@@ -595,7 +595,7 @@ void SimpleCalorimeter::FinalizeTower()
     for(const auto &track : fTowerTrackArray)
     {
       auto new_track = track;
-      new_track.AddCandidate(const_cast<Candidate *>(&track)); // preserve parentage
+      new_track.AddCandidate(&track); // preserve parentage
       new_track.Momentum = ROOT::Math::PtEtaPhiMVector(track.Momentum.Pt() * rescaleFactor, track.Momentum.Eta(), track.Momentum.Phi(), track.Momentum.M());
       fEFlowTrackOutputArray->emplace_back(new_track);
     }

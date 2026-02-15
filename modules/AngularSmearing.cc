@@ -108,7 +108,7 @@ void AngularSmearing::Process()
 
     auto new_candidate = candidate;
     new_candidate.Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); // preserve parentage
+    new_candidate.AddCandidate(&candidate); // preserve parentage
 
     fOutputArray->emplace_back(new_candidate);
   }

@@ -113,7 +113,7 @@ void PhotonID::Process()
   for(const auto &candidate : *fInputPhotonArray)
   {
     auto new_candidate = candidate;
-    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate));
+    new_candidate.AddCandidate(&candidate);
 
     const auto &candidatePosition = candidate.Position;
     const auto &candidateMomentum = candidate.Momentum;
