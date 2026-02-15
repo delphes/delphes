@@ -34,6 +34,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModel.h"
 #include "classes/DelphesSTDHEPReader.h"
 #include "modules/Delphes.h"
 
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
-  TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   DelphesSTDHEPReader *reader = 0;
   Int_t i, maxEvents, skipEvents;
   Long64_t length, eventCounter;
@@ -126,9 +127,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    modularDelphes->ExportArray(allParticleOutputArray, "allParticles");
+    modularDelphes->ExportArray(stableParticleOutputArray, "stableParticles");
+    modularDelphes->ExportArray(partonOutputArray, "partons");
 
     reader = new DelphesSTDHEPReader;
 
@@ -178,7 +179,7 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       reader->Clear();
       readStopWatch.Start();
-      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) && reader->ReadBlock(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
+      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) && reader->ReadBlock(factory, *allParticleOutputArray, *stableParticleOutputArray, *partonOutputArray) && !interrupted)
       {
         if(reader->EventReady())
         {
@@ -197,6 +198,10 @@ int main(int argc, char *argv[])
             treeWriter->Fill();
 
             treeWriter->Clear();
+
+            stableParticleOutputArray->clear();
+            allParticleOutputArray->clear();
+            partonOutputArray->clear();
           }
 
           modularDelphes->Clear();

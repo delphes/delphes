@@ -28,73 +28,31 @@
 #include "modules/RecoPuFilter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
-
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-RecoPuFilter::RecoPuFilter() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-RecoPuFilter::~RecoPuFilter()
-{
-}
 
 //------------------------------------------------------------------------------
 
 void RecoPuFilter::Init()
 {
-
-  ExRootConfParam param;
-
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
   // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "filteredParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void RecoPuFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void RecoPuFilter::Process()
 {
-  Candidate *candidate;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    if(candidate->IsRecoPU) continue;
-    fOutputArray->Add(candidate);
+    if(candidate.IsRecoPU) continue;
+    fOutputArray->emplace_back(candidate);
   }
 }

@@ -33,15 +33,13 @@
 #include <set>
 #include <vector>
 
-class TObjArray;
-class DelphesFormula;
 class Candidate;
+class DelphesFormula;
 
-class DenseTrackFilter: public DelphesModule
+class DenseTrackFilter : public DelphesModule
 {
 public:
-  DenseTrackFilter();
-  ~DenseTrackFilter();
+  DenseTrackFilter() = default;
 
   void Init();
   void Process();
@@ -50,7 +48,7 @@ public:
 private:
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fBestTrack;
+  const Candidate *fBestTrack{nullptr};
 
   Int_t fTowerTrackHits;
 
@@ -63,14 +61,11 @@ private:
 
   std::vector<Long64_t> fTowerHits;
 
-  TIterator *fItTrackInputArray; //!
-
-  const TObjArray *fTrackInputArray; //!
-  TObjArray *fTrackOutputArray; //!
-
-  TObjArray *fChargedHadronOutputArray; //!
-  TObjArray *fElectronOutputArray; //!
-  TObjArray *fMuonOutputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  OutputHandle<std::vector<Candidate> > fTrackOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fChargedHadronOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fElectronOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fMuonOutputArray; //!
 
   void FillTrack();
   ClassDef(DenseTrackFilter, 1)

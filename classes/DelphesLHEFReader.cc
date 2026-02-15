@@ -34,7 +34,6 @@
 
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
-#include "TObjArray.h"
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
 
@@ -94,9 +93,9 @@ bool DelphesLHEFReader::EventReady()
 //---------------------------------------------------------------------------
 
 bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  std::vector<Candidate> &allParticleOutputArray,
+  std::vector<Candidate> &stableParticleOutputArray,
+  std::vector<Candidate> &partonOutputArray)
 {
   int rc, id;
   char *pch;
@@ -269,9 +268,9 @@ void DelphesLHEFReader::AnalyzeWeight(ExRootTreeBranch *branch)
 //---------------------------------------------------------------------------
 
 void DelphesLHEFReader::AnalyzeParticle(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  std::vector<Candidate> &allParticleOutputArray,
+  std::vector<Candidate> &stableParticleOutputArray,
+  std::vector<Candidate> &partonOutputArray)
 {
   Candidate *candidate;
   TParticlePDG *pdgParticle;
@@ -297,17 +296,17 @@ void DelphesLHEFReader::AnalyzeParticle(DelphesFactory *factory,
   candidate->D1 = -1;
   candidate->D2 = -1;
 
-  allParticleOutputArray->Add(candidate);
+  allParticleOutputArray.emplace_back(*candidate);
 
   if(!pdgParticle) return;
 
   if(fStatus == 1)
   {
-    stableParticleOutputArray->Add(candidate);
+    stableParticleOutputArray.emplace_back(*candidate);
   }
   else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
   {
-    partonOutputArray->Add(candidate);
+    partonOutputArray.emplace_back(*candidate);
   }
 }
 

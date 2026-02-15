@@ -27,7 +27,6 @@
 #include "modules/Hector.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -56,7 +53,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 Hector::Hector() :
-  fBeamLine(0), fItInputArray(0)
+  fBeamLine(0)
 {
 }
 
@@ -89,20 +86,16 @@ void Hector::Init()
   fBeamLine->calcMatrix();
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "hits"));
+  ExportArray(fOutputArray, GetString("OutputArray", "hits"));
 }
 
 //------------------------------------------------------------------------------
 
 void Hector::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
   if(fBeamLine) delete fBeamLine;
 }
 
@@ -110,18 +103,17 @@ void Hector::Finish()
 
 void Hector::Process()
 {
-  Candidate *candidate, *mother;
   Double_t pz;
   Double_t x, y, z, tx, ty, theta;
   Double_t distance, time;
 
   const Double_t c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     pz = candidateMomentum.Pz();
 
     if(TMath::Abs(candidateMomentum.Eta()) <= fEtaMin || TMath::Sign(pz, Double_t(fDirection)) != pz) continue;
@@ -140,7 +132,7 @@ void Hector::Process()
     distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / TMath::Cos(theta);
     time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
 
-    H_BeamParticle particle(candidate->Mass, candidate->Charge);
+    H_BeamParticle particle(candidate.Mass, candidate.Charge);
     //    particle.set4Momentum(candidateMomentum);
     particle.set4Momentum(candidateMomentum.Px(), candidateMomentum.Py(),
       candidateMomentum.Pz(), candidateMomentum.E());
@@ -155,13 +147,11 @@ void Hector::Process()
 
     particle.propagate(fDistance);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
-    candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
-    candidate->AddCandidate(mother);
-
-    fOutputArray->Add(candidate);
+    auto new_candidate = candidate;
+    new_candidate.Position = ROOT::Math::XYZTVector(particle.getX(), particle.getY(), particle.getS(), time);
+    new_candidate.Momentum = ROOT::Math::PxPyPzEVector(particle.getTX(), particle.getTY(), 0.0, particle.getE());
+    new_candidate.AddCandidate(&candidate); // preserve parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

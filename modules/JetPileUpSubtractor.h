@@ -29,15 +29,12 @@
 
 #include "classes/DelphesModule.h"
 
-#include <deque>
+class Candidate;
 
-class TObjArray;
-
-class JetPileUpSubtractor: public DelphesModule
+class JetPileUpSubtractor : public DelphesModule
 {
 public:
-  JetPileUpSubtractor();
-  ~JetPileUpSubtractor();
+  JetPileUpSubtractor() = default;
 
   void Init();
   void Process();
@@ -46,13 +43,9 @@ public:
 private:
   Double_t fJetPTMin;
 
-  TIterator *fItJetInputArray; //!
-  TIterator *fItRhoInputArray; //!
-
-  const TObjArray *fJetInputArray; //!
-  const TObjArray *fRhoInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fRhoInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(JetPileUpSubtractor, 1)
 };

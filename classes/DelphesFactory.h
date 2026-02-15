@@ -28,7 +28,8 @@
  *
  */
 
-#include "TNamed.h"
+#include "classes/DelphesModel.h"
+#include <TNamed.h>
 
 #include <map>
 #include <set>
@@ -38,13 +39,16 @@ class Candidate;
 
 class ExRootTreeBranch;
 
-class DelphesFactory: public TNamed
+class DelphesFactory : public TNamed
 {
 public:
   DelphesFactory(const char *name = "ObjectFactory");
   ~DelphesFactory();
 
   virtual void Clear(Option_t *option = "");
+
+  DelphesModel *RunModel() { return &fRunModel; }
+  DelphesModel *EventModel() { return &fEventModel; }
 
   TObjArray *NewPermanentArray();
 
@@ -58,13 +62,16 @@ public:
   T *New() { return static_cast<T *>(New(T::Class())); }
 
 private:
-  ExRootTreeBranch *fObjArrays; //!
+  ExRootTreeBranch *fObjArrays{nullptr}; //!
 
 #if !defined(__CINT__) && !defined(__CLING__)
   std::map<const TClass *, ExRootTreeBranch *> fBranches; //!
 #endif
 
   std::set<TObject *> fPool; //!
+
+  DelphesModel fRunModel;
+  DelphesModel fEventModel;
 
   ClassDef(DelphesFactory, 1)
 };

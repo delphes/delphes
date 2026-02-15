@@ -4,29 +4,20 @@
 #include "classes/DelphesModule.h"
 #include <vector>
 
-class TObjArray;
-class TIterator;
+class Candidate;
 class PuppiContainer;
 
-class RunPUPPI: public DelphesModule
+class RunPUPPI : public DelphesModule
 {
 
 public:
-  RunPUPPI();
-  ~RunPUPPI();
+  RunPUPPI() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-  TIterator *fItTrackInputArray;
-  TIterator *fItNeutralInputArray; //!
-  TIterator *fPVItInputArray; //!
-
-  const TObjArray *fTrackInputArray;
-  const TObjArray *fNeutralInputArray; //!
-  const TObjArray *fPVInputArray; //!
   PuppiContainer *fPuppi;
   // puppi parameters
   bool fApplyNoLep;
@@ -47,9 +38,12 @@ private:
   std::vector<int> fMetricId;
   std::vector<int> fCombId;
 
-  TObjArray *fOutputArray;
-  TObjArray *fOutputTrackArray;
-  TObjArray *fOutputNeutralArray;
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fNeutralInputArray; //!
+  InputHandle<std::vector<Candidate> > fPVInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputTrackArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputNeutralArray; //!
 
   ClassDef(RunPUPPI, 1)
 };

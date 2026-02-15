@@ -29,11 +29,10 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class H_BeamLine;
 
-class Hector: public DelphesModule
+class Hector : public DelphesModule
 {
 public:
   Hector();
@@ -53,11 +52,8 @@ private:
 
   H_BeamLine *fBeamLine;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(Hector, 1)
 };

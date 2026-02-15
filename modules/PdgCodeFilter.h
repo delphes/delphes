@@ -32,14 +32,12 @@
 #include "classes/DelphesModule.h"
 #include <vector>
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class PdgCodeFilter: public DelphesModule
+class PdgCodeFilter : public DelphesModule
 {
 public:
-  PdgCodeFilter();
-  ~PdgCodeFilter();
+  PdgCodeFilter() = default;
 
   void Init();
   void Process();
@@ -56,11 +54,8 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(PdgCodeFilter, 1)
 };

@@ -31,7 +31,7 @@
 
 // Dependencies (#includes)
 
-#include "TLorentzVector.h"
+#include "Math/Vector4D.h"
 #include "TMatrixDSym.h"
 #include "TObject.h"
 #include "TRef.h"
@@ -43,7 +43,7 @@ class DelphesFactory;
 
 //---------------------------------------------------------------------------
 
-class Event: public TObject
+class Event : public TObject
 {
 public:
   Long64_t Number; // event number
@@ -56,7 +56,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class LHCOEvent: public Event
+class LHCOEvent : public Event
 {
 public:
   Int_t Trigger; // trigger word
@@ -66,7 +66,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class LHEFEvent: public Event
+class LHEFEvent : public Event
 {
 public:
   Int_t ProcessID; // subprocess code for the event | hepup.IDPRUP
@@ -82,7 +82,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class LHEFWeight: public TObject
+class LHEFWeight : public TObject
 {
 public:
   Int_t ID; // weight ID
@@ -93,7 +93,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class HepMCEvent: public Event
+class HepMCEvent : public Event
 {
 public:
   Int_t ProcessID; // unique signal process id | signal_process_id()
@@ -123,7 +123,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class GenParticle: public SortableObject
+class GenParticle : public SortableObject
 {
 public:
   Int_t PID; // particle HEP ID number | hepevt.idhep[number]
@@ -160,14 +160,14 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
 
   ClassDef(GenParticle, 2)
 };
 
 //---------------------------------------------------------------------------
 
-class Vertex: public SortableObject
+class Vertex : public SortableObject
 {
 public:
   Float_t T; // vertex position (t component)
@@ -200,21 +200,21 @@ public:
 
 //---------------------------------------------------------------------------
 
-class MissingET: public TObject
+class MissingET : public TObject
 {
 public:
   Float_t MET; // mising transverse energy
   Float_t Eta; // mising energy pseudorapidity
   Float_t Phi; // mising energy azimuthal angle
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
 
   ClassDef(MissingET, 1)
 };
 
 //---------------------------------------------------------------------------
 
-class ScalarHT: public TObject
+class ScalarHT : public TObject
 {
 public:
   Float_t HT; // scalar sum of transverse momenta
@@ -224,7 +224,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Rho: public TObject
+class Rho : public TObject
 {
 public:
   Float_t Rho; // rho energy density
@@ -235,7 +235,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Weight: public TObject
+class Weight : public TObject
 {
 public:
   Float_t Weight; // weight for the event
@@ -245,7 +245,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Photon: public SortableObject
+class Photon : public SortableObject
 {
 public:
   Float_t PT; // photon transverse momentum
@@ -272,14 +272,14 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
 
   ClassDef(Photon, 4)
 };
 
 //---------------------------------------------------------------------------
 
-class Electron: public SortableObject
+class Electron : public SortableObject
 {
 public:
   Float_t PT; // electron transverse momentum
@@ -309,14 +309,14 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
 
   ClassDef(Electron, 4)
 };
 
 //---------------------------------------------------------------------------
 
-class Muon: public SortableObject
+class Muon : public SortableObject
 {
 public:
   Float_t PT; // muon transverse momentum
@@ -344,14 +344,14 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
 
   ClassDef(Muon, 4)
 };
 
 //---------------------------------------------------------------------------
 
-class Jet: public SortableObject
+class Jet : public SortableObject
 {
 public:
   Float_t PT; // jet transverse momentum
@@ -395,13 +395,13 @@ public:
 
   Float_t Tau[5]; // N-subjettiness
 
-  TLorentzVector SoftDroppedJet;
-  TLorentzVector SoftDroppedSubJet1;
-  TLorentzVector SoftDroppedSubJet2;
+  ROOT::Math::XYZTVector SoftDroppedJet;
+  ROOT::Math::XYZTVector SoftDroppedSubJet1;
+  ROOT::Math::XYZTVector SoftDroppedSubJet2;
 
-  TLorentzVector TrimmedP4[5]; // first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
-  TLorentzVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
-  TLorentzVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  ROOT::Math::XYZTVector TrimmedP4[5]; // first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
+  ROOT::Math::XYZTVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  ROOT::Math::XYZTVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
 
   Int_t NSubJetsTrimmed; // number of subjets trimmed
   Int_t NSubJetsPruned; // number of subjets pruned
@@ -419,15 +419,15 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
-  TLorentzVector Area;
+  ROOT::Math::PtEtaPhiMVector P4() const;
+  ROOT::Math::XYZTVector Area;
 
   ClassDef(Jet, 5)
 };
 
 //---------------------------------------------------------------------------
 
-class Track: public SortableObject
+class Track : public SortableObject
 {
 public:
   Int_t PID; // HEP ID number
@@ -437,7 +437,6 @@ public:
   Int_t IsPU; // 0 or 1 for particles from pile-up interactions
   Int_t IsRecoPU; // 0 or 1 for reconstructed particles from pile-up
   Float_t HardEnergyFraction; // fraction of hard scattering vs PU energy in the particle flow candidate
-
 
   Float_t P; // track momentum
   Float_t PT; // track transverse momentum
@@ -491,7 +490,7 @@ public:
   Float_t ErrorD0CtgTheta;
   Float_t ErrorPhiC;
   Float_t ErrorPhiDZ;
-  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorPhiCtgTheta;
   Float_t ErrorCDZ;
   Float_t ErrorCCtgTheta;
   Float_t ErrorDZCtgTheta;
@@ -503,7 +502,7 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
   TMatrixDSym CovarianceMatrix() const;
 
   ClassDef(Track, 4)
@@ -511,7 +510,7 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Tower: public SortableObject
+class Tower : public SortableObject
 {
 public:
   Float_t ET; // calorimeter tower transverse energy
@@ -542,14 +541,14 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiEVector P4() const;
 
   ClassDef(Tower, 5)
 };
 
 //---------------------------------------------------------------------------
 
-class ParticleFlowCandidate: public SortableObject
+class ParticleFlowCandidate : public SortableObject
 {
 
 public:
@@ -614,7 +613,7 @@ public:
   Float_t ErrorD0CtgTheta;
   Float_t ErrorPhiC;
   Float_t ErrorPhiDZ;
-  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorPhiCtgTheta;
   Float_t ErrorCDZ;
   Float_t ErrorCCtgTheta;
   Float_t ErrorDZCtgTheta;
@@ -624,7 +623,7 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  TLorentzVector P4() const;
+  ROOT::Math::PtEtaPhiMVector P4() const;
   TMatrixDSym CovarianceMatrix() const;
 
   Int_t NTimeHits; // number of hits contributing to time measurement
@@ -638,12 +637,11 @@ public:
   TRefArray Particles; // references to generated particles
 
   ClassDef(ParticleFlowCandidate, 4)
-
 };
 
 //---------------------------------------------------------------------------
 
-class HectorHit: public SortableObject
+class HectorHit : public SortableObject
 {
 public:
   Float_t E; // reconstructed energy [GeV]
@@ -666,7 +664,7 @@ public:
 };
 //---------------------------------------------------------------------------
 
-class CscCluster: public SortableObject
+class CscCluster : public SortableObject
 {
 public:
   Float_t Eta; // eta of LLP
@@ -695,12 +693,13 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Candidate: public SortableObject
+class Candidate : public SortableObject
 {
   friend class DelphesFactory;
 
 public:
   Candidate();
+  Candidate(const Candidate &);
 
   Int_t PID;
 
@@ -737,7 +736,7 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
-  TLorentzVector Momentum, Position, InitialPosition, PositionError, DecayPosition, Area;
+  ROOT::Math::XYZTVector Momentum, Position, InitialPosition, PositionError, DecayPosition, Area;
 
   Float_t L; // path length
   Float_t DZ;
@@ -798,8 +797,8 @@ public:
   Float_t SumPt;
 
   // ACTS compliant 6x6 track covariance (D0, phi, Curvature, dz, ctg(theta))
-
-  TMatrixDSym TrackCovariance;
+  std::vector<double> TrackCovariance;
+  //TMatrixDSym TrackCovariance;
 
   // vertex variables
 
@@ -817,13 +816,13 @@ public:
 
   // Other Substructure variables
 
-  TLorentzVector SoftDroppedJet;
-  TLorentzVector SoftDroppedSubJet1;
-  TLorentzVector SoftDroppedSubJet2;
+  ROOT::Math::XYZTVector SoftDroppedJet;
+  ROOT::Math::XYZTVector SoftDroppedSubJet1;
+  ROOT::Math::XYZTVector SoftDroppedSubJet2;
 
-  TLorentzVector TrimmedP4[5]; // first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
-  TLorentzVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
-  TLorentzVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  ROOT::Math::XYZTVector TrimmedP4[5]; // first entry (i = 0) is the total Trimmed Jet 4-momenta and from i = 1 to 4 are the trimmed subjets 4-momenta
+  ROOT::Math::XYZTVector PrunedP4[5]; // first entry (i = 0) is the total Pruned Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
+  ROOT::Math::XYZTVector SoftDroppedP4[5]; // first entry (i = 0) is the total SoftDropped Jet 4-momenta and from i = 1 to 4 are the pruned subjets 4-momenta
 
   Int_t NSubJetsTrimmed; // number of subjets trimmed
   Int_t NSubJetsPruned; // number of subjets pruned
@@ -842,8 +841,8 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  void AddCandidate(Candidate *object);
-  TObjArray *GetCandidates();
+  void AddCandidate(const Candidate *object);
+  const std::vector<Candidate *> &GetCandidates() const;
 
   Bool_t Overlaps(const Candidate *object) const;
 
@@ -853,7 +852,7 @@ public:
 
 private:
   DelphesFactory *fFactory; //!
-  TObjArray *fArray; //!
+  std::vector<Candidate *> fArray; //!
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 

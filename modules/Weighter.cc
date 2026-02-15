@@ -27,7 +27,6 @@
 #include "modules/Weighter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -61,19 +58,6 @@ bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) cons
   }
 
   return false;
-}
-
-//------------------------------------------------------------------------------
-
-Weighter::Weighter() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-Weighter::~Weighter()
-{
 }
 
 //------------------------------------------------------------------------------
@@ -122,27 +106,21 @@ void Weighter::Init()
   }
 
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "weight"));
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "weight"));
 }
 
 //------------------------------------------------------------------------------
 
 void Weighter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void Weighter::Process()
 {
-  Candidate *candidate;
   Int_t i;
   TIndexStruct index;
   Double_t weight;
@@ -151,16 +129,17 @@ void Weighter::Process()
 
   DelphesFactory *factory = GetFactory();
 
+  fOutputArray->clear();
+
   // loop over all particles
   fCodeSet.clear();
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    if(candidate->Status != 3) continue;
+    if(candidate.Status != 3) continue;
 
-    if(fWeightSet.find(candidate->PID) == fWeightSet.end()) continue;
+    if(fWeightSet.find(candidate.PID) == fWeightSet.end()) continue;
 
-    fCodeSet.insert(candidate->PID);
+    fCodeSet.insert(candidate.PID);
   }
 
   // find default weight value
@@ -186,9 +165,9 @@ void Weighter::Process()
     }
   }
 
-  candidate = factory->NewCandidate();
-  candidate->Momentum.SetPtEtaPhiE(weight, 0.0, 0.0, weight);
-  fOutputArray->Add(candidate);
+  auto *candidate = factory->NewCandidate();
+  candidate->Momentum = ROOT::Math::PtEtaPhiEVector(weight, 0.0, 0.0, weight);
+  fOutputArray->emplace_back(*candidate);
 }
 
 //------------------------------------------------------------------------------

@@ -27,12 +27,12 @@
  *
  */
 
+#include "DelphesFactory.h"
+#include "DelphesModel.h"
 #include "ExRootAnalysis/ExRootTask.h"
 
 class TClass;
-class TObject;
 class TFolder;
-class TClonesArray;
 
 class ExRootResult;
 class ExRootTreeBranch;
@@ -40,7 +40,7 @@ class ExRootTreeWriter;
 
 class DelphesFactory;
 
-class DelphesModule: public ExRootTask
+class DelphesModule : public ExRootTask
 {
 public:
   DelphesModule();
@@ -50,8 +50,17 @@ public:
   virtual void Process();
   virtual void Finish();
 
-  TObjArray *ImportArray(const char *name);
-  TObjArray *ExportArray(const char *name);
+  template <typename T>
+  void ImportArray(std::string_view field_name, OutputHandle<T> &handle)
+  {
+    GetFactory()->EventModel()->Attach(field_name, handle);
+  }
+  template <typename T>
+  void ExportArray(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
+  {
+    auto module_field_name = std::string{GetName()} + "/" + std::string{field_name};
+    GetFactory()->EventModel()->Book(handle, module_field_name, description);
+  }
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
   void AddInfo(const char *name, Double_t value);

@@ -27,7 +27,6 @@
 #include "modules/ImpactParameterSmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,7 +49,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 ImpactParameterSmearing::ImpactParameterSmearing() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -73,38 +70,32 @@ void ImpactParameterSmearing::Init()
   fFormula->Compile(GetString("ResolutionFormula", "0.0"));
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
-
+  ImportArray(GetString("InputArray", "TrackMerger/tracks"), fInputArray);
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void ImpactParameterSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void ImpactParameterSmearing::Process()
 {
-  Candidate *candidate, *particle, *mother;
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray) //TODO: ensure const safety
   {
 
     // take momentum before smearing (otherwise apply double smearing on d0)
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate.GetCandidates().at(0));
 
-    const TLorentzVector &candidateMomentum = particle->Momentum;
+    const auto &candidateMomentum = particle->Momentum;
 
     eta = candidateMomentum.Eta();
     pt = candidateMomentum.Pt();
@@ -115,9 +106,9 @@ void ImpactParameterSmearing::Process()
     py = candidateMomentum.Py();
 
     // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
-    xd = candidate->Xd;
-    yd = candidate->Yd;
-    zd = candidate->Zd;
+    xd = candidate.Xd;
+    yd = candidate.Yd;
+    zd = candidate.Zd;
 
     // calculate smeared values
     sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
@@ -134,18 +125,16 @@ void ImpactParameterSmearing::Process()
     dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
-    mother = candidate;
+    auto new_candidate = candidate;
+    new_candidate.Xd = xd;
+    new_candidate.Yd = yd;
+    new_candidate.Zd = zd;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Xd = xd;
-    candidate->Yd = yd;
-    candidate->Zd = zd;
+    new_candidate.D0 = d0;
+    new_candidate.ErrorD0 = dd0;
 
-    candidate->D0 = d0;
-    candidate->ErrorD0 = dd0;
-
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate.AddCandidate(&candidate); // ensure parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

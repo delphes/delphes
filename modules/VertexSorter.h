@@ -15,33 +15,23 @@
 
 #include <string>
 
-class TObjArray;
-class TIterator;
 class Candidate;
 
-class VertexSorter: public DelphesModule
+class VertexSorter : public DelphesModule
 {
 public:
-  VertexSorter();
-  ~VertexSorter();
+  VertexSorter() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-  TObjArray *fInputArray;
-
-  TObjArray *fTrackInputArray;
-  TIterator *fItTrackInputArray;
-
-  TObjArray *fJetInputArray;
-  TIterator *fItJetInputArray;
-
-  TObjArray *fBeamSpotInputArray;
-  TIterator *fItBeamSpotInputArray;
-
-  TObjArray *fOutputArray;
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fBeamSpotInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   std::string fMethod;
 

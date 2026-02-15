@@ -21,7 +21,7 @@
 
 /** \class DecayFilter
  *
- *  This module randomly generates decays along the particle trajectory length 
+ *  This module randomly generates decays along the particle trajectory length
  *  according to actual particle decay length, taking into account for the boost
  *  and using ROOT TDatabasePDG as a source for the particle lifetime.
  *
@@ -36,27 +36,20 @@
 
 #include "classes/DelphesModule.h"
 
-#include <deque>
+class Candidate;
 
-class TObjArray;
-
-class DecayFilter: public DelphesModule
+class DecayFilter : public DelphesModule
 {
 public:
-  DecayFilter();
-  ~DecayFilter();
+  DecayFilter() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(DecayFilter, 1)
 };

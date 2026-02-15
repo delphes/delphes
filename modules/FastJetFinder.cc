@@ -27,7 +27,6 @@
 #include "modules/FastJetFinder.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,11 +35,10 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -78,7 +76,7 @@ using namespace fastjet::contrib;
 
 FastJetFinder::FastJetFinder() :
   fPlugin(0), fRecomb(0), fAxesDef(0), fMeasureDef(0), fNjettinessPlugin(0), fValenciaPlugin(0),
-  fDefinition(0), fAreaDefinition(0), fItInputArray(0)
+  fDefinition(0), fAreaDefinition(0)
 {
 }
 
@@ -249,7 +247,7 @@ void FastJetFinder::Init()
     fDefinition = new JetDefinition(fValenciaPlugin);
     break;
   case 10:
-    fDefinition = new JetDefinition(ee_genkt_algorithm,fParameterR,fParameterP);
+    fDefinition = new JetDefinition(ee_genkt_algorithm, fParameterR, fParameterP);
     break;
 
   // kT durham algorithm, 2 options:
@@ -258,7 +256,6 @@ void FastJetFinder::Init()
   case 11:
     fDefinition = new JetDefinition(ee_kt_algorithm);
     break;
-
   }
 
   fPlugin = plugin;
@@ -286,15 +283,12 @@ void FastJetFinder::Init()
   }
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray = fInputArray->MakeIterator();
+  ImportArray(GetString("InputArray", "Calorimeter/towers"), fInputArray);
 
   // create output arrays
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-  fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
-  fConstituentsOutputArray = ExportArray(GetString("ConstituentsOutputArray", "constituents"));
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
+  ExportArray(fRhoOutputArray, GetString("RhoOutputArray", "rho"));
+  ExportArray(fConstituentsOutputArray, GetString("ConstituentsOutputArray", "constituents"));
 }
 
 //------------------------------------------------------------------------------
@@ -308,7 +302,6 @@ void FastJetFinder::Finish()
     if(itEstimators->estimator) delete itEstimators->estimator;
   }
 
-  if(fItInputArray) delete fItInputArray;
   if(fDefinition) delete fDefinition;
   if(fAreaDefinition) delete fAreaDefinition;
   if(fPlugin) delete static_cast<JetDefinition::Plugin *>(fPlugin);
@@ -323,9 +316,6 @@ void FastJetFinder::Finish()
 
 void FastJetFinder::Process()
 {
-  Candidate *candidate, *constituent;
-  TLorentzVector momentum;
-
   Double_t deta, dphi, detaMax, dphiMax;
   Double_t time, timeWeight;
   Double_t neutralEnergyFraction, chargedEnergyFraction;
@@ -346,14 +336,17 @@ void FastJetFinder::Process()
 
   DelphesFactory *factory = GetFactory();
 
+  fOutputArray->clear();
+  fRhoOutputArray->clear();
+  fConstituentsOutputArray->clear();
+
   inputList.clear();
 
   // loop over input objects
-  fItInputArray->Reset();
   number = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    momentum = candidate->Momentum;
+    const auto momentum = candidate.Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
     inputList.push_back(jet);
@@ -378,11 +371,11 @@ void FastJetFinder::Process()
       itEstimators->estimator->set_particles(inputList);
       rho = itEstimators->estimator->rho();
 
-      candidate = factory->NewCandidate();
-      candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
+      auto *candidate = factory->NewCandidate();
+      candidate->Momentum = ROOT::Math::PtEtaPhiEVector(rho, 0.0, 0.0, rho);
       candidate->Edges[0] = itEstimators->etaMin;
       candidate->Edges[1] = itEstimators->etaMax;
-      fRhoOutputArray->Add(candidate);
+      fRhoOutputArray->emplace_back(*candidate);
     }
   }
 
@@ -393,9 +386,9 @@ void FastJetFinder::Process()
     try
     {
       // exclusive dcut mode
-      if (fDCut > 0.0)
+      if(fDCut > 0.0)
       {
-        outputList = sorted_by_pt(sequence->exclusive_jets(fDCut*fDCut));
+        outputList = sorted_by_pt(sequence->exclusive_jets(fDCut * fDCut));
       }
       else
       {
@@ -407,7 +400,7 @@ void FastJetFinder::Process()
     {
       outputList.clear();
     }
-    
+
     excl_ymerge12 = sequence->exclusive_ymerge(1);
     excl_ymerge23 = sequence->exclusive_ymerge(2);
     excl_ymerge34 = sequence->exclusive_ymerge(3);
@@ -428,12 +421,12 @@ void FastJetFinder::Process()
     jet = *itOutputList;
     if(fJetAlgorithm == 7) jet = join(jet.constituents());
 
-    momentum.SetPxPyPzE(jet.px(), jet.py(), jet.pz(), jet.E());
+    const auto momentum = ROOT::Math::PxPyPzEVector(jet.px(), jet.py(), jet.pz(), jet.E());
 
     area.reset(0.0, 0.0, 0.0, 0.0);
     if(fAreaDefinition) area = itOutputList->area_4vector();
 
-    candidate = factory->NewCandidate();
+    auto *candidate = factory->NewCandidate();
 
     time = 0.0;
     timeWeight = 0.0;
@@ -443,8 +436,8 @@ void FastJetFinder::Process()
     ncharged = 0;
     nneutrals = 0;
 
-    neutralEnergyFraction =0.;
-    chargedEnergyFraction =0.;
+    neutralEnergyFraction = 0.;
+    chargedEnergyFraction = 0.;
 
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
@@ -452,36 +445,36 @@ void FastJetFinder::Process()
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       if(itInputList->user_index() < 0) continue;
-      constituent = static_cast<Candidate *>(fInputArray->At(itInputList->user_index()));
+      const auto &constituent = fInputArray->at(itInputList->user_index());
 
-      deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
-      dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
+      deta = TMath::Abs(momentum.Eta() - constituent.Momentum.Eta());
+      dphi = TMath::Abs(ROOT::Math::VectorUtil::DeltaPhi(momentum, constituent.Momentum));
       if(deta > detaMax) detaMax = deta;
       if(dphi > dphiMax) dphiMax = dphi;
 
-      if(constituent->Charge == 0)
+      if(constituent.Charge == 0)
       {
         nneutrals++;
-        neutralEnergyFraction += constituent->Momentum.E();
+        neutralEnergyFraction += constituent.Momentum.E();
       }
       else
       {
         ncharged++;
-        chargedEnergyFraction += constituent->Momentum.E();
+        chargedEnergyFraction += constituent.Momentum.E();
       }
 
-      time += TMath::Sqrt(constituent->Momentum.E()) * (constituent->Position.T());
-      timeWeight += TMath::Sqrt(constituent->Momentum.E());
+      time += TMath::Sqrt(constituent.Momentum.E()) * (constituent.Position.T());
+      timeWeight += TMath::Sqrt(constituent.Momentum.E());
 
-      charge += constituent->Charge;
+      charge += constituent.Charge;
 
-      fConstituentsOutputArray->Add(constituent);
-      candidate->AddCandidate(constituent);
+      fConstituentsOutputArray->emplace_back(constituent);
+      candidate->AddCandidate(&constituent);
     }
 
     candidate->Momentum = momentum;
-    candidate->Position.SetT(time / timeWeight);
-    candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
+    candidate->Position.SetE(time / timeWeight);
+    candidate->Area = ROOT::Math::PxPyPzEVector(area.px(), area.py(), area.pz(), area.E());
 
     candidate->DeltaEta = detaMax;
     candidate->DeltaPhi = dphiMax;
@@ -489,8 +482,8 @@ void FastJetFinder::Process()
     candidate->NNeutrals = nneutrals;
     candidate->NCharged = ncharged;
 
-    candidate->NeutralEnergyFraction = (momentum.E() > 0 ) ? neutralEnergyFraction/momentum.E() : 0.0;
-    candidate->ChargedEnergyFraction = (momentum.E() > 0 ) ? chargedEnergyFraction/momentum.E() : 0.0;
+    candidate->NeutralEnergyFraction = (momentum.E() > 0) ? neutralEnergyFraction / momentum.E() : 0.0;
+    candidate->ChargedEnergyFraction = (momentum.E() > 0) ? chargedEnergyFraction / momentum.E() : 0.0;
 
     //for exclusive clustering, access y_n,n+1 as exclusive_ymerge (fNJets);
     candidate->ExclYmerge12 = excl_ymerge12;
@@ -509,7 +502,7 @@ void FastJetFinder::Process()
       fastjet::Filter trimmer(fastjet::JetDefinition(fastjet::kt_algorithm, fRTrim), fastjet::SelectorPtFractionMin(fPtFracTrim));
       fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
 
-      candidate->TrimmedP4[0].SetPtEtaPhiM(trimmed_jet.pt(), trimmed_jet.eta(), trimmed_jet.phi(), trimmed_jet.m());
+      candidate->TrimmedP4[0] = ROOT::Math::PtEtaPhiMVector(trimmed_jet.pt(), trimmed_jet.eta(), trimmed_jet.phi(), trimmed_jet.m());
 
       // four hardest subjets
       subjets.clear();
@@ -521,7 +514,7 @@ void FastJetFinder::Process()
       for(size_t i = 0; i < subjets.size() and i < 4; i++)
       {
         if(subjets.at(i).pt() < 0) continue;
-        candidate->TrimmedP4[i + 1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+        candidate->TrimmedP4[i + 1] = ROOT::Math::PtEtaPhiMVector(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
       }
     }
 
@@ -535,7 +528,7 @@ void FastJetFinder::Process()
       fastjet::Pruner pruner(fastjet::JetDefinition(fastjet::cambridge_algorithm, fRPrun), fZcutPrun, fRcutPrun);
       fastjet::PseudoJet pruned_jet = pruner(*itOutputList);
 
-      candidate->PrunedP4[0].SetPtEtaPhiM(pruned_jet.pt(), pruned_jet.eta(), pruned_jet.phi(), pruned_jet.m());
+      candidate->PrunedP4[0] = ROOT::Math::PtEtaPhiMVector(pruned_jet.pt(), pruned_jet.eta(), pruned_jet.phi(), pruned_jet.m());
 
       // four hardest subjet
       subjets.clear();
@@ -547,7 +540,7 @@ void FastJetFinder::Process()
       for(size_t i = 0; i < subjets.size() and i < 4; i++)
       {
         if(subjets.at(i).pt() < 0) continue;
-        candidate->PrunedP4[i + 1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+        candidate->PrunedP4[i + 1] = ROOT::Math::PtEtaPhiMVector(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
       }
     }
 
@@ -561,7 +554,7 @@ void FastJetFinder::Process()
       contrib::SoftDrop softDrop(fBetaSoftDrop, fSymmetryCutSoftDrop, fR0SoftDrop);
       fastjet::PseudoJet softdrop_jet = softDrop(*itOutputList);
 
-      candidate->SoftDroppedP4[0].SetPtEtaPhiM(softdrop_jet.pt(), softdrop_jet.eta(), softdrop_jet.phi(), softdrop_jet.m());
+      candidate->SoftDroppedP4[0] = ROOT::Math::PtEtaPhiMVector(softdrop_jet.pt(), softdrop_jet.eta(), softdrop_jet.phi(), softdrop_jet.m());
 
       // four hardest subjet
 
@@ -575,7 +568,7 @@ void FastJetFinder::Process()
       for(size_t i = 0; i < subjets.size() and i < 4; i++)
       {
         if(subjets.at(i).pt() < 0) continue;
-        candidate->SoftDroppedP4[i + 1].SetPtEtaPhiM(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
+        candidate->SoftDroppedP4[i + 1] = ROOT::Math::PtEtaPhiMVector(subjets.at(i).pt(), subjets.at(i).eta(), subjets.at(i).phi(), subjets.at(i).m());
         if(i == 0) candidate->SoftDroppedSubJet1 = candidate->SoftDroppedP4[i + 1];
         if(i == 1) candidate->SoftDroppedSubJet2 = candidate->SoftDroppedP4[i + 1];
       }
@@ -599,7 +592,7 @@ void FastJetFinder::Process()
       candidate->Tau[4] = nSub5(*itOutputList);
     }
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(*candidate);
   }
   delete sequence;
 }

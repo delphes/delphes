@@ -46,65 +46,51 @@ CompBase *CscCluster::fgCompare = CompE<CscCluster>::Instance();
 
 //------------------------------------------------------------------------------
 
-TLorentzVector GenParticle::P4() const
+ROOT::Math::PtEtaPhiMVector GenParticle::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPxPyPzE(Px, Py, Pz, E);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(ROOT::Math::PxPyPzEVector(Px, Py, Pz, E));
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector MissingET::P4() const
+ROOT::Math::PtEtaPhiMVector MissingET::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(MET, Eta, Phi, 0.0);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(MET, Eta, Phi, 0.0);
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Photon::P4() const
+ROOT::Math::PtEtaPhiMVector Photon::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(PT, Eta, Phi, 0.0);
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Electron::P4() const
+ROOT::Math::PtEtaPhiMVector Electron::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(PT, Eta, Phi, 0.0);
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Muon::P4() const
+ROOT::Math::PtEtaPhiMVector Muon::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(PT, Eta, Phi, 0.0);
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Jet::P4() const
+ROOT::Math::PtEtaPhiMVector Jet::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(PT, Eta, Phi, Mass);
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Track::P4() const
+ROOT::Math::PtEtaPhiMVector Track::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(PT, Eta, Phi, Mass);
 }
 
 //------------------------------------------------------------------------------
@@ -115,55 +101,50 @@ TMatrixDSym Track::CovarianceMatrix() const
   Cv.ResizeTo(5, 5);
 
   // convert diagonal term to original units
-  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
-  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC, 2.);
-  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
-  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
+  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2) = TMath::Power(ErrorC, 2.);
+  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
 
   // off diagonal terms
-  Cv(0, 1)=ErrorD0Phi;
-  Cv(0, 2)=ErrorD0C;
-  Cv(0, 3)=ErrorD0DZ;
-  Cv(0, 4)=ErrorD0CtgTheta;
-  Cv(1, 2)=ErrorPhiC;
-  Cv(1, 3)=ErrorPhiDZ;
-  Cv(1, 4)=ErrorPhiCtgTheta;
-  Cv(2, 3)=ErrorCDZ;
-  Cv(2, 4)=ErrorCCtgTheta;
-  Cv(3, 4)=ErrorDZCtgTheta;
+  Cv(0, 1) = ErrorD0Phi;
+  Cv(0, 2) = ErrorD0C;
+  Cv(0, 3) = ErrorD0DZ;
+  Cv(0, 4) = ErrorD0CtgTheta;
+  Cv(1, 2) = ErrorPhiC;
+  Cv(1, 3) = ErrorPhiDZ;
+  Cv(1, 4) = ErrorPhiCtgTheta;
+  Cv(2, 3) = ErrorCDZ;
+  Cv(2, 4) = ErrorCCtgTheta;
+  Cv(3, 4) = ErrorDZCtgTheta;
 
-  Cv(1, 0)=Cv(0, 1);
-  Cv(2, 0)=Cv(0, 2);
-  Cv(3, 0)=Cv(0, 3);
-  Cv(4, 0)=Cv(0, 4);
-  Cv(2, 1)=Cv(1, 2);
-  Cv(3, 1)=Cv(1, 3);
-  Cv(4, 1)=Cv(1, 4);
-  Cv(3, 2)=Cv(2, 3);
-  Cv(4, 2)=Cv(2, 4);
-  Cv(4, 3)=Cv(3, 4);
+  Cv(1, 0) = Cv(0, 1);
+  Cv(2, 0) = Cv(0, 2);
+  Cv(3, 0) = Cv(0, 3);
+  Cv(4, 0) = Cv(0, 4);
+  Cv(2, 1) = Cv(1, 2);
+  Cv(3, 1) = Cv(1, 3);
+  Cv(4, 1) = Cv(1, 4);
+  Cv(3, 2) = Cv(2, 3);
+  Cv(4, 2) = Cv(2, 4);
+  Cv(4, 3) = Cv(3, 4);
 
   return Cv;
 }
 
-
 //------------------------------------------------------------------------------
 
-TLorentzVector Tower::P4() const
+ROOT::Math::PtEtaPhiEVector Tower::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiE(ET, Eta, Phi, E);
-  return vec;
+  return ROOT::Math::PtEtaPhiEVector(ET, Eta, Phi, E);
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector ParticleFlowCandidate::P4() const
+ROOT::Math::PtEtaPhiMVector ParticleFlowCandidate::P4() const
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
-  return vec;
+  return ROOT::Math::PtEtaPhiMVector(PT, Eta, Phi, Mass);
 }
 
 //------------------------------------------------------------------------------
@@ -174,34 +155,34 @@ TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
   Cv.ResizeTo(5, 5);
 
   // convert diagonal term to original units
-  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
-  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC, 2.);
-  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
-  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
+  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2) = TMath::Power(ErrorC, 2.);
+  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
 
   // off diagonal terms
-  Cv(0, 1)=ErrorD0Phi;
-  Cv(0, 2)=ErrorD0C;
-  Cv(0, 3)=ErrorD0DZ;
-  Cv(0, 4)=ErrorD0CtgTheta;
-  Cv(1, 2)=ErrorPhiC;
-  Cv(1, 3)=ErrorPhiDZ;
-  Cv(1, 4)=ErrorPhiCtgTheta;
-  Cv(2, 3)=ErrorCDZ;
-  Cv(2, 4)=ErrorCCtgTheta;
-  Cv(3, 4)=ErrorDZCtgTheta;
+  Cv(0, 1) = ErrorD0Phi;
+  Cv(0, 2) = ErrorD0C;
+  Cv(0, 3) = ErrorD0DZ;
+  Cv(0, 4) = ErrorD0CtgTheta;
+  Cv(1, 2) = ErrorPhiC;
+  Cv(1, 3) = ErrorPhiDZ;
+  Cv(1, 4) = ErrorPhiCtgTheta;
+  Cv(2, 3) = ErrorCDZ;
+  Cv(2, 4) = ErrorCCtgTheta;
+  Cv(3, 4) = ErrorDZCtgTheta;
 
-  Cv(1, 0)=Cv(0, 1);
-  Cv(2, 0)=Cv(0, 2);
-  Cv(3, 0)=Cv(0, 3);
-  Cv(4, 0)=Cv(0, 4);
-  Cv(2, 1)=Cv(1, 2);
-  Cv(3, 1)=Cv(1, 3);
-  Cv(4, 1)=Cv(1, 4);
-  Cv(3, 2)=Cv(2, 3);
-  Cv(4, 2)=Cv(2, 4);
-  Cv(4, 3)=Cv(3, 4);
+  Cv(1, 0) = Cv(0, 1);
+  Cv(2, 0) = Cv(0, 2);
+  Cv(3, 0) = Cv(0, 3);
+  Cv(4, 0) = Cv(0, 4);
+  Cv(2, 1) = Cv(1, 2);
+  Cv(3, 1) = Cv(1, 3);
+  Cv(4, 1) = Cv(1, 4);
+  Cv(3, 2) = Cv(2, 3);
+  Cv(4, 2) = Cv(2, 4);
+  Cv(4, 3) = Cv(3, 4);
 
   return Cv;
 }
@@ -241,8 +222,8 @@ Candidate::Candidate() :
   BetaStar(0),
   MeanSqDeltaR(0),
   PTD(0),
-  NeutralEnergyFraction(0),  // neutral energy fraction
-  ChargedEnergyFraction(0),  // charged energy fraction
+  NeutralEnergyFraction(0), // neutral energy fraction
+  ChargedEnergyFraction(0), // charged energy fraction
   NTimeHits(-1),
   IsolationVar(-999),
   IsolationVarRhoCorr(-999),
@@ -261,8 +242,7 @@ Candidate::Candidate() :
   ExclYmerge45(0),
   ExclYmerge56(0),
   ParticleDensity(0),
-  fFactory(0),
-  fArray(0)
+  fFactory(0)
 {
   int i;
   Edges[0] = 0.0;
@@ -294,17 +274,19 @@ Candidate::Candidate() :
 
 //------------------------------------------------------------------------------
 
-void Candidate::AddCandidate(Candidate *object)
+Candidate::Candidate(const Candidate &oth) { oth.Copy(*this); }
+
+//------------------------------------------------------------------------------
+
+void Candidate::AddCandidate(const Candidate *object)
 {
-  if(!fArray) fArray = fFactory->NewArray();
-  fArray->Add(object);
+  fArray.emplace_back(const_cast<Candidate *>(object));
 }
 
 //------------------------------------------------------------------------------
 
-TObjArray *Candidate::GetCandidates()
+const std::vector<Candidate *> &Candidate::GetCandidates() const
 {
-  if(!fArray) fArray = fFactory->NewArray();
   return fArray;
 }
 
@@ -312,27 +294,15 @@ TObjArray *Candidate::GetCandidates()
 
 Bool_t Candidate::Overlaps(const Candidate *object) const
 {
-  const Candidate *candidate;
-
+  if(!object) return kFALSE;
   if(object->GetUniqueID() == GetUniqueID()) return kTRUE;
 
-  if(fArray)
-  {
-    TIter it(fArray);
-    while((candidate = static_cast<Candidate *>(it.Next())))
-    {
+  if(!fArray.empty())
+    for(const auto &candidate : fArray)
       if(candidate->Overlaps(object)) return kTRUE;
-    }
-  }
 
-  if(object->fArray)
-  {
-    TIter it(object->fArray);
-    while((candidate = static_cast<Candidate *>(it.Next())))
-    {
-      if(candidate->Overlaps(this)) return kTRUE;
-    }
-  }
+  for(const auto &candidate : object->fArray)
+    if(candidate->Overlaps(this)) return kTRUE;
 
   return kFALSE;
 }
@@ -351,7 +321,6 @@ TObject *Candidate::Clone(const char * /*newname*/) const
 void Candidate::Copy(TObject &obj) const
 {
   Candidate &object = static_cast<Candidate &>(obj);
-  Candidate *candidate;
 
   object.PID = PID;
   object.Status = Status;
@@ -482,20 +451,12 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
   object.TrackCovariance = TrackCovariance;
   object.fFactory = fFactory;
-  object.fArray = 0;
 
   // copy cluster timing info
   copy(ECalEnergyTimePairs.begin(), ECalEnergyTimePairs.end(), back_inserter(object.ECalEnergyTimePairs));
 
-  if(fArray && fArray->GetEntriesFast() > 0)
-  {
-    TIter itArray(fArray);
-    TObjArray *array = object.GetCandidates();
-    while((candidate = static_cast<Candidate *>(itArray.Next())))
-    {
-      array->Add(candidate);
-    }
-  }
+  for(const auto &candidate : fArray)
+    object.AddCandidate(candidate);
 }
 
 //------------------------------------------------------------------------------
@@ -540,7 +501,7 @@ void Candidate::Clear(Option_t * /*option*/)
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   DecayPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  TrackCovariance.Zero();
+  TrackCovariance.clear();
   L = 0.0;
   ErrorT = 0.0;
   D0 = 0.0;
@@ -613,7 +574,6 @@ void Candidate::Clear(Option_t * /*option*/)
   ExclYmerge56 = 0.0;
   ParticleDensity = 0.0;
 
-
   for(i = 0; i < 5; ++i)
   {
     TrimmedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
@@ -624,6 +584,5 @@ void Candidate::Clear(Option_t * /*option*/)
   NSubJetsTrimmed = 0;
   NSubJetsPruned = 0;
   NSubJetsSoftDropped = 0;
-
-  fArray = 0;
+  fArray.clear();
 }

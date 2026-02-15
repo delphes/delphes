@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /** \class CscClusterEfficiency
+/** \class CscClusterEfficiency
   *
   *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
   *  It is implemented based on the ClusterEfficiency parameterization function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
@@ -28,7 +28,6 @@
 #include "modules/CscClusterEfficiency.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesCscClusterFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,9 +36,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -53,7 +50,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 CscClusterEfficiency::CscClusterEfficiency() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesCscClusterFormula;
 }
@@ -72,43 +69,36 @@ void CscClusterEfficiency::Init()
   // read CscClusterEfficiency formula
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  // import input array(s)
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void CscClusterEfficiency::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void CscClusterEfficiency::Process()
 {
-  Candidate *candidate;
   Double_t Ehad, Eem, decayR, decayZ;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
+    const auto &candidateDecayPosition = candidate.DecayPosition;
     decayZ = abs(candidateDecayPosition.Z());
-    decayR = sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2));
-    Ehad = candidate->Ehad;
-    Eem = candidate->Eem;
+    decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
+    Ehad = candidate.Ehad;
+    Eem = candidate.Eem;
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(decayR, decayZ, Ehad, Eem)) continue;
 
-
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

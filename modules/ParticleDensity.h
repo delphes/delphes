@@ -30,32 +30,25 @@
 
 #include "classes/DelphesModule.h"
 
-#include <deque>
-
-class TObjArray;
+class Candidate;
 class TH2F;
 
-class ParticleDensity: public DelphesModule
+class ParticleDensity : public DelphesModule
 {
 public:
-  ParticleDensity();
-  ~ParticleDensity();
+  ParticleDensity() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   Bool_t fUseMomentumVector; // !
   TH2F *fHisto; //!
-  
+
   ClassDef(ParticleDensity, 1)
 };
 

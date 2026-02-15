@@ -27,7 +27,6 @@
 #include "modules/UniqueObjectFinder.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -49,17 +46,7 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-UniqueObjectFinder::UniqueObjectFinder()
-{
-}
-
-//------------------------------------------------------------------------------
-
-UniqueObjectFinder::~UniqueObjectFinder()
-{
-}
+//TODO: large refactoring of this code with change of memory management. A thorough validation is required!
 
 //------------------------------------------------------------------------------
 
@@ -72,18 +59,15 @@ void UniqueObjectFinder::Init()
 
   ExRootConfParam param = GetParam("InputArray");
   Long_t i, size;
-  const TObjArray *array;
-  TIterator *iterator;
 
   fInputMap.clear();
 
   size = param.GetSize();
   for(i = 0; i < size / 2; ++i)
   {
-    array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
-
-    fInputMap.push_back(make_pair(iterator, ExportArray(param[i * 2 + 1].GetString())));
+    auto &[input_collection, output_collection] = fInputMap.emplace_back();
+    ImportArray(param[i * 2].GetString(), input_collection);
+    ExportArray(output_collection, param[i * 2 + 1].GetString());
   }
 }
 
@@ -91,79 +75,38 @@ void UniqueObjectFinder::Init()
 
 void UniqueObjectFinder::Finish()
 {
-  vector<pair<TIterator *, TObjArray *> >::iterator itInputMap;
-  TIterator *iterator;
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-
-    if(iterator) delete iterator;
-  }
 }
 
 //------------------------------------------------------------------------------
 
 void UniqueObjectFinder::Process()
 {
-  Candidate *candidate;
-  vector<pair<TIterator *, TObjArray *> >::iterator itInputMap;
-  TIterator *iterator;
-  TObjArray *array;
+  for(const auto &[input_collection, output_collection] : fInputMap)
+    output_collection->clear();
 
-  // loop over all input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-    array = itInputMap->second;
-
-    // loop over all candidates
-    iterator->Reset();
-    while((candidate = static_cast<Candidate *>(iterator->Next())))
-    {
-      if(Unique(candidate, itInputMap))
-      {
-        array->Add(candidate);
-      }
-    }
-  }
+  for(auto itInputMap = fInputMap.cbegin(); itInputMap != fInputMap.cend(); ++itInputMap) // loop over all input arrays
+    for(const auto &candidate : *(itInputMap->first)) // loop over all candidates
+      if(Unique(&candidate, itInputMap))
+        itInputMap->second->emplace_back(candidate);
 }
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, vector<pair<TIterator *, TObjArray *> >::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(const Candidate *candidate, InputMap::const_iterator itInputMap)
 {
-  Candidate *previousCandidate;
-  vector<pair<TIterator *, TObjArray *> >::iterator previousItInputMap;
-  TObjArray *array;
-
-  // loop over previous arrays
-  for(previousItInputMap = fInputMap.begin(); previousItInputMap != itInputMap; ++previousItInputMap)
-  {
-    array = previousItInputMap->second;
-    TIter iterator(array);
-
-    // loop over all candidates
-    iterator.Reset();
-    while((previousCandidate = static_cast<Candidate *>(iterator.Next())))
-    {
+  if(!candidate) return kTRUE;
+  for(auto previousItInputMap = fInputMap.cbegin(); previousItInputMap != itInputMap; ++previousItInputMap) // loop over previous arrays
+    for(const auto &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
       if(fUseUniqueID)
       {
-        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID())
-        {
+        if(candidate && candidate->GetUniqueID() == previousCandidate.GetUniqueID())
           return kFALSE;
-        }
       }
       else
       {
-        if(candidate->Overlaps(previousCandidate))
-        {
+        if(candidate && candidate->Overlaps(&previousCandidate))
           return kFALSE;
-        }
       }
-    }
-  }
-
   return kTRUE;
 }
 

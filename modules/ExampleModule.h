@@ -31,10 +31,10 @@
 
 #include <deque>
 
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class ExampleModule: public DelphesModule
+class ExampleModule : public DelphesModule
 {
 public:
   ExampleModule();
@@ -52,11 +52,8 @@ private:
 
   DelphesFormula *fFormula; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(ExampleModule, 1)
 };

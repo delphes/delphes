@@ -27,17 +27,18 @@
  *
  */
 
-#include <stdint.h>
-#include <stdio.h>
-
 #include "classes/DelphesXDRReader.h"
 
-class TObjArray;
+#include <stdint.h>
+#include <stdio.h>
+#include <vector>
+
 class TStopwatch;
 class TDatabasePDG;
 class ExRootTreeBranch;
+
+class Candidate;
 class DelphesFactory;
-class DelphesXDRReader;
 
 class DelphesSTDHEPReader
 {
@@ -63,18 +64,18 @@ public:
   bool EventReady();
 
   bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
 private:
   void AnalyzeParticles(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   void SkipBytes(int size);
   void SkipArray(int elsize);

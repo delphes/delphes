@@ -27,7 +27,6 @@
 #include "modules/Efficiency.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,7 +49,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 Efficiency::Efficiency() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -72,43 +69,38 @@ void Efficiency::Init()
 
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  // import input array(s)
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
 
   // switch to compute efficiency based on momentum vector eta, phi
   fUseMomentumVector = GetBool("UseMomentumVector", false);
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void Efficiency::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void Efficiency::Process()
 {
-  Candidate *candidate;
   Double_t pt, eta, phi, e;
 
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
 
-    if (fUseMomentumVector){
+    if(fUseMomentumVector)
+    {
       eta = candidateMomentum.Eta();
       phi = candidateMomentum.Phi();
     }
@@ -117,9 +109,9 @@ void Efficiency::Process()
     e = candidateMomentum.E();
 
     // apply an efficency formula
-    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, candidate)) continue;
+    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, const_cast<Candidate *>(&candidate))) continue; //TODO: ensure const-qualification
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

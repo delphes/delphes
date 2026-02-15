@@ -29,7 +29,6 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCylindricalFormula.h"
-#include "classes/DelphesFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -38,9 +37,7 @@
 #include "TDatabasePDG.h"
 #include "TF1.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 #include "TVector3.h"
@@ -55,7 +52,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PhotonConversions::PhotonConversions() :
-  fItInputArray(0), fConversionMap(0), fDecayXsec(0)
+  fConversionMap(0), fDecayXsec(0)
 {
   fDecayXsec = new TF1("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0);
   fConversionMap = new DelphesCylindricalFormula;
@@ -84,20 +81,16 @@ void PhotonConversions::Init()
   fConversionMap->Compile(GetString("ConversionMap", "0.0"));
 
   // import array with output from filter/classifier module
-
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
 
   // create output arrays
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void PhotonConversions::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
   if(fDecayXsec) delete fDecayXsec;
   if(fConversionMap) delete fConversionMap;
 }
@@ -106,8 +99,6 @@ void PhotonConversions::Finish()
 
 void PhotonConversions::Process()
 {
-  Candidate *candidate, *ep, *em;
-  TLorentzVector candidatePosition, candidateMomentum;
   TVector3 pos_i;
   Double_t px, py, pz, pt, pt2, e, eta, phi;
   Double_t x, y, z, t;
@@ -119,18 +110,17 @@ void PhotonConversions::Process()
   Double_t rate, p_conv, x1, x2;
   Bool_t converted;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-
-    if(candidate->PID != 22)
+    if(candidate.PID != 22)
     {
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
     }
     else
     {
-      candidatePosition = candidate->Position;
-      candidateMomentum = candidate->Momentum;
+      const auto &candidatePosition = candidate.Position;
+      const auto &candidateMomentum = candidate.Momentum;
       x = candidatePosition.X() * 1.0E-3;
       y = candidatePosition.Y() * 1.0E-3;
       z = candidatePosition.Z() * 1.0E-3;
@@ -218,14 +208,14 @@ void PhotonConversions::Process()
           x1 = fDecayXsec->GetRandom();
           x2 = 1 - x1;
 
-          ep = static_cast<Candidate *>(candidate->Clone());
-          em = static_cast<Candidate *>(candidate->Clone());
+          auto *ep = static_cast<Candidate *>(candidate.Clone());
+          auto *em = static_cast<Candidate *>(candidate.Clone());
 
           ep->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
           em->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
 
-          ep->Momentum.SetPtEtaPhiE(x1 * pt, eta, phi, x1 * e);
-          em->Momentum.SetPtEtaPhiE(x2 * pt, eta, phi, x2 * e);
+          ep->Momentum = ROOT::Math::PtEtaPhiEVector(x1 * pt, eta, phi, x1 * e);
+          em->Momentum = ROOT::Math::PtEtaPhiEVector(x2 * pt, eta, phi, x2 * e);
 
           ep->PID = -11;
           em->PID = 11;
@@ -236,13 +226,13 @@ void PhotonConversions::Process()
           ep->IsFromConversion = 1;
           em->IsFromConversion = 1;
 
-          fOutputArray->Add(em);
-          fOutputArray->Add(ep);
+          fOutputArray->emplace_back(*em);
+          fOutputArray->emplace_back(*ep);
 
           break;
         }
       }
-      if(!converted) fOutputArray->Add(candidate);
+      if(!converted) fOutputArray->emplace_back(candidate);
     }
   }
 }

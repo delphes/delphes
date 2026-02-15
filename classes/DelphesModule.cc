@@ -76,42 +76,6 @@ void DelphesModule::Finish()
 
 //------------------------------------------------------------------------------
 
-TObjArray *DelphesModule::ImportArray(const char *name)
-{
-  stringstream message;
-  TObjArray *object;
-
-  object = static_cast<TObjArray *>(GetObject(Form("Export/%s", name), TObjArray::Class()));
-  if(!object)
-  {
-    message << "can't access input list '" << name;
-    message << "' in module '" << GetName() << "'";
-    throw runtime_error(message.str());
-  }
-
-  return object;
-}
-
-//------------------------------------------------------------------------------
-
-TObjArray *DelphesModule::ExportArray(const char *name)
-{
-  TObjArray *array;
-  if(!fExportFolder)
-  {
-    fExportFolder = NewFolder("Export");
-  }
-
-  array = GetFactory()->NewPermanentArray();
-
-  array->SetName(name);
-  fExportFolder->Add(array);
-
-  return array;
-}
-
-//------------------------------------------------------------------------------
-
 ExRootTreeBranch *DelphesModule::NewBranch(const char *name, TClass *cl)
 {
   stringstream message;

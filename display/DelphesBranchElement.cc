@@ -16,13 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "display/DelphesBranchElement.h"
 #include "TEveArrow.h"
 #include "TEveJetCone.h"
 #include "TEveTrack.h"
 #include "TEveTrackPropagator.h"
 #include "TEveVector.h"
 #include "classes/DelphesClasses.h"
+#include "display/DelphesBranchElement.h"
 #include <iostream>
 
 // special case for calo towers
@@ -55,19 +55,15 @@ void DelphesBranchElement<DelphesCaloData>::ReadBranch()
   }
 }
 template <>
-std::vector<TLorentzVector> DelphesBranchElement<DelphesCaloData>::GetVectors()
+std::vector<ROOT::Math::XYZTVector> DelphesBranchElement<DelphesCaloData>::GetVectors()
 {
-  std::vector<TLorentzVector> output;
+  std::vector<ROOT::Math::XYZTVector> output;
   if(TString(GetType()) == "Tower")
   {
     TIter itTower(branch_);
     Tower *tower;
     while((tower = (Tower *)itTower.Next()))
-    {
-      TLorentzVector v;
-      v.SetPtEtaPhiM(tower->Eem + tower->Ehad, (tower->Edges[0] + tower->Edges[1]) / 2., (tower->Edges[2] + tower->Edges[3]) / 2., 0.);
-      output.push_back(v);
-    }
+      output.emplace_back(ROOT::Math::PtEtaPhiMVector(tower->Eem + tower->Ehad, (tower->Edges[0] + tower->Edges[1]) / 2., (tower->Edges[2] + tower->Edges[3]) / 2., 0.));
   }
   return output;
 }
@@ -138,20 +134,16 @@ void DelphesBranchElement<TEveElementList>::ReadBranch()
   }
 }
 template <>
-std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors()
+std::vector<ROOT::Math::XYZTVector> DelphesBranchElement<TEveElementList>::GetVectors()
 {
-  std::vector<TLorentzVector> output;
+  std::vector<ROOT::Math::XYZTVector> output;
   if(TString(GetType()) == "Jet")
   {
     TIter itJet(branch_);
     Jet *jet;
     // Loop over all jets
     while((jet = (Jet *)itJet.Next()))
-    {
-      TLorentzVector v;
-      v.SetPtEtaPhiM(jet->PT, jet->Eta, jet->Phi, jet->Mass);
-      output.push_back(v);
-    }
+      output.emplace_back(ROOT::Math::PtEtaPhiMVector(jet->PT, jet->Eta, jet->Phi, jet->Mass));
   }
   else if(TString(GetType()) == "MissingET")
   {
@@ -159,11 +151,7 @@ std::vector<TLorentzVector> DelphesBranchElement<TEveElementList>::GetVectors()
     MissingET *MET;
     // Missing Et
     while((MET = (MissingET *)itMet.Next()))
-    {
-      TLorentzVector v;
-      v.SetPtEtaPhiM(MET->MET, MET->Eta, MET->Phi, 0.);
-      output.push_back(v);
-    }
+      output.emplace_back(ROOT::Math::PtEtaPhiMVector(MET->MET, MET->Eta, MET->Phi, 0.));
   }
   return output;
 }
@@ -301,42 +289,34 @@ void DelphesBranchElement<TEveTrackList>::ReadBranch()
   }
 }
 template <>
-std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors()
+std::vector<ROOT::Math::XYZTVector> DelphesBranchElement<TEveTrackList>::GetVectors()
 {
-  std::vector<TLorentzVector> output;
+  std::vector<ROOT::Math::XYZTVector> output;
   TString type = GetType();
   TIter itTrack(branch_);
   if(type == "Track")
   { // CASE 1: TRACKS
     Track *track;
     while((track = (Track *)itTrack.Next()))
-    {
-      output.push_back(track->P4());
-    }
+      output.emplace_back(track->P4());
   }
   else if(type == "Electron")
   { // CASE 2: ELECTRONS
     Electron *electron;
     while((electron = (Electron *)itTrack.Next()))
-    {
-      output.push_back(electron->P4());
-    }
+      output.emplace_back(electron->P4());
   }
   else if(type == "Muon")
   { // CASE 3: MUONS
     Muon *muon;
     while((muon = (Muon *)itTrack.Next()))
-    {
-      output.push_back(muon->P4());
-    }
+      output.emplace_back(muon->P4());
   }
   else if(type == "Photon")
   { // CASE 4: PHOTONS
     Photon *photon;
     while((photon = (Photon *)itTrack.Next()))
-    {
-      output.push_back(photon->P4());
-    }
+      output.emplace_back(photon->P4());
   }
   else if(type == "GenParticle")
   { // CASE 5: GENPARTICLES
@@ -344,7 +324,7 @@ std::vector<TLorentzVector> DelphesBranchElement<TEveTrackList>::GetVectors()
     while((particle = (GenParticle *)itTrack.Next()))
     {
       if(particle->Status != 1) continue;
-      output.push_back(particle->P4());
+      output.emplace_back(particle->P4());
     }
   }
   return output;

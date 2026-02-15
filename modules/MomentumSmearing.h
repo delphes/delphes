@@ -29,11 +29,10 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class MomentumSmearing: public DelphesModule
+class MomentumSmearing : public DelphesModule
 {
 public:
   MomentumSmearing();
@@ -48,11 +47,8 @@ private:
 
   DelphesFormula *fFormula; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   Double_t fUseMomentumVector; //!
 
