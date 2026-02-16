@@ -40,6 +40,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -181,7 +182,7 @@ Bool_t PhotonID::isFake(const Candidate *obj)
     Int_t status = gen.Status;
     Int_t pdgCode = TMath::Abs(gen.PID);
     Float_t dPtOverPt = TMath::Abs((mom_gen.Pt() - mom_rec.Pt()) / mom_rec.Pt());
-    Float_t deltaR = mom_gen.DeltaR(mom_rec);
+    Float_t deltaR = ROOT::Math::VectorUtil::DeltaR(mom_gen, mom_rec);
 
     if(status != 1) continue;
     if(pdgCode != 22) continue;

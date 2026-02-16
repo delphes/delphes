@@ -21,6 +21,7 @@
 #include "TRandom3.h"
 #include "TString.h"
 //#include "TDatabasePDG.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -95,7 +96,7 @@ void PileUpJetID::Process()
       for(const auto &constituent : candidate.GetCandidates())
       {
         float pt = constituent->Momentum.Pt();
-        float dr = candidate.Momentum.DeltaR(constituent->Momentum);
+        float dr = ROOT::Math::VectorUtil::DeltaR(candidate.Momentum, constituent->Momentum);
         //	cout << " There exists a constituent with dr=" << dr << endl;
         sumpt += pt;
         sumdrsqptsq += dr * dr * pt * pt;
@@ -148,7 +149,7 @@ void PileUpJetID::Process()
       // Not using constituents, using dr
       for(const auto &trk : *fTrackInputArray)
       {
-        if(trk.Momentum.DeltaR(candidate.Momentum) < fParameterR)
+        if(ROOT::Math::VectorUtil::DeltaR(trk.Momentum, candidate.Momentum) < fParameterR)
         {
           float pt = trk.Momentum.Pt();
           sumpt += pt;
@@ -161,7 +162,7 @@ void PileUpJetID::Process()
           {
             sumptchpv += pt;
           }
-          float dr = candidate.Momentum.DeltaR(trk.Momentum);
+          float dr = ROOT::Math::VectorUtil::DeltaR(candidate.Momentum, trk.Momentum);
           sumdrsqptsq += dr * dr * pt * pt;
           sumptsq += pt * pt;
           nc++;
@@ -176,11 +177,11 @@ void PileUpJetID::Process()
       }
       for(const auto &constituent : *fNeutralInputArray)
       {
-        if(constituent.Momentum.DeltaR(candidate.Momentum) < fParameterR)
+        if(ROOT::Math::VectorUtil::DeltaR(constituent.Momentum, candidate.Momentum) < fParameterR)
         {
           float pt = constituent.Momentum.Pt();
           sumpt += pt;
-          float dr = candidate.Momentum.DeltaR(constituent.Momentum);
+          float dr = ROOT::Math::VectorUtil::DeltaR(candidate.Momentum, constituent.Momentum);
           sumdrsqptsq += dr * dr * pt * pt;
           sumptsq += pt * pt;
           nn++;
@@ -280,7 +281,7 @@ void PileUpJetID::Process()
       { // use DeltaR
         for(const auto &constituent : *fNeutralInputArray)
         {
-          if(constituent.Momentum.DeltaR(candidate.Momentum) < fParameterR && constituent.Momentum.Pt() > fNeutralPTMin)
+          if(ROOT::Math::VectorUtil::DeltaR(constituent.Momentum, candidate.Momentum) < fParameterR && constituent.Momentum.Pt() > fNeutralPTMin)
           {
             fNeutralsInPassingJets->emplace_back(constituent);
             //            cout << "    Constitutent added Pt Eta Charge " << constituent.Momentum.Pt() << " " << constituent.Momentum.Eta() << " " << constituent.Charge << endl;

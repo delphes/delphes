@@ -38,6 +38,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -83,7 +84,7 @@ void LeptonDressing::Process()
       const auto &dressingMomentum = dressing.Momentum;
       if(dressingMomentum.Pt() > 0.1)
       {
-        if(candidateMomentum.DeltaR(dressingMomentum) <= fDeltaR)
+        if(ROOT::Math::VectorUtil::DeltaR(candidateMomentum, dressingMomentum) <= fDeltaR)
         {
           momentum += dressingMomentum;
         }

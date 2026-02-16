@@ -38,6 +38,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -212,7 +213,7 @@ void TauTagging::Process()
           tauMomentum += daughter.Momentum;
         }
 
-        if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
+        if(ROOT::Math::VectorUtil::DeltaR(jetMomentum, tauMomentum) <= fDeltaR)
         {
           pdgCode = 15;
           charge = tau.Charge;
@@ -235,8 +236,7 @@ void TauTagging::Process()
           if(tauMomentum.Pt() < fClassifier->fPTMin) continue;
           if(TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
 
-          Double_t dr = jetMomentum.DeltaR(tauMomentum);
-          if(dr < drMin)
+          if(const auto dr = ROOT::Math::VectorUtil::DeltaR(jetMomentum, tauMomentum); dr < drMin)
           {
             drMin = dr;
             pdgCode = TMath::Abs(part.PID);

@@ -25,6 +25,7 @@
 #include "TRandom3.h"
 #include "TString.h"
 #include "TVector3.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -128,7 +129,7 @@ void VertexSorter::Process()
           continue;
         ROOT::Math::PxPyPzEVector q(jetCandidate.Momentum.Px(), jetCandidate.Momentum.Py(), jetCandidate.Momentum.Pz(), jetCandidate.Momentum.E());
 
-        if(p.DeltaR(q) > 0.4)
+        if(ROOT::Math::VectorUtil::DeltaR(p, q) > 0.4)
           continue;
         isInJet = true;
         break;

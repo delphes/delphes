@@ -38,6 +38,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -205,7 +206,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate &jet, const std::vector<Candi
     // default delphes method
     pdgCode = TMath::Abs(parton.PID);
     if(TMath::Abs(parton.PID) == 21) pdgCode = 0;
-    if(jet.Momentum.DeltaR(parton.Momentum) <= fDeltaR)
+    if(ROOT::Math::VectorUtil::DeltaR(jet.Momentum, parton.Momentum) <= fDeltaR)
     {
       if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
     }
@@ -214,7 +215,8 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate &jet, const std::vector<Candi
 
     for(const auto &partonLHEF : partonLHEFArray)
     {
-      if(parton.Momentum.DeltaR(partonLHEF.Momentum) < 0.001 && parton.PID == partonLHEF.PID && partonLHEF.Charge == parton.Charge)
+      if(ROOT::Math::VectorUtil::DeltaR(parton.Momentum, partonLHEF.Momentum) < 0.001
+        && parton.PID == partonLHEF.PID && partonLHEF.Charge == parton.Charge)
       {
         break;
       }
@@ -232,7 +234,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate &jet, const std::vector<Candi
         if((daughterFlavor2 == 1 || daughterFlavor2 == 2 || daughterFlavor2 == 3 || daughterFlavor2 == 4 || daughterFlavor2 == 5 || daughterFlavor2 == 21)) daughterCounter++;
       }
       if(daughterCounter > 0) continue;
-      if(jet.Momentum.DeltaR(parton.Momentum) <= fDeltaR)
+      if(ROOT::Math::VectorUtil::DeltaR(jet.Momentum, parton.Momentum) <= fDeltaR)
       {
         // if not yet found && pdgId is a c, take as c
         if(TMath::Abs(parton.PID) == 4) tempParton = &parton;
@@ -270,7 +272,7 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate &jet, const std::vector<Ca
 
   for(const auto &partonLHEF : partonLHEFArray)
   {
-    dist = jet.Momentum.DeltaR(partonLHEF.Momentum); // take the DR
+    dist = ROOT::Math::VectorUtil::DeltaR(jet.Momentum, partonLHEF.Momentum); // take the DR
 
     if(partonLHEF.Status == 1 && dist <= fDeltaR)
     {
@@ -281,11 +283,12 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate &jet, const std::vector<Ca
 
   for(const auto &parton : partonArray)
   {
-    dist = jet.Momentum.DeltaR(parton.Momentum); // take the DR
+    dist = ROOT::Math::VectorUtil::DeltaR(jet.Momentum, parton.Momentum); // take the DR
     isGoodCandidate = true;
     for(const auto &partonLHEF : partonLHEFArray)
     {
-      if(parton.Momentum.DeltaR(partonLHEF.Momentum) < 0.01 && parton.PID == partonLHEF.PID && partonLHEF.Charge == parton.Charge)
+      if(ROOT::Math::VectorUtil::DeltaR(parton.Momentum, partonLHEF.Momentum) < 0.01
+        && parton.PID == partonLHEF.PID && partonLHEF.Charge == parton.Charge)
       {
         isGoodCandidate = false;
         break;
@@ -323,12 +326,14 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate &jet, const std::vector<Ca
       if(parton->M1 != -1)
       {
         const auto &mother1 = fParticleInputArray->at(parton->M1);
-        if(motherCounter > 0 && mother1.Momentum.DeltaR(tempParton->Momentum) < 0.001) continue;
+        if(motherCounter > 0
+          && ROOT::Math::VectorUtil::DeltaR(mother1.Momentum, tempParton->Momentum) < 0.001) continue;
       }
       if(parton->M2 != -1)
       {
         const auto &mother2 = fParticleInputArray->at(parton->M2);
-        if(motherCounter > 0 && mother2.Momentum.DeltaR(tempParton->Momentum) < 0.001) continue;
+        if(motherCounter > 0
+          && ROOT::Math::VectorUtil::DeltaR(mother2.Momentum, tempParton->Momentum) < 0.001) continue;
       }
       // mother is the initialParton --> OK
       if(TMath::Abs(tempParton->PID) == 4)

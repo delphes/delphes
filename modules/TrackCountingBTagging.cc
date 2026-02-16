@@ -33,6 +33,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -100,7 +101,7 @@ void TrackCountingBTagging::Process()
       d0 = TMath::Abs(track.D0);
       if(d0 > fIPmax) continue;
 
-      dr = jetMomentum.DeltaR(trkMomentum);
+      dr = ROOT::Math::VectorUtil::DeltaR(jetMomentum, trkMomentum);
       if(dr > fDeltaR) continue;
 
       xd = track.Xd;

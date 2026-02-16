@@ -41,6 +41,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -166,11 +167,13 @@ void Isolation::Process()
 
       if(fUseMiniCone)
       {
-        pass = candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax && candidateMomentum.DeltaR(isolationMomentum) > fDeltaRMin;
+        pass = ROOT::Math::VectorUtil::DeltaR(candidateMomentum, isolationMomentum) <= fDeltaRMax
+          && ROOT::Math::VectorUtil::DeltaR(candidateMomentum, isolationMomentum) > fDeltaRMin;
       }
       else
       {
-        pass = candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax && candidate.GetUniqueID() != isolation.GetUniqueID();
+        pass = ROOT::Math::VectorUtil::DeltaR(candidateMomentum, isolationMomentum) <= fDeltaRMax
+          && candidate.GetUniqueID() != isolation.GetUniqueID();
       }
 
       if(pass)

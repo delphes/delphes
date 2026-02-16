@@ -27,6 +27,7 @@
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -205,7 +206,7 @@ void TrackCountingTauTagging::Process()
     for(const auto &track : *fTrackInputArray)
     {
       if((track.Momentum).Pt() < fTrackPTMin) continue;
-      if(jetMomentum.DeltaR(track.Momentum) <= fDeltaRTrack)
+      if(ROOT::Math::VectorUtil::DeltaR(jetMomentum, track.Momentum) <= fDeltaRTrack)
       {
         identifier -= 1;
         charge += track.Charge;
@@ -232,7 +233,7 @@ void TrackCountingTauTagging::Process()
         tauMomentum += daughter.Momentum;
       }
 
-      if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
+      if(ROOT::Math::VectorUtil::DeltaR(jetMomentum, tauMomentum) <= fDeltaR)
       {
         matchedTau = true;
       }
