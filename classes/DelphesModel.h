@@ -31,8 +31,11 @@
  *
  */
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 36, 0)
 using namespace ROOT; // from ROOT v6.36 on, default namespace
+#else
 using namespace ROOT::Experimental;
+#endif
 /// Handle to retrieve fields from a data model
 template <typename T>
 using InputHandle = std::shared_ptr<T>;
@@ -62,6 +65,7 @@ public:
   template <typename T>
   void Book(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
   {
+#if !defined(__CINT__) && !defined(__CLING__)
     const auto field_name_str = std::string{field_name};
     if(!fields_.insert(field_name_str).second)
       throwBookingFailure(field_name, "Field name already exists");
@@ -72,7 +76,7 @@ public:
     handle = OutputHandle<T>{model_->MakeField<T>(field_label, std::string{description})};
 #else
     handle = OutputHandle<T>{model_->MakeField<T>({field_label, std::string{description}})};
-  };
+#endif
 #endif
   }
 
@@ -80,6 +84,7 @@ public:
   template <typename T>
   void Attach(std::string_view field_name, InputHandle<T> &handle) const
   {
+#if !defined(__CINT__) && !defined(__CLING__)
     try
     {
       handle = Entry().GetPtr<T>(FieldName(field_name).FieldLabel());
@@ -89,6 +94,7 @@ public:
       throwAttachingFailure(field_name, except.GetError().GetReport());
       throw;
     }
+#endif
   }
 
   const REntry &Entry() const;
