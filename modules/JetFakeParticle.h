@@ -30,15 +30,13 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class JetFakeParticle: public DelphesModule
+class JetFakeParticle : public DelphesModule
 {
 public:
-  JetFakeParticle();
-  ~JetFakeParticle();
+  JetFakeParticle() = default;
 
   void Init();
   void Process();
@@ -50,14 +48,11 @@ private:
   TFakeMap fEfficiencyMap;
 #endif
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fElectronOutputArray; //!
-  TObjArray *fMuonOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
-  TObjArray *fJetOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fElectronOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fMuonOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fPhotonOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fJetOutputArray; //!
 
   ClassDef(JetFakeParticle, 1)
 };

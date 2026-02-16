@@ -32,13 +32,13 @@
 #include "TDatabasePDG.h"
 #include "TFile.h"
 #include "TLorentzVector.h"
-#include "TObjArray.h"
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
+#include "classes/DelphesModel.h"
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
@@ -51,13 +51,12 @@ using namespace std;
 
 void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   ExRootTreeBranch *branch, DelphesFactory *factory,
-  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray,
+  std::vector<Candidate> &allParticleOutputArray, std::vector<Candidate> &stableParticleOutputArray, std::vector<Candidate> &partonOutputArray,
   TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
   int i;
 
   HepMCEvent *element;
-  Candidate *candidate;
   TDatabasePDG *pdg;
   TParticlePDG *pdgParticle;
   Int_t pdgCode;
@@ -108,7 +107,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     z = particle.zProd();
     t = particle.tProd();
 
-    candidate = factory->NewCandidate();
+    auto *candidate = factory->NewCandidate();
 
     candidate->PID = pid;
     pdgCode = TMath::Abs(candidate->PID);
@@ -129,21 +128,20 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
     candidate->Position.SetXYZT(x, y, z, t);
 
-    allParticleOutputArray->Add(candidate);
+    allParticleOutputArray.emplace_back(*candidate);
 
     if(!pdgParticle) continue;
 
     if(status == 1)
     {
-      stableParticleOutputArray->Add(candidate);
+      stableParticleOutputArray.emplace_back(*candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
-      partonOutputArray->Add(candidate);
+      partonOutputArray.emplace_back(*candidate);
     }
   }
 }
-
 
 //---------------------------------------------------------------------------
 
@@ -233,8 +231,8 @@ int main(int argc, char *argv[])
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
-  TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  TObjArray *stableParticleOutputArrayLHEF = 0, *allParticleOutputArrayLHEF = 0, *partonOutputArrayLHEF = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArrayLHEF, allParticleOutputArrayLHEF, partonOutputArrayLHEF;
   DelphesLHEFReader *reader = 0;
   Long64_t eventCounter, errorCounter;
   Long64_t numberOfEvents, timesAllowErrors;
@@ -286,9 +284,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    modularDelphes->ExportArray(allParticleOutputArray, "allParticles");
+    modularDelphes->ExportArray(stableParticleOutputArray, "stableParticles");
+    modularDelphes->ExportArray(partonOutputArray, "partons");
 
     // Initialize Pythia
     pythia = new Pythia8::Pythia;
@@ -329,7 +327,7 @@ int main(int argc, char *argv[])
     spareMode1 = pythia->mode("Main:spareMode1");
     spareParm1 = pythia->parm("Main:spareParm1");
     spareParm2 = pythia->parm("Main:spareParm2");
-        
+
     // Check if particle gun
     if(!spareFlag1)
     {
@@ -342,9 +340,9 @@ int main(int argc, char *argv[])
         branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
         branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
 
-        allParticleOutputArrayLHEF = modularDelphes->ExportArray("allParticlesLHEF");
-        stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
-        partonOutputArrayLHEF = modularDelphes->ExportArray("partonsLHEF");
+        modularDelphes->ExportArray(allParticleOutputArrayLHEF, "allParticlesLHEF");
+        modularDelphes->ExportArray(stableParticleOutputArrayLHEF, "stableParticlesLHEF");
+        modularDelphes->ExportArray(partonOutputArrayLHEF, "partonsLHEF");
       }
     }
 
@@ -362,8 +360,7 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady())
-        ;
+      while(reader && reader->ReadBlock(factory, *allParticleOutputArrayLHEF, *stableParticleOutputArrayLHEF, *partonOutputArrayLHEF) && !reader->EventReady());
 
       if(spareFlag1)
       {
@@ -402,7 +399,7 @@ int main(int argc, char *argv[])
 
       procStopWatch.Start();
       ConvertInput(eventCounter, pythia, branchEvent, factory,
-        allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
+        *allParticleOutputArray, *stableParticleOutputArray, *partonOutputArray,
         &readStopWatch, &procStopWatch);
       modularDelphes->ProcessTask();
       procStopWatch.Stop();
@@ -415,19 +412,23 @@ int main(int argc, char *argv[])
 
 #if PYTHIA_VERSION_INTEGER > 8300
       // fill Pythia8 Weights - see https://pythia.org/latest-manual/CrossSectionsAndWeights.html
-      for(int iWeight = 0; iWeight < pythia->info.weightNameVector().size(); ++iWeight)
+      for(size_t iWeight = 0; iWeight < pythia->info.weightNameVector().size(); ++iWeight)
       {
         Weight *weight;
         weight = static_cast<Weight *>(branchWeight->NewEntry());
         weight->Weight = pythia->info.weightValueVector()[iWeight];
       }
 #endif
-      
+
       treeWriter->Fill();
 
       treeWriter->Clear();
       modularDelphes->Clear();
       if(reader) reader->Clear();
+
+      stableParticleOutputArray->clear();
+      allParticleOutputArray->clear();
+      partonOutputArray->clear();
 
       readStopWatch.Start();
       progressBar.Update(eventCounter, eventCounter);

@@ -27,7 +27,6 @@
 #include "modules/PileUpMergerPythia8.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
@@ -39,11 +38,10 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/RotationZ.h>
 
 #include <algorithm>
 #include <iostream>
@@ -55,7 +53,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpMergerPythia8::PileUpMergerPythia8() :
-  fFunction(0), fPythia(0), fItInputArray(0)
+  fFunction(0), fPythia(0)
 {
   fFunction = new DelphesTF2;
 }
@@ -95,12 +93,11 @@ void PileUpMergerPythia8::Init()
   fPythia->readFile(fileName);
 
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray); // I/O
 
   // create output arrays
-  fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
+  ExportArray(fParticleOutputArray, GetString("ParticleOutputArray", "stableParticles"));
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
@@ -121,12 +118,11 @@ void PileUpMergerPythia8::Process()
   Float_t px, py, pz, e;
   Double_t dz, dphi, dt;
   Int_t numberOfEvents, event, numberOfParticles, i;
-  Candidate *candidate, *vertex;
-  DelphesFactory *factory;
 
   const Double_t c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
+  fParticleOutputArray->clear();
+  fVertexOutputArray->clear();
 
   // --- Deal with primary vertex first  ------
 
@@ -136,16 +132,16 @@ void PileUpMergerPythia8::Process()
   dz *= 1.0E3; // necessary in order to make z in mm
   vx = 0.0;
   vy = 0.0;
-  numberOfParticles = fInputArray->GetEntriesFast();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  numberOfParticles = fInputArray->size();
+  for(auto &candidate : *fInputArray)
   {
-    vx += candidate->Position.X();
-    vy += candidate->Position.Y();
-    z = candidate->Position.Z();
-    t = candidate->Position.T();
-    candidate->Position.SetZ(z + dz);
-    candidate->Position.SetT(t + dt);
-    fParticleOutputArray->Add(candidate);
+    vx += candidate.Position.X();
+    vy += candidate.Position.Y();
+    z = candidate.Position.Z();
+    t = candidate.Position.T();
+    candidate.Position.SetPz(z + dz);
+    candidate.Position.SetE(t + dt);
+    fParticleOutputArray->emplace_back(candidate);
   }
 
   if(numberOfParticles > 0)
@@ -154,11 +150,11 @@ void PileUpMergerPythia8::Process()
     vy /= numberOfParticles;
   }
 
-  factory = GetFactory();
+  auto *factory = GetFactory();
 
-  vertex = factory->NewCandidate();
+  auto *vertex = factory->NewCandidate();
   vertex->Position.SetXYZT(vx, vy, dz, dt);
-  fVertexOutputArray->Add(vertex);
+  fVertexOutputArray->emplace_back(*vertex);
 
   // --- Then with pile-up vertices  ------
 
@@ -177,8 +173,7 @@ void PileUpMergerPythia8::Process()
 
   for(event = 0; event < numberOfEvents; ++event)
   {
-    while(!fPythia->next())
-      ;
+    while(!fPythia->next());
 
     // --- Pile-up vertex smearing
 
@@ -210,7 +205,7 @@ void PileUpMergerPythia8::Process()
       z = particle.zProd();
       t = particle.tProd();
 
-      candidate = factory->NewCandidate();
+      auto *candidate = factory->NewCandidate();
 
       candidate->PID = pid;
 
@@ -223,18 +218,18 @@ void PileUpMergerPythia8::Process()
       candidate->IsPU = 1;
 
       candidate->Momentum.SetPxPyPzE(px, py, pz, e);
-      candidate->Momentum.RotateZ(dphi);
+      candidate->Momentum = ROOT::Math::RotationZ(dphi) * candidate->Momentum;
 
       x -= fInputBeamSpotX;
       y -= fInputBeamSpotY;
       candidate->Position.SetXYZT(x, y, z + dz, t + dt);
-      candidate->Position.RotateZ(dphi);
-      candidate->Position += TLorentzVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
+      candidate->Position = ROOT::Math::RotationZ(dphi) * candidate->Position;
+      candidate->Position += ROOT::Math::XYZTVector(fOutputBeamSpotX, fOutputBeamSpotY, 0.0, 0.0);
 
       vx += candidate->Position.X();
       vy += candidate->Position.Y();
 
-      fParticleOutputArray->Add(candidate);
+      fParticleOutputArray->emplace_back(*candidate);
     }
 
     if(numberOfParticles > 0)
@@ -243,11 +238,11 @@ void PileUpMergerPythia8::Process()
       vy /= numberOfParticles;
     }
 
-    vertex = factory->NewCandidate();
+    auto *vertex = factory->NewCandidate();
     vertex->Position.SetXYZT(vx, vy, dz, dt);
     vertex->IsPU = 1;
 
-    fVertexOutputArray->Add(vertex);
+    fVertexOutputArray->emplace_back(*vertex);
   }
 }
 

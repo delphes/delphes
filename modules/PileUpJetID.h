@@ -13,14 +13,13 @@
 
 #include <deque>
 
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class PileUpJetID: public DelphesModule
+class PileUpJetID : public DelphesModule
 {
 public:
-  PileUpJetID();
-  ~PileUpJetID();
+  PileUpJetID() = default;
 
   void Init();
   void Process();
@@ -60,7 +59,7 @@ meanSqDeltaR betaStar SigEff BgdEff
 BRYAN
 -----
 
-Barrel (MeanSqDR, Beta, sig eff, bg eff): 
+Barrel (MeanSqDR, Beta, sig eff, bg eff):
 0.10, 0.08, 90%, 8%
 0.11, 0.12, 90%, 6%
 0.13, 0.16, 89%, 5%
@@ -74,10 +73,10 @@ Endcap (MeanSqDR, Beta, sig eff, bg eff):
 SETH GUESSES FOR |eta| > 4.0
 ----------------------------
 
-MeanSqDeltaR 
-0.07 
-0.10 
-0.14 
+MeanSqDeltaR
+0.07
+0.10
+0.14
 0.2
   */
 
@@ -88,18 +87,11 @@ MeanSqDeltaR
 
   Bool_t fAverageEachTower;
 
-  TIterator *fItJetInputArray; //!
-
-  const TObjArray *fJetInputArray; //!
-
-  const TObjArray *fTrackInputArray; // SCZ
-  const TObjArray *fNeutralInputArray;
-
-  TIterator *fItTrackInputArray; // SCZ
-  TIterator *fItNeutralInputArray; // SCZ
-
-  TObjArray *fOutputArray; //!
-  TObjArray *fNeutralsInPassingJets; // SCZ
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fTrackInputArray; // SCZ
+  InputHandle<std::vector<Candidate> > fNeutralInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fNeutralsInPassingJets; // SCZ
 
   ClassDef(PileUpJetID, 2)
 };

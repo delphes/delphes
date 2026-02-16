@@ -27,14 +27,12 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class LeptonDressing: public DelphesModule
+class LeptonDressing : public DelphesModule
 {
 public:
-  LeptonDressing();
-  ~LeptonDressing();
+  LeptonDressing() = default;
 
   void Init();
   void Process();
@@ -43,15 +41,9 @@ public:
 private:
   Double_t fDeltaR;
 
-  TIterator *fItDressingInputArray; //!
-
-  TIterator *fItCandidateInputArray; //!
-
-  const TObjArray *fDressingInputArray; //!
-
-  const TObjArray *fCandidateInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fDressingInputArray; //!
+  InputHandle<std::vector<Candidate> > fCandidateInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(LeptonDressing, 1)
 };

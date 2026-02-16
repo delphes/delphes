@@ -32,15 +32,12 @@
 #include <utility>
 #include <vector>
 
-class TIterator;
-class TObjArray;
 class Candidate;
 
-class UniqueObjectFinder: public DelphesModule
+class UniqueObjectFinder : public DelphesModule
 {
 public:
-  UniqueObjectFinder();
-  ~UniqueObjectFinder();
+  UniqueObjectFinder() = default;
 
   void Init();
   void Process();
@@ -49,9 +46,11 @@ public:
 private:
   Bool_t fUseUniqueID;
 
-  Bool_t Unique(Candidate *candidate, std::vector<std::pair<TIterator *, TObjArray *> >::iterator itInputMap);
+  using InputMap = std::vector<std::pair<InputHandle<std::vector<Candidate> >, OutputHandle<std::vector<Candidate> > > >;
 
-  std::vector<std::pair<TIterator *, TObjArray *> > fInputMap; //!
+  Bool_t Unique(const Candidate *candidate, InputMap::const_iterator itInputMap);
+
+  InputMap fInputMap; //!
 
   ClassDef(UniqueObjectFinder, 1)
 };

@@ -29,12 +29,11 @@
 
 #include "classes/DelphesModule.h"
 
-class TClonesArray;
-class TIterator;
+class Candidate;
 class DelphesCylindricalFormula;
 class TF1;
 
-class PhotonConversions: public DelphesModule
+class PhotonConversions : public DelphesModule
 {
 public:
   PhotonConversions();
@@ -48,11 +47,8 @@ private:
   Double_t fRadius, fRadius2, fHalfLength;
   Double_t fEtaMin, fEtaMax;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   DelphesCylindricalFormula *fConversionMap; //!
 

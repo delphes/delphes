@@ -27,7 +27,6 @@
 #include "modules/EnergySmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,7 +49,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 EnergySmearing::EnergySmearing() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -72,35 +69,29 @@ void EnergySmearing::Init()
 
   fFormula->Compile(GetString("ResolutionFormula", "0.0"));
 
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  // import input array(s)
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void EnergySmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void EnergySmearing::Process()
 {
-  Candidate *candidate, *mother;
   Double_t pt, energy, eta, phi, m;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
 
     pt = candidatePosition.Pt();
     eta = candidatePosition.Eta();
@@ -113,16 +104,14 @@ void EnergySmearing::Process()
 
     if(energy <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto new_candidate = candidate;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    pt = (energy > m) ? TMath::Sqrt(energy*energy - m*m)/TMath::CosH(eta) : 0;
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
-    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
-    candidate->AddCandidate(mother);
-
-    fOutputArray->Add(candidate);
+    pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
+    new_candidate.Momentum = ROOT::Math::PtEtaPhiEVector(pt, eta, phi, energy);
+    new_candidate.TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
+    new_candidate.AddCandidate(const_cast<Candidate *>(&candidate)); //TODO: ensure const-qualification
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

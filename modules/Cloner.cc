@@ -27,7 +27,6 @@
 #include "modules/Cloner.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -43,51 +42,28 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Cloner::Cloner() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-Cloner::~Cloner()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void Cloner::Init()
 {
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  ImportArray(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void Cloner::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void Cloner::Process()
 {
-  Candidate *candidate;
-
+  fOutputArray->clear();
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
-  {
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    fOutputArray->Add(candidate);
-  }
+  for(const auto &candidate : *fInputArray)
+    fOutputArray->emplace_back(candidate); // invoke copy constructor
 }
 
 //------------------------------------------------------------------------------

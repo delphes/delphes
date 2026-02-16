@@ -27,7 +27,6 @@
 #include "modules/TimeSmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -51,16 +48,16 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fResolutionFormula(0), fItInputArray(0)
+  fResolutionFormula(0)
 {
-	fResolutionFormula = new DelphesFormula;
+  fResolutionFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TimeSmearing::~TimeSmearing()
 {
-	if(fResolutionFormula) delete fResolutionFormula;
+  if(fResolutionFormula) delete fResolutionFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -73,38 +70,34 @@ void TimeSmearing::Init()
   fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
 
   // import track input array
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
-
+  ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"), fInputArray);
 
   // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
+  ExportArray(fOutputArray, GetString("OutputArray", "tracks"));
 }
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Process()
 {
-  Candidate *candidate, *mother;
   Double_t tf_smeared, tf;
   Double_t eta, energy;
   Double_t timeResolution;
 
   const Double_t c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
-  {
+  fOutputArray->clear();
 
-    const TLorentzVector &candidateFinalPosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+  for(const auto &candidate : *fInputArray)
+  {
+    const auto &candidateFinalPosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
 
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
@@ -115,13 +108,12 @@ void TimeSmearing::Process()
     timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
     tf_smeared = gRandom->Gaus(tf, timeResolution);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto new_candidate = candidate;
 
-    candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
-    candidate->ErrorT = timeResolution * 1.0E3 * c_light;
+    new_candidate.Position.SetE(tf_smeared * 1.0E3 * c_light);
+    new_candidate.ErrorT = timeResolution * 1.0E3 * c_light;
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate.AddCandidate(&candidate); // ensure parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }

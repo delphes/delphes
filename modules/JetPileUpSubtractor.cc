@@ -27,7 +27,6 @@
 #include "modules/JetPileUpSubtractor.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -51,71 +48,49 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-JetPileUpSubtractor::JetPileUpSubtractor() :
-  fItJetInputArray(0), fItRhoInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-JetPileUpSubtractor::~JetPileUpSubtractor()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void JetPileUpSubtractor::Init()
 {
   fJetPTMin = GetDouble("JetPTMin", 20.0);
 
-  // import input array(s)
+  // import input arrays
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray);
+  ImportArray(GetString("RhoInputArray", "Rho/rho"), fRhoInputArray);
 
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
-
-  fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
-  fItRhoInputArray = fRhoInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void JetPileUpSubtractor::Finish()
 {
-  if(fItRhoInputArray) delete fItRhoInputArray;
-  if(fItJetInputArray) delete fItJetInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void JetPileUpSubtractor::Process()
 {
-  Candidate *candidate, *object;
-  TLorentzVector momentum, area;
   Double_t eta = 0.0;
   Double_t rho = 0.0;
 
+  fOutputArray->clear();
+
   // loop over all input candidates
-  fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(const auto &candidate : *fJetInputArray)
   {
-    momentum = candidate->Momentum;
-    area = candidate->Area;
+    auto momentum = candidate.Momentum;
+    const auto &area = candidate.Area;
     eta = momentum.Eta();
 
     // find rho
     rho = 0.0;
     if(fRhoInputArray)
     {
-      fItRhoInputArray->Reset();
-      while((object = static_cast<Candidate *>(fItRhoInputArray->Next())))
+      for(const auto &object : *fRhoInputArray)
       {
-        if(eta >= object->Edges[0] && eta < object->Edges[1])
+        if(eta >= object.Edges[0] && eta < object.Edges[1])
         {
-          rho = object->Momentum.Pt();
+          rho = object.Momentum.Pt();
         }
       }
     }
@@ -127,10 +102,9 @@ void JetPileUpSubtractor::Process()
 
     if(momentum.Pt() <= fJetPTMin) continue;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
-
-    fOutputArray->Add(candidate);
+    auto new_candidate = candidate;
+    new_candidate.Momentum = momentum;
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

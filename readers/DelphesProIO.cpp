@@ -40,6 +40,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModel.h"
 #include "classes/DelphesStream.h"
 #include "modules/Delphes.h"
 
@@ -59,8 +60,8 @@ using namespace std;
 // non-zero value of units momentumUnit and positionUnit.
 void ConvertInput(proio::Event *event, double momentumUnit, double positionUnit,
   ExRootTreeBranch *branch, DelphesFactory *factory,
-  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray, TStopwatch *readStopWatch, TStopwatch *procStopWatch)
+  std::vector<Candidate> &allParticleOutputArray, std::vector<Candidate> &stableParticleOutputArray, std::vector<Candidate> &partonOutputArray,
+  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
 {
 
   HepMCEvent *element;
@@ -150,16 +151,16 @@ void ConvertInput(proio::Event *event, double momentumUnit, double positionUnit,
         candidate->Mass = mass;
         candidate->Momentum.SetXYZM(px, py, pz, mass);
         candidate->Position.SetXYZT(x, y, z, t);
-        allParticleOutputArray->Add(candidate);
+        allParticleOutputArray.emplace_back(*candidate);
         if(!pdgParticle) continue;
 
         if(status == 1)
         {
-          stableParticleOutputArray->Add(candidate);
+          stableParticleOutputArray.emplace_back(*candidate);
         }
         else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
         {
-          partonOutputArray->Add(candidate);
+          partonOutputArray.emplace_back(*candidate);
         }
       }
     }
@@ -236,17 +237,17 @@ void ConvertInput(proio::Event *event, double momentumUnit, double positionUnit,
 
       candidate->Position.SetXYZT(x, y, z, t);
 
-      allParticleOutputArray->Add(candidate);
+      allParticleOutputArray.emplace_back(*candidate);
 
       if(!pdgParticle) continue;
 
       if(status == 1)
       {
-        stableParticleOutputArray->Add(candidate);
+        stableParticleOutputArray.emplace_back(*candidate);
       }
       else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
       {
-        partonOutputArray->Add(candidate);
+        partonOutputArray.emplace_back(*candidate);
       }
     }
 
@@ -276,7 +277,7 @@ int main(int argc, char *argv[])
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
-  TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
+  OutputHandle<std::vector<Candidate> > stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
 
@@ -321,9 +322,9 @@ int main(int argc, char *argv[])
     modularDelphes->SetTreeWriter(treeWriter);
 
     factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    modularDelphes->ExportArray(allParticleOutputArray, "allParticles");
+    modularDelphes->ExportArray(stableParticleOutputArray, "stableParticles");
+    modularDelphes->ExportArray(partonOutputArray, "partons");
 
     modularDelphes->InitTask();
 
@@ -341,7 +342,7 @@ int main(int argc, char *argv[])
 
       /*
 // this is slow method, but general
-      inputFile->SeekToStart(); 
+      inputFile->SeekToStart();
       int nn=0;
       auto event = new proio::Event();
       while(inputFile->Next(event)){
@@ -396,8 +397,8 @@ int main(int argc, char *argv[])
 
         ConvertInput(event, varint_energy, varint_length,
           branchEvent, factory,
-          allParticleOutputArray, stableParticleOutputArray,
-          partonOutputArray, &readStopWatch, &procStopWatch);
+          *allParticleOutputArray, *stableParticleOutputArray, *partonOutputArray,
+          &readStopWatch, &procStopWatch);
 
         modularDelphes->ProcessTask();
         procStopWatch.Stop();
@@ -406,6 +407,10 @@ int main(int argc, char *argv[])
 
         modularDelphes->Clear();
         treeWriter->Clear();
+
+        stableParticleOutputArray->clear();
+        allParticleOutputArray->clear();
+        partonOutputArray->clear();
 
         readStopWatch.Start();
         progressBar.Update(eventCounter);

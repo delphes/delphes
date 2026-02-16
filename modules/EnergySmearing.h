@@ -29,11 +29,10 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class EnergySmearing: public DelphesModule
+class EnergySmearing : public DelphesModule
 {
 public:
   EnergySmearing();
@@ -46,11 +45,8 @@ public:
 private:
   DelphesFormula *fFormula; //!
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(EnergySmearing, 1)
 };

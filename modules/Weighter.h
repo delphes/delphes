@@ -32,13 +32,12 @@
 #include <map>
 #include <set>
 
-class TObjArray;
+class Candidate;
 
-class Weighter: public DelphesModule
+class Weighter : public DelphesModule
 {
 public:
-  Weighter();
-  ~Weighter();
+  Weighter() = default;
 
   void Init();
   void Process();
@@ -56,11 +55,8 @@ private:
   std::map<TIndexStruct, Double_t> fWeightMap;
 #endif
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(Weighter, 1)
 };

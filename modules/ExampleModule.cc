@@ -27,7 +27,6 @@
 #include "modules/ExampleModule.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,7 +49,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 ExampleModule::ExampleModule() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -87,40 +84,32 @@ void ExampleModule::Init()
   }
 
   // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  ImportArray(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void ExampleModule::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void ExampleModule::Process()
 {
-  Candidate *candidate;
-  TLorentzVector candidatePosition, candidateMomentum;
-
+  fOutputArray->clear(); // clear the output collection for each event
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-    candidatePosition = candidate->Position;
-    candidateMomentum = candidate->Momentum;
+    const auto candidatePosition = candidate.Position;
+    const auto candidateMomentum = candidate.Momentum;
 
     // apply an efficency formula
     if(gRandom->Uniform() <= fFormula->Eval(candidateMomentum.Pt(), candidatePosition.Eta()))
     {
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
     }
   }
 }

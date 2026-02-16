@@ -27,18 +27,16 @@
  *
  */
 
-#include "classes/DelphesClasses.h"
 #include "classes/DelphesModule.h"
-#include <map>
 
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class ExRootFilter;
+class ExRootSTLVectorFilter;
 class PartonClassifier;
 class ParticleLHEFClassifier;
 
-class JetFlavorAssociation: public DelphesModule
+class JetFlavorAssociation : public DelphesModule
 {
 public:
   JetFlavorAssociation();
@@ -48,8 +46,8 @@ public:
   void Process();
   void Finish();
 
-  void GetAlgoFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
-  void GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
+  void GetAlgoFlavor(Candidate &jet, const std::vector<Candidate> &partonArray, const std::vector<Candidate> &partonLHEFArray);
+  void GetPhysicsFlavor(Candidate &jet, const std::vector<Candidate> &partonArray, const std::vector<Candidate> &partonLHEFArray);
 
 private:
   Double_t fDeltaR;
@@ -57,18 +55,13 @@ private:
   PartonClassifier *fPartonClassifier; //!
   ParticleLHEFClassifier *fParticleLHEFClassifier; //!
 
-  ExRootFilter *fPartonFilter;
-  ExRootFilter *fParticleLHEFFilter;
+  ExRootSTLVectorFilter *fPartonFilter;
+  ExRootSTLVectorFilter *fParticleLHEFFilter;
 
-  TIterator *fItPartonInputArray; //!
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItParticleLHEFInputArray; //!
-  TIterator *fItJetInputArray; //!
-
-  const TObjArray *fPartonInputArray; //!
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fParticleLHEFInputArray; //!
-  const TObjArray *fJetInputArray; //!
+  InputHandle<std::vector<Candidate> > fPartonInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleInputArray; //!
+  InputHandle<std::vector<Candidate> > fParticleLHEFInputArray; //!
+  InputHandle<std::vector<Candidate> > fJetInputArray; //!
 
   ClassDef(JetFlavorAssociation, 1)
 };

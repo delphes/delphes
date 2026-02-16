@@ -21,7 +21,7 @@
 
 /** \class PhotonID
  *
- *  Applies complex photon Id. Reconstructed photon candidtes are first separated into matched and non-matched to gen particles. 
+ *  Applies complex photon Id. Reconstructed photon candidtes are first separated into matched and non-matched to gen particles.
  *  Non-matched pass the "fake" efficiency. Matched photons get further splitted into isolated and non-isolated (user can choose criterion for isolation)
  *  Isolated photons pass the "prompt" efficiency while the non-isolated pass the "non-prompt" efficiency
  *
@@ -31,12 +31,10 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class PhotonID: public DelphesModule
+class PhotonID : public DelphesModule
 {
 public:
   PhotonID();
@@ -52,17 +50,15 @@ private:
   DelphesFormula *fFakeFormula;
 
   // import input arrays
-  const TObjArray *fInputPhotonArray;
-  TIterator *fItInputPhotonArray;
+  InputHandle<std::vector<Candidate> > fInputPhotonArray; //!
 
   // use filtered collection for speed
-  const TObjArray *fInputGenArray;
-  TIterator *fItInputGenArray;
+  InputHandle<std::vector<Candidate> > fInputGenArray; //!
 
   Double_t fPTMin;
   Double_t fRelIsoMax;
 
-  TObjArray *fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   Bool_t isFake(const Candidate *obj);
 

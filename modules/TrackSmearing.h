@@ -13,11 +13,10 @@
 
 #include "classes/DelphesModule.h"
 
-class TIterator;
-class TObjArray;
+class Candidate;
 class DelphesFormula;
 
-class TrackSmearing: public DelphesModule
+class TrackSmearing : public DelphesModule
 {
 public:
   TrackSmearing();
@@ -59,12 +58,9 @@ private:
 
   Bool_t fApplyToPileUp;
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-  const TObjArray *fBeamSpotInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  InputHandle<std::vector<Candidate> > fBeamSpotInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(TrackSmearing, 1)
 };

@@ -31,18 +31,15 @@
 #include "modules/TauTagging.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
+#include "ExRootAnalysis/ExRootSTLVectorFilter.h"
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -56,8 +53,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TaggingParticlesSkimmer::TaggingParticlesSkimmer() :
-  fClassifier(0), fFilter(0), fItPartonInputArray(0),
-  fPartonInputArray(0), fParticleInputArray(0), fOutputArray(0)
+  fClassifier(0), fFilter(0)
 {
 }
 
@@ -75,27 +71,24 @@ void TaggingParticlesSkimmer::Init()
   fPTMin = GetDouble("PTMin", 15.0);
   fEtaMax = GetDouble("EtaMax", 2.5);
 
-  // import input array
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
+  // import input arrays
+  ImportArray(GetString("InputArray", "Delphes/partons"), fPartonInputArray);
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fParticleInputArray);
 
-  fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
+  // create output array
+  ExportArray(fOutputArray, GetString("OutputArray", "taggingParticles"));
 
-  fClassifier = new TauTaggingPartonClassifier(fParticleInputArray);
+  fClassifier = new TauTaggingPartonClassifier(*fParticleInputArray);
   fClassifier->fPTMin = GetDouble("PTMin", 15.0);
   fClassifier->fEtaMax = GetDouble("EtaMax", 2.5);
 
-  fFilter = new ExRootFilter(fPartonInputArray);
-
-  // output array
-  fOutputArray = ExportArray(GetString("OutputArray", "taggingParticles"));
+  fFilter = new ExRootSTLVectorFilter(*fPartonInputArray);
 }
 
 //------------------------------------------------------------------------------
 
 void TaggingParticlesSkimmer::Finish()
 {
-  if(fItPartonInputArray) delete fItPartonInputArray;
   if(fFilter) delete fFilter;
   if(fClassifier) delete fClassifier;
 }
@@ -104,60 +97,52 @@ void TaggingParticlesSkimmer::Finish()
 
 void TaggingParticlesSkimmer::Process()
 {
-  Candidate *candidate, *tau, *daughter;
-  TLorentzVector tauMomentum;
   Double_t pt, eta;
-  TObjArray *tauArray;
-  Int_t pdgCode, i;
+  Int_t pdgCode;
+
+  fOutputArray->clear();
 
   // first select hadronic taus and replace them by visible part
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier, 0);
+  const auto tauArray = fFilter->GetSubArray(fClassifier, 0);
 
-  if(tauArray == 0) return;
-
-  TIter itTauArray(tauArray);
+  if(tauArray.empty()) return;
 
   // loop over all input taus
-  itTauArray.Reset();
-  while((tau = static_cast<Candidate *>(itTauArray.Next())))
+  for(const auto &tau : tauArray)
   {
-    if(tau->D1 < 0) continue;
+    if(tau.D1 < 0) continue;
 
-    if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+    if(tau.D1 >= static_cast<int>(fParticleInputArray->size()) || tau.D2 >= static_cast<int>(fParticleInputArray->size()))
     {
       throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
     }
 
-    tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-
-    for(i = tau->D1; i <= tau->D2; ++i)
+    ROOT::Math::XYZTVector tauMomentum;
+    for(int i = tau.D1; i <= tau.D2; ++i)
     {
-      daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
-      if(TMath::Abs(daughter->PID) == 16) continue;
-      tauMomentum += daughter->Momentum;
+      const auto &daughter = fParticleInputArray->at(i);
+      if(TMath::Abs(daughter.PID) == 16) continue;
+      tauMomentum += daughter.Momentum;
     }
 
-    candidate = static_cast<Candidate *>(tau->Clone());
-    candidate->Momentum = tauMomentum;
-
-    fOutputArray->Add(candidate);
+    auto new_candidate = tau;
+    new_candidate.Momentum = tauMomentum;
+    fOutputArray->emplace_back(new_candidate);
   }
 
   // then add all other partons (except tau's to avoid double counting)
-
-  fItPartonInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItPartonInputArray->Next())))
+  for(const auto &candidate : *fPartonInputArray)
   {
-    pdgCode = TMath::Abs(candidate->PID);
+    pdgCode = TMath::Abs(candidate.PID);
     if(pdgCode == 15) continue;
 
-    pt = candidate->Momentum.Pt();
+    pt = candidate.Momentum.Pt();
     if(pt < fPTMin) continue;
 
-    eta = TMath::Abs(candidate->Momentum.Eta());
+    eta = TMath::Abs(candidate.Momentum.Eta());
     if(eta > fEtaMax) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }

@@ -27,7 +27,6 @@
 #include "modules/EnergyScale.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,7 +49,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 EnergyScale::EnergyScale() :
-  fFormula(0), fItInputArray(0)
+  fFormula(0)
 {
   fFormula = new DelphesFormula;
 }
@@ -72,44 +69,36 @@ void EnergyScale::Init()
 
   fFormula->Compile(GetString("ScaleFormula", "0.0"));
 
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+  // import input array(s)
+  ImportArray(GetString("InputArray", "FastJetFinder/jets"), fInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
 }
 
 //------------------------------------------------------------------------------
 
 void EnergyScale::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void EnergyScale::Process()
 {
-  Candidate *candidate;
-  TLorentzVector momentum;
   Double_t scale;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    momentum = candidate->Momentum;
+    auto momentum = candidate.Momentum;
 
     scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
 
     if(scale > 0.0) momentum *= scale;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
-
-    fOutputArray->Add(candidate);
+    auto new_candidate = candidate;
+    new_candidate.Momentum = momentum;
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

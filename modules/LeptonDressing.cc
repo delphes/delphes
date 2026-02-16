@@ -27,7 +27,6 @@
 #include "modules/LeptonDressing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,11 +35,10 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -51,79 +49,52 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-LeptonDressing::LeptonDressing() :
-  fItDressingInputArray(0), fItCandidateInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-LeptonDressing::~LeptonDressing()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void LeptonDressing::Init()
 {
   fDeltaR = GetDouble("DeltaRMax", 0.4);
 
-  // import input array(s)
-
-  fDressingInputArray = ImportArray(GetString("DressingInputArray", "Calorimeter/photons"));
-  fItDressingInputArray = fDressingInputArray->MakeIterator();
-
-  fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"));
-  fItCandidateInputArray = fCandidateInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
+  // import input arrays
+  ImportArray(GetString("DressingInputArray", "Calorimeter/photons"), fDressingInputArray);
+  ImportArray(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"), fCandidateInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "electrons"));
 }
 
 //------------------------------------------------------------------------------
 
 void LeptonDressing::Finish()
 {
-  if(fItCandidateInputArray) delete fItCandidateInputArray;
-  if(fItDressingInputArray) delete fItDressingInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void LeptonDressing::Process()
 {
-  Candidate *candidate, *dressing, *mother;
-  TLorentzVector momentum;
+  fOutputArray->clear();
 
   // loop over all input candidate
-  fItCandidateInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItCandidateInputArray->Next())))
+  for(const auto &candidate : *fCandidateInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
 
     // loop over all input tracks
-    fItDressingInputArray->Reset();
-    momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-    while((dressing = static_cast<Candidate *>(fItDressingInputArray->Next())))
+    ROOT::Math::XYZTVector momentum;
+    for(const auto &dressing : *fDressingInputArray)
     {
-      const TLorentzVector &dressingMomentum = dressing->Momentum;
+      const auto &dressingMomentum = dressing.Momentum;
       if(dressingMomentum.Pt() > 0.1)
       {
-        if(candidateMomentum.DeltaR(dressingMomentum) <= fDeltaR)
+        if(ROOT::Math::VectorUtil::DeltaR(candidateMomentum, dressingMomentum) <= fDeltaR)
         {
           momentum += dressingMomentum;
         }
       }
     }
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-
-    candidate->Momentum += momentum;
-    candidate->AddCandidate(mother);
-
-    fOutputArray->Add(candidate);
+    auto new_candidate = candidate;
+    new_candidate.Momentum += momentum;
+    new_candidate.AddCandidate(&candidate); // ensure parentage
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

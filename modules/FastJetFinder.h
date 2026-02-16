@@ -31,8 +31,7 @@
 
 #include <vector>
 
-class TObjArray;
-class TIterator;
+class Candidate;
 
 namespace fastjet
 {
@@ -48,7 +47,7 @@ class MeasureDefinition;
 } // namespace contrib
 } // namespace fastjet
 
-class FastJetFinder: public DelphesModule
+class FastJetFinder : public DelphesModule
 {
 public:
   FastJetFinder();
@@ -147,13 +146,10 @@ private:
   std::vector<TEstimatorStruct> fEstimators; //!
 #endif
 
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
-  TObjArray *fRhoOutputArray; //!
-  TObjArray *fConstituentsOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fRhoOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fConstituentsOutputArray; //!
 
   ClassDef(FastJetFinder, 1)
 };

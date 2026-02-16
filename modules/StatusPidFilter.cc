@@ -28,7 +28,6 @@
 #include "modules/StatusPidFilter.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,9 +36,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -113,7 +110,7 @@ bool hasBottom(int pdgCode)
   return false;
 }
 
-bool isTauDaughter(int pdgCode, int M1, const TObjArray *fInputArray)
+bool isTauDaughter(int pdgCode, int M1, const std::vector<Candidate> &fInputArray)
 {
   //not needed, just to speed up the code - can be further refined but gives only negligible improvement:
   if(pdgCode == 15 || pdgCode < 11 || (pdgCode > 22 && pdgCode < 100) || pdgCode > 1000)
@@ -122,39 +119,24 @@ bool isTauDaughter(int pdgCode, int M1, const TObjArray *fInputArray)
   if(M1 < 0)
     return false;
 
-  Candidate *mother;
-  mother = static_cast<Candidate *>(fInputArray->At(M1));
-  if(TMath::Abs(mother->PID) == 15)
+  const auto &mother = fInputArray.at(M1);
+  if(TMath::Abs(mother.PID) == 15)
     return true;
 
   return false;
 }
 
-bool isWDaughter(int M1, const TObjArray *fInputArray)
+bool isWDaughter(int M1, const std::vector<Candidate> &fInputArray)
 {
   if(M1 < 0) return false;
 
-  Candidate *mother;
-  mother = static_cast<Candidate *>(fInputArray->At(M1));
-  if(TMath::Abs(mother->PID) == 24) return true;
+  const auto &mother = fInputArray.at(M1);
+  if(TMath::Abs(mother.PID) == 24) return true;
 
   return false;
 }
 
 } // namespace
-
-//------------------------------------------------------------------------------
-
-StatusPidFilter::StatusPidFilter() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-StatusPidFilter::~StatusPidFilter()
-{
-}
 
 //------------------------------------------------------------------------------
 
@@ -167,34 +149,31 @@ void StatusPidFilter::Init()
   fRequireNotPileup = GetBool("RequireNotPileup", false);
 
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  ImportArray(GetString("InputArray", "Delphes/allParticles"), fInputArray);
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "filteredParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void StatusPidFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void StatusPidFilter::Process()
 {
-  Candidate *candidate;
   Int_t status, pdgCode;
   Bool_t pass;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+
+  for(const auto &candidate : *fInputArray)
   {
-    status = candidate->Status;
-    pdgCode = TMath::Abs(candidate->PID);
+    status = candidate.Status;
+    pdgCode = TMath::Abs(candidate.PID);
 
     pass = kFALSE;
 
@@ -221,7 +200,7 @@ void StatusPidFilter::Process()
     bool is_b_hadron = hasBottom(pdgCode);
     bool is_b_quark = (pdgCode == 5);
 
-    bool is_tau_daughter = isTauDaughter(pdgCode, candidate->M1, fInputArray);
+    bool is_tau_daughter = isTauDaughter(pdgCode, candidate.M1, *fInputArray);
 
     if(is_b_hadron)
       pass = kTRUE;
@@ -229,17 +208,17 @@ void StatusPidFilter::Process()
     if(is_tau_daughter)
       pass = kTRUE;
 
-    bool is_W_daughter = isWDaughter(candidate->M1, fInputArray);
+    bool is_W_daughter = isWDaughter(candidate.M1, *fInputArray);
     if(is_W_daughter)
       pass = kTRUE;
 
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination
-    if(!pass || (candidate->Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter || is_W_daughter))) continue;
+    if(!pass || (candidate.Momentum.Pt() < fPTMin && !(is_b_hadron || is_b_quark || is_tau_daughter || is_W_daughter))) continue;
 
     // not pileup particles
-    if(fRequireNotPileup && (candidate->IsPU > 0)) continue;
+    if(fRequireNotPileup && (candidate.IsPU > 0)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }

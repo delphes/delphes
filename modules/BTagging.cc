@@ -29,14 +29,11 @@
 #include "modules/BTagging.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -46,19 +43,6 @@
 #include <stdexcept>
 
 using namespace std;
-
-//------------------------------------------------------------------------------
-
-BTagging::BTagging() :
-  fItJetInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-BTagging::~BTagging()
-{
-}
 
 //------------------------------------------------------------------------------
 
@@ -95,9 +79,7 @@ void BTagging::Init()
   }
 
   // import input array(s)
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray);
 }
 
 //------------------------------------------------------------------------------
@@ -106,8 +88,6 @@ void BTagging::Finish()
 {
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
-
-  if(fItJetInputArray) delete fItJetInputArray;
 
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
   {
@@ -120,23 +100,21 @@ void BTagging::Finish()
 
 void BTagging::Process()
 {
-  Candidate *jet;
   Double_t pt, eta, phi, e;
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(auto &jet : *fJetInputArray)
   {
-    const TLorentzVector &jetMomentum = jet->Momentum;
+    const auto &jetMomentum = jet.Momentum;
     eta = jetMomentum.Eta();
     phi = jetMomentum.Phi();
     pt = jetMomentum.Pt();
     e = jetMomentum.E();
 
     // find an efficiency formula
-    itEfficiencyMap = fEfficiencyMap.find(jet->Flavor);
+    itEfficiencyMap = fEfficiencyMap.find(jet.Flavor);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
@@ -144,10 +122,10 @@ void BTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficiency formula
-    jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    jet.BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
 
     // find an efficiency formula for algo flavor definition
-    itEfficiencyMap = fEfficiencyMap.find(jet->FlavorAlgo);
+    itEfficiencyMap = fEfficiencyMap.find(jet.FlavorAlgo);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
@@ -155,10 +133,10 @@ void BTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficiency formula
-    jet->BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    jet.BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
 
     // find an efficiency formula for phys flavor definition
-    itEfficiencyMap = fEfficiencyMap.find(jet->FlavorPhys);
+    itEfficiencyMap = fEfficiencyMap.find(jet.FlavorPhys);
     if(itEfficiencyMap == fEfficiencyMap.end())
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
@@ -166,7 +144,7 @@ void BTagging::Process()
     formula = itEfficiencyMap->second;
 
     // apply an efficiency formula
-    jet->BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    jet.BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
   }
 }
 

@@ -43,7 +43,6 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesXDRReader.h"
 
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
@@ -93,9 +92,9 @@ bool DelphesSTDHEPReader::EventReady()
 //---------------------------------------------------------------------------
 
 bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  std::vector<Candidate> &allParticleOutputArray,
+  std::vector<Candidate> &stableParticleOutputArray,
+  std::vector<Candidate> &partonOutputArray)
 {
   fReader[0].ReadValue(&fBlockType, 4);
 
@@ -330,9 +329,7 @@ void DelphesSTDHEPReader::ReadSTDCM1()
   // skip 5*4 + 2*8 = 36 bytes
   SkipBytes(36);
 
-  if((strncmp((char *)fBuffer, "1.", 2) == 0) || (strncmp((char *)fBuffer, "2.", 2) == 0) ||
-     (strncmp((char *)fBuffer, "3.", 2) == 0) || (strncmp((char *)fBuffer, "4.", 2) == 0) ||
-     (strncmp((char *)fBuffer, "5.00", 4) == 0))
+  if((strncmp((char *)fBuffer, "1.", 2) == 0) || (strncmp((char *)fBuffer, "2.", 2) == 0) || (strncmp((char *)fBuffer, "3.", 2) == 0) || (strncmp((char *)fBuffer, "4.", 2) == 0) || (strncmp((char *)fBuffer, "5.00", 4) == 0))
   {
     return;
   }
@@ -387,10 +384,7 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   fReader[5].ReadValue(&phepSize, 4);
   fReader[6].ReadValue(&vhepSize, 4);
 
-  if(fEventSize < 0 ||
-     fEventSize != (int)idhepSize      || fEventSize != (int)isthepSize     ||
-     (2*fEventSize) != (int)jmohepSize || (2*fEventSize) != (int)jdahepSize ||
-     (5*fEventSize) != (int)phepSize   || (4*fEventSize) != (int)vhepSize)
+  if(fEventSize < 0 || fEventSize != (int)idhepSize || fEventSize != (int)isthepSize || (2 * fEventSize) != (int)jmohepSize || (2 * fEventSize) != (int)jdahepSize || (5 * fEventSize) != (int)phepSize || (4 * fEventSize) != (int)vhepSize)
   {
     throw runtime_error("Inconsistent size of arrays. File is probably corrupted.");
   }
@@ -455,9 +449,9 @@ void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eve
 //---------------------------------------------------------------------------
 
 void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  std::vector<Candidate> &allParticleOutputArray,
+  std::vector<Candidate> &stableParticleOutputArray,
+  std::vector<Candidate> &partonOutputArray)
 {
   Candidate *candidate;
   TParticlePDG *pdgParticle;
@@ -509,17 +503,17 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
 
     candidate->Position.SetXYZT(x, y, z, t);
 
-    allParticleOutputArray->Add(candidate);
+    allParticleOutputArray.emplace_back(*candidate);
 
     if(!pdgParticle) continue;
 
     if(status == 1)
     {
-      stableParticleOutputArray->Add(candidate);
+      stableParticleOutputArray.emplace_back(*candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
-      partonOutputArray->Add(candidate);
+      partonOutputArray.emplace_back(*candidate);
     }
   }
 }

@@ -27,15 +27,13 @@
 #include "modules/TrackCountingBTagging.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -43,19 +41,6 @@
 #include <stdexcept>
 
 using namespace std;
-
-//------------------------------------------------------------------------------
-
-TrackCountingBTagging::TrackCountingBTagging() :
-  fItTrackInputArray(0), fItJetInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-TrackCountingBTagging::~TrackCountingBTagging()
-{
-}
 
 //------------------------------------------------------------------------------
 
@@ -72,29 +57,21 @@ void TrackCountingBTagging::Init()
 
   fUse3D = GetBool("Use3D", false);
 
-  // import input array(s)
-
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+  // import input arrays
+  ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"), fTrackInputArray);
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
 }
 
 //------------------------------------------------------------------------------
 
 void TrackCountingBTagging::Finish()
 {
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItJetInputArray) delete fItJetInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void TrackCountingBTagging::Process()
 {
-  Candidate *jet, *track;
-
   Double_t jpx, jpy, jpz;
   Double_t dr, tpt;
   Double_t xd, yd, zd, d0, dd0, dz, ddz, sip;
@@ -104,36 +81,35 @@ void TrackCountingBTagging::Process()
   Int_t count;
 
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(auto &jet : *fJetInputArray)
   {
-    const TLorentzVector &jetMomentum = jet->Momentum;
+    const auto &jetMomentum = jet.Momentum;
     jpx = jetMomentum.Px();
     jpy = jetMomentum.Py();
     jpz = jetMomentum.Pz();
 
     // loop over all input tracks
-    fItTrackInputArray->Reset();
     count = 0;
     // stop once we have enough tracks
-    while((track = static_cast<Candidate *>(fItTrackInputArray->Next())) and count < fNtracks)
+    for(const auto &track : *fTrackInputArray)
     {
-      const TLorentzVector &trkMomentum = track->Momentum;
+      if(count >= fNtracks) break;
+      const auto &trkMomentum = track.Momentum;
       tpt = trkMomentum.Pt();
       if(tpt < fPtMin) continue;
 
-      d0 = TMath::Abs(track->D0);
+      d0 = TMath::Abs(track.D0);
       if(d0 > fIPmax) continue;
 
-      dr = jetMomentum.DeltaR(trkMomentum);
+      dr = ROOT::Math::VectorUtil::DeltaR(jetMomentum, trkMomentum);
       if(dr > fDeltaR) continue;
 
-      xd = track->Xd;
-      yd = track->Yd;
-      zd = track->Zd;
-      dd0 = TMath::Abs(track->ErrorD0);
-      dz = TMath::Abs(track->DZ);
-      ddz = TMath::Abs(track->ErrorDZ);
+      xd = track.Xd;
+      yd = track.Yd;
+      zd = track.Zd;
+      dd0 = TMath::Abs(track.ErrorD0);
+      dz = TMath::Abs(track.DZ);
+      ddz = TMath::Abs(track.ErrorDZ);
 
       if(fUse3D)
       {
@@ -151,7 +127,7 @@ void TrackCountingBTagging::Process()
     }
 
     // set BTag flag to true if count >= Ntracks
-    jet->BTag |= (count >= fNtracks) << fBitNumber;
+    jet.BTag |= (count >= fNtracks) << fBitNumber;
   }
 }
 

@@ -28,6 +28,7 @@ else()
 endif()
 
 add_library(ExRootAnalysis OBJECT ${sources} ExRootAnalysisDict.cxx)
+target_include_directories(ExRootAnalysis PRIVATE ${CMAKE_SOURCE_DIR})  #TODO: strip and break dependence with Delphes
 
 # install headers
 install(FILES ${headers} DESTINATION include/ExRootAnalysis)

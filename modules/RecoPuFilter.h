@@ -33,25 +33,20 @@
 #include "classes/DelphesModule.h"
 #include <vector>
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class RecoPuFilter: public DelphesModule
+class RecoPuFilter : public DelphesModule
 {
 public:
-  RecoPuFilter();
-  ~RecoPuFilter();
+  RecoPuFilter() = default;
 
   void Init();
   void Process();
   void Finish();
 
 private:
-  TIterator *fItInputArray; //!
-
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  InputHandle<std::vector<Candidate> > fInputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(RecoPuFilter, 1)
 };

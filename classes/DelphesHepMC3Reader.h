@@ -27,6 +27,8 @@
  *
  */
 
+#include <Math/Vector4D.h>
+
 #include <map>
 #include <vector>
 
@@ -35,7 +37,6 @@
 class TObjArray;
 class TStopwatch;
 class TDatabasePDG;
-class TLorentzVector;
 class ExRootTreeBranch;
 class DelphesFactory;
 class Candidate;
@@ -52,9 +53,9 @@ public:
   bool EventReady();
 
   bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
@@ -66,9 +67,9 @@ private:
 
   void AnalyzeParticle(DelphesFactory *factory);
 
-  void FinalizeParticles(TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  void FinalizeParticles(std::vector<Candidate> &allParticleOutputArray,
+    std::vector<Candidate> &stableParticleOutputArray,
+    std::vector<Candidate> &partonOutputArray);
 
   FILE *fInputFile;
 
@@ -94,7 +95,7 @@ private:
   int fParticleCode, fPID, fParticleStatus, fOutVertexCode;
   double fPx, fPy, fPz, fE, fMass;
 
-  std::vector<std::pair<TLorentzVector *, TObjArray *> > fVertices;
+  std::vector<std::pair<ROOT::Math::XYZTVector *, TObjArray *> > fVertices;
   std::vector<int> fParticles;
 
   std::map<int, int> fInVertexMap;

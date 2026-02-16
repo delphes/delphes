@@ -65,5 +65,6 @@
 #pragma link C++ class HectorHit+;
 
 #pragma link C++ class Candidate+;
+#pragma link C++ class std::vector<Candidate>+;
 
 #endif

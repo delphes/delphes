@@ -27,7 +27,6 @@
 #include "modules/AngularSmearing.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -36,9 +35,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,7 +49,7 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 AngularSmearing::AngularSmearing() :
-  fFormulaEta(0), fFormulaPhi(0), fItInputArray(0)
+  fFormulaEta(0), fFormulaPhi(0)
 {
   fFormulaEta = new DelphesFormula;
   fFormulaPhi = new DelphesFormula;
@@ -76,33 +73,27 @@ void AngularSmearing::Init()
   fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fInputArray = ImportArray<std::vector<Candidate> >(GetString("InputArray", "ParticlePropagator/stableParticles"));
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fOutputArray = ExportArray<std::vector<Candidate> >(GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void AngularSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void AngularSmearing::Process()
 {
-  Candidate *candidate, *mother;
   Double_t pt, eta, phi, e, m;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = candidateMomentum.Pt();
@@ -110,17 +101,16 @@ void AngularSmearing::Process()
     m = candidateMomentum.M();
 
     // apply smearing formula for eta,phi
-    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, candidate));
-    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, candidate));
+    eta = gRandom->Gaus(eta, fFormulaEta->Eval(pt, eta, phi, e, const_cast<Candidate *>(&candidate))); //TODO: const-qualified version?
+    phi = gRandom->Gaus(phi, fFormulaPhi->Eval(pt, eta, phi, e, const_cast<Candidate *>(&candidate)));
 
     if(pt <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-    candidate->AddCandidate(mother);
+    auto new_candidate = candidate;
+    new_candidate.Momentum = ROOT::Math::PtEtaPhiMVector(pt, eta, phi, m);
+    new_candidate.AddCandidate(&candidate); // preserve parentage
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

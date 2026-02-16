@@ -10,7 +10,6 @@
 #include "modules/PileUpJetID.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -19,11 +18,10 @@
 
 #include "TFormula.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 //#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
+#include <Math/VectorUtil.h>
 
 #include <algorithm>
 #include <iostream>
@@ -34,22 +32,8 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PileUpJetID::PileUpJetID() :
-  fItJetInputArray(0), fTrackInputArray(0), fNeutralInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-PileUpJetID::~PileUpJetID()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void PileUpJetID::Init()
 {
-
   fJetPTMin = GetDouble("JetPTMin", 20.0);
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
@@ -64,22 +48,13 @@ void PileUpJetID::Init()
 
   fAverageEachTower = false; // for timing
 
-  // import input array(s)
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
-
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
-
-  fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "ParticlePropagator/tracks"));
-  fItNeutralInputArray = fNeutralInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-
-  fNeutralsInPassingJets = ExportArray(GetString("NeutralsInPassingJets", "eflowtowers"));
+  // import input arrays
+  ImportArray(GetString("JetInputArray", "FastJetFinder/jets"), fJetInputArray); // I/O
+  ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"), fTrackInputArray);
+  ImportArray(GetString("NeutralInputArray", "ParticlePropagator/tracks"), fNeutralInputArray);
+  // create output arrays
+  ExportArray(fOutputArray, GetString("OutputArray", "jets"));
+  ExportArray(fNeutralsInPassingJets, GetString("NeutralsInPassingJets", "eflowtowers"));
 }
 
 //------------------------------------------------------------------------------
@@ -87,29 +62,19 @@ void PileUpJetID::Init()
 void PileUpJetID::Finish()
 {
   //  cout << "In finish" << endl;
-
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItNeutralInputArray) delete fItNeutralInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void PileUpJetID::Process()
 {
-  Candidate *candidate, *constituent;
-  TLorentzVector momentum, area;
-
-  Candidate *trk;
+  fOutputArray->clear();
+  fNeutralsInPassingJets->clear();
 
   // loop over all input candidates
-  fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(auto &candidate : *fJetInputArray)
   {
-    momentum = candidate->Momentum;
-    area = candidate->Area;
-
-    candidate->NTimeHits = 0;
+    candidate.NTimeHits = 0;
 
     float sumpt = 0.;
     float sumptch = 0.;
@@ -128,11 +93,10 @@ void PileUpJetID::Process()
 
     if(fUseConstituents)
     {
-      TIter itConstituents(candidate->GetCandidates());
-      while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+      for(const auto &constituent : candidate.GetCandidates())
       {
         float pt = constituent->Momentum.Pt();
-        float dr = candidate->Momentum.DeltaR(constituent->Momentum);
+        float dr = ROOT::Math::VectorUtil::DeltaR(candidate.Momentum, constituent->Momentum);
         //	cout << " There exists a constituent with dr=" << dr << endl;
         sumpt += pt;
         sumdrsqptsq += dr * dr * pt * pt;
@@ -171,27 +135,26 @@ void PileUpJetID::Process()
           }
           else
           {
-            candidate->NTimeHits++;
+            candidate.NTimeHits++;
           }
         }
         if(fAverageEachTower && tow_sumW > 0.)
         {
-          candidate->NTimeHits++;
+          candidate.NTimeHits++;
         }
       }
     }
     else
     {
       // Not using constituents, using dr
-      fItTrackInputArray->Reset();
-      while((trk = static_cast<Candidate *>(fItTrackInputArray->Next())))
+      for(const auto &trk : *fTrackInputArray)
       {
-        if(trk->Momentum.DeltaR(candidate->Momentum) < fParameterR)
+        if(ROOT::Math::VectorUtil::DeltaR(trk.Momentum, candidate.Momentum) < fParameterR)
         {
-          float pt = trk->Momentum.Pt();
+          float pt = trk.Momentum.Pt();
           sumpt += pt;
           sumptch += pt;
-          if(trk->IsRecoPU)
+          if(trk.IsRecoPU)
           {
             sumptchpu += pt;
           }
@@ -199,7 +162,7 @@ void PileUpJetID::Process()
           {
             sumptchpv += pt;
           }
-          float dr = candidate->Momentum.DeltaR(trk->Momentum);
+          float dr = ROOT::Math::VectorUtil::DeltaR(candidate.Momentum, trk.Momentum);
           sumdrsqptsq += dr * dr * pt * pt;
           sumptsq += pt * pt;
           nc++;
@@ -212,14 +175,13 @@ void PileUpJetID::Process()
           }
         }
       }
-      fItNeutralInputArray->Reset();
-      while((constituent = static_cast<Candidate *>(fItNeutralInputArray->Next())))
+      for(const auto &constituent : *fNeutralInputArray)
       {
-        if(constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR)
+        if(ROOT::Math::VectorUtil::DeltaR(constituent.Momentum, candidate.Momentum) < fParameterR)
         {
-          float pt = constituent->Momentum.Pt();
+          float pt = constituent.Momentum.Pt();
           sumpt += pt;
-          float dr = candidate->Momentum.DeltaR(constituent->Momentum);
+          float dr = ROOT::Math::VectorUtil::DeltaR(candidate.Momentum, constituent.Momentum);
           sumdrsqptsq += dr * dr * pt * pt;
           sumptsq += pt * pt;
           nn++;
@@ -236,42 +198,42 @@ void PileUpJetID::Process()
 
     if(sumptch > 0.)
     {
-      candidate->Beta = sumptchpv / sumptch;
-      candidate->BetaStar = sumptchpu / sumptch;
+      candidate.Beta = sumptchpv / sumptch;
+      candidate.BetaStar = sumptchpu / sumptch;
     }
     else
     {
-      candidate->Beta = -999.;
-      candidate->BetaStar = -999.;
+      candidate.Beta = -999.;
+      candidate.BetaStar = -999.;
     }
     if(sumptsq > 0.)
     {
-      candidate->MeanSqDeltaR = sumdrsqptsq / sumptsq;
+      candidate.MeanSqDeltaR = sumdrsqptsq / sumptsq;
     }
     else
     {
-      candidate->MeanSqDeltaR = -999.;
+      candidate.MeanSqDeltaR = -999.;
     }
-    candidate->NCharged = nc;
-    candidate->NNeutrals = nn;
+    candidate.NCharged = nc;
+    candidate.NNeutrals = nn;
     if(sumpt > 0.)
     {
-      candidate->PTD = TMath::Sqrt(sumptsq) / sumpt;
+      candidate.PTD = TMath::Sqrt(sumptsq) / sumpt;
       for(int i = 0; i < 5; i++)
       {
-        candidate->FracPt[i] = pt_ann[i] / sumpt;
+        candidate.FracPt[i] = pt_ann[i] / sumpt;
       }
     }
     else
     {
-      candidate->PTD = -999.;
+      candidate.PTD = -999.;
       for(int i = 0; i < 5; i++)
       {
-        candidate->FracPt[i] = -999.;
+        candidate.FracPt[i] = -999.;
       }
     }
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
 
     // New stuff
     /*
@@ -283,48 +245,46 @@ void PileUpJetID::Process()
     */
 
     bool passId = false;
-    if(candidate->Momentum.Pt() > fJetPTMinForNeutrals && candidate->MeanSqDeltaR > -0.1)
+    if(candidate.Momentum.Pt() > fJetPTMinForNeutrals && candidate.MeanSqDeltaR > -0.1)
     {
-      if(fabs(candidate->Momentum.Eta()) < 1.5)
+      if(fabs(candidate.Momentum.Eta()) < 1.5)
       {
-        passId = ((candidate->Beta > fBetaMinBarrel) && (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxBarrel));
+        passId = ((candidate.Beta > fBetaMinBarrel) && (candidate.MeanSqDeltaR < fMeanSqDeltaRMaxBarrel));
       }
-      else if(fabs(candidate->Momentum.Eta()) < 4.0)
+      else if(fabs(candidate.Momentum.Eta()) < 4.0)
       {
-        passId = ((candidate->Beta > fBetaMinEndcap) && (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxEndcap));
+        passId = ((candidate.Beta > fBetaMinEndcap) && (candidate.MeanSqDeltaR < fMeanSqDeltaRMaxEndcap));
       }
       else
       {
-        passId = (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxForward);
+        passId = (candidate.MeanSqDeltaR < fMeanSqDeltaRMaxForward);
       }
     }
 
-    //    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate->Momentum.Pt()
-    //	 << " " << candidate->Momentum.Eta() << " " << candidate->MeanSqDeltaR << " " << candidate->Beta << " " << passId << endl;
+    //    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate.Momentum.Pt()
+    //	 << " " << candidate.Momentum.Eta() << " " << candidate.MeanSqDeltaR << " " << candidate.Beta << " " << passId << endl;
 
     if(passId)
     {
       if(fUseConstituents)
       {
-        TIter itConstituents(candidate->GetCandidates());
-        while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+        for(const auto &constituent : candidate.GetCandidates())
         {
           if(constituent->Charge == 0 && constituent->Momentum.Pt() > fNeutralPTMin)
           {
-            fNeutralsInPassingJets->Add(constituent);
+            fNeutralsInPassingJets->emplace_back(*constituent);
             //	    cout << "    Constitutent added Pt Eta Charge " << constituent->Momentum.Pt() << " " << constituent->Momentum.Eta() << " " << constituent->Charge << endl;
           }
         }
       }
       else
       { // use DeltaR
-        fItNeutralInputArray->Reset();
-        while((constituent = static_cast<Candidate *>(fItNeutralInputArray->Next())))
+        for(const auto &constituent : *fNeutralInputArray)
         {
-          if(constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR && constituent->Momentum.Pt() > fNeutralPTMin)
+          if(ROOT::Math::VectorUtil::DeltaR(constituent.Momentum, candidate.Momentum) < fParameterR && constituent.Momentum.Pt() > fNeutralPTMin)
           {
-            fNeutralsInPassingJets->Add(constituent);
-            //            cout << "    Constitutent added Pt Eta Charge " << constituent->Momentum.Pt() << " " << constituent->Momentum.Eta() << " " << constituent->Charge << endl;
+            fNeutralsInPassingJets->emplace_back(constituent);
+            //            cout << "    Constitutent added Pt Eta Charge " << constituent.Momentum.Pt() << " " << constituent.Momentum.Eta() << " " << constituent.Charge << endl;
           }
         }
       }

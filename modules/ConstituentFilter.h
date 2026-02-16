@@ -32,14 +32,12 @@
 #include <map>
 #include <vector>
 
-class TIterator;
-class TObjArray;
+class Candidate;
 
-class ConstituentFilter: public DelphesModule
+class ConstituentFilter : public DelphesModule
 {
 public:
-  ConstituentFilter();
-  ~ConstituentFilter();
+  ConstituentFilter() = default;
 
   void Init();
   void Process();
@@ -48,11 +46,10 @@ public:
 private:
   Double_t fJetPTMin;
 
-  std::vector<TIterator *> fInputList; //!
+  std::vector<InputHandle<std::vector<Candidate> > > fInputList; //!
+  std::vector<std::pair<InputHandle<std::vector<Candidate> >, OutputHandle<std::vector<Candidate> > > > fInputMap; //!
 
-  std::map<TIterator *, TObjArray *> fInputMap; //!
-
-  TObjArray *fOutputArray; //!
+  OutputHandle<std::vector<Candidate> > fOutputArray; //!
 
   ClassDef(ConstituentFilter, 1)
 };

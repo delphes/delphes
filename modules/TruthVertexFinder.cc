@@ -27,7 +27,6 @@
 #include "modules/TruthVertexFinder.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
@@ -37,9 +36,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -52,107 +49,79 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TruthVertexFinder::TruthVertexFinder() :
-fItInputArray(0), fItOutputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-TruthVertexFinder::~TruthVertexFinder()
-{
-}
-
-//------------------------------------------------------------------------------
-
 void TruthVertexFinder::Init()
 {
-
   fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
   // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output arrays
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-  //fItOutputArray = fVertexOutputArray->MakeIterator();
+  ImportArray(GetString("InputArray", "Delphes/stableParticles"), fInputArray);
+  // create output array
+  ExportArray(fVertexOutputArray, GetString("VertexOutputArray", "vertices"));
 }
 
 //------------------------------------------------------------------------------
 
 void TruthVertexFinder::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-  if(fItOutputArray) delete fItOutputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void TruthVertexFinder::Process()
 {
-  Int_t nvtx = -1;
   Float_t pt;
-  Candidate *candidate, *vertex;
-  DelphesFactory *factory;
 
+  ROOT::Math::XYZTVector vertexPosition(0., 0., 0., 0.);
 
-  fItInputArray->Reset();
+  fVertexOutputArray->clear();
 
-  factory = GetFactory();
-  vertex = factory->NewCandidate();
-
-  TLorentzVector vertexPosition(0., 0., 0., 0.);
-
-  nvtx=0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  size_t nvtx = 0;
+  for(const auto &candidate : *fInputArray)
   {
 
-     const TLorentzVector &candidatePosition = candidate->Position;
-     const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
 
-     pt = candidateMomentum.Pt();
-     
-     // check whether vertex already included, if so add particle
-     Bool_t old_vertex=false;
-     fItOutputArray = fVertexOutputArray->MakeIterator();
-     fItOutputArray->Reset();
-     while((vertex = static_cast<Candidate *>(fItOutputArray->Next())))
-     {
-        const TLorentzVector &vertexPosition = vertex->Position;
-        // check whether spatial difference is < 1 um, in that case assume it is the same vertex
-        if ( TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution*1.E3)
-        {
-           old_vertex=true;
-           vertex->AddCandidate(candidate);
-           if (TMath::Abs(candidate->Charge) > 0)
-           {
-              vertex->ClusterNDF += 1;
-              vertex->GenSumPT2 += pt*pt;
-           }
-        }
-     }
+    pt = candidateMomentum.Pt();
 
-     // else fill new vertex
-     if (!old_vertex)
-     {
-        vertex = factory->NewCandidate();
-        vertex->Position = candidatePosition;
-        vertex->ClusterIndex = nvtx;
-
-        if (TMath::Abs(candidate->Charge) > 0)
+    // check whether vertex already included, if so add particle
+    Bool_t old_vertex = false;
+    for(auto &vertex : *fVertexOutputArray)
+    {
+      const auto &vertexPosition = vertex.Position;
+      // check whether spatial difference is < 1 um, in that case assume it is the same vertex
+      if(TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
+      {
+        old_vertex = true;
+        vertex.AddCandidate(&candidate); // keep parentage
+        if(TMath::Abs(candidate.Charge) > 0)
         {
-           vertex->ClusterNDF = 1;
-           vertex->GenSumPT2 = pt*pt;
+          vertex.ClusterNDF += 1;
+          vertex.GenSumPT2 += pt * pt;
         }
-        else
-        {
-           vertex->ClusterNDF = 0;
-           vertex->GenSumPT2 = 0.;
-        }
-        fVertexOutputArray->Add(vertex);
-        nvtx++;
       }
-   }
+    }
+
+    // else fill new vertex
+    if(!old_vertex)
+    {
+      auto *vertex = GetFactory()->NewCandidate();
+      vertex->Position = candidatePosition;
+      vertex->ClusterIndex = nvtx;
+
+      if(TMath::Abs(candidate.Charge) > 0)
+      {
+        vertex->ClusterNDF = 1;
+        vertex->GenSumPT2 = pt * pt;
+      }
+      else
+      {
+        vertex->ClusterNDF = 0;
+        vertex->GenSumPT2 = 0.;
+      }
+      fVertexOutputArray->emplace_back(*vertex);
+      nvtx++;
+    }
+  }
 }
 
 //------------------------------------------------------------------------------

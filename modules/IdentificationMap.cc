@@ -28,7 +28,6 @@
 #include "modules/IdentificationMap.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
@@ -37,9 +36,7 @@
 
 #include "TDatabasePDG.h"
 #include "TFormula.h"
-#include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -49,19 +46,6 @@
 #include <stdexcept>
 
 using namespace std;
-
-//------------------------------------------------------------------------------
-
-IdentificationMap::IdentificationMap() :
-  fItInputArray(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-IdentificationMap::~IdentificationMap()
-{
-}
 
 //------------------------------------------------------------------------------
 
@@ -96,35 +80,23 @@ void IdentificationMap::Init()
   }
 
   // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
+  ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"), fInputArray);
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  ExportArray(fOutputArray, GetString("OutputArray", "stableParticles"));
 }
 
 //------------------------------------------------------------------------------
 
 void IdentificationMap::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-
-  TMisIDMap::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-  for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
-  {
-    formula = (itEfficiencyMap->second).second;
-    if(formula) delete formula;
-  }
+  for(auto itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
+    if(auto *formula = (itEfficiencyMap->second).second; formula) delete formula;
 }
 
 //------------------------------------------------------------------------------
 
 void IdentificationMap::Process()
 {
-  Candidate *candidate;
   Double_t pt, eta, phi, e;
   TMisIDMap::iterator itEfficiencyMap;
   pair<TMisIDMap::iterator, TMisIDMap::iterator> range;
@@ -133,18 +105,18 @@ void IdentificationMap::Process()
 
   Double_t p, r, total;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(const auto &candidate : *fInputArray)
   {
-    const TLorentzVector &candidatePosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const auto &candidatePosition = candidate.Position;
+    const auto &candidateMomentum = candidate.Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
     e = candidateMomentum.E();
 
-    pdgCodeIn = candidate->PID;
-    charge = candidate->Charge;
+    pdgCodeIn = candidate.PID;
+    charge = candidate.Charge;
 
     // first check that PID of this particle is specified in the map
     // otherwise, look for PID = 0
@@ -169,9 +141,9 @@ void IdentificationMap::Process()
       if(total <= r && r < total + p)
       {
         // change PID of particle
-        candidate = static_cast<Candidate *>(candidate->Clone());
-        if(pdgCodeOut != 0) candidate->PID = charge * pdgCodeOut;
-        fOutputArray->Add(candidate);
+        auto new_candidate = candidate;
+        if(pdgCodeOut != 0) new_candidate.PID = charge * pdgCodeOut;
+        fOutputArray->emplace_back(new_candidate);
         break;
       }
 
