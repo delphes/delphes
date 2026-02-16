@@ -31,6 +31,9 @@
 
 #include "TClonesArray.h"
 #include "TFile.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 38, 0)
+#include <Math/VectorUtil.h>
+#endif
 
 #include "classes/DelphesClasses.h"
 
@@ -279,14 +282,24 @@ void LHCOWriter::AnalyseMuons()
     fItTrack->Reset();
     while((track = static_cast<Track *>(fItTrack->Next())))
     {
-      if(element->P4().DeltaR(track->P4()) < 0.5) sumPT += track->PT;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 38, 0)
+      const auto deltaR = element->P4().DeltaR(track->P4());
+#else
+      const auto deltaR = ROOT::Math::VectorUtil::DeltaR(element->P4(), track->P4());
+#endif
+      if(deltaR < 0.5) sumPT += track->PT;
     }
 
     sumET = 0.0;
     fItTower->Reset();
     while((tower = static_cast<Tower *>(fItTower->Next())))
     {
-      if(element->P4().DeltaR(tower->P4()) < 0.5) sumET += tower->ET;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 38, 0)
+      const auto deltaR = element->P4().DeltaR(tower->P4());
+#else
+      const auto deltaR = ROOT::Math::VectorUtil::DeltaR(element->P4(), tower->P4());
+#endif
+      if(deltaR < 0.5) sumET += tower->ET;
     }
 
     tauCounter = 0;
@@ -302,7 +315,11 @@ void LHCOWriter::AnalyseMuons()
         continue;
       }
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 38, 0)
       jetDR = element->P4().DeltaR(jet->P4());
+#else
+      jetDR = ROOT::Math::VectorUtil::DeltaR(element->P4(), jet->P4());
+#endif
       if(jetDR < minDR)
       {
         minIndex = jetCounter;
@@ -391,7 +408,12 @@ void LHCOWriter::AnalyseJets()
     fItTrack->Reset();
     while((track = static_cast<Track *>(fItTrack->Next())))
     {
-      if(element->P4().DeltaR(track->P4()) < 0.5) ++counter;
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 38, 0)
+      const auto deltaR = element->P4().DeltaR(track->P4());
+#else
+      const auto deltaR = ROOT::Math::VectorUtil::DeltaR(element->P4(), track->P4());
+#endif
+      if(deltaR < 0.5) ++counter;
     }
 
     fIntParam[1] = 4;
