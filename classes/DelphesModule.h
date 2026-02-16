@@ -51,15 +51,26 @@ public:
   virtual void Finish();
 
   template <typename T>
-  void ImportArray(std::string_view field_name, OutputHandle<T> &handle)
+  InputHandle<T> ImportArray(std::string_view field_name)
   {
-    GetFactory()->EventModel()->Attach(field_name, handle);
+    return GetFactory()->EventModel()->Attach<T>(field_name);
+  }
+  template <typename T>
+  void ImportArray(std::string_view field_name, InputHandle<T> &handle)
+  {
+    handle = ImportArray<T>(field_name);
+  }
+
+  template <typename T>
+  OutputHandle<T> ExportArray(std::string_view field_name, std::string_view description = "")
+  {
+    auto module_field_name = std::string{GetName()} + "/" + std::string{field_name};
+    return GetFactory()->EventModel()->Book<T>(module_field_name, description);
   }
   template <typename T>
   void ExportArray(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
   {
-    auto module_field_name = std::string{GetName()} + "/" + std::string{field_name};
-    GetFactory()->EventModel()->Book(handle, module_field_name, description);
+    handle = ExportArray<T>(field_name, description);
   }
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);

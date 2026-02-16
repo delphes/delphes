@@ -54,29 +54,57 @@ public:
   public:
     explicit FieldName(std::string_view label);
 
-    const std::string &FieldLabel() const { return field_label_; }
+    const std::string &FieldLabel() const { return fFieldLabel; }
 
   private:
-    std::string label_;
-    std::string field_label_;
+    std::string fLabel;
+    std::string fFieldLabel;
   };
+
+  /// Book a memory segment, and return it as a given field identified by a field name and a description
+  template <typename T>
+  OutputHandle<T> Book(std::string_view field_name, std::string_view description = "")
+  {
+#if !defined(__CINT__) && !defined(__CLING__)
+    const auto field_name_str = std::string{field_name};
+    if(!fFields.insert(field_name_str).second)
+      throwBookingFailure(field_name, "Field name already exists");
+    if(fFieldTypes.count(field_name_str) == 0)
+      fFieldTypes[field_name_str] = RField<T>::TypeName();
+    const auto field_label = FieldName(field_name).FieldLabel();
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 36, 0)
+    return OutputHandle<T>{fModel->MakeField<T>(field_label, std::string{description})};
+#else
+    return OutputHandle<T>{fModel->MakeField<T>({field_label, std::string{description}})};
+#endif
+#else
+    return {};
+#endif
+  }
 
   /// Book a memory segment, and attach it to a given field identified by a field name and a description
   template <typename T>
   void Book(OutputHandle<T> &handle, std::string_view field_name, std::string_view description = "")
   {
+    handle = Book<T>(field_name, description);
+  }
+
+  /// Attach a memory segment and return it as a given field identified by a field name
+  template <typename T>
+  InputHandle<T> Attach(std::string_view field_name) const
+  {
 #if !defined(__CINT__) && !defined(__CLING__)
-    const auto field_name_str = std::string{field_name};
-    if(!fields_.insert(field_name_str).second)
-      throwBookingFailure(field_name, "Field name already exists");
-    if(field_types_.count(field_name_str) == 0)
-      field_types_[field_name_str] = RField<T>::TypeName();
-    const auto field_label = FieldName(field_name).FieldLabel();
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 36, 0)
-    handle = OutputHandle<T>{model_->MakeField<T>(field_label, std::string{description})};
+    try
+    {
+      return Entry().GetPtr<T>(FieldName(field_name).FieldLabel());
+    }
+    catch(const RException &except)
+    {
+      throwAttachingFailure(field_name, except.GetError().GetReport());
+      throw;
+    }
 #else
-    handle = OutputHandle<T>{model_->MakeField<T>({field_label, std::string{description}})};
-#endif
+    return {};
 #endif
   }
 
@@ -84,17 +112,7 @@ public:
   template <typename T>
   void Attach(std::string_view field_name, InputHandle<T> &handle) const
   {
-#if !defined(__CINT__) && !defined(__CLING__)
-    try
-    {
-      handle = Entry().GetPtr<T>(FieldName(field_name).FieldLabel());
-    }
-    catch(const RException &except)
-    {
-      throwAttachingFailure(field_name, except.GetError().GetReport());
-      throw;
-    }
-#endif
+    handle = Attach<T>(field_name);
   }
 
   const REntry &Entry() const;
@@ -104,13 +122,12 @@ private:
   void throwBookingFailure(std::string_view, std::string_view details = "") const noexcept(false);
   void throwAttachingFailure(std::string_view, std::string_view details = "") const noexcept(false);
 
-  const std::string name_; ///< fields collection name (run, event/trigger)
-  RNTupleModel *model_{nullptr}; ///< RNTuple data model
-  bool model_released_{false}; ///< has the model property been given to a writer?
-  REntry *entry_{nullptr}; ///< default entry associated to the data model
-  std::set<std::string> fields_; ///< collection of field names managed by this data model
+  const std::string fName; ///< fields collection name (run, event/trigger)
+  RNTupleModel *fModel{nullptr}; ///< RNTuple data model
+  REntry *fEntry{nullptr}; ///< default entry associated to the data model
+  std::set<std::string> fFields; ///< collection of field names managed by this data model
   /// mapping of C++ types associated to each field registered in the data model
-  std::unordered_map<std::string, std::string> field_types_;
+  std::unordered_map<std::string, std::string> fFieldTypes;
 };
 
 #endif /* DelphesModel_h */
