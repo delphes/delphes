@@ -1141,7 +1141,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	//
 	Double_t *thms = new Double_t[Nhit];		// Scattering angles/plane
 	//
-	Int_t mLast = 0;				// Last measurement layer
+	Int_t mLast = -1;				// Last measurement layer
 	for (Int_t ii = 0; ii < Nhit; ii++)		// Hit layer loop
 	{
 		
@@ -1425,7 +1425,7 @@ void SolTrack::KalmanCovT(Bool_t Res, Bool_t MS, Double_t mass)
 	//
 	Double_t *thms = new Double_t[Nhit];		// Scattering angles/plane
 	//
-	Int_t mLast = 0;				// Last measurement layer
+	Int_t mLast = -1;				// Last measurement layer
 	for (Int_t ii = 0; ii < Nhit; ii++)		// Hit layer loop
 	{
 
