@@ -87,7 +87,7 @@ Delphes::~Delphes()
 
 //------------------------------------------------------------------------------
 
-void Delphes::Clear()
+void Delphes::Clear(Option_t * /*option*/)
 {
   if(fFactory) fFactory->Clear();
 }

@@ -141,7 +141,7 @@ TVectorD TrkUtil::XPtoPar(TVector3 x, TVector3 p, Double_t Q, Double_t Bz)
 	Double_t phi0 = TMath::ATan2((p(1) - a * x(0)), (p(0) + a * x(1)));	// Phi0
 	Double_t D;								// Impact parameter D
 	//std::cout<<"TrkUtil::XPtoPar: x(0) = "<<x(0)*1.e20<<", x(1) = "<<x(1)*1.e20<<std::endl;
-	if(x(0) < 1.e-10) x(0) = 0.0; if(x(1) < 1.e-10) x(1) = 0.0;
+	if(TMath::Abs(x(0)) < 1.e-10) x(0) = 0.0; if(TMath::Abs(x(1)) < 1.e-10) x(1) = 0.0;
 	if((x(0)*x(0) + x(1)*x(1)) == 0.0) {
 		D = 0.0;	// Avoid rounding off problems
 		//std::cout<<"TrkUtil::XPtoPar: D=0"<<std::endl;

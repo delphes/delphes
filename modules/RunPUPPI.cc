@@ -155,7 +155,6 @@ void RunPUPPI::Process()
   // Fill input particles for puppi
   std::vector<RecoObj> puppiInputVector;
   puppiInputVector.clear();
-  int lNBad = 0;
   // Loop on charge track candidate
   for(auto &candidate : *fTrackInputArray) //TODO: check if const GetCandidates getter is possible
   {
@@ -169,7 +168,6 @@ void RunPUPPI::Process()
     //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
     if(candidate.IsRecoPU and candidate.Charge != 0)
     { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
-      lNBad++;
       curRecoObj.id = 2;
       curRecoObj.vtxId = 0.7 * (fPVInputArray->size()); //Hack apply reco vtx efficiency of 70% for calibration
       if(TMath::Abs(candidate.PID) == 11)

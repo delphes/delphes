@@ -145,7 +145,6 @@ void TrackSmearing::Finish()
 
 void TrackSmearing::Process()
 {
-  Int_t iCandidate = 0;
   Double_t pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
   Double_t x, y, z, t, px, py, pz, theta;
   Double_t q, r;
@@ -385,8 +384,6 @@ void TrackSmearing::Process()
 
     new_candidate.AddCandidate(&candidate); // set mother particle
     fOutputArray->emplace_back(new_candidate);
-
-    iCandidate++;
   }
 }
 

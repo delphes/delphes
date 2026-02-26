@@ -42,7 +42,7 @@ public:
 
   DelphesFactory *GetFactory() const { return fFactory; }
 
-  void Clear();
+  void Clear(Option_t *option = "");
 
   virtual void Init();
   virtual void Process();
