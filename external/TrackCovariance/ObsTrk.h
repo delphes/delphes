@@ -46,6 +46,7 @@ private:
 	TMatrixDSym fCovILC;			// Covariance of track parameters in ILC format
 									// (d0, phi0, w, z0, tan(lambda))
 	TVector3 fXfirst;			// x,y,z of first track hit
+	Int_t fNmeasure;			// Only for Kalman version. Nr of used measurements
 	Bool_t fEflag;				// Electron flag
 	Double_t fEscale;			// Electron resolution degradation
 	Bool_t fObsDone;			// Flags completion of parameter generation
@@ -107,6 +108,7 @@ public:
 	TMatrixDSym GetCovILC() { return fCovILC; }
 	// First hit
 	TVector3 GetFirstHit()  { return fXfirst; }
+	Int_t GetUmeas() { return fNmeasure;}	// #used measurement including layer efficiency
 	// Set resolution degradation scale
 	void SetScale(Double_t scale);
 };

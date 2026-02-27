@@ -145,13 +145,22 @@ void TrackCovariance::Process()
 
     mass = candidateMomentum.M();
 
-    //
+    // ********************************
     // Standard implementation with grid
     //ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
+    // ********************************
     //
-    // Try Kalman without any grid
+    // *******************************
+    // Kalman implementation without any grid
+    // efficiency in tracking layers use can affect acceptance
+    // Comment lines below within ******** and
+    // uncomment above to return to standard implementation
+    //
     ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, mass, fGeometry);
-
+    Int_t MinMeasure = 6;     // minimum number of measurements required
+    if(track.GetUmeas() < MinMeasure) continue;
+    //
+    // *******************************
 		// apply rescaling factors to resolution
     if (TMath::Abs(candidate->PID) == 11)
 		{
