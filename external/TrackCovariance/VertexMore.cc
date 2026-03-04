@@ -69,8 +69,8 @@ VertexMore::VertexMore(VertexFit* V, Bool_t opt)
 VertexMore::~VertexMore()
 {
 	for (Int_t i = 0; i < fNtr; i++) {
-		fpi[i]->Clear();	
-		fCpi[i]->Clear();	
+		fpi[i]->Clear();	delete fpi[i];
+		fCpi[i]->Clear();	delete fCpi[i];	
 	}
 	fpi.clear();
 	fCpi.clear();

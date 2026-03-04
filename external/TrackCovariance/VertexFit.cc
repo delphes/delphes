@@ -729,9 +729,13 @@ void VertexFit::RemoveTrk(Int_t iTrk)	// Remove iTrk track
 	fNtr--;
 	fChi2List.Clear();
 	fChi2List.ResizeTo(fNtr);		// Resize chi2 array
+	if (fPar[iTrk]) delete fPar[iTrk]; 
 	fPar.erase(fPar.begin() + iTrk);		// Remove track
+	if (fCov[iTrk]) delete fCov[iTrk]; 
 	fCov.erase(fCov.begin() + iTrk);
+	if (fParNew[iTrk]) delete fParNew[iTrk]; 
 	fParNew.erase(fParNew.begin() + iTrk);		// Remove track
+	if (fCovNew[iTrk]) delete fCovNew[iTrk]; 
 	fCovNew.erase(fCovNew.begin() + iTrk);
 	fCharged.erase(fCharged.begin() + iTrk);
 	//
