@@ -41,18 +41,17 @@ using namespace std;
 
 OldCalorimeter::OldCalorimeter() :
   fECalResolutionFormula(std::make_unique<DelphesFormula>()),
-  fHCalResolutionFormula(std::make_unique<DelphesFormula>())
+  fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
+  fTowerECalArray(std::make_unique<TObjArray>()),
+  fTowerHCalArray(std::make_unique<TObjArray>()),
+  fTowerTrackArray(std::make_unique<TObjArray>()),
+  fTowerECalTrackArray(std::make_unique<TObjArray>()),
+  fTowerHCalTrackArray(std::make_unique<TObjArray>())
 {
-  fTowerECalArray = new TObjArray;
   fItTowerECalArray = fTowerECalArray->MakeIterator();
-  fTowerHCalArray = new TObjArray;
   fItTowerHCalArray = fTowerHCalArray->MakeIterator();
-
-  fTowerTrackArray = new TObjArray;
   fItTowerTrackArray = fTowerTrackArray->MakeIterator();
-  fTowerECalTrackArray = new TObjArray;
   fItTowerECalTrackArray = fTowerECalTrackArray->MakeIterator();
-  fTowerHCalTrackArray = new TObjArray;
   fItTowerHCalTrackArray = fTowerHCalTrackArray->MakeIterator();
 }
 
@@ -60,17 +59,11 @@ OldCalorimeter::OldCalorimeter() :
 
 OldCalorimeter::~OldCalorimeter()
 {
-  if(fTowerECalArray) delete fTowerECalArray;
   if(fItTowerECalArray) delete fItTowerECalArray;
-  if(fTowerHCalArray) delete fTowerHCalArray;
   if(fItTowerHCalArray) delete fItTowerHCalArray;
-
-  delete fTowerTrackArray;
-  delete fItTowerTrackArray;
-  delete fTowerECalTrackArray;
-  delete fItTowerECalTrackArray;
-  delete fTowerHCalTrackArray;
-  delete fItTowerHCalTrackArray;
+  if(fItTowerTrackArray) delete fItTowerTrackArray;
+  if(fItTowerECalTrackArray) delete fItTowerECalTrackArray;
+  if(fItTowerHCalTrackArray) delete fItTowerHCalTrackArray;
 }
 
 //------------------------------------------------------------------------------

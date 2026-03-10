@@ -119,7 +119,7 @@ private:
   TObjArray *fEFlowTrackOutputArray{nullptr}; //!
   TObjArray *fEFlowTowerOutputArray{nullptr}; //!
 
-  TObjArray *fTowerTrackArray{nullptr}; //!
+  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
   TIterator *fItTowerTrackArray{nullptr}; //!
 
   void FinalizeTower();
