@@ -27,9 +27,9 @@
  *
  */
 
-#include "modules/ClusterCounting.h"
 #include "TrackCovariance/TrkUtil.h"
 #include "classes/DelphesClasses.h"
+#include "modules/ClusterCounting.h"
 
 #include "TLorentzVector.h"
 #include "TMath.h"
@@ -43,23 +43,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ClusterCounting::ClusterCounting()
-{
-  fTrackUtil = new TrkUtil();
-}
+ClusterCounting::ClusterCounting() : fTrackUtil(std::make_unique<TrkUtil>()) {}
 
 //------------------------------------------------------------------------------
 
-ClusterCounting::~ClusterCounting()
-{
-  delete fTrackUtil;
-}
+ClusterCounting::~ClusterCounting() {}
 
 //------------------------------------------------------------------------------
 
 void ClusterCounting::Init()
 {
-
   // geometric acceptance
   fRmin = GetDouble("Rmin", 0.);
   fRmax = GetDouble("Rmax", 0.);
@@ -100,7 +93,7 @@ void ClusterCounting::Finish()
 
 void ClusterCounting::Process()
 {
-  Candidate *candidate, *mother, *particle;
+  Candidate *candidate = nullptr, *mother = nullptr, *particle = nullptr;
   Double_t mass, trackLength, Ncl;
 
   fItInputArray->Reset();

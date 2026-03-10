@@ -51,17 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-MomentumSmearing::MomentumSmearing()
-{
-  fFormula = new DelphesFormula;
-}
+MomentumSmearing::MomentumSmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-MomentumSmearing::~MomentumSmearing()
-{
-  delete fFormula;
-}
+MomentumSmearing::~MomentumSmearing() {}
 
 //------------------------------------------------------------------------------
 
@@ -95,7 +89,7 @@ void MomentumSmearing::Finish()
 
 void MomentumSmearing::Process()
 {
-  Candidate *candidate, *mother;
+  Candidate *candidate = nullptr, *mother = nullptr;
   Double_t pt, eta, phi, e, m, res;
 
   fItInputArray->Reset();

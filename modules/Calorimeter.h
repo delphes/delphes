@@ -52,7 +52,7 @@ private:
   typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fTower = nullptr;
+  Candidate *fTower{nullptr};
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fECalTowerEnergy, fHCalTowerEnergy;
   Double_t fECalTrackEnergy, fHCalTrackEnergy;
@@ -88,27 +88,27 @@ private:
   std::vector<Double_t> fECalTrackFractions;
   std::vector<Double_t> fHCalTrackFractions;
 
-  DelphesFormula *fECalResolutionFormula = nullptr; //!
-  DelphesFormula *fHCalResolutionFormula = nullptr; //!
+  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray = nullptr; //!
-  TIterator *fItTrackInputArray = nullptr; //!
+  TIterator *fItParticleInputArray{nullptr}; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
 
-  const TObjArray *fParticleInputArray = nullptr; //!
-  const TObjArray *fTrackInputArray = nullptr; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
 
-  TObjArray *fTowerOutputArray = nullptr; //!
-  TObjArray *fPhotonOutputArray = nullptr; //!
+  TObjArray *fTowerOutputArray{nullptr}; //!
+  TObjArray *fPhotonOutputArray{nullptr}; //!
 
-  TObjArray *fEFlowTrackOutputArray = nullptr; //!
-  TObjArray *fEFlowPhotonOutputArray = nullptr; //!
-  TObjArray *fEFlowNeutralHadronOutputArray = nullptr; //!
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowPhotonOutputArray{nullptr}; //!
+  TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
 
-  TObjArray *fECalTowerTrackArray = nullptr; //!
-  TIterator *fItECalTowerTrackArray = nullptr; //!
+  TObjArray *fECalTowerTrackArray{nullptr}; //!
+  TIterator *fItECalTowerTrackArray{nullptr}; //!
 
-  TObjArray *fHCalTowerTrackArray = nullptr; //!
-  TIterator *fItHCalTowerTrackArray = nullptr; //!
+  TObjArray *fHCalTowerTrackArray{nullptr}; //!
+  TIterator *fItHCalTowerTrackArray{nullptr}; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

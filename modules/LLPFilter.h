@@ -66,14 +66,14 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TIterator *fItParticleInputArray = nullptr;
-  const TObjArray *fParticleInputArray = nullptr;
+  TIterator *fItParticleInputArray{nullptr};
+  const TObjArray *fParticleInputArray{nullptr};
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(LLPFilter, 1)
 };

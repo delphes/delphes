@@ -55,16 +55,15 @@ private:
   Double_t fOutputBeamSpotX;
   Double_t fOutputBeamSpotY;
 
-  DelphesTF2 *fFunction = nullptr; //!
+  const std::unique_ptr<DelphesTF2> fFunction; //!
+  std::unique_ptr<DelphesPileUpReader> fReader; //!
 
-  DelphesPileUpReader *fReader = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
-
-  TObjArray *fParticleOutputArray = nullptr; //!
-  TObjArray *fVertexOutputArray = nullptr; //!
+  TObjArray *fParticleOutputArray{nullptr}; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
 
   ClassDef(PileUpMerger, 1)
 };

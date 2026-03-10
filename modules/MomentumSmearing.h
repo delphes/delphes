@@ -46,13 +46,13 @@ public:
 private:
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
-  DelphesFormula *fFormula = nullptr; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   Double_t fUseMomentumVector; //!
 

@@ -5,7 +5,7 @@
 
 /** \class BeamSpotFilter
  *
- *  Extracts beam spot 
+ *  Extracts beam spot
  *
  *  \author Michele Selvaggi
  *
@@ -27,13 +27,11 @@ public:
   void Finish();
 
 private:
-  Float_t fPassedOne;
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
-
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(BeamSpotFilter, 1)
 };

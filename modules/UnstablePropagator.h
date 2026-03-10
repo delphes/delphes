@@ -51,9 +51,9 @@ private:
   Double_t fLmin; // minimum
 
   Bool_t fDebug;
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
   std::vector<Int_t> DaughterIndices(Candidate *candidate);
   void PrintPart(TString prefix, Candidate *candidate);

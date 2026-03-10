@@ -45,15 +45,15 @@ public:
   void Finish();
 
 private:
-  typedef std::multimap<Int_t, std::pair<Int_t, DelphesFormula *> > TMisIDMap; //!
+  typedef std::multimap<Int_t, std::pair<Int_t, std::unique_ptr<DelphesFormula> > > TMisIDMap; //!
 
   TMisIDMap fEfficiencyMap; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(IdentificationMap, 1)
 };

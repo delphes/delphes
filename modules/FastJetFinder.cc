@@ -76,22 +76,18 @@ using namespace fastjet::contrib;
 
 //------------------------------------------------------------------------------
 
-FastJetFinder::FastJetFinder()
-{
-}
+FastJetFinder::FastJetFinder() {}
 
 //------------------------------------------------------------------------------
 
-FastJetFinder::~FastJetFinder()
-{
-}
+FastJetFinder::~FastJetFinder() {}
 
 //------------------------------------------------------------------------------
 
 void FastJetFinder::Init()
 {
-  JetDefinition::Plugin *plugin = 0;
-  JetDefinition::Recombiner *recomb = 0;
+  JetDefinition::Plugin *plugin = nullptr;
+  JetDefinition::Recombiner *recomb = nullptr;
   ExRootConfParam param;
   Long_t i, size;
   Double_t etaMin, etaMax;
@@ -133,22 +129,22 @@ void FastJetFinder::Init()
   fGamma = GetDouble("Gamma", 1.0);
   //fBeta parameter see above
 
-  fMeasureDef = new NormalizedMeasure(fBeta, fParameterR);
+  fMeasureDef = std::make_unique<NormalizedMeasure>(fBeta, fParameterR);
 
   switch(fAxisMode)
   {
   default:
   case 1:
-    fAxesDef = new WTA_KT_Axes();
+    fAxesDef = std::make_unique<WTA_KT_Axes>();
     break;
   case 2:
-    fAxesDef = new OnePass_WTA_KT_Axes();
+    fAxesDef = std::make_unique<OnePass_WTA_KT_Axes>();
     break;
   case 3:
-    fAxesDef = new KT_Axes();
+    fAxesDef = std::make_unique<KT_Axes>();
     break;
   case 4:
-    fAxesDef = new OnePass_KT_Axes();
+    fAxesDef = std::make_unique<OnePass_KT_Axes>();
   }
 
   //-- Trimming parameters --
@@ -191,22 +187,21 @@ void FastJetFinder::Init()
   {
   default:
   case 0:
-    fAreaDefinition = 0;
     break;
   case 1:
-    fAreaDefinition = new AreaDefinition(active_area_explicit_ghosts, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+    fAreaDefinition = std::make_unique<AreaDefinition>(active_area_explicit_ghosts, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
     break;
   case 2:
-    fAreaDefinition = new AreaDefinition(one_ghost_passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+    fAreaDefinition = std::make_unique<AreaDefinition>(one_ghost_passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
     break;
   case 3:
-    fAreaDefinition = new AreaDefinition(passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+    fAreaDefinition = std::make_unique<AreaDefinition>(passive_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
     break;
   case 4:
-    fAreaDefinition = new AreaDefinition(VoronoiAreaSpec(fEffectiveRfact));
+    fAreaDefinition = std::make_unique<AreaDefinition>(VoronoiAreaSpec(fEffectiveRfact));
     break;
   case 5:
-    fAreaDefinition = new AreaDefinition(active_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+    fAreaDefinition = std::make_unique<AreaDefinition>(active_area, GhostedAreaSpec(fGhostEtaMax, fRepeat, fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
     break;
   }
 
@@ -214,47 +209,47 @@ void FastJetFinder::Init()
   {
   case 1:
     plugin = new CDFJetCluPlugin(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
-    fDefinition = new JetDefinition(plugin);
+    fDefinition = std::make_unique<JetDefinition>(plugin);
     break;
   case 2:
     plugin = new CDFMidPointPlugin(fSeedThreshold, fConeRadius, fConeAreaFraction, fMaxPairSize, fMaxIterations, fOverlapThreshold);
-    fDefinition = new JetDefinition(plugin);
+    fDefinition = std::make_unique<JetDefinition>(plugin);
     break;
   case 3:
     plugin = new SISConePlugin(fConeRadius, fOverlapThreshold, fMaxIterations, fJetPTMin);
-    fDefinition = new JetDefinition(plugin);
+    fDefinition = std::make_unique<JetDefinition>(plugin);
     break;
   case 4:
-    fDefinition = new JetDefinition(kt_algorithm, fParameterR);
+    fDefinition = std::make_unique<JetDefinition>(kt_algorithm, fParameterR);
     break;
   case 5:
-    fDefinition = new JetDefinition(cambridge_algorithm, fParameterR);
+    fDefinition = std::make_unique<JetDefinition>(cambridge_algorithm, fParameterR);
     break;
   default:
   case 6:
-    fDefinition = new JetDefinition(antikt_algorithm, fParameterR);
+    fDefinition = std::make_unique<JetDefinition>(antikt_algorithm, fParameterR);
     break;
   case 7:
     recomb = new WinnerTakeAllRecombiner();
-    fDefinition = new JetDefinition(antikt_algorithm, fParameterR, recomb, Best);
+    fDefinition = std::make_unique<JetDefinition>(antikt_algorithm, fParameterR, recomb, Best);
     break;
   case 8:
-    fNjettinessPlugin = new NjettinessPlugin(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
-    fDefinition = new JetDefinition(fNjettinessPlugin);
+    fNjettinessPlugin = std::make_unique<NjettinessPlugin>(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
+    fDefinition = std::make_unique<JetDefinition>(fNjettinessPlugin.get());
     break;
   case 9:
-    fValenciaPlugin = new ValenciaPlugin(fParameterR, fBeta, fGamma);
-    fDefinition = new JetDefinition(fValenciaPlugin);
+    fValenciaPlugin = std::make_unique<ValenciaPlugin>(fParameterR, fBeta, fGamma);
+    fDefinition = std::make_unique<JetDefinition>(fValenciaPlugin.get());
     break;
   case 10:
-    fDefinition = new JetDefinition(ee_genkt_algorithm, fParameterR, fParameterP);
+    fDefinition = std::make_unique<JetDefinition>(ee_genkt_algorithm, fParameterR, fParameterP);
     break;
 
   // kT durham algorithm, 2 options:
   // 1. njets mode: stop when reach predetermined n jet (optionally apply sqrt(ExclYmerge(n-1,n))*Evis) > cut offline)
   // 2. dcut mode: stop when all dij above some threshold dcut. Is applied if fDCut > 0.
   case 11:
-    fDefinition = new JetDefinition(ee_kt_algorithm);
+    fDefinition = std::make_unique<JetDefinition>(ee_kt_algorithm);
     break;
   }
 
@@ -275,10 +270,10 @@ void FastJetFinder::Init()
     {
       etaMin = param[i * 2].GetDouble();
       etaMax = param[i * 2 + 1].GetDouble();
-      estimatorStruct.estimator = new JetMedianBackgroundEstimator(SelectorRapRange(etaMin, etaMax), *fDefinition, *fAreaDefinition);
+      TEstimatorStruct &estimatorStruct = fEstimators.emplace_back();
+      estimatorStruct.estimator = std::make_unique<JetMedianBackgroundEstimator>(SelectorRapRange(etaMin, etaMax), *fDefinition, *fAreaDefinition);
       estimatorStruct.etaMin = etaMin;
       estimatorStruct.etaMax = etaMax;
-      fEstimators.push_back(estimatorStruct);
     }
   }
 
@@ -300,27 +295,18 @@ void FastJetFinder::Finish()
 {
   vector<TEstimatorStruct>::iterator itEstimators;
 
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
-  {
-    if(itEstimators->estimator) delete itEstimators->estimator;
-  }
+  fEstimators.clear();
 
-  delete fItInputArray;
-  delete fDefinition;
-  delete fAreaDefinition;
-  delete static_cast<JetDefinition::Plugin *>(fPlugin);
-  delete static_cast<JetDefinition::Recombiner *>(fRecomb);
-  delete fNjettinessPlugin;
-  delete fAxesDef;
-  delete fMeasureDef;
-  delete fValenciaPlugin;
+  if(fItInputArray) delete fItInputArray;
+  if(fPlugin) delete static_cast<JetDefinition::Plugin *>(fPlugin);
+  if(fRecomb) delete static_cast<JetDefinition::Recombiner *>(fRecomb);
 }
 
 //------------------------------------------------------------------------------
 
 void FastJetFinder::Process()
 {
-  Candidate *candidate, *constituent;
+  Candidate *candidate = nullptr, *constituent = nullptr;
   TLorentzVector momentum;
 
   Double_t deta, dphi, detaMax, dphiMax;

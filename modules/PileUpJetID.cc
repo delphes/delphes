@@ -48,7 +48,6 @@ PileUpJetID::~PileUpJetID()
 
 void PileUpJetID::Init()
 {
-
   fJetPTMin = GetDouble("JetPTMin", 20.0);
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
@@ -96,10 +95,10 @@ void PileUpJetID::Finish()
 
 void PileUpJetID::Process()
 {
-  Candidate *candidate, *constituent;
+  Candidate *candidate = nullptr, *constituent = nullptr;
   TLorentzVector momentum, area;
 
-  Candidate *trk;
+  Candidate *trk = nullptr;
 
   // loop over all input candidates
   fItJetInputArray->Reset();

@@ -49,23 +49,18 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+
 using namespace std;
 
 //------------------------------------------------------------------------------
 
-CscClusterId::CscClusterId()
-{
-  fFormula = new DelphesCscClusterFormula;
-  fEtaFormula = new DelphesCscClusterFormula;
-}
+CscClusterId::CscClusterId() :
+  fFormula(std::make_unique<DelphesCscClusterFormula>()),
+  fEtaFormula(std::make_unique<DelphesCscClusterFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-CscClusterId::~CscClusterId()
-{
-  delete fFormula;
-  delete fEtaFormula;
-}
+CscClusterId::~CscClusterId() {}
 
 //------------------------------------------------------------------------------
 

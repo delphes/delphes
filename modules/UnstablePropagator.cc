@@ -52,15 +52,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-UnstablePropagator::UnstablePropagator()
-{
-}
+UnstablePropagator::UnstablePropagator() {}
 
 //------------------------------------------------------------------------------
 
-UnstablePropagator::~UnstablePropagator()
-{
-}
+UnstablePropagator::~UnstablePropagator() {}
 
 //------------------------------------------------------------------------------
 
@@ -103,7 +99,7 @@ void UnstablePropagator::Finish()
 
 void UnstablePropagator::Process()
 {
-  Candidate *candidate, *daughter;
+  Candidate *candidate = nullptr, *daughter = nullptr;
   TLorentzVector particlePosition, particleMomentum;
   Double_t pt2, q;
   Double_t lof, x, y, z;
@@ -174,7 +170,6 @@ void UnstablePropagator::Process()
 
 std::vector<Int_t> UnstablePropagator::DaughterIndices(Candidate *candidate)
 {
-
   std::vector<Int_t> indices;
 
   Int_t d1 = candidate->D1;
@@ -219,8 +214,7 @@ Double_t UnstablePropagator::FlightDistance(Candidate *mother, Candidate *daught
 
 void UnstablePropagator::ComputeChainFlightDistances(TString prefix, Candidate *candidate)
 {
-
-  Candidate *daughter, *mother;
+  Candidate *daughter = nullptr, *mother = nullptr;
   mother = candidate;
   std::vector<Int_t> drange = DaughterIndices(mother);
 
@@ -250,7 +244,7 @@ void UnstablePropagator::ComputeChainFlightDistances(TString prefix, Candidate *
 
 void UnstablePropagator::PropagateAndUpdateChain(TString prefix, Candidate *candidate)
 {
-  Candidate *daughter, *mother;
+  Candidate *daughter = nullptr, *mother = nullptr;
   TLorentzVector updatedPosition;
   mother = candidate;
   std::vector<Int_t> drange = DaughterIndices(mother);

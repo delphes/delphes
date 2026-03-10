@@ -18,7 +18,7 @@
 
 /** \class DecayFilter
  *
- *  This module randomly generates decays along the particle trajectory length 
+ *  This module randomly generates decays along the particle trajectory length
  *  according to actual particle decay length, taking into account for the boost
  *  and using ROOT TDatabasePDG as a source for the particle lifetime.
  *
@@ -59,21 +59,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DecayFilter::DecayFilter()
-{
-}
+DecayFilter::DecayFilter() {}
 
 //------------------------------------------------------------------------------
 
-DecayFilter::~DecayFilter()
-{
-}
+DecayFilter::~DecayFilter() {}
 
 //------------------------------------------------------------------------------
 
 void DecayFilter::Init()
 {
-
   // import input array(s)
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
@@ -95,7 +90,7 @@ void DecayFilter::Finish()
 
 void DecayFilter::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
   const Double_t c = TMath::C(); // [m/s]
   Double_t m, t, p, bgct, L, l;

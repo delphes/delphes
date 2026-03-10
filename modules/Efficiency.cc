@@ -51,17 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Efficiency::Efficiency()
-{
-  fFormula = new DelphesFormula;
-}
+Efficiency::Efficiency() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-Efficiency::~Efficiency()
-{
-  delete fFormula;
-}
+Efficiency::~Efficiency() {}
 
 //------------------------------------------------------------------------------
 
@@ -95,7 +89,7 @@ void Efficiency::Finish()
 
 void Efficiency::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Double_t pt, eta, phi, e;
 
   fItInputArray->Reset();

@@ -57,11 +57,10 @@
 
 using namespace std;
 
-Delphes::Delphes(const char *name)
+Delphes::Delphes(const char *name) :
+  fFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
 {
   TFolder *folder;
-
-  fFactory = new DelphesFactory("ObjectFactory");
 
   folder = new TFolder(name, "");
 
@@ -69,7 +68,7 @@ Delphes::Delphes(const char *name)
   SetFolder(folder);
 
   folder->Add(this);
-  folder->Add(fFactory);
+  folder->Add(fFactory.get());
 
   gROOT->GetListOfBrowsables()->Add(folder);
 }
@@ -85,7 +84,6 @@ Delphes::~Delphes()
     folder->Clear();
     delete folder;
   }
-  delete fFactory;
 }
 
 //------------------------------------------------------------------------------
@@ -146,14 +144,10 @@ void Delphes::Init()
 
 //------------------------------------------------------------------------------
 
-void Delphes::Process()
-{
-}
+void Delphes::Process() {}
 
 //------------------------------------------------------------------------------
 
-void Delphes::Finish()
-{
-}
+void Delphes::Finish() {}
 
 //------------------------------------------------------------------------------

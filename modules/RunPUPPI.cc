@@ -20,11 +20,11 @@ using namespace std;
 using namespace fastjet;
 
 //------------------------------------------------------------------------------
-RunPUPPI::RunPUPPI()
-{
-}
+
+RunPUPPI::RunPUPPI() {}
 
 //------------------------------------------------------------------------------
+
 RunPUPPI::~RunPUPPI() {}
 
 //------------------------------------------------------------------------------
@@ -138,16 +138,15 @@ void RunPUPPI::Init()
     //if(std::find(puppiAlgo.begin(),puppiAlgo.end(),algoTmp) != puppiAlgo.end()) continue;
     puppiAlgo.push_back(algoTmp);
   }
-  fPuppi = new PuppiContainer(true, fUseExp, fMinPuppiWeight, puppiAlgo);
+  fPuppi = std::make_unique<PuppiContainer>(true, fUseExp, fMinPuppiWeight, puppiAlgo);
 }
 
 //------------------------------------------------------------------------------
 
 void RunPUPPI::Finish()
 {
-  delete fItTrackInputArray;
-  delete fItNeutralInputArray;
-  delete fPuppi;
+  if(fItTrackInputArray) delete fItTrackInputArray;
+  if(fItNeutralInputArray) delete fItNeutralInputArray;
 }
 
 //------------------------------------------------------------------------------

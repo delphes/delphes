@@ -44,14 +44,14 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormulaEta = nullptr; //!
-  DelphesFormula *fFormulaPhi = nullptr; //!
+  const std::unique_ptr<DelphesFormula> fFormulaEta; //!
+  const std::unique_ptr<DelphesFormula> fFormulaPhi; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(AngularSmearing, 1)
 };

@@ -60,7 +60,7 @@ meanSqDeltaR betaStar SigEff BgdEff
 BRYAN
 -----
 
-Barrel (MeanSqDR, Beta, sig eff, bg eff): 
+Barrel (MeanSqDR, Beta, sig eff, bg eff):
 0.10, 0.08, 90%, 8%
 0.11, 0.12, 90%, 6%
 0.13, 0.16, 89%, 5%
@@ -74,10 +74,10 @@ Endcap (MeanSqDR, Beta, sig eff, bg eff):
 SETH GUESSES FOR |eta| > 4.0
 ----------------------------
 
-MeanSqDeltaR 
-0.07 
-0.10 
-0.14 
+MeanSqDeltaR
+0.07
+0.10
+0.14
 0.2
   */
 
@@ -88,18 +88,18 @@ MeanSqDeltaR
 
   Bool_t fAverageEachTower;
 
-  TIterator *fItJetInputArray = nullptr; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  const TObjArray *fJetInputArray = nullptr; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
-  const TObjArray *fTrackInputArray = nullptr; // SCZ
-  const TObjArray *fNeutralInputArray = nullptr;
+  const TObjArray *fTrackInputArray{nullptr}; // SCZ
+  const TObjArray *fNeutralInputArray{nullptr};
 
-  TIterator *fItTrackInputArray = nullptr; // SCZ
-  TIterator *fItNeutralInputArray = nullptr; // SCZ
+  TIterator *fItTrackInputArray{nullptr}; // SCZ
+  TIterator *fItNeutralInputArray{nullptr}; // SCZ
 
-  TObjArray *fOutputArray = nullptr; //!
-  TObjArray *fNeutralsInPassingJets = nullptr; // SCZ
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fNeutralsInPassingJets{nullptr}; // SCZ
 
   ClassDef(PileUpJetID, 2)
 };

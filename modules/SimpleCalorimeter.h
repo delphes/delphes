@@ -26,7 +26,7 @@
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *  \author A. Chattopadhyay - UPRM 
+ *  \author A. Chattopadhyay - UPRM
  *
  */
 
@@ -54,7 +54,7 @@ private:
   typedef std::map<Long64_t, Double_t> TFractionMap; //!
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fTower = nullptr;
+  Candidate *fTower{nullptr};
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
 
   Double_t fTowerEnergy;
@@ -106,21 +106,21 @@ private:
     return fInsensitiveBinSet.find(std::make_pair(etaBin, phiBin)) != fInsensitiveBinSet.end();
   }
 
-  DelphesFormula *fResolutionFormula = nullptr; //!
+  const std::unique_ptr<DelphesFormula> fResolutionFormula; //!
 
-  TIterator *fItParticleInputArray = nullptr; //!
-  TIterator *fItTrackInputArray = nullptr; //!
+  TIterator *fItParticleInputArray{nullptr}; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
 
-  const TObjArray *fParticleInputArray = nullptr; //!
-  const TObjArray *fTrackInputArray = nullptr; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
 
-  TObjArray *fTowerOutputArray = nullptr; //!
+  TObjArray *fTowerOutputArray{nullptr}; //!
 
-  TObjArray *fEFlowTrackOutputArray = nullptr; //!
-  TObjArray *fEFlowTowerOutputArray = nullptr; //!
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowTowerOutputArray{nullptr}; //!
 
-  TObjArray *fTowerTrackArray = nullptr; //!
-  TIterator *fItTowerTrackArray = nullptr; //!
+  TObjArray *fTowerTrackArray{nullptr}; //!
+  TIterator *fItTowerTrackArray{nullptr}; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

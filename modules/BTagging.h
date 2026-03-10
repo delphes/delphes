@@ -23,7 +23,7 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -50,12 +50,12 @@ private:
   Int_t fBitNumber;
 
 #if !defined(__CINT__) && !defined(__CLING__)
-  std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
+  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
 #endif
 
-  TIterator *fItJetInputArray = nullptr; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  const TObjArray *fJetInputArray = nullptr; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
   ClassDef(BTagging, 1)
 };

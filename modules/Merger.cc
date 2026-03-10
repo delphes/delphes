@@ -52,15 +52,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Merger::Merger()
-{
-}
+Merger::Merger() {}
 
 //------------------------------------------------------------------------------
 
-Merger::~Merger()
-{
-}
+Merger::~Merger() {}
 
 //------------------------------------------------------------------------------
 
@@ -96,7 +92,7 @@ void Merger::Init()
 void Merger::Finish()
 {
   vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
+  TIterator *iterator = nullptr;
 
   for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
   {
@@ -109,11 +105,11 @@ void Merger::Finish()
 
 void Merger::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   TLorentzVector momentum;
   Double_t sumPT, sumE;
   vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
+  TIterator *iterator = nullptr;
 
   DelphesFactory *factory = GetFactory();
 

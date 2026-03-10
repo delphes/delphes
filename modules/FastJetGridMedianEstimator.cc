@@ -74,15 +74,11 @@ using namespace fastjet::contrib;
 
 //------------------------------------------------------------------------------
 
-FastJetGridMedianEstimator::FastJetGridMedianEstimator()
-{
-}
+FastJetGridMedianEstimator::FastJetGridMedianEstimator() {}
 
 //------------------------------------------------------------------------------
 
-FastJetGridMedianEstimator::~FastJetGridMedianEstimator()
-{
-}
+FastJetGridMedianEstimator::~FastJetGridMedianEstimator() {}
 
 //------------------------------------------------------------------------------
 
@@ -104,7 +100,7 @@ void FastJetGridMedianEstimator::Init()
     rapMax = param[i * 4 + 1].GetDouble();
     drap = param[i * 4 + 2].GetDouble();
     dphi = param[i * 4 + 3].GetDouble();
-    fEstimators.push_back(new GridMedianBackgroundEstimator(rapMin, rapMax, drap, dphi));
+    fEstimators.push_back(std::make_unique<GridMedianBackgroundEstimator>(rapMin, rapMax, drap, dphi));
   }
 
   // import input array
@@ -119,14 +115,8 @@ void FastJetGridMedianEstimator::Init()
 
 void FastJetGridMedianEstimator::Finish()
 {
-  vector<GridMedianBackgroundEstimator *>::iterator itEstimators;
-
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
-  {
-    if(*itEstimators) delete *itEstimators;
-  }
-
-  delete fItInputArray;
+  fEstimators.clear();
+  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
@@ -140,8 +130,7 @@ void FastJetGridMedianEstimator::Process()
   PseudoJet jet;
   vector<PseudoJet> inputList, outputList;
 
-  vector<GridMedianBackgroundEstimator *>::iterator itEstimators;
-  ;
+  vector<std::unique_ptr<GridMedianBackgroundEstimator> >::iterator itEstimators;
 
   DelphesFactory *factory = GetFactory();
 

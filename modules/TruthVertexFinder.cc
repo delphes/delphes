@@ -52,21 +52,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TruthVertexFinder::TruthVertexFinder()
-{
-}
+TruthVertexFinder::TruthVertexFinder() {}
 
 //------------------------------------------------------------------------------
 
-TruthVertexFinder::~TruthVertexFinder()
-{
-}
+TruthVertexFinder::~TruthVertexFinder() {}
 
 //------------------------------------------------------------------------------
 
 void TruthVertexFinder::Init()
 {
-
   fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
@@ -91,8 +86,8 @@ void TruthVertexFinder::Process()
 {
   Int_t nvtx = -1;
   Float_t pt;
-  Candidate *candidate, *vertex;
-  DelphesFactory *factory;
+  Candidate *candidate = nullptr, *vertex = nullptr;
+  DelphesFactory *factory = nullptr;
 
   fItInputArray->Reset();
 

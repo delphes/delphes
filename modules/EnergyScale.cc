@@ -51,17 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-EnergyScale::EnergyScale()
-{
-  fFormula = new DelphesFormula;
-}
+EnergyScale::EnergyScale() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-EnergyScale::~EnergyScale()
-{
-  delete fFormula;
-}
+EnergyScale::~EnergyScale() {}
 
 //------------------------------------------------------------------------------
 
@@ -92,7 +86,7 @@ void EnergyScale::Finish()
 
 void EnergyScale::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   TLorentzVector momentum;
   Double_t scale;
 

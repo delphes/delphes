@@ -53,11 +53,11 @@ private:
   Int_t fNtracks;
   Bool_t fUse3D;
 
-  TIterator *fItTrackInputArray = nullptr; //!
-  TIterator *fItJetInputArray = nullptr; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  const TObjArray *fTrackInputArray = nullptr; //!
-  const TObjArray *fJetInputArray = nullptr; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
   ClassDef(TrackCountingBTagging, 1)
 };

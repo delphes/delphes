@@ -54,13 +54,13 @@ private:
 
   Int_t fGasOption;
 
-  TrkUtil *fTrackUtil = nullptr;
+  const std::unique_ptr<TrkUtil> fTrackUtil;
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(ClusterCounting, 1)
 };

@@ -50,13 +50,13 @@ private:
 
   std::deque<Double_t> fArrayParam;
 
-  DelphesFormula *fFormula = nullptr; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(ExampleModule, 1)
 };

@@ -51,25 +51,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackCovariance::TrackCovariance()
-{
-  fGeometry = new SolGeom();
-  fCovariance = new SolGridCov();
-  fElectronScaleFactor = new DelphesFormula;
-  fMuonScaleFactor = new DelphesFormula;
-  fChargedHadronScaleFactor = new DelphesFormula;
-}
+TrackCovariance::TrackCovariance() :
+  fElectronScaleFactor(std::make_unique<DelphesFormula>()),
+  fMuonScaleFactor(std::make_unique<DelphesFormula>()),
+  fChargedHadronScaleFactor(std::make_unique<DelphesFormula>()),
+  fGeometry(std::make_unique<SolGeom>()),
+  fCovariance(std::make_unique<SolGridCov>()) {}
 
 //------------------------------------------------------------------------------
 
-TrackCovariance::~TrackCovariance()
-{
-  delete fGeometry;
-  delete fCovariance;
-  delete fElectronScaleFactor;
-  delete fMuonScaleFactor;
-  delete fChargedHadronScaleFactor;
-}
+TrackCovariance::~TrackCovariance() {}
 
 //------------------------------------------------------------------------------
 
@@ -86,7 +77,7 @@ void TrackCovariance::Init()
   fChargedHadronScaleFactor->Compile(GetString("ChargedHadronScaleFactor", "1.0"));
 
   // load geometry
-  fCovariance->Calc(fGeometry);
+  fCovariance->Calc(fGeometry.get());
   fCovariance->SetMinHits(fNMinHits);
   // load geometry
   fAcx = fCovariance->AccPnt();
@@ -137,14 +128,14 @@ void TrackCovariance::Process()
     if(inside)
       Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
     else
-      Accept = fCovariance->IsAccepted(candidatePosition.Vect(), candidateMomentum.Vect(), fGeometry);
+      Accept = fCovariance->IsAccepted(candidatePosition.Vect(), candidateMomentum.Vect(), fGeometry.get());
     if(!Accept) continue;
 
     mass = candidateMomentum.M();
 
     // ********************************
     // Standard implementation with grid
-    //ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
+    //ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance.get(), fGeometry.get());
     // ********************************
     //
     // *******************************
@@ -153,19 +144,19 @@ void TrackCovariance::Process()
     // Comment lines below within ******** and
     // uncomment above to return to standard implementation
     //
-    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, mass, fGeometry);
-    Int_t MinMeasure = 6;     // minimum number of measurements required
+    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, mass, fGeometry.get());
+    Int_t MinMeasure = 6; // minimum number of measurements required
     if(track.GetUmeas() < MinMeasure) continue;
     //
     // *******************************
-		// apply rescaling factors to resolution
-    if (TMath::Abs(candidate->PID) == 11)
+    // apply rescaling factors to resolution
+    if(TMath::Abs(candidate->PID) == 11)
     {
-			track.SetScale(fElectronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
+      track.SetScale(fElectronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
-    else if (TMath::Abs(candidate->PID) == 13)
+    else if(TMath::Abs(candidate->PID) == 13)
     {
-        track.SetScale(fMuonScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
+      track.SetScale(fMuonScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
     else
     {

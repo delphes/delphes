@@ -42,11 +42,11 @@ private:
   Int_t fMinNDF;
   Int_t fGrowSeeds;
 
-  TObjArray *fInputArray = nullptr;
-  TIterator *fItInputArray = nullptr;
+  TObjArray *fInputArray{nullptr};
+  TIterator *fItInputArray{nullptr};
 
-  TObjArray *fOutputArray = nullptr;
-  TObjArray *fVertexOutputArray = nullptr;
+  TObjArray *fOutputArray{nullptr};
+  TObjArray *fVertexOutputArray{nullptr};
 
   std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
   std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;

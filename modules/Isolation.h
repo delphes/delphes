@@ -49,36 +49,26 @@ public:
 
 private:
   Double_t fDeltaRMax;
-
   Double_t fPTRatioMax;
-
   Double_t fPTSumMax;
-
   Double_t fDeltaRMin;
-
   Bool_t fUsePTSum;
-
   Bool_t fUseRhoCorrection;
-
   Bool_t fUseMiniCone;
 
-  IsolationClassifier *fClassifier = nullptr; //!
+  const std::unique_ptr<IsolationClassifier> fClassifier; //!
 
-  ExRootFilter *fFilter = nullptr;
+  std::unique_ptr<ExRootFilter> fFilter;
 
-  TIterator *fItIsolationInputArray = nullptr; //!
+  TIterator *fItIsolationInputArray{nullptr}; //!
+  TIterator *fItCandidateInputArray{nullptr}; //!
+  TIterator *fItRhoInputArray{nullptr}; //!
 
-  TIterator *fItCandidateInputArray = nullptr; //!
+  const TObjArray *fIsolationInputArray{nullptr}; //!
+  const TObjArray *fCandidateInputArray{nullptr}; //!
+  const TObjArray *fRhoInputArray{nullptr}; //!
 
-  TIterator *fItRhoInputArray = nullptr; //!
-
-  const TObjArray *fIsolationInputArray = nullptr; //!
-
-  const TObjArray *fCandidateInputArray = nullptr; //!
-
-  const TObjArray *fRhoInputArray = nullptr; //!
-
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(Isolation, 1)
 };

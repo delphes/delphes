@@ -61,16 +61,15 @@ private:
 
   Double_t fPTMin;
 
-  DelphesTF2 *fFunction = nullptr; //!
+  const std::unique_ptr<DelphesTF2> fFunction; //!
+  std::unique_ptr<Pythia8::Pythia> fPythia; //!
 
-  Pythia8::Pythia *fPythia = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
-
-  TObjArray *fParticleOutputArray = nullptr; //!
-  TObjArray *fVertexOutputArray = nullptr; //!
+  TObjArray *fParticleOutputArray{nullptr}; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
 
   ClassDef(PileUpMergerPythia8, 1)
 };

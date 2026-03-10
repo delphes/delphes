@@ -5,7 +5,7 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  $Date: 2013-02-22 01:01:36 +0100 (Fri, 22 Feb 2013) $
  *  $Revision: 926 $
@@ -42,25 +42,19 @@ private:
   Double_t fDeltaRTrack;
   Double_t fTrackPTMin;
 
-  std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
+  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
 
-  TrackCountingTauTaggingPartonClassifier *fClassifier = nullptr; //!
+  std::unique_ptr<TrackCountingTauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<ExRootFilter> fFilter;
 
-  ExRootFilter *fFilter = nullptr;
+  TIterator *fItPartonInputArray{nullptr}; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  TIterator *fItPartonInputArray = nullptr; //!
-
-  TIterator *fItTrackInputArray = nullptr; //!
-
-  TIterator *fItJetInputArray = nullptr; //!
-
-  const TObjArray *fParticleInputArray = nullptr; //!
-
-  const TObjArray *fTrackInputArray = nullptr; //!
-
-  const TObjArray *fPartonInputArray = nullptr; //!
-
-  const TObjArray *fJetInputArray = nullptr; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
   ClassDef(TrackCountingTauTagging, 1)
 };

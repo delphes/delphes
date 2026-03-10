@@ -54,15 +54,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ParticlePropagator::ParticlePropagator()
-{
-}
+ParticlePropagator::ParticlePropagator() {}
 
 //------------------------------------------------------------------------------
 
-ParticlePropagator::~ParticlePropagator()
-{
-}
+ParticlePropagator::~ParticlePropagator() {}
 
 //------------------------------------------------------------------------------
 
@@ -120,7 +116,7 @@ void ParticlePropagator::Finish()
 
 void ParticlePropagator::Process()
 {
-  Candidate *candidate, *mother, *particle;
+  Candidate *candidate = nullptr, *mother = nullptr, *particle = nullptr;
   TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
   Double_t px, py, pz, pt, pt2, e, q;
   Double_t x, y, z, t, r;

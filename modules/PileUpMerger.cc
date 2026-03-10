@@ -52,17 +52,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PileUpMerger::PileUpMerger()
-{
-  fFunction = new DelphesTF2;
-}
+PileUpMerger::PileUpMerger() : fFunction(std::unique_ptr<DelphesTF2>()) {}
 
 //------------------------------------------------------------------------------
 
-PileUpMerger::~PileUpMerger()
-{
-  delete fFunction;
-}
+PileUpMerger::~PileUpMerger() {}
 
 //------------------------------------------------------------------------------
 
@@ -88,7 +82,7 @@ void PileUpMerger::Init()
   fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
 
   fileName = GetString("PileUpFile", "MinBias.pileup");
-  fReader = new DelphesPileUpReader(fileName);
+  fReader = std::make_unique<DelphesPileUpReader>(fileName);
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
@@ -101,10 +95,7 @@ void PileUpMerger::Init()
 
 //------------------------------------------------------------------------------
 
-void PileUpMerger::Finish()
-{
-  delete fReader;
-}
+void PileUpMerger::Finish() {}
 
 //------------------------------------------------------------------------------
 

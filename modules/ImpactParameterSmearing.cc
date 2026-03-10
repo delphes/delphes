@@ -51,17 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ImpactParameterSmearing::ImpactParameterSmearing()
-{
-  fFormula = new DelphesFormula;
-}
+ImpactParameterSmearing::ImpactParameterSmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-ImpactParameterSmearing::~ImpactParameterSmearing()
-{
-  delete fFormula;
-}
+ImpactParameterSmearing::~ImpactParameterSmearing() {}
 
 //------------------------------------------------------------------------------
 
@@ -92,7 +86,7 @@ void ImpactParameterSmearing::Finish()
 
 void ImpactParameterSmearing::Process()
 {
-  Candidate *candidate, *particle, *mother;
+  Candidate *candidate = nullptr, *particle = nullptr, *mother = nullptr;
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 

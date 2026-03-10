@@ -54,17 +54,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PileUpMergerPythia8::PileUpMergerPythia8()
-{
-  fFunction = new DelphesTF2;
-}
+PileUpMergerPythia8::PileUpMergerPythia8() : fFunction(std::make_unique<DelphesTF2>()) {}
 
 //------------------------------------------------------------------------------
 
-PileUpMergerPythia8::~PileUpMergerPythia8()
-{
-  delete fFunction;
-}
+PileUpMergerPythia8::~PileUpMergerPythia8() {}
 
 //------------------------------------------------------------------------------
 
@@ -90,7 +84,7 @@ void PileUpMergerPythia8::Init()
   fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
 
   fileName = GetString("ConfigFile", "MinBias.cmnd");
-  fPythia = new Pythia8::Pythia();
+  fPythia = std::make_unique<Pythia8::Pythia>();
   fPythia->readFile(fileName);
 
   // import input array
@@ -106,7 +100,7 @@ void PileUpMergerPythia8::Init()
 
 void PileUpMergerPythia8::Finish()
 {
-  delete fPythia;
+  fPythia.reset();
 }
 
 //------------------------------------------------------------------------------

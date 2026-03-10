@@ -113,19 +113,13 @@ Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-JetFlavorAssociation::JetFlavorAssociation()
-{
-  fPartonClassifier = new PartonClassifier;
-  fParticleLHEFClassifier = new ParticleLHEFClassifier;
-}
+JetFlavorAssociation::JetFlavorAssociation() :
+  fPartonClassifier(std::make_unique<PartonClassifier>()),
+  fParticleLHEFClassifier(std::make_unique<ParticleLHEFClassifier>()) {}
 
 //------------------------------------------------------------------------------
 
-JetFlavorAssociation::~JetFlavorAssociation()
-{
-  delete fPartonClassifier;
-  delete fParticleLHEFClassifier;
-}
+JetFlavorAssociation::~JetFlavorAssociation() {}
 
 //------------------------------------------------------------------------------
 
@@ -144,7 +138,7 @@ void JetFlavorAssociation::Init()
   // import input array(s)
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
   fItPartonInputArray = fPartonInputArray->MakeIterator();
-  fPartonFilter = new ExRootFilter(fPartonInputArray);
+  fPartonFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
   fItParticleInputArray = fParticleInputArray->MakeIterator();
@@ -161,7 +155,7 @@ void JetFlavorAssociation::Init()
   if(fParticleLHEFInputArray)
   {
     fItParticleLHEFInputArray = fParticleLHEFInputArray->MakeIterator();
-    fParticleLHEFFilter = new ExRootFilter(fParticleLHEFInputArray);
+    fParticleLHEFFilter = std::make_unique<ExRootFilter>(fParticleLHEFInputArray);
   }
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
@@ -172,13 +166,10 @@ void JetFlavorAssociation::Init()
 
 void JetFlavorAssociation::Finish()
 {
-  delete fPartonFilter;
-  delete fParticleLHEFFilter;
-
-  delete fItJetInputArray;
-  delete fItParticleLHEFInputArray;
-  delete fItParticleInputArray;
-  delete fItPartonInputArray;
+  if(fItJetInputArray) delete fItJetInputArray;
+  if(fItParticleLHEFInputArray) delete fItParticleLHEFInputArray;
+  if(fItParticleInputArray) delete fItParticleInputArray;
+  if(fItPartonInputArray) delete fItPartonInputArray;
 }
 
 //------------------------------------------------------------------------------
@@ -192,13 +183,13 @@ void JetFlavorAssociation::Process()
 
   // select quark and gluons
   fPartonFilter->Reset();
-  partonArray = fPartonFilter->GetSubArray(fPartonClassifier, 0); // get the filtered parton array
+  partonArray = fPartonFilter->GetSubArray(fPartonClassifier.get(), 0); // get the filtered parton array
   if(partonArray == 0) return;
 
   if(fParticleLHEFInputArray)
   {
     fParticleLHEFFilter->Reset();
-    partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier, 0); // get the filtered parton array
+    partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier.get(), 0); // get the filtered parton array
   }
   // loop over all input jets
   fItJetInputArray->Reset();

@@ -23,7 +23,7 @@
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
- *  and sets b-tagging flags 
+ *  and sets b-tagging flags
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -58,22 +58,18 @@ private:
   Double_t fDeltaR;
 
 #if !defined(__CINT__) && !defined(__CLING__)
-  std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
+  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
 #endif
 
-  TauTaggingPartonClassifier *fClassifier = nullptr; //!
+  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<ExRootFilter> fFilter;
 
-  ExRootFilter *fFilter = nullptr;
+  TIterator *fItPartonInputArray{nullptr}; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  TIterator *fItPartonInputArray = nullptr; //!
-
-  TIterator *fItJetInputArray = nullptr; //!
-
-  const TObjArray *fParticleInputArray = nullptr; //!
-
-  const TObjArray *fPartonInputArray = nullptr; //!
-
-  const TObjArray *fJetInputArray = nullptr; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
   ClassDef(TauTagging, 1)
 };
@@ -89,7 +85,7 @@ public:
 
   Double_t fEtaMax, fPTMin;
 
-  const TObjArray *fParticleInputArray = nullptr;
+  const TObjArray *fParticleInputArray{nullptr};
 };
 
 #endif
