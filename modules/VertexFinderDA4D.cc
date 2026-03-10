@@ -140,10 +140,9 @@ void VertexFinderDA4D::Finish()
 void VertexFinderDA4D::Process()
 {
   Candidate *candidate = nullptr, *track = nullptr;
-  TObjArray *ClusterArray = nullptr;
-  ClusterArray = new TObjArray;
   TIterator *ItClusterArray = nullptr;
   Int_t ivtx = 0;
+  const auto ClusterArray = std::make_unique<TObjArray>();
 
   fInputArray->Sort();
 
@@ -273,8 +272,6 @@ void VertexFinderDA4D::Process()
       sort(pvs.begin(), pvs.end(), VertexHigherPtSquared());
     }
      */
-
-  delete ClusterArray;
 }
 
 //------------------------------------------------------------------------------

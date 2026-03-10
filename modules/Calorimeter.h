@@ -104,10 +104,10 @@ private:
   TObjArray *fEFlowPhotonOutputArray{nullptr}; //!
   TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
 
-  TObjArray *fECalTowerTrackArray{nullptr}; //!
-  TIterator *fItECalTowerTrackArray{nullptr}; //!
+  const std::unique_ptr<TObjArray> fECalTowerTrackArray; //!
+  const std::unique_ptr<TObjArray> fHCalTowerTrackArray; //!
 
-  TObjArray *fHCalTowerTrackArray{nullptr}; //!
+  TIterator *fItECalTowerTrackArray{nullptr}; //!
   TIterator *fItHCalTowerTrackArray{nullptr}; //!
 
   void FinalizeTower();

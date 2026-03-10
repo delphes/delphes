@@ -59,15 +59,13 @@ using namespace std;
 
 DualReadoutCalorimeter::DualReadoutCalorimeter() :
   fECalResolutionFormula(std::make_unique<DelphesFormula>()),
-  fHCalResolutionFormula(std::make_unique<DelphesFormula>())
+  fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
+  fECalTowerTrackArray(std::make_unique<TObjArray>()),
+  fHCalTowerTrackArray(std::make_unique<TObjArray>()),
+  fTowerTrackArray(std::make_unique<TObjArray>())
 {
-  fECalTowerTrackArray = new TObjArray;
   fItECalTowerTrackArray = fECalTowerTrackArray->MakeIterator();
-
-  fHCalTowerTrackArray = new TObjArray;
   fItHCalTowerTrackArray = fHCalTowerTrackArray->MakeIterator();
-
-  fTowerTrackArray = new TObjArray;
   fItTowerTrackArray = fTowerTrackArray->MakeIterator();
 }
 
@@ -75,13 +73,8 @@ DualReadoutCalorimeter::DualReadoutCalorimeter() :
 
 DualReadoutCalorimeter::~DualReadoutCalorimeter()
 {
-  if(fECalTowerTrackArray) delete fECalTowerTrackArray;
   if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
-
-  if(fHCalTowerTrackArray) delete fHCalTowerTrackArray;
   if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
-
-  if(fTowerTrackArray) delete fTowerTrackArray;
   if(fItTowerTrackArray) delete fItTowerTrackArray;
 }
 

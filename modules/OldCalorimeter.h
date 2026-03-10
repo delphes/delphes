@@ -71,19 +71,16 @@ private:
   TObjArray *fEFlowTrackOutputArray{nullptr}; //!
   TObjArray *fEFlowTowerOutputArray{nullptr}; //!
 
-  TObjArray *fTowerECalArray{nullptr}; //!
+  const std::unique_ptr<TObjArray> fTowerECalArray; //!
+  const std::unique_ptr<TObjArray> fTowerHCalArray; //!
+  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
+  const std::unique_ptr<TObjArray> fTowerECalTrackArray; //!
+  const std::unique_ptr<TObjArray> fTowerHCalTrackArray; //!
+
   TIterator *fItTowerECalArray{nullptr}; //!
-
-  TObjArray *fTowerHCalArray{nullptr}; //!
   TIterator *fItTowerHCalArray{nullptr}; //!
-
-  TObjArray *fTowerTrackArray{nullptr}; //!
   TIterator *fItTowerTrackArray{nullptr}; //!
-
-  TObjArray *fTowerECalTrackArray{nullptr}; //!
   TIterator *fItTowerECalTrackArray{nullptr}; //!
-
-  TObjArray *fTowerHCalTrackArray{nullptr}; //!
   TIterator *fItTowerHCalTrackArray{nullptr}; //!
 
   void FinalizeTower();
