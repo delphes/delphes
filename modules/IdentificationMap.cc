@@ -52,15 +52,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-IdentificationMap::IdentificationMap()
-{
-}
+IdentificationMap::IdentificationMap() {}
 
 //------------------------------------------------------------------------------
 
-IdentificationMap::~IdentificationMap()
-{
-}
+IdentificationMap::~IdentificationMap() {}
 
 //------------------------------------------------------------------------------
 
@@ -68,7 +64,6 @@ void IdentificationMap::Init()
 {
   TMisIDMap::iterator itEfficiencyMap;
   ExRootConfParam param;
-  DelphesFormula *formula;
   Int_t i, size, pdg;
 
   // read efficiency formulas
@@ -78,20 +73,20 @@ void IdentificationMap::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 3; ++i)
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 3 + 2].GetString());
     pdg = param[i * 3].GetInt();
-    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i * 3 + 1].GetInt(), formula)));
+    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i * 3 + 1].GetInt(), std::move(formula))));
   }
 
   // set default efficiency formula
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile("1.0");
 
-    fEfficiencyMap.insert(make_pair(0, make_pair(0, formula)));
+    fEfficiencyMap.insert(make_pair(0, make_pair(0, std::move(formula))));
   }
 
   // import input array
@@ -108,15 +103,8 @@ void IdentificationMap::Init()
 
 void IdentificationMap::Finish()
 {
-  delete fItInputArray;
-
-  TMisIDMap::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-  for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
-  {
-    formula = (itEfficiencyMap->second).second;
-    if(formula) delete formula;
-  }
+  if(fItInputArray) delete fItInputArray;
+  fEfficiencyMap.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -127,7 +115,6 @@ void IdentificationMap::Process()
   Double_t pt, eta, phi, e;
   TMisIDMap::iterator itEfficiencyMap;
   pair<TMisIDMap::iterator, TMisIDMap::iterator> range;
-  DelphesFormula *formula;
   Int_t pdgCodeIn, pdgCodeOut, charge;
 
   Double_t p, r, total;
@@ -160,7 +147,7 @@ void IdentificationMap::Process()
     // loop over sub-map for this PID
     for(TMisIDMap::iterator it = range.first; it != range.second; ++it)
     {
-      formula = (it->second).second;
+      auto &formula = (it->second).second;
       pdgCodeOut = (it->second).first;
 
       p = formula->Eval(pt, eta, phi, e);

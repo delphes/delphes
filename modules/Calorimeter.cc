@@ -52,11 +52,10 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Calorimeter::Calorimeter()
+Calorimeter::Calorimeter() :
+  fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+  fHCalResolutionFormula(std::make_unique<DelphesFormula>())
 {
-
-  fECalResolutionFormula = new DelphesFormula;
-  fHCalResolutionFormula = new DelphesFormula;
 
   fECalTowerTrackArray = new TObjArray;
   fItECalTowerTrackArray = fECalTowerTrackArray->MakeIterator();
@@ -69,13 +68,6 @@ Calorimeter::Calorimeter()
 
 Calorimeter::~Calorimeter()
 {
-
-  delete fECalResolutionFormula;
-  delete fHCalResolutionFormula;
-
-  delete fECalTowerTrackArray;
-  delete fItECalTowerTrackArray;
-
   delete fHCalTowerTrackArray;
   delete fItHCalTowerTrackArray;
 }

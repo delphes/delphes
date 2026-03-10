@@ -46,17 +46,17 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula = nullptr; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
   Double_t fPTMin;
 
   std::map<TIterator *, TObjArray *> fInputMap; //!
 
+  TIterator *fItVertexInputArray{nullptr}; //!
+
+  const TObjArray *fVertexInputArray{nullptr}; //!
+
   ClassDef(TrackPileUpSubtractor, 1)
-
-    TIterator *fItVertexInputArray = nullptr; //!
-
-  const TObjArray *fVertexInputArray = nullptr; //!
 };
 
 #endif

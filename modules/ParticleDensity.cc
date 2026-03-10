@@ -52,21 +52,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ParticleDensity::ParticleDensity()
-{
-}
+ParticleDensity::ParticleDensity() {}
 
 //------------------------------------------------------------------------------
 
-ParticleDensity::~ParticleDensity()
-{
-}
+ParticleDensity::~ParticleDensity() {}
 
 //------------------------------------------------------------------------------
 
 void ParticleDensity::Init()
 {
-
   // import input array(s)
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
@@ -96,7 +91,7 @@ void ParticleDensity::Init()
     binsPhi[i] = paramPhi[i].GetDouble();
   }
 
-  fHisto = new TH2F("hParticleDensity", ";#eta;#varphi;d^{2}N/d#etad#varphi", nbinsEta, binsEta.data(), nbinsPhi, binsPhi.data());
+  fHisto = std::make_unique<TH2F>("hParticleDensity", ";#eta;#varphi;d^{2}N/d#etad#varphi", nbinsEta, binsEta.data(), nbinsPhi, binsPhi.data());
 
   fUseMomentumVector = GetBool("UseMomentumVector", false);
 }
@@ -105,15 +100,14 @@ void ParticleDensity::Init()
 
 void ParticleDensity::Finish()
 {
-  delete fItInputArray;
-  delete fHisto;
+  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------
 
 void ParticleDensity::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   fHisto->Reset();
 
   // loop over all input candidates to fill histogram

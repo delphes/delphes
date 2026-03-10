@@ -52,15 +52,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-JetFakeParticle::JetFakeParticle()
-{
-}
+JetFakeParticle::JetFakeParticle() {}
 
 //------------------------------------------------------------------------------
 
-JetFakeParticle::~JetFakeParticle()
-{
-}
+JetFakeParticle::~JetFakeParticle() {}
 
 //------------------------------------------------------------------------------
 
@@ -68,7 +64,6 @@ void JetFakeParticle::Init()
 {
   TFakeMap::iterator itEfficiencyMap;
   ExRootConfParam param;
-  DelphesFormula *formula;
   Int_t i, size, pdgCode;
 
   // read efficiency formulas
@@ -79,7 +74,7 @@ void JetFakeParticle::Init()
 
   for(i = 0; i < size / 2; ++i)
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
     pdgCode = param[i * 2].GetInt();
 
@@ -88,17 +83,17 @@ void JetFakeParticle::Init()
       throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
     }
 
-    fEfficiencyMap[param[i * 2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
   }
 
   // set default efficiency formula
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
-    fEfficiencyMap[0] = formula;
+    fEfficiencyMap[0] = std::move(formula);
   }
 
   // import input array
@@ -118,25 +113,17 @@ void JetFakeParticle::Init()
 
 void JetFakeParticle::Finish()
 {
-  delete fItInputArray;
-
-  TFakeMap::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-  for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
-  {
-    formula = itEfficiencyMap->second;
-    if(formula) delete formula;
-  }
+  if(fItInputArray) delete fItInputArray;
+  fEfficiencyMap.clear();
 }
 
 //------------------------------------------------------------------------------
 
 void JetFakeParticle::Process()
 {
-  Candidate *candidate, *fake = 0;
+  Candidate *candidate = nullptr, *fake = nullptr;
   Double_t pt, eta, phi, e;
   TFakeMap::iterator itEfficiencyMap;
-  DelphesFormula *formula;
   Int_t pdgCodeOut;
 
   Double_t p, r, rs, total;
@@ -157,7 +144,7 @@ void JetFakeParticle::Process()
     // loop over map for this jet
     for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
     {
-      formula = itEfficiencyMap->second;
+      auto &formula = itEfficiencyMap->second;
       pdgCodeOut = itEfficiencyMap->first;
 
       p = formula->Eval(pt, eta, phi, e);

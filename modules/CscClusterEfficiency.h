@@ -44,13 +44,13 @@ public:
   void Finish();
 
 private:
-  DelphesCscClusterFormula *fFormula = nullptr; //!
+  const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(CscClusterEfficiency, 1)
 };

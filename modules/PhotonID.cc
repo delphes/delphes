@@ -18,7 +18,7 @@
 
 /** \class PhotonID
  *
- *  Applies complex photon Id. Reconstructed photon candidtes are first separated into matched and non-matched to gen particles. 
+ *  Applies complex photon Id. Reconstructed photon candidtes are first separated into matched and non-matched to gen particles.
  *  Non-matched pass the "fake" efficiency. Matched photons get further splitted into isolated and non-isolated (user can choose criterion for isolation)
  *  Isolated photons pass the "prompt" efficiency while the non-isolated pass the "non-prompt" efficiency
  *
@@ -53,21 +53,14 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PhotonID::PhotonID()
-{
-  fPromptFormula = new DelphesFormula;
-  fNonPromptFormula = new DelphesFormula;
-  fFakeFormula = new DelphesFormula;
-}
+PhotonID::PhotonID() :
+  fPromptFormula(std::make_unique<DelphesFormula>()),
+  fNonPromptFormula(std::make_unique<DelphesFormula>()),
+  fFakeFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-PhotonID::~PhotonID()
-{
-  delete fPromptFormula;
-  delete fNonPromptFormula;
-  delete fFakeFormula;
-}
+PhotonID::~PhotonID() {}
 
 //------------------------------------------------------------------------------
 
@@ -109,7 +102,7 @@ void PhotonID::Finish()
 
 void PhotonID::Process()
 {
-  Candidate *candidate, *mother;
+  Candidate *candidate = nullptr, *mother = nullptr;
   Double_t pt, eta, phi, e;
   Double_t relIso;
   Bool_t isolated;

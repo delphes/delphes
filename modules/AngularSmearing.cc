@@ -51,19 +51,12 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-AngularSmearing::AngularSmearing()
-{
-  fFormulaEta = new DelphesFormula;
-  fFormulaPhi = new DelphesFormula;
-}
+AngularSmearing::AngularSmearing() :
+  fFormulaEta(std::make_unique<DelphesFormula>()), fFormulaPhi(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-AngularSmearing::~AngularSmearing()
-{
-  delete fFormulaEta;
-  delete fFormulaPhi;
-}
+AngularSmearing::~AngularSmearing() {}
 
 //------------------------------------------------------------------------------
 

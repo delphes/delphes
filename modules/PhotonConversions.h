@@ -48,15 +48,14 @@ private:
   Double_t fRadius, fRadius2, fHalfLength;
   Double_t fEtaMin, fEtaMax;
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
-  DelphesCylindricalFormula *fConversionMap = nullptr; //!
-
-  TF1 *fDecayXsec = nullptr; //!
+  const std::unique_ptr<DelphesCylindricalFormula> fConversionMap; //!
+  const std::unique_ptr<TF1> fDecayXsec; //!
 
   Double_t fStep;
 

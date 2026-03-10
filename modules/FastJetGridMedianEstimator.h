@@ -49,13 +49,13 @@ public:
   void Finish();
 
 private:
-  std::vector<fastjet::GridMedianBackgroundEstimator *> fEstimators; //!
+  std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fRhoOutputArray = nullptr; //!
+  TObjArray *fRhoOutputArray{nullptr}; //!
 
   ClassDef(FastJetGridMedianEstimator, 1)
 };

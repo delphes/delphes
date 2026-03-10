@@ -30,18 +30,18 @@ public:
   void Finish();
 
 private:
-  TObjArray *fInputArray = nullptr;
+  TObjArray *fInputArray{nullptr};
 
-  TObjArray *fTrackInputArray = nullptr;
-  TIterator *fItTrackInputArray = nullptr;
+  TObjArray *fTrackInputArray{nullptr};
+  TIterator *fItTrackInputArray{nullptr};
 
-  TObjArray *fJetInputArray = nullptr;
-  TIterator *fItJetInputArray = nullptr;
+  TObjArray *fJetInputArray{nullptr};
+  TIterator *fItJetInputArray{nullptr};
 
-  TObjArray *fBeamSpotInputArray = nullptr;
-  TIterator *fItBeamSpotInputArray = nullptr;
+  TObjArray *fBeamSpotInputArray{nullptr};
+  TIterator *fItBeamSpotInputArray{nullptr};
 
-  TObjArray *fOutputArray = nullptr;
+  TObjArray *fOutputArray{nullptr};
 
   std::string fMethod;
 

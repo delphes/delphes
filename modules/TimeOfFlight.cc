@@ -50,21 +50,16 @@
 using namespace std;
 //------------------------------------------------------------------------------
 
-TimeOfFlight::TimeOfFlight()
-{
-}
+TimeOfFlight::TimeOfFlight() {}
 
 //------------------------------------------------------------------------------
 
-TimeOfFlight::~TimeOfFlight()
-{
-}
+TimeOfFlight::~TimeOfFlight() {}
 
 //------------------------------------------------------------------------------
 
 void TimeOfFlight::Init()
 {
-
   // method to compute vertex time
   fVertexTimeMode = GetInt("VertexTimeMode", 0);
 
@@ -92,7 +87,7 @@ void TimeOfFlight::Finish()
 
 void TimeOfFlight::Process()
 {
-  Candidate *candidate, *particle, *vertex, *constituent, *mother;
+  Candidate *candidate = nullptr, *particle = nullptr, *vertex = nullptr, *constituent = nullptr, *mother = nullptr;
   Double_t ti, t_truth, tf;
   Double_t l, tof, beta;
 
@@ -189,7 +184,7 @@ void TimeOfFlight::Process()
 
 void TimeOfFlight::ComputeVertexMomenta()
 {
-  Candidate *track, *constituent, *particle, *vertex;
+  Candidate *track = nullptr, *constituent = nullptr, *particle = nullptr, *vertex = nullptr;
 
   fItVertexInputArray->Reset();
   while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))

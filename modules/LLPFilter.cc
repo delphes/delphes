@@ -54,21 +54,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-LLPFilter::LLPFilter()
-{
-}
+LLPFilter::LLPFilter() {}
 
 //------------------------------------------------------------------------------
 
-LLPFilter::~LLPFilter()
-{
-}
+LLPFilter::~LLPFilter() {}
 
 //------------------------------------------------------------------------------
 
 void LLPFilter::Init()
 {
-
   ExRootConfParam param;
   Size_t i, size;
 
@@ -129,12 +124,12 @@ void LLPFilter::Finish()
 void LLPFilter::Process()
 {
 
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Int_t pdgCode;
   Double_t pt, eta;
-  Candidate *tempCandidate;
+  Candidate *tempCandidate = nullptr;
 
-  Candidate *daughter;
+  Candidate *daughter = nullptr;
   Int_t daughterPdg;
 
   // loop over particles to find LLP

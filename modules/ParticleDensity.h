@@ -46,14 +46,14 @@ public:
   void Finish();
 
 private:
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   Bool_t fUseMomentumVector; // !
-  TH2F *fHisto = nullptr; //!
+  std::unique_ptr<TH2F> fHisto; //!
 
   ClassDef(ParticleDensity, 1)
 };

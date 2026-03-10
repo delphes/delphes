@@ -48,9 +48,9 @@ public:
 private:
   std::vector<TIterator *> fInputList; //!
 
-  TObjArray *fOutputArray = nullptr; //!
-  TObjArray *fMomentumOutputArray = nullptr; //!
-  TObjArray *fEnergyOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fMomentumOutputArray{nullptr}; //!
+  TObjArray *fEnergyOutputArray{nullptr}; //!
 
   ClassDef(Merger, 1)
 };

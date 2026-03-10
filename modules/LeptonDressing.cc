@@ -51,15 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-LeptonDressing::LeptonDressing()
-{
-}
+LeptonDressing::LeptonDressing() {}
 
 //------------------------------------------------------------------------------
 
-LeptonDressing::~LeptonDressing()
-{
-}
+LeptonDressing::~LeptonDressing() {}
 
 //------------------------------------------------------------------------------
 
@@ -92,7 +88,7 @@ void LeptonDressing::Finish()
 
 void LeptonDressing::Process()
 {
-  Candidate *candidate, *dressing, *mother;
+  Candidate *candidate = nullptr, *dressing = nullptr, *mother = nullptr;
   TLorentzVector momentum;
 
   // loop over all input candidate

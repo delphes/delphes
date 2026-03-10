@@ -51,17 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-EnergySmearing::EnergySmearing()
-{
-  fFormula = new DelphesFormula;
-}
+EnergySmearing::EnergySmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-EnergySmearing::~EnergySmearing()
-{
-  delete fFormula;
-}
+EnergySmearing::~EnergySmearing() {}
 
 //------------------------------------------------------------------------------
 
@@ -92,7 +86,7 @@ void EnergySmearing::Finish()
 
 void EnergySmearing::Process()
 {
-  Candidate *candidate, *mother;
+  Candidate *candidate = nullptr, *mother = nullptr;
   Double_t pt, energy, eta, phi, m;
 
   fItInputArray->Reset();

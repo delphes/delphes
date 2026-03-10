@@ -21,7 +21,7 @@
 
 /** \class PhotonID
  *
- *  Applies complex photon Id. Reconstructed photon candidtes are first separated into matched and non-matched to gen particles. 
+ *  Applies complex photon Id. Reconstructed photon candidtes are first separated into matched and non-matched to gen particles.
  *  Non-matched pass the "fake" efficiency. Matched photons get further splitted into isolated and non-isolated (user can choose criterion for isolation)
  *  Isolated photons pass the "prompt" efficiency while the non-isolated pass the "non-prompt" efficiency
  *
@@ -47,22 +47,22 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fPromptFormula = nullptr;
-  DelphesFormula *fNonPromptFormula = nullptr;
-  DelphesFormula *fFakeFormula = nullptr;
+  const std::unique_ptr<DelphesFormula> fPromptFormula;
+  const std::unique_ptr<DelphesFormula> fNonPromptFormula;
+  const std::unique_ptr<DelphesFormula> fFakeFormula;
 
   // import input arrays
-  const TObjArray *fInputPhotonArray = nullptr;
-  TIterator *fItInputPhotonArray = nullptr;
+  const TObjArray *fInputPhotonArray{nullptr};
+  TIterator *fItInputPhotonArray{nullptr};
 
   // use filtered collection for speed
-  const TObjArray *fInputGenArray = nullptr;
-  TIterator *fItInputGenArray = nullptr;
+  const TObjArray *fInputGenArray{nullptr};
+  TIterator *fItInputGenArray{nullptr};
 
   Double_t fPTMin;
   Double_t fRelIsoMax;
 
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   Bool_t isFake(const Candidate *obj);
 

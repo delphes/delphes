@@ -51,15 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DenseTrackFilter::DenseTrackFilter()
-{
-}
+DenseTrackFilter::DenseTrackFilter() {}
 
 //------------------------------------------------------------------------------
 
-DenseTrackFilter::~DenseTrackFilter()
-{
-}
+DenseTrackFilter::~DenseTrackFilter() {}
 
 //------------------------------------------------------------------------------
 
@@ -69,7 +65,7 @@ void DenseTrackFilter::Init()
   Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
   TBinMap::iterator itEtaBin;
   set<Double_t>::iterator itPhiBin;
-  vector<Double_t> *phiBins;
+  vector<Double_t> *phiBins = nullptr;
 
   // read eta and phi bins
   param = GetParam("EtaPhiBins");
@@ -135,7 +131,7 @@ void DenseTrackFilter::Finish()
 
 void DenseTrackFilter::Process()
 {
-  Candidate *track;
+  Candidate *track = nullptr;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
@@ -233,8 +229,7 @@ void DenseTrackFilter::Process()
 
 void DenseTrackFilter::FillTrack()
 {
-
-  Candidate *candidate, *track;
+  Candidate *candidate = nullptr, *track = nullptr;
   Double_t pt, eta, phi, m;
   Int_t numberOfCandidates;
 

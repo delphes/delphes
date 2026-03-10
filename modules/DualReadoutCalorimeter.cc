@@ -57,12 +57,10 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DualReadoutCalorimeter::DualReadoutCalorimeter()
+DualReadoutCalorimeter::DualReadoutCalorimeter() :
+  fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+  fHCalResolutionFormula(std::make_unique<DelphesFormula>())
 {
-
-  fECalResolutionFormula = new DelphesFormula;
-  fHCalResolutionFormula = new DelphesFormula;
-
   fECalTowerTrackArray = new TObjArray;
   fItECalTowerTrackArray = fECalTowerTrackArray->MakeIterator();
 
@@ -77,18 +75,14 @@ DualReadoutCalorimeter::DualReadoutCalorimeter()
 
 DualReadoutCalorimeter::~DualReadoutCalorimeter()
 {
+  if(fECalTowerTrackArray) delete fECalTowerTrackArray;
+  if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
 
-  delete fECalResolutionFormula;
-  delete fHCalResolutionFormula;
+  if(fHCalTowerTrackArray) delete fHCalTowerTrackArray;
+  if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
 
-  delete fECalTowerTrackArray;
-  delete fItECalTowerTrackArray;
-
-  delete fHCalTowerTrackArray;
-  delete fItHCalTowerTrackArray;
-
-  delete fTowerTrackArray;
-  delete fItTowerTrackArray;
+  if(fTowerTrackArray) delete fTowerTrackArray;
+  if(fItTowerTrackArray) delete fItTowerTrackArray;
 }
 
 //------------------------------------------------------------------------------
@@ -100,7 +94,7 @@ void DualReadoutCalorimeter::Init()
   Double_t ecalFraction, hcalFraction;
   TBinMap::iterator itEtaBin;
   set<Double_t>::iterator itPhiBin;
-  vector<Double_t> *phiBins;
+  vector<Double_t> *phiBins = nullptr;
 
   // read eta and phi bins
   param = GetParam("EtaPhiBins");
@@ -198,8 +192,8 @@ void DualReadoutCalorimeter::Init()
 void DualReadoutCalorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  delete fItParticleInputArray;
-  delete fItTrackInputArray;
+  if(fItParticleInputArray) delete fItParticleInputArray;
+  if(fItTrackInputArray) delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;
@@ -210,7 +204,7 @@ void DualReadoutCalorimeter::Finish()
 
 void DualReadoutCalorimeter::Process()
 {
-  Candidate *particle, *track;
+  Candidate *particle = nullptr, *track = nullptr;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
@@ -473,8 +467,7 @@ void DualReadoutCalorimeter::Process()
 
 void DualReadoutCalorimeter::FinalizeTower()
 {
-
-  Candidate *track, *tower, *mother, *candidate;
+  Candidate *track = nullptr, *tower = nullptr, *mother = nullptr, *candidate = nullptr;
   Double_t energy, pt, eta, phi, r, time;
   Double_t neutralEnergy;
 

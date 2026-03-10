@@ -59,15 +59,15 @@ public:
   void Finish();
 
 private:
-  void *fPlugin = nullptr; //!
-  void *fRecomb = nullptr; //!
+  void *fPlugin{nullptr}; //!
+  void *fRecomb{nullptr}; //!
 
-  fastjet::contrib::AxesDefinition *fAxesDef = nullptr;
-  fastjet::contrib::MeasureDefinition *fMeasureDef = nullptr;
+  std::unique_ptr<fastjet::contrib::AxesDefinition> fAxesDef;
+  std::unique_ptr<fastjet::contrib::MeasureDefinition> fMeasureDef;
 
-  fastjet::contrib::NjettinessPlugin *fNjettinessPlugin = nullptr; //!
-  fastjet::contrib::ValenciaPlugin *fValenciaPlugin = nullptr; //!
-  fastjet::JetDefinition *fDefinition = nullptr; //!
+  std::unique_ptr<fastjet::contrib::NjettinessPlugin> fNjettinessPlugin; //!
+  std::unique_ptr<fastjet::contrib::ValenciaPlugin> fValenciaPlugin; //!
+  std::unique_ptr<fastjet::JetDefinition> fDefinition; //!
 
   Int_t fJetAlgorithm;
   Double_t fParameterR;
@@ -122,7 +122,7 @@ private:
 
   // --- FastJet Area method --------
 
-  fastjet::AreaDefinition *fAreaDefinition = nullptr;
+  std::unique_ptr<fastjet::AreaDefinition> fAreaDefinition;
   Int_t fAreaAlgorithm;
   Bool_t fComputeRho;
 
@@ -140,20 +140,20 @@ private:
 #if !defined(__CINT__) && !defined(__CLING__)
   struct TEstimatorStruct
   {
-    fastjet::JetMedianBackgroundEstimator *estimator;
+    std::unique_ptr<fastjet::JetMedianBackgroundEstimator> estimator;
     Double_t etaMin, etaMax;
   };
 
   std::vector<TEstimatorStruct> fEstimators; //!
 #endif
 
-  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray = nullptr; //!
-  TObjArray *fRhoOutputArray = nullptr; //!
-  TObjArray *fConstituentsOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fRhoOutputArray{nullptr}; //!
+  TObjArray *fConstituentsOutputArray{nullptr}; //!
 
   ClassDef(FastJetFinder, 1)
 };

@@ -35,25 +35,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackSmearing::TrackSmearing()
-{
-  fD0Formula = new DelphesFormula;
-  fDZFormula = new DelphesFormula;
-  fPFormula = new DelphesFormula;
-  fCtgThetaFormula = new DelphesFormula;
-  fPhiFormula = new DelphesFormula;
-}
+TrackSmearing::TrackSmearing() :
+  fD0Formula(std::make_unique<DelphesFormula>()),
+  fDZFormula(std::make_unique<DelphesFormula>()),
+  fPFormula(std::make_unique<DelphesFormula>()),
+  fCtgThetaFormula(std::make_unique<DelphesFormula>()),
+  fPhiFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-TrackSmearing::~TrackSmearing()
-{
-  delete fD0Formula;
-  delete fDZFormula;
-  delete fPFormula;
-  delete fCtgThetaFormula;
-  delete fPhiFormula;
-}
+TrackSmearing::~TrackSmearing() {}
 
 //------------------------------------------------------------------------------
 
@@ -154,7 +145,7 @@ void TrackSmearing::Finish()
 void TrackSmearing::Process()
 {
   TLorentzVector beamSpotPosition;
-  Candidate *candidate, *mother;
+  Candidate *candidate = nullptr, *mother = nullptr;
   Double_t pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
   Double_t x, y, z, t, px, py, pz, theta;
   Double_t q, r;

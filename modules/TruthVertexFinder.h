@@ -44,12 +44,13 @@ public:
 private:
   Double_t fResolution; //!
 
-  TIterator *fItInputArray = nullptr; //!
-  TIterator *fItOutputArray = nullptr; //!
+  TIterator *fItInputArray{nullptr}; //!
+  TIterator *fItOutputArray{nullptr}; //!
 
-  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fVertexOutputArray = nullptr; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
+
   ClassDef(TruthVertexFinder, 1)
 };
 

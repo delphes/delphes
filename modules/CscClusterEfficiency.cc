@@ -52,17 +52,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-CscClusterEfficiency::CscClusterEfficiency()
-{
-  fFormula = new DelphesCscClusterFormula;
-}
+CscClusterEfficiency::CscClusterEfficiency() : fFormula(std::make_unique<DelphesCscClusterFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-CscClusterEfficiency::~CscClusterEfficiency()
-{
-  delete fFormula;
-}
+CscClusterEfficiency::~CscClusterEfficiency() {}
 
 //------------------------------------------------------------------------------
 
@@ -92,7 +86,7 @@ void CscClusterEfficiency::Finish()
 
 void CscClusterEfficiency::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Double_t Ehad, Eem, decayR, decayZ;
 
   fItInputArray->Reset();

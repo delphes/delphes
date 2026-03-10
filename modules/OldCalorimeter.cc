@@ -39,11 +39,10 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-OldCalorimeter::OldCalorimeter()
+OldCalorimeter::OldCalorimeter() :
+  fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+  fHCalResolutionFormula(std::make_unique<DelphesFormula>())
 {
-  fECalResolutionFormula = new DelphesFormula;
-  fHCalResolutionFormula = new DelphesFormula;
-
   fTowerECalArray = new TObjArray;
   fItTowerECalArray = fTowerECalArray->MakeIterator();
   fTowerHCalArray = new TObjArray;
@@ -61,13 +60,10 @@ OldCalorimeter::OldCalorimeter()
 
 OldCalorimeter::~OldCalorimeter()
 {
-  delete fECalResolutionFormula;
-  delete fHCalResolutionFormula;
-
-  delete fTowerECalArray;
-  delete fItTowerECalArray;
-  delete fTowerHCalArray;
-  delete fItTowerHCalArray;
+  if(fTowerECalArray) delete fTowerECalArray;
+  if(fItTowerECalArray) delete fItTowerECalArray;
+  if(fTowerHCalArray) delete fTowerHCalArray;
+  if(fItTowerHCalArray) delete fItTowerHCalArray;
 
   delete fTowerTrackArray;
   delete fItTowerTrackArray;
@@ -184,7 +180,7 @@ void OldCalorimeter::Finish()
 
 void OldCalorimeter::Process()
 {
-  Candidate *particle, *track;
+  Candidate *particle = nullptr, *track = nullptr;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
@@ -421,10 +417,10 @@ void OldCalorimeter::Process()
 
 void OldCalorimeter::FinalizeTower()
 {
-  Candidate *particle, *track, *tower;
+  Candidate *particle = nullptr, *track = nullptr, *tower = nullptr;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
-  TIterator *itTowerTrackArray;
+  TIterator *itTowerTrackArray = nullptr;
 
   if(!fTower) return;
 

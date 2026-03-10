@@ -43,15 +43,13 @@ public:
 private:
   Double_t fDeltaR;
 
-  TIterator *fItDressingInputArray = nullptr; //!
+  TIterator *fItDressingInputArray{nullptr}; //!
+  TIterator *fItCandidateInputArray{nullptr}; //!
 
-  TIterator *fItCandidateInputArray = nullptr; //!
+  const TObjArray *fDressingInputArray{nullptr}; //!
+  const TObjArray *fCandidateInputArray{nullptr}; //!
 
-  const TObjArray *fDressingInputArray = nullptr; //!
-
-  const TObjArray *fCandidateInputArray = nullptr; //!
-
-  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(LeptonDressing, 1)
 };

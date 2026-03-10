@@ -50,7 +50,7 @@ public:
 private:
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fBestTrack = nullptr;
+  Candidate *fBestTrack{nullptr};
 
   Int_t fTowerTrackHits;
 
@@ -63,14 +63,14 @@ private:
 
   std::vector<Long64_t> fTowerHits;
 
-  TIterator *fItTrackInputArray = nullptr; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
 
-  const TObjArray *fTrackInputArray = nullptr; //!
-  TObjArray *fTrackOutputArray = nullptr; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  TObjArray *fTrackOutputArray{nullptr}; //!
 
-  TObjArray *fChargedHadronOutputArray = nullptr; //!
-  TObjArray *fElectronOutputArray = nullptr; //!
-  TObjArray *fMuonOutputArray = nullptr; //!
+  TObjArray *fChargedHadronOutputArray{nullptr}; //!
+  TObjArray *fElectronOutputArray{nullptr}; //!
+  TObjArray *fMuonOutputArray{nullptr}; //!
 
   void FillTrack();
   ClassDef(DenseTrackFilter, 1)

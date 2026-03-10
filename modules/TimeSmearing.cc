@@ -50,17 +50,11 @@
 using namespace std;
 //------------------------------------------------------------------------------
 
-TimeSmearing::TimeSmearing()
-{
-  fResolutionFormula = new DelphesFormula;
-}
+TimeSmearing::TimeSmearing() : fResolutionFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-TimeSmearing::~TimeSmearing()
-{
-  delete fResolutionFormula;
-}
+TimeSmearing::~TimeSmearing() {}
 
 //------------------------------------------------------------------------------
 
@@ -100,7 +94,6 @@ void TimeSmearing::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
-
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
