@@ -48,9 +48,8 @@ private:
   const std::unique_ptr<DelphesCscClusterFormula> fEtaFormula; //!
   Double_t fEtaCutMax;
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

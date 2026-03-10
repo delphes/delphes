@@ -56,19 +56,13 @@ Calorimeter::Calorimeter() :
   fECalResolutionFormula(std::make_unique<DelphesFormula>()),
   fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
   fECalTowerTrackArray(std::make_unique<TObjArray>()),
-  fHCalTowerTrackArray(std::make_unique<TObjArray>())
-{
-  fItECalTowerTrackArray = fECalTowerTrackArray->MakeIterator();
-  fItHCalTowerTrackArray = fHCalTowerTrackArray->MakeIterator();
-}
+  fItECalTowerTrackArray(fECalTowerTrackArray->MakeIterator()),
+  fHCalTowerTrackArray(std::make_unique<TObjArray>()),
+  fItHCalTowerTrackArray(fHCalTowerTrackArray->MakeIterator()) {}
 
 //------------------------------------------------------------------------------
 
-Calorimeter::~Calorimeter()
-{
-  if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
-  if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
-}
+Calorimeter::~Calorimeter() {}
 
 //------------------------------------------------------------------------------
 
@@ -158,10 +152,10 @@ void Calorimeter::Init()
 
   // import array with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fItParticleInputArray = fParticleInputArray->MakeIterator();
+  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -177,8 +171,6 @@ void Calorimeter::Init()
 void Calorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  delete fItParticleInputArray;
-  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

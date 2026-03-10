@@ -46,7 +46,7 @@ public:
   void Finish();
 
 private:
-  std::vector<TIterator *> fInputList; //!
+  std::vector<std::unique_ptr<TIterator> > fInputList; //!
 
   TObjArray *fOutputArray{nullptr}; //!
   TObjArray *fMomentumOutputArray{nullptr}; //!

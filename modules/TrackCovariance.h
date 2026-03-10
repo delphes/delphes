@@ -61,7 +61,7 @@ private:
 
   AcceptanceClx *fAcx{nullptr};
 
-  TIterator *fItInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   const TObjArray *fInputArray{nullptr}; //!
 

@@ -43,7 +43,7 @@ private:
   Int_t fGrowSeeds;
 
   TObjArray *fInputArray{nullptr};
-  TIterator *fItInputArray{nullptr};
+  std::unique_ptr<TIterator> fItInputArray;
 
   TObjArray *fOutputArray{nullptr};
   TObjArray *fVertexOutputArray{nullptr};

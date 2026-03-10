@@ -56,9 +56,8 @@ private:
 
   const std::unique_ptr<TrkUtil> fTrackUtil;
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

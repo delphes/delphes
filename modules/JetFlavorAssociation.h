@@ -60,10 +60,10 @@ private:
   std::unique_ptr<ExRootFilter> fPartonFilter;
   std::unique_ptr<ExRootFilter> fParticleLHEFFilter;
 
-  TIterator *fItPartonInputArray{nullptr}; //!
-  TIterator *fItParticleInputArray{nullptr}; //!
-  TIterator *fItParticleLHEFInputArray{nullptr}; //!
-  TIterator *fItJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+  std::unique_ptr<TIterator> fItParticleLHEFInputArray; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
 
   const TObjArray *fPartonInputArray{nullptr}; //!
   const TObjArray *fParticleInputArray{nullptr}; //!

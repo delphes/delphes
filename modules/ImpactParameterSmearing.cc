@@ -68,7 +68,7 @@ void ImpactParameterSmearing::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -77,10 +77,7 @@ void ImpactParameterSmearing::Init()
 
 //------------------------------------------------------------------------------
 
-void ImpactParameterSmearing::Finish()
-{
-  delete fItInputArray;
-}
+void ImpactParameterSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 

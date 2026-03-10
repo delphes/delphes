@@ -108,11 +108,11 @@ private:
 
   const std::unique_ptr<DelphesFormula> fResolutionFormula; //!
 
-  TIterator *fItParticleInputArray{nullptr}; //!
-  TIterator *fItTrackInputArray{nullptr}; //!
-
   const TObjArray *fParticleInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+
   const TObjArray *fTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
 
   TObjArray *fTowerOutputArray{nullptr}; //!
 
@@ -120,7 +120,7 @@ private:
   TObjArray *fEFlowTowerOutputArray{nullptr}; //!
 
   const std::unique_ptr<TObjArray> fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray{nullptr}; //!
+  const std::unique_ptr<TIterator> fItTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

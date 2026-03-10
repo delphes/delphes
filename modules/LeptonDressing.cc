@@ -66,10 +66,10 @@ void LeptonDressing::Init()
   // import input array(s)
 
   fDressingInputArray = ImportArray(GetString("DressingInputArray", "Calorimeter/photons"));
-  fItDressingInputArray = fDressingInputArray->MakeIterator();
+  fItDressingInputArray.reset(fDressingInputArray->MakeIterator());
 
   fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"));
-  fItCandidateInputArray = fCandidateInputArray->MakeIterator();
+  fItCandidateInputArray.reset(fCandidateInputArray->MakeIterator());
 
   // create output array
 
@@ -78,11 +78,7 @@ void LeptonDressing::Init()
 
 //------------------------------------------------------------------------------
 
-void LeptonDressing::Finish()
-{
-  delete fItCandidateInputArray;
-  delete fItDressingInputArray;
-}
+void LeptonDressing::Finish() {}
 
 //------------------------------------------------------------------------------
 

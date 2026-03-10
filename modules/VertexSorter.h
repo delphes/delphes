@@ -33,13 +33,11 @@ private:
   TObjArray *fInputArray{nullptr};
 
   TObjArray *fTrackInputArray{nullptr};
-  TIterator *fItTrackInputArray{nullptr};
-
   TObjArray *fJetInputArray{nullptr};
-  TIterator *fItJetInputArray{nullptr};
-
   TObjArray *fBeamSpotInputArray{nullptr};
-  TIterator *fItBeamSpotInputArray{nullptr};
+
+  std::unique_ptr<TIterator> fItTrackInputArray;
+  std::unique_ptr<TIterator> fItJetInputArray;
 
   TObjArray *fOutputArray{nullptr};
 

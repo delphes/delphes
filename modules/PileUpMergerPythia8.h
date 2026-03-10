@@ -64,9 +64,8 @@ private:
   const std::unique_ptr<DelphesTF2> fFunction; //!
   std::unique_ptr<Pythia8::Pythia> fPythia; //!
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fParticleOutputArray{nullptr}; //!
   TObjArray *fVertexOutputArray{nullptr}; //!

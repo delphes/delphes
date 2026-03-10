@@ -60,9 +60,9 @@ private:
 
   Bool_t fApplyToPileUp;
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
   const TObjArray *fBeamSpotInputArray{nullptr}; //!
 
   TObjArray *fOutputArray{nullptr}; //!

@@ -47,9 +47,8 @@ private:
   const std::unique_ptr<DelphesFormula> fResolutionFormula;
   Int_t fVertexTimeMode;
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

@@ -106,7 +106,7 @@ void FastJetGridMedianEstimator::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
 }
@@ -116,7 +116,6 @@ void FastJetGridMedianEstimator::Init()
 void FastJetGridMedianEstimator::Finish()
 {
   fEstimators.clear();
-  if(fItInputArray) delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

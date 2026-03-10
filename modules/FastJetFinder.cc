@@ -280,7 +280,7 @@ void FastJetFinder::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output arrays
 
@@ -297,7 +297,6 @@ void FastJetFinder::Finish()
 
   fEstimators.clear();
 
-  if(fItInputArray) delete fItInputArray;
   if(fPlugin) delete static_cast<JetDefinition::Plugin *>(fPlugin);
   if(fRecomb) delete static_cast<JetDefinition::Recombiner *>(fRecomb);
 }

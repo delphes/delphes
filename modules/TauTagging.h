@@ -64,12 +64,13 @@ private:
   std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
   std::unique_ptr<ExRootFilter> fFilter;
 
-  TIterator *fItPartonInputArray{nullptr}; //!
-  TIterator *fItJetInputArray{nullptr}; //!
-
   const TObjArray *fParticleInputArray{nullptr}; //!
+
   const TObjArray *fPartonInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+
   const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
 
   ClassDef(TauTagging, 1)
 };

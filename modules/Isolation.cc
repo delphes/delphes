@@ -108,18 +108,18 @@ void Isolation::Init()
   // import input array(s)
 
   fIsolationInputArray = ImportArray(GetString("IsolationInputArray", "Delphes/partons"));
-  fItIsolationInputArray = fIsolationInputArray->MakeIterator();
+  fItIsolationInputArray.reset(fIsolationInputArray->MakeIterator());
 
   fFilter = std::make_unique<ExRootFilter>(fIsolationInputArray);
 
   fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "Calorimeter/electrons"));
-  fItCandidateInputArray = fCandidateInputArray->MakeIterator();
+  fItCandidateInputArray.reset(fCandidateInputArray->MakeIterator());
 
   rhoInputArrayName = GetString("RhoInputArray", "");
   if(rhoInputArrayName[0] != '\0')
   {
     fRhoInputArray = ImportArray(rhoInputArrayName);
-    fItRhoInputArray = fRhoInputArray->MakeIterator();
+    fItRhoInputArray.reset(fRhoInputArray->MakeIterator());
   }
   else
   {
@@ -133,12 +133,7 @@ void Isolation::Init()
 
 //------------------------------------------------------------------------------
 
-void Isolation::Finish()
-{
-  if(fItRhoInputArray) delete fItRhoInputArray;
-  if(fItCandidateInputArray) delete fItCandidateInputArray;
-  if(fItIsolationInputArray) delete fItIsolationInputArray;
-}
+void Isolation::Finish() {}
 
 //------------------------------------------------------------------------------
 

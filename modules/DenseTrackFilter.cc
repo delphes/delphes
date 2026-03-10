@@ -107,7 +107,7 @@ void DenseTrackFilter::Init()
   fEtaPhiRes = GetDouble("EtaPhiRes", 0.003);
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMergerProp/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   fTrackOutputArray = ExportArray(GetString("TrackOutputArray", "tracks"));
   fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
@@ -120,7 +120,6 @@ void DenseTrackFilter::Init()
 void DenseTrackFilter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

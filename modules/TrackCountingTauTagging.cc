@@ -158,25 +158,21 @@ void TrackCountingTauTagging::Init()
   fClassifier->fEtaMax = GetDouble("TauEtaMax", 2.5);
 
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
+  fItPartonInputArray.reset(fPartonInputArray->MakeIterator());
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMerger/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   fFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+  fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
 void TrackCountingTauTagging::Finish()
 {
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
-
   fEfficiencyMap.clear();
 }
 

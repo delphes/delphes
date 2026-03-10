@@ -116,7 +116,7 @@ void TrackSmearing::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // import beamspot
   try
@@ -135,10 +135,7 @@ void TrackSmearing::Init()
 
 //------------------------------------------------------------------------------
 
-void TrackSmearing::Finish()
-{
-  delete fItInputArray;
-}
+void TrackSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 

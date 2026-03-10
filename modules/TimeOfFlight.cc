@@ -65,11 +65,11 @@ void TimeOfFlight::Init()
 
   // import track input array
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // import vertex input array
   fVertexInputArray = ImportArray(GetString("VertexInputArray", "TruthVertexFinder/vertices"));
-  fItVertexInputArray = fVertexInputArray->MakeIterator();
+  fItVertexInputArray.reset(fVertexInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -77,11 +77,7 @@ void TimeOfFlight::Init()
 
 //------------------------------------------------------------------------------
 
-void TimeOfFlight::Finish()
-{
-  delete fItInputArray;
-  delete fItVertexInputArray;
-}
+void TimeOfFlight::Finish() {}
 
 //------------------------------------------------------------------------------
 

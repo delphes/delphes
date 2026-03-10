@@ -81,7 +81,7 @@ void PhotonConversions::Init()
   // import array with output from filter/classifier module
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output arrays
 
@@ -90,10 +90,7 @@ void PhotonConversions::Init()
 
 //------------------------------------------------------------------------------
 
-void PhotonConversions::Finish()
-{
-  if(fItInputArray) delete fItInputArray;
-}
+void PhotonConversions::Finish() {}
 
 //------------------------------------------------------------------------------
 

@@ -46,11 +46,11 @@ public:
 private:
   Int_t fVertexTimeMode;
 
-  TIterator *fItInputArray{nullptr}; //!
-  TIterator *fItVertexInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
   const TObjArray *fVertexInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItVertexInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

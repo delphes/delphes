@@ -68,7 +68,7 @@ void EnergySmearing::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -77,10 +77,7 @@ void EnergySmearing::Init()
 
 //------------------------------------------------------------------------------
 
-void EnergySmearing::Finish()
-{
-  delete fItInputArray;
-}
+void EnergySmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 

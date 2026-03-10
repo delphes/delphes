@@ -64,7 +64,6 @@ void ConstituentFilter::Init()
   ExRootConfParam param;
   Long_t i, size;
   const TObjArray *array;
-  TIterator *iterator;
 
   fJetPTMin = GetDouble("JetPTMin", 0.0);
 
@@ -75,9 +74,7 @@ void ConstituentFilter::Init()
   for(i = 0; i < size; ++i)
   {
     array = ImportArray(param[i].GetString());
-    iterator = array->MakeIterator();
-
-    fInputList.push_back(iterator);
+    fInputList.push_back(std::unique_ptr<TIterator>(array->MakeIterator()));
   }
 
   param = GetParam("ConstituentInputArray");
@@ -85,9 +82,7 @@ void ConstituentFilter::Init()
   for(i = 0; i < size / 2; ++i)
   {
     array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
-
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
+    fInputMap[std::unique_ptr<TIterator>(array->MakeIterator())] = ExportArray(param[i * 2 + 1].GetString());
   }
 }
 
@@ -95,21 +90,8 @@ void ConstituentFilter::Init()
 
 void ConstituentFilter::Finish()
 {
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
-
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
-  {
-    iterator = *itInputList;
-    if(iterator) delete iterator;
-  }
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-    if(iterator) delete iterator;
-  }
+  fInputList.clear();
+  fInputMap.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -117,15 +99,14 @@ void ConstituentFilter::Finish()
 void ConstituentFilter::Process()
 {
   Candidate *jet, *constituent;
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
+  map<std::unique_ptr<TIterator>, TObjArray *>::iterator itInputMap;
+  vector<std::unique_ptr<TIterator> >::iterator itInputList;
   TObjArray *array;
 
   // loop over all jet input arrays
   for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
   {
-    iterator = *itInputList;
+    auto &iterator = *itInputList;
 
     // loop over all jets
     iterator->Reset();
@@ -147,7 +128,7 @@ void ConstituentFilter::Process()
   // loop over all constituent input arrays
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
   {
-    iterator = itInputMap->first;
+    auto &iterator = itInputMap->first;
     array = itInputMap->second;
 
     // loop over all constituents

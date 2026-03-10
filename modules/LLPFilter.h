@@ -66,12 +66,11 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
-  TIterator *fItParticleInputArray{nullptr};
   const TObjArray *fParticleInputArray{nullptr};
+  std::unique_ptr<TIterator> fItParticleInputArray;
 
   TObjArray *fOutputArray{nullptr}; //!
 

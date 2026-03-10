@@ -99,7 +99,7 @@ void JetFakeParticle::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -113,7 +113,6 @@ void JetFakeParticle::Init()
 
 void JetFakeParticle::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
   fEfficiencyMap.clear();
 }
 

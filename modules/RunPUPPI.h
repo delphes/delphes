@@ -26,13 +26,14 @@ private:
   double fMinPuppiWeight;
   bool fUseExp;
 
-  TIterator *fItTrackInputArray{nullptr};
-  TIterator *fItNeutralInputArray{nullptr}; //!
-  TIterator *fPVItInputArray{nullptr}; //!
-
   const TObjArray *fTrackInputArray{nullptr};
+  std::unique_ptr<TIterator> fItTrackInputArray;
+
   const TObjArray *fNeutralInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItNeutralInputArray; //!
+
   const TObjArray *fPVInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fPVItInputArray; //!
 
   std::vector<float> fEtaMinBin;
   std::vector<float> fEtaMaxBin;

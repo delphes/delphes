@@ -47,9 +47,8 @@ private:
   const std::unique_ptr<DelphesFormula> fFormulaEta; //!
   const std::unique_ptr<DelphesFormula> fFormulaPhi; //!
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

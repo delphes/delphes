@@ -80,7 +80,7 @@ void PdgCodeFilter::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   param = GetParam("PdgCode");
   size = param.GetSize();
@@ -99,10 +99,7 @@ void PdgCodeFilter::Init()
 
 //------------------------------------------------------------------------------
 
-void PdgCodeFilter::Finish()
-{
-  delete fItInputArray;
-}
+void PdgCodeFilter::Finish() {}
 
 //------------------------------------------------------------------------------
 

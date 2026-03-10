@@ -61,22 +61,15 @@ DualReadoutCalorimeter::DualReadoutCalorimeter() :
   fECalResolutionFormula(std::make_unique<DelphesFormula>()),
   fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
   fECalTowerTrackArray(std::make_unique<TObjArray>()),
+  fItECalTowerTrackArray(fECalTowerTrackArray->MakeIterator()),
   fHCalTowerTrackArray(std::make_unique<TObjArray>()),
-  fTowerTrackArray(std::make_unique<TObjArray>())
-{
-  fItECalTowerTrackArray = fECalTowerTrackArray->MakeIterator();
-  fItHCalTowerTrackArray = fHCalTowerTrackArray->MakeIterator();
-  fItTowerTrackArray = fTowerTrackArray->MakeIterator();
-}
+  fItHCalTowerTrackArray(fHCalTowerTrackArray->MakeIterator()),
+  fTowerTrackArray(std::make_unique<TObjArray>()),
+  fItTowerTrackArray(fTowerTrackArray->MakeIterator()) {}
 
 //------------------------------------------------------------------------------
 
-DualReadoutCalorimeter::~DualReadoutCalorimeter()
-{
-  if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
-  if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
-}
+DualReadoutCalorimeter::~DualReadoutCalorimeter() {}
 
 //------------------------------------------------------------------------------
 
@@ -166,10 +159,10 @@ void DualReadoutCalorimeter::Init()
 
   // import array with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fItParticleInputArray = fParticleInputArray->MakeIterator();
+  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -185,8 +178,6 @@ void DualReadoutCalorimeter::Init()
 void DualReadoutCalorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

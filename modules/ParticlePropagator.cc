@@ -85,7 +85,7 @@ void ParticlePropagator::Init()
   // import array with output from filter/classifier module
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // import beamspot
   try
@@ -107,10 +107,7 @@ void ParticlePropagator::Init()
 
 //------------------------------------------------------------------------------
 
-void ParticlePropagator::Finish()
-{
-  delete fItInputArray;
-}
+void ParticlePropagator::Finish() {}
 
 //------------------------------------------------------------------------------
 

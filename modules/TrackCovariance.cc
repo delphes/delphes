@@ -84,7 +84,7 @@ void TrackCovariance::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -93,10 +93,7 @@ void TrackCovariance::Init()
 
 //------------------------------------------------------------------------------
 
-void TrackCovariance::Finish()
-{
-  delete fItInputArray;
-}
+void TrackCovariance::Finish() {}
 
 //------------------------------------------------------------------------------
 
