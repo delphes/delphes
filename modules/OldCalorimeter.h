@@ -59,8 +59,8 @@ private:
   const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
   const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray{nullptr}; //!
-  TIterator *fItTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
 
   const TObjArray *fParticleInputArray{nullptr}; //!
   const TObjArray *fTrackInputArray{nullptr}; //!
@@ -77,11 +77,11 @@ private:
   const std::unique_ptr<TObjArray> fTowerECalTrackArray; //!
   const std::unique_ptr<TObjArray> fTowerHCalTrackArray; //!
 
-  TIterator *fItTowerECalArray{nullptr}; //!
-  TIterator *fItTowerHCalArray{nullptr}; //!
-  TIterator *fItTowerTrackArray{nullptr}; //!
-  TIterator *fItTowerECalTrackArray{nullptr}; //!
-  TIterator *fItTowerHCalTrackArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItTowerECalArray; //!
+  std::unique_ptr<TIterator> fItTowerHCalArray; //!
+  std::unique_ptr<TIterator> fItTowerTrackArray; //!
+  std::unique_ptr<TIterator> fItTowerECalTrackArray; //!
+  std::unique_ptr<TIterator> fItTowerHCalTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

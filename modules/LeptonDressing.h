@@ -43,11 +43,11 @@ public:
 private:
   Double_t fDeltaR;
 
-  TIterator *fItDressingInputArray{nullptr}; //!
-  TIterator *fItCandidateInputArray{nullptr}; //!
-
   const TObjArray *fDressingInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItDressingInputArray; //!
+
   const TObjArray *fCandidateInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItCandidateInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

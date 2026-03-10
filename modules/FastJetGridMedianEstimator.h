@@ -51,9 +51,8 @@ public:
 private:
   std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fRhoOutputArray{nullptr}; //!
 

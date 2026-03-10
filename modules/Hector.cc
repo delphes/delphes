@@ -86,7 +86,7 @@ void Hector::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -95,10 +95,7 @@ void Hector::Init()
 
 //------------------------------------------------------------------------------
 
-void Hector::Finish()
-{
-  if(fItInputArray) delete fItInputArray;
-}
+void Hector::Finish() {}
 
 //------------------------------------------------------------------------------
 

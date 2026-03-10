@@ -52,9 +52,8 @@ private:
 
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

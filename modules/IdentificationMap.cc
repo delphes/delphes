@@ -92,7 +92,7 @@ void IdentificationMap::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -103,7 +103,6 @@ void IdentificationMap::Init()
 
 void IdentificationMap::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
   fEfficiencyMap.clear();
 }
 

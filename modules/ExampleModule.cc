@@ -82,7 +82,7 @@ void ExampleModule::Init()
   // import input array(s)
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array(s)
 
@@ -91,10 +91,7 @@ void ExampleModule::Init()
 
 //------------------------------------------------------------------------------
 
-void ExampleModule::Finish()
-{
-  delete fItInputArray;
-}
+void ExampleModule::Finish() {}
 
 //------------------------------------------------------------------------------
 

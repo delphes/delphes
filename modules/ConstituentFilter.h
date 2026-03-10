@@ -48,9 +48,9 @@ public:
 private:
   Double_t fJetPTMin;
 
-  std::vector<TIterator *> fInputList; //!
+  std::vector<std::unique_ptr<TIterator> > fInputList; //!
 
-  std::map<TIterator *, TObjArray *> fInputMap; //!
+  std::map<std::unique_ptr<TIterator>, TObjArray *> fInputMap; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

@@ -65,7 +65,7 @@ void ParticleDensity::Init()
   // import input array(s)
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array(s)
 
@@ -98,10 +98,7 @@ void ParticleDensity::Init()
 
 //------------------------------------------------------------------------------
 
-void ParticleDensity::Finish()
-{
-  if(fItInputArray) delete fItInputArray;
-}
+void ParticleDensity::Finish() {}
 
 //------------------------------------------------------------------------------
 

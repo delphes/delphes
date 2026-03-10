@@ -33,11 +33,11 @@ void RunPUPPI::Init()
 {
   // input collection
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/towers"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
   fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "Calorimeter/towers"));
-  fItNeutralInputArray = fNeutralInputArray->MakeIterator();
+  fItNeutralInputArray.reset(fNeutralInputArray->MakeIterator());
   fPVInputArray = ImportArray(GetString("PVInputArray", "PV"));
-  fPVItInputArray = fPVInputArray->MakeIterator();
+  fPVItInputArray.reset(fPVInputArray->MakeIterator());
   // puppi parameters
   fApplyNoLep = GetBool("UseNoLep", true);
   fMinPuppiWeight = GetDouble("MinPuppiWeight", 0.01);
@@ -143,11 +143,7 @@ void RunPUPPI::Init()
 
 //------------------------------------------------------------------------------
 
-void RunPUPPI::Finish()
-{
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItNeutralInputArray) delete fItNeutralInputArray;
-}
+void RunPUPPI::Finish() {}
 
 //------------------------------------------------------------------------------
 

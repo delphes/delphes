@@ -70,7 +70,7 @@ void TaggingParticlesSkimmer::Init()
 
   // import input array
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
+  fItPartonInputArray.reset(fPartonInputArray->MakeIterator());
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
 
@@ -86,10 +86,7 @@ void TaggingParticlesSkimmer::Init()
 
 //------------------------------------------------------------------------------
 
-void TaggingParticlesSkimmer::Finish()
-{
-  if(fItPartonInputArray) delete fItPartonInputArray;
-}
+void TaggingParticlesSkimmer::Finish() {}
 
 //------------------------------------------------------------------------------
 

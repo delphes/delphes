@@ -60,9 +60,9 @@ private:
 
   std::unique_ptr<ExRootFilter> fFilter;
 
-  TIterator *fItIsolationInputArray{nullptr}; //!
-  TIterator *fItCandidateInputArray{nullptr}; //!
-  TIterator *fItRhoInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItIsolationInputArray; //!
+  std::unique_ptr<TIterator> fItCandidateInputArray; //!
+  std::unique_ptr<TIterator> fItRhoInputArray; //!
 
   const TObjArray *fIsolationInputArray{nullptr}; //!
   const TObjArray *fCandidateInputArray{nullptr}; //!

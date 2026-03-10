@@ -74,11 +74,11 @@ void PhotonID::Init()
 
   // import input arrays
   fInputPhotonArray = ImportArray(GetString("InputPhotonArray", "PhotonIsolation/photons"));
-  fItInputPhotonArray = fInputPhotonArray->MakeIterator();
+  fItInputPhotonArray.reset(fInputPhotonArray->MakeIterator());
 
   // use filtered collection for speed
   fInputGenArray = ImportArray(GetString("InputGenArray", "GenParticleFilter/filteredParticles"));
-  fItInputGenArray = fInputGenArray->MakeIterator();
+  fItInputGenArray.reset(fInputGenArray->MakeIterator());
 
   // min pt to be considered, make sure this threshold is higher than threshold in particle filter
   fPTMin = GetDouble("PTMin", 10.0);
@@ -92,11 +92,7 @@ void PhotonID::Init()
 
 //------------------------------------------------------------------------------
 
-void PhotonID::Finish()
-{
-  delete fItInputPhotonArray;
-  delete fItInputGenArray;
-}
+void PhotonID::Finish() {}
 
 //------------------------------------------------------------------------------
 

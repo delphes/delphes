@@ -65,20 +65,16 @@ void TruthVertexFinder::Init()
   fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output arrays
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-  //fItOutputArray = fVertexOutputArray->MakeIterator();
+  //fItOutputArray.reset(fVertexOutputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
-void TruthVertexFinder::Finish()
-{
-  delete fItInputArray;
-  delete fItOutputArray;
-}
+void TruthVertexFinder::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -107,7 +103,7 @@ void TruthVertexFinder::Process()
 
     // check whether vertex already included, if so add particle
     Bool_t old_vertex = false;
-    fItOutputArray = fVertexOutputArray->MakeIterator();
+    fItOutputArray.reset(fVertexOutputArray->MakeIterator());
     fItOutputArray->Reset();
     while((vertex = static_cast<Candidate *>(fItOutputArray->Next())))
     {

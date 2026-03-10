@@ -137,11 +137,11 @@ void JetFlavorAssociation::Init()
 
   // import input array(s)
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
+  fItPartonInputArray.reset(fPartonInputArray->MakeIterator());
   fPartonFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
-  fItParticleInputArray = fParticleInputArray->MakeIterator();
+  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   try
   {
@@ -154,23 +154,17 @@ void JetFlavorAssociation::Init()
 
   if(fParticleLHEFInputArray)
   {
-    fItParticleLHEFInputArray = fParticleLHEFInputArray->MakeIterator();
+    fItParticleLHEFInputArray.reset(fParticleLHEFInputArray->MakeIterator());
     fParticleLHEFFilter = std::make_unique<ExRootFilter>(fParticleLHEFInputArray);
   }
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+  fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
-void JetFlavorAssociation::Finish()
-{
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItParticleLHEFInputArray) delete fItParticleLHEFInputArray;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
-}
+void JetFlavorAssociation::Finish() {}
 
 //------------------------------------------------------------------------------
 

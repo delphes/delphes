@@ -46,11 +46,11 @@ public:
 private:
   Double_t fJetPTMin;
 
-  TIterator *fItJetInputArray{nullptr}; //!
-  TIterator *fItRhoInputArray{nullptr}; //!
-
   const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+
   const TObjArray *fRhoInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItRhoInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

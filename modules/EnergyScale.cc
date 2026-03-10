@@ -68,7 +68,7 @@ void EnergyScale::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -77,10 +77,7 @@ void EnergyScale::Init()
 
 //------------------------------------------------------------------------------
 
-void EnergyScale::Finish()
-{
-  delete fItInputArray;
-}
+void EnergyScale::Finish() {}
 
 //------------------------------------------------------------------------------
 

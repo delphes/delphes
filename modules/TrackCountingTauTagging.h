@@ -47,9 +47,9 @@ private:
   std::unique_ptr<TrackCountingTauTaggingPartonClassifier> fClassifier; //!
   std::unique_ptr<ExRootFilter> fFilter;
 
-  TIterator *fItPartonInputArray{nullptr}; //!
-  TIterator *fItTrackInputArray{nullptr}; //!
-  TIterator *fItJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
 
   const TObjArray *fParticleInputArray{nullptr}; //!
   const TObjArray *fTrackInputArray{nullptr}; //!

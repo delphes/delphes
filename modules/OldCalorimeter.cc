@@ -48,23 +48,16 @@ OldCalorimeter::OldCalorimeter() :
   fTowerECalTrackArray(std::make_unique<TObjArray>()),
   fTowerHCalTrackArray(std::make_unique<TObjArray>())
 {
-  fItTowerECalArray = fTowerECalArray->MakeIterator();
-  fItTowerHCalArray = fTowerHCalArray->MakeIterator();
-  fItTowerTrackArray = fTowerTrackArray->MakeIterator();
-  fItTowerECalTrackArray = fTowerECalTrackArray->MakeIterator();
-  fItTowerHCalTrackArray = fTowerHCalTrackArray->MakeIterator();
+  fItTowerECalArray.reset(fTowerECalArray->MakeIterator());
+  fItTowerHCalArray.reset(fTowerHCalArray->MakeIterator());
+  fItTowerTrackArray.reset(fTowerTrackArray->MakeIterator());
+  fItTowerECalTrackArray.reset(fTowerECalTrackArray->MakeIterator());
+  fItTowerHCalTrackArray.reset(fTowerHCalTrackArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
-OldCalorimeter::~OldCalorimeter()
-{
-  if(fItTowerECalArray) delete fItTowerECalArray;
-  if(fItTowerHCalArray) delete fItTowerHCalArray;
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
-  if(fItTowerECalTrackArray) delete fItTowerECalTrackArray;
-  if(fItTowerHCalTrackArray) delete fItTowerHCalTrackArray;
-}
+OldCalorimeter::~OldCalorimeter() {}
 
 //------------------------------------------------------------------------------
 
@@ -143,10 +136,10 @@ void OldCalorimeter::Init()
 
   // import array with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fItParticleInputArray = fParticleInputArray->MakeIterator();
+  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -161,8 +154,6 @@ void OldCalorimeter::Init()
 void OldCalorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  delete fItParticleInputArray;
-  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;
@@ -471,11 +462,11 @@ void OldCalorimeter::FinalizeTower()
   {
     if(fTowerECalHits == fTowerECalTrackHits && fTowerHCalHits == fTowerHCalTrackHits)
     {
-      itTowerTrackArray = fItTowerTrackArray;
+      itTowerTrackArray = fItTowerTrackArray.get();
     }
     else if(fTowerECalHits == fTowerECalTrackHits)
     {
-      itTowerTrackArray = fItTowerECalTrackArray;
+      itTowerTrackArray = fItTowerECalTrackArray.get();
 
       if(hcalEnergy > 0.0)
       {
@@ -507,7 +498,7 @@ void OldCalorimeter::FinalizeTower()
     }
     else if(fTowerHCalHits == fTowerHCalTrackHits)
     {
-      itTowerTrackArray = fItTowerHCalTrackArray;
+      itTowerTrackArray = fItTowerHCalTrackArray.get();
 
       if(ecalEnergy > 0.0)
       {

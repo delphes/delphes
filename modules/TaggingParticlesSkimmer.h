@@ -55,9 +55,9 @@ private:
   std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
   std::unique_ptr<ExRootFilter> fFilter;
 
-  TIterator *fItPartonInputArray{nullptr}; //!
-
   const TObjArray *fPartonInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+
   const TObjArray *fParticleInputArray{nullptr}; //!
 
   TObjArray *fOutputArray{nullptr}; //!

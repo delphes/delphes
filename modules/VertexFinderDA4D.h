@@ -46,7 +46,7 @@ private:
   Double_t fDtCutOff{0.}; // for when the beamspot has time
 
   TObjArray *fInputArray{nullptr};
-  TIterator *fItInputArray{nullptr};
+  std::unique_ptr<TIterator> fItInputArray;
 
   TObjArray *fOutputArray{nullptr};
   TObjArray *fVertexOutputArray{nullptr};

@@ -68,7 +68,7 @@ void Efficiency::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // switch to compute efficiency based on momentum vector eta, phi
   fUseMomentumVector = GetBool("UseMomentumVector", false);
@@ -80,10 +80,7 @@ void Efficiency::Init()
 
 //------------------------------------------------------------------------------
 
-void Efficiency::Finish()
-{
-  delete fItInputArray;
-}
+void Efficiency::Finish() {}
 
 //------------------------------------------------------------------------------
 

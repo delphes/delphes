@@ -58,9 +58,8 @@ private:
   const std::unique_ptr<DelphesTF2> fFunction; //!
   std::unique_ptr<DelphesPileUpReader> fReader; //!
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray{nullptr}; //!
 
   TObjArray *fParticleOutputArray{nullptr}; //!
   TObjArray *fVertexOutputArray{nullptr}; //!

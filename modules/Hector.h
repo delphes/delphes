@@ -53,9 +53,8 @@ private:
 
   std::unique_ptr<H_BeamLine> fBeamLine;
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

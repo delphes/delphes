@@ -55,17 +55,12 @@ using namespace std;
 
 SimpleCalorimeter::SimpleCalorimeter() :
   fResolutionFormula(std::make_unique<DelphesFormula>()),
-  fTowerTrackArray(std::make_unique<TObjArray>())
-{
-  fItTowerTrackArray = fTowerTrackArray->MakeIterator();
-}
+  fTowerTrackArray(std::make_unique<TObjArray>()),
+  fItTowerTrackArray(fTowerTrackArray->MakeIterator()) {}
 
 //------------------------------------------------------------------------------
 
-SimpleCalorimeter::~SimpleCalorimeter()
-{
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
-}
+SimpleCalorimeter::~SimpleCalorimeter() {}
 
 //------------------------------------------------------------------------------
 
@@ -178,10 +173,10 @@ void SimpleCalorimeter::Init()
 
   // import array with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fItParticleInputArray = fParticleInputArray->MakeIterator();
+  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -195,8 +190,6 @@ void SimpleCalorimeter::Init()
 void SimpleCalorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  delete fItParticleInputArray;
-  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

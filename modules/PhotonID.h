@@ -53,11 +53,11 @@ private:
 
   // import input arrays
   const TObjArray *fInputPhotonArray{nullptr};
-  TIterator *fItInputPhotonArray{nullptr};
+  std::unique_ptr<TIterator> fItInputPhotonArray;
 
   // use filtered collection for speed
   const TObjArray *fInputGenArray{nullptr};
-  TIterator *fItInputGenArray{nullptr};
+  std::unique_ptr<TIterator> fItInputGenArray;
 
   Double_t fPTMin;
   Double_t fRelIsoMax;

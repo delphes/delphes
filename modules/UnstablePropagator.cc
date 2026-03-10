@@ -85,15 +85,12 @@ void UnstablePropagator::Init()
   // import array with output from filter/classifier module
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
-void UnstablePropagator::Finish()
-{
-  delete fItInputArray;
-}
+void UnstablePropagator::Finish() {}
 
 //------------------------------------------------------------------------------
 

@@ -64,7 +64,7 @@ void TrackPileUpSubtractor::Init()
   // import input array
 
   fVertexInputArray = ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"));
-  fItVertexInputArray = fVertexInputArray->MakeIterator();
+  fItVertexInputArray.reset(fVertexInputArray->MakeIterator());
 
   // read resolution formula in m
   fFormula->Compile(GetString("ZVertexResolution", "0.001"));
@@ -76,15 +76,12 @@ void TrackPileUpSubtractor::Init()
   ExRootConfParam param = GetParam("InputArray");
   Long_t i, size;
   const TObjArray *array;
-  TIterator *iterator;
 
   size = param.GetSize();
   for(i = 0; i < size / 2; ++i)
   {
     array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
-
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
+    fInputMap[std::unique_ptr<TIterator>(array->MakeIterator())] = ExportArray(param[i * 2 + 1].GetString());
   }
 }
 
@@ -92,17 +89,7 @@ void TrackPileUpSubtractor::Init()
 
 void TrackPileUpSubtractor::Finish()
 {
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  TIterator *iterator;
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-
-    if(iterator) delete iterator;
-  }
-
-  delete fItVertexInputArray;
+  fInputMap.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -110,8 +97,7 @@ void TrackPileUpSubtractor::Finish()
 void TrackPileUpSubtractor::Process()
 {
   Candidate *candidate, *particle;
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  TIterator *iterator;
+  map<std::unique_ptr<TIterator>, TObjArray *>::iterator itInputMap;
   TObjArray *array;
   Double_t z, zvtx = 0;
   Double_t pt, eta, phi, e;
@@ -131,7 +117,7 @@ void TrackPileUpSubtractor::Process()
   // loop over all input arrays
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
   {
-    iterator = itInputMap->first;
+    auto &iterator = itInputMap->first;
     array = itInputMap->second;
 
     // loop over all candidates

@@ -63,9 +63,9 @@ private:
 
   std::vector<Long64_t> fTowerHits;
 
-  TIterator *fItTrackInputArray{nullptr}; //!
-
   const TObjArray *fTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+
   TObjArray *fTrackOutputArray{nullptr}; //!
 
   TObjArray *fChargedHadronOutputArray{nullptr}; //!

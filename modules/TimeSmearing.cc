@@ -67,7 +67,7 @@ void TimeSmearing::Init()
 
   // import track input array
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -75,10 +75,7 @@ void TimeSmearing::Init()
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Finish()
-{
-  delete fItInputArray;
-}
+void TimeSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 

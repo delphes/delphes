@@ -163,7 +163,7 @@ void StatusPidFilter::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -172,10 +172,7 @@ void StatusPidFilter::Init()
 
 //------------------------------------------------------------------------------
 
-void StatusPidFilter::Finish()
-{
-  delete fItInputArray;
-}
+void StatusPidFilter::Finish() {}
 
 //------------------------------------------------------------------------------
 

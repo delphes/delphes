@@ -119,7 +119,7 @@ void Weighter::Init()
   // import input array(s)
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array(s)
 
@@ -128,10 +128,7 @@ void Weighter::Init()
 
 //------------------------------------------------------------------------------
 
-void Weighter::Finish()
-{
-  delete fItInputArray;
-}
+void Weighter::Finish() {}
 
 //------------------------------------------------------------------------------
 

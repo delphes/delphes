@@ -68,7 +68,7 @@ void CscClusterEfficiency::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -77,10 +77,7 @@ void CscClusterEfficiency::Init()
 
 //------------------------------------------------------------------------------
 
-void CscClusterEfficiency::Finish()
-{
-  delete fItInputArray;
-}
+void CscClusterEfficiency::Finish() {}
 
 //------------------------------------------------------------------------------
 

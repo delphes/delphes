@@ -122,7 +122,7 @@ void VertexFinderDA4D::Init()
   fD0CutOff /= 10.0;
 
   fInputArray = ImportArray(GetString("InputArray", "TrackSmearing/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
@@ -130,10 +130,7 @@ void VertexFinderDA4D::Init()
 
 //------------------------------------------------------------------------------
 
-void VertexFinderDA4D::Finish()
-{
-  delete fItInputArray;
-}
+void VertexFinderDA4D::Finish() {}
 
 //------------------------------------------------------------------------------
 

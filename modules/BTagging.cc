@@ -91,15 +91,12 @@ void BTagging::Init()
   // import input array(s)
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+  fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
-void BTagging::Finish()
-{
-  if(fItJetInputArray) delete fItJetInputArray;
-}
+void BTagging::Finish() {}
 
 //------------------------------------------------------------------------------
 

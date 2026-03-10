@@ -50,9 +50,8 @@ private:
   TFakeMap fEfficiencyMap;
 #endif
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fElectronOutputArray{nullptr}; //!
   TObjArray *fMuonOutputArray{nullptr}; //!

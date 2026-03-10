@@ -53,9 +53,8 @@ private:
   std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
 #endif
 
-  TIterator *fItJetInputArray{nullptr}; //!
-
   const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
 
   ClassDef(BTagging, 1)
 };

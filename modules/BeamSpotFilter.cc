@@ -46,7 +46,7 @@ void BeamSpotFilter::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
 
@@ -55,10 +55,7 @@ void BeamSpotFilter::Init()
 
 //------------------------------------------------------------------------------
 
-void BeamSpotFilter::Finish()
-{
-  delete fItInputArray;
-}
+void BeamSpotFilter::Finish() {}
 
 //------------------------------------------------------------------------------
 

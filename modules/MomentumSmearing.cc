@@ -68,7 +68,7 @@ void MomentumSmearing::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+  fItInputArray.reset(fInputArray->MakeIterator());
 
   // switch to compute momentum smearing based on momentum vector eta, phi
   fUseMomentumVector = GetBool("UseMomentumVector", false);
@@ -80,10 +80,7 @@ void MomentumSmearing::Init()
 
 //------------------------------------------------------------------------------
 
-void MomentumSmearing::Finish()
-{
-  delete fItInputArray;
-}
+void MomentumSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 

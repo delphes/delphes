@@ -49,9 +49,8 @@ private:
 
   TMisIDMap fEfficiencyMap; //!
 
-  TIterator *fItInputArray{nullptr}; //!
-
   const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
   TObjArray *fOutputArray{nullptr}; //!
 

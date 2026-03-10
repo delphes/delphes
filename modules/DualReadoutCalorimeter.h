@@ -100,8 +100,8 @@ private:
   const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
   const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray{nullptr}; //!
-  TIterator *fItTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
 
   const TObjArray *fParticleInputArray{nullptr}; //!
   const TObjArray *fTrackInputArray{nullptr}; //!
@@ -114,12 +114,13 @@ private:
   TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
 
   const std::unique_ptr<TObjArray> fECalTowerTrackArray; //!
-  const std::unique_ptr<TObjArray> fHCalTowerTrackArray; //!
-  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
+  const std::unique_ptr<TIterator> fItECalTowerTrackArray; //!
 
-  TIterator *fItECalTowerTrackArray{nullptr}; //!
-  TIterator *fItHCalTowerTrackArray{nullptr}; //!
-  TIterator *fItTowerTrackArray{nullptr}; //!
+  const std::unique_ptr<TObjArray> fHCalTowerTrackArray; //!
+  const std::unique_ptr<TIterator> fItHCalTowerTrackArray; //!
+
+  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
+  const std::unique_ptr<TIterator> fItTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
