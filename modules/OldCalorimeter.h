@@ -24,7 +24,7 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class OldCalorimeter: public DelphesModule
+class OldCalorimeter : public DelphesModule
 {
 public:
   OldCalorimeter();
@@ -38,7 +38,7 @@ private:
   typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fTower;
+  Candidate *fTower{nullptr};
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTowerECalNeutralEnergy, fTowerHCalNeutralEnergy;
@@ -56,35 +56,35 @@ private:
   std::vector<Double_t> fECalFractions;
   std::vector<Double_t> fHCalFractions;
 
-  DelphesFormula *fECalResolutionFormula; //!
-  DelphesFormula *fHCalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItParticleInputArray{nullptr}; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
 
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
 
-  TObjArray *fTowerOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
+  TObjArray *fTowerOutputArray{nullptr}; //!
+  TObjArray *fPhotonOutputArray{nullptr}; //!
 
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowTowerOutputArray; //!
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowTowerOutputArray{nullptr}; //!
 
-  TObjArray *fTowerECalArray; //!
-  TIterator *fItTowerECalArray; //!
+  TObjArray *fTowerECalArray{nullptr}; //!
+  TIterator *fItTowerECalArray{nullptr}; //!
 
-  TObjArray *fTowerHCalArray; //!
-  TIterator *fItTowerHCalArray; //!
+  TObjArray *fTowerHCalArray{nullptr}; //!
+  TIterator *fItTowerHCalArray{nullptr}; //!
 
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
+  TObjArray *fTowerTrackArray{nullptr}; //!
+  TIterator *fItTowerTrackArray{nullptr}; //!
 
-  TObjArray *fTowerECalTrackArray; //!
-  TIterator *fItTowerECalTrackArray; //!
+  TObjArray *fTowerECalTrackArray{nullptr}; //!
+  TIterator *fItTowerECalTrackArray{nullptr}; //!
 
-  TObjArray *fTowerHCalTrackArray; //!
-  TIterator *fItTowerHCalTrackArray; //!
+  TObjArray *fTowerHCalTrackArray{nullptr}; //!
+  TIterator *fItTowerHCalTrackArray{nullptr}; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

@@ -6,11 +6,11 @@
  *
  */
 
-#include "modules/VertexFinderDA4D.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesPileUpReader.h"
+#include "modules/VertexFinderDA4D.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -91,18 +91,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-VertexFinderDA4D::VertexFinderDA4D() :
-  fVerbose(0), fMinPT(0), fVertexSpaceSize(0), fVertexTimeSize(0),
-  fUseTc(0), fBetaMax(0), fBetaStop(0), fCoolingFactor(0),
-  fMaxIterations(0), fDzCutOff(0), fD0CutOff(0), fDtCutOff(0)
-{
-}
+VertexFinderDA4D::VertexFinderDA4D() {}
 
 //------------------------------------------------------------------------------
 
-VertexFinderDA4D::~VertexFinderDA4D()
-{
-}
+VertexFinderDA4D::~VertexFinderDA4D() {}
 
 //------------------------------------------------------------------------------
 
@@ -146,10 +139,10 @@ void VertexFinderDA4D::Finish()
 
 void VertexFinderDA4D::Process()
 {
-  Candidate *candidate, *track;
-  TObjArray *ClusterArray;
+  Candidate *candidate = nullptr, *track = nullptr;
+  TObjArray *ClusterArray = nullptr;
   ClusterArray = new TObjArray;
-  TIterator *ItClusterArray;
+  TIterator *ItClusterArray = nullptr;
   Int_t ivtx = 0;
 
   fInputArray->Sort();
@@ -350,7 +343,7 @@ void VertexFinderDA4D::clusterize(const TObjArray &tracks, TObjArray &clusters)
 
 vector<Candidate *> VertexFinderDA4D::vertices()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   UInt_t clusterIndex = 0;
   vector<Candidate *> clusters;
 

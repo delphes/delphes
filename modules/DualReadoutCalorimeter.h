@@ -38,10 +38,9 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class DualReadoutCalorimeter: public DelphesModule
+class DualReadoutCalorimeter : public DelphesModule
 {
 public:
-
   DualReadoutCalorimeter();
   ~DualReadoutCalorimeter();
 
@@ -50,11 +49,10 @@ public:
   void Finish();
 
 private:
+  typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
-  typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
-
-  Candidate *fTower;
+  Candidate *fTower{nullptr};
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fECalTowerEnergy, fHCalTowerEnergy;
   Double_t fECalTrackEnergy, fHCalTrackEnergy;
@@ -88,41 +86,41 @@ private:
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
 
-  std::vector < Double_t > fEtaBins;
-  std::vector < std::vector < Double_t >* > fPhiBins;
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
 
-  std::vector < Long64_t > fTowerHits;
+  std::vector<Long64_t> fTowerHits;
 
-  std::vector < Double_t > fECalTowerFractions;
-  std::vector < Double_t > fHCalTowerFractions;
+  std::vector<Double_t> fECalTowerFractions;
+  std::vector<Double_t> fHCalTowerFractions;
 
-  std::vector < Double_t > fECalTrackFractions;
-  std::vector < Double_t > fHCalTrackFractions;
+  std::vector<Double_t> fECalTrackFractions;
+  std::vector<Double_t> fHCalTrackFractions;
 
-  DelphesFormula *fECalResolutionFormula; //!
-  DelphesFormula *fHCalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItParticleInputArray{nullptr}; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
 
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
 
-  TObjArray *fTowerOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
+  TObjArray *fTowerOutputArray{nullptr}; //!
+  TObjArray *fPhotonOutputArray{nullptr}; //!
 
-  TObjArray *fEFlowTrackOutputArray; //!
-  TObjArray *fEFlowPhotonOutputArray; //!
-  TObjArray *fEFlowNeutralHadronOutputArray; //!
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowPhotonOutputArray{nullptr}; //!
+  TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
 
-  TObjArray *fECalTowerTrackArray; //!
-  TIterator *fItECalTowerTrackArray; //!
+  TObjArray *fECalTowerTrackArray{nullptr}; //!
+  TIterator *fItECalTowerTrackArray{nullptr}; //!
 
-  TObjArray *fHCalTowerTrackArray; //!
-  TIterator *fItHCalTowerTrackArray; //!
+  TObjArray *fHCalTowerTrackArray{nullptr}; //!
+  TIterator *fItHCalTowerTrackArray{nullptr}; //!
 
-  TObjArray *fTowerTrackArray; //!
-  TIterator *fItTowerTrackArray; //!
+  TObjArray *fTowerTrackArray{nullptr}; //!
+  TIterator *fItTowerTrackArray{nullptr}; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /** \class CscClusterId
+/** \class CscClusterId
   *
   *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
   *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
@@ -29,8 +29,8 @@
 #include "modules/CscClusterId.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesCscClusterFormula.h"
+#include "classes/DelphesFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -44,29 +44,25 @@
 #include "TRandom3.h"
 #include "TString.h"
 
+#include "assert.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "assert.h"
+
 using namespace std;
 
 //------------------------------------------------------------------------------
 
 CscClusterId::CscClusterId() :
-  fFormula(0), fEtaFormula(0), fItInputArray(0)
+  fFormula(std::make_unique<DelphesCscClusterFormula>()),
+  fEtaFormula(std::make_unique<DelphesCscClusterFormula>())
 {
-  fFormula = new DelphesCscClusterFormula;
-  fEtaFormula = new DelphesCscClusterFormula;
 }
 
 //------------------------------------------------------------------------------
 
-CscClusterId::~CscClusterId()
-{
-  if(fFormula) delete fFormula;
-  if(fEtaFormula) delete fEtaFormula;
-}
+CscClusterId::~CscClusterId() {}
 
 //------------------------------------------------------------------------------
 
@@ -109,7 +105,7 @@ void CscClusterId::Process()
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
     decayZ = abs(candidateDecayPosition.Z());
-    decayR = sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2));
+    decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
     Ehad = candidate->Ehad;
 
     cosTheta = TMath::Abs(momentum.CosTheta());
@@ -121,7 +117,7 @@ void CscClusterId::Process()
 
     // depending on the decay region (station Number), different eta cut is applied, implemented based on cut_based_id.py in HEPData
     float eta_cut = fEtaFormula->Eval(decayR, decayZ);
-    if(gRandom->Uniform() > NStationEff*(abs(eta)<fEtaCutMax)+(1.0-NStationEff)*(abs(eta)<eta_cut)) continue;
+    if(gRandom->Uniform() > NStationEff * (abs(eta) < fEtaCutMax) + (1.0 - NStationEff) * (abs(eta) < eta_cut)) continue;
 
     fOutputArray->Add(candidate);
   }

@@ -65,16 +65,11 @@ bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) cons
 
 //------------------------------------------------------------------------------
 
-Weighter::Weighter() :
-  fItInputArray(0)
-{
-}
+Weighter::Weighter() {}
 
 //------------------------------------------------------------------------------
 
-Weighter::~Weighter()
-{
-}
+Weighter::~Weighter() {}
 
 //------------------------------------------------------------------------------
 
@@ -142,7 +137,7 @@ void Weighter::Finish()
 
 void Weighter::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Int_t i;
   TIndexStruct index;
   Double_t weight;

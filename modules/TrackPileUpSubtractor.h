@@ -35,7 +35,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class TrackPileUpSubtractor: public DelphesModule
+class TrackPileUpSubtractor : public DelphesModule
 {
 public:
   TrackPileUpSubtractor();
@@ -46,7 +46,7 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
   Double_t fPTMin;
 
@@ -54,9 +54,9 @@ private:
 
   ClassDef(TrackPileUpSubtractor, 1)
 
-    TIterator *fItVertexInputArray; //!
+    TIterator *fItVertexInputArray { nullptr }; //!
 
-  const TObjArray *fVertexInputArray; //!
+  const TObjArray *fVertexInputArray{nullptr}; //!
 };
 
 #endif

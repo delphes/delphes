@@ -48,7 +48,7 @@ class MeasureDefinition;
 } // namespace contrib
 } // namespace fastjet
 
-class FastJetFinder: public DelphesModule
+class FastJetFinder : public DelphesModule
 {
 public:
   FastJetFinder();
@@ -59,15 +59,15 @@ public:
   void Finish();
 
 private:
-  void *fPlugin; //!
-  void *fRecomb; //!
+  void *fPlugin{nullptr}; //!
+  void *fRecomb{nullptr}; //!
 
-  fastjet::contrib::AxesDefinition *fAxesDef;
-  fastjet::contrib::MeasureDefinition *fMeasureDef;
+  std::unique_ptr<fastjet::contrib::AxesDefinition> fAxesDef;
+  std::unique_ptr<fastjet::contrib::MeasureDefinition> fMeasureDef;
 
-  fastjet::contrib::NjettinessPlugin *fNjettinessPlugin; //!
-  fastjet::contrib::ValenciaPlugin *fValenciaPlugin; //!
-  fastjet::JetDefinition *fDefinition; //!
+  std::unique_ptr<fastjet::contrib::NjettinessPlugin> fNjettinessPlugin; //!
+  std::unique_ptr<fastjet::contrib::ValenciaPlugin> fValenciaPlugin; //!
+  std::unique_ptr<fastjet::JetDefinition> fDefinition; //!
 
   Int_t fJetAlgorithm;
   Double_t fParameterR;
@@ -122,7 +122,7 @@ private:
 
   // --- FastJet Area method --------
 
-  fastjet::AreaDefinition *fAreaDefinition;
+  std::unique_ptr<fastjet::AreaDefinition> fAreaDefinition;
   Int_t fAreaAlgorithm;
   Bool_t fComputeRho;
 
@@ -140,20 +140,20 @@ private:
 #if !defined(__CINT__) && !defined(__CLING__)
   struct TEstimatorStruct
   {
-    fastjet::JetMedianBackgroundEstimator *estimator;
+    std::unique_ptr<fastjet::JetMedianBackgroundEstimator> estimator;
     Double_t etaMin, etaMax;
   };
 
   std::vector<TEstimatorStruct> fEstimators; //!
 #endif
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
-  TObjArray *fRhoOutputArray; //!
-  TObjArray *fConstituentsOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fRhoOutputArray{nullptr}; //!
+  TObjArray *fConstituentsOutputArray{nullptr}; //!
 
   ClassDef(FastJetFinder, 1)
 };

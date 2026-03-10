@@ -1,6 +1,6 @@
 /** \class BeamSpotFilter
  *
- *  Extracts beam spot 
+ *  Extracts beam spot
  *
  *  \author Michele Selvaggi
  *
@@ -33,16 +33,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-BeamSpotFilter::BeamSpotFilter() :
-  fItInputArray(0)
-{
-}
+BeamSpotFilter::BeamSpotFilter() {}
 
 //------------------------------------------------------------------------------
 
-BeamSpotFilter::~BeamSpotFilter()
-{
-}
+BeamSpotFilter::~BeamSpotFilter() {}
 
 //------------------------------------------------------------------------------
 
@@ -69,7 +64,7 @@ void BeamSpotFilter::Finish()
 
 void BeamSpotFilter::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Bool_t passed = false;
 
   fItInputArray->Reset();

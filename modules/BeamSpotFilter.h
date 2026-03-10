@@ -5,7 +5,7 @@
 
 /** \class BeamSpotFilter
  *
- *  Extracts beam spot 
+ *  Extracts beam spot
  *
  *  \author Michele Selvaggi
  *
@@ -16,7 +16,7 @@
 class TIterator;
 class TObjArray;
 
-class BeamSpotFilter: public DelphesModule
+class BeamSpotFilter : public DelphesModule
 {
 public:
   BeamSpotFilter();
@@ -27,13 +27,11 @@ public:
   void Finish();
 
 private:
-  Float_t fPassedOne;
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(BeamSpotFilter, 1)
 };

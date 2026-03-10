@@ -46,16 +46,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackCountingBTagging::TrackCountingBTagging() :
-  fItTrackInputArray(0), fItJetInputArray(0)
-{
-}
+TrackCountingBTagging::TrackCountingBTagging() {}
 
 //------------------------------------------------------------------------------
 
-TrackCountingBTagging::~TrackCountingBTagging()
-{
-}
+TrackCountingBTagging::~TrackCountingBTagging() {}
 
 //------------------------------------------------------------------------------
 
@@ -93,7 +88,7 @@ void TrackCountingBTagging::Finish()
 
 void TrackCountingBTagging::Process()
 {
-  Candidate *jet, *track;
+  Candidate *jet = nullptr, *track = nullptr;
 
   Double_t jpx, jpy, jpz;
   Double_t dr, tpt;

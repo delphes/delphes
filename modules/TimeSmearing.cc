@@ -51,17 +51,11 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 TimeSmearing::TimeSmearing() :
-  fResolutionFormula(0), fItInputArray(0)
-{
-	fResolutionFormula = new DelphesFormula;
-}
+  fResolutionFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-TimeSmearing::~TimeSmearing()
-{
-	if(fResolutionFormula) delete fResolutionFormula;
-}
+TimeSmearing::~TimeSmearing() {}
 
 //------------------------------------------------------------------------------
 
@@ -75,7 +69,6 @@ void TimeSmearing::Init()
   // import track input array
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
   fItInputArray = fInputArray->MakeIterator();
-
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));

@@ -30,7 +30,7 @@
 class TIterator;
 class TObjArray;
 
-class LeptonDressing: public DelphesModule
+class LeptonDressing : public DelphesModule
 {
 public:
   LeptonDressing();
@@ -43,15 +43,13 @@ public:
 private:
   Double_t fDeltaR;
 
-  TIterator *fItDressingInputArray; //!
+  TIterator *fItDressingInputArray{nullptr}; //!
+  TIterator *fItCandidateInputArray{nullptr}; //!
 
-  TIterator *fItCandidateInputArray; //!
+  const TObjArray *fDressingInputArray{nullptr}; //!
+  const TObjArray *fCandidateInputArray{nullptr}; //!
 
-  const TObjArray *fDressingInputArray; //!
-
-  const TObjArray *fCandidateInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(LeptonDressing, 1)
 };

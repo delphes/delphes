@@ -122,7 +122,7 @@ bool isTauDaughter(int pdgCode, int M1, const TObjArray *fInputArray)
   if(M1 < 0)
     return false;
 
-  Candidate *mother;
+  Candidate *mother = nullptr;
   mother = static_cast<Candidate *>(fInputArray->At(M1));
   if(TMath::Abs(mother->PID) == 15)
     return true;
@@ -145,16 +145,11 @@ bool isWDaughter(int M1, const TObjArray *fInputArray)
 
 //------------------------------------------------------------------------------
 
-StatusPidFilter::StatusPidFilter() :
-  fItInputArray(0)
-{
-}
+StatusPidFilter::StatusPidFilter() {}
 
 //------------------------------------------------------------------------------
 
-StatusPidFilter::~StatusPidFilter()
-{
-}
+StatusPidFilter::~StatusPidFilter() {}
 
 //------------------------------------------------------------------------------
 
@@ -186,7 +181,7 @@ void StatusPidFilter::Finish()
 
 void StatusPidFilter::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Int_t status, pdgCode;
   Bool_t pass;
 

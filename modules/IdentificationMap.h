@@ -34,7 +34,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class IdentificationMap: public DelphesModule
+class IdentificationMap : public DelphesModule
 {
 public:
   IdentificationMap();
@@ -45,15 +45,15 @@ public:
   void Finish();
 
 private:
-  typedef std::multimap<Int_t, std::pair<Int_t, DelphesFormula *> > TMisIDMap; //!
+  typedef std::multimap<Int_t, std::pair<Int_t, std::unique_ptr<DelphesFormula> > > TMisIDMap; //!
 
   TMisIDMap fEfficiencyMap; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(IdentificationMap, 1)
 };

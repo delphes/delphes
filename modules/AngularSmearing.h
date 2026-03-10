@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class AngularSmearing: public DelphesModule
+class AngularSmearing : public DelphesModule
 {
 public:
   AngularSmearing();
@@ -44,14 +44,14 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormulaEta; //!
-  DelphesFormula *fFormulaPhi; //!
+  const std::unique_ptr<DelphesFormula> fFormulaEta; //!
+  const std::unique_ptr<DelphesFormula> fFormulaPhi; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(AngularSmearing, 1)
 };

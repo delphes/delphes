@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class H_BeamLine;
 
-class Hector: public DelphesModule
+class Hector : public DelphesModule
 {
 public:
   Hector();
@@ -51,13 +51,13 @@ private:
   Double_t fSigmaE, fSigmaX, fSigmaY, fSigmaT;
   Double_t fEtaMin;
 
-  H_BeamLine *fBeamLine;
+  std::unique_ptr<H_BeamLine> fBeamLine;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(Hector, 1)
 };

@@ -37,7 +37,7 @@ class ExRootTreeWriter;
 
 class DelphesFactory;
 
-class Delphes: public DelphesModule
+class Delphes : public DelphesModule
 {
 public:
   Delphes(const char *name = "Delphes");
@@ -45,7 +45,7 @@ public:
 
   void SetTreeWriter(ExRootTreeWriter *treeWriter);
 
-  DelphesFactory *GetFactory() const { return fFactory; }
+  DelphesFactory *GetFactory() const { return fFactory.get(); }
 
   void Clear(Option_t *option = "");
 
@@ -54,7 +54,7 @@ public:
   virtual void Finish();
 
 private:
-  DelphesFactory *fFactory;
+  const std::unique_ptr<DelphesFactory> fFactory;
 
   ClassDef(Delphes, 1)
 };

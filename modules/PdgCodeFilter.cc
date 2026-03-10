@@ -51,22 +51,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PdgCodeFilter::PdgCodeFilter() :
-  fItInputArray(0)
-{
-}
+PdgCodeFilter::PdgCodeFilter() {}
 
 //------------------------------------------------------------------------------
 
-PdgCodeFilter::~PdgCodeFilter()
-{
-}
+PdgCodeFilter::~PdgCodeFilter() {}
 
 //------------------------------------------------------------------------------
 
 void PdgCodeFilter::Init()
 {
-
   ExRootConfParam param;
   Size_t i, size;
 
@@ -114,7 +108,7 @@ void PdgCodeFilter::Finish()
 
 void PdgCodeFilter::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Int_t pdgCode;
   Bool_t pass;
   Double_t pt;

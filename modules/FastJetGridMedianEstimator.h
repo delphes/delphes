@@ -38,7 +38,7 @@ namespace fastjet
 class GridMedianBackgroundEstimator;
 }
 
-class FastJetGridMedianEstimator: public DelphesModule
+class FastJetGridMedianEstimator : public DelphesModule
 {
 public:
   FastJetGridMedianEstimator();
@@ -49,13 +49,13 @@ public:
   void Finish();
 
 private:
-  std::vector<fastjet::GridMedianBackgroundEstimator *> fEstimators; //!
+  std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fRhoOutputArray; //!
+  TObjArray *fRhoOutputArray{nullptr}; //!
 
   ClassDef(FastJetGridMedianEstimator, 1)
 };

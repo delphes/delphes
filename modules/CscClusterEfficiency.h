@@ -19,8 +19,6 @@
 #ifndef CscClusterEfficiency_h
 #define CscClusterEfficiency_h
 
-
-
 /** \class CscClusterEfficiency
  *
  *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
@@ -35,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesCscClusterFormula;
 
-class CscClusterEfficiency: public DelphesModule
+class CscClusterEfficiency : public DelphesModule
 {
 public:
   CscClusterEfficiency();
@@ -46,13 +44,13 @@ public:
   void Finish();
 
 private:
-  DelphesCscClusterFormula *fFormula; //!
+  const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(CscClusterEfficiency, 1)
 };

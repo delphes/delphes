@@ -55,23 +55,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TaggingParticlesSkimmer::TaggingParticlesSkimmer() :
-  fClassifier(0), fFilter(0), fItPartonInputArray(0),
-  fPartonInputArray(0), fParticleInputArray(0), fOutputArray(0)
-{
-}
+TaggingParticlesSkimmer::TaggingParticlesSkimmer() {}
 
 //------------------------------------------------------------------------------
 
-TaggingParticlesSkimmer::~TaggingParticlesSkimmer()
-{
-}
+TaggingParticlesSkimmer::~TaggingParticlesSkimmer() {}
 
 //------------------------------------------------------------------------------
 
 void TaggingParticlesSkimmer::Init()
 {
-
   fPTMin = GetDouble("PTMin", 15.0);
   fEtaMax = GetDouble("EtaMax", 2.5);
 
@@ -81,11 +74,11 @@ void TaggingParticlesSkimmer::Init()
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
 
-  fClassifier = new TauTaggingPartonClassifier(fParticleInputArray);
+  fClassifier = std::make_unique<TauTaggingPartonClassifier>(fParticleInputArray);
   fClassifier->fPTMin = GetDouble("PTMin", 15.0);
   fClassifier->fEtaMax = GetDouble("EtaMax", 2.5);
 
-  fFilter = new ExRootFilter(fPartonInputArray);
+  fFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
 
   // output array
   fOutputArray = ExportArray(GetString("OutputArray", "taggingParticles"));
@@ -96,23 +89,21 @@ void TaggingParticlesSkimmer::Init()
 void TaggingParticlesSkimmer::Finish()
 {
   if(fItPartonInputArray) delete fItPartonInputArray;
-  if(fFilter) delete fFilter;
-  if(fClassifier) delete fClassifier;
 }
 
 //------------------------------------------------------------------------------
 
 void TaggingParticlesSkimmer::Process()
 {
-  Candidate *candidate, *tau, *daughter;
+  Candidate *candidate = nullptr, *tau = nullptr, *daughter = nullptr;
   TLorentzVector tauMomentum;
   Double_t pt, eta;
-  TObjArray *tauArray;
+  TObjArray *tauArray = nullptr;
   Int_t pdgCode, i;
 
   // first select hadronic taus and replace them by visible part
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier, 0);
+  tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   if(tauArray == 0) return;
 

@@ -37,7 +37,7 @@ class TObjArray;
 class ExRootFilter;
 class IsolationClassifier;
 
-class Isolation: public DelphesModule
+class Isolation : public DelphesModule
 {
 public:
   Isolation();
@@ -49,36 +49,26 @@ public:
 
 private:
   Double_t fDeltaRMax;
-
   Double_t fPTRatioMax;
-
   Double_t fPTSumMax;
-
   Double_t fDeltaRMin;
-
   Bool_t fUsePTSum;
-
   Bool_t fUseRhoCorrection;
-
   Bool_t fUseMiniCone;
 
-  IsolationClassifier *fClassifier; //!
+  const std::unique_ptr<IsolationClassifier> fClassifier; //!
 
-  ExRootFilter *fFilter;
+  std::unique_ptr<ExRootFilter> fFilter;
 
-  TIterator *fItIsolationInputArray; //!
+  TIterator *fItIsolationInputArray{nullptr}; //!
+  TIterator *fItCandidateInputArray{nullptr}; //!
+  TIterator *fItRhoInputArray{nullptr}; //!
 
-  TIterator *fItCandidateInputArray; //!
+  const TObjArray *fIsolationInputArray{nullptr}; //!
+  const TObjArray *fCandidateInputArray{nullptr}; //!
+  const TObjArray *fRhoInputArray{nullptr}; //!
 
-  TIterator *fItRhoInputArray; //!
-
-  const TObjArray *fIsolationInputArray; //!
-
-  const TObjArray *fCandidateInputArray; //!
-
-  const TObjArray *fRhoInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(Isolation, 1)
 };

@@ -35,7 +35,7 @@
 class TObjArray;
 class TH2F;
 
-class ParticleDensity: public DelphesModule
+class ParticleDensity : public DelphesModule
 {
 public:
   ParticleDensity();
@@ -46,16 +46,15 @@ public:
   void Finish();
 
 private:
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   Bool_t fUseMomentumVector; // !
-  TH2F *fHisto; //!
-  
+  std::unique_ptr<TH2F> fHisto; //!
+
   ClassDef(ParticleDensity, 1)
 };
 

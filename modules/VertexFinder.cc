@@ -6,11 +6,11 @@
  *
  */
 
-#include "modules/VertexFinder.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesPileUpReader.h"
+#include "modules/VertexFinder.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -38,16 +38,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-VertexFinder::VertexFinder() :
-  fSigma(0), fMinPT(0), fMaxEta(0), fSeedMinPT(0), fMinNDF(0), fGrowSeeds(0)
-{
-}
+VertexFinder::VertexFinder() {}
 
 //------------------------------------------------------------------------------
 
-VertexFinder::~VertexFinder()
-{
-}
+VertexFinder::~VertexFinder() {}
 
 //------------------------------------------------------------------------------
 
@@ -85,7 +80,7 @@ static Bool_t secondDescending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double
 
 void VertexFinder::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
 
   // Clear the track and cluster maps before starting
   trackIDToDouble.clear();
@@ -172,7 +167,7 @@ void VertexFinder::Process()
 
 void VertexFinder::createSeeds()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   UInt_t clusterIndex = 0, maxSeeds = 0;
 
   // Loop over all tracks, initializing some variables.

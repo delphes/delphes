@@ -54,22 +54,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-LLPFilter::LLPFilter() :
-  fItInputArray(0)
-{
-}
+LLPFilter::LLPFilter() {}
 
 //------------------------------------------------------------------------------
 
-LLPFilter::~LLPFilter()
-{
-}
+LLPFilter::~LLPFilter() {}
 
 //------------------------------------------------------------------------------
 
 void LLPFilter::Init()
 {
-
   ExRootConfParam param;
   Size_t i, size;
 
@@ -87,7 +81,6 @@ void LLPFilter::Init()
   fDecayRegionEtaMax = GetDouble("DecayRegionEtaMax", 0.0); // requirement on abs(eta)
   fDecayRegionEtaMin = GetDouble("DecayRegionEtaMin", 0.0); //requirement on abs(eta)
 
-
   // no pileup
   fRequireNotPileup = GetBool("RequireNotPileup", false);
 
@@ -101,9 +94,8 @@ void LLPFilter::Init()
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
-  fParticleInputArray =  ImportArray(GetString("InputArray", "Delphes/allParticles"));
+  fParticleInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItParticleInputArray = fParticleInputArray->MakeIterator();
-
 
   param = GetParam("PdgCode");
   size = param.GetSize();
@@ -132,14 +124,13 @@ void LLPFilter::Finish()
 void LLPFilter::Process()
 {
 
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   Int_t pdgCode;
   Double_t pt, eta;
-  Candidate *tempCandidate;
+  Candidate *tempCandidate = nullptr;
 
-  Candidate *daughter;
+  Candidate *daughter = nullptr;
   Int_t daughterPdg;
-
 
   // loop over particles to find LLP
   fItInputArray->Reset();
@@ -155,10 +146,9 @@ void LLPFilter::Process()
     pt = candidateMomentum.Pt();
     eta = candidateMomentum.Eta();
     if(pt < fPTMin) continue;
-    if (fDaughterNumber > 0)
+    if(fDaughterNumber > 0)
     {
-      if (candidate->D2-candidate->D1 != fDaughterNumber) continue;//require at least fDaughterNumber daughters
-
+      if(candidate->D2 - candidate->D1 != fDaughterNumber) continue; //require at least fDaughterNumber daughters
     }
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end()) continue; //require pdgID is one of the LLP id
     if(fRequireStatus && (candidate->Status != fStatus)) continue;
@@ -172,10 +162,10 @@ void LLPFilter::Process()
     {
 
       daughterPdg = daughter->PID;
-      if (daughter->Status != 1)continue;
-      if (daughter->IsPU)continue;
-      if (abs(daughterPdg)==12 || abs(daughterPdg)==14 || abs(daughterPdg)==16 || abs(daughterPdg)==13)continue; // ignore neutrinos and muons
-      if (abs(daughterPdg) > 1000000) continue;//ignore BSM particles
+      if(daughter->Status != 1) continue;
+      if(daughter->IsPU) continue;
+      if(abs(daughterPdg) == 12 || abs(daughterPdg) == 14 || abs(daughterPdg) == 16 || abs(daughterPdg) == 13) continue; // ignore neutrinos and muons
+      if(abs(daughterPdg) > 1000000) continue; //ignore BSM particles
 
       const TLorentzVector &daughterMomentum = daughter->Momentum;
 
@@ -183,28 +173,30 @@ void LLPFilter::Process()
       tempCandidate = daughter;
       while(tempCandidate->M1 != -1 && tempCandidate->M1 != index)
       {
-        tempCandidate  = static_cast<Candidate *>(fParticleInputArray->At(tempCandidate->M1));
+        tempCandidate = static_cast<Candidate *>(fParticleInputArray->At(tempCandidate->M1));
       }
-      if (tempCandidate->M1 == -1) continue;
+      if(tempCandidate->M1 == -1) continue;
 
       // assign LLP EM or hadronic energy, depending on the daughter ID
-      if (abs(daughterPdg)==11 || abs(daughterPdg)==22 || abs(daughterPdg)==111)candidate->Eem += daughterMomentum.E();
-      else candidate->Ehad += daughterMomentum.E();
+      if(abs(daughterPdg) == 11 || abs(daughterPdg) == 22 || abs(daughterPdg) == 111)
+        candidate->Eem += daughterMomentum.E();
+      else
+        candidate->Ehad += daughterMomentum.E();
     }
 
-    if (fRequireDecayRegion)
+    if(fRequireDecayRegion)
     {
-      if (abs(eta) < fDecayRegionEtaMax && abs(eta) > fDecayRegionEtaMin
-         && abs(candidateDecayPosition.Z()) < fDecayRegionZMax && abs(candidateDecayPosition.Z()) > fDecayRegionZMin
-         && sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2)) < fDecayRegionRMax
-         && sqrt(pow(candidateDecayPosition.X(),2)+pow(candidateDecayPosition.Y(),2)) > fDecayRegionRMin)
+      if(abs(eta) < fDecayRegionEtaMax && abs(eta) > fDecayRegionEtaMin
+        && abs(candidateDecayPosition.Z()) < fDecayRegionZMax && abs(candidateDecayPosition.Z()) > fDecayRegionZMin
+        && sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2)) < fDecayRegionRMax
+        && sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2)) > fDecayRegionRMin)
       {
         fOutputArray->Add(candidate);
       }
-
     }
-    else{
+    else
+    {
       fOutputArray->Add(candidate);
     }
-  }//end of while loop
+  } //end of while loop
 }

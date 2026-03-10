@@ -17,7 +17,7 @@ class TObjArray;
 class TIterator;
 class Candidate;
 
-class VertexFinderDA4D: public DelphesModule
+class VertexFinderDA4D : public DelphesModule
 {
 public:
   VertexFinderDA4D();
@@ -31,25 +31,25 @@ public:
   std::vector<Candidate *> vertices();
 
 private:
-  Bool_t fVerbose;
-  Double_t fMinPT;
+  Bool_t fVerbose{0};
+  Double_t fMinPT{0.};
 
-  Float_t fVertexSpaceSize;
-  Float_t fVertexTimeSize;
-  Bool_t fUseTc;
-  Float_t fBetaMax;
-  Float_t fBetaStop;
-  Double_t fCoolingFactor;
-  Int_t fMaxIterations;
-  Double_t fDzCutOff;
-  Double_t fD0CutOff;
-  Double_t fDtCutOff; // for when the beamspot has time
+  Float_t fVertexSpaceSize{0.};
+  Float_t fVertexTimeSize{0.};
+  Bool_t fUseTc{false};
+  Float_t fBetaMax{0.};
+  Float_t fBetaStop{0.};
+  Double_t fCoolingFactor{0.};
+  Int_t fMaxIterations{0};
+  Double_t fDzCutOff{0.};
+  Double_t fD0CutOff{0.};
+  Double_t fDtCutOff{0.}; // for when the beamspot has time
 
-  TObjArray *fInputArray;
-  TIterator *fItInputArray;
+  TObjArray *fInputArray{nullptr};
+  TIterator *fItInputArray{nullptr};
 
-  TObjArray *fOutputArray;
-  TObjArray *fVertexOutputArray;
+  TObjArray *fOutputArray{nullptr};
+  TObjArray *fVertexOutputArray{nullptr};
 
   ClassDef(VertexFinderDA4D, 1)
 };

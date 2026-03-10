@@ -55,10 +55,9 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PhotonConversions::PhotonConversions() :
-  fItInputArray(0), fConversionMap(0), fDecayXsec(0)
+  fConversionMap(std::make_unique<DelphesCylindricalFormula>()),
+  fDecayXsec(std::make_unique<TF1>("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0))
 {
-  fDecayXsec = new TF1("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0);
-  fConversionMap = new DelphesCylindricalFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -98,8 +97,6 @@ void PhotonConversions::Init()
 void PhotonConversions::Finish()
 {
   if(fItInputArray) delete fItInputArray;
-  if(fDecayXsec) delete fDecayXsec;
-  if(fConversionMap) delete fConversionMap;
 }
 
 //------------------------------------------------------------------------------

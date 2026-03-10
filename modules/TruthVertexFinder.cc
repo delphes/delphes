@@ -52,22 +52,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TruthVertexFinder::TruthVertexFinder() :
-fItInputArray(0), fItOutputArray(0)
-{
-}
+TruthVertexFinder::TruthVertexFinder() {}
 
 //------------------------------------------------------------------------------
 
-TruthVertexFinder::~TruthVertexFinder()
-{
-}
+TruthVertexFinder::~TruthVertexFinder() {}
 
 //------------------------------------------------------------------------------
 
 void TruthVertexFinder::Init()
 {
-
   fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
@@ -92,9 +86,8 @@ void TruthVertexFinder::Process()
 {
   Int_t nvtx = -1;
   Float_t pt;
-  Candidate *candidate, *vertex;
-  DelphesFactory *factory;
-
+  Candidate *candidate = nullptr, *vertex = nullptr;
+  DelphesFactory *factory = nullptr;
 
   fItInputArray->Reset();
 
@@ -103,56 +96,56 @@ void TruthVertexFinder::Process()
 
   TLorentzVector vertexPosition(0., 0., 0., 0.);
 
-  nvtx=0;
+  nvtx = 0;
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
 
-     const TLorentzVector &candidatePosition = candidate->Position;
-     const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const TLorentzVector &candidatePosition = candidate->Position;
+    const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-     pt = candidateMomentum.Pt();
-     
-     // check whether vertex already included, if so add particle
-     Bool_t old_vertex=false;
-     fItOutputArray = fVertexOutputArray->MakeIterator();
-     fItOutputArray->Reset();
-     while((vertex = static_cast<Candidate *>(fItOutputArray->Next())))
-     {
-        const TLorentzVector &vertexPosition = vertex->Position;
-        // check whether spatial difference is < 1 um, in that case assume it is the same vertex
-        if ( TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution*1.E3)
-        {
-           old_vertex=true;
-           vertex->AddCandidate(candidate);
-           if (TMath::Abs(candidate->Charge) > 0)
-           {
-              vertex->ClusterNDF += 1;
-              vertex->GenSumPT2 += pt*pt;
-           }
-        }
-     }
+    pt = candidateMomentum.Pt();
 
-     // else fill new vertex
-     if (!old_vertex)
-     {
-        vertex = factory->NewCandidate();
-        vertex->Position = candidatePosition;
-        vertex->ClusterIndex = nvtx;
-
-        if (TMath::Abs(candidate->Charge) > 0)
+    // check whether vertex already included, if so add particle
+    Bool_t old_vertex = false;
+    fItOutputArray = fVertexOutputArray->MakeIterator();
+    fItOutputArray->Reset();
+    while((vertex = static_cast<Candidate *>(fItOutputArray->Next())))
+    {
+      const TLorentzVector &vertexPosition = vertex->Position;
+      // check whether spatial difference is < 1 um, in that case assume it is the same vertex
+      if(TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
+      {
+        old_vertex = true;
+        vertex->AddCandidate(candidate);
+        if(TMath::Abs(candidate->Charge) > 0)
         {
-           vertex->ClusterNDF = 1;
-           vertex->GenSumPT2 = pt*pt;
+          vertex->ClusterNDF += 1;
+          vertex->GenSumPT2 += pt * pt;
         }
-        else
-        {
-           vertex->ClusterNDF = 0;
-           vertex->GenSumPT2 = 0.;
-        }
-        fVertexOutputArray->Add(vertex);
-        nvtx++;
       }
-   }
+    }
+
+    // else fill new vertex
+    if(!old_vertex)
+    {
+      vertex = factory->NewCandidate();
+      vertex->Position = candidatePosition;
+      vertex->ClusterIndex = nvtx;
+
+      if(TMath::Abs(candidate->Charge) > 0)
+      {
+        vertex->ClusterNDF = 1;
+        vertex->GenSumPT2 = pt * pt;
+      }
+      else
+      {
+        vertex->ClusterNDF = 0;
+        vertex->GenSumPT2 = 0.;
+      }
+      fVertexOutputArray->Add(vertex);
+      nvtx++;
+    }
+  }
 }
 
 //------------------------------------------------------------------------------

@@ -49,9 +49,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 TauTaggingPartonClassifier::TauTaggingPartonClassifier(const TObjArray *array) :
-  fParticleInputArray(array)
-{
-}
+  fParticleInputArray(array) {}
 
 //------------------------------------------------------------------------------
 
@@ -100,25 +98,18 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-TauTagging::TauTagging() :
-  fClassifier(0), fFilter(0),
-  fItPartonInputArray(0), fItJetInputArray(0)
-{
-}
+TauTagging::TauTagging() {}
 
 //------------------------------------------------------------------------------
 
-TauTagging::~TauTagging()
-{
-}
+TauTagging::~TauTagging() {}
 
 //------------------------------------------------------------------------------
 
 void TauTagging::Init()
 {
-  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
+  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
   ExRootConfParam param;
-  DelphesFormula *formula;
   Int_t i, size;
 
   fBitNumber = GetInt("BitNumber", 0);
@@ -132,34 +123,34 @@ void TauTagging::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
 
-    fEfficiencyMap[param[i * 2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
   }
 
   // set default efficiency formula
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
-    fEfficiencyMap[0] = formula;
+    fEfficiencyMap[0] = std::move(formula);
   }
 
   // import input array(s)
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
 
-  fClassifier = new TauTaggingPartonClassifier(fParticleInputArray);
+  fClassifier = std::make_unique<TauTaggingPartonClassifier>(fParticleInputArray);
   fClassifier->fPTMin = GetDouble("TauPTMin", 1.0);
   fClassifier->fEtaMax = GetDouble("TauEtaMax", 2.5);
 
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
   fItPartonInputArray = fPartonInputArray->MakeIterator();
 
-  fFilter = new ExRootFilter(fPartonInputArray);
+  fFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
@@ -169,36 +160,26 @@ void TauTagging::Init()
 
 void TauTagging::Finish()
 {
-  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-
-  if(fFilter) delete fFilter;
-  if(fClassifier) delete fClassifier;
   if(fItJetInputArray) delete fItJetInputArray;
   if(fItPartonInputArray) delete fItPartonInputArray;
 
-  for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
-  {
-    formula = itEfficiencyMap->second;
-    if(formula) delete formula;
-  }
+  fEfficiencyMap.clear();
 }
 
 //------------------------------------------------------------------------------
 
 void TauTagging::Process()
 {
-  Candidate *jet, *tau, *daughter, *part;
+  Candidate *jet = nullptr, *tau = nullptr, *daughter = nullptr, *part = nullptr;
   TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e, eff;
-  TObjArray *tauArray;
-  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
-  DelphesFormula *formula;
+  TObjArray *tauArray = nullptr;
+  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
   Int_t pdgCode, charge, i;
 
   // select taus
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier, 0);
+  tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
   fItJetInputArray->Reset();
@@ -246,7 +227,7 @@ void TauTagging::Process()
 
     // fake electrons and muons
 
-    if (pdgCode == 0)
+    if(pdgCode == 0)
     {
 
       Double_t drMin = fDeltaR;
@@ -255,17 +236,17 @@ void TauTagging::Process()
       {
         if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13)
         {
-            tauMomentum = part->Momentum;
-            if (tauMomentum.Pt() < fClassifier->fPTMin) continue;
-            if (TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
+          tauMomentum = part->Momentum;
+          if(tauMomentum.Pt() < fClassifier->fPTMin) continue;
+          if(TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
 
-            Double_t dr = jetMomentum.DeltaR(tauMomentum);
-            if( dr < drMin)
-            {
-               drMin = dr;
-               pdgCode = TMath::Abs(part->PID);
-               charge = part->Charge;
-            }
+          Double_t dr = jetMomentum.DeltaR(tauMomentum);
+          if(dr < drMin)
+          {
+            drMin = dr;
+            pdgCode = TMath::Abs(part->PID);
+            charge = part->Charge;
+          }
         }
       }
     }
@@ -276,7 +257,7 @@ void TauTagging::Process()
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
-    formula = itEfficiencyMap->second;
+    auto &formula = itEfficiencyMap->second;
 
     // apply an efficency formula
     eff = formula->Eval(pt, eta, phi, e);

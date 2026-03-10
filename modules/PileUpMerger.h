@@ -33,7 +33,7 @@ class TObjArray;
 class DelphesPileUpReader;
 class DelphesTF2;
 
-class PileUpMerger: public DelphesModule
+class PileUpMerger : public DelphesModule
 {
 public:
   PileUpMerger();
@@ -55,16 +55,15 @@ private:
   Double_t fOutputBeamSpotX;
   Double_t fOutputBeamSpotY;
 
-  DelphesTF2 *fFunction; //!
+  const std::unique_ptr<DelphesTF2> fFunction; //!
+  std::unique_ptr<DelphesPileUpReader> fReader; //!
 
-  DelphesPileUpReader *fReader; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fParticleOutputArray; //!
-  TObjArray *fVertexOutputArray; //!
+  TObjArray *fParticleOutputArray{nullptr}; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
 
   ClassDef(PileUpMerger, 1)
 };

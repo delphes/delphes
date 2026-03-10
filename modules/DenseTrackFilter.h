@@ -37,7 +37,7 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class DenseTrackFilter: public DelphesModule
+class DenseTrackFilter : public DelphesModule
 {
 public:
   DenseTrackFilter();
@@ -50,7 +50,7 @@ public:
 private:
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-  Candidate *fBestTrack;
+  Candidate *fBestTrack{nullptr};
 
   Int_t fTowerTrackHits;
 
@@ -63,14 +63,14 @@ private:
 
   std::vector<Long64_t> fTowerHits;
 
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
 
-  const TObjArray *fTrackInputArray; //!
-  TObjArray *fTrackOutputArray; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  TObjArray *fTrackOutputArray{nullptr}; //!
 
-  TObjArray *fChargedHadronOutputArray; //!
-  TObjArray *fElectronOutputArray; //!
-  TObjArray *fMuonOutputArray; //!
+  TObjArray *fChargedHadronOutputArray{nullptr}; //!
+  TObjArray *fElectronOutputArray{nullptr}; //!
+  TObjArray *fMuonOutputArray{nullptr}; //!
 
   void FillTrack();
   ClassDef(DenseTrackFilter, 1)

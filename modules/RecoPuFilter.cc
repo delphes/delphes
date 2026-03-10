@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-RecoPuFilter::RecoPuFilter() :
-  fItInputArray(0)
+RecoPuFilter::RecoPuFilter()
 {
 }
 
@@ -67,9 +66,6 @@ RecoPuFilter::~RecoPuFilter()
 
 void RecoPuFilter::Init()
 {
-
-  ExRootConfParam param;
-
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray = fInputArray->MakeIterator();
@@ -89,7 +85,7 @@ void RecoPuFilter::Finish()
 
 void RecoPuFilter::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))

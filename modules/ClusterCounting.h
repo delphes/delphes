@@ -35,7 +35,7 @@ class TObjArray;
 
 class TrkUtil;
 
-class ClusterCounting: public DelphesModule
+class ClusterCounting : public DelphesModule
 {
 public:
   ClusterCounting();
@@ -46,22 +46,21 @@ public:
   void Finish();
 
 private:
-
   Double_t fRmin;
-	Double_t fRmax;
-	Double_t fZmin;
-	Double_t fZmax;
+  Double_t fRmax;
+  Double_t fZmin;
+  Double_t fZmax;
   Double_t fBz;
 
   Int_t fGasOption;
 
-  TrkUtil *fTrackUtil;
+  const std::unique_ptr<TrkUtil> fTrackUtil;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(ClusterCounting, 1)
 };

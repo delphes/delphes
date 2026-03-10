@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class EnergyScale: public DelphesModule
+class EnergyScale : public DelphesModule
 {
 public:
   EnergyScale();
@@ -44,13 +44,13 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(EnergyScale, 1)
 };

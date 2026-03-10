@@ -55,16 +55,14 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 PileUpMergerPythia8::PileUpMergerPythia8() :
-  fFunction(0), fPythia(0), fItInputArray(0)
+  fFunction(std::make_unique<DelphesTF2>())
 {
-  fFunction = new DelphesTF2;
 }
 
 //------------------------------------------------------------------------------
 
 PileUpMergerPythia8::~PileUpMergerPythia8()
 {
-  delete fFunction;
 }
 
 //------------------------------------------------------------------------------
@@ -91,7 +89,7 @@ void PileUpMergerPythia8::Init()
   fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
 
   fileName = GetString("ConfigFile", "MinBias.cmnd");
-  fPythia = new Pythia8::Pythia();
+  fPythia = std::make_unique<Pythia8::Pythia>();
   fPythia->readFile(fileName);
 
   // import input array
@@ -107,7 +105,7 @@ void PileUpMergerPythia8::Init()
 
 void PileUpMergerPythia8::Finish()
 {
-  if(fPythia) delete fPythia;
+  fPythia.reset();
 }
 
 //------------------------------------------------------------------------------
@@ -177,8 +175,7 @@ void PileUpMergerPythia8::Process()
 
   for(event = 0; event < numberOfEvents; ++event)
   {
-    while(!fPythia->next())
-      ;
+    while(!fPythia->next());
 
     // --- Pile-up vertex smearing
 

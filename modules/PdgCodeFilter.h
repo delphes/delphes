@@ -35,7 +35,7 @@
 class TIterator;
 class TObjArray;
 
-class PdgCodeFilter: public DelphesModule
+class PdgCodeFilter : public DelphesModule
 {
 public:
   PdgCodeFilter();
@@ -56,11 +56,11 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(PdgCodeFilter, 1)
 };

@@ -35,7 +35,7 @@
 class TIterator;
 class TObjArray;
 
-class ConstituentFilter: public DelphesModule
+class ConstituentFilter : public DelphesModule
 {
 public:
   ConstituentFilter();
@@ -52,7 +52,7 @@ private:
 
   std::map<TIterator *, TObjArray *> fInputMap; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(ConstituentFilter, 1)
 };

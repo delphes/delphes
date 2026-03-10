@@ -49,24 +49,18 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-BTagging::BTagging() :
-  fItJetInputArray(0)
-{
-}
+BTagging::BTagging() {}
 
 //------------------------------------------------------------------------------
 
-BTagging::~BTagging()
-{
-}
+BTagging::~BTagging() {}
 
 //------------------------------------------------------------------------------
 
 void BTagging::Init()
 {
-  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
+  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
   ExRootConfParam param;
-  DelphesFormula *formula;
   Int_t i, size;
 
   fBitNumber = GetInt("BitNumber", 0);
@@ -78,20 +72,20 @@ void BTagging::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
 
-    fEfficiencyMap[param[i * 2].GetInt()] = formula;
+    fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
   }
 
   // set default efficiency formula
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    formula = new DelphesFormula;
+    auto formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
-    fEfficiencyMap[0] = formula;
+    fEfficiencyMap[0] = std::move(formula);
   }
 
   // import input array(s)
@@ -104,16 +98,7 @@ void BTagging::Init()
 
 void BTagging::Finish()
 {
-  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-
   if(fItJetInputArray) delete fItJetInputArray;
-
-  for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
-  {
-    formula = itEfficiencyMap->second;
-    if(formula) delete formula;
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -122,8 +107,7 @@ void BTagging::Process()
 {
   Candidate *jet;
   Double_t pt, eta, phi, e;
-  map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
-  DelphesFormula *formula;
+  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
 
   // loop over all input jets
   fItJetInputArray->Reset();
@@ -141,10 +125,12 @@ void BTagging::Process()
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
-    formula = itEfficiencyMap->second;
+    {
+      auto &formula = itEfficiencyMap->second;
 
-    // apply an efficiency formula
-    jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+      // apply an efficiency formula
+      jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    }
 
     // find an efficiency formula for algo flavor definition
     itEfficiencyMap = fEfficiencyMap.find(jet->FlavorAlgo);
@@ -152,10 +138,12 @@ void BTagging::Process()
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
-    formula = itEfficiencyMap->second;
+    {
+      auto &formula = itEfficiencyMap->second;
 
-    // apply an efficiency formula
-    jet->BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+      // apply an efficiency formula
+      jet->BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    }
 
     // find an efficiency formula for phys flavor definition
     itEfficiencyMap = fEfficiencyMap.find(jet->FlavorPhys);
@@ -163,10 +151,12 @@ void BTagging::Process()
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
-    formula = itEfficiencyMap->second;
+    {
+      auto &formula = itEfficiencyMap->second;
 
-    // apply an efficiency formula
-    jet->BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+      // apply an efficiency formula
+      jet->BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
+    }
   }
 }
 

@@ -37,7 +37,7 @@ namespace Pythia8
 class Pythia;
 };
 
-class PileUpMergerPythia8: public DelphesModule
+class PileUpMergerPythia8 : public DelphesModule
 {
 public:
   PileUpMergerPythia8();
@@ -61,16 +61,15 @@ private:
 
   Double_t fPTMin;
 
-  DelphesTF2 *fFunction; //!
+  const std::unique_ptr<DelphesTF2> fFunction; //!
+  std::unique_ptr<Pythia8::Pythia> fPythia; //!
 
-  Pythia8::Pythia *fPythia; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  TIterator *fItInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
-
-  TObjArray *fParticleOutputArray; //!
-  TObjArray *fVertexOutputArray; //!
+  TObjArray *fParticleOutputArray{nullptr}; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
 
   ClassDef(PileUpMergerPythia8, 1)
 };

@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class Efficiency: public DelphesModule
+class Efficiency : public DelphesModule
 {
 public:
   Efficiency();
@@ -44,13 +44,13 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   Double_t fUseMomentumVector; //!
 

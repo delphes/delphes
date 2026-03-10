@@ -17,7 +17,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class TrackSmearing: public DelphesModule
+class TrackSmearing : public DelphesModule
 {
 public:
   TrackSmearing();
@@ -30,41 +30,42 @@ public:
 private:
   Double_t ptError(const Double_t, const Double_t, const Double_t, const Double_t);
 
+  const std::unique_ptr<DelphesFormula> fD0Formula; //!
+  const std::unique_ptr<DelphesFormula> fDZFormula; //!
+  const std::unique_ptr<DelphesFormula> fPFormula; //!
+  const std::unique_ptr<DelphesFormula> fCtgThetaFormula; //!
+  const std::unique_ptr<DelphesFormula> fPhiFormula; //!
+
   Double_t fBz;
 
-  DelphesFormula *fD0Formula; //!
   std::string fD0ResolutionFile;
   std::string fD0ResolutionHist;
   Bool_t fUseD0Formula;
 
-  DelphesFormula *fDZFormula; //!
   std::string fDZResolutionFile;
   std::string fDZResolutionHist;
   Bool_t fUseDZFormula;
 
-  DelphesFormula *fPFormula; //!
   std::string fPResolutionFile;
   std::string fPResolutionHist;
   Bool_t fUsePFormula;
 
-  DelphesFormula *fCtgThetaFormula; //!
   std::string fCtgThetaResolutionFile;
   std::string fCtgThetaResolutionHist;
   Bool_t fUseCtgThetaFormula;
 
-  DelphesFormula *fPhiFormula; //!
   std::string fPhiResolutionFile;
   std::string fPhiResolutionHist;
   Bool_t fUsePhiFormula;
 
   Bool_t fApplyToPileUp;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
-  const TObjArray *fBeamSpotInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
+  const TObjArray *fBeamSpotInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(TrackSmearing, 1)
 };

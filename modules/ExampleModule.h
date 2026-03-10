@@ -34,7 +34,7 @@
 class TObjArray;
 class DelphesFormula;
 
-class ExampleModule: public DelphesModule
+class ExampleModule : public DelphesModule
 {
 public:
   ExampleModule();
@@ -50,13 +50,13 @@ private:
 
   std::deque<Double_t> fArrayParam;
 
-  DelphesFormula *fFormula; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(ExampleModule, 1)
 };

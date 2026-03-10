@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesCscClusterFormula;
 
-class CscClusterId: public DelphesModule
+class CscClusterId : public DelphesModule
 {
 public:
   CscClusterId();
@@ -44,15 +44,15 @@ public:
   void Finish();
 
 private:
-  DelphesCscClusterFormula *fFormula; //!
-  DelphesCscClusterFormula *fEtaFormula; //!
+  const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
+  const std::unique_ptr<DelphesCscClusterFormula> fEtaFormula; //!
   Double_t fEtaCutMax;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(CscClusterId, 1)
 };

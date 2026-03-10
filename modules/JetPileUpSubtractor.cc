@@ -51,16 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-JetPileUpSubtractor::JetPileUpSubtractor() :
-  fItJetInputArray(0), fItRhoInputArray(0)
-{
-}
+JetPileUpSubtractor::JetPileUpSubtractor() {}
 
 //------------------------------------------------------------------------------
 
-JetPileUpSubtractor::~JetPileUpSubtractor()
-{
-}
+JetPileUpSubtractor::~JetPileUpSubtractor() {}
 
 //------------------------------------------------------------------------------
 
@@ -93,7 +88,7 @@ void JetPileUpSubtractor::Finish()
 
 void JetPileUpSubtractor::Process()
 {
-  Candidate *candidate, *object;
+  Candidate *candidate = nullptr, *object = nullptr;
   TLorentzVector momentum, area;
   Double_t eta = 0.0;
   Double_t rho = 0.0;

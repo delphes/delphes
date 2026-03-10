@@ -31,7 +31,7 @@
 
 class TObjArray;
 
-class TruthVertexFinder: public DelphesModule
+class TruthVertexFinder : public DelphesModule
 {
 public:
   TruthVertexFinder();
@@ -42,15 +42,14 @@ public:
   void Finish();
 
 private:
-
   Double_t fResolution; //!
 
-  TIterator *fItInputArray; //!
-  TIterator *fItOutputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
+  TIterator *fItOutputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fVertexOutputArray; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
   ClassDef(TruthVertexFinder, 1)
 };
 

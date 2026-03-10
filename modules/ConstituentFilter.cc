@@ -51,15 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ConstituentFilter::ConstituentFilter()
-{
-}
+ConstituentFilter::ConstituentFilter() {}
 
 //------------------------------------------------------------------------------
 
-ConstituentFilter::~ConstituentFilter()
-{
-}
+ConstituentFilter::~ConstituentFilter() {}
 
 //------------------------------------------------------------------------------
 

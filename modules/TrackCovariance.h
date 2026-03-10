@@ -38,7 +38,7 @@ class SolGridCov;
 class AcceptanceClx;
 class DelphesFormula;
 
-class TrackCovariance: public DelphesModule
+class TrackCovariance : public DelphesModule
 {
 public:
   TrackCovariance();
@@ -52,20 +52,20 @@ private:
   Double_t fBz;
   Int_t fNMinHits;
 
-  DelphesFormula *fElectronScaleFactor;
-  DelphesFormula *fMuonScaleFactor;
-  DelphesFormula *fChargedHadronScaleFactor;
+  const std::unique_ptr<DelphesFormula> fElectronScaleFactor;
+  const std::unique_ptr<DelphesFormula> fMuonScaleFactor;
+  const std::unique_ptr<DelphesFormula> fChargedHadronScaleFactor;
 
-  SolGeom *fGeometry;
-  SolGridCov *fCovariance;
+  const std::unique_ptr<SolGeom> fGeometry;
+  const std::unique_ptr<SolGridCov> fCovariance;
 
-  AcceptanceClx *fAcx;
+  AcceptanceClx *fAcx{nullptr};
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(TrackCovariance, 1)
 };

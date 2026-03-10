@@ -38,7 +38,7 @@ class TObjArray;
 class ExRootFilter;
 class TauTaggingPartonClassifier;
 
-class TaggingParticlesSkimmer: public DelphesModule
+class TaggingParticlesSkimmer : public DelphesModule
 {
 public:
   TaggingParticlesSkimmer();
@@ -52,16 +52,15 @@ private:
   Double_t fPTMin; //!
   Double_t fEtaMax; //!
 
-  TauTaggingPartonClassifier *fClassifier; //!
+  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<ExRootFilter> fFilter;
 
-  ExRootFilter *fFilter;
+  TIterator *fItPartonInputArray{nullptr}; //!
 
-  TIterator *fItPartonInputArray; //!
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
 
-  const TObjArray *fPartonInputArray; //!
-  const TObjArray *fParticleInputArray; //!
-
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(TaggingParticlesSkimmer, 1)
 };

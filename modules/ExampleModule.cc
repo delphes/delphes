@@ -51,18 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ExampleModule::ExampleModule() :
-  fFormula(0), fItInputArray(0)
-{
-  fFormula = new DelphesFormula;
-}
+ExampleModule::ExampleModule() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-ExampleModule::~ExampleModule()
-{
-  if(fFormula) delete fFormula;
-}
+ExampleModule::~ExampleModule() {}
 
 //------------------------------------------------------------------------------
 
@@ -107,7 +100,7 @@ void ExampleModule::Finish()
 
 void ExampleModule::Process()
 {
-  Candidate *candidate;
+  Candidate *candidate = nullptr;
   TLorentzVector candidatePosition, candidateMomentum;
 
   // loop over all input candidates

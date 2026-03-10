@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class MomentumSmearing: public DelphesModule
+class MomentumSmearing : public DelphesModule
 {
 public:
   MomentumSmearing();
@@ -46,13 +46,13 @@ public:
 private:
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
-  DelphesFormula *fFormula; //!
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   Double_t fUseMomentumVector; //!
 

@@ -34,7 +34,7 @@ class TIterator;
 class DelphesCylindricalFormula;
 class TF1;
 
-class PhotonConversions: public DelphesModule
+class PhotonConversions : public DelphesModule
 {
 public:
   PhotonConversions();
@@ -48,15 +48,14 @@ private:
   Double_t fRadius, fRadius2, fHalfLength;
   Double_t fEtaMin, fEtaMax;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
-  DelphesCylindricalFormula *fConversionMap; //!
-
-  TF1 *fDecayXsec; //!
+  const std::unique_ptr<DelphesCylindricalFormula> fConversionMap; //!
+  const std::unique_ptr<TF1> fDecayXsec; //!
 
   Double_t fStep;
 

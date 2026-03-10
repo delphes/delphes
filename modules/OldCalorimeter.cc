@@ -40,17 +40,9 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 OldCalorimeter::OldCalorimeter() :
-  fECalResolutionFormula(0), fHCalResolutionFormula(0),
-  fItParticleInputArray(0), fItTrackInputArray(0),
-  fTowerECalArray(0), fItTowerECalArray(0),
-  fTowerHCalArray(0), fItTowerHCalArray(0),
-  fTowerTrackArray(0), fItTowerTrackArray(0),
-  fTowerECalTrackArray(0), fItTowerECalTrackArray(0),
-  fTowerHCalTrackArray(0), fItTowerHCalTrackArray(0)
+  fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+  fHCalResolutionFormula(std::make_unique<DelphesFormula>())
 {
-  fECalResolutionFormula = new DelphesFormula;
-  fHCalResolutionFormula = new DelphesFormula;
-
   fTowerECalArray = new TObjArray;
   fItTowerECalArray = fTowerECalArray->MakeIterator();
   fTowerHCalArray = new TObjArray;
@@ -68,9 +60,6 @@ OldCalorimeter::OldCalorimeter() :
 
 OldCalorimeter::~OldCalorimeter()
 {
-  if(fECalResolutionFormula) delete fECalResolutionFormula;
-  if(fHCalResolutionFormula) delete fHCalResolutionFormula;
-
   if(fTowerECalArray) delete fTowerECalArray;
   if(fItTowerECalArray) delete fItTowerECalArray;
   if(fTowerHCalArray) delete fTowerHCalArray;
@@ -191,7 +180,7 @@ void OldCalorimeter::Finish()
 
 void OldCalorimeter::Process()
 {
-  Candidate *particle, *track;
+  Candidate *particle = nullptr, *track = nullptr;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
   Int_t number;
@@ -314,7 +303,7 @@ void OldCalorimeter::Process()
   {
     towerHit = (*itTowerHits);
     flags = (towerHit >> 24) & 0x00000000000000FFLL;
-    number = (towerHit)&0x0000000000FFFFFFLL;
+    number = (towerHit) & 0x0000000000FFFFFFLL;
     hitEtaPhi = towerHit >> 32;
 
     if(towerEtaPhi != hitEtaPhi)
@@ -428,10 +417,10 @@ void OldCalorimeter::Process()
 
 void OldCalorimeter::FinalizeTower()
 {
-  Candidate *particle, *track, *tower;
+  Candidate *particle = nullptr, *track = nullptr, *tower = nullptr;
   Double_t energy, pt, eta, phi;
   Double_t ecalEnergy, hcalEnergy;
-  TIterator *itTowerTrackArray;
+  TIterator *itTowerTrackArray = nullptr;
 
   if(!fTower) return;
 

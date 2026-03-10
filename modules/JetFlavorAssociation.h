@@ -38,7 +38,7 @@ class ExRootFilter;
 class PartonClassifier;
 class ParticleLHEFClassifier;
 
-class JetFlavorAssociation: public DelphesModule
+class JetFlavorAssociation : public DelphesModule
 {
 public:
   JetFlavorAssociation();
@@ -54,21 +54,21 @@ public:
 private:
   Double_t fDeltaR;
 
-  PartonClassifier *fPartonClassifier; //!
-  ParticleLHEFClassifier *fParticleLHEFClassifier; //!
+  const std::unique_ptr<PartonClassifier> fPartonClassifier; //!
+  const std::unique_ptr<ParticleLHEFClassifier> fParticleLHEFClassifier; //!
 
-  ExRootFilter *fPartonFilter;
-  ExRootFilter *fParticleLHEFFilter;
+  std::unique_ptr<ExRootFilter> fPartonFilter;
+  std::unique_ptr<ExRootFilter> fParticleLHEFFilter;
 
-  TIterator *fItPartonInputArray; //!
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItParticleLHEFInputArray; //!
-  TIterator *fItJetInputArray; //!
+  TIterator *fItPartonInputArray{nullptr}; //!
+  TIterator *fItParticleInputArray{nullptr}; //!
+  TIterator *fItParticleLHEFInputArray{nullptr}; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  const TObjArray *fPartonInputArray; //!
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fParticleLHEFInputArray; //!
-  const TObjArray *fJetInputArray; //!
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fParticleLHEFInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
   ClassDef(JetFlavorAssociation, 1)
 };

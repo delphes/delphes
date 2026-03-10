@@ -51,18 +51,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::TrackPileUpSubtractor() :
-  fFormula(0)
-{
-  fFormula = new DelphesFormula;
-}
+TrackPileUpSubtractor::TrackPileUpSubtractor() : fFormula(std::make_unique<DelphesFormula>()) {}
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::~TrackPileUpSubtractor()
-{
-  if(fFormula) delete fFormula;
-}
+TrackPileUpSubtractor::~TrackPileUpSubtractor() {}
 
 //------------------------------------------------------------------------------
 

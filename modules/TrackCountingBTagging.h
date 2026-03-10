@@ -33,7 +33,7 @@
 
 class TObjArray;
 
-class TrackCountingBTagging: public DelphesModule
+class TrackCountingBTagging : public DelphesModule
 {
 public:
   TrackCountingBTagging();
@@ -53,11 +53,11 @@ private:
   Int_t fNtracks;
   Bool_t fUse3D;
 
-  TIterator *fItTrackInputArray; //!
-  TIterator *fItJetInputArray; //!
+  TIterator *fItTrackInputArray{nullptr}; //!
+  TIterator *fItJetInputArray{nullptr}; //!
 
-  const TObjArray *fTrackInputArray; //!
-  const TObjArray *fJetInputArray; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 
   ClassDef(TrackCountingBTagging, 1)
 };

@@ -54,11 +54,8 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 SimpleCalorimeter::SimpleCalorimeter() :
-  fResolutionFormula(0),
-  fItParticleInputArray(0), fItTrackInputArray(0)
+  fResolutionFormula(std::make_unique<DelphesFormula>())
 {
-
-  fResolutionFormula = new DelphesFormula;
   fTowerTrackArray = new TObjArray;
   fItTowerTrackArray = fTowerTrackArray->MakeIterator();
 }
@@ -68,7 +65,6 @@ SimpleCalorimeter::SimpleCalorimeter() :
 SimpleCalorimeter::~SimpleCalorimeter()
 {
 
-  if(fResolutionFormula) delete fResolutionFormula;
   if(fTowerTrackArray) delete fTowerTrackArray;
   if(fItTowerTrackArray) delete fItTowerTrackArray;
 }
@@ -345,7 +341,7 @@ void SimpleCalorimeter::Process()
 
   // loop over all hits
   towerEtaPhi = 0;
-  fTower = 0;
+  fTower = nullptr;
   for(itTowerHits = fTowerHits.begin(); itTowerHits != fTowerHits.end(); ++itTowerHits)
   {
     towerHit = (*itTowerHits);

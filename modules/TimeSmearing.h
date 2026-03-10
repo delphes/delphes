@@ -33,7 +33,7 @@ class TIterator;
 class TObjArray;
 class DelphesFormula;
 
-class TimeSmearing: public DelphesModule
+class TimeSmearing : public DelphesModule
 {
 public:
   TimeSmearing();
@@ -44,15 +44,14 @@ public:
   void Finish();
 
 private:
-
-  DelphesFormula *fResolutionFormula;
+  const std::unique_ptr<DelphesFormula> fResolutionFormula;
   Int_t fVertexTimeMode;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray{nullptr}; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray{nullptr}; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray{nullptr}; //!
 
   ClassDef(TimeSmearing, 1)
 };

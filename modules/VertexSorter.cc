@@ -41,16 +41,11 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-VertexSorter::VertexSorter() :
-  fInputArray(NULL), fTrackInputArray(NULL), fItTrackInputArray(NULL), fJetInputArray(NULL), fItJetInputArray(NULL), fOutputArray(NULL)
-{
-}
+VertexSorter::VertexSorter() {}
 
 //------------------------------------------------------------------------------
 
-VertexSorter::~VertexSorter()
-{
-}
+VertexSorter::~VertexSorter() {}
 
 //------------------------------------------------------------------------------
 
@@ -106,7 +101,7 @@ static Bool_t secondAscending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_
 
 void VertexSorter::Process()
 {
-  Candidate *candidate, *jetCandidate, *beamSpotCandidate;
+  Candidate *candidate = nullptr, *jetCandidate = nullptr, *beamSpotCandidate = nullptr;
   map<Int_t, UInt_t> clusterIDToIndex;
   map<Int_t, UInt_t>::const_iterator itClusterIDToIndex;
   map<Int_t, Double_t> clusterIDToSumPT2;
