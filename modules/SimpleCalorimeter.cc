@@ -54,9 +54,9 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 SimpleCalorimeter::SimpleCalorimeter() :
-  fResolutionFormula(std::make_unique<DelphesFormula>())
+  fResolutionFormula(std::make_unique<DelphesFormula>()),
+  fTowerTrackArray(std::make_unique<TObjArray>())
 {
-  fTowerTrackArray = new TObjArray;
   fItTowerTrackArray = fTowerTrackArray->MakeIterator();
 }
 
@@ -64,8 +64,6 @@ SimpleCalorimeter::SimpleCalorimeter() :
 
 SimpleCalorimeter::~SimpleCalorimeter()
 {
-
-  if(fTowerTrackArray) delete fTowerTrackArray;
   if(fItTowerTrackArray) delete fItTowerTrackArray;
 }
 
