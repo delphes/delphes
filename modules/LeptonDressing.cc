@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-LeptonDressing::LeptonDressing() :
-  fItDressingInputArray(0), fItCandidateInputArray(0)
+LeptonDressing::LeptonDressing()
 {
 }
 
@@ -85,8 +84,8 @@ void LeptonDressing::Init()
 
 void LeptonDressing::Finish()
 {
-  if(fItCandidateInputArray) delete fItCandidateInputArray;
-  if(fItDressingInputArray) delete fItDressingInputArray;
+  delete fItCandidateInputArray;
+  delete fItDressingInputArray;
 }
 
 //------------------------------------------------------------------------------

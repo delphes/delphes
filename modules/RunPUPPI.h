@@ -20,14 +20,14 @@ public:
   void Finish();
 
 private:
-  TIterator *fItTrackInputArray;
-  TIterator *fItNeutralInputArray; //!
-  TIterator *fPVItInputArray; //!
+  TIterator *fItTrackInputArray = nullptr;
+  TIterator *fItNeutralInputArray = nullptr; //!
+  TIterator *fPVItInputArray = nullptr; //!
 
-  const TObjArray *fTrackInputArray;
-  const TObjArray *fNeutralInputArray; //!
-  const TObjArray *fPVInputArray; //!
-  PuppiContainer *fPuppi;
+  const TObjArray *fTrackInputArray = nullptr;
+  const TObjArray *fNeutralInputArray = nullptr; //!
+  const TObjArray *fPVInputArray = nullptr; //!
+  PuppiContainer *fPuppi = nullptr;
   // puppi parameters
   bool fApplyNoLep;
   double fMinPuppiWeight;
@@ -47,9 +47,9 @@ private:
   std::vector<int> fMetricId;
   std::vector<int> fCombId;
 
-  TObjArray *fOutputArray;
-  TObjArray *fOutputTrackArray;
-  TObjArray *fOutputNeutralArray;
+  TObjArray *fOutputArray = nullptr;
+  TObjArray *fOutputTrackArray = nullptr;
+  TObjArray *fOutputNeutralArray = nullptr;
 
   ClassDef(RunPUPPI, 1)
 };

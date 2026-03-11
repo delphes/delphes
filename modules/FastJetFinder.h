@@ -59,15 +59,15 @@ public:
   void Finish();
 
 private:
-  void *fPlugin; //!
-  void *fRecomb; //!
+  void *fPlugin = nullptr; //!
+  void *fRecomb = nullptr; //!
 
-  fastjet::contrib::AxesDefinition *fAxesDef;
-  fastjet::contrib::MeasureDefinition *fMeasureDef;
+  fastjet::contrib::AxesDefinition *fAxesDef = nullptr;
+  fastjet::contrib::MeasureDefinition *fMeasureDef = nullptr;
 
-  fastjet::contrib::NjettinessPlugin *fNjettinessPlugin; //!
-  fastjet::contrib::ValenciaPlugin *fValenciaPlugin; //!
-  fastjet::JetDefinition *fDefinition; //!
+  fastjet::contrib::NjettinessPlugin *fNjettinessPlugin = nullptr; //!
+  fastjet::contrib::ValenciaPlugin *fValenciaPlugin = nullptr; //!
+  fastjet::JetDefinition *fDefinition = nullptr; //!
 
   Int_t fJetAlgorithm;
   Double_t fParameterR;
@@ -122,7 +122,7 @@ private:
 
   // --- FastJet Area method --------
 
-  fastjet::AreaDefinition *fAreaDefinition;
+  fastjet::AreaDefinition *fAreaDefinition = nullptr;
   Int_t fAreaAlgorithm;
   Bool_t fComputeRho;
 
@@ -147,13 +147,13 @@ private:
   std::vector<TEstimatorStruct> fEstimators; //!
 #endif
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
-  TObjArray *fRhoOutputArray; //!
-  TObjArray *fConstituentsOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fRhoOutputArray = nullptr; //!
+  TObjArray *fConstituentsOutputArray = nullptr; //!
 
   ClassDef(FastJetFinder, 1)
 };

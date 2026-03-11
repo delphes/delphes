@@ -65,8 +65,7 @@ bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) cons
 
 //------------------------------------------------------------------------------
 
-Weighter::Weighter() :
-  fItInputArray(0)
+Weighter::Weighter()
 {
 }
 
@@ -135,7 +134,7 @@ void Weighter::Init()
 
 void Weighter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

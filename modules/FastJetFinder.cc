@@ -76,9 +76,7 @@ using namespace fastjet::contrib;
 
 //------------------------------------------------------------------------------
 
-FastJetFinder::FastJetFinder() :
-  fPlugin(0), fRecomb(0), fAxesDef(0), fMeasureDef(0), fNjettinessPlugin(0), fValenciaPlugin(0),
-  fDefinition(0), fAreaDefinition(0), fItInputArray(0)
+FastJetFinder::FastJetFinder()
 {
 }
 
@@ -308,15 +306,15 @@ void FastJetFinder::Finish()
     if(itEstimators->estimator) delete itEstimators->estimator;
   }
 
-  if(fItInputArray) delete fItInputArray;
-  if(fDefinition) delete fDefinition;
-  if(fAreaDefinition) delete fAreaDefinition;
-  if(fPlugin) delete static_cast<JetDefinition::Plugin *>(fPlugin);
-  if(fRecomb) delete static_cast<JetDefinition::Recombiner *>(fRecomb);
-  if(fNjettinessPlugin) delete static_cast<JetDefinition::Plugin *>(fNjettinessPlugin);
-  if(fAxesDef) delete fAxesDef;
-  if(fMeasureDef) delete fMeasureDef;
-  if(fValenciaPlugin) delete static_cast<JetDefinition::Plugin *>(fValenciaPlugin);
+  delete fItInputArray;
+  delete fDefinition;
+  delete fAreaDefinition;
+  delete static_cast<JetDefinition::Plugin *>(fPlugin);
+  delete static_cast<JetDefinition::Recombiner *>(fRecomb);
+  delete static_cast<JetDefinition::Plugin *>(fNjettinessPlugin);
+  delete fAxesDef;
+  delete fMeasureDef;
+  delete static_cast<JetDefinition::Plugin *>(fValenciaPlugin);
 }
 
 //------------------------------------------------------------------------------

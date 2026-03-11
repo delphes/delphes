@@ -34,8 +34,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PileUpJetID::PileUpJetID() :
-  fItJetInputArray(0), fTrackInputArray(0), fNeutralInputArray(0)
+PileUpJetID::PileUpJetID()
 {
 }
 
@@ -88,9 +87,9 @@ void PileUpJetID::Finish()
 {
   //  cout << "In finish" << endl;
 
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItNeutralInputArray) delete fItNeutralInputArray;
+  delete fItJetInputArray;
+  delete fItTrackInputArray;
+  delete fItNeutralInputArray;
 }
 
 //------------------------------------------------------------------------------

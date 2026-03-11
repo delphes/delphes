@@ -46,7 +46,7 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  DelphesFormula *fFormula = nullptr; //!
 
   Double_t fPTMin;
 
@@ -54,9 +54,9 @@ private:
 
   ClassDef(TrackPileUpSubtractor, 1)
 
-    TIterator *fItVertexInputArray; //!
+    TIterator *fItVertexInputArray = nullptr; //!
 
-  const TObjArray *fVertexInputArray; //!
+  const TObjArray *fVertexInputArray = nullptr; //!
 };
 
 #endif

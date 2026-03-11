@@ -61,16 +61,16 @@ private:
 
   Double_t fPTMin;
 
-  DelphesTF2 *fFunction; //!
+  DelphesTF2 *fFunction = nullptr; //!
 
-  Pythia8::Pythia *fPythia; //!
+  Pythia8::Pythia *fPythia = nullptr; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fParticleOutputArray; //!
-  TObjArray *fVertexOutputArray; //!
+  TObjArray *fParticleOutputArray = nullptr; //!
+  TObjArray *fVertexOutputArray = nullptr; //!
 
   ClassDef(PileUpMergerPythia8, 1)
 };

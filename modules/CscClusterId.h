@@ -44,15 +44,15 @@ public:
   void Finish();
 
 private:
-  DelphesCscClusterFormula *fFormula; //!
-  DelphesCscClusterFormula *fEtaFormula; //!
+  DelphesCscClusterFormula *fFormula = nullptr; //!
+  DelphesCscClusterFormula *fEtaFormula = nullptr; //!
   Double_t fEtaCutMax;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(CscClusterId, 1)
 };

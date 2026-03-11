@@ -43,8 +43,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Cloner::Cloner() :
-  fItInputArray(0)
+Cloner::Cloner()
 {
 }
 
@@ -72,7 +71,7 @@ void Cloner::Init()
 
 void Cloner::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

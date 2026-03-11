@@ -50,8 +50,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 
-TimeSmearing::TimeSmearing() :
-  fResolutionFormula(0), fItInputArray(0)
+TimeSmearing::TimeSmearing()
 {
 	fResolutionFormula = new DelphesFormula;
 }
@@ -60,7 +59,7 @@ TimeSmearing::TimeSmearing() :
 
 TimeSmearing::~TimeSmearing()
 {
-	if(fResolutionFormula) delete fResolutionFormula;
+	delete fResolutionFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -85,7 +84,7 @@ void TimeSmearing::Init()
 
 void TimeSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

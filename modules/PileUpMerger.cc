@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PileUpMerger::PileUpMerger() :
-  fFunction(0), fReader(0), fItInputArray(0)
+PileUpMerger::PileUpMerger()
 {
   fFunction = new DelphesTF2;
 }
@@ -104,7 +103,7 @@ void PileUpMerger::Init()
 
 void PileUpMerger::Finish()
 {
-  if(fReader) delete fReader;
+  delete fReader;
 }
 
 //------------------------------------------------------------------------------

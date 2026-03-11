@@ -47,22 +47,22 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fPromptFormula;
-  DelphesFormula *fNonPromptFormula;
-  DelphesFormula *fFakeFormula;
+  DelphesFormula *fPromptFormula = nullptr;
+  DelphesFormula *fNonPromptFormula = nullptr;
+  DelphesFormula *fFakeFormula = nullptr;
 
   // import input arrays
-  const TObjArray *fInputPhotonArray;
-  TIterator *fItInputPhotonArray;
+  const TObjArray *fInputPhotonArray = nullptr;
+  TIterator *fItInputPhotonArray = nullptr;
 
   // use filtered collection for speed
-  const TObjArray *fInputGenArray;
-  TIterator *fItInputGenArray;
+  const TObjArray *fInputGenArray = nullptr;
+  TIterator *fItInputGenArray = nullptr;
 
   Double_t fPTMin;
   Double_t fRelIsoMax;
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   Bool_t isFake(const Candidate *obj);
 

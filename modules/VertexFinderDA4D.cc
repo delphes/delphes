@@ -139,7 +139,7 @@ void VertexFinderDA4D::Init()
 
 void VertexFinderDA4D::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

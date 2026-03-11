@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-CscClusterEfficiency::CscClusterEfficiency() :
-  fFormula(0), fItInputArray(0)
+CscClusterEfficiency::CscClusterEfficiency()
 {
   fFormula = new DelphesCscClusterFormula;
 }
@@ -62,7 +61,7 @@ CscClusterEfficiency::CscClusterEfficiency() :
 
 CscClusterEfficiency::~CscClusterEfficiency()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +85,7 @@ void CscClusterEfficiency::Init()
 
 void CscClusterEfficiency::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

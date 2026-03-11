@@ -50,8 +50,7 @@
 using namespace std;
 //------------------------------------------------------------------------------
 
-TimeOfFlight::TimeOfFlight() :
-  fItInputArray(0), fItVertexInputArray(0)
+TimeOfFlight::TimeOfFlight()
 {
 }
 
@@ -85,8 +84,8 @@ void TimeOfFlight::Init()
 
 void TimeOfFlight::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-  if(fItVertexInputArray) delete fItVertexInputArray;
+  delete fItInputArray;
+  delete fItVertexInputArray;
 }
 
 //------------------------------------------------------------------------------

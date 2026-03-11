@@ -55,8 +55,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Hector::Hector() :
-  fBeamLine(0), fItInputArray(0)
+Hector::Hector()
 {
 }
 
@@ -102,8 +101,8 @@ void Hector::Init()
 
 void Hector::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-  if(fBeamLine) delete fBeamLine;
+  delete fItInputArray;
+  delete fBeamLine;
 }
 
 //------------------------------------------------------------------------------

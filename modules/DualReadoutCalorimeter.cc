@@ -58,9 +58,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DualReadoutCalorimeter::DualReadoutCalorimeter() :
-  fECalResolutionFormula(0), fHCalResolutionFormula(0),
-  fItParticleInputArray(0), fItTrackInputArray(0)
+DualReadoutCalorimeter::DualReadoutCalorimeter()
 {
 
   fECalResolutionFormula = new DelphesFormula;
@@ -82,17 +80,17 @@ DualReadoutCalorimeter::DualReadoutCalorimeter() :
 DualReadoutCalorimeter::~DualReadoutCalorimeter()
 {
 
-  if(fECalResolutionFormula) delete fECalResolutionFormula;
-  if(fHCalResolutionFormula) delete fHCalResolutionFormula;
+  delete fECalResolutionFormula;
+  delete fHCalResolutionFormula;
 
-  if(fECalTowerTrackArray) delete fECalTowerTrackArray;
-  if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
+  delete fECalTowerTrackArray;
+  delete fItECalTowerTrackArray;
 
-  if(fHCalTowerTrackArray) delete fHCalTowerTrackArray;
-  if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
+  delete fHCalTowerTrackArray;
+  delete fItHCalTowerTrackArray;
 
-  if(fTowerTrackArray) delete fTowerTrackArray;
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
+  delete fTowerTrackArray;
+  delete fItTowerTrackArray;
 
 }
 
@@ -203,8 +201,8 @@ void DualReadoutCalorimeter::Init()
 void DualReadoutCalorimeter::Finish()
 {
   vector< vector< Double_t >* >::iterator itPhiBin;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  delete fItParticleInputArray;
+  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

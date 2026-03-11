@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-UnstablePropagator::UnstablePropagator() :
-  fItInputArray(0)
+UnstablePropagator::UnstablePropagator()
 {
 }
 
@@ -98,7 +97,7 @@ void UnstablePropagator::Init()
 
 void UnstablePropagator::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

@@ -39,14 +39,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-OldCalorimeter::OldCalorimeter() :
-  fECalResolutionFormula(0), fHCalResolutionFormula(0),
-  fItParticleInputArray(0), fItTrackInputArray(0),
-  fTowerECalArray(0), fItTowerECalArray(0),
-  fTowerHCalArray(0), fItTowerHCalArray(0),
-  fTowerTrackArray(0), fItTowerTrackArray(0),
-  fTowerECalTrackArray(0), fItTowerECalTrackArray(0),
-  fTowerHCalTrackArray(0), fItTowerHCalTrackArray(0)
+OldCalorimeter::OldCalorimeter()
 {
   fECalResolutionFormula = new DelphesFormula;
   fHCalResolutionFormula = new DelphesFormula;
@@ -68,20 +61,20 @@ OldCalorimeter::OldCalorimeter() :
 
 OldCalorimeter::~OldCalorimeter()
 {
-  if(fECalResolutionFormula) delete fECalResolutionFormula;
-  if(fHCalResolutionFormula) delete fHCalResolutionFormula;
+  delete fECalResolutionFormula;
+  delete fHCalResolutionFormula;
 
-  if(fTowerECalArray) delete fTowerECalArray;
-  if(fItTowerECalArray) delete fItTowerECalArray;
-  if(fTowerHCalArray) delete fTowerHCalArray;
-  if(fItTowerHCalArray) delete fItTowerHCalArray;
+  delete fTowerECalArray;
+  delete fItTowerECalArray;
+  delete fTowerHCalArray;
+  delete fItTowerHCalArray;
 
-  if(fTowerTrackArray) delete fTowerTrackArray;
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
-  if(fTowerECalTrackArray) delete fTowerECalTrackArray;
-  if(fItTowerECalTrackArray) delete fItTowerECalTrackArray;
-  if(fTowerHCalTrackArray) delete fTowerHCalTrackArray;
-  if(fItTowerHCalTrackArray) delete fItTowerHCalTrackArray;
+  delete fTowerTrackArray;
+  delete fItTowerTrackArray;
+  delete fTowerECalTrackArray;
+  delete fItTowerECalTrackArray;
+  delete fTowerHCalTrackArray;
+  delete fItTowerHCalTrackArray;
 }
 
 //------------------------------------------------------------------------------
@@ -179,8 +172,8 @@ void OldCalorimeter::Init()
 void OldCalorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  delete fItParticleInputArray;
+  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ExampleModule::ExampleModule() :
-  fFormula(0), fItInputArray(0)
+ExampleModule::ExampleModule()
 {
   fFormula = new DelphesFormula;
 }
@@ -61,7 +60,7 @@ ExampleModule::ExampleModule() :
 
 ExampleModule::~ExampleModule()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -100,7 +99,7 @@ void ExampleModule::Init()
 
 void ExampleModule::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

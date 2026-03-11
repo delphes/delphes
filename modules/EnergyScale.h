@@ -44,13 +44,13 @@ public:
   void Finish();
 
 private:
-  DelphesFormula *fFormula; //!
+  DelphesFormula *fFormula = nullptr; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(EnergyScale, 1)
 };

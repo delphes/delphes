@@ -52,9 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-Calorimeter::Calorimeter() :
-  fECalResolutionFormula(0), fHCalResolutionFormula(0),
-  fItParticleInputArray(0), fItTrackInputArray(0)
+Calorimeter::Calorimeter()
 {
 
   fECalResolutionFormula = new DelphesFormula;
@@ -72,14 +70,14 @@ Calorimeter::Calorimeter() :
 Calorimeter::~Calorimeter()
 {
 
-  if(fECalResolutionFormula) delete fECalResolutionFormula;
-  if(fHCalResolutionFormula) delete fHCalResolutionFormula;
+  delete fECalResolutionFormula;
+  delete fHCalResolutionFormula;
 
-  if(fECalTowerTrackArray) delete fECalTowerTrackArray;
-  if(fItECalTowerTrackArray) delete fItECalTowerTrackArray;
+  delete fECalTowerTrackArray;
+  delete fItECalTowerTrackArray;
 
-  if(fHCalTowerTrackArray) delete fHCalTowerTrackArray;
-  if(fItHCalTowerTrackArray) delete fItHCalTowerTrackArray;
+  delete fHCalTowerTrackArray;
+  delete fItHCalTowerTrackArray;
 }
 
 //------------------------------------------------------------------------------
@@ -189,8 +187,8 @@ void Calorimeter::Init()
 void Calorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  delete fItParticleInputArray;
+  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

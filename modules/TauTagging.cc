@@ -100,9 +100,7 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-TauTagging::TauTagging() :
-  fClassifier(0), fFilter(0),
-  fItPartonInputArray(0), fItJetInputArray(0)
+TauTagging::TauTagging()
 {
 }
 
@@ -172,10 +170,10 @@ void TauTagging::Finish()
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
-  if(fFilter) delete fFilter;
-  if(fClassifier) delete fClassifier;
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
+  delete fFilter;
+  delete fClassifier;
+  delete fItJetInputArray;
+  delete fItPartonInputArray;
 
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
   {

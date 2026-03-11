@@ -52,20 +52,20 @@ private:
   Double_t fBz;
   Int_t fNMinHits;
 
-  DelphesFormula *fElectronScaleFactor;
-  DelphesFormula *fMuonScaleFactor;
-  DelphesFormula *fChargedHadronScaleFactor;
+  DelphesFormula *fElectronScaleFactor = nullptr;
+  DelphesFormula *fMuonScaleFactor = nullptr;
+  DelphesFormula *fChargedHadronScaleFactor = nullptr;
 
-  SolGeom *fGeometry;
-  SolGridCov *fCovariance;
+  SolGeom *fGeometry = nullptr;
+  SolGridCov *fCovariance = nullptr;
 
-  AcceptanceClx *fAcx;
+  AcceptanceClx *fAcx = nullptr;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(TrackCovariance, 1)
 };

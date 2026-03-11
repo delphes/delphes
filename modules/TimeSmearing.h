@@ -45,14 +45,14 @@ public:
 
 private:
 
-  DelphesFormula *fResolutionFormula;
+  DelphesFormula *fResolutionFormula = nullptr;
   Int_t fVertexTimeMode;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(TimeSmearing, 1)
 };

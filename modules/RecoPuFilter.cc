@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-RecoPuFilter::RecoPuFilter() :
-  fItInputArray(0)
+RecoPuFilter::RecoPuFilter()
 {
 }
 
@@ -82,7 +81,7 @@ void RecoPuFilter::Init()
 
 void RecoPuFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

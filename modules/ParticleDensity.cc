@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ParticleDensity::ParticleDensity() :
-  fItInputArray(0)
+ParticleDensity::ParticleDensity()
 {}
 
 //------------------------------------------------------------------------------
@@ -104,8 +103,8 @@ void ParticleDensity::Init()
 
 void ParticleDensity::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-  if (fHisto) delete fHisto;
+  delete fItInputArray;
+  delete fHisto;
 }
 
 //------------------------------------------------------------------------------

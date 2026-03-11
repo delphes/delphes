@@ -52,7 +52,7 @@ private:
 
   std::map<TIterator *, TObjArray *> fInputMap; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(ConstituentFilter, 1)
 };

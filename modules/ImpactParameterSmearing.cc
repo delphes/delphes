@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ImpactParameterSmearing::ImpactParameterSmearing() :
-  fFormula(0), fItInputArray(0)
+ImpactParameterSmearing::ImpactParameterSmearing()
 {
   fFormula = new DelphesFormula;
 }
@@ -61,7 +60,7 @@ ImpactParameterSmearing::ImpactParameterSmearing() :
 
 ImpactParameterSmearing::~ImpactParameterSmearing()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +85,7 @@ void ImpactParameterSmearing::Init()
 
 void ImpactParameterSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

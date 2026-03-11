@@ -47,13 +47,13 @@ private:
 
   Int_t fVertexTimeMode;
 
-  TIterator *fItInputArray; //!
-  TIterator *fItVertexInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
+  TIterator *fItVertexInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
-  const TObjArray *fVertexInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fVertexInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(TimeOfFlight, 1)
 };

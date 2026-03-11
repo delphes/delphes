@@ -20,9 +20,7 @@ using namespace std;
 using namespace fastjet;
 
 //------------------------------------------------------------------------------
-RunPUPPI::RunPUPPI() :
-  fItTrackInputArray(0),
-  fItNeutralInputArray(0)
+RunPUPPI::RunPUPPI()
 {
 }
 
@@ -147,9 +145,9 @@ void RunPUPPI::Init()
 
 void RunPUPPI::Finish()
 {
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItNeutralInputArray) delete fItNeutralInputArray;
-  if(fPuppi) delete fPuppi;
+  delete fItTrackInputArray;
+  delete fItNeutralInputArray;
+  delete fPuppi;
 }
 
 //------------------------------------------------------------------------------

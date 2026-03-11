@@ -88,18 +88,18 @@ MeanSqDeltaR
 
   Bool_t fAverageEachTower;
 
-  TIterator *fItJetInputArray; //!
+  TIterator *fItJetInputArray = nullptr; //!
 
-  const TObjArray *fJetInputArray; //!
+  const TObjArray *fJetInputArray = nullptr; //!
 
-  const TObjArray *fTrackInputArray; // SCZ
-  const TObjArray *fNeutralInputArray;
+  const TObjArray *fTrackInputArray = nullptr; // SCZ
+  const TObjArray *fNeutralInputArray = nullptr;
 
-  TIterator *fItTrackInputArray; // SCZ
-  TIterator *fItNeutralInputArray; // SCZ
+  TIterator *fItTrackInputArray = nullptr; // SCZ
+  TIterator *fItNeutralInputArray = nullptr; // SCZ
 
-  TObjArray *fOutputArray; //!
-  TObjArray *fNeutralsInPassingJets; // SCZ
+  TObjArray *fOutputArray = nullptr; //!
+  TObjArray *fNeutralsInPassingJets = nullptr; // SCZ
 
   ClassDef(PileUpJetID, 2)
 };

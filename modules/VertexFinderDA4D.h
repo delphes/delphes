@@ -45,11 +45,11 @@ private:
   Double_t fD0CutOff;
   Double_t fDtCutOff; // for when the beamspot has time
 
-  TObjArray *fInputArray;
-  TIterator *fItInputArray;
+  TObjArray *fInputArray = nullptr;
+  TIterator *fItInputArray = nullptr;
 
-  TObjArray *fOutputArray;
-  TObjArray *fVertexOutputArray;
+  TObjArray *fOutputArray = nullptr;
+  TObjArray *fVertexOutputArray = nullptr;
 
   ClassDef(VertexFinderDA4D, 1)
 };

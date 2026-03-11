@@ -53,9 +53,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-SimpleCalorimeter::SimpleCalorimeter() :
-  fResolutionFormula(0),
-  fItParticleInputArray(0), fItTrackInputArray(0)
+SimpleCalorimeter::SimpleCalorimeter()
 {
 
   fResolutionFormula = new DelphesFormula;
@@ -68,9 +66,9 @@ SimpleCalorimeter::SimpleCalorimeter() :
 SimpleCalorimeter::~SimpleCalorimeter()
 {
 
-  if(fResolutionFormula) delete fResolutionFormula;
-  if(fTowerTrackArray) delete fTowerTrackArray;
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
+  delete fResolutionFormula;
+  delete fTowerTrackArray;
+  delete fItTowerTrackArray;
 }
 
 //------------------------------------------------------------------------------
@@ -201,8 +199,8 @@ void SimpleCalorimeter::Init()
 void SimpleCalorimeter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  delete fItParticleInputArray;
+  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

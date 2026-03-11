@@ -55,9 +55,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TaggingParticlesSkimmer::TaggingParticlesSkimmer() :
-  fClassifier(0), fFilter(0), fItPartonInputArray(0),
-  fPartonInputArray(0), fParticleInputArray(0), fOutputArray(0)
+TaggingParticlesSkimmer::TaggingParticlesSkimmer()
 {
 }
 
@@ -95,9 +93,9 @@ void TaggingParticlesSkimmer::Init()
 
 void TaggingParticlesSkimmer::Finish()
 {
-  if(fItPartonInputArray) delete fItPartonInputArray;
-  if(fFilter) delete fFilter;
-  if(fClassifier) delete fClassifier;
+  delete fItPartonInputArray;
+  delete fFilter;
+  delete fClassifier;
 }
 
 //------------------------------------------------------------------------------

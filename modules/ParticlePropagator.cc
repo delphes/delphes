@@ -54,8 +54,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ParticlePropagator::ParticlePropagator() :
-  fItInputArray(0)
+ParticlePropagator::ParticlePropagator()
 {
 }
 
@@ -114,7 +113,7 @@ void ParticlePropagator::Init()
 
 void ParticlePropagator::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

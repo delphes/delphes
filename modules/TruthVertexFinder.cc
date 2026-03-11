@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TruthVertexFinder::TruthVertexFinder() :
-fItInputArray(0), fItOutputArray(0)
+TruthVertexFinder::TruthVertexFinder()
 {
 }
 
@@ -82,8 +81,8 @@ void TruthVertexFinder::Init()
 
 void TruthVertexFinder::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
-  if(fItOutputArray) delete fItOutputArray;
+  delete fItInputArray;
+  delete fItOutputArray;
 }
 
 //------------------------------------------------------------------------------

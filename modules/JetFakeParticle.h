@@ -50,14 +50,14 @@ private:
   TFakeMap fEfficiencyMap;
 #endif
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fElectronOutputArray; //!
-  TObjArray *fMuonOutputArray; //!
-  TObjArray *fPhotonOutputArray; //!
-  TObjArray *fJetOutputArray; //!
+  TObjArray *fElectronOutputArray = nullptr; //!
+  TObjArray *fMuonOutputArray = nullptr; //!
+  TObjArray *fPhotonOutputArray = nullptr; //!
+  TObjArray *fJetOutputArray = nullptr; //!
 
   ClassDef(JetFakeParticle, 1)
 };

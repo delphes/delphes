@@ -51,13 +51,13 @@ private:
   Double_t fSigmaE, fSigmaX, fSigmaY, fSigmaT;
   Double_t fEtaMin;
 
-  H_BeamLine *fBeamLine;
+  H_BeamLine *fBeamLine = nullptr;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(Hector, 1)
 };

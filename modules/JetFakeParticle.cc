@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-JetFakeParticle::JetFakeParticle() :
-  fItInputArray(0)
+JetFakeParticle::JetFakeParticle()
 {
 }
 
@@ -119,7 +118,7 @@ void JetFakeParticle::Init()
 
 void JetFakeParticle::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 
   TFakeMap::iterator itEfficiencyMap;
   DelphesFormula *formula;

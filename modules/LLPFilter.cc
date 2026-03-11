@@ -54,8 +54,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-LLPFilter::LLPFilter() :
-  fItInputArray(0)
+LLPFilter::LLPFilter()
 {
 }
 
@@ -124,7 +123,7 @@ void LLPFilter::Init()
 
 void LLPFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

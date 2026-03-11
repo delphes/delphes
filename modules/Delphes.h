@@ -54,7 +54,7 @@ public:
   virtual void Finish();
 
 private:
-  DelphesFactory *fFactory;
+  DelphesFactory *fFactory = nullptr;
 
   ClassDef(Delphes, 1)
 };

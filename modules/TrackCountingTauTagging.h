@@ -44,23 +44,23 @@ private:
 
   std::map<Int_t, DelphesFormula *> fEfficiencyMap; //!
 
-  TrackCountingTauTaggingPartonClassifier *fClassifier; //!
+  TrackCountingTauTaggingPartonClassifier *fClassifier = nullptr; //!
 
-  ExRootFilter *fFilter;
+  ExRootFilter *fFilter = nullptr;
 
-  TIterator *fItPartonInputArray; //!
+  TIterator *fItPartonInputArray = nullptr; //!
 
-  TIterator *fItTrackInputArray; //!
+  TIterator *fItTrackInputArray = nullptr; //!
 
-  TIterator *fItJetInputArray; //!
+  TIterator *fItJetInputArray = nullptr; //!
 
-  const TObjArray *fParticleInputArray; //!
+  const TObjArray *fParticleInputArray = nullptr; //!
 
-  const TObjArray *fTrackInputArray; //!
+  const TObjArray *fTrackInputArray = nullptr; //!
 
-  const TObjArray *fPartonInputArray; //!
+  const TObjArray *fPartonInputArray = nullptr; //!
 
-  const TObjArray *fJetInputArray; //!
+  const TObjArray *fJetInputArray = nullptr; //!
 
   ClassDef(TrackCountingTauTagging, 1)
 };

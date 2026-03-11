@@ -113,10 +113,7 @@ Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-JetFlavorAssociation::JetFlavorAssociation() :
-  fPartonClassifier(0), fPartonFilter(0), fParticleLHEFFilter(0),
-  fItPartonInputArray(0), fItParticleInputArray(0),
-  fItParticleLHEFInputArray(0), fItJetInputArray(0)
+JetFlavorAssociation::JetFlavorAssociation()
 {
   fPartonClassifier = new PartonClassifier;
   fParticleLHEFClassifier = new ParticleLHEFClassifier;
@@ -126,8 +123,8 @@ JetFlavorAssociation::JetFlavorAssociation() :
 
 JetFlavorAssociation::~JetFlavorAssociation()
 {
-  if(fPartonClassifier) delete fPartonClassifier;
-  if(fParticleLHEFClassifier) delete fParticleLHEFClassifier;
+  delete fPartonClassifier;
+  delete fParticleLHEFClassifier;
 }
 
 //------------------------------------------------------------------------------
@@ -175,13 +172,13 @@ void JetFlavorAssociation::Init()
 
 void JetFlavorAssociation::Finish()
 {
-  if(fPartonFilter) delete fPartonFilter;
-  if(fParticleLHEFFilter) delete fParticleLHEFFilter;
+  delete fPartonFilter;
+  delete fParticleLHEFFilter;
 
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItParticleLHEFInputArray) delete fItParticleLHEFInputArray;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
+  delete fItJetInputArray;
+  delete fItParticleLHEFInputArray;
+  delete fItParticleInputArray;
+  delete fItPartonInputArray;
 }
 
 //------------------------------------------------------------------------------

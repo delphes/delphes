@@ -46,8 +46,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackCountingBTagging::TrackCountingBTagging() :
-  fItTrackInputArray(0), fItJetInputArray(0)
+TrackCountingBTagging::TrackCountingBTagging()
 {
 }
 
@@ -85,8 +84,8 @@ void TrackCountingBTagging::Init()
 
 void TrackCountingBTagging::Finish()
 {
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItJetInputArray) delete fItJetInputArray;
+  delete fItTrackInputArray;
+  delete fItJetInputArray;
 }
 
 //------------------------------------------------------------------------------

@@ -145,8 +145,7 @@ bool isWDaughter(int M1, const TObjArray *fInputArray)
 
 //------------------------------------------------------------------------------
 
-StatusPidFilter::StatusPidFilter() :
-  fItInputArray(0)
+StatusPidFilter::StatusPidFilter()
 {
 }
 
@@ -179,7 +178,7 @@ void StatusPidFilter::Init()
 
 void StatusPidFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

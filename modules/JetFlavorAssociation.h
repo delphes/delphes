@@ -54,21 +54,21 @@ public:
 private:
   Double_t fDeltaR;
 
-  PartonClassifier *fPartonClassifier; //!
-  ParticleLHEFClassifier *fParticleLHEFClassifier; //!
+  PartonClassifier *fPartonClassifier = nullptr; //!
+  ParticleLHEFClassifier *fParticleLHEFClassifier = nullptr; //!
 
-  ExRootFilter *fPartonFilter;
-  ExRootFilter *fParticleLHEFFilter;
+  ExRootFilter *fPartonFilter = nullptr;
+  ExRootFilter *fParticleLHEFFilter = nullptr;
 
-  TIterator *fItPartonInputArray; //!
-  TIterator *fItParticleInputArray; //!
-  TIterator *fItParticleLHEFInputArray; //!
-  TIterator *fItJetInputArray; //!
+  TIterator *fItPartonInputArray = nullptr; //!
+  TIterator *fItParticleInputArray = nullptr; //!
+  TIterator *fItParticleLHEFInputArray = nullptr; //!
+  TIterator *fItJetInputArray = nullptr; //!
 
-  const TObjArray *fPartonInputArray; //!
-  const TObjArray *fParticleInputArray; //!
-  const TObjArray *fParticleLHEFInputArray; //!
-  const TObjArray *fJetInputArray; //!
+  const TObjArray *fPartonInputArray = nullptr; //!
+  const TObjArray *fParticleInputArray = nullptr; //!
+  const TObjArray *fParticleLHEFInputArray = nullptr; //!
+  const TObjArray *fJetInputArray = nullptr; //!
 
   ClassDef(JetFlavorAssociation, 1)
 };

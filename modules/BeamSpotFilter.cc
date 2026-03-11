@@ -33,8 +33,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-BeamSpotFilter::BeamSpotFilter() :
-  fItInputArray(0)
+BeamSpotFilter::BeamSpotFilter()
 {
 }
 
@@ -62,7 +61,7 @@ void BeamSpotFilter::Init()
 
 void BeamSpotFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

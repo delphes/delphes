@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PdgCodeFilter::PdgCodeFilter() :
-  fItInputArray(0)
+PdgCodeFilter::PdgCodeFilter()
 {
 }
 
@@ -107,7 +106,7 @@ void PdgCodeFilter::Init()
 
 void PdgCodeFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

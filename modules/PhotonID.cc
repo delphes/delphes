@@ -53,8 +53,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-PhotonID::PhotonID() :
-  fPromptFormula(0), fNonPromptFormula(0), fFakeFormula(0), fItInputPhotonArray(0), fItInputGenArray(0)
+PhotonID::PhotonID()
 {
   fPromptFormula = new DelphesFormula;
   fNonPromptFormula = new DelphesFormula;
@@ -65,9 +64,9 @@ PhotonID::PhotonID() :
 
 PhotonID::~PhotonID()
 {
-  if(fPromptFormula) delete fPromptFormula;
-  if(fNonPromptFormula) delete fNonPromptFormula;
-  if(fFakeFormula) delete fFakeFormula;
+  delete fPromptFormula;
+  delete fNonPromptFormula;
+  delete fFakeFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -102,8 +101,8 @@ void PhotonID::Init()
 
 void PhotonID::Finish()
 {
-  if(fItInputPhotonArray) delete fItInputPhotonArray;
-  if(fItInputGenArray) delete fItInputGenArray;
+  delete fItInputPhotonArray;
+  delete fItInputGenArray;
 }
 
 //------------------------------------------------------------------------------

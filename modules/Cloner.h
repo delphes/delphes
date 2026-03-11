@@ -44,10 +44,10 @@ public:
   void Finish();
 
 private:
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
-  TObjArray *fOutputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(Cloner, 1)
 };

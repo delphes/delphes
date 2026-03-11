@@ -59,8 +59,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DecayFilter::DecayFilter() :
-  fItInputArray(0)
+DecayFilter::DecayFilter()
 {}
 
 //------------------------------------------------------------------------------
@@ -87,7 +86,7 @@ void DecayFilter::Init()
 
 void DecayFilter::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

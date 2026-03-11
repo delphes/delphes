@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-EnergySmearing::EnergySmearing() :
-  fFormula(0), fItInputArray(0)
+EnergySmearing::EnergySmearing()
 {
   fFormula = new DelphesFormula;
 }
@@ -61,7 +60,7 @@ EnergySmearing::EnergySmearing() :
 
 EnergySmearing::~EnergySmearing()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +85,7 @@ void EnergySmearing::Init()
 
 void EnergySmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

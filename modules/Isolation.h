@@ -62,23 +62,23 @@ private:
 
   Bool_t fUseMiniCone;
 
-  IsolationClassifier *fClassifier; //!
+  IsolationClassifier *fClassifier = nullptr; //!
 
-  ExRootFilter *fFilter;
+  ExRootFilter *fFilter = nullptr;
 
-  TIterator *fItIsolationInputArray; //!
+  TIterator *fItIsolationInputArray = nullptr; //!
 
-  TIterator *fItCandidateInputArray; //!
+  TIterator *fItCandidateInputArray = nullptr; //!
 
-  TIterator *fItRhoInputArray; //!
+  TIterator *fItRhoInputArray = nullptr; //!
 
-  const TObjArray *fIsolationInputArray; //!
+  const TObjArray *fIsolationInputArray = nullptr; //!
 
-  const TObjArray *fCandidateInputArray; //!
+  const TObjArray *fCandidateInputArray = nullptr; //!
 
-  const TObjArray *fRhoInputArray; //!
+  const TObjArray *fRhoInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(Isolation, 1)
 };

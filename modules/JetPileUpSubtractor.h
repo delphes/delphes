@@ -46,13 +46,13 @@ public:
 private:
   Double_t fJetPTMin;
 
-  TIterator *fItJetInputArray; //!
-  TIterator *fItRhoInputArray; //!
+  TIterator *fItJetInputArray = nullptr; //!
+  TIterator *fItRhoInputArray = nullptr; //!
 
-  const TObjArray *fJetInputArray; //!
-  const TObjArray *fRhoInputArray; //!
+  const TObjArray *fJetInputArray = nullptr; //!
+  const TObjArray *fRhoInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(JetPileUpSubtractor, 1)
 };

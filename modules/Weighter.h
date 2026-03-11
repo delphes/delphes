@@ -56,11 +56,11 @@ private:
   std::map<TIndexStruct, Double_t> fWeightMap;
 #endif
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(Weighter, 1)
 };

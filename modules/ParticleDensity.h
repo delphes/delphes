@@ -47,14 +47,14 @@ public:
 
 private:
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   Bool_t fUseMomentumVector; // !
-  TH2F *fHisto; //!
+  TH2F *fHisto = nullptr; //!
   
   ClassDef(ParticleDensity, 1)
 };

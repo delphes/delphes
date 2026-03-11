@@ -49,8 +49,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-BTagging::BTagging() :
-  fItJetInputArray(0)
+BTagging::BTagging()
 {
 }
 
@@ -107,7 +106,7 @@ void BTagging::Finish()
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
-  if(fItJetInputArray) delete fItJetInputArray;
+  delete fItJetInputArray;
 
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
   {

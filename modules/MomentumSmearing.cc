@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-MomentumSmearing::MomentumSmearing() :
-  fFormula(0), fItInputArray(0)
+MomentumSmearing::MomentumSmearing()
 {
   fFormula = new DelphesFormula;
 }
@@ -61,7 +60,7 @@ MomentumSmearing::MomentumSmearing() :
 
 MomentumSmearing::~MomentumSmearing()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -89,7 +88,7 @@ void MomentumSmearing::Init()
 
 void MomentumSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

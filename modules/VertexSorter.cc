@@ -41,8 +41,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-VertexSorter::VertexSorter() :
-  fInputArray(NULL), fTrackInputArray(NULL), fItTrackInputArray(NULL), fJetInputArray(NULL), fItJetInputArray(NULL), fOutputArray(NULL)
+VertexSorter::VertexSorter()
 {
 }
 
@@ -86,8 +85,8 @@ void VertexSorter::Init()
 
 void VertexSorter::Finish()
 {
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItJetInputArray) delete fItJetInputArray;
+  delete fItTrackInputArray;
+  delete fItJetInputArray;
 }
 
 //------------------------------------------------------------------------------

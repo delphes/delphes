@@ -74,8 +74,7 @@ using namespace fastjet::contrib;
 
 //------------------------------------------------------------------------------
 
-FastJetGridMedianEstimator::FastJetGridMedianEstimator() :
-  fItInputArray(0)
+FastJetGridMedianEstimator::FastJetGridMedianEstimator()
 {
 }
 
@@ -127,7 +126,7 @@ void FastJetGridMedianEstimator::Finish()
     if(*itEstimators) delete *itEstimators;
   }
 
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

@@ -35,8 +35,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackSmearing::TrackSmearing() :
-  fD0Formula(0), fDZFormula(0), fPFormula(0), fCtgThetaFormula(0), fPhiFormula(0), fItInputArray(0)
+TrackSmearing::TrackSmearing()
 {
   fD0Formula = new DelphesFormula;
   fDZFormula = new DelphesFormula;
@@ -49,11 +48,11 @@ TrackSmearing::TrackSmearing() :
 
 TrackSmearing::~TrackSmearing()
 {
-  if(fD0Formula) delete fD0Formula;
-  if(fDZFormula) delete fDZFormula;
-  if(fPFormula) delete fPFormula;
-  if(fCtgThetaFormula) delete fCtgThetaFormula;
-  if(fPhiFormula) delete fPhiFormula;
+  delete fD0Formula;
+  delete fDZFormula;
+  delete fPFormula;
+  delete fCtgThetaFormula;
+  delete fPhiFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -147,7 +146,7 @@ void TrackSmearing::Init()
 
 void TrackSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

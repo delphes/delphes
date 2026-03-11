@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-DenseTrackFilter::DenseTrackFilter() :
-  fItTrackInputArray(0)
+DenseTrackFilter::DenseTrackFilter()
 {
 }
 
@@ -125,7 +124,7 @@ void DenseTrackFilter::Init()
 void DenseTrackFilter::Finish()
 {
   vector<vector<Double_t> *>::iterator itPhiBin;
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  delete fItTrackInputArray;
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
   {
     delete *itPhiBin;

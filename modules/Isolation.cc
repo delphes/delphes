@@ -78,10 +78,7 @@ Int_t IsolationClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-Isolation::Isolation() :
-  fClassifier(0), fFilter(0),
-  fItIsolationInputArray(0), fItCandidateInputArray(0),
-  fItRhoInputArray(0)
+Isolation::Isolation()
 {
   fClassifier = new IsolationClassifier;
 }
@@ -143,10 +140,10 @@ void Isolation::Init()
 
 void Isolation::Finish()
 {
-  if(fItRhoInputArray) delete fItRhoInputArray;
-  if(fFilter) delete fFilter;
-  if(fItCandidateInputArray) delete fItCandidateInputArray;
-  if(fItIsolationInputArray) delete fItIsolationInputArray;
+  delete fItRhoInputArray;
+  delete fFilter;
+  delete fItCandidateInputArray;
+  delete fItIsolationInputArray;
 }
 
 //------------------------------------------------------------------------------

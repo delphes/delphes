@@ -52,8 +52,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-IdentificationMap::IdentificationMap() :
-  fItInputArray(0)
+IdentificationMap::IdentificationMap()
 {
 }
 
@@ -109,7 +108,7 @@ void IdentificationMap::Init()
 
 void IdentificationMap::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 
   TMisIDMap::iterator itEfficiencyMap;
   DelphesFormula *formula;

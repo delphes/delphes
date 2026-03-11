@@ -53,8 +53,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-CscClusterId::CscClusterId() :
-  fFormula(0), fEtaFormula(0), fItInputArray(0)
+CscClusterId::CscClusterId()
 {
   fFormula = new DelphesCscClusterFormula;
   fEtaFormula = new DelphesCscClusterFormula;
@@ -64,8 +63,8 @@ CscClusterId::CscClusterId() :
 
 CscClusterId::~CscClusterId()
 {
-  if(fFormula) delete fFormula;
-  if(fEtaFormula) delete fEtaFormula;
+  delete fFormula;
+  delete fEtaFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -92,7 +91,7 @@ void CscClusterId::Init()
 
 void CscClusterId::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

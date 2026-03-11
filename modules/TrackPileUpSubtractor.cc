@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::TrackPileUpSubtractor() :
-  fFormula(0)
+TrackPileUpSubtractor::TrackPileUpSubtractor()
 {
   fFormula = new DelphesFormula;
 }
@@ -61,7 +60,7 @@ TrackPileUpSubtractor::TrackPileUpSubtractor() :
 
 TrackPileUpSubtractor::~TrackPileUpSubtractor()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -109,7 +108,7 @@ void TrackPileUpSubtractor::Finish()
     if(iterator) delete iterator;
   }
 
-  if(fItVertexInputArray) delete fItVertexInputArray;
+  delete fItVertexInputArray;
 }
 
 //------------------------------------------------------------------------------

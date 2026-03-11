@@ -43,8 +43,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ClusterCounting::ClusterCounting() :
-  fTrackUtil(0)
+ClusterCounting::ClusterCounting()
 {
   fTrackUtil = new TrkUtil();
 }
@@ -53,7 +52,7 @@ ClusterCounting::ClusterCounting() :
 
 ClusterCounting::~ClusterCounting()
 {
-  if(fTrackUtil) delete fTrackUtil;
+  delete fTrackUtil;
 }
 
 //------------------------------------------------------------------------------
@@ -94,7 +93,7 @@ void ClusterCounting::Init()
 
 void ClusterCounting::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

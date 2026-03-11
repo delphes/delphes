@@ -71,7 +71,7 @@ void VertexFinder::Init()
 
 void VertexFinder::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

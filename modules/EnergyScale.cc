@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-EnergyScale::EnergyScale() :
-  fFormula(0), fItInputArray(0)
+EnergyScale::EnergyScale()
 {
   fFormula = new DelphesFormula;
 }
@@ -61,7 +60,7 @@ EnergyScale::EnergyScale() :
 
 EnergyScale::~EnergyScale()
 {
-  if(fFormula) delete fFormula;
+  delete fFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -86,7 +85,7 @@ void EnergyScale::Init()
 
 void EnergyScale::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

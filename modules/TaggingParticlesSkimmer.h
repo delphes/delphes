@@ -52,16 +52,16 @@ private:
   Double_t fPTMin; //!
   Double_t fEtaMax; //!
 
-  TauTaggingPartonClassifier *fClassifier; //!
+  TauTaggingPartonClassifier *fClassifier = nullptr; //!
 
-  ExRootFilter *fFilter;
+  ExRootFilter *fFilter = nullptr;
 
-  TIterator *fItPartonInputArray; //!
+  TIterator *fItPartonInputArray = nullptr; //!
 
-  const TObjArray *fPartonInputArray; //!
-  const TObjArray *fParticleInputArray; //!
+  const TObjArray *fPartonInputArray = nullptr; //!
+  const TObjArray *fParticleInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(TaggingParticlesSkimmer, 1)
 };

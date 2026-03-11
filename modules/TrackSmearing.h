@@ -32,39 +32,39 @@ private:
 
   Double_t fBz;
 
-  DelphesFormula *fD0Formula; //!
+  DelphesFormula *fD0Formula = nullptr; //!
   std::string fD0ResolutionFile;
   std::string fD0ResolutionHist;
   Bool_t fUseD0Formula;
 
-  DelphesFormula *fDZFormula; //!
+  DelphesFormula *fDZFormula = nullptr; //!
   std::string fDZResolutionFile;
   std::string fDZResolutionHist;
   Bool_t fUseDZFormula;
 
-  DelphesFormula *fPFormula; //!
+  DelphesFormula *fPFormula = nullptr; //!
   std::string fPResolutionFile;
   std::string fPResolutionHist;
   Bool_t fUsePFormula;
 
-  DelphesFormula *fCtgThetaFormula; //!
+  DelphesFormula *fCtgThetaFormula = nullptr; //!
   std::string fCtgThetaResolutionFile;
   std::string fCtgThetaResolutionHist;
   Bool_t fUseCtgThetaFormula;
 
-  DelphesFormula *fPhiFormula; //!
+  DelphesFormula *fPhiFormula = nullptr; //!
   std::string fPhiResolutionFile;
   std::string fPhiResolutionHist;
   Bool_t fUsePhiFormula;
 
   Bool_t fApplyToPileUp;
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
-  const TObjArray *fBeamSpotInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
+  const TObjArray *fBeamSpotInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(TrackSmearing, 1)
 };

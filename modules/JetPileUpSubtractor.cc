@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-JetPileUpSubtractor::JetPileUpSubtractor() :
-  fItJetInputArray(0), fItRhoInputArray(0)
+JetPileUpSubtractor::JetPileUpSubtractor()
 {
 }
 
@@ -85,8 +84,8 @@ void JetPileUpSubtractor::Init()
 
 void JetPileUpSubtractor::Finish()
 {
-  if(fItRhoInputArray) delete fItRhoInputArray;
-  if(fItJetInputArray) delete fItJetInputArray;
+  delete fItRhoInputArray;
+  delete fItJetInputArray;
 }
 
 //------------------------------------------------------------------------------

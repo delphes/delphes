@@ -106,9 +106,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-TrackCountingTauTagging::TrackCountingTauTagging() :
-  fClassifier(0), fFilter(0),
-  fItPartonInputArray(0), fItTrackInputArray(0), fItJetInputArray(0)
+TrackCountingTauTagging::TrackCountingTauTagging()
 {
 }
 
@@ -183,11 +181,11 @@ void TrackCountingTauTagging::Finish()
   map<Int_t, DelphesFormula *>::iterator itEfficiencyMap;
   DelphesFormula *formula;
 
-  if(fFilter) delete fFilter;
-  if(fClassifier) delete fClassifier;
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  if(fItPartonInputArray) delete fItPartonInputArray;
+  delete fFilter;
+  delete fClassifier;
+  delete fItJetInputArray;
+  delete fItTrackInputArray;
+  delete fItPartonInputArray;
 
   for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
   {

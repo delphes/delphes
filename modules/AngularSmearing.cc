@@ -51,8 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-AngularSmearing::AngularSmearing() :
-  fFormulaEta(0), fFormulaPhi(0), fItInputArray(0)
+AngularSmearing::AngularSmearing()
 {
   fFormulaEta = new DelphesFormula;
   fFormulaPhi = new DelphesFormula;
@@ -62,8 +61,8 @@ AngularSmearing::AngularSmearing() :
 
 AngularSmearing::~AngularSmearing()
 {
-  if(fFormulaEta) delete fFormulaEta;
-  if(fFormulaPhi) delete fFormulaPhi;
+  delete fFormulaEta;
+  delete fFormulaPhi;
 }
 
 //------------------------------------------------------------------------------
@@ -89,7 +88,7 @@ void AngularSmearing::Init()
 
 void AngularSmearing::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

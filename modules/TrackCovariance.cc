@@ -51,9 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackCovariance::TrackCovariance() :
-  fElectronScaleFactor(0), fMuonScaleFactor(0), fChargedHadronScaleFactor(0),
-  fGeometry(0), fCovariance(0), fAcx(0), fItInputArray(0)
+TrackCovariance::TrackCovariance()
 {
   fGeometry = new SolGeom();
   fCovariance = new SolGridCov();
@@ -69,11 +67,11 @@ TrackCovariance::TrackCovariance() :
 
 TrackCovariance::~TrackCovariance()
 {
-  if(fGeometry) delete fGeometry;
-  if(fCovariance) delete fCovariance;
-  if(fElectronScaleFactor) delete fElectronScaleFactor;
-  if(fMuonScaleFactor) delete fMuonScaleFactor;
-  if(fChargedHadronScaleFactor) delete fChargedHadronScaleFactor;
+  delete fGeometry;
+  delete fCovariance;
+  delete fElectronScaleFactor;
+  delete fMuonScaleFactor;
+  delete fChargedHadronScaleFactor;
 }
 
 //------------------------------------------------------------------------------
@@ -109,7 +107,7 @@ void TrackCovariance::Init()
 
 void TrackCovariance::Finish()
 {
-  if(fItInputArray) delete fItInputArray;
+  delete fItInputArray;
 }
 
 //------------------------------------------------------------------------------

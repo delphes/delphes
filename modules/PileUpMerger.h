@@ -55,16 +55,16 @@ private:
   Double_t fOutputBeamSpotX;
   Double_t fOutputBeamSpotY;
 
-  DelphesTF2 *fFunction; //!
+  DelphesTF2 *fFunction = nullptr; //!
 
-  DelphesPileUpReader *fReader; //!
+  DelphesPileUpReader *fReader = nullptr; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fParticleOutputArray; //!
-  TObjArray *fVertexOutputArray; //!
+  TObjArray *fParticleOutputArray = nullptr; //!
+  TObjArray *fVertexOutputArray = nullptr; //!
 
   ClassDef(PileUpMerger, 1)
 };

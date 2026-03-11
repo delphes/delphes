@@ -46,13 +46,13 @@ public:
   void Finish();
 
 private:
-  DelphesCscClusterFormula *fFormula; //!
+  DelphesCscClusterFormula *fFormula = nullptr; //!
 
-  TIterator *fItInputArray; //!
+  TIterator *fItInputArray = nullptr; //!
 
-  const TObjArray *fInputArray; //!
+  const TObjArray *fInputArray = nullptr; //!
 
-  TObjArray *fOutputArray; //!
+  TObjArray *fOutputArray = nullptr; //!
 
   ClassDef(CscClusterEfficiency, 1)
 };
