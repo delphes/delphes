@@ -27,12 +27,14 @@ private:
 	Double_t fpar[5];	// D, phi0, C, z0, cot(theta)
 	//
 	TMatrixDSym fCov;		// Full covariance matrix
+	Int_t fNmeasure;		// Number of measurements used (account for layer efficiency)
 	//
 public:
 	//
 	// Constructors
 	SolTrack(Double_t *x, Double_t *p, SolGeom *G);
 	SolTrack(TVector3 x, TVector3 p, SolGeom* G);
+	SolTrack(TVector3 x, TVector3 p, Double_t Charge, SolGeom* G);	// Now preferred with Kalman
 	SolTrack(Double_t D, Double_t phi0, Double_t C, Double_t z0, Double_t ct, SolGeom *G);
 	// Destructor
 	~SolTrack();
@@ -73,6 +75,7 @@ public:
 	Int_t nHit();	// Nr. of layers hit
 	Int_t nmHit();	// Nr. of measurement layers hit
 	Int_t nMeas();	// Nr. of measurements
+	Int_t GetUmeas() { return fNmeasure;}	// #used measurement including layer efficiency
 	Bool_t HitLayer(Int_t Layer, Double_t &R, Double_t &phi, Double_t &zz);
 	Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&zhh);
 	Int_t HitList(Int_t *&ihh, Double_t *&rhh, Double_t *&phh, Double_t *&zhh);

@@ -31,13 +31,15 @@ SolTrack::SolTrack(Double_t *x, Double_t *p, SolGeom *G)
 	fpar[2] = gPar(2);
 	fpar[3] = gPar(3);
 	fpar[4] = gPar(4);
+	// Number of measurements
+	//fNmeasure = nMeas();	// Nr. of measurements
 	//cout << "SolTrack:: C = " << C << ", fpar[2] = " << fpar[2] << endl;
 	//
 	// Init covariances
 	//
 	fCov.ResizeTo(5, 5);
 }
-SolTrack::SolTrack(TVector3 x, TVector3 p, SolGeom* G)
+SolTrack::SolTrack(TVector3 x, TVector3 p, Double_t Charge, SolGeom* G)
 {
 	// set B field
 	fG = G;					// Store geometry
@@ -47,7 +49,6 @@ SolTrack::SolTrack(TVector3 x, TVector3 p, SolGeom* G)
 	fp[0] = p(0); fp[1] = p(1); fp[2] = p(2);
 	fx[0] = x(0); fx[1] = x(1); fx[2] = x(2);
 	// Get generated parameters
-	Double_t Charge = 1.0;						// Don't worry about charge for now
 	TVectorD gPar = XPtoPar(x, p, Charge);
 	// Store parameters
 	fpar[0] = gPar(0);
@@ -55,6 +56,37 @@ SolTrack::SolTrack(TVector3 x, TVector3 p, SolGeom* G)
 	fpar[2] = gPar(2);
 	fpar[3] = gPar(3);
 	fpar[4] = gPar(4);
+	// Number of measurements
+	//fNmeasure = nMeas();	// Nr. of measurements
+	//std::cout<<"SolfTrack: track parameters: D, phi0, C, z0, cot"; gPar.Print();
+	//cout << "SolTrack:: C = " << C << ", fpar[2] = " << fpar[2] << endl;
+	//
+	// Init covariances
+	//
+	fCov.ResizeTo(5, 5);
+}
+SolTrack::SolTrack(TVector3 x, TVector3 p, SolGeom* G)
+{
+	// Ignore charge. For backward compatibility.
+	//
+	Double_t Charge = 1.0;
+	// set B field
+	fG = G;					// Store geometry
+	Double_t B = G->B();
+	SetB(B);
+	// Store momentum
+	fp[0] = p(0); fp[1] = p(1); fp[2] = p(2);
+	fx[0] = x(0); fx[1] = x(1); fx[2] = x(2);
+	// Get generated parameters
+	TVectorD gPar = XPtoPar(x, p, Charge);
+	// Store parameters
+	fpar[0] = gPar(0);
+	fpar[1] = gPar(1);
+	fpar[2] = gPar(2);
+	fpar[3] = gPar(3);
+	fpar[4] = gPar(4);
+	// Number of measurements
+	//fNmeasure = nMeas();	// Nr. of measurements
 	//std::cout<<"SolfTrack: track parameters: D, phi0, C, z0, cot"; gPar.Print();
 	//cout << "SolTrack:: C = " << C << ", fpar[2] = " << fpar[2] << endl;
 	//
@@ -82,6 +114,8 @@ SolTrack::SolTrack(Double_t D, Double_t phi0, Double_t C, Double_t z0, Double_t 
 	//
 	fp[0] = px; fp[1] = py; fp[2] = pz;
 	fx[0] = -D*TMath::Sin(phi0); fx[1] = D*TMath::Cos(phi0);  fx[2] = z0;
+	// Number of measurements
+	// fNmeasure = nMeas();	// Nr. of measurements
 	//
 	// Init covariances
 	//
@@ -1141,7 +1175,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	//
 	Double_t *thms = new Double_t[Nhit];		// Scattering angles/plane
 	//
-	Int_t mLast = 0;				// Last measurement layer
+	Int_t mLast = -1;				// Last measurement layer
 	for (Int_t ii = 0; ii < Nhit; ii++)		// Hit layer loop
 	{
 		
@@ -1202,6 +1236,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	}
 	//
 	// Loop on all layers starting with last measurement layer
+	fNmeasure = 0;
 	for(Int_t ii=mLast; ii>=0; ii--){
 		//
 		// Process measurement layers
@@ -1218,6 +1253,7 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 			Double_t zi = zh[ii];
 			Int_t ityp  = fG->lTyp(i);	// Layer type Barrel or Z
 			Int_t nmeai = fG->lND(i);	// # measurements in layer
+			fNmeasure += nmeai;		// Increment number of measurements
 			Double_t stri = 0;		// Stereo angle
 			Double_t sig = 0;		// Resolution
 			Double_t csa = 0;		// Cosine stereo angle
@@ -1346,9 +1382,10 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	delete [] thms;
 }
 //
+//********************************************************
+//********************************************************
 // True Kalman implementation
 //********************************************************
-// WORK IN PROGRESS !!!!!                                *
 //********************************************************
 //
 // Covariance matrix estimation with Kalman filter
@@ -1425,7 +1462,7 @@ void SolTrack::KalmanCovT(Bool_t Res, Bool_t MS, Double_t mass)
 	//
 	Double_t *thms = new Double_t[Nhit];		// Scattering angles/plane
 	//
-	Int_t mLast = 0;				// Last measurement layer
+	Int_t mLast = -1;				// Last measurement layer
 	for (Int_t ii = 0; ii < Nhit; ii++)		// Hit layer loop
 	{
 
@@ -1486,6 +1523,7 @@ void SolTrack::KalmanCovT(Bool_t Res, Bool_t MS, Double_t mass)
 	}
 	//
 	// Loop on all layers starting with last measurement layer
+	fNmeasure = 0;
 	for(Int_t ii=mLast; ii>=0; ii--){
 		//
 		// Multiple scattering contribution for all layers
@@ -1520,6 +1558,7 @@ void SolTrack::KalmanCovT(Bool_t Res, Bool_t MS, Double_t mass)
 			Double_t zi = zh[ii];
 			Int_t ityp  = fG->lTyp(i);	// Layer type Barrel or Z
 			Int_t nmeai = fG->lND(i);	// # measurements in layer
+			fNmeasure += nmeai;		// Increment number of measurements
 			Double_t stri = 0;		// Stereo angle
 			Double_t sig = 0;		// Resolution
 			Double_t csa = 0;		// Cosine stereo angle
