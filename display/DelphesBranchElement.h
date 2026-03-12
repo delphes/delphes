@@ -85,7 +85,7 @@ public:
   }
 
   // resets the collection (before moving to the next event)
-  virtual void Reset(){};
+  virtual void Reset() {};
 
   // template class name
   virtual const char *GetClassName() { return data_->ClassName(); }

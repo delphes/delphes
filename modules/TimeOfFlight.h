@@ -44,7 +44,6 @@ public:
   void ComputeVertexMomenta();
 
 private:
-
   Int_t fVertexTimeMode;
 
   TIterator *fItInputArray = nullptr; //!

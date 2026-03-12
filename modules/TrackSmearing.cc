@@ -330,7 +330,7 @@ void TrackSmearing::Process()
     candidate->Momentum.SetPx(p * TMath::Cos(phi) * TMath::Sin(theta));
     candidate->Momentum.SetPy(p * TMath::Sin(phi) * TMath::Sin(theta));
     candidate->Momentum.SetPz(p * TMath::Cos(theta));
-    candidate->Momentum.SetE(TMath::Sqrt(p*p + m*m));
+    candidate->Momentum.SetE(TMath::Sqrt(p * p + m * m));
     candidate->PT = candidate->Momentum.Pt();
 
     x = position.X();

@@ -44,7 +44,6 @@ public:
   void Finish();
 
 private:
-
   DelphesFormula *fResolutionFormula = nullptr;
   Int_t fVertexTimeMode;
 

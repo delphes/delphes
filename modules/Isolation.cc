@@ -54,7 +54,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-class IsolationClassifier : public ExRootClassifier
+class IsolationClassifier: public ExRootClassifier
 {
 public:
   IsolationClassifier() {}

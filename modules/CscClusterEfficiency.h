@@ -19,8 +19,6 @@
 #ifndef CscClusterEfficiency_h
 #define CscClusterEfficiency_h
 
-
-
 /** \class CscClusterEfficiency
  *
  *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838

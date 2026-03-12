@@ -247,7 +247,7 @@ void FastJetFinder::Init()
     fDefinition = new JetDefinition(fValenciaPlugin);
     break;
   case 10:
-    fDefinition = new JetDefinition(ee_genkt_algorithm,fParameterR,fParameterP);
+    fDefinition = new JetDefinition(ee_genkt_algorithm, fParameterR, fParameterP);
     break;
 
   // kT durham algorithm, 2 options:
@@ -256,7 +256,6 @@ void FastJetFinder::Init()
   case 11:
     fDefinition = new JetDefinition(ee_kt_algorithm);
     break;
-
   }
 
   fPlugin = plugin;
@@ -391,9 +390,9 @@ void FastJetFinder::Process()
     try
     {
       // exclusive dcut mode
-      if (fDCut > 0.0)
+      if(fDCut > 0.0)
       {
-        outputList = sorted_by_pt(sequence->exclusive_jets(fDCut*fDCut));
+        outputList = sorted_by_pt(sequence->exclusive_jets(fDCut * fDCut));
       }
       else
       {
@@ -405,7 +404,7 @@ void FastJetFinder::Process()
     {
       outputList.clear();
     }
-    
+
     excl_ymerge12 = sequence->exclusive_ymerge(1);
     excl_ymerge23 = sequence->exclusive_ymerge(2);
     excl_ymerge34 = sequence->exclusive_ymerge(3);
@@ -441,8 +440,8 @@ void FastJetFinder::Process()
     ncharged = 0;
     nneutrals = 0;
 
-    neutralEnergyFraction =0.;
-    chargedEnergyFraction =0.;
+    neutralEnergyFraction = 0.;
+    chargedEnergyFraction = 0.;
 
     inputList.clear();
     inputList = sequence->constituents(*itOutputList);
@@ -487,8 +486,8 @@ void FastJetFinder::Process()
     candidate->NNeutrals = nneutrals;
     candidate->NCharged = ncharged;
 
-    candidate->NeutralEnergyFraction = (momentum.E() > 0 ) ? neutralEnergyFraction/momentum.E() : 0.0;
-    candidate->ChargedEnergyFraction = (momentum.E() > 0 ) ? chargedEnergyFraction/momentum.E() : 0.0;
+    candidate->NeutralEnergyFraction = (momentum.E() > 0) ? neutralEnergyFraction / momentum.E() : 0.0;
+    candidate->ChargedEnergyFraction = (momentum.E() > 0) ? chargedEnergyFraction / momentum.E() : 0.0;
 
     //for exclusive clustering, access y_n,n+1 as exclusive_ymerge (fNJets);
     candidate->ExclYmerge12 = excl_ymerge12;

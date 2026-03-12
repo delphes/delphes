@@ -42,11 +42,11 @@
 #include "ExRootAnalysis/ExRootResult.h"
 
 #include "TDatabasePDG.h"
-#include "TParticlePDG.h"
 #include "TFormula.h"
 #include "TLorentzVector.h"
 #include "TMath.h"
 #include "TObjArray.h"
+#include "TParticlePDG.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -60,12 +60,14 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 DecayFilter::DecayFilter()
-{}
+{
+}
 
 //------------------------------------------------------------------------------
 
 DecayFilter::~DecayFilter()
-{}
+{
+}
 
 //------------------------------------------------------------------------------
 
@@ -97,20 +99,22 @@ void DecayFilter::Process()
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
   const Double_t c = TMath::C(); // [m/s]
   Double_t m, t, p, bgct, L, l;
-  
+
   // loop over all input candidates
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
     // get particle information from PDG
     TParticlePDG *pdg = pdgdb->GetParticle(candidate->PID);
-    if (!pdg) { // don't know this particle
+    if(!pdg)
+    { // don't know this particle
       fOutputArray->Add(candidate);
       continue;
-    }    
+    }
     m = pdg->Mass();
     t = pdg->Lifetime(); // [s]
-    if (t == 0.) { // does not decay
+    if(t == 0.)
+    { // does not decay
       fOutputArray->Add(candidate);
       continue;
     }
@@ -124,7 +128,7 @@ void DecayFilter::Process()
     l = gRandom->Exp(bgct);
 
     // if random decay happens before end of trajectory, reject track
-    if (l < L) continue;
+    if(l < L) continue;
 
     // else particle did not decay within the trajectory
     fOutputArray->Add(candidate);

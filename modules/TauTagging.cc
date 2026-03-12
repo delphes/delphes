@@ -244,7 +244,7 @@ void TauTagging::Process()
 
     // fake electrons and muons
 
-    if (pdgCode == 0)
+    if(pdgCode == 0)
     {
 
       Double_t drMin = fDeltaR;
@@ -253,17 +253,17 @@ void TauTagging::Process()
       {
         if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13)
         {
-            tauMomentum = part->Momentum;
-            if (tauMomentum.Pt() < fClassifier->fPTMin) continue;
-            if (TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
+          tauMomentum = part->Momentum;
+          if(tauMomentum.Pt() < fClassifier->fPTMin) continue;
+          if(TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
 
-            Double_t dr = jetMomentum.DeltaR(tauMomentum);
-            if( dr < drMin)
-            {
-               drMin = dr;
-               pdgCode = TMath::Abs(part->PID);
-               charge = part->Charge;
-            }
+          Double_t dr = jetMomentum.DeltaR(tauMomentum);
+          if(dr < drMin)
+          {
+            drMin = dr;
+            pdgCode = TMath::Abs(part->PID);
+            charge = part->Charge;
+          }
         }
       }
     }

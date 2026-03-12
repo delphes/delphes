@@ -116,7 +116,7 @@ void EnergySmearing::Process()
     candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    pt = (energy > m) ? TMath::Sqrt(energy*energy - m*m)/TMath::CosH(eta) : 0;
+    pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
     candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
     candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
     candidate->AddCandidate(mother);

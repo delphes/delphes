@@ -51,7 +51,6 @@ public:
   void Finish();
 
 private:
-
   TIterator *fItInputArray = nullptr; //!
 
   const TObjArray *fInputArray = nullptr; //!

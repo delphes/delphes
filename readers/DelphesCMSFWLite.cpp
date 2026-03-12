@@ -216,7 +216,7 @@ void ConvertInput(fwlite::Event &event, Long64_t eventCounter,
     {
       // Prevent duplicated particle.
       if(!isMiniAOD) stableParticleOutputArray->Add(candidate);
-      if (pdgCode == 11 || pdgCode == 13) partonOutputArray->Add(candidate);
+      if(pdgCode == 11 || pdgCode == 13) partonOutputArray->Add(candidate);
     }
     //else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
@@ -352,15 +352,15 @@ int main(int argc, char *argv[])
 
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
-    
+
     maxEvents = confReader->GetInt("::MaxEvents", 0);
     skipEvents = confReader->GetInt("::SkipEvents", 0);
-    
+
     if(maxEvents < 0)
     {
       throw runtime_error("MaxEvents must be zero or positive");
     }
-    
+
     if(skipEvents < 0)
     {
       throw runtime_error("SkipEvents must be zero or positive");
@@ -403,9 +403,10 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       treeWriter->Clear();
 
-      for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || eventCounter-skipEvents < maxEvents); ++event)
+      for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || eventCounter - skipEvents < maxEvents); ++event)
       {
-        if(eventCounter >= skipEvents){
+        if(eventCounter >= skipEvents)
+        {
           ConvertInput(event, eventCounter, branchEvent, branchWeight, factory,
             allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
           modularDelphes->ProcessTask();

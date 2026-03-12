@@ -236,7 +236,7 @@ TGeoVolume *Delphes3DGeometry::getDetector(bool withTowers)
 std::pair<Double_t, Double_t> Delphes3DGeometry::addTracker(TGeoVolume *top)
 {
   // tracker: a cylinder with two cones substracted
-  new TGeoCone("forwardTkAcceptance", (tk_length_ / 2. + 0.05), 0., tk_radius_, (tk_length_)*2. * exp(-tk_etamax_) / (1 - exp(-2. * tk_etamax_)), tk_radius_);
+  new TGeoCone("forwardTkAcceptance", (tk_length_ / 2. + 0.05), 0., tk_radius_, (tk_length_) * 2. * exp(-tk_etamax_) / (1 - exp(-2. * tk_etamax_)), tk_radius_);
   TGeoTranslation *tr1 = new TGeoTranslation("tkacc1", 0., 0., tk_length_ / 2.);
   tr1->RegisterYourself();
   TGeoRotation *negz = new TGeoRotation("tknegz", 0, 180, 0);

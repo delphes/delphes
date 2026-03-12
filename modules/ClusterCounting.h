@@ -46,11 +46,10 @@ public:
   void Finish();
 
 private:
-
   Double_t fRmin;
-	Double_t fRmax;
-	Double_t fZmin;
-	Double_t fZmax;
+  Double_t fRmax;
+  Double_t fZmin;
+  Double_t fZmax;
   Double_t fBz;
 
   Int_t fGasOption;

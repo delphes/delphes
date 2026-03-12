@@ -1,4 +1,4 @@
-   /*
+/*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2020  Universite catholique de Louvain (UCLouvain), Belgium
  *
@@ -28,13 +28,13 @@
  */
 
 #include "modules/ClusterCounting.h"
-#include "classes/DelphesClasses.h"
 #include "TrackCovariance/TrkUtil.h"
+#include "classes/DelphesClasses.h"
 
 #include "TLorentzVector.h"
-#include "TVectorD.h"
 #include "TMath.h"
 #include "TObjArray.h"
+#include "TVectorD.h"
 
 #include <iostream>
 #include <sstream>
@@ -61,13 +61,13 @@ void ClusterCounting::Init()
 {
 
   // geometric acceptance
-  fRmin  = GetDouble("Rmin", 0.);
-  fRmax  = GetDouble("Rmax", 0.);
-  fZmin  = GetDouble("Zmin", 0.);
-  fZmax  = GetDouble("Zmax", 0.);
+  fRmin = GetDouble("Rmin", 0.);
+  fRmax = GetDouble("Rmax", 0.);
+  fZmin = GetDouble("Zmin", 0.);
+  fZmax = GetDouble("Zmax", 0.);
 
   // magnetic field
-  fBz    = GetDouble("Bz", 0.);
+  fBz = GetDouble("Bz", 0.);
 
   // gas mix option: 0
   // 0:  Helium 90 - Isobutane 10
@@ -111,22 +111,22 @@ void ClusterCounting::Process()
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
 
     // converting to meters
-    const TLorentzVector &candidatePosition = particle->Position*1e-03;
+    const TLorentzVector &candidatePosition = particle->Position * 1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
-		TVectorD Par = TrkUtil::XPtoPar(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz);
+    TVectorD Par = TrkUtil::XPtoPar(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fBz);
     mass = candidateMomentum.M();
 
     trackLength = fTrackUtil->TrkLen(Par);
 
-    mother    = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    mother = candidate;
+    candidate = static_cast<Candidate *>(candidate->Clone());
 
     Ncl = 0.;
-    if (fTrackUtil->IonClusters(Ncl, mass, Par))
+    if(fTrackUtil->IonClusters(Ncl, mass, Par))
     {
       candidate->Nclusters = Ncl;
-      candidate->dNdx = (trackLength > 0.) ? Ncl/trackLength : -1;
+      candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
     }
 
     candidate->AddCandidate(mother);

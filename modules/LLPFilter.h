@@ -21,7 +21,6 @@
 #ifndef LLPFilter_h
 #define LLPFilter_h
 
-
 /** \class LLPFilter
  *
  *  Filter LLPs with particular PDG ID/status and calculate the EM and hadronic energy of LLP based on decay particles

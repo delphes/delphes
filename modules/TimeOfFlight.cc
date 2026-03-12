@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- /** \class TimeOfFlight
+/** \class TimeOfFlight
   *
   *  Calculates Time-Of-Flight
   *
@@ -115,49 +115,49 @@ void TimeOfFlight::Process()
     t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
 
     // various options on how to calculate the vertex time
-    ti=0;
-    switch (fVertexTimeMode)
-	  {
-    	case 0:
-    	{
-        // assume ti from MC truth
-        // most aggressive, we are cheating and assume we can perfectly reconstruct time of primary and secondary vertices
-        ti = t_truth;
-        break;
-    	}
-    	case 1:
-    	{
-        // always assume t=0, most conservative assumption
-        // reasonable assumption for particles originating from PV, if beamSpot has small time spread compared to timing resolution
-        // probably bad assumption for particles from highly displaced vertices (i.e Ks)
-        ti=0;
-        break;
-    	}
-    	case 2:
-    	{
-        // same as 2 but attempt at estimate beta from vertex mass and momentum
-        beta = 1.;
-        fItVertexInputArray->Reset();
-        while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
-        {
-          TIter itGenParts(vertex->GetCandidates());
-          itGenParts.Reset();
-
-          while((constituent = static_cast<Candidate *>(itGenParts.Next())))
-          {
-            if (particle == constituent)
-            {
-              beta = vertex->Momentum.Beta();
-              break;
-            }
-          }
-        } // end vertex  loop
-
-        // track displacement to be possibily replaced by vertex fitted position
-        ti = candidateInitialPositionSmeared.Vect().Mag() * 1.0E-3 /(beta*c_light);
-      }
+    ti = 0;
+    switch(fVertexTimeMode)
+    {
+    case 0:
+    {
+      // assume ti from MC truth
+      // most aggressive, we are cheating and assume we can perfectly reconstruct time of primary and secondary vertices
+      ti = t_truth;
       break;
-  	}
+    }
+    case 1:
+    {
+      // always assume t=0, most conservative assumption
+      // reasonable assumption for particles originating from PV, if beamSpot has small time spread compared to timing resolution
+      // probably bad assumption for particles from highly displaced vertices (i.e Ks)
+      ti = 0;
+      break;
+    }
+    case 2:
+    {
+      // same as 2 but attempt at estimate beta from vertex mass and momentum
+      beta = 1.;
+      fItVertexInputArray->Reset();
+      while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
+      {
+        TIter itGenParts(vertex->GetCandidates());
+        itGenParts.Reset();
+
+        while((constituent = static_cast<Candidate *>(itGenParts.Next())))
+        {
+          if(particle == constituent)
+          {
+            beta = vertex->Momentum.Beta();
+            break;
+          }
+        }
+      } // end vertex  loop
+
+      // track displacement to be possibily replaced by vertex fitted position
+      ti = candidateInitialPositionSmeared.Vect().Mag() * 1.0E-3 / (beta * c_light);
+    }
+    break;
+    }
 
     // this quantity has already been smeared by another module
     tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
@@ -168,11 +168,11 @@ void TimeOfFlight::Process()
     l = candidate->L * 1.0E-3;
 
     // particle velocity
-    beta = l/(c_light*tof);
+    beta = l / (c_light * tof);
 
     // calculate particle mass (i.e particle ID)
-    mother    = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
+    mother = candidate;
+    candidate = static_cast<Candidate *>(candidate->Clone());
 
     // update time at vertex based on option
     candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
@@ -205,7 +205,7 @@ void TimeOfFlight::ComputeVertexMomenta()
       {
         // get gen part that generated track
         particle = static_cast<Candidate *>(track->GetCandidates()->At(0));
-        if (particle == constituent)
+        if(particle == constituent)
         {
           vertex->Momentum += track->Momentum;
         }

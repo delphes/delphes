@@ -83,14 +83,15 @@ Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi, Double_t 
 {
 
   Double_t d0 = 0., dz = 0., ctgTheta = 0., radius = 0., density = 0.;
-  if (candidate) {
+  if(candidate)
+  {
     d0 = candidate->D0;
     dz = candidate->DZ;
     ctgTheta = candidate->CtgTheta;
     radius = candidate->Position.Pt();
     density = candidate->ParticleDensity;
   }
-    
+
   Double_t x[4] = {pt, eta, phi, energy};
   Double_t params[5] = {d0, dz, ctgTheta, radius, density};
   return EvalPar(x, params);

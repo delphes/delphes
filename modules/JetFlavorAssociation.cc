@@ -51,7 +51,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-class PartonClassifier : public ExRootClassifier
+class PartonClassifier: public ExRootClassifier
 {
 public:
   PartonClassifier() {}
@@ -84,7 +84,7 @@ Int_t PartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-class ParticleLHEFClassifier : public ExRootClassifier
+class ParticleLHEFClassifier: public ExRootClassifier
 {
 public:
   ParticleLHEFClassifier() {}

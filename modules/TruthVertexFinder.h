@@ -42,7 +42,6 @@ public:
   void Finish();
 
 private:
-
   Double_t fResolution; //!
 
   TIterator *fItInputArray = nullptr; //!

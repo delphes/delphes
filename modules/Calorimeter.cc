@@ -228,15 +228,15 @@ void Calorimeter::Process()
   // loop over all particles
   fItParticleInputArray->Reset();
   number = -1;
-  fTowerRmax=0.;
+  fTowerRmax = 0.;
   while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
 
     // compute maximum radius (needed in FinalizeTower to assess whether barrel or endcap tower)
-    if (particlePosition.Perp() > fTowerRmax)
-      fTowerRmax=particlePosition.Perp();
+    if(particlePosition.Perp() > fTowerRmax)
+      fTowerRmax = particlePosition.Perp();
 
     pdgCode = TMath::Abs(particle->PID);
 
@@ -330,7 +330,7 @@ void Calorimeter::Process()
   {
     towerHit = (*itTowerHits);
     flags = (towerHit >> 24) & 0x00000000000000FFLL;
-    number = (towerHit)&0x0000000000FFFFFFLL;
+    number = (towerHit) & 0x0000000000FFFFFFLL;
     hitEtaPhi = towerHit >> 32;
 
     if(towerEtaPhi != hitEtaPhi)
@@ -514,15 +514,15 @@ void Calorimeter::FinalizeTower()
 
   for(size_t i = 0; i < fTower->ECalEnergyTimePairs.size(); ++i)
   {
-    weight = TMath::Power((fTower->ECalEnergyTimePairs[i].first),2);
+    weight = TMath::Power((fTower->ECalEnergyTimePairs[i].first), 2);
     sumWeightedTime += weight * fTower->ECalEnergyTimePairs[i].second;
     sumWeight += weight;
     fTower->NTimeHits++;
   }
 
   // check whether barrel or endcap tower
-  if (fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
-    r = fTower->Position.Z()/TMath::SinH(eta);
+  if(fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
+    r = fTower->Position.Z() / TMath::SinH(eta);
   else
     r = fTower->Position.Pt();
 
@@ -656,7 +656,7 @@ void Calorimeter::FinalizeTower()
       track = static_cast<Candidate *>(track->Clone());
       track->AddCandidate(mother);
       track->Momentum *= rescaleFactor;
-      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt()*rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
+      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt() * rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
 
       fEFlowTrackOutputArray->Add(track);
     }

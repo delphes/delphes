@@ -438,7 +438,6 @@ public:
   Int_t IsRecoPU; // 0 or 1 for reconstructed particles from pile-up
   Float_t HardEnergyFraction; // fraction of hard scattering vs PU energy in the particle flow candidate
 
-
   Float_t P; // track momentum
   Float_t PT; // track transverse momentum
   Float_t Eta; // track pseudorapidity
@@ -491,7 +490,7 @@ public:
   Float_t ErrorD0CtgTheta;
   Float_t ErrorPhiC;
   Float_t ErrorPhiDZ;
-  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorPhiCtgTheta;
   Float_t ErrorCDZ;
   Float_t ErrorCCtgTheta;
   Float_t ErrorDZCtgTheta;
@@ -614,7 +613,7 @@ public:
   Float_t ErrorD0CtgTheta;
   Float_t ErrorPhiC;
   Float_t ErrorPhiDZ;
-  Float_t ErrorPhiCtgTheta ;
+  Float_t ErrorPhiCtgTheta;
   Float_t ErrorCDZ;
   Float_t ErrorCCtgTheta;
   Float_t ErrorDZCtgTheta;
@@ -638,7 +637,6 @@ public:
   TRefArray Particles; // references to generated particles
 
   ClassDef(ParticleFlowCandidate, 4)
-
 };
 
 //---------------------------------------------------------------------------

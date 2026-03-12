@@ -115,38 +115,37 @@ TMatrixDSym Track::CovarianceMatrix() const
   Cv.ResizeTo(5, 5);
 
   // convert diagonal term to original units
-  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
-  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC, 2.);
-  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
-  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
+  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2) = TMath::Power(ErrorC, 2.);
+  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
 
   // off diagonal terms
-  Cv(0, 1)=ErrorD0Phi;
-  Cv(0, 2)=ErrorD0C;
-  Cv(0, 3)=ErrorD0DZ;
-  Cv(0, 4)=ErrorD0CtgTheta;
-  Cv(1, 2)=ErrorPhiC;
-  Cv(1, 3)=ErrorPhiDZ;
-  Cv(1, 4)=ErrorPhiCtgTheta;
-  Cv(2, 3)=ErrorCDZ;
-  Cv(2, 4)=ErrorCCtgTheta;
-  Cv(3, 4)=ErrorDZCtgTheta;
+  Cv(0, 1) = ErrorD0Phi;
+  Cv(0, 2) = ErrorD0C;
+  Cv(0, 3) = ErrorD0DZ;
+  Cv(0, 4) = ErrorD0CtgTheta;
+  Cv(1, 2) = ErrorPhiC;
+  Cv(1, 3) = ErrorPhiDZ;
+  Cv(1, 4) = ErrorPhiCtgTheta;
+  Cv(2, 3) = ErrorCDZ;
+  Cv(2, 4) = ErrorCCtgTheta;
+  Cv(3, 4) = ErrorDZCtgTheta;
 
-  Cv(1, 0)=Cv(0, 1);
-  Cv(2, 0)=Cv(0, 2);
-  Cv(3, 0)=Cv(0, 3);
-  Cv(4, 0)=Cv(0, 4);
-  Cv(2, 1)=Cv(1, 2);
-  Cv(3, 1)=Cv(1, 3);
-  Cv(4, 1)=Cv(1, 4);
-  Cv(3, 2)=Cv(2, 3);
-  Cv(4, 2)=Cv(2, 4);
-  Cv(4, 3)=Cv(3, 4);
+  Cv(1, 0) = Cv(0, 1);
+  Cv(2, 0) = Cv(0, 2);
+  Cv(3, 0) = Cv(0, 3);
+  Cv(4, 0) = Cv(0, 4);
+  Cv(2, 1) = Cv(1, 2);
+  Cv(3, 1) = Cv(1, 3);
+  Cv(4, 1) = Cv(1, 4);
+  Cv(3, 2) = Cv(2, 3);
+  Cv(4, 2) = Cv(2, 4);
+  Cv(4, 3) = Cv(3, 4);
 
   return Cv;
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -174,34 +173,34 @@ TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
   Cv.ResizeTo(5, 5);
 
   // convert diagonal term to original units
-  Cv(0, 0)=TMath::Power(ErrorD0, 2.);
-  Cv(1, 1)=TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2)=TMath::Power(ErrorC, 2.);
-  Cv(3, 3)=TMath::Power(ErrorDZ, 2.);
-  Cv(4, 4)=TMath::Power(ErrorCtgTheta, 2.);
+  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
+  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2) = TMath::Power(ErrorC, 2.);
+  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
 
   // off diagonal terms
-  Cv(0, 1)=ErrorD0Phi;
-  Cv(0, 2)=ErrorD0C;
-  Cv(0, 3)=ErrorD0DZ;
-  Cv(0, 4)=ErrorD0CtgTheta;
-  Cv(1, 2)=ErrorPhiC;
-  Cv(1, 3)=ErrorPhiDZ;
-  Cv(1, 4)=ErrorPhiCtgTheta;
-  Cv(2, 3)=ErrorCDZ;
-  Cv(2, 4)=ErrorCCtgTheta;
-  Cv(3, 4)=ErrorDZCtgTheta;
+  Cv(0, 1) = ErrorD0Phi;
+  Cv(0, 2) = ErrorD0C;
+  Cv(0, 3) = ErrorD0DZ;
+  Cv(0, 4) = ErrorD0CtgTheta;
+  Cv(1, 2) = ErrorPhiC;
+  Cv(1, 3) = ErrorPhiDZ;
+  Cv(1, 4) = ErrorPhiCtgTheta;
+  Cv(2, 3) = ErrorCDZ;
+  Cv(2, 4) = ErrorCCtgTheta;
+  Cv(3, 4) = ErrorDZCtgTheta;
 
-  Cv(1, 0)=Cv(0, 1);
-  Cv(2, 0)=Cv(0, 2);
-  Cv(3, 0)=Cv(0, 3);
-  Cv(4, 0)=Cv(0, 4);
-  Cv(2, 1)=Cv(1, 2);
-  Cv(3, 1)=Cv(1, 3);
-  Cv(4, 1)=Cv(1, 4);
-  Cv(3, 2)=Cv(2, 3);
-  Cv(4, 2)=Cv(2, 4);
-  Cv(4, 3)=Cv(3, 4);
+  Cv(1, 0) = Cv(0, 1);
+  Cv(2, 0) = Cv(0, 2);
+  Cv(3, 0) = Cv(0, 3);
+  Cv(4, 0) = Cv(0, 4);
+  Cv(2, 1) = Cv(1, 2);
+  Cv(3, 1) = Cv(1, 3);
+  Cv(4, 1) = Cv(1, 4);
+  Cv(3, 2) = Cv(2, 3);
+  Cv(4, 2) = Cv(2, 4);
+  Cv(4, 3) = Cv(3, 4);
 
   return Cv;
 }
@@ -241,8 +240,8 @@ Candidate::Candidate() :
   BetaStar(0),
   MeanSqDeltaR(0),
   PTD(0),
-  NeutralEnergyFraction(0),  // neutral energy fraction
-  ChargedEnergyFraction(0),  // charged energy fraction
+  NeutralEnergyFraction(0), // neutral energy fraction
+  ChargedEnergyFraction(0), // charged energy fraction
   NTimeHits(-1),
   IsolationVar(-999),
   IsolationVarRhoCorr(-999),
@@ -612,7 +611,6 @@ void Candidate::Clear(Option_t * /*option*/)
   ExclYmerge45 = 0.0;
   ExclYmerge56 = 0.0;
   ParticleDensity = 0.0;
-
 
   for(i = 0; i < 5; ++i)
   {

@@ -40,7 +40,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-class TrackCountingTauTaggingPartonClassifier : public ExRootClassifier
+class TrackCountingTauTaggingPartonClassifier: public ExRootClassifier
 {
 public:
   TrackCountingTauTaggingPartonClassifier(const TObjArray *array);

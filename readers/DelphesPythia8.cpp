@@ -144,7 +144,6 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   }
 }
 
-
 //---------------------------------------------------------------------------
 
 static bool interrupted = false;
@@ -329,7 +328,7 @@ int main(int argc, char *argv[])
     spareMode1 = pythia->mode("Main:spareMode1");
     spareParm1 = pythia->parm("Main:spareParm1");
     spareParm2 = pythia->parm("Main:spareParm2");
-        
+
     // Check if particle gun
     if(!spareFlag1)
     {
@@ -362,8 +361,7 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady())
-        ;
+      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
 
       if(spareFlag1)
       {
@@ -422,7 +420,7 @@ int main(int argc, char *argv[])
         weight->Weight = pythia->info.weightValueVector()[iWeight];
       }
 #endif
-      
+
       treeWriter->Fill();
 
       treeWriter->Clear();

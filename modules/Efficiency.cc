@@ -98,7 +98,6 @@ void Efficiency::Process()
   Candidate *candidate;
   Double_t pt, eta, phi, e;
 
-
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
@@ -107,7 +106,8 @@ void Efficiency::Process()
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
 
-    if (fUseMomentumVector){
+    if(fUseMomentumVector)
+    {
       eta = candidateMomentum.Eta();
       phi = candidateMomentum.Phi();
     }
