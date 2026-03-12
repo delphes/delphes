@@ -10,11 +10,13 @@ AlignOperands: false
 AlignTrailingComments: false
 AlignAfterOpenBracket: DontAlign
 BreakConstructorInitializers: AfterColon
+SpaceBeforeInheritanceColon: false
 SpaceBeforeParens: Never
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeTernaryOperators: false
 BreakBeforeBraces: Custom
 BraceWrapping:
+  AfterCaseLabel: true
   AfterClass: true
   AfterControlStatement: true
   AfterEnum: true
