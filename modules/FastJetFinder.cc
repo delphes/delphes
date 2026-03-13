@@ -310,10 +310,10 @@ void FastJetFinder::Finish()
   delete fAreaDefinition;
   delete static_cast<JetDefinition::Plugin *>(fPlugin);
   delete static_cast<JetDefinition::Recombiner *>(fRecomb);
-  delete static_cast<JetDefinition::Plugin *>(fNjettinessPlugin);
+  delete fNjettinessPlugin;
   delete fAxesDef;
   delete fMeasureDef;
-  delete static_cast<JetDefinition::Plugin *>(fValenciaPlugin);
+  delete fValenciaPlugin;
 }
 
 //------------------------------------------------------------------------------
