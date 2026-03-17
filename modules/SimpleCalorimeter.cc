@@ -443,24 +443,6 @@ void SimpleCalorimeter::Process()
       }
       continue;
     }
-    else
-    {
-
-      particle = static_cast<Candidate *>(fParticleInputArray->At(number));
-      momentum = particle->Momentum;
-
-      energy = momentum.E() * fTrackFractions[number];
-
-      if(fTrackFractions[number] > 1.0E-9)
-      {
-        // compute total neutral energy
-        fNeutralEnergy += energy;
-        if(particle->IsPU) fNeutralEnergyFromPU += energy;
-      }
-    }
-
-    // fill current tower
-    energy = momentum.E() * fTowerFractions[number];
 
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
@@ -471,6 +453,14 @@ void SimpleCalorimeter::Process()
 
     // fill current tower
     energy = momentum.E() * fTowerFractions[number];
+
+    if(!(flags & 1))
+    {
+      // compute total neutral energy
+      fNeutralEnergy += energy;
+      if(particle->IsPU) fNeutralEnergyFromPU += energy;
+    }
+
     if(fTower) // add only if tower exists
     {
       fTowerEnergy += energy;
