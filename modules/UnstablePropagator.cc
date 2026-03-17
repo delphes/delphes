@@ -17,46 +17,50 @@
  */
 
 /** \class UnstablePropagator
-  *
-  *  Propagates charged unstable particles in magnetic field
-  *  and updates coordinates of its daughters iteratively
-  *
-  *  \author M. Selvaggi - CERN
-  *
-  */
-
-#include "modules/UnstablePropagator.h"
+ *
+ *  Propagates charged unstable particles in magnetic field
+ *  and updates coordinates of its daughters iteratively
+ *
+ *  \author M. Selvaggi - CERN
+ *
+ */
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class UnstablePropagator: public DelphesModule
+{
+public:
+  UnstablePropagator() = default;
 
-UnstablePropagator::UnstablePropagator() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
+  Double_t fBz;
+  Double_t fLmin; // minimum
 
-UnstablePropagator::~UnstablePropagator() {}
+  Bool_t fDebug;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  std::vector<Int_t> DaughterIndices(Candidate *candidate);
+  void PrintPart(TString prefix, Candidate *candidate);
+  Double_t FlightDistance(Candidate *mother, Candidate *daughter);
+  Int_t Index(Candidate *candidate);
+  void ComputeChainFlightDistances(TString prefix, Candidate *candidate);
+  void PropagateAndUpdateChain(TString prefix, Candidate *candidate);
+  TLorentzVector PropagatedPosition(Candidate *candidate);
+};
 
 //------------------------------------------------------------------------------
 
@@ -87,10 +91,6 @@ void UnstablePropagator::Init()
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
   fItInputArray.reset(fInputArray->MakeIterator());
 }
-
-//------------------------------------------------------------------------------
-
-void UnstablePropagator::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -422,3 +422,7 @@ Int_t UnstablePropagator::Index(Candidate *particle)
   }
   return j;
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("UnstablePropagator", UnstablePropagator);

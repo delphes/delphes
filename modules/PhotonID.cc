@@ -22,51 +22,59 @@
  *  Non-matched pass the "fake" efficiency. Matched photons get further splitted into isolated and non-isolated (user can choose criterion for isolation)
  *  Isolated photons pass the "prompt" efficiency while the non-isolated pass the "non-prompt" efficiency
  *
- *  \author M. Selvaggi CERN
+ *  \author M. Selvaggi - CERN
  *
  */
-
-#include "modules/PhotonID.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class PhotonID: public DelphesModule
+{
+public:
+  PhotonID() :
+    fPromptFormula(std::make_unique<DelphesFormula>()),
+    fNonPromptFormula(std::make_unique<DelphesFormula>()),
+    fFakeFormula(std::make_unique<DelphesFormula>()) {}
 
-PhotonID::PhotonID() :
-  fPromptFormula(std::make_unique<DelphesFormula>()),
-  fNonPromptFormula(std::make_unique<DelphesFormula>()),
-  fFakeFormula(std::make_unique<DelphesFormula>()) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const std::unique_ptr<DelphesFormula> fPromptFormula;
+  const std::unique_ptr<DelphesFormula> fNonPromptFormula;
+  const std::unique_ptr<DelphesFormula> fFakeFormula;
 
-PhotonID::~PhotonID() {}
+  // import input arrays
+  const TObjArray *fInputPhotonArray{nullptr};
+  std::unique_ptr<TIterator> fItInputPhotonArray;
+
+  // use filtered collection for speed
+  const TObjArray *fInputGenArray{nullptr};
+  std::unique_ptr<TIterator> fItInputGenArray;
+
+  Double_t fPTMin;
+  Double_t fRelIsoMax;
+
+  TObjArray *fOutputArray{nullptr}; //!
+
+  Bool_t isFake(const Candidate *obj);
+};
 
 //------------------------------------------------------------------------------
 
 void PhotonID::Init()
 {
-
   // read PhotonID formulae
   fPromptFormula->Compile(GetString("PromptFormula", "1.0"));
   fNonPromptFormula->Compile(GetString("NonPromptFormula", "1.0"));
@@ -89,10 +97,6 @@ void PhotonID::Init()
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "photons"));
 }
-
-//------------------------------------------------------------------------------
-
-void PhotonID::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -195,3 +199,7 @@ Bool_t PhotonID::isFake(const Candidate *obj)
 
   return !matches;
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("PhotonID", PhotonID);

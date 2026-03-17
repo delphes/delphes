@@ -8,44 +8,38 @@
  *
 */
 
-#include "modules/VertexSorter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
-#include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TMatrixT.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-#include "TVector3.h"
-
-#include <algorithm>
-#include <iostream>
-#include <map>
-#include <stdexcept>
-#include <string>
-#include <utility>
-#include <vector>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class VertexSorter: public DelphesModule
+{
+public:
+  VertexSorter() = default;
 
-VertexSorter::VertexSorter() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  TObjArray *fInputArray{nullptr};
 
-VertexSorter::~VertexSorter() {}
+  TObjArray *fTrackInputArray{nullptr};
+  TObjArray *fJetInputArray{nullptr};
+  TObjArray *fBeamSpotInputArray{nullptr};
+
+  std::unique_ptr<TIterator> fItTrackInputArray;
+  std::unique_ptr<TIterator> fItJetInputArray;
+
+  TObjArray *fOutputArray{nullptr};
+
+  std::string fMethod;
+};
 
 //------------------------------------------------------------------------------
 
@@ -75,10 +69,6 @@ void VertexSorter::Init()
 
   fMethod = GetString("Method", "BTV");
 }
-
-//------------------------------------------------------------------------------
-
-void VertexSorter::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -214,3 +204,5 @@ void VertexSorter::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("VertexSorter", VertexSorter);

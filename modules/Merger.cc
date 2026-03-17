@@ -25,38 +25,39 @@
  *
  */
 
-#include "modules/Merger.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <vector>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class Merger: public DelphesModule
+{
+public:
+  Merger() = default;
 
-Merger::Merger() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  std::vector<std::unique_ptr<TIterator> > fInputList; //!
 
-Merger::~Merger() {}
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fMomentumOutputArray{nullptr}; //!
+  TObjArray *fEnergyOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -141,3 +142,5 @@ void Merger::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Merger", Merger);

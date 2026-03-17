@@ -16,49 +16,71 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//------------------------------------------------------------------------------
+
 /** \class LLPFilter
  *
  *  Filter LLPs with particular PDG ID/status and calculate the EM and hadronic energy of LLP based on decay particles
  *  The classification of EM and hadronic energy of LLP is based on instructions from the HEPData entry for the CMS paper searching
  *  for neutral LLPs in the CMS endcap muon detectors: https://www.hepdata.net/record/104408
- *  Muons and neutrinos are ignored. Photons, electrons, and pi0 are EM energy and everything else is hadronic energy.
  *
  *  \author Christina Wang
  *
  */
 
-#include "modules/LLPFilter.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
 #include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <vector>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class LLPFilter: public DelphesModule
+{
+public:
+  LLPFilter() = default;
 
-LLPFilter::LLPFilter() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fPTMin; //!
+  Bool_t fRequireDecayRegion;
+  Double_t fDecayRegionRMax;
+  Double_t fDecayRegionRMin;
+  Double_t fDecayRegionZMax;
+  Double_t fDecayRegionZMin;
+  Double_t fDecayRegionEtaMax;
+  Double_t fDecayRegionEtaMin;
+  Int_t fDaughterNumber;
+  Bool_t fInvert; //!
+  Bool_t fRequireStatus; //!
+  Int_t fStatus; //!
+  Bool_t fRequireCharge; //!
+  Int_t fCharge; //!
+  Bool_t fRequireNotPileup; //!
 
-LLPFilter::~LLPFilter() {}
+  std::vector<Int_t> fPdgCodes;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  const TObjArray *fParticleInputArray{nullptr};
+  std::unique_ptr<TIterator> fItParticleInputArray;
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -114,13 +136,8 @@ void LLPFilter::Init()
 
 //------------------------------------------------------------------------------
 
-void LLPFilter::Finish() {}
-
-//------------------------------------------------------------------------------
-
 void LLPFilter::Process()
 {
-
   Candidate *candidate = nullptr;
   Int_t pdgCode;
   Double_t pt, eta;
@@ -197,3 +214,7 @@ void LLPFilter::Process()
     }
   } //end of while loop
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("LLPFilter", LLPFilter);

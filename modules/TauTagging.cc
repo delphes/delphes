@@ -26,83 +26,52 @@
  *
  */
 
-#include "modules/TauTagging.h"
+#include "modules/TauTaggingPartonClassifier.h"
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include "ExRootAnalysis/ExRootFilter.h"
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
+
+#include <map>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-TauTaggingPartonClassifier::TauTaggingPartonClassifier(const TObjArray *array) :
-  fParticleInputArray(array) {}
-
-//------------------------------------------------------------------------------
-
-Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
+class TauTagging: public DelphesModule
 {
-  Candidate *tau = static_cast<Candidate *>(object);
-  Candidate *daughter1 = 0;
-  Candidate *daughter2 = 0;
+public:
+  TauTagging() = default;
 
-  const TLorentzVector &momentum = tau->Momentum;
-  Int_t pdgCode, i, j;
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-  pdgCode = TMath::Abs(tau->PID);
-  if(pdgCode != 15) return -1;
+private:
+  Int_t fBitNumber;
 
-  if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
+  Double_t fDeltaR;
 
-  if(tau->D1 < 0) return -1;
+#if !defined(__CINT__) && !defined(__CLING__)
+  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
+#endif
 
-  if(tau->D2 < tau->D1) return -1;
+  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<ExRootFilter> fFilter;
 
-  if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
-  {
-    throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
-  }
+  const TObjArray *fParticleInputArray{nullptr}; //!
 
-  for(i = tau->D1; i <= tau->D2; ++i)
-  {
-    daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
-    pdgCode = TMath::Abs(daughter1->PID);
-    //if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
-    //  return -1;
-    if(pdgCode == 24)
-    {
-      if(daughter1->D1 < 0) return -1;
-      for(j = daughter1->D1; j <= daughter1->D2; ++j)
-      {
-        daughter2 = static_cast<Candidate *>(fParticleInputArray->At(j));
-        pdgCode = TMath::Abs(daughter2->PID);
-        if(pdgCode == 11 || pdgCode == 13) return -1;
-      }
-    }
-  }
-  return 0;
-}
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
 
-//------------------------------------------------------------------------------
-
-TauTagging::TauTagging() {}
-
-//------------------------------------------------------------------------------
-
-TauTagging::~TauTagging() {}
+  const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -268,3 +237,5 @@ void TauTagging::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TauTagging", TauTagging);

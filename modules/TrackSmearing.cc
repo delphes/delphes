@@ -2,49 +2,79 @@
  *
  *  Performs d0, dZ, p, Theta, Phi smearing of tracks.
  *
- *  \authors A. Hart, M. Selvaggi
  *
-*/
-
-#include "modules/TrackSmearing.h"
+ *
+ *  \author A. Hart, M. Selvaggi
+ *
+ */
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TProfile2D.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TFile.h>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TProfile2D.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class TrackSmearing: public DelphesModule
+{
+public:
+  TrackSmearing() :
+    fD0Formula(std::make_unique<DelphesFormula>()),
+    fDZFormula(std::make_unique<DelphesFormula>()),
+    fPFormula(std::make_unique<DelphesFormula>()),
+    fCtgThetaFormula(std::make_unique<DelphesFormula>()),
+    fPhiFormula(std::make_unique<DelphesFormula>()) {}
 
-TrackSmearing::TrackSmearing() :
-  fD0Formula(std::make_unique<DelphesFormula>()),
-  fDZFormula(std::make_unique<DelphesFormula>()),
-  fPFormula(std::make_unique<DelphesFormula>()),
-  fCtgThetaFormula(std::make_unique<DelphesFormula>()),
-  fPhiFormula(std::make_unique<DelphesFormula>()) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t ptError(const Double_t, const Double_t, const Double_t, const Double_t);
 
-TrackSmearing::~TrackSmearing() {}
+  const std::unique_ptr<DelphesFormula> fD0Formula; //!
+  const std::unique_ptr<DelphesFormula> fDZFormula; //!
+  const std::unique_ptr<DelphesFormula> fPFormula; //!
+  const std::unique_ptr<DelphesFormula> fCtgThetaFormula; //!
+  const std::unique_ptr<DelphesFormula> fPhiFormula; //!
+
+  Double_t fBz;
+
+  std::string fD0ResolutionFile;
+  std::string fD0ResolutionHist;
+  Bool_t fUseD0Formula;
+
+  std::string fDZResolutionFile;
+  std::string fDZResolutionHist;
+  Bool_t fUseDZFormula;
+
+  std::string fPResolutionFile;
+  std::string fPResolutionHist;
+  Bool_t fUsePFormula;
+
+  std::string fCtgThetaResolutionFile;
+  std::string fCtgThetaResolutionHist;
+  Bool_t fUseCtgThetaFormula;
+
+  std::string fPhiResolutionFile;
+  std::string fPhiResolutionHist;
+  Bool_t fUsePhiFormula;
+
+  Bool_t fApplyToPileUp;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  const TObjArray *fBeamSpotInputArray{nullptr}; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -132,10 +162,6 @@ void TrackSmearing::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void TrackSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -395,3 +421,5 @@ Double_t TrackSmearing::ptError(const Double_t p, const Double_t ctgTheta, const
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackSmearing", TrackSmearing);

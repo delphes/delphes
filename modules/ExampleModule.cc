@@ -24,38 +24,42 @@
  *
  */
 
-#include "modules/ExampleModule.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <deque>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class ExampleModule: public DelphesModule
+{
+public:
+  ExampleModule() : fFormula(std::make_unique<DelphesFormula>()) {}
 
-ExampleModule::ExampleModule() : fFormula(std::make_unique<DelphesFormula>()) {}
+  void Init() override;
+  void Process() override;
+  void Finish() override {}
 
-//------------------------------------------------------------------------------
+private:
+  Int_t fIntParam;
+  Double_t fDoubleParam;
 
-ExampleModule::~ExampleModule() {}
+  std::deque<Double_t> fArrayParam;
+
+  const std::unique_ptr<DelphesFormula> fFormula; //!
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -64,9 +68,7 @@ void ExampleModule::Init()
   // read parameters
 
   fIntParam = GetInt("IntParam", 10);
-
   fDoubleParam = GetDouble("DoubleParam", 1.0);
-
   fFormula->Compile(GetString("EfficiencyFormula", "0.4"));
 
   ExRootConfParam param = GetParam("ArrayParam");
@@ -91,10 +93,6 @@ void ExampleModule::Init()
 
 //------------------------------------------------------------------------------
 
-void ExampleModule::Finish() {}
-
-//------------------------------------------------------------------------------
-
 void ExampleModule::Process()
 {
   Candidate *candidate = nullptr;
@@ -116,3 +114,5 @@ void ExampleModule::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ExampleModule", ExampleModule);

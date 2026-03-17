@@ -8,41 +8,56 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
-#include "classes/DelphesPileUpReader.h"
-#include "modules/VertexFinder.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TMatrixT.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
 #include "TVector3.h"
-
-#include <algorithm>
-#include <iostream>
-#include <map>
-#include <stdexcept>
-#include <string>
-#include <utility>
-#include <vector>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class VertexFinder: public DelphesModule
+{
+public:
+  VertexFinder() = default;
 
-VertexFinder::VertexFinder() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  void createSeeds();
+  void growCluster(const UInt_t);
+  Double_t weight(const UInt_t);
+  void addTrackToCluster(const UInt_t, const UInt_t);
+  void removeTrackFromCluster(const UInt_t, const UInt_t);
 
-VertexFinder::~VertexFinder() {}
+  Double_t fSigma;
+  Double_t fMinPT;
+  Double_t fMaxEta;
+  Double_t fSeedMinPT;
+  Int_t fMinNDF;
+  Int_t fGrowSeeds;
+
+  TObjArray *fInputArray{nullptr};
+  std::unique_ptr<TIterator> fItInputArray;
+
+  TObjArray *fOutputArray{nullptr};
+  TObjArray *fVertexOutputArray{nullptr};
+
+  std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
+  std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;
+  std::map<UInt_t, std::map<std::string, Bool_t> > trackIDToBool;
+
+  std::map<UInt_t, std::map<std::string, Double_t> > clusterIDToDouble;
+  std::map<UInt_t, std::map<std::string, Int_t> > clusterIDToInt;
+  std::map<UInt_t, std::map<std::string, Bool_t> > clusterIDToBool;
+  std::vector<std::pair<UInt_t, Double_t> > trackPT;
+  std::vector<std::pair<UInt_t, Double_t> > clusterSumPT2;
+};
 
 //------------------------------------------------------------------------------
 
@@ -61,10 +76,6 @@ void VertexFinder::Init()
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
 }
-
-//------------------------------------------------------------------------------
-
-void VertexFinder::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -345,3 +356,5 @@ void VertexFinder::addTrackToCluster(const UInt_t trackID, const UInt_t clusterI
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("VertexFinder", VertexFinder);

@@ -24,33 +24,40 @@
  *
  */
 
-#include "modules/TrackCountingBTagging.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class TrackCountingBTagging: public DelphesModule
+{
+public:
+  TrackCountingBTagging() = default;
 
-TrackCountingBTagging::TrackCountingBTagging() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Int_t fBitNumber;
 
-TrackCountingBTagging::~TrackCountingBTagging() {}
+  Double_t fPtMin;
+  Double_t fDeltaR;
+  Double_t fIPmax;
+  Double_t fSigMin;
+  Int_t fNtracks;
+  Bool_t fUse3D;
+
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+
+  const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -75,10 +82,6 @@ void TrackCountingBTagging::Init()
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
-
-//------------------------------------------------------------------------------
-
-void TrackCountingBTagging::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -147,3 +150,5 @@ void TrackCountingBTagging::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackCountingBTagging", TrackCountingBTagging);

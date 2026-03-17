@@ -24,38 +24,34 @@
  *
  */
 
-#include "modules/JetPileUpSubtractor.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class JetPileUpSubtractor: public DelphesModule
+{
+public:
+  JetPileUpSubtractor() = default;
 
-JetPileUpSubtractor::JetPileUpSubtractor() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fJetPTMin;
 
-JetPileUpSubtractor::~JetPileUpSubtractor() {}
+  const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+
+  const TObjArray *fRhoInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItRhoInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -63,22 +59,16 @@ void JetPileUpSubtractor::Init()
 {
   fJetPTMin = GetDouble("JetPTMin", 20.0);
 
-  // import input array(s)
-
+  // import input arrays
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray.reset(fJetInputArray->MakeIterator());
 
   fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
   fItRhoInputArray.reset(fRhoInputArray->MakeIterator());
 
-  // create output array(s)
-
+  // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
 }
-
-//------------------------------------------------------------------------------
-
-void JetPileUpSubtractor::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -126,3 +116,5 @@ void JetPileUpSubtractor::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("JetPileUpSubtractor", JetPileUpSubtractor);

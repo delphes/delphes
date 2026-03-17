@@ -24,26 +24,20 @@
  *
  */
 
-#include "modules/PileUpMergerPythia8.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TDatabasePDG.h>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
-#include "Pythia.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <Pythia.h>
 
 #include <algorithm>
 #include <iostream>
@@ -52,13 +46,38 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class PileUpMergerPythia8: public DelphesModule
+{
+public:
+  PileUpMergerPythia8() : fFunction(std::make_unique<DelphesTF2>()) {}
 
-PileUpMergerPythia8::PileUpMergerPythia8() : fFunction(std::make_unique<DelphesTF2>()) {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  Int_t fPileUpDistribution;
+  Double_t fMeanPileUp;
 
-PileUpMergerPythia8::~PileUpMergerPythia8() {}
+  Double_t fZVertexSpread;
+  Double_t fTVertexSpread;
+
+  Double_t fInputBeamSpotX;
+  Double_t fInputBeamSpotY;
+  Double_t fOutputBeamSpotX;
+  Double_t fOutputBeamSpotY;
+
+  Double_t fPTMin;
+
+  const std::unique_ptr<DelphesTF2> fFunction; //!
+  std::unique_ptr<Pythia8::Pythia> fPythia; //!
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fParticleOutputArray{nullptr}; //!
+  TObjArray *fVertexOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -244,3 +263,5 @@ void PileUpMergerPythia8::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("PileUpMergerPythia8", PileUpMergerPythia8);

@@ -17,44 +17,44 @@
  */
 
 /** \class TimeOfFlight
-  *
-  *  Calculates Time-Of-Flight
-  *
-  *  \author Michele Selvaggi - CERN
-  *
- */
-
-#include "modules/TimeOfFlight.h"
+ *
+ *  Calculates Time-Of-Flight
+ *
+ *  \author Michele Selvaggi - CERN
+ *
+*/
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
 using namespace std;
-//------------------------------------------------------------------------------
 
-TimeOfFlight::TimeOfFlight() {}
+class TimeOfFlight: public DelphesModule
+{
+public:
+  TimeOfFlight() = default;
 
-//------------------------------------------------------------------------------
+  void Init() override;
+  void Process() override;
 
-TimeOfFlight::~TimeOfFlight() {}
+  void ComputeVertexMomenta();
+
+private:
+  Int_t fVertexTimeMode;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  const TObjArray *fVertexInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItVertexInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -74,10 +74,6 @@ void TimeOfFlight::Init()
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
-
-//------------------------------------------------------------------------------
-
-void TimeOfFlight::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -205,3 +201,7 @@ void TimeOfFlight::ComputeVertexMomenta()
     } // end vertex consitutent loop
   } // end vertex  loop
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TimeOfFlight", TimeOfFlight);

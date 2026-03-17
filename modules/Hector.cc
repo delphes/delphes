@@ -24,28 +24,14 @@
  *
  */
 
-#include "modules/Hector.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 #include "Hector/H_BeamLine.h"
 #include "Hector/H_BeamParticle.h"
@@ -53,13 +39,29 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class Hector: public DelphesModule
+{
+public:
+  Hector() = default;
 
-Hector::Hector() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Int_t fDirection;
 
-Hector::~Hector() {}
+  Double_t fBeamLineLength, fDistance;
+  Double_t fOffsetX, fOffsetS;
+  Double_t fSigmaE, fSigmaX, fSigmaY, fSigmaT;
+  Double_t fEtaMin;
+
+  std::unique_ptr<H_BeamLine> fBeamLine;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -84,18 +86,12 @@ void Hector::Init()
   fBeamLine->calcMatrix();
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "hits"));
 }
-
-//------------------------------------------------------------------------------
-
-void Hector::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -157,3 +153,5 @@ void Hector::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Hector", Hector);

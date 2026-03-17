@@ -24,38 +24,55 @@
  *
  */
 
-#include "modules/DenseTrackFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <set>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class DenseTrackFilter: public DelphesModule
+{
+public:
+  DenseTrackFilter() = default;
 
-DenseTrackFilter::DenseTrackFilter() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-DenseTrackFilter::~DenseTrackFilter() {}
+  Candidate *fBestTrack{nullptr};
+
+  Int_t fTowerTrackHits;
+
+  Double_t fEtaPhiRes;
+
+  TBinMap fBinMap; //!
+
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
+
+  std::vector<Long64_t> fTowerHits;
+
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+
+  TObjArray *fTrackOutputArray{nullptr}; //!
+
+  TObjArray *fChargedHadronOutputArray{nullptr}; //!
+  TObjArray *fElectronOutputArray{nullptr}; //!
+  TObjArray *fMuonOutputArray{nullptr}; //!
+
+  void FillTrack();
+};
 
 //------------------------------------------------------------------------------
 
@@ -263,3 +280,7 @@ void DenseTrackFilter::FillTrack()
     fChargedHadronOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("DenseTrackFilter", DenseTrackFilter);

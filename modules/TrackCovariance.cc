@@ -20,34 +20,56 @@
  *
  *  Smears track parameters according to appropriate covariance matrix.
  *
- *  \authors F. Bedeschi - INFN Pisa
-*            P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors P. Demin - UCLouvain, Louvain-la-Neuve
  *           M. Selvaggi - CERN
  *
- *
  */
-
 //FIXME add reference to Bedeschi-code
 //FIXME make sure about units of P, X
 //FIXME fix pt > 200 GeV issue and angle > 6.41
 
-#include "modules/TrackCovariance.h"
-
 #include "classes/DelphesClasses.h"
-
-#include "TrackCovariance/ObsTrk.h"
-#include "TrackCovariance/SolGeom.h"
-#include "TrackCovariance/SolGridCov.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
+#include <TrackCovariance/ObsTrk.h>
+#include <TrackCovariance/SolGeom.h>
+#include <TrackCovariance/SolGridCov.h>
 
-#include <iostream>
-#include <sstream>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
+
+class TrackCovariance: public DelphesModule
+{
+public:
+  TrackCovariance();
+
+  void Init() override;
+  void Process() override;
+
+private:
+  Double_t fBz;
+  Int_t fNMinHits;
+
+  const std::unique_ptr<DelphesFormula> fElectronScaleFactor;
+  const std::unique_ptr<DelphesFormula> fMuonScaleFactor;
+  const std::unique_ptr<DelphesFormula> fChargedHadronScaleFactor;
+
+  const std::unique_ptr<SolGeom> fGeometry;
+  const std::unique_ptr<SolGridCov> fCovariance;
+
+  AcceptanceClx *fAcx{nullptr};
+
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  const TObjArray *fInputArray{nullptr}; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -57,10 +79,6 @@ TrackCovariance::TrackCovariance() :
   fChargedHadronScaleFactor(std::make_unique<DelphesFormula>()),
   fGeometry(std::make_unique<SolGeom>()),
   fCovariance(std::make_unique<SolGridCov>()) {}
-
-//------------------------------------------------------------------------------
-
-TrackCovariance::~TrackCovariance() {}
 
 //------------------------------------------------------------------------------
 
@@ -90,10 +108,6 @@ void TrackCovariance::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
-
-//------------------------------------------------------------------------------
-
-void TrackCovariance::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -221,3 +235,5 @@ void TrackCovariance::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackCovariance", TrackCovariance);

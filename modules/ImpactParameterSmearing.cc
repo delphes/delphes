@@ -24,60 +24,48 @@
  *
  */
 
-#include "modules/ImpactParameterSmearing.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class ImpactParameterSmearing: public DelphesModule
+{
+public:
+  ImpactParameterSmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
 
-ImpactParameterSmearing::ImpactParameterSmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-ImpactParameterSmearing::~ImpactParameterSmearing() {}
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
 void ImpactParameterSmearing::Init()
 {
   // read resolution formula
-
   fFormula->Compile(GetString("ResolutionFormula", "0.0"));
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
   fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
-
-//------------------------------------------------------------------------------
-
-void ImpactParameterSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -140,3 +128,5 @@ void ImpactParameterSmearing::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ImpactParameterSmearing", ImpactParameterSmearing);

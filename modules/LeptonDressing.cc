@@ -18,44 +18,38 @@
 
 /** \class LeptonDressing
  *
- *
- *
  *  \author P. Demin && A. Mertens - UCL, Louvain-la-Neuve
  *
  */
 
-#include "modules/LeptonDressing.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class LeptonDressing: public DelphesModule
+{
+public:
+  LeptonDressing() = default;
 
-LeptonDressing::LeptonDressing() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fDeltaR;
 
-LeptonDressing::~LeptonDressing() {}
+  const TObjArray *fDressingInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItDressingInputArray; //!
+
+  const TObjArray *fCandidateInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItCandidateInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -63,8 +57,7 @@ void LeptonDressing::Init()
 {
   fDeltaR = GetDouble("DeltaRMax", 0.4);
 
-  // import input array(s)
-
+  // import input arrasy
   fDressingInputArray = ImportArray(GetString("DressingInputArray", "Calorimeter/photons"));
   fItDressingInputArray.reset(fDressingInputArray->MakeIterator());
 
@@ -72,13 +65,8 @@ void LeptonDressing::Init()
   fItCandidateInputArray.reset(fCandidateInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
 }
-
-//------------------------------------------------------------------------------
-
-void LeptonDressing::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -119,3 +107,5 @@ void LeptonDressing::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("LeptonDressing", LeptonDressing);

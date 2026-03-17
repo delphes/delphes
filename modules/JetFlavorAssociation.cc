@@ -9,7 +9,7 @@
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY || FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
@@ -18,34 +18,22 @@
 
 /** \class JetFlavorAssociation
  *
- *  Find origin of jet && evaluate jet flavor
+ *  Find origin of jet and evaluate jet flavor
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
-#include "modules/JetFlavorAssociation.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
@@ -57,6 +45,51 @@ public:
   PartonClassifier() {}
   Int_t GetCategory(TObject *object);
   Double_t fEtaMax, fPTMin;
+};
+
+//------------------------------------------------------------------------------
+
+class ParticleLHEFClassifier: public ExRootClassifier
+{
+public:
+  ParticleLHEFClassifier() {}
+  Int_t GetCategory(TObject *object);
+  Double_t fEtaMax, fPTMin;
+};
+
+//------------------------------------------------------------------------------
+
+class JetFlavorAssociation: public DelphesModule
+{
+public:
+  JetFlavorAssociation() :
+    fPartonClassifier(std::make_unique<PartonClassifier>()),
+    fParticleLHEFClassifier(std::make_unique<ParticleLHEFClassifier>()) {}
+
+  void Init() override;
+  void Process() override;
+
+  void GetAlgoFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
+  void GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
+
+private:
+  Double_t fDeltaR;
+
+  const std::unique_ptr<PartonClassifier> fPartonClassifier; //!
+  const std::unique_ptr<ParticleLHEFClassifier> fParticleLHEFClassifier; //!
+
+  std::unique_ptr<ExRootFilter> fPartonFilter;
+  std::unique_ptr<ExRootFilter> fParticleLHEFFilter;
+
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+  std::unique_ptr<TIterator> fItParticleLHEFInputArray; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fParticleLHEFInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
 };
 
 //------------------------------------------------------------------------------
@@ -84,14 +117,6 @@ Int_t PartonClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-class ParticleLHEFClassifier: public ExRootClassifier
-{
-public:
-  ParticleLHEFClassifier() {}
-  Int_t GetCategory(TObject *object);
-  Double_t fEtaMax, fPTMin;
-};
-
 Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
 {
   // select parton in the parton list
@@ -110,16 +135,6 @@ Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
 
   return 0;
 }
-
-//------------------------------------------------------------------------------
-
-JetFlavorAssociation::JetFlavorAssociation() :
-  fPartonClassifier(std::make_unique<PartonClassifier>()),
-  fParticleLHEFClassifier(std::make_unique<ParticleLHEFClassifier>()) {}
-
-//------------------------------------------------------------------------------
-
-JetFlavorAssociation::~JetFlavorAssociation() {}
 
 //------------------------------------------------------------------------------
 
@@ -161,10 +176,6 @@ void JetFlavorAssociation::Init()
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
   fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
-
-//------------------------------------------------------------------------------
-
-void JetFlavorAssociation::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -364,3 +375,7 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArr
     }
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("JetFlavorAssociation", JetFlavorAssociation);

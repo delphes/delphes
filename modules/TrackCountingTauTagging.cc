@@ -1,40 +1,29 @@
-
 /** \class TrackCountingTauTagging
  *
  *  Determines origin of jet,
  *  applies b-tagging efficiency (miss identification rate) formulas
  *  and sets b-tagging flags
  *
- *  $Date: 2013-07-12 00:22:27 +0200 (Fri, 12 Jul 2013) $
- *  $Revision: 1217 $
+ *  $Date: 2013-02-22 01:01:36 +0100 (Fri, 22 Feb 2013) $
+ *  $Revision: 926 $
  *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
-#include "modules/TrackCountingTauTagging.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
@@ -43,7 +32,7 @@ using namespace std;
 class TrackCountingTauTaggingPartonClassifier: public ExRootClassifier
 {
 public:
-  TrackCountingTauTaggingPartonClassifier(const TObjArray *array);
+  explicit TrackCountingTauTaggingPartonClassifier(const TObjArray *array) : fParticleInputArray(array) {}
 
   Int_t GetCategory(TObject *object);
 
@@ -53,10 +42,37 @@ public:
 };
 
 //------------------------------------------------------------------------------
-TrackCountingTauTaggingPartonClassifier::TrackCountingTauTaggingPartonClassifier(const TObjArray *array) :
-  fParticleInputArray(array)
+
+class TrackCountingTauTagging: public DelphesModule
 {
-}
+public:
+  TrackCountingTauTagging() = default;
+
+  void Init() override;
+  void Process() override;
+  void Finish() override;
+
+private:
+  Int_t fBitNumber;
+
+  Double_t fDeltaR;
+  Double_t fDeltaRTrack;
+  Double_t fTrackPTMin;
+
+  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
+
+  std::unique_ptr<TrackCountingTauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<ExRootFilter> fFilter;
+
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  const TObjArray *fJetInputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -103,14 +119,6 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 
   return 0;
 }
-
-//------------------------------------------------------------------------------
-
-TrackCountingTauTagging::TrackCountingTauTagging() {}
-
-//------------------------------------------------------------------------------
-
-TrackCountingTauTagging::~TrackCountingTauTagging() {}
 
 //------------------------------------------------------------------------------
 
@@ -272,3 +280,5 @@ void TrackCountingTauTagging::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackCountingTauTagging", TrackCountingTauTagging);

@@ -18,49 +18,50 @@
 
 /** \class PhotonConversions
  *
- *
- * Converts photons into e+ e- pairs according to mass ditribution in the detector.
+ *  Converts photons into e+ e- pairs according to material ditribution in the detector.
  *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
  *
  */
 
-#include "modules/PhotonConversions.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCylindricalFormula.h"
-#include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TF1.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-#include "TVector3.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TF1.h>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
+#include <TVector3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class PhotonConversions: public DelphesModule
+{
+public:
+  PhotonConversions() :
+    fConversionMap(std::make_unique<DelphesCylindricalFormula>()),
+    fDecayXsec(std::make_unique<TF1>("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0)) {}
 
-PhotonConversions::PhotonConversions() :
-  fConversionMap(std::make_unique<DelphesCylindricalFormula>()),
-  fDecayXsec(std::make_unique<TF1>("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0)) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fRadius, fRadius2, fHalfLength;
+  Double_t fEtaMin, fEtaMax;
 
-PhotonConversions::~PhotonConversions() {}
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+
+  const std::unique_ptr<DelphesCylindricalFormula> fConversionMap; //!
+  const std::unique_ptr<TF1> fDecayXsec; //!
+
+  Double_t fStep;
+};
 
 //------------------------------------------------------------------------------
 
@@ -87,10 +88,6 @@ void PhotonConversions::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void PhotonConversions::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -238,3 +235,5 @@ void PhotonConversions::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("PhotonConversions", PhotonConversions);

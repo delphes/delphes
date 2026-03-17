@@ -25,54 +25,45 @@
  *
  */
 
-#include "modules/ParticleDensity.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TFormula.h"
-#include "TH2F.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TH2F.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class ParticleDensity: public DelphesModule
+{
+public:
+  ParticleDensity() = default;
 
-ParticleDensity::ParticleDensity() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
-ParticleDensity::~ParticleDensity() {}
+  TObjArray *fOutputArray{nullptr}; //!
+
+  Bool_t fUseMomentumVector; // !
+  std::unique_ptr<TH2F> fHisto; //!
+};
 
 //------------------------------------------------------------------------------
 
 void ParticleDensity::Init()
 {
-  // import input array(s)
-
+  // import input array
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
   fItInputArray.reset(fInputArray->MakeIterator());
 
-  // create output array(s)
-
+  // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 
   // create multiplicity histogram
-
   ExRootConfParam paramEta = GetParam("EtaBins");
   const Long_t sizeEta = paramEta.GetSize();
   Int_t nbinsEta = sizeEta - 1;
@@ -95,10 +86,6 @@ void ParticleDensity::Init()
 
   fUseMomentumVector = GetBool("UseMomentumVector", false);
 }
-
-//------------------------------------------------------------------------------
-
-void ParticleDensity::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -141,3 +128,5 @@ void ParticleDensity::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ParticleDensity", ParticleDensity);

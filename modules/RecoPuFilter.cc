@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*  \class RecoPuFilter
+/** \class RecoPuFilter
  *
  *  Removes particles with RecoPU flag = true.
  *  Input collection needs to pass by TrackPileUpSubtractor first)
@@ -25,38 +25,26 @@
  *
  */
 
-#include "modules/RecoPuFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TObjArray.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+class RecoPuFilter: public DelphesModule
+{
+public:
+  RecoPuFilter() = default;
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+  void Init() override;
+  void Process() override;
 
-using namespace std;
+private:
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
-//------------------------------------------------------------------------------
-
-RecoPuFilter::RecoPuFilter() {}
-
-//------------------------------------------------------------------------------
-
-RecoPuFilter::~RecoPuFilter() {}
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -72,10 +60,6 @@ void RecoPuFilter::Init()
 
 //------------------------------------------------------------------------------
 
-void RecoPuFilter::Finish() {}
-
-//------------------------------------------------------------------------------
-
 void RecoPuFilter::Process()
 {
   Candidate *candidate = nullptr;
@@ -87,3 +71,7 @@ void RecoPuFilter::Process()
     fOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("RecoPuFilter", RecoPuFilter);

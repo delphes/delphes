@@ -30,6 +30,7 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootConfReader.h"
@@ -126,7 +127,8 @@ void Delphes::Init()
     itModules = modules->find(name);
     if(itModules != modules->end())
     {
-      task = NewTask(itModules->second, itModules->first);
+      auto module_object = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
+      task = NewTask(dynamic_cast<ExRootTask *>(module_object.release()), itModules->first);
       if(task)
       {
         task->SetFolder(GetFolder());

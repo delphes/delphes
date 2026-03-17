@@ -24,38 +24,39 @@
  *
  */
 
-#include "modules/PdgCodeFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class PdgCodeFilter: public DelphesModule
+{
+public:
+  PdgCodeFilter() = default;
 
-PdgCodeFilter::PdgCodeFilter() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fPTMin; //!
+  Bool_t fInvert; //!
+  Bool_t fRequireStatus; //!
+  Int_t fStatus; //!
+  Bool_t fRequireCharge; //!
+  Int_t fCharge; //!
+  Bool_t fRequireNotPileup; //!
 
-PdgCodeFilter::~PdgCodeFilter() {}
+  std::vector<Int_t> fPdgCodes;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -99,10 +100,6 @@ void PdgCodeFilter::Init()
 
 //------------------------------------------------------------------------------
 
-void PdgCodeFilter::Finish() {}
-
-//------------------------------------------------------------------------------
-
 void PdgCodeFilter::Process()
 {
   Candidate *candidate = nullptr;
@@ -129,3 +126,7 @@ void PdgCodeFilter::Process()
     if(pass) fOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("PdgCodeFilter", PdgCodeFilter);

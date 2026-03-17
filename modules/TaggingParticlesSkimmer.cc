@@ -16,50 +16,53 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//------------------------------------------------------------------------------
-
 /** \class TaggingParticlesSkimmer
  *
  *  Filters particle collection by only keeping gen particles useful for b and tau tagging.
- *  tau particles are replaced by their "visible decay".
+    tau particles are replaced by their "visible decay".
  *
  *  \author M. Selvaggi
  *
  */
 
-#include "modules/TaggingParticlesSkimmer.h"
-#include "modules/TauTagging.h"
+#include "modules/TauTaggingPartonClassifier.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class TaggingParticlesSkimmer: public DelphesModule
+{
+public:
+  TaggingParticlesSkimmer() = default;
 
-TaggingParticlesSkimmer::TaggingParticlesSkimmer() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fPTMin; //!
+  Double_t fEtaMax; //!
 
-TaggingParticlesSkimmer::~TaggingParticlesSkimmer() {}
+  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<ExRootFilter> fFilter;
+
+  const TObjArray *fPartonInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItPartonInputArray; //!
+
+  const TObjArray *fParticleInputArray{nullptr}; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -83,10 +86,6 @@ void TaggingParticlesSkimmer::Init()
   // output array
   fOutputArray = ExportArray(GetString("OutputArray", "taggingParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void TaggingParticlesSkimmer::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -149,3 +148,7 @@ void TaggingParticlesSkimmer::Process()
     fOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TaggingParticlesSkimmer", TaggingParticlesSkimmer);

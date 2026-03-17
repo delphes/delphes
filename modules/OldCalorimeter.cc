@@ -1,4 +1,3 @@
-
 /** \class OldCalorimeter
  *
  *  Fills calorimeter towers, performs calorimeter resolution smearing,
@@ -12,30 +11,80 @@
  *
  */
 
-#include "modules/OldCalorimeter.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
+
+class OldCalorimeter: public DelphesModule
+{
+public:
+  OldCalorimeter();
+
+  void Init() override;
+  void Process() override;
+  void Finish() override;
+
+private:
+  typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
+
+  Candidate *fTower{nullptr};
+  Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
+  Double_t fTowerECalEnergy, fTowerHCalEnergy;
+  Double_t fTowerECalNeutralEnergy, fTowerHCalNeutralEnergy;
+  Int_t fTowerPhotonHits, fTowerECalHits, fTowerHCalHits, fTowerAllHits;
+  Int_t fTowerECalTrackHits, fTowerHCalTrackHits, fTowerTrackAllHits;
+
+  TFractionMap fFractionMap; //!
+  TBinMap fBinMap; //!
+
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
+
+  std::vector<Long64_t> fTowerHits;
+
+  std::vector<Double_t> fECalFractions;
+  std::vector<Double_t> fHCalFractions;
+
+  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
+
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+
+  TObjArray *fTowerOutputArray{nullptr}; //!
+  TObjArray *fPhotonOutputArray{nullptr}; //!
+
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowTowerOutputArray{nullptr}; //!
+
+  const std::unique_ptr<TObjArray> fTowerECalArray; //!
+  const std::unique_ptr<TObjArray> fTowerHCalArray; //!
+  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
+  const std::unique_ptr<TObjArray> fTowerECalTrackArray; //!
+  const std::unique_ptr<TObjArray> fTowerHCalTrackArray; //!
+
+  std::unique_ptr<TIterator> fItTowerECalArray; //!
+  std::unique_ptr<TIterator> fItTowerHCalArray; //!
+  std::unique_ptr<TIterator> fItTowerTrackArray; //!
+  std::unique_ptr<TIterator> fItTowerECalTrackArray; //!
+  std::unique_ptr<TIterator> fItTowerHCalTrackArray; //!
+
+  void FinalizeTower();
+  Double_t LogNormal(Double_t mean, Double_t sigma);
+};
 
 //------------------------------------------------------------------------------
 
@@ -54,10 +103,6 @@ OldCalorimeter::OldCalorimeter() :
   fItTowerECalTrackArray.reset(fTowerECalTrackArray->MakeIterator());
   fItTowerHCalTrackArray.reset(fTowerHCalTrackArray->MakeIterator());
 }
-
-//------------------------------------------------------------------------------
-
-OldCalorimeter::~OldCalorimeter() {}
 
 //------------------------------------------------------------------------------
 
@@ -567,3 +612,7 @@ Double_t OldCalorimeter::LogNormal(Double_t mean, Double_t sigma)
     return 0.0;
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("OldCalorimeter", OldCalorimeter);
