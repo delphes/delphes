@@ -44,7 +44,7 @@ class DelphesModule: public ExRootTask
 {
 public:
   DelphesModule();
-  ~DelphesModule();
+  virtual ~DelphesModule();
 
   virtual void Init();
   virtual void Process();
@@ -60,13 +60,13 @@ public:
   DelphesFactory *GetFactory();
 
 protected:
-  ExRootTreeWriter *fTreeWriter;
-  DelphesFactory *fFactory;
+  ExRootTreeWriter *fTreeWriter{nullptr};
+  DelphesFactory *fFactory{nullptr};
 
 private:
-  ExRootResult *fPlots;
+  ExRootResult *fPlots{nullptr};
 
-  TFolder *fPlotFolder, *fExportFolder;
+  TFolder *fPlotFolder{nullptr}, *fExportFolder{nullptr};
 
   ClassDef(DelphesModule, 1)
 };

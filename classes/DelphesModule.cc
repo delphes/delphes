@@ -44,35 +44,23 @@
 
 using namespace std;
 
-DelphesModule::DelphesModule() :
-  fTreeWriter(0), fFactory(0), fPlots(0),
-  fPlotFolder(0), fExportFolder(0)
-{
-}
+DelphesModule::DelphesModule() {}
 
 //------------------------------------------------------------------------------
 
-DelphesModule::~DelphesModule()
-{
-}
+DelphesModule::~DelphesModule() {}
 
 //------------------------------------------------------------------------------
 
-void DelphesModule::Init()
-{
-}
+void DelphesModule::Init() {}
 
 //------------------------------------------------------------------------------
 
-void DelphesModule::Process()
-{
-}
+void DelphesModule::Process() {}
 
 //------------------------------------------------------------------------------
 
-void DelphesModule::Finish()
-{
-}
+void DelphesModule::Finish() {}
 
 //------------------------------------------------------------------------------
 
