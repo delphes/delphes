@@ -24,61 +24,52 @@
  *
  */
 
-#include "modules/FastJetGridMedianEstimator.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TObjArray.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <utility>
-#include <vector>
-
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/JetDefinition.hh"
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/RectangularGrid.hh"
-#include "fastjet/Selector.hh"
-#include "fastjet/tools/JetMedianBackgroundEstimator.hh"
-
-#include "fastjet/tools/GridMedianBackgroundEstimator.hh"
-
-#include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
-#include "fastjet/plugins/SISCone/fastjet/SISConePlugin.hh"
-
-#include "fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh"
-#include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
-#include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
-#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/ClusterSequenceArea.hh>
+#include <fastjet/JetDefinition.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/RectangularGrid.hh>
+#include <fastjet/Selector.hh>
+#include <fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh>
+#include <fastjet/contribs/Nsubjettiness/Njettiness.hh>
+#include <fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh>
+#include <fastjet/contribs/Nsubjettiness/Nsubjettiness.hh>
+#include <fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh>
+#include <fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh>
+#include <fastjet/plugins/SISCone/fastjet/SISConePlugin.hh>
+#include <fastjet/tools/GridMedianBackgroundEstimator.hh>
+#include <fastjet/tools/JetMedianBackgroundEstimator.hh>
 
 using namespace std;
 using namespace fastjet;
 using namespace fastjet::contrib;
 
-//------------------------------------------------------------------------------
+class FastJetGridMedianEstimator: public DelphesModule
+{
+public:
+  FastJetGridMedianEstimator() = default;
 
-FastJetGridMedianEstimator::FastJetGridMedianEstimator() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
 
-FastJetGridMedianEstimator::~FastJetGridMedianEstimator() {}
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fRhoOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -162,3 +153,7 @@ void FastJetGridMedianEstimator::Process()
     fRhoOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("FastJetGridMedianEstimator", FastJetGridMedianEstimator);

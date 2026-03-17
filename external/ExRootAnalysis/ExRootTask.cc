@@ -7,8 +7,8 @@
  *
  */
 
-#include "ExRootAnalysis/ExRootTask.h"
 #include "ExRootAnalysis/ExRootConfReader.h"
+#include "ExRootAnalysis/ExRootTask.h"
 
 #include "TClass.h"
 #include "TFolder.h"
@@ -138,6 +138,19 @@ void ExRootTask::Add(TTask *task)
 
 //------------------------------------------------------------------------------
 
+ExRootTask *ExRootTask::NewTask(ExRootTask *task, const char *taskName)
+{
+  if(!task) return nullptr;
+
+  task->SetName(taskName);
+  task->SetFolder(fFolder);
+  task->SetConfReader(fConfReader);
+
+  return task;
+}
+
+//------------------------------------------------------------------------------
+
 ExRootTask *ExRootTask::NewTask(TClass *cl, const char *taskName)
 {
   stringstream message;
@@ -151,12 +164,7 @@ ExRootTask *ExRootTask::NewTask(TClass *cl, const char *taskName)
     throw runtime_error(message.str());
   }
 
-  ExRootTask *task = static_cast<ExRootTask *>(cl->New());
-  task->SetName(taskName);
-  task->SetFolder(fFolder);
-  task->SetConfReader(fConfReader);
-
-  return task;
+  return NewTask(static_cast<ExRootTask *>(cl->New()), taskName);
 }
 
 //------------------------------------------------------------------------------

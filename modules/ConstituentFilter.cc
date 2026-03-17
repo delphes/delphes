@@ -24,38 +24,33 @@
  *
  */
 
-#include "modules/ConstituentFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class ConstituentFilter: public DelphesModule
+{
+public:
+  ConstituentFilter() = default;
 
-ConstituentFilter::ConstituentFilter() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fJetPTMin;
 
-ConstituentFilter::~ConstituentFilter() {}
+  std::vector<std::unique_ptr<TIterator> > fInputList; //!
+
+  std::map<std::unique_ptr<TIterator>, TObjArray *> fInputMap; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -145,3 +140,5 @@ void ConstituentFilter::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ConstituentFilter", ConstituentFilter);

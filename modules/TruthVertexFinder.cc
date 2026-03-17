@@ -18,45 +18,40 @@
 
 /** \class TruthVertexFinder
  *
- *  Merges particles from pile-up sample into event
+ *  Produces list of MC truth vertices
  *
- *  \author M. Selvaggi - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi - CERN
  *
  */
 
-#include "modules/TruthVertexFinder.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesPileUpReader.h"
-#include "classes/DelphesTF2.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class TruthVertexFinder: public DelphesModule
+{
+public:
+  TruthVertexFinder() = default;
 
-TruthVertexFinder::TruthVertexFinder() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fResolution; //!
 
-TruthVertexFinder::~TruthVertexFinder() {}
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fVertexOutputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -71,10 +66,6 @@ void TruthVertexFinder::Init()
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
   //fItOutputArray.reset(fVertexOutputArray->MakeIterator());
 }
-
-//------------------------------------------------------------------------------
-
-void TruthVertexFinder::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -145,3 +136,5 @@ void TruthVertexFinder::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TruthVertexFinder", TruthVertexFinder);

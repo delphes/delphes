@@ -26,40 +26,42 @@
  *
  */
 
-#include "modules/BTagging.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TObjArray.h>
+#include <TRandom3.h>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <map>
+
+class BTagging: public DelphesModule
+{
+public:
+  BTagging() = default;
+
+  void Init() override;
+  void Process() override;
+
+private:
+  Int_t fBitNumber;
+
+#if !defined(__CINT__) && !defined(__CLING__)
+  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
+#endif
+
+  const TObjArray *fJetInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItJetInputArray; //!
+};
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
-BTagging::BTagging() {}
-
-//------------------------------------------------------------------------------
-
-BTagging::~BTagging() {}
-
-//------------------------------------------------------------------------------
-
 void BTagging::Init()
 {
-  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
+  std::map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
   ExRootConfParam param;
   Int_t i, size;
 
@@ -96,15 +98,11 @@ void BTagging::Init()
 
 //------------------------------------------------------------------------------
 
-void BTagging::Finish() {}
-
-//------------------------------------------------------------------------------
-
 void BTagging::Process()
 {
   Candidate *jet;
   Double_t pt, eta, phi, e;
-  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
+  std::map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
 
   // loop over all input jets
   fItJetInputArray->Reset();
@@ -158,3 +156,5 @@ void BTagging::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("BTagging", BTagging);

@@ -31,57 +31,44 @@
  *
  */
 
-#include "modules/DecayFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TDatabasePDG.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TParticlePDG.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class DecayFilter: public DelphesModule
+{
+public:
+  DecayFilter() = default;
 
-DecayFilter::DecayFilter() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
-DecayFilter::~DecayFilter() {}
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
 void DecayFilter::Init()
 {
-  // import input array(s)
-
+  // import input arrays
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
   fItInputArray.reset(fInputArray->MakeIterator());
 
-  // create output array(s)
-
+  // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
-
-//------------------------------------------------------------------------------
-
-void DecayFilter::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -128,3 +115,5 @@ void DecayFilter::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("DecayFilter", DecayFilter);

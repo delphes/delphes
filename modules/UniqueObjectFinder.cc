@@ -18,44 +18,40 @@
 
 /** \class UniqueObjectFinder
  *
- *  Finds uniquely identified photons, electrons and jets.
+ *  Finds uniquely identified photons, electrons, taus and jets.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
-#include "modules/UniqueObjectFinder.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TObjArray.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <vector>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class UniqueObjectFinder: public DelphesModule
+{
+public:
+  UniqueObjectFinder() = default;
 
-UniqueObjectFinder::UniqueObjectFinder() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  Bool_t fUseUniqueID;
 
-UniqueObjectFinder::~UniqueObjectFinder() {}
+  using InputMap = std::vector<std::pair<std::unique_ptr<TIterator>, TObjArray *> >;
+
+  Bool_t Unique(Candidate *candidate, InputMap::iterator itInputMap);
+
+  InputMap fInputMap; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -154,3 +150,5 @@ Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::iterator itInp
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("UniqueObjectFinder", UniqueObjectFinder);

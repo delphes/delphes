@@ -55,8 +55,6 @@ public:
 
 private:
   const std::unique_ptr<DelphesFactory> fFactory;
-
-  ClassDef(Delphes, 1)
 };
 
 #endif /* Delphes_h */

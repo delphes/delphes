@@ -24,45 +24,43 @@
  *
  */
 
-#include "modules/TrackPileUpSubtractor.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class TrackPileUpSubtractor: public DelphesModule
+{
+public:
+  TrackPileUpSubtractor() : fFormula(std::make_unique<DelphesFormula>()) {}
 
-TrackPileUpSubtractor::TrackPileUpSubtractor() : fFormula(std::make_unique<DelphesFormula>()) {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-TrackPileUpSubtractor::~TrackPileUpSubtractor() {}
+  Double_t fPTMin;
+
+  std::map<std::unique_ptr<TIterator>, TObjArray *> fInputMap; //!
+
+  std::unique_ptr<TIterator> fItVertexInputArray{nullptr}; //!
+
+  const TObjArray *fVertexInputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TrackPileUpSubtractor::Init()
 {
   // import input array
-
   fVertexInputArray = ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"));
   fItVertexInputArray.reset(fVertexInputArray->MakeIterator());
 
@@ -72,7 +70,6 @@ void TrackPileUpSubtractor::Init()
   fPTMin = GetDouble("PTMin", 0.);
 
   // import arrays with output from other modules
-
   ExRootConfParam param = GetParam("InputArray");
   Long_t i, size;
   const TObjArray *array;
@@ -149,3 +146,7 @@ void TrackPileUpSubtractor::Process()
     }
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackPileUpSubtractor", TrackPileUpSubtractor);

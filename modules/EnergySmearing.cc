@@ -24,60 +24,50 @@
  *
  */
 
-#include "modules/EnergySmearing.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class EnergySmearing: public DelphesModule
+{
+public:
+  EnergySmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
 
-EnergySmearing::EnergySmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-EnergySmearing::~EnergySmearing() {}
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
 void EnergySmearing::Init()
 {
   // read resolution formula
-
   fFormula->Compile(GetString("ResolutionFormula", "0.0"));
 
-  // import input array
-
+  // import input arrays
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void EnergySmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -117,3 +107,5 @@ void EnergySmearing::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("EnergySmearing", EnergySmearing);

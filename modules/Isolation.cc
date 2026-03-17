@@ -23,32 +23,21 @@
  *  to the candidate's transverse momentum. outputs candidates that have
  *  the transverse momenta fraction within (PTRatioMin, PTRatioMax].
  *
- *  \author P. Demin, M. Selvaggi, R. Gerosa - UCL, Louvain-la-Neuve
+ *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
-#include "modules/Isolation.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
@@ -59,30 +48,49 @@ class IsolationClassifier: public ExRootClassifier
 public:
   IsolationClassifier() {}
 
-  Int_t GetCategory(TObject *object);
+  Int_t GetCategory(TObject *object)
+  {
+    Candidate *track = static_cast<Candidate *>(object);
+    if(const TLorentzVector &momentum = track->Momentum; momentum.Pt() < fPTMin) return -1;
+    return 0;
+  }
 
   Double_t fPTMin;
 };
 
 //------------------------------------------------------------------------------
 
-Int_t IsolationClassifier::GetCategory(TObject *object)
+class Isolation: public DelphesModule
 {
-  Candidate *track = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = track->Momentum;
+public:
+  Isolation() : fClassifier(std::make_unique<IsolationClassifier>()) {}
 
-  if(momentum.Pt() < fPTMin) return -1;
+  void Init() override;
+  void Process() override;
 
-  return 0;
-}
+private:
+  Double_t fDeltaRMax;
+  Double_t fPTRatioMax;
+  Double_t fPTSumMax;
+  Double_t fDeltaRMin;
+  Bool_t fUsePTSum;
+  Bool_t fUseRhoCorrection;
+  Bool_t fUseMiniCone;
 
-//------------------------------------------------------------------------------
+  const std::unique_ptr<IsolationClassifier> fClassifier; //!
 
-Isolation::Isolation() : fClassifier(std::make_unique<IsolationClassifier>()) {}
+  std::unique_ptr<ExRootFilter> fFilter;
 
-//------------------------------------------------------------------------------
+  std::unique_ptr<TIterator> fItIsolationInputArray; //!
+  std::unique_ptr<TIterator> fItCandidateInputArray; //!
+  std::unique_ptr<TIterator> fItRhoInputArray; //!
 
-Isolation::~Isolation() {}
+  const TObjArray *fIsolationInputArray{nullptr}; //!
+  const TObjArray *fCandidateInputArray{nullptr}; //!
+  const TObjArray *fRhoInputArray{nullptr}; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -130,10 +138,6 @@ void Isolation::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
 }
-
-//------------------------------------------------------------------------------
-
-void Isolation::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -254,3 +258,5 @@ void Isolation::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Isolation", Isolation);

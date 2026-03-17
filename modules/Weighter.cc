@@ -24,52 +24,46 @@
  *
  */
 
-#include "modules/Weighter.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) const
+class Weighter: public DelphesModule
 {
-  Int_t i;
+public:
+  Weighter() = default;
 
-  for(i = 0; i < 4; ++i)
+  void Init() override;
+  void Process() override;
+
+private:
+#if !defined(__CINT__) && !defined(__CLING__)
+  struct TIndexStruct
   {
-    if(codes[i] != value.codes[i]) return codes[i] < value.codes[i];
-  }
+    Int_t codes[4];
+    bool operator<(const TIndexStruct &value) const
+    {
+      for(size_t i = 0; i < 4; ++i)
+        if(codes[i] != value.codes[i]) return codes[i] < value.codes[i];
+      return false;
+    }
+  };
 
-  return false;
-}
+  std::set<Int_t> fWeightSet, fCodeSet;
+  std::map<TIndexStruct, Double_t> fWeightMap;
+#endif
 
-//------------------------------------------------------------------------------
+  std::unique_ptr<TIterator> fItInputArray; //!
 
-Weighter::Weighter() {}
+  const TObjArray *fInputArray{nullptr}; //!
 
-//------------------------------------------------------------------------------
-
-Weighter::~Weighter() {}
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -128,10 +122,6 @@ void Weighter::Init()
 
 //------------------------------------------------------------------------------
 
-void Weighter::Finish() {}
-
-//------------------------------------------------------------------------------
-
 void Weighter::Process()
 {
   Candidate *candidate = nullptr;
@@ -184,3 +174,5 @@ void Weighter::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Weighter", Weighter);

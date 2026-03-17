@@ -24,11 +24,12 @@
  *
  */
 
-#include "modules/AngularSmearing.h"
+#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
@@ -47,16 +48,24 @@
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
+class AngularSmearing: public DelphesModule
+{
+public:
+  AngularSmearing() :
+    fFormulaEta(std::make_unique<DelphesFormula>()), fFormulaPhi(std::make_unique<DelphesFormula>()) {}
 
-//------------------------------------------------------------------------------
+  void Init() override;
+  void Process() override;
 
-AngularSmearing::AngularSmearing() :
-  fFormulaEta(std::make_unique<DelphesFormula>()), fFormulaPhi(std::make_unique<DelphesFormula>()) {}
+private:
+  const std::unique_ptr<DelphesFormula> fFormulaEta; //!
+  const std::unique_ptr<DelphesFormula> fFormulaPhi; //!
 
-//------------------------------------------------------------------------------
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
 
-AngularSmearing::~AngularSmearing() {}
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -76,10 +85,6 @@ void AngularSmearing::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void AngularSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -114,3 +119,5 @@ void AngularSmearing::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("AngularSmearing", AngularSmearing);

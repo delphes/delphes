@@ -27,38 +27,39 @@
  *
  */
 
-#include "modules/ParticlePropagator.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class ParticlePropagator: public DelphesModule
+{
+public:
+  ParticlePropagator() = default;
 
-ParticlePropagator::ParticlePropagator() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
+  Double_t fBz;
 
-ParticlePropagator::~ParticlePropagator() {}
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  const TObjArray *fInputArray{nullptr}; //!
+  const TObjArray *fBeamSpotInputArray{nullptr}; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fNeutralOutputArray{nullptr}; //!
+  TObjArray *fChargedHadronOutputArray{nullptr}; //!
+  TObjArray *fElectronOutputArray{nullptr}; //!
+  TObjArray *fMuonOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -104,10 +105,6 @@ void ParticlePropagator::Init()
   fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons"));
   fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons"));
 }
-
-//------------------------------------------------------------------------------
-
-void ParticlePropagator::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -367,3 +364,5 @@ void ParticlePropagator::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ParticlePropagator", ParticlePropagator);

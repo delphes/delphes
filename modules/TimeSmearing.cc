@@ -20,48 +20,44 @@
  *
  *  Performs time smearing.
  *
- *  \author M. Selvaggi - CERN
+ *  \author Michele Selvaggi - CERN
  *
  */
-
-#include "modules/TimeSmearing.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
-//------------------------------------------------------------------------------
 
-TimeSmearing::TimeSmearing() : fResolutionFormula(std::make_unique<DelphesFormula>()) {}
+class TimeSmearing: public DelphesModule
+{
+public:
+  TimeSmearing() : fResolutionFormula(std::make_unique<DelphesFormula>()) {}
 
-//------------------------------------------------------------------------------
+  void Init() override;
+  void Process() override;
 
-TimeSmearing::~TimeSmearing() {}
+private:
+  const std::unique_ptr<DelphesFormula> fResolutionFormula;
+  Int_t fVertexTimeMode;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Init()
 {
-  // read resolution formula
-
   // read time resolution formula in seconds
   fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
 
@@ -72,10 +68,6 @@ void TimeSmearing::Init()
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
-
-//------------------------------------------------------------------------------
-
-void TimeSmearing::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -113,3 +105,7 @@ void TimeSmearing::Process()
     fOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TimeSmearing", TimeSmearing);

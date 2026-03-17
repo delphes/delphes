@@ -17,74 +17,63 @@
  */
 
 /** \class CscClusterId
-  *
-  *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
-  *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
-  *  to reproduce the cut-based ID efficiency of the CMS paper.
-  *
-  *  \author Christina Wang
-  *
-  */
-
-#include "modules/CscClusterId.h"
+ *
+ *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
+ *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
+ *
+ *  \author Christina Wang
+ *
+ */
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCscClusterFormula.h"
-#include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include "assert.h"
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class CscClusterId: public DelphesModule
+{
+public:
+  CscClusterId() :
+    fFormula(std::make_unique<DelphesCscClusterFormula>()),
+    fEtaFormula(std::make_unique<DelphesCscClusterFormula>()) {}
 
-CscClusterId::CscClusterId() :
-  fFormula(std::make_unique<DelphesCscClusterFormula>()),
-  fEtaFormula(std::make_unique<DelphesCscClusterFormula>()) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
+  const std::unique_ptr<DelphesCscClusterFormula> fEtaFormula; //!
+  Double_t fEtaCutMax;
 
-CscClusterId::~CscClusterId() {}
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
 void CscClusterId::Init()
 {
   // read efficiency formula
-
   fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
   fEtaFormula->Compile(GetString("EtaCutFormula", "1.0"));
   fEtaCutMax = GetDouble("EtaCutMax", 999.0);
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void CscClusterId::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -119,3 +108,5 @@ void CscClusterId::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("CscClusterId", CscClusterId);

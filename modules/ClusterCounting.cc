@@ -20,34 +20,47 @@
  *
  *  Counts ionisation clusters of energy loss in drift chambers
  *
- *  \authors F. Bedeschi - INFN Pisa
-*            P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors F. Bedeschi - INFN
  *           M. Selvaggi - CERN
- *
  *
  */
 
-#include "TrackCovariance/TrkUtil.h"
 #include "classes/DelphesClasses.h"
-#include "modules/ClusterCounting.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TVectorD.h"
+#include <TrackCovariance/TrkUtil.h>
 
-#include <iostream>
-#include <sstream>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
+#include <TVectorD.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class ClusterCounting: public DelphesModule
+{
+public:
+  ClusterCounting() : fTrackUtil(std::make_unique<TrkUtil>()) {}
 
-ClusterCounting::ClusterCounting() : fTrackUtil(std::make_unique<TrkUtil>()) {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  Double_t fRmin;
+  Double_t fRmax;
+  Double_t fZmin;
+  Double_t fZmax;
+  Double_t fBz;
 
-ClusterCounting::~ClusterCounting() {}
+  Int_t fGasOption;
+
+  const std::unique_ptr<TrkUtil> fTrackUtil;
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -81,10 +94,6 @@ void ClusterCounting::Init()
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
 }
-
-//------------------------------------------------------------------------------
-
-void ClusterCounting::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -126,3 +135,5 @@ void ClusterCounting::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ClusterCounting", ClusterCounting);

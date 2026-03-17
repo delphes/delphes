@@ -1,3 +1,4 @@
+
 /*
  *  Delphes: a framework for fast simulation of a generic collider experiment
  *  Copyright (C) 2012-2014  Universite catholique de Louvain (UCL), Belgium
@@ -22,45 +23,110 @@
  *  and creates energy flow objects (tracks, photons, and neutral hadrons).
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *  \author A. Chattopadhyay - UPRM (Added insensitive calorimeter bins functionality)
+ *  \author A. Chattopadhyay - UPRM
  *
  */
-
-#include "modules/SimpleCalorimeter.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class SimpleCalorimeter: public DelphesModule
+{
+public:
+  SimpleCalorimeter() :
+    fResolutionFormula(std::make_unique<DelphesFormula>()),
+    fTowerTrackArray(std::make_unique<TObjArray>()),
+    fItTowerTrackArray(fTowerTrackArray->MakeIterator()) {}
 
-SimpleCalorimeter::SimpleCalorimeter() :
-  fResolutionFormula(std::make_unique<DelphesFormula>()),
-  fTowerTrackArray(std::make_unique<TObjArray>()),
-  fItTowerTrackArray(fTowerTrackArray->MakeIterator()) {}
+  void Init();
+  void Process();
+  void Finish();
 
-//------------------------------------------------------------------------------
+private:
+  typedef std::map<Long64_t, Double_t> TFractionMap; //!
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-SimpleCalorimeter::~SimpleCalorimeter() {}
+  Candidate *fTower{nullptr};
+  Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
+
+  Double_t fTowerEnergy;
+  Double_t fNeutralEnergy;
+  Double_t fTrackEnergy;
+
+  Double_t fTowerEnergyFromPU;
+  Double_t fTrackEnergyFromPU;
+  Double_t fNeutralEnergyFromPU;
+
+  Double_t fTowerTime;
+  Double_t fTrackTime;
+
+  Double_t fTowerRmax;
+
+  Double_t fTowerTimeWeight;
+  Double_t fTrackTimeWeight;
+
+  Int_t fTowerTrackHits, fTowerPhotonHits;
+
+  Double_t fEnergyMin;
+
+  Double_t fEnergySignificanceMin;
+
+  Double_t fTrackSigma;
+
+  Bool_t fSmearTowerCenter;
+
+  Bool_t fIsEcal; //!
+
+  TFractionMap fFractionMap; //!
+  TBinMap fBinMap; //!
+
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
+
+  std::vector<Long64_t> fTowerHits;
+
+  std::vector<Double_t> fTowerFractions;
+
+  std::vector<Double_t> fTrackFractions;
+
+  // Insensitive bins stored as integer indices (etaBin, phiBin)
+  std::set<std::pair<Short_t, Short_t> > fInsensitiveBinSet;
+
+  // Flag telling whether the *current* tower is insensitive or not
+  inline bool IsTowerInsensitive(Short_t etaBin, Short_t phiBin) const
+  {
+    return fInsensitiveBinSet.find(std::make_pair(etaBin, phiBin)) != fInsensitiveBinSet.end();
+  }
+
+  const std::unique_ptr<DelphesFormula> fResolutionFormula; //!
+
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+
+  const TObjArray *fTrackInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+
+  TObjArray *fTowerOutputArray{nullptr}; //!
+
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowTowerOutputArray{nullptr}; //!
+
+  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
+  const std::unique_ptr<TIterator> fItTowerTrackArray; //!
+
+  void FinalizeTower();
+  Double_t LogNormal(Double_t mean, Double_t sigma);
+};
 
 //------------------------------------------------------------------------------
 
@@ -623,3 +689,7 @@ Double_t SimpleCalorimeter::LogNormal(Double_t mean, Double_t sigma)
     return 0.0;
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("SimpleCalorimeter", SimpleCalorimeter);

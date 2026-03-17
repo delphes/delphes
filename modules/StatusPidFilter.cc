@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \class StatusPidFilter
+/** \class Efficiency
  *
  *  Removes all generated particles except electrons, muons, taus,
  *  and particles with status == 3.
@@ -25,30 +25,33 @@
  *
  */
 
-#include "modules/StatusPidFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TMath.h>
+#include <TObjArray.h>
 
 using namespace std;
+
+class StatusPidFilter: public DelphesModule
+{
+public:
+  StatusPidFilter() = default;
+
+  void Init() override;
+  void Process() override;
+
+private:
+  Double_t fPTMin; //!
+
+  Bool_t fRequireNotPileup; //!
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 namespace
 {
@@ -145,14 +148,6 @@ bool isWDaughter(int M1, const TObjArray *fInputArray)
 
 //------------------------------------------------------------------------------
 
-StatusPidFilter::StatusPidFilter() {}
-
-//------------------------------------------------------------------------------
-
-StatusPidFilter::~StatusPidFilter() {}
-
-//------------------------------------------------------------------------------
-
 void StatusPidFilter::Init()
 {
   // PT threshold
@@ -169,10 +164,6 @@ void StatusPidFilter::Init()
 
   fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
 }
-
-//------------------------------------------------------------------------------
-
-void StatusPidFilter::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -235,3 +226,7 @@ void StatusPidFilter::Process()
     fOutputArray->Add(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("StatusPidFilter", StatusPidFilter);

@@ -24,63 +24,145 @@
  *
  */
 
-#include "modules/FastJetFinder.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
 
 #include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
 #include <vector>
 
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/JetDefinition.hh"
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/Selector.hh"
-#include "fastjet/tools/JetMedianBackgroundEstimator.hh"
-
-#include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
-#include "fastjet/plugins/SISCone/fastjet/SISConePlugin.hh"
-
-#include "fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh"
-#include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
-#include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
-#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
-
-#include "fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh"
-
-#include "fastjet/contribs/RecursiveTools/SoftDrop.hh"
-#include "fastjet/tools/Filter.hh"
-#include "fastjet/tools/Pruner.hh"
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/ClusterSequenceArea.hh>
+#include <fastjet/JetDefinition.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/Selector.hh>
+#include <fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh>
+#include <fastjet/contribs/Nsubjettiness/Njettiness.hh>
+#include <fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh>
+#include <fastjet/contribs/Nsubjettiness/Nsubjettiness.hh>
+#include <fastjet/contribs/RecursiveTools/SoftDrop.hh>
+#include <fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh>
+#include <fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh>
+#include <fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh>
+#include <fastjet/plugins/SISCone/fastjet/SISConePlugin.hh>
+#include <fastjet/tools/Filter.hh>
+#include <fastjet/tools/JetMedianBackgroundEstimator.hh>
+#include <fastjet/tools/Pruner.hh>
 
 using namespace std;
 using namespace fastjet;
 using namespace fastjet::contrib;
 
-//------------------------------------------------------------------------------
+class FastJetFinder: public DelphesModule
+{
+public:
+  FastJetFinder() = default;
 
-FastJetFinder::FastJetFinder() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  void *fPlugin{nullptr}; //!
+  void *fRecomb{nullptr}; //!
 
-FastJetFinder::~FastJetFinder() {}
+  std::unique_ptr<fastjet::contrib::AxesDefinition> fAxesDef;
+  std::unique_ptr<fastjet::contrib::MeasureDefinition> fMeasureDef;
+
+  std::unique_ptr<fastjet::contrib::NjettinessPlugin> fNjettinessPlugin; //!
+  std::unique_ptr<fastjet::contrib::ValenciaPlugin> fValenciaPlugin; //!
+  std::unique_ptr<fastjet::JetDefinition> fDefinition; //!
+
+  Int_t fJetAlgorithm;
+  Double_t fParameterR;
+  Double_t fParameterP;
+
+  Double_t fJetPTMin;
+  Double_t fConeRadius;
+  Double_t fSeedThreshold;
+  Double_t fConeAreaFraction;
+  Int_t fMaxIterations;
+  Int_t fMaxPairSize;
+  Int_t fIratch;
+  Int_t fAdjacencyCut;
+  Double_t fOverlapThreshold;
+
+  //-- Exclusive clustering for e+e- collisions --
+
+  Int_t fNJets;
+  Double_t fDCut;
+  Bool_t fExclusiveClustering;
+
+  //-- Valencia Linear Collider algorithm
+  Double_t fGamma;
+
+  //-- N (sub)jettiness parameters --
+
+  Bool_t fComputeNsubjettiness;
+  Double_t fBeta;
+  Int_t fAxisMode;
+  Double_t fRcutOff;
+  Int_t fN;
+
+  //-- Trimming parameters --
+
+  Bool_t fComputeTrimming;
+  Double_t fRTrim;
+  Double_t fPtFracTrim;
+
+  //-- Pruning parameters --
+
+  Bool_t fComputePruning;
+  Double_t fZcutPrun;
+  Double_t fRcutPrun;
+  Double_t fRPrun;
+
+  //-- SoftDrop parameters --
+
+  Bool_t fComputeSoftDrop;
+  Double_t fBetaSoftDrop;
+  Double_t fSymmetryCutSoftDrop;
+  Double_t fR0SoftDrop;
+
+  // --- FastJet Area method --------
+
+  std::unique_ptr<fastjet::AreaDefinition> fAreaDefinition;
+  Int_t fAreaAlgorithm;
+  Bool_t fComputeRho;
+
+  // -- ghost based areas --
+  Double_t fGhostEtaMax;
+  Int_t fRepeat;
+  Double_t fGhostArea;
+  Double_t fGridScatter;
+  Double_t fPtScatter;
+  Double_t fMeanGhostPt;
+
+  // -- voronoi areas --
+  Double_t fEffectiveRfact;
+
+#if !defined(__CINT__) && !defined(__CLING__)
+  struct TEstimatorStruct
+  {
+    std::unique_ptr<fastjet::JetMedianBackgroundEstimator> estimator;
+    Double_t etaMin, etaMax;
+  };
+
+  std::vector<TEstimatorStruct> fEstimators; //!
+#endif
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+  TObjArray *fRhoOutputArray{nullptr}; //!
+  TObjArray *fConstituentsOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -585,3 +667,5 @@ void FastJetFinder::Process()
   }
   delete sequence;
 }
+
+REGISTER_MODULE("FastJetFinder", FastJetFinder);

@@ -24,62 +24,46 @@
  *
  */
 
-#include "modules/Cloner.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TObjArray.h>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-Cloner::Cloner() {}
-
-//------------------------------------------------------------------------------
-
-Cloner::~Cloner() {}
-
-//------------------------------------------------------------------------------
-
-void Cloner::Init()
+class Cloner: public DelphesModule
 {
-  // import input array(s)
+public:
+  Cloner() = default;
 
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray.reset(fInputArray->MakeIterator());
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void Cloner::Finish() {}
-
-//------------------------------------------------------------------------------
-
-void Cloner::Process()
-{
-  Candidate *candidate;
-
-  // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  void Init() override
   {
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    fOutputArray->Add(candidate);
+    // import input array(s)
+    fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
+    fItInputArray.reset(fInputArray->MakeIterator());
+
+    // create output array(s)
+    fOutputArray = ExportArray(GetString("OutputArray", "jets"));
   }
-}
+  void Process() override
+  {
+    Candidate *candidate;
+
+    // loop over all input candidates
+    fItInputArray->Reset();
+    while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+    {
+      candidate = static_cast<Candidate *>(candidate->Clone());
+      fOutputArray->Add(candidate);
+    }
+  }
+
+private:
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Cloner", Cloner);

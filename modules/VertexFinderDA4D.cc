@@ -8,31 +8,48 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
-#include "classes/DelphesPileUpReader.h"
-#include "modules/VertexFinderDA4D.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TMatrixT.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-#include "TVector3.h"
-
-#include <algorithm>
-#include <iostream>
-#include <stdexcept>
-#include <utility>
-#include <vector>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TMatrixT.h>
+#include <TObjArray.h>
 
 using namespace std;
+
+class VertexFinderDA4D: public DelphesModule
+{
+public:
+  VertexFinderDA4D() = default;
+
+  void Init() override;
+  void Process() override;
+
+  void clusterize(const TObjArray &tracks, TObjArray &clusters);
+  std::vector<Candidate *> vertices();
+
+private:
+  Bool_t fVerbose{0};
+  Double_t fMinPT{0.};
+
+  Float_t fVertexSpaceSize{0.};
+  Float_t fVertexTimeSize{0.};
+  Bool_t fUseTc{false};
+  Float_t fBetaMax{0.};
+  Float_t fBetaStop{0.};
+  Double_t fCoolingFactor{0.};
+  Int_t fMaxIterations{0};
+  Double_t fDzCutOff{0.};
+  Double_t fD0CutOff{0.};
+  Double_t fDtCutOff{0.}; // for when the beamspot has time
+
+  TObjArray *fInputArray{nullptr};
+  std::unique_ptr<TIterator> fItInputArray;
+
+  TObjArray *fOutputArray{nullptr};
+  TObjArray *fVertexOutputArray{nullptr};
+};
 
 static const Double_t mm = 1.;
 static const Double_t m = 1000. * mm;
@@ -87,16 +104,6 @@ static bool recTrackLessZ1(const track_t &tk1, const track_t &tk2)
   return tk1.z < tk2.z;
 }
 
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-VertexFinderDA4D::VertexFinderDA4D() {}
-
-//------------------------------------------------------------------------------
-
-VertexFinderDA4D::~VertexFinderDA4D() {}
-
 //------------------------------------------------------------------------------
 
 void VertexFinderDA4D::Init()
@@ -127,10 +134,6 @@ void VertexFinderDA4D::Init()
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
 }
-
-//------------------------------------------------------------------------------
-
-void VertexFinderDA4D::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -1201,3 +1204,7 @@ void splitAll(vector<vertex_t> &y)
 
   y = y1;
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("VertexFinderDA4D", VertexFinderDA4D);

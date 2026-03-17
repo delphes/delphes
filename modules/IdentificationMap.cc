@@ -25,38 +25,36 @@
  *
  */
 
-#include "modules/IdentificationMap.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class IdentificationMap: public DelphesModule
+{
+public:
+  IdentificationMap() = default;
 
-IdentificationMap::IdentificationMap() {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  typedef std::multimap<Int_t, std::pair<Int_t, std::unique_ptr<DelphesFormula> > > TMisIDMap; //!
 
-IdentificationMap::~IdentificationMap() {}
+  TMisIDMap fEfficiencyMap; //!
+
+  const TObjArray *fInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItInputArray; //!
+
+  TObjArray *fOutputArray{nullptr}; //!
+};
 
 //------------------------------------------------------------------------------
 
@@ -166,3 +164,5 @@ void IdentificationMap::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("IdentificationMap", IdentificationMap);

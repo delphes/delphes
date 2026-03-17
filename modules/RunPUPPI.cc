@@ -1,31 +1,64 @@
-#include "modules/RunPUPPI.h"
+#include <PUPPI/AlgoObj.hh>
+#include <PUPPI/PuppiContainer.hh>
+#include <PUPPI/RecoObj2.hh>
 
-#include "PUPPI/AlgoObj.hh"
-#include "PUPPI/PuppiContainer.hh"
-#include "PUPPI/RecoObj2.hh"
-
-#include "fastjet/PseudoJet.hh"
+#include <fastjet/PseudoJet.hh>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 #include <vector>
 
 using namespace std;
 using namespace fastjet;
 
-//------------------------------------------------------------------------------
+class RunPUPPI: public DelphesModule
+{
+public:
+  RunPUPPI() = default;
 
-RunPUPPI::RunPUPPI() {}
+  void Init() override;
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  std::unique_ptr<PuppiContainer> fPuppi;
+  // puppi parameters
+  bool fApplyNoLep;
+  double fMinPuppiWeight;
+  bool fUseExp;
 
-RunPUPPI::~RunPUPPI() {}
+  const TObjArray *fTrackInputArray{nullptr};
+  std::unique_ptr<TIterator> fItTrackInputArray;
+
+  const TObjArray *fNeutralInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fItNeutralInputArray; //!
+
+  const TObjArray *fPVInputArray{nullptr}; //!
+  std::unique_ptr<TIterator> fPVItInputArray; //!
+
+  std::vector<float> fEtaMinBin;
+  std::vector<float> fEtaMaxBin;
+  std::vector<float> fPtMinBin;
+  std::vector<float> fConeSizeBin;
+  std::vector<float> fRMSPtMinBin;
+  std::vector<float> fRMSScaleFactorBin;
+  std::vector<float> fNeutralMinEBin;
+  std::vector<float> fNeutralPtSlope;
+  std::vector<bool> fApplyCHS;
+  std::vector<bool> fUseCharged;
+  std::vector<bool> fApplyLowPUCorr;
+  std::vector<int> fMetricId;
+  std::vector<int> fCombId;
+
+  TObjArray *fOutputArray{nullptr};
+  TObjArray *fOutputTrackArray{nullptr};
+  TObjArray *fOutputNeutralArray{nullptr};
+};
 
 //------------------------------------------------------------------------------
 
@@ -140,10 +173,6 @@ void RunPUPPI::Init()
   }
   fPuppi = std::make_unique<PuppiContainer>(true, fUseExp, fMinPuppiWeight, puppiAlgo);
 }
-
-//------------------------------------------------------------------------------
-
-void RunPUPPI::Finish() {}
 
 //------------------------------------------------------------------------------
 
@@ -277,3 +306,7 @@ void RunPUPPI::Process()
     }
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("RunPUPPI", RunPUPPI);

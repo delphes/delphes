@@ -16,46 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UniqueObjectFinder_h
-#define UniqueObjectFinder_h
+#ifndef TauTaggingPartonClassifier_h
+#define TauTaggingPartonClassifier_h
 
-/** \class UniqueObjectFinder
+/** \class TauTaggingPartonClassifier
  *
- *  Finds uniquely identified photons, electrons, taus and jets.
+ *  Determines jet category
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
-#include "classes/DelphesModule.h"
+#include "ExRootAnalysis/ExRootClassifier.h"
 
-#include <utility>
-#include <vector>
-
-class TIterator;
 class TObjArray;
-class Candidate;
 
-class UniqueObjectFinder : public DelphesModule
+//------------------------------------------------------------------------------
+
+class TauTaggingPartonClassifier: public ExRootClassifier
 {
 public:
-  UniqueObjectFinder();
-  ~UniqueObjectFinder();
+  TauTaggingPartonClassifier(const TObjArray *array);
 
-  void Init();
-  void Process();
-  void Finish();
+  Int_t GetCategory(TObject *object);
 
-private:
-  Bool_t fUseUniqueID;
+  Double_t fEtaMax, fPTMin;
 
-  using InputMap = std::vector<std::pair<std::unique_ptr<TIterator>, TObjArray *> >;
-
-  Bool_t Unique(Candidate *candidate, InputMap::iterator itInputMap);
-
-  InputMap fInputMap; //!
-
-  ClassDef(UniqueObjectFinder, 1)
+  const TObjArray *fParticleInputArray{nullptr};
 };
 
 #endif

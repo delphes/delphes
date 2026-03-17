@@ -25,44 +25,107 @@
  *
  */
 
-#include "modules/Calorimeter.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootFilter.h"
 #include "ExRootAnalysis/ExRootResult.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TRandom3.h>
 
 #include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <map>
+#include <set>
+#include <vector>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+class Calorimeter: public DelphesModule
+{
+public:
+  Calorimeter() : fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+                  fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
+                  fECalTowerTrackArray(std::make_unique<TObjArray>()),
+                  fItECalTowerTrackArray(fECalTowerTrackArray->MakeIterator()),
+                  fHCalTowerTrackArray(std::make_unique<TObjArray>()),
+                  fItHCalTowerTrackArray(fHCalTowerTrackArray->MakeIterator()) {}
 
-Calorimeter::Calorimeter() :
-  fECalResolutionFormula(std::make_unique<DelphesFormula>()),
-  fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
-  fECalTowerTrackArray(std::make_unique<TObjArray>()),
-  fItECalTowerTrackArray(fECalTowerTrackArray->MakeIterator()),
-  fHCalTowerTrackArray(std::make_unique<TObjArray>()),
-  fItHCalTowerTrackArray(fHCalTowerTrackArray->MakeIterator()) {}
+  void Init() override;
+  void Process() override;
+  void Finish() override;
 
-//------------------------------------------------------------------------------
+private:
+  typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
+  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
 
-Calorimeter::~Calorimeter() {}
+  Candidate *fTower{nullptr};
+  Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
+  Double_t fECalTowerEnergy, fHCalTowerEnergy;
+  Double_t fECalTrackEnergy, fHCalTrackEnergy;
+
+  Double_t fTimingEnergyMin;
+  Bool_t fElectronsFromTrack;
+  Double_t fTowerRmax;
+
+  Int_t fTowerTrackHits, fTowerPhotonHits;
+
+  Double_t fECalEnergyMin;
+  Double_t fHCalEnergyMin;
+
+  Double_t fECalEnergySignificanceMin;
+  Double_t fHCalEnergySignificanceMin;
+
+  Double_t fECalTrackSigma;
+  Double_t fHCalTrackSigma;
+
+  Bool_t fSmearTowerCenter;
+
+  TFractionMap fFractionMap; //!
+  TBinMap fBinMap; //!
+
+  std::vector<Double_t> fEtaBins;
+  std::vector<std::vector<Double_t> *> fPhiBins;
+
+  std::vector<Long64_t> fTowerHits;
+
+  std::vector<Double_t> fECalTowerFractions;
+  std::vector<Double_t> fHCalTowerFractions;
+
+  std::vector<Double_t> fECalTrackFractions;
+  std::vector<Double_t> fHCalTrackFractions;
+
+  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
+
+  std::unique_ptr<TIterator> fItParticleInputArray; //!
+  std::unique_ptr<TIterator> fItTrackInputArray; //!
+
+  const TObjArray *fParticleInputArray{nullptr}; //!
+  const TObjArray *fTrackInputArray{nullptr}; //!
+
+  TObjArray *fTowerOutputArray{nullptr}; //!
+  TObjArray *fPhotonOutputArray{nullptr}; //!
+
+  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
+  TObjArray *fEFlowPhotonOutputArray{nullptr}; //!
+  TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
+
+  const std::unique_ptr<TObjArray> fECalTowerTrackArray; //!
+  const std::unique_ptr<TIterator> fItECalTowerTrackArray; //!
+
+  const std::unique_ptr<TObjArray> fHCalTowerTrackArray; //!
+  const std::unique_ptr<TIterator> fItHCalTowerTrackArray; //!
+
+  void FinalizeTower();
+  Double_t LogNormal(Double_t mean, Double_t sigma);
+};
 
 //------------------------------------------------------------------------------
 
@@ -663,3 +726,7 @@ Double_t Calorimeter::LogNormal(Double_t mean, Double_t sigma)
     return 0.0;
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("Calorimeter", Calorimeter);

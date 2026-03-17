@@ -24,45 +24,59 @@
  *
  */
 
-#include "modules/TreeWriter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TROOT.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <TObjArray.h>
+#include <TROOT.h>
 
-#include <algorithm>
-#include <iostream>
 #include <set>
-#include <sstream>
-#include <stdexcept>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-TreeWriter::TreeWriter()
+class TreeWriter: public DelphesModule
 {
-}
+public:
+  TreeWriter() = default;
 
-//------------------------------------------------------------------------------
+  void Init() override;
+  void Process() override;
 
-TreeWriter::~TreeWriter()
-{
-}
+private:
+  void FillParticles(Candidate *candidate, TRefArray *array);
+
+  void ProcessParticles(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessVertices(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessTracks(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessTowers(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessMuons(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessCscCluster(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessTauJets(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessJets(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessMissingET(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessRho(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessWeight(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessHectorHit(ExRootTreeBranch *branch, TObjArray *array);
+
+#if !defined(__CINT__) && !defined(__CLING__)
+  typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, TObjArray *); //!
+
+  typedef std::map<ExRootTreeBranch *, std::pair<TProcessMethod, TObjArray *> > TBranchMap; //!
+
+  TBranchMap fBranchMap; //!
+
+  std::map<TClass *, TProcessMethod> fClassMap; //!
+#endif
+};
 
 //------------------------------------------------------------------------------
 
@@ -137,12 +151,6 @@ void TreeWriter::Init()
 
     AddInfo(infoName, infoValue);
   }
-}
-
-//------------------------------------------------------------------------------
-
-void TreeWriter::Finish()
-{
 }
 
 //------------------------------------------------------------------------------
@@ -1089,3 +1097,5 @@ void TreeWriter::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TreeWriter", TreeWriter);
