@@ -29,8 +29,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include <TObjArray.h>
-
 using namespace std;
 
 class Weighter: public DelphesModule
@@ -58,11 +56,8 @@ private:
   std::map<TIndexStruct, Double_t> fWeightMap;
 #endif
 
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  const TObjArray *fInputArray{nullptr}; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -110,13 +105,10 @@ void Weighter::Init()
     fWeightMap[index] = weight;
   }
 
-  // import input array(s)
-
+  // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
-  // create output array(s)
-
+  // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "weight"));
 }
 
@@ -124,7 +116,8 @@ void Weighter::Init()
 
 void Weighter::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   Int_t i;
   TIndexStruct index;
   Double_t weight;
@@ -135,8 +128,7 @@ void Weighter::Process()
 
   // loop over all particles
   fCodeSet.clear();
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     if(candidate->Status != 3) continue;
 
@@ -168,9 +160,9 @@ void Weighter::Process()
     }
   }
 
-  candidate = factory->NewCandidate();
+  auto *candidate = factory->NewCandidate();
   candidate->Momentum.SetPtEtaPhiE(weight, 0.0, 0.0, weight);
-  fOutputArray->Add(candidate);
+  fOutputArray->emplace_back(candidate);
 }
 
 //------------------------------------------------------------------------------

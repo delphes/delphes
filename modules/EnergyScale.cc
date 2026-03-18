@@ -31,7 +31,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -46,10 +45,8 @@ public:
 private:
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -61,7 +58,6 @@ void EnergyScale::Init()
 
   // import input arrays
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
@@ -71,12 +67,11 @@ void EnergyScale::Init()
 
 void EnergyScale::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
   TLorentzVector momentum;
   Double_t scale;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     momentum = candidate->Momentum;
 
@@ -84,10 +79,10 @@ void EnergyScale::Process()
 
     if(scale > 0.0) momentum *= scale;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Momentum = momentum;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

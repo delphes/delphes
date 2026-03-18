@@ -33,7 +33,7 @@
 
 //------------------------------------------------------------------------------
 
-TauTaggingPartonClassifier::TauTaggingPartonClassifier(const TObjArray *array) :
+TauTaggingPartonClassifier::TauTaggingPartonClassifier(const CandidatesCollection &array) :
   fParticleInputArray(array) {}
 
 //------------------------------------------------------------------------------
@@ -56,14 +56,14 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D2 < tau->D1) return -1;
 
-  if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+  if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
   {
     throw std::runtime_error("tau's daughter index is greater than the ParticleInputArray size");
   }
 
   for(i = tau->D1; i <= tau->D2; ++i)
   {
-    daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
+    daughter1 = static_cast<Candidate *>(fParticleInputArray->at(i));
     pdgCode = TMath::Abs(daughter1->PID);
     //if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
     //  return -1;
@@ -72,7 +72,7 @@ Int_t TauTaggingPartonClassifier::GetCategory(TObject *object)
       if(daughter1->D1 < 0) return -1;
       for(j = daughter1->D1; j <= daughter1->D2; ++j)
       {
-        daughter2 = static_cast<Candidate *>(fParticleInputArray->At(j));
+        daughter2 = static_cast<Candidate *>(fParticleInputArray->at(j));
         pdgCode = TMath::Abs(daughter2->PID);
         if(pdgCode == 11 || pdgCode == 13) return -1;
       }

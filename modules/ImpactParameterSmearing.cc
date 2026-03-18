@@ -30,7 +30,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -46,10 +45,8 @@ public:
 private:
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -61,7 +58,6 @@ void ImpactParameterSmearing::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -71,16 +67,15 @@ void ImpactParameterSmearing::Init()
 
 void ImpactParameterSmearing::Process()
 {
-  Candidate *candidate = nullptr, *particle = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-
     // take momentum before smearing (otherwise apply double smearing on d0)
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
@@ -112,18 +107,16 @@ void ImpactParameterSmearing::Process()
     dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
-    mother = candidate;
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Xd = xd;
+    new_candidate->Yd = yd;
+    new_candidate->Zd = zd;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Xd = xd;
-    candidate->Yd = yd;
-    candidate->Zd = zd;
+    new_candidate->D0 = d0;
+    new_candidate->ErrorD0 = dd0;
 
-    candidate->D0 = d0;
-    candidate->ErrorD0 = dd0;
-
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

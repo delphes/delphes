@@ -29,7 +29,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -52,10 +51,8 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -81,7 +78,6 @@ void PdgCodeFilter::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   param = GetParam("PdgCode");
   size = param.GetSize();
@@ -102,13 +98,13 @@ void PdgCodeFilter::Init()
 
 void PdgCodeFilter::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   Int_t pdgCode;
   Bool_t pass;
   Double_t pt;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -123,7 +119,7 @@ void PdgCodeFilter::Process()
     if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
 
     if(fInvert) pass = !pass;
-    if(pass) fOutputArray->Add(candidate);
+    if(pass) fOutputArray->emplace_back(candidate);
   }
 }
 

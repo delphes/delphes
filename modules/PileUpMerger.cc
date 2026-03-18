@@ -34,7 +34,6 @@
 #include <TDatabasePDG.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -62,11 +61,10 @@ private:
   const std::unique_ptr<DelphesTF2> fFunction; //!
   std::unique_ptr<DelphesPileUpReader> fReader; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
 
-  TObjArray *fParticleOutputArray{nullptr}; //!
-  TObjArray *fVertexOutputArray{nullptr}; //!
+  CandidatesCollection fParticleOutputArray; //!
+  CandidatesCollection fVertexOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -97,7 +95,6 @@ void PileUpMerger::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output arrays
   fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
@@ -108,6 +105,9 @@ void PileUpMerger::Init()
 
 void PileUpMerger::Process()
 {
+  fParticleOutputArray->clear();
+  fVertexOutputArray->clear();
+
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
   Int_t pid, nch, nvtx = -1;
@@ -120,8 +120,6 @@ void PileUpMerger::Process()
   DelphesFactory *factory;
 
   const Double_t c_light = 2.99792458E8;
-
-  fItInputArray->Reset();
 
   // --- Deal with primary vertex first  ------
 
@@ -138,14 +136,14 @@ void PileUpMerger::Process()
   vx = 0.0;
   vy = 0.0;
 
-  numberOfParticles = fInputArray->GetEntriesFast();
+  numberOfParticles = fInputArray->size();
   nch = 0;
   sumpt2 = 0.0;
 
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     vx += candidate->Position.X();
     vy += candidate->Position.Y();
@@ -165,7 +163,7 @@ void PileUpMerger::Process()
 
     candidate->IsPU = 0;
 
-    fParticleOutputArray->Add(candidate);
+    fParticleOutputArray->emplace_back(candidate);
 
     if(TMath::Abs(candidate->Charge) > 1.0E-9)
     {
@@ -187,7 +185,7 @@ void PileUpMerger::Process()
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
   vertex->GenSumPT2 = sumpt2;
-  fVertexOutputArray->Add(vertex);
+  fVertexOutputArray->emplace_back(vertex);
 
   // --- Then with pile-up vertices  ------
 
@@ -271,7 +269,7 @@ void PileUpMerger::Process()
         vertex->AddCandidate(candidate);
       }
 
-      fParticleOutputArray->Add(candidate);
+      fParticleOutputArray->emplace_back(candidate);
     }
 
     if(numberOfParticles > 0)
@@ -291,7 +289,7 @@ void PileUpMerger::Process()
 
     vertex->IsPU = 1;
 
-    fVertexOutputArray->Add(vertex);
+    fVertexOutputArray->emplace_back(vertex);
   }
 }
 

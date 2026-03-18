@@ -32,7 +32,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -48,10 +47,8 @@ public:
 private:
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -63,7 +60,6 @@ void EnergySmearing::Init()
 
   // import input arrays
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -73,11 +69,11 @@ void EnergySmearing::Init()
 
 void EnergySmearing::Process()
 {
-  Candidate *candidate = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
   Double_t pt, energy, eta, phi, m;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -93,16 +89,16 @@ void EnergySmearing::Process()
 
     if(energy <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto *mother = candidate;
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
-    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
-    candidate->AddCandidate(mother);
+    new_candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+    new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
+    new_candidate->AddCandidate(mother);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

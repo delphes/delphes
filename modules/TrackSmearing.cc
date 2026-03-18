@@ -16,7 +16,6 @@
 #include <TFile.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TProfile2D.h>
 #include <TRandom3.h>
 
@@ -68,12 +67,10 @@ private:
 
   Bool_t fApplyToPileUp;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fBeamSpotInputArray; //!
 
-  const TObjArray *fBeamSpotInputArray{nullptr}; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -146,16 +143,14 @@ void TrackSmearing::Init()
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // import beamspot
   try
   {
     fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
   }
-  catch(runtime_error &e)
+  catch(const std::runtime_error &)
   {
-    fBeamSpotInputArray = 0;
   }
 
   // create output array
@@ -167,8 +162,9 @@ void TrackSmearing::Init()
 
 void TrackSmearing::Process()
 {
+  fOutputArray->clear();
+
   TLorentzVector beamSpotPosition;
-  Candidate *candidate = nullptr, *mother = nullptr;
   Double_t pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
   Double_t x, y, z, t, px, py, pz, theta;
   Double_t q, r;
@@ -181,11 +177,11 @@ void TrackSmearing::Process()
              *ctgThetaErrorHist = NULL,
              *phiErrorHist = NULL;
 
-  if(!fBeamSpotInputArray || fBeamSpotInputArray->GetSize() == 0)
+  if(fBeamSpotInputArray->empty())
     beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   else
   {
-    Candidate &beamSpotCandidate = *((Candidate *)fBeamSpotInputArray->At(0));
+    Candidate &beamSpotCandidate = *((Candidate *)fBeamSpotInputArray->at(0));
     beamSpotPosition = beamSpotCandidate.Position;
   }
 
@@ -225,10 +221,8 @@ void TrackSmearing::Process()
     fin->Close();
   }
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->InitialPosition;
 
@@ -332,47 +326,46 @@ void TrackSmearing::Process()
     while(phi > TMath::Pi()) phi -= TMath::TwoPi();
     while(phi <= -TMath::Pi()) phi += TMath::TwoPi();
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->D0 = d0;
-    candidate->DZ = dz;
-    candidate->P = p;
-    candidate->CtgTheta = ctgTheta;
-    candidate->Phi = phi;
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->D0 = d0;
+    new_candidate->DZ = dz;
+    new_candidate->P = p;
+    new_candidate->CtgTheta = ctgTheta;
+    new_candidate->Phi = phi;
 
     theta = TMath::ACos(ctgTheta / TMath::Sqrt(1.0 + ctgTheta * ctgTheta));
-    candidate->Momentum.SetPx(p * TMath::Cos(phi) * TMath::Sin(theta));
-    candidate->Momentum.SetPy(p * TMath::Sin(phi) * TMath::Sin(theta));
-    candidate->Momentum.SetPz(p * TMath::Cos(theta));
-    candidate->Momentum.SetE(TMath::Sqrt(p * p + m * m));
-    candidate->PT = candidate->Momentum.Pt();
+    new_candidate->Momentum.SetPx(p * TMath::Cos(phi) * TMath::Sin(theta));
+    new_candidate->Momentum.SetPy(p * TMath::Sin(phi) * TMath::Sin(theta));
+    new_candidate->Momentum.SetPz(p * TMath::Cos(theta));
+    new_candidate->Momentum.SetE(TMath::Sqrt(p * p + m * m));
+    new_candidate->PT = new_candidate->Momentum.Pt();
 
     x = position.X();
     y = position.Y();
     z = position.Z();
     t = position.T();
-    px = candidate->Momentum.Px();
-    py = candidate->Momentum.Py();
-    pz = candidate->Momentum.Pz();
-    pt = candidate->Momentum.Pt();
+    px = new_candidate->Momentum.Px();
+    py = new_candidate->Momentum.Py();
+    pz = new_candidate->Momentum.Pz();
+    pt = new_candidate->Momentum.Pt();
 
     // -- solve for delta: d0' = ( (x+delta)*py' - (y+delta)*px' )/pt'
 
-    candidate->InitialPosition.SetX(x + ((px * y - py * x + d0 * pt) / (py - px)));
-    candidate->InitialPosition.SetY(y + ((px * y - py * x + d0 * pt) / (py - px)));
-    x = candidate->InitialPosition.X();
-    y = candidate->InitialPosition.Y();
-    candidate->InitialPosition.SetZ(z + ((pz * (px * (x - beamSpotPosition.X()) + py * (y - beamSpotPosition.Y())) + pt * pt * (dz - z)) / (pt * pt)));
-    z = candidate->InitialPosition.Z();
+    new_candidate->InitialPosition.SetX(x + ((px * y - py * x + d0 * pt) / (py - px)));
+    new_candidate->InitialPosition.SetY(y + ((px * y - py * x + d0 * pt) / (py - px)));
+    x = new_candidate->InitialPosition.X();
+    y = new_candidate->InitialPosition.Y();
+    new_candidate->InitialPosition.SetZ(z + ((pz * (px * (x - beamSpotPosition.X()) + py * (y - beamSpotPosition.Y())) + pt * pt * (dz - z)) / (pt * pt)));
+    z = new_candidate->InitialPosition.Z();
 
-    candidate->InitialPosition.SetT(t);
+    new_candidate->InitialPosition.SetT(t);
 
     // update closest approach
     x *= 1.0E-3;
     y *= 1.0E-3;
     z *= 1.0E-3;
 
-    q = candidate->Charge;
+    q = new_candidate->Charge;
 
     r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
     phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
@@ -392,23 +385,23 @@ void TrackSmearing::Process()
     yd = (rc2 > 0.0) ? yd / rc2 : -999;
     zd = z + (TMath::Sqrt(xd * xd + yd * yd) - TMath::Sqrt(x * x + y * y)) * pz / pt;
 
-    candidate->Xd = xd * 1.0E3;
-    candidate->Yd = yd * 1.0E3;
-    candidate->Zd = zd * 1.0E3;
+    new_candidate->Xd = xd * 1.0E3;
+    new_candidate->Yd = yd * 1.0E3;
+    new_candidate->Zd = zd * 1.0E3;
 
-    if(fApplyToPileUp || !candidate->IsPU)
+    if(fApplyToPileUp || !new_candidate->IsPU)
     {
-      candidate->ErrorD0 = d0Error;
-      candidate->ErrorDZ = dzError;
-      candidate->ErrorP = pError;
-      candidate->ErrorCtgTheta = ctgThetaError;
-      candidate->ErrorPhi = phiError;
-      candidate->ErrorPT = ptError(p, ctgTheta, pError, ctgThetaError);
-      candidate->TrackResolution = pError / p;
+      new_candidate->ErrorD0 = d0Error;
+      new_candidate->ErrorDZ = dzError;
+      new_candidate->ErrorP = pError;
+      new_candidate->ErrorCtgTheta = ctgThetaError;
+      new_candidate->ErrorPhi = phiError;
+      new_candidate->ErrorPT = ptError(p, ctgTheta, pError, ctgThetaError);
+      new_candidate->TrackResolution = pError / p;
     }
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

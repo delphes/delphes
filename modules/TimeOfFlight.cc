@@ -30,7 +30,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -47,13 +46,10 @@ public:
 private:
   Int_t fVertexTimeMode;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fVertexInputArray; //!
 
-  const TObjArray *fVertexInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItVertexInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -65,11 +61,8 @@ void TimeOfFlight::Init()
 
   // import track input array
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray.reset(fInputArray->MakeIterator());
-
   // import vertex input array
   fVertexInputArray = ImportArray(GetString("VertexInputArray", "TruthVertexFinder/vertices"));
-  fItVertexInputArray.reset(fVertexInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -79,7 +72,9 @@ void TimeOfFlight::Init()
 
 void TimeOfFlight::Process()
 {
-  Candidate *candidate = nullptr, *particle = nullptr, *vertex = nullptr, *constituent = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
+  Candidate *particle = nullptr;
   Double_t ti, t_truth, tf;
   Double_t l, tof, beta;
 
@@ -88,11 +83,9 @@ void TimeOfFlight::Process()
   // first compute momenta of vertices based on reconstructed tracks
   ComputeVertexMomenta();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     const TLorentzVector &candidateInitialPosition = particle->Position;
     const TLorentzVector &candidateInitialPositionSmeared = candidate->InitialPosition;
@@ -124,13 +117,9 @@ void TimeOfFlight::Process()
     {
       // same as 2 but attempt at estimate beta from vertex mass and momentum
       beta = 1.;
-      fItVertexInputArray->Reset();
-      while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
+      for(const auto &vertex : *fVertexInputArray)
       {
-        TIter itGenParts(vertex->GetCandidates());
-        itGenParts.Reset();
-
-        while((constituent = static_cast<Candidate *>(itGenParts.Next())))
+        for(const auto &constituent : vertex->GetCandidates())
         {
           if(particle == constituent)
           {
@@ -158,17 +147,16 @@ void TimeOfFlight::Process()
     beta = l / (c_light * tof);
 
     // calculate particle mass (i.e particle ID)
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     // update time at vertex based on option
-    candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
+    new_candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
 
     // update particle mass based on TOF-based PID (commented for now, assume this calculation is done offline)
-    //candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
+    //new_candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
@@ -176,26 +164,15 @@ void TimeOfFlight::Process()
 
 void TimeOfFlight::ComputeVertexMomenta()
 {
-  Candidate *track = nullptr, *constituent = nullptr, *particle = nullptr, *vertex = nullptr;
-
-  fItVertexInputArray->Reset();
-  while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
+  for(const auto &vertex : *fVertexInputArray)
   {
-
-    TIter itGenParts(vertex->GetCandidates());
-    itGenParts.Reset();
-
-    while((constituent = static_cast<Candidate *>(itGenParts.Next())))
+    for(const auto &constituent : vertex->GetCandidates())
     {
-      fItInputArray->Reset();
-      while((track = static_cast<Candidate *>(fItInputArray->Next())))
+      for(const auto &track : *fInputArray)
       {
         // get gen part that generated track
-        particle = static_cast<Candidate *>(track->GetCandidates()->At(0));
-        if(particle == constituent)
-        {
+        if(auto *particle = static_cast<Candidate *>(track->GetCandidates().at(0)); particle == constituent)
           vertex->Momentum += track->Momentum;
-        }
 
       } // end track loop
     } // end vertex consitutent loop

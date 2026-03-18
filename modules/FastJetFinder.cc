@@ -31,7 +31,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 
 #include <algorithm>
 #include <vector>
@@ -156,12 +155,11 @@ private:
   std::vector<TEstimatorStruct> fEstimators; //!
 #endif
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
+  CandidatesCollection fInputArray; //!
 
-  TObjArray *fOutputArray{nullptr}; //!
-  TObjArray *fRhoOutputArray{nullptr}; //!
-  TObjArray *fConstituentsOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
+  CandidatesCollection fRhoOutputArray; //!
+  CandidatesCollection fConstituentsOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -360,12 +358,9 @@ void FastJetFinder::Init()
   }
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output arrays
-
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
   fConstituentsOutputArray = ExportArray(GetString("ConstituentsOutputArray", "constituents"));
@@ -387,6 +382,10 @@ void FastJetFinder::Finish()
 
 void FastJetFinder::Process()
 {
+  fOutputArray->clear();
+  fRhoOutputArray->clear();
+  fConstituentsOutputArray->clear();
+
   Candidate *candidate = nullptr, *constituent = nullptr;
   TLorentzVector momentum;
 
@@ -413,9 +412,8 @@ void FastJetFinder::Process()
   inputList.clear();
 
   // loop over input objects
-  fItInputArray->Reset();
   number = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
@@ -446,7 +444,7 @@ void FastJetFinder::Process()
       candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
       candidate->Edges[0] = itEstimators->etaMin;
       candidate->Edges[1] = itEstimators->etaMax;
-      fRhoOutputArray->Add(candidate);
+      fRhoOutputArray->emplace_back(candidate);
     }
   }
 
@@ -516,7 +514,7 @@ void FastJetFinder::Process()
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       if(itInputList->user_index() < 0) continue;
-      constituent = static_cast<Candidate *>(fInputArray->At(itInputList->user_index()));
+      constituent = static_cast<Candidate *>(fInputArray->at(itInputList->user_index()));
 
       deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
@@ -539,7 +537,7 @@ void FastJetFinder::Process()
 
       charge += constituent->Charge;
 
-      fConstituentsOutputArray->Add(constituent);
+      fConstituentsOutputArray->emplace_back(constituent);
       candidate->AddCandidate(constituent);
     }
 
@@ -663,7 +661,7 @@ void FastJetFinder::Process()
       candidate->Tau[4] = nSub5(*itOutputList);
     }
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
   delete sequence;
 }

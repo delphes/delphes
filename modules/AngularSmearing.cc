@@ -39,7 +39,6 @@
 #include "TFormula.h"
 #include "TLorentzVector.h"
 #include "TMath.h"
-#include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
 
@@ -61,10 +60,8 @@ private:
   const std::unique_ptr<DelphesFormula> fFormulaEta; //!
   const std::unique_ptr<DelphesFormula> fFormulaPhi; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray;
+  CandidatesCollection fOutputArray;
 };
 
 //------------------------------------------------------------------------------
@@ -72,17 +69,13 @@ private:
 void AngularSmearing::Init()
 {
   // read resolution formula
-
   fFormulaEta->Compile(GetString("EtaResolutionFormula", "0.0"));
   fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
 
@@ -90,11 +83,10 @@ void AngularSmearing::Init()
 
 void AngularSmearing::Process()
 {
-  Candidate *candidate, *mother;
+  fOutputArray->clear();
   Double_t pt, eta, phi, e, m;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidateMomentum.Eta();
@@ -109,12 +101,11 @@ void AngularSmearing::Process()
 
     if(pt <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-    candidate->AddCandidate(mother);
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

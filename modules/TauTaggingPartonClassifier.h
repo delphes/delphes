@@ -27,22 +27,22 @@
  *
  */
 
-#include "ExRootAnalysis/ExRootClassifier.h"
+#include "classes/DelphesClasses.h"
 
-class TObjArray;
+#include "ExRootAnalysis/ExRootClassifier.h"
 
 //------------------------------------------------------------------------------
 
 class TauTaggingPartonClassifier: public ExRootClassifier
 {
 public:
-  TauTaggingPartonClassifier(const TObjArray *array);
+  TauTaggingPartonClassifier(const CandidatesCollection &array);
 
   Int_t GetCategory(TObject *object);
 
   Double_t fEtaMax, fPTMin;
 
-  const TObjArray *fParticleInputArray{nullptr};
+  const CandidatesCollection &fParticleInputArray;
 };
 
 #endif

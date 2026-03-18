@@ -31,7 +31,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -47,10 +46,8 @@ public:
 private:
   const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -62,7 +59,6 @@ void CscClusterEfficiency::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -72,11 +68,11 @@ void CscClusterEfficiency::Init()
 
 void CscClusterEfficiency::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   Double_t Ehad, Eem, decayR, decayZ;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
     decayZ = abs(candidateDecayPosition.Z());
@@ -86,7 +82,7 @@ void CscClusterEfficiency::Process()
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(decayR, decayZ, Ehad, Eem)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

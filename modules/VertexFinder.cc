@@ -11,13 +11,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TVector3.h"
-#include <TObjArray.h>
-
 using namespace std;
 
 class VertexFinder: public DelphesModule
@@ -42,11 +35,10 @@ private:
   Int_t fMinNDF;
   Int_t fGrowSeeds;
 
-  TObjArray *fInputArray{nullptr};
-  std::unique_ptr<TIterator> fItInputArray;
+  CandidatesCollection fInputArray;
 
-  TObjArray *fOutputArray{nullptr};
-  TObjArray *fVertexOutputArray{nullptr};
+  CandidatesCollection fOutputArray;
+  CandidatesCollection fVertexOutputArray;
 
   std::map<UInt_t, std::map<std::string, Double_t> > trackIDToDouble;
   std::map<UInt_t, std::map<std::string, Int_t> > trackIDToInt;
@@ -71,7 +63,6 @@ void VertexFinder::Init()
   fGrowSeeds = GetInt("GrowSeeds", 1);
 
   fInputArray = ImportArray(GetString("InputArray", "TrackSmearing/tracks"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
@@ -88,6 +79,9 @@ static Bool_t secondDescending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double
 
 void VertexFinder::Process()
 {
+  fOutputArray->clear();
+  fVertexOutputArray->clear();
+
   Candidate *candidate = nullptr;
 
   // Clear the track and cluster maps before starting
@@ -134,13 +128,12 @@ void VertexFinder::Process()
   }
 
   // Add tracks to the output array after updating their ClusterIndex.
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     if(candidate->Momentum.Pt() < fMinPT || fabs(candidate->Momentum.Eta()) > fMaxEta)
       continue;
     candidate->ClusterIndex = trackIDToInt.at(candidate->GetUniqueID()).at("clusterIndex");
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 
   // Add clusters with at least MinNDF tracks to the output array in order of
@@ -167,7 +160,7 @@ void VertexFinder::Process()
     candidate->Position.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("z"), 0.0);
     candidate->PositionError.SetXYZT(0.0, 0.0, clusterIDToDouble.at(cluster->first).at("ez"), 0.0);
 
-    fVertexOutputArray->Add(candidate);
+    fVertexOutputArray->emplace_back(candidate);
   }
 }
 
@@ -175,12 +168,10 @@ void VertexFinder::Process()
 
 void VertexFinder::createSeeds()
 {
-  Candidate *candidate = nullptr;
   UInt_t clusterIndex = 0, maxSeeds = 0;
 
   // Loop over all tracks, initializing some variables.
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     if(candidate->Momentum.Pt() < fMinPT || fabs(candidate->Momentum.Eta()) > fMaxEta)
       continue;

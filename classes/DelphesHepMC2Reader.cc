@@ -37,7 +37,6 @@
 
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
-#include "TObjArray.h"
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
 
@@ -105,9 +104,9 @@ bool DelphesHepMC2Reader::EventReady()
 //---------------------------------------------------------------------------
 
 bool DelphesHepMC2Reader::ReadBlock(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  CandidatesCollection &allParticleOutputArray,
+  CandidatesCollection &stableParticleOutputArray,
+  CandidatesCollection &partonOutputArray)
 {
   map<int, pair<int, int> >::iterator itMotherMap;
   map<int, pair<int, int> >::iterator itDaughterMap;
@@ -368,9 +367,9 @@ void DelphesHepMC2Reader::AnalyzeWeight(ExRootTreeBranch *branch)
 //---------------------------------------------------------------------------
 
 void DelphesHepMC2Reader::AnalyzeParticle(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  CandidatesCollection &allParticleOutputArray,
+  CandidatesCollection &stableParticleOutputArray,
+  CandidatesCollection &partonOutputArray)
 {
   Candidate *candidate;
   TParticlePDG *pdgParticle;
@@ -418,33 +417,32 @@ void DelphesHepMC2Reader::AnalyzeParticle(DelphesFactory *factory,
     candidate->D1 = 1;
   }
 
-  allParticleOutputArray->Add(candidate);
+  allParticleOutputArray->emplace_back(candidate);
 
   if(!pdgParticle) return;
 
   if(fStatus == 1)
   {
-    stableParticleOutputArray->Add(candidate);
+    stableParticleOutputArray->emplace_back(candidate);
   }
   else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
   {
-    partonOutputArray->Add(candidate);
+    partonOutputArray->emplace_back(candidate);
   }
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC2Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
+void DelphesHepMC2Reader::FinalizeParticles(const CandidatesCollection &allParticleOutputArray)
 {
   Candidate *candidate;
   Candidate *candidateDaughter;
   map<int, pair<int, int> >::iterator itMotherMap;
   map<int, pair<int, int> >::iterator itDaughterMap;
-  int i;
 
-  for(i = 0; i < allParticleOutputArray->GetEntriesFast(); ++i)
+  for(size_t i = 0; i < allParticleOutputArray->size(); ++i)
   {
-    candidate = static_cast<Candidate *>(allParticleOutputArray->At(i));
+    candidate = static_cast<Candidate *>(allParticleOutputArray->at(i));
 
     if(candidate->M1 > 0)
     {
@@ -484,7 +482,7 @@ void DelphesHepMC2Reader::FinalizeParticles(TObjArray *allParticleOutputArray)
       {
         candidate->D1 = itDaughterMap->second.first;
         candidate->D2 = itDaughterMap->second.second;
-        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->At(candidate->D1));
+        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->at(candidate->D1));
         const TLorentzVector &decayPosition = candidateDaughter->Position;
         candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }

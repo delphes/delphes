@@ -37,7 +37,6 @@
 
 #include <TDatabasePDG.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TParticlePDG.h>
 #include <TRandom3.h>
 
@@ -52,19 +51,16 @@ public:
   void Process() override;
 
 private:
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
 
 void DecayFilter::Init()
 {
-  // import input arrays
+  // import input array
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -74,27 +70,27 @@ void DecayFilter::Init()
 
 void DecayFilter::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
   const Double_t c = TMath::C(); // [m/s]
   Double_t m, t, p, bgct, L, l;
 
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     // get particle information from PDG
     TParticlePDG *pdg = pdgdb->GetParticle(candidate->PID);
     if(!pdg)
     { // don't know this particle
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
       continue;
     }
     m = pdg->Mass();
     t = pdg->Lifetime(); // [s]
     if(t == 0.)
     { // does not decay
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
       continue;
     }
 
@@ -110,7 +106,7 @@ void DecayFilter::Process()
     if(l < L) continue;
 
     // else particle did not decay within the trajectory
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

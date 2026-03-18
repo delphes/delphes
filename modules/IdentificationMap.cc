@@ -31,7 +31,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -50,10 +49,8 @@ private:
 
   TMisIDMap fEfficiencyMap; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -88,12 +85,9 @@ void IdentificationMap::Init()
   }
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
 
@@ -108,7 +102,8 @@ void IdentificationMap::Finish()
 
 void IdentificationMap::Process()
 {
-  Candidate *candidate;
+  fOutputArray->clear();
+
   Double_t pt, eta, phi, e;
   TMisIDMap::iterator itEfficiencyMap;
   pair<TMisIDMap::iterator, TMisIDMap::iterator> range;
@@ -116,8 +111,7 @@ void IdentificationMap::Process()
 
   Double_t p, r, total;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -152,9 +146,9 @@ void IdentificationMap::Process()
       if(total <= r && r < total + p)
       {
         // change PID of particle
-        candidate = static_cast<Candidate *>(candidate->Clone());
-        if(pdgCodeOut != 0) candidate->PID = charge * pdgCodeOut;
-        fOutputArray->Add(candidate);
+        auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+        if(pdgCodeOut != 0) new_candidate->PID = charge * pdgCodeOut;
+        fOutputArray->emplace_back(new_candidate);
         break;
       }
 

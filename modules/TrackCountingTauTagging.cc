@@ -13,16 +13,15 @@
  */
 
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFilter.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -32,13 +31,13 @@ using namespace std;
 class TrackCountingTauTaggingPartonClassifier: public ExRootClassifier
 {
 public:
-  explicit TrackCountingTauTaggingPartonClassifier(const TObjArray *array) : fParticleInputArray(array) {}
+  explicit TrackCountingTauTaggingPartonClassifier(const CandidatesCollection &array) : fParticleInputArray(array) {}
 
   Int_t GetCategory(TObject *object);
 
   Double_t fEtaMax, fPTMin;
 
-  const TObjArray *fParticleInputArray;
+  const CandidatesCollection &fParticleInputArray;
 };
 
 //------------------------------------------------------------------------------
@@ -62,16 +61,12 @@ private:
   std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
 
   std::unique_ptr<TrackCountingTauTaggingPartonClassifier> fClassifier; //!
-  std::unique_ptr<ExRootFilter> fFilter;
+  std::unique_ptr<DelphesFilter> fFilter;
 
-  std::unique_ptr<TIterator> fItPartonInputArray; //!
-  std::unique_ptr<TIterator> fItTrackInputArray; //!
-  std::unique_ptr<TIterator> fItJetInputArray; //!
-
-  const TObjArray *fParticleInputArray{nullptr}; //!
-  const TObjArray *fTrackInputArray{nullptr}; //!
-  const TObjArray *fPartonInputArray{nullptr}; //!
-  const TObjArray *fJetInputArray{nullptr}; //!
+  CandidatesCollection fParticleInputArray; //!
+  CandidatesCollection fTrackInputArray; //!
+  CandidatesCollection fPartonInputArray; //!
+  CandidatesCollection fJetInputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -79,8 +74,6 @@ private:
 Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 {
   Candidate *tau = static_cast<Candidate *>(object);
-  Candidate *daughter1 = 0;
-  Candidate *daughter2 = 0;
 
   const TLorentzVector &momentum = tau->Momentum;
   Int_t pdgCode, i, j;
@@ -94,14 +87,14 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 
   if(tau->D2 < tau->D1) return -1;
 
-  if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+  if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
   {
     throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
   }
 
   for(i = tau->D1; i <= tau->D2; ++i)
   {
-    daughter1 = static_cast<Candidate *>(fParticleInputArray->At(i));
+    auto *daughter1 = static_cast<Candidate *>(fParticleInputArray->at(i));
     pdgCode = TMath::Abs(daughter1->PID);
     if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
       return -1;
@@ -110,7 +103,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
       if(daughter1->D1 < 0) return -1;
       for(j = daughter1->D1; j <= daughter1->D2; ++j)
       {
-        daughter2 = static_cast<Candidate *>(fParticleInputArray->At(j));
+        auto *daughter2 = static_cast<Candidate *>(fParticleInputArray->at(j));
         pdgCode = TMath::Abs(daughter2->PID);
         if(pdgCode == 11 || pdgCode == 13) return -1;
       }
@@ -158,23 +151,16 @@ void TrackCountingTauTagging::Init()
   }
 
   // import input array(s)
-
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
+  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
+  fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMerger/tracks"));
+  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
 
   fClassifier = std::make_unique<TrackCountingTauTaggingPartonClassifier>(fParticleInputArray);
   fClassifier->fPTMin = GetDouble("TauPTMin", 1.0);
   fClassifier->fEtaMax = GetDouble("TauEtaMax", 2.5);
 
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray.reset(fPartonInputArray->MakeIterator());
-
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMerger/tracks"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
-
-  fFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray.reset(fJetInputArray->MakeIterator());
+  fFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
 }
 
 //------------------------------------------------------------------------------
@@ -188,24 +174,17 @@ void TrackCountingTauTagging::Finish()
 
 void TrackCountingTauTagging::Process()
 {
-  Candidate *jet = nullptr, *tau = nullptr, *track = nullptr, *daughter = nullptr;
   TLorentzVector tauMomentum;
   Double_t pt, eta, phi, e;
-  TObjArray *tauArray = nullptr;
   map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
   Int_t charge, i, identifier;
 
   // select taus
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
-
-  if(tauArray == 0) return;
-
-  TIter itTauArray(tauArray);
+  CandidatesCollection tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(const auto &jet : *fJetInputArray)
   {
     identifier = 0;
     const TLorentzVector &jetMomentum = jet->Momentum;
@@ -216,8 +195,7 @@ void TrackCountingTauTagging::Process()
     e = jetMomentum.E();
 
     // loop over all input tracks
-    fItTrackInputArray->Reset();
-    while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+    for(const auto &track : *fTrackInputArray)
     {
       if((track->Momentum).Pt() < fTrackPTMin) continue;
       if(jetMomentum.DeltaR(track->Momentum) <= fDeltaRTrack)
@@ -228,13 +206,12 @@ void TrackCountingTauTagging::Process()
     }
 
     // loop over all input taus
-    itTauArray.Reset();
     bool matchedTau = false;
-    while((tau = static_cast<Candidate *>(itTauArray.Next())))
+    for(const auto &tau : *tauArray)
     {
       if(tau->D1 < 0) continue;
 
-      if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+      if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
       {
         throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
       }
@@ -243,7 +220,7 @@ void TrackCountingTauTagging::Process()
 
       for(i = tau->D1; i <= tau->D2; ++i)
       {
-        daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
+        auto *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
         if(TMath::Abs(daughter->PID) == 16) continue;
         tauMomentum += daughter->Momentum;
       }

@@ -31,7 +31,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -46,11 +45,8 @@ public:
 private:
   Double_t fResolution; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fVertexOutputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItOutputArray; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fVertexOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -58,35 +54,31 @@ private:
 void TruthVertexFinder::Init()
 {
   fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
+
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
-  // create output arrays
+  // create output array
   fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-  //fItOutputArray.reset(fVertexOutputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
 void TruthVertexFinder::Process()
 {
+  fVertexOutputArray->clear();
+
   Int_t nvtx = -1;
   Float_t pt;
-  Candidate *candidate = nullptr, *vertex = nullptr;
   DelphesFactory *factory = nullptr;
 
-  fItInputArray->Reset();
-
   factory = GetFactory();
-  vertex = factory->NewCandidate();
 
   TLorentzVector vertexPosition(0., 0., 0., 0.);
 
   nvtx = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
@@ -94,9 +86,7 @@ void TruthVertexFinder::Process()
 
     // check whether vertex already included, if so add particle
     Bool_t old_vertex = false;
-    fItOutputArray.reset(fVertexOutputArray->MakeIterator());
-    fItOutputArray->Reset();
-    while((vertex = static_cast<Candidate *>(fItOutputArray->Next())))
+    for(auto &vertex : *fVertexOutputArray)
     {
       const TLorentzVector &vertexPosition = vertex->Position;
       // check whether spatial difference is < 1 um, in that case assume it is the same vertex
@@ -115,7 +105,7 @@ void TruthVertexFinder::Process()
     // else fill new vertex
     if(!old_vertex)
     {
-      vertex = factory->NewCandidate();
+      auto *vertex = factory->NewCandidate();
       vertex->Position = candidatePosition;
       vertex->ClusterIndex = nvtx;
 
@@ -129,7 +119,7 @@ void TruthVertexFinder::Process()
         vertex->ClusterNDF = 0;
         vertex->GenSumPT2 = 0.;
       }
-      fVertexOutputArray->Add(vertex);
+      fVertexOutputArray->emplace_back(vertex);
       nvtx++;
     }
   }

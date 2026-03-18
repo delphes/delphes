@@ -10,8 +10,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include "TObjArray.h"
-
 class BeamSpotFilter: public DelphesModule
 {
 public:
@@ -21,10 +19,8 @@ public:
   void Process() override;
 
 private:
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -33,7 +29,6 @@ void BeamSpotFilter::Init()
 {
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
@@ -43,14 +38,13 @@ void BeamSpotFilter::Init()
 
 void BeamSpotFilter::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
   Bool_t passed = false;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())) && !passed)
+  for(const auto &candidate : *fInputArray)
   {
+    if(passed) break;
     if(candidate->IsPU == 0) passed = true;
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

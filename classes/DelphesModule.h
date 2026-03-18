@@ -34,6 +34,8 @@ class TObject;
 class TFolder;
 class TClonesArray;
 
+class Candidate;
+
 class ExRootResult;
 class ExRootTreeBranch;
 class ExRootTreeWriter;
@@ -50,8 +52,8 @@ public:
   virtual void Process();
   virtual void Finish();
 
-  TObjArray *ImportArray(const char *name);
-  TObjArray *ExportArray(const char *name);
+  std::shared_ptr<std::vector<Candidate *> > &ImportArray(const char *name);
+  std::shared_ptr<std::vector<Candidate *> > &ExportArray(const char *name);
 
   ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
   void AddInfo(const char *name, Double_t value);

@@ -32,7 +32,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -52,13 +51,12 @@ private:
   TFakeMap fEfficiencyMap;
 #endif
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
+  CandidatesCollection fInputArray; //!
 
-  TObjArray *fElectronOutputArray{nullptr}; //!
-  TObjArray *fMuonOutputArray{nullptr}; //!
-  TObjArray *fPhotonOutputArray{nullptr}; //!
-  TObjArray *fJetOutputArray{nullptr}; //!
+  CandidatesCollection fElectronOutputArray; //!
+  CandidatesCollection fMuonOutputArray; //!
+  CandidatesCollection fPhotonOutputArray; //!
+  CandidatesCollection fJetOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -100,12 +98,9 @@ void JetFakeParticle::Init()
   }
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
-  // create output array
-
+  // create output arrays
   fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "fakeElectrons"));
   fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "fakeMuons"));
   fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "fakePhotons"));
@@ -123,15 +118,18 @@ void JetFakeParticle::Finish()
 
 void JetFakeParticle::Process()
 {
-  Candidate *candidate = nullptr, *fake = nullptr;
+  fElectronOutputArray->clear();
+  fMuonOutputArray->clear();
+  fPhotonOutputArray->clear();
+  fJetOutputArray->clear();
+
   Double_t pt, eta, phi, e;
   TFakeMap::iterator itEfficiencyMap;
   Int_t pdgCodeOut;
 
   Double_t p, r, rs, total;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidateMomentum.Eta();
@@ -141,7 +139,7 @@ void JetFakeParticle::Process()
 
     r = gRandom->Uniform();
     total = 0.0;
-    fake = 0;
+    Candidate *fake = nullptr;
 
     // loop over map for this jet
     for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
@@ -172,9 +170,9 @@ void JetFakeParticle::Process()
 
         if(TMath::Abs(pdgCodeOut) == 22) fake->PID = 22;
 
-        if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->Add(fake);
-        if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->Add(fake);
-        if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->Add(fake);
+        if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->emplace_back(fake);
+        if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->emplace_back(fake);
+        if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->emplace_back(fake);
 
         break;
       }
@@ -182,7 +180,7 @@ void JetFakeParticle::Process()
       total += p;
     }
 
-    if(!fake) fJetOutputArray->Add(candidate);
+    if(!fake) fJetOutputArray->emplace_back(candidate);
   }
 }
 

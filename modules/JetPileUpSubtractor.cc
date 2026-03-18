@@ -29,7 +29,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -44,13 +43,10 @@ public:
 private:
   Double_t fJetPTMin;
 
-  const TObjArray *fJetInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItJetInputArray; //!
+  CandidatesCollection fJetInputArray; //!
+  CandidatesCollection fRhoInputArray; //!
 
-  const TObjArray *fRhoInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItRhoInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -61,10 +57,7 @@ void JetPileUpSubtractor::Init()
 
   // import input arrays
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray.reset(fJetInputArray->MakeIterator());
-
   fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
-  fItRhoInputArray.reset(fRhoInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
@@ -74,14 +67,14 @@ void JetPileUpSubtractor::Init()
 
 void JetPileUpSubtractor::Process()
 {
-  Candidate *candidate = nullptr, *object = nullptr;
+  fOutputArray->clear();
+
   TLorentzVector momentum, area;
   Double_t eta = 0.0;
   Double_t rho = 0.0;
 
   // loop over all input candidates
-  fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(const auto &candidate : *fJetInputArray)
   {
     momentum = candidate->Momentum;
     area = candidate->Area;
@@ -89,15 +82,11 @@ void JetPileUpSubtractor::Process()
 
     // find rho
     rho = 0.0;
-    if(fRhoInputArray)
+    for(const auto &object : *fRhoInputArray)
     {
-      fItRhoInputArray->Reset();
-      while((object = static_cast<Candidate *>(fItRhoInputArray->Next())))
+      if(eta >= object->Edges[0] && eta < object->Edges[1])
       {
-        if(eta >= object->Edges[0] && eta < object->Edges[1])
-        {
-          rho = object->Momentum.Pt();
-        }
+        rho = object->Momentum.Pt();
       }
     }
 
@@ -108,10 +97,10 @@ void JetPileUpSubtractor::Process()
 
     if(momentum.Pt() <= fJetPTMin) continue;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Momentum = momentum;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

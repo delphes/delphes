@@ -30,7 +30,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include "Hector/H_BeamLine.h"
@@ -57,10 +56,8 @@ private:
 
   std::unique_ptr<H_BeamLine> fBeamLine;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -87,7 +84,6 @@ void Hector::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "hits"));
@@ -97,15 +93,15 @@ void Hector::Init()
 
 void Hector::Process()
 {
-  Candidate *candidate = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
   Double_t pz;
   Double_t x, y, z, tx, ty, theta;
   Double_t distance, time;
 
   const Double_t c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -142,13 +138,12 @@ void Hector::Process()
 
     particle.propagate(fDistance);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
-    candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
-    candidate->AddCandidate(mother);
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
+    new_candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

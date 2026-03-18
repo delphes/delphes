@@ -31,7 +31,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include <deque>
@@ -55,10 +54,8 @@ private:
 
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -66,7 +63,6 @@ private:
 void ExampleModule::Init()
 {
   // read parameters
-
   fIntParam = GetInt("IntParam", 10);
   fDoubleParam = GetDouble("DoubleParam", 1.0);
   fFormula->Compile(GetString("EfficiencyFormula", "0.4"));
@@ -82,12 +78,9 @@ void ExampleModule::Init()
   }
 
   // import input array(s)
-
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array(s)
-
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
 }
 
@@ -95,21 +88,19 @@ void ExampleModule::Init()
 
 void ExampleModule::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   TLorentzVector candidatePosition, candidateMomentum;
 
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     candidatePosition = candidate->Position;
     candidateMomentum = candidate->Momentum;
 
     // apply an efficency formula
     if(gRandom->Uniform() <= fFormula->Eval(candidateMomentum.Pt(), candidatePosition.Eta()))
-    {
-      fOutputArray->Add(candidate);
-    }
+      fOutputArray->emplace_back(candidate);
   }
 }
 

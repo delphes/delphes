@@ -25,25 +25,44 @@
  */
 
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFilter.h"
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// https://cmssdt.cern.ch/SDT/lxr/source/PhysicsTools/JetMCAlgos/plugins/PartonSelector.cc
 class PartonClassifier: public ExRootClassifier
 {
 public:
   PartonClassifier() {}
-  Int_t GetCategory(TObject *object);
+  Int_t GetCategory(TObject *object)
+  {
+    // select parton in the parton list
+
+    Candidate *parton = static_cast<Candidate *>(object);
+    const TLorentzVector &momentum = parton->Momentum;
+    Int_t pdgCode;
+
+    // inside the eta && momentum range (be a little bit larger that the tracking coverage
+    if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
+
+    pdgCode = TMath::Abs(parton->PID);
+
+    if(parton->Status == -1) return -1;
+    if(pdgCode != 21 && pdgCode > 5) return -1; // not a parton, skip
+    if(parton->Status == 3 || parton->Status == 2) return 0; // if status 3 return
+
+    return 0;
+  }
   Double_t fEtaMax, fPTMin;
 };
 
@@ -53,7 +72,24 @@ class ParticleLHEFClassifier: public ExRootClassifier
 {
 public:
   ParticleLHEFClassifier() {}
-  Int_t GetCategory(TObject *object);
+  Int_t GetCategory(TObject *object)
+  {
+    // select parton in the parton list
+
+    Candidate *particleLHEF = static_cast<Candidate *>(object);
+    const TLorentzVector &momentum = particleLHEF->Momentum;
+    Int_t pdgCode;
+
+    // inside the eta && momentum range (be a little bit larger that the tracking coverage
+    if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
+
+    pdgCode = TMath::Abs(particleLHEF->PID);
+    if(particleLHEF->Status == -1) return -1;
+    if(pdgCode != 21 && pdgCode > 5) return -1; // not a parton, skip
+    if(particleLHEF->Status != 1) return -1; // if status 3 return
+
+    return 0;
+  }
   Double_t fEtaMax, fPTMin;
 };
 
@@ -69,8 +105,8 @@ public:
   void Init() override;
   void Process() override;
 
-  void GetAlgoFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
-  void GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray);
+  void GetAlgoFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray);
+  void GetPhysicsFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray);
 
 private:
   Double_t fDeltaR;
@@ -78,63 +114,14 @@ private:
   const std::unique_ptr<PartonClassifier> fPartonClassifier; //!
   const std::unique_ptr<ParticleLHEFClassifier> fParticleLHEFClassifier; //!
 
-  std::unique_ptr<ExRootFilter> fPartonFilter;
-  std::unique_ptr<ExRootFilter> fParticleLHEFFilter;
+  std::unique_ptr<DelphesFilter> fPartonFilter;
+  std::unique_ptr<DelphesFilter> fParticleLHEFFilter;
 
-  std::unique_ptr<TIterator> fItPartonInputArray; //!
-  std::unique_ptr<TIterator> fItParticleInputArray; //!
-  std::unique_ptr<TIterator> fItParticleLHEFInputArray; //!
-  std::unique_ptr<TIterator> fItJetInputArray; //!
-
-  const TObjArray *fPartonInputArray{nullptr}; //!
-  const TObjArray *fParticleInputArray{nullptr}; //!
-  const TObjArray *fParticleLHEFInputArray{nullptr}; //!
-  const TObjArray *fJetInputArray{nullptr}; //!
+  CandidatesCollection fPartonInputArray; //!
+  CandidatesCollection fParticleInputArray; //!
+  CandidatesCollection fParticleLHEFInputArray; //!
+  CandidatesCollection fJetInputArray; //!
 };
-
-//------------------------------------------------------------------------------
-// https://cmssdt.cern.ch/SDT/lxr/source/PhysicsTools/JetMCAlgos/plugins/PartonSelector.cc
-
-Int_t PartonClassifier::GetCategory(TObject *object)
-{
-  // select parton in the parton list
-
-  Candidate *parton = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = parton->Momentum;
-  Int_t pdgCode;
-
-  // inside the eta && momentum range (be a little bit larger that the tracking coverage
-  if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
-
-  pdgCode = TMath::Abs(parton->PID);
-
-  if(parton->Status == -1) return -1;
-  if(pdgCode != 21 && pdgCode > 5) return -1; // not a parton, skip
-  if(parton->Status == 3 || parton->Status == 2) return 0; // if status 3 return
-
-  return 0;
-}
-
-//------------------------------------------------------------------------------
-
-Int_t ParticleLHEFClassifier::GetCategory(TObject *object)
-{
-  // select parton in the parton list
-
-  Candidate *particleLHEF = static_cast<Candidate *>(object);
-  const TLorentzVector &momentum = particleLHEF->Momentum;
-  Int_t pdgCode;
-
-  // inside the eta && momentum range (be a little bit larger that the tracking coverage
-  if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
-
-  pdgCode = TMath::Abs(particleLHEF->PID);
-  if(particleLHEF->Status == -1) return -1;
-  if(pdgCode != 21 && pdgCode > 5) return -1; // not a parton, skip
-  if(particleLHEF->Status != 1) return -1; // if status 3 return
-
-  return 0;
-}
 
 //------------------------------------------------------------------------------
 
@@ -152,44 +139,32 @@ void JetFlavorAssociation::Init()
 
   // import input array(s)
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray.reset(fPartonInputArray->MakeIterator());
-  fPartonFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
+  fPartonFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
 
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
-  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   try
   {
     fParticleLHEFInputArray = ImportArray(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"));
+    fParticleLHEFFilter = std::make_unique<DelphesFilter>(fParticleLHEFInputArray);
   }
-  catch(runtime_error &e)
+  catch(runtime_error &)
   {
-    fParticleLHEFInputArray = 0;
-  }
-
-  if(fParticleLHEFInputArray)
-  {
-    fItParticleLHEFInputArray.reset(fParticleLHEFInputArray->MakeIterator());
-    fParticleLHEFFilter = std::make_unique<ExRootFilter>(fParticleLHEFInputArray);
   }
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
 void JetFlavorAssociation::Process()
 {
-
-  Candidate *jet;
-  TObjArray *partonArray = 0;
-  TObjArray *partonLHEFArray = 0;
+  CandidatesCollection partonArray, partonLHEFArray;
 
   // select quark and gluons
   fPartonFilter->Reset();
   partonArray = fPartonFilter->GetSubArray(fPartonClassifier.get(), 0); // get the filtered parton array
-  if(partonArray == 0) return;
+  if(!partonArray || partonArray->empty()) return;
 
   if(fParticleLHEFInputArray)
   {
@@ -197,8 +172,7 @@ void JetFlavorAssociation::Process()
     partonLHEFArray = fParticleLHEFFilter->GetSubArray(fParticleLHEFClassifier.get(), 0); // get the filtered parton array
   }
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(const auto &jet : *fJetInputArray)
   {
     // get standard flavor
     GetAlgoFlavor(jet, partonArray, partonLHEFArray);
@@ -210,19 +184,14 @@ void JetFlavorAssociation::Process()
 // Standard definition of jet flavor in
 // https://cmssdt.cern.ch/SDT/lxr/source/PhysicsTools/JetMCAlgos/plugins/JetPartonMatcher.cc?v=CMSSW_7_3_0_pre1
 
-void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray)
+void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray)
 {
   float maxPt = 0;
   int daughterCounter = 0;
-  Candidate *parton, *partonLHEF;
   Candidate *tempParton = 0, *tempPartonHighestPt = 0;
   int pdgCode, pdgCodeMax = -1;
 
-  TIter itPartonArray(partonArray);
-  TIter itPartonLHEFArray(partonLHEFArray);
-
-  itPartonArray.Reset();
-  while((parton = static_cast<Candidate *>(itPartonArray.Next())))
+  for(const auto &parton : *partonArray)
   {
     // default delphes method
     pdgCode = TMath::Abs(parton->PID);
@@ -232,41 +201,39 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray,
       if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
     }
 
-    if(!fParticleLHEFInputArray) continue;
-
-    itPartonLHEFArray.Reset();
-    while((partonLHEF = static_cast<Candidate *>(itPartonLHEFArray.Next())))
-    {
-      if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
+    if(partonLHEFArray)
+      for(const auto &partonLHEF : *partonLHEFArray)
       {
-        break;
-      }
-
-      // check the daughter
-      daughterCounter = 0;
-      if(parton->D1 != -1 || parton->D2 != -1)
-      {
-        // partons are only quarks || gluons
-        int daughterFlavor1 = -1;
-        int daughterFlavor2 = -1;
-        if(parton->D1 != -1) daughterFlavor1 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->At(parton->D1))->PID);
-        if(parton->D2 != -1) daughterFlavor2 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->At(parton->D2))->PID);
-        if((daughterFlavor1 == 1 || daughterFlavor1 == 2 || daughterFlavor1 == 3 || daughterFlavor1 == 4 || daughterFlavor1 == 5 || daughterFlavor1 == 21)) daughterCounter++;
-        if((daughterFlavor2 == 1 || daughterFlavor2 == 2 || daughterFlavor2 == 3 || daughterFlavor2 == 4 || daughterFlavor2 == 5 || daughterFlavor2 == 21)) daughterCounter++;
-      }
-      if(daughterCounter > 0) continue;
-      if(jet->Momentum.DeltaR(parton->Momentum) <= fDeltaR)
-      {
-        // if not yet found && pdgId is a c, take as c
-        if(TMath::Abs(parton->PID) == 4) tempParton = parton;
-        if(TMath::Abs(parton->PID) == 5) tempParton = parton;
-        if(parton->Momentum.Pt() > maxPt)
+        if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
         {
-          maxPt = parton->Momentum.Pt();
-          tempPartonHighestPt = parton;
+          break;
+        }
+
+        // check the daughter
+        daughterCounter = 0;
+        if(parton->D1 != -1 || parton->D2 != -1)
+        {
+          // partons are only quarks || gluons
+          int daughterFlavor1 = -1;
+          int daughterFlavor2 = -1;
+          if(parton->D1 != -1) daughterFlavor1 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->at(parton->D1))->PID);
+          if(parton->D2 != -1) daughterFlavor2 = TMath::Abs(static_cast<Candidate *>(fParticleInputArray->at(parton->D2))->PID);
+          if((daughterFlavor1 == 1 || daughterFlavor1 == 2 || daughterFlavor1 == 3 || daughterFlavor1 == 4 || daughterFlavor1 == 5 || daughterFlavor1 == 21)) daughterCounter++;
+          if((daughterFlavor2 == 1 || daughterFlavor2 == 2 || daughterFlavor2 == 3 || daughterFlavor2 == 4 || daughterFlavor2 == 5 || daughterFlavor2 == 21)) daughterCounter++;
+        }
+        if(daughterCounter > 0) continue;
+        if(jet->Momentum.DeltaR(parton->Momentum) <= fDeltaR)
+        {
+          // if not yet found && pdgId is a c, take as c
+          if(TMath::Abs(parton->PID) == 4) tempParton = parton;
+          if(TMath::Abs(parton->PID) == 5) tempParton = parton;
+          if(parton->Momentum.Pt() > maxPt)
+          {
+            maxPt = parton->Momentum.Pt();
+            tempPartonHighestPt = parton;
+          }
         }
       }
-    }
   }
 
   if(!tempParton) tempParton = tempPartonHighestPt;
@@ -280,7 +247,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, TObjArray *partonArray,
 
 //------------------------------------------------------------------------------
 
-void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArray, TObjArray *partonLHEFArray)
+void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray)
 {
   int partonCounter = 0;
   float biggerConeSize = 0.7;
@@ -288,18 +255,12 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArr
   bool isGoodCandidate;
   int contaminatingFlavor = 0;
   int motherCounter = 0;
-  Candidate *parton, *partonLHEF, *mother1, *mother2;
-  Candidate *tempParton = 0;
+  Candidate *tempParton = nullptr;
   vector<Candidate *> contaminations;
-  vector<Candidate *>::iterator itContaminations;
-
-  TIter itPartonArray(partonArray);
-  TIter itPartonLHEFArray(partonLHEFArray);
 
   contaminations.clear();
 
-  itPartonLHEFArray.Reset();
-  while((partonLHEF = static_cast<Candidate *>(itPartonLHEFArray.Next())))
+  for(const auto &partonLHEF : *partonLHEFArray)
   {
     dist = jet->Momentum.DeltaR(partonLHEF->Momentum); // take the DR
 
@@ -310,13 +271,11 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArr
     }
   }
 
-  itPartonArray.Reset();
-  itPartonLHEFArray.Reset();
-  while((parton = static_cast<Candidate *>(itPartonArray.Next())))
+  for(const auto &parton : *partonArray)
   {
     dist = jet->Momentum.DeltaR(parton->Momentum); // take the DR
     isGoodCandidate = true;
-    while((partonLHEF = static_cast<Candidate *>(itPartonLHEFArray.Next())))
+    for(const auto &partonLHEF : *partonLHEFArray)
     {
       if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.01 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
       {
@@ -338,17 +297,16 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArr
   {
     jet->FlavorPhys = 0;
   }
-  else if(contaminations.size() == 0)
+  else if(contaminations.empty())
   {
     jet->FlavorPhys = TMath::Abs(tempParton->PID);
   }
-  else if(contaminations.size() > 0)
+  else
   {
     jet->FlavorPhys = TMath::Abs(tempParton->PID);
 
-    for(itContaminations = contaminations.begin(); itContaminations != contaminations.end(); ++itContaminations)
+    for(const auto &parton : contaminations)
     {
-      parton = *itContaminations;
       contaminatingFlavor = TMath::Abs(parton->PID);
       motherCounter = 0;
       if(parton->M1 != -1) motherCounter++;
@@ -356,13 +314,13 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, TObjArray *partonArr
 
       if(parton->M1 != -1)
       {
-        mother1 = static_cast<Candidate *>(fParticleInputArray->At(parton->M1));
-        if(mother1 && motherCounter > 0 && mother1->Momentum.DeltaR(tempParton->Momentum) < 0.001) continue;
+        if(const auto *mother1 = static_cast<Candidate *>(fParticleInputArray->at(parton->M1));
+          mother1 && motherCounter > 0 && mother1->Momentum.DeltaR(tempParton->Momentum) < 0.001) continue;
       }
       if(parton->M2 != -1)
       {
-        mother2 = static_cast<Candidate *>(fParticleInputArray->At(parton->M2));
-        if(mother2 && motherCounter > 0 && mother2->Momentum.DeltaR(tempParton->Momentum) < 0.001) continue;
+        if(const auto *mother2 = static_cast<Candidate *>(fParticleInputArray->at(parton->M2));
+          mother2 && motherCounter > 0 && mother2->Momentum.DeltaR(tempParton->Momentum) < 0.001) continue;
       }
       // mother is the initialParton --> OK
       if(TMath::Abs(tempParton->PID) == 4)

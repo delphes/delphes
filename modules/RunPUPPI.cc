@@ -32,15 +32,6 @@ private:
   double fMinPuppiWeight;
   bool fUseExp;
 
-  const TObjArray *fTrackInputArray{nullptr};
-  std::unique_ptr<TIterator> fItTrackInputArray;
-
-  const TObjArray *fNeutralInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItNeutralInputArray; //!
-
-  const TObjArray *fPVInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fPVItInputArray; //!
-
   std::vector<float> fEtaMinBin;
   std::vector<float> fEtaMaxBin;
   std::vector<float> fPtMinBin;
@@ -55,9 +46,13 @@ private:
   std::vector<int> fMetricId;
   std::vector<int> fCombId;
 
-  TObjArray *fOutputArray{nullptr};
-  TObjArray *fOutputTrackArray{nullptr};
-  TObjArray *fOutputNeutralArray{nullptr};
+  CandidatesCollection fTrackInputArray;
+  CandidatesCollection fNeutralInputArray; //!
+  CandidatesCollection fPVInputArray; //!
+
+  CandidatesCollection fOutputArray;
+  CandidatesCollection fOutputTrackArray;
+  CandidatesCollection fOutputNeutralArray;
 };
 
 //------------------------------------------------------------------------------
@@ -66,11 +61,8 @@ void RunPUPPI::Init()
 {
   // input collection
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/towers"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
   fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "Calorimeter/towers"));
-  fItNeutralInputArray.reset(fNeutralInputArray->MakeIterator());
   fPVInputArray = ImportArray(GetString("PVInputArray", "PV"));
-  fPVItInputArray.reset(fPVInputArray->MakeIterator());
   // puppi parameters
   fApplyNoLep = GetBool("UseNoLep", true);
   fMinPuppiWeight = GetDouble("MinPuppiWeight", 0.01);
@@ -178,6 +170,9 @@ void RunPUPPI::Init()
 
 void RunPUPPI::Process()
 {
+  fOutputArray->clear();
+  fOutputTrackArray->clear();
+  fOutputNeutralArray->clear();
 
   Candidate *candidate, *particle;
   TLorentzVector momentum;
@@ -185,22 +180,18 @@ void RunPUPPI::Process()
   //DelphesFactory *factory = GetFactory();
 
   // loop over input objects
-  fItTrackInputArray->Reset();
-  fItNeutralInputArray->Reset();
-  fPVItInputArray->Reset();
-
   std::vector<Candidate *> InputParticles;
   InputParticles.clear();
 
   // take the leading vertex
   float PVZ = 0.;
-  Candidate *pv = static_cast<Candidate *>(fPVItInputArray->Next());
+  Candidate *pv = static_cast<Candidate *>(fPVInputArray->at(0));
   if(pv) PVZ = pv->Position.Z();
   // Fill input particles for puppi
   std::vector<RecoObj> puppiInputVector;
   puppiInputVector.clear();
   // Loop on charge track candidate
-  while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  for(const auto &candidate : *fTrackInputArray)
   {
     momentum = candidate->Momentum;
     RecoObj curRecoObj;
@@ -208,12 +199,12 @@ void RunPUPPI::Process()
     curRecoObj.eta = momentum.Eta();
     curRecoObj.phi = momentum.Phi();
     curRecoObj.m = momentum.M();
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0)); //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
+    particle = static_cast<Candidate *>(candidate->GetCandidates().at(0)); //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
     //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
     if(candidate->IsRecoPU and candidate->Charge != 0)
     { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
       curRecoObj.id = 2;
-      curRecoObj.vtxId = 0.7 * (fPVInputArray->GetEntries()); //Hack apply reco vtx efficiency of 70% for calibration
+      curRecoObj.vtxId = 0.7 * (fPVInputArray->size()); //Hack apply reco vtx efficiency of 70% for calibration
       if(TMath::Abs(candidate->PID) == 11)
         curRecoObj.pfType = 2;
       else if(TMath::Abs(candidate->PID) == 13)
@@ -249,7 +240,7 @@ void RunPUPPI::Process()
   }
 
   // Loop on neutral calo cells
-  while((candidate = static_cast<Candidate *>(fItNeutralInputArray->Next())))
+  for(const auto &candidate : *fNeutralInputArray)
   {
     momentum = candidate->Momentum;
     RecoObj curRecoObj;
@@ -258,7 +249,7 @@ void RunPUPPI::Process()
     curRecoObj.phi = momentum.Phi();
     curRecoObj.m = momentum.M();
     curRecoObj.charge = 0;
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
     if(candidate->Charge == 0)
     {
       curRecoObj.id = 0; // neutrals have id==0
@@ -293,11 +284,11 @@ void RunPUPPI::Process()
     {
       candidate = static_cast<Candidate *>(InputParticles.at(it->user_index())->Clone());
       candidate->Momentum.SetPxPyPzE(it->px(), it->py(), it->pz(), it->e());
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
       if(puppiInputVector.at(it->user_index()).id == 1 or puppiInputVector.at(it->user_index()).id == 2)
-        fOutputTrackArray->Add(candidate);
+        fOutputTrackArray->emplace_back(candidate);
       else if(puppiInputVector.at(it->user_index()).id == 0)
-        fOutputNeutralArray->Add(candidate);
+        fOutputNeutralArray->emplace_back(candidate);
     }
     else
     {

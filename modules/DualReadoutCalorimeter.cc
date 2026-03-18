@@ -33,7 +33,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include <iostream>
@@ -46,7 +45,8 @@ using namespace std;
 class DualReadoutCalorimeter: public DelphesModule
 {
 public:
-  DualReadoutCalorimeter();
+  DualReadoutCalorimeter() : fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+                             fHCalResolutionFormula(std::make_unique<DelphesFormula>()) {}
 
   void Init() override;
   void Process() override;
@@ -104,44 +104,24 @@ private:
   const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
   const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
-  std::unique_ptr<TIterator> fItParticleInputArray; //!
-  std::unique_ptr<TIterator> fItTrackInputArray; //!
+  CandidatesCollection fParticleInputArray; //!
+  CandidatesCollection fTrackInputArray; //!
 
-  const TObjArray *fParticleInputArray{nullptr}; //!
-  const TObjArray *fTrackInputArray{nullptr}; //!
+  CandidatesCollection fTowerOutputArray; //!
+  CandidatesCollection fPhotonOutputArray; //!
 
-  TObjArray *fTowerOutputArray{nullptr}; //!
-  TObjArray *fPhotonOutputArray{nullptr}; //!
+  CandidatesCollection fEFlowTrackOutputArray; //!
+  CandidatesCollection fEFlowPhotonOutputArray; //!
+  CandidatesCollection fEFlowNeutralHadronOutputArray; //!
 
-  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
-  TObjArray *fEFlowPhotonOutputArray{nullptr}; //!
-  TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
-
-  const std::unique_ptr<TObjArray> fECalTowerTrackArray; //!
-  const std::unique_ptr<TIterator> fItECalTowerTrackArray; //!
-
-  const std::unique_ptr<TObjArray> fHCalTowerTrackArray; //!
-  const std::unique_ptr<TIterator> fItHCalTowerTrackArray; //!
-
-  const std::unique_ptr<TObjArray> fTowerTrackArray; //!
-  const std::unique_ptr<TIterator> fItTowerTrackArray; //!
+  CandidatesCollection fECalTowerTrackArray; //!
+  CandidatesCollection fHCalTowerTrackArray; //!
+  CandidatesCollection fTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
   Double_t TruncatedGaussian(Double_t mean, Double_t sigma);
 };
-
-//------------------------------------------------------------------------------
-
-DualReadoutCalorimeter::DualReadoutCalorimeter() :
-  fECalResolutionFormula(std::make_unique<DelphesFormula>()),
-  fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
-  fECalTowerTrackArray(std::make_unique<TObjArray>()),
-  fItECalTowerTrackArray(fECalTowerTrackArray->MakeIterator()),
-  fHCalTowerTrackArray(std::make_unique<TObjArray>()),
-  fItHCalTowerTrackArray(fHCalTowerTrackArray->MakeIterator()),
-  fTowerTrackArray(std::make_unique<TObjArray>()),
-  fItTowerTrackArray(fTowerTrackArray->MakeIterator()) {}
 
 //------------------------------------------------------------------------------
 
@@ -229,12 +209,9 @@ void DualReadoutCalorimeter::Init()
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
   fHCalResolutionFormula->Compile(GetString("HCalResolutionFormula", "0"));
 
-  // import array with output from other modules
+  // import arrays with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
-
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -260,6 +237,12 @@ void DualReadoutCalorimeter::Finish()
 
 void DualReadoutCalorimeter::Process()
 {
+  fTowerOutputArray->clear();
+  fPhotonOutputArray->clear();
+  fEFlowTrackOutputArray->clear();
+  fEFlowPhotonOutputArray->clear();
+  fEFlowNeutralHadronOutputArray->clear();
+
   Candidate *particle = nullptr, *track = nullptr;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
@@ -287,13 +270,12 @@ void DualReadoutCalorimeter::Process()
   fHCalTrackFractions.clear();
 
   // loop over all particles
-  fItParticleInputArray->Reset();
   number = -1;
   fTowerRmax = 0.;
 
   //cout<<"--------- new event ---------- "<<endl;
 
-  while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
+  for(const auto &particle : *fParticleInputArray)
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
@@ -341,9 +323,8 @@ void DualReadoutCalorimeter::Process()
   }
 
   // loop over all tracks
-  fItTrackInputArray->Reset();
   number = -1;
-  while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  for(const auto &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -440,9 +421,9 @@ void DualReadoutCalorimeter::Process()
       fTowerTime = 0.0;
       fTowerTimeWeight = 0.0;
 
-      fECalTowerTrackArray->Clear();
-      fHCalTowerTrackArray->Clear();
-      fTowerTrackArray->Clear();
+      fECalTowerTrackArray->clear();
+      fHCalTowerTrackArray->clear();
+      fTowerTrackArray->clear();
     }
 
     // check for track hits
@@ -450,7 +431,7 @@ void DualReadoutCalorimeter::Process()
     {
       ++fTowerTrackHits;
 
-      track = static_cast<Candidate *>(fTrackInputArray->At(number));
+      track = static_cast<Candidate *>(fTrackInputArray->at(number));
       momentum = track->Momentum;
       position = track->Position;
 
@@ -483,11 +464,11 @@ void DualReadoutCalorimeter::Process()
           energyGuess = momentum.E();
 
         fTrackSigma += (track->TrackResolution) * energyGuess * (track->TrackResolution) * energyGuess;
-        fTowerTrackArray->Add(track);
+        fTowerTrackArray->emplace_back(track);
       }
       else
       {
-        fEFlowTrackOutputArray->Add(track);
+        fEFlowTrackOutputArray->emplace_back(track);
       }
 
       continue;
@@ -496,7 +477,7 @@ void DualReadoutCalorimeter::Process()
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
 
-    particle = static_cast<Candidate *>(fParticleInputArray->At(number));
+    particle = static_cast<Candidate *>(fParticleInputArray->at(number));
     momentum = particle->Momentum;
     position = particle->Position;
 
@@ -523,7 +504,12 @@ void DualReadoutCalorimeter::Process()
 
 void DualReadoutCalorimeter::FinalizeTower()
 {
-  Candidate *track = nullptr, *tower = nullptr, *mother = nullptr, *candidate = nullptr;
+  fTowerOutputArray->clear();
+  fPhotonOutputArray->clear();
+  fEFlowTrackOutputArray->clear();
+  fEFlowPhotonOutputArray->clear();
+  fEFlowNeutralHadronOutputArray->clear();
+
   Double_t energy, pt, eta, phi, r, time;
   Double_t neutralEnergy;
 
@@ -542,10 +528,8 @@ void DualReadoutCalorimeter::FinalizeTower()
   if(debug) cout << "-----------------------------------------------------------------------" << endl;
   if(debug) cout << "New Tower: " << fECalTowerEnergy << "," << fHCalTowerEnergy << "," << fHCalTowerEnergy << "," << fTowerEta << endl;
 
-  if(debug) cout << "   gen particles in tower :" << fTower->GetCandidates()->GetEntriesFast() << endl;
-  TIter it1(fTower->GetCandidates());
-  it1.Reset();
-  while((candidate = static_cast<Candidate *>(it1.Next())))
+  if(debug) cout << "   gen particles in tower :" << fTower->GetCandidates().size() << endl;
+  for(const auto &candidate : fTower->GetCandidates())
   {
     //cout<<": " << <<endl;
     TLorentzVector mom = candidate->Momentum;
@@ -664,14 +648,14 @@ void DualReadoutCalorimeter::FinalizeTower()
   {
     if(fTowerPhotonHits > 0 && fTowerTrackHits == 0)
     {
-      fPhotonOutputArray->Add(fTower);
+      fPhotonOutputArray->emplace_back(fTower);
     }
 
     if(debug) cout << "   creating tower with energy: " << energy << endl;
     if(debug) cout << "   creating tower with PID: " << fTower->PID << endl;
     if(debug) cout << "   creating tower with track energy: " << fTower->Etrk << endl;
 
-    fTowerOutputArray->Add(fTower);
+    fTowerOutputArray->emplace_back(fTower);
   }
 
   // ---------------------------------------------------------------------------
@@ -708,7 +692,7 @@ void DualReadoutCalorimeter::FinalizeTower()
   if(neutralSignificance > neutralMinPFSignificance)
   {
 
-    tower = static_cast<Candidate *>(fTower->Clone());
+    auto *tower = static_cast<Candidate *>(fTower->Clone());
     if(isPureEM)
     {
       tower->Eem = neutralEnergy;
@@ -716,7 +700,7 @@ void DualReadoutCalorimeter::FinalizeTower()
       tower->PID = 22;
       pt = neutralEnergy / TMath::CosH(eta);
       tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
-      fEFlowPhotonOutputArray->Add(tower);
+      fEFlowPhotonOutputArray->emplace_back(tower);
     }
     else
     {
@@ -729,7 +713,7 @@ void DualReadoutCalorimeter::FinalizeTower()
       if(p > 0)
       {
         tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
-        fEFlowNeutralHadronOutputArray->Add(tower);
+        fEFlowNeutralHadronOutputArray->emplace_back(tower);
       }
     }
 
@@ -739,13 +723,11 @@ void DualReadoutCalorimeter::FinalizeTower()
     if(debug) cout << "       " << endl;
 
     // now clone tracks
-    fItTowerTrackArray->Reset();
-    while((track = static_cast<Candidate *>(fItTowerTrackArray->Next())))
+    for(const auto &track : *fTowerTrackArray)
     {
-      mother = track;
-      track = static_cast<Candidate *>(track->Clone());
-      track->AddCandidate(mother);
-      fEFlowTrackOutputArray->Add(track);
+      auto *new_track = static_cast<Candidate *>(track->Clone());
+      new_track->AddCandidate(track);
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 
@@ -765,15 +747,13 @@ void DualReadoutCalorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fTrackEnergy;
 
     //rescale tracks
-    fItTowerTrackArray->Reset();
-    while((track = static_cast<Candidate *>(fItTowerTrackArray->Next())))
+    for(const auto &track : *fTowerTrackArray)
     {
-      mother = track;
-      track = static_cast<Candidate *>(track->Clone());
-      track->AddCandidate(mother);
-      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt() * rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
-      if(debug) cout << "  track Momentum: " << track->PID << ", " << track->Momentum.Pt() << ", " << track->Momentum.Eta() << ", " << track->Momentum.M() << endl;
-      fEFlowTrackOutputArray->Add(track);
+      auto *new_track = static_cast<Candidate *>(track->Clone());
+      new_track->AddCandidate(track);
+      new_track->Momentum.SetPtEtaPhiM(new_track->Momentum.Pt() * rescaleFactor, new_track->Momentum.Eta(), new_track->Momentum.Phi(), new_track->Momentum.M());
+      if(debug) cout << "  track Momentum: " << new_track->PID << ", " << new_track->Momentum.Pt() << ", " << new_track->Momentum.Eta() << ", " << new_track->Momentum.M() << endl;
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 }

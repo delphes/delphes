@@ -31,7 +31,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include <map>
@@ -51,8 +50,7 @@ private:
   std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
 #endif
 
-  const TObjArray *fJetInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItJetInputArray; //!
+  CandidatesCollection fJetInputArray; //!
 };
 
 using namespace std;
@@ -93,20 +91,17 @@ void BTagging::Init()
   // import input array(s)
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
 void BTagging::Process()
 {
-  Candidate *jet;
   Double_t pt, eta, phi, e;
   std::map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
 
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(const auto &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
     eta = jetMomentum.Eta();
