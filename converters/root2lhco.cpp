@@ -82,39 +82,34 @@ private:
   Int_t fIntParam[kIntParamSize];
   Double_t fDblParam[kDblParamSize];
 
-  ExRootTreeReader *fTreeReader;
-  FILE *fOutputFile;
+  ExRootTreeReader *fTreeReader{nullptr};
+  FILE *fOutputFile{nullptr};
 
-  TClonesArray *fBranchEvent;
+  TClonesArray *fBranchEvent{nullptr};
 
-  TClonesArray *fBranchTrack;
-  TClonesArray *fBranchTower;
+  TClonesArray *fBranchTrack{nullptr};
+  TClonesArray *fBranchTower{nullptr};
 
-  TClonesArray *fBranchPhoton;
-  TClonesArray *fBranchElectron;
-  TClonesArray *fBranchMuon;
-  TClonesArray *fBranchJet;
-  TClonesArray *fBranchMissingET;
+  TClonesArray *fBranchPhoton{nullptr};
+  TClonesArray *fBranchElectron{nullptr};
+  TClonesArray *fBranchMuon{nullptr};
+  TClonesArray *fBranchJet{nullptr};
+  TClonesArray *fBranchMissingET{nullptr};
 
-  TIterator *fItTrack;
-  TIterator *fItTower;
+  std::unique_ptr<TIterator> fItTrack;
+  std::unique_ptr<TIterator> fItTower;
 
-  TIterator *fItPhoton;
-  TIterator *fItElectron;
-  TIterator *fItMuon;
-  TIterator *fItJet;
+  std::unique_ptr<TIterator> fItPhoton;
+  std::unique_ptr<TIterator> fItElectron;
+  std::unique_ptr<TIterator> fItMuon;
+  std::unique_ptr<TIterator> fItJet;
 };
 
 //------------------------------------------------------------------------------
 
 LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string jetBranchName) :
-  fTreeReader(0), fOutputFile(0),
-  fBranchEvent(0), fBranchTrack(0), fBranchTower(0), fBranchPhoton(0),
-  fBranchElectron(0), fBranchMuon(0), fBranchJet(0), fBranchMissingET(0)
+  fTreeReader(treeReader), fOutputFile(outputFile)
 {
-  fTreeReader = treeReader;
-  fOutputFile = outputFile;
-
   // information about reconstructed event
   fBranchEvent = fTreeReader->UseBranch("Event");
   // reconstructed tracks
@@ -137,12 +132,12 @@ LHCOWriter::LHCOWriter(ExRootTreeReader *treeReader, FILE *outputFile, string je
     throw runtime_error("ROOT file doesn't contain all required branches");
   }
 
-  fItTrack = fBranchTrack->MakeIterator();
-  fItTower = fBranchTower->MakeIterator();
-  fItPhoton = fBranchPhoton->MakeIterator();
-  fItElectron = fBranchElectron->MakeIterator();
-  fItMuon = fBranchMuon->MakeIterator();
-  fItJet = fBranchJet->MakeIterator();
+  fItTrack.reset(fBranchTrack->MakeIterator());
+  fItTower.reset(fBranchTower->MakeIterator());
+  fItPhoton.reset(fBranchPhoton->MakeIterator());
+  fItElectron.reset(fBranchElectron->MakeIterator());
+  fItMuon.reset(fBranchMuon->MakeIterator());
+  fItJet.reset(fBranchJet->MakeIterator());
 }
 
 //------------------------------------------------------------------------------

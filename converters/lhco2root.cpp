@@ -66,7 +66,6 @@ class LHCOConverter
 {
 public:
   LHCOConverter(TFile *outputFile);
-  ~LHCOConverter();
 
   void Write();
 
@@ -92,34 +91,30 @@ private:
   Int_t fIntParam[kIntParamSize];
   Double_t fDblParam[kDblParamSize];
 
-  Bool_t fIsReadyToFill;
+  Bool_t fIsReadyToFill{kFALSE};
 
-  Int_t fTriggerWord, fEventNumber;
+  Int_t fTriggerWord{0};
+  Int_t fEventNumber{1};
 
-  char *fBuffer;
+  std::array<char, kBufferSize> fBuffer;
 
-  ExRootTreeWriter *fTreeWriter;
+  const std::unique_ptr<ExRootTreeWriter> fTreeWriter;
 
-  ExRootTreeBranch *fBranchEvent;
-  ExRootTreeBranch *fBranchTrack;
-  ExRootTreeBranch *fBranchTower;
-  ExRootTreeBranch *fBranchPhoton;
-  ExRootTreeBranch *fBranchElectron;
-  ExRootTreeBranch *fBranchMuon;
-  ExRootTreeBranch *fBranchJet;
-  ExRootTreeBranch *fBranchMissingET;
+  ExRootTreeBranch *fBranchEvent{nullptr};
+  ExRootTreeBranch *fBranchTrack{nullptr};
+  ExRootTreeBranch *fBranchTower{nullptr};
+  ExRootTreeBranch *fBranchPhoton{nullptr};
+  ExRootTreeBranch *fBranchElectron{nullptr};
+  ExRootTreeBranch *fBranchMuon{nullptr};
+  ExRootTreeBranch *fBranchJet{nullptr};
+  ExRootTreeBranch *fBranchMissingET{nullptr};
 };
 
 //------------------------------------------------------------------------------
 
 LHCOConverter::LHCOConverter(TFile *outputFile) :
-  fIsReadyToFill(kFALSE),
-  fTriggerWord(0), fEventNumber(1),
-  fBuffer(0), fTreeWriter(0)
+  fTreeWriter(std::make_unique<ExRootTreeWriter>(outputFile, "Delphes"))
 {
-  fBuffer = new char[kBufferSize];
-  fTreeWriter = new ExRootTreeWriter(outputFile, "Delphes");
-
   // information about reconstructed event
   fBranchEvent = fTreeWriter->NewBranch("Event", LHCOEvent::Class());
   // reconstructed tracks
@@ -140,21 +135,13 @@ LHCOConverter::LHCOConverter(TFile *outputFile) :
 
 //------------------------------------------------------------------------------
 
-LHCOConverter::~LHCOConverter()
-{
-  if(fTreeWriter) delete fTreeWriter;
-  if(fBuffer) delete[] fBuffer;
-}
-
-//------------------------------------------------------------------------------
-
 Bool_t LHCOConverter::ReadLine(FILE *inputFile)
 {
   int rc;
 
-  if(!fgets(fBuffer, kBufferSize, inputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), kBufferSize, inputFile)) return kFALSE;
 
-  DelphesStream bufferStream(fBuffer);
+  DelphesStream bufferStream(fBuffer.data());
 
   rc = bufferStream.ReadInt(fIntParam[0]);
 
@@ -372,8 +359,6 @@ int main(int argc, char *argv[])
   char appName[] = "lhco2root";
   stringstream message;
   FILE *inputFile = 0;
-  TFile *outputFile = 0;
-  LHCOConverter *converter = 0;
   Int_t i;
   Long64_t length, eventCounter;
 
@@ -397,15 +382,14 @@ int main(int argc, char *argv[])
 
   try
   {
-    outputFile = TFile::Open(argv[1], "CREATE");
-
-    if(outputFile == NULL)
+    const auto outputFile = std::make_unique<TFile>(argv[1], "CREATE");
+    if(!outputFile)
     {
       message << "can't open " << argv[1];
       throw runtime_error(message.str());
     }
 
-    converter = new LHCOConverter(outputFile);
+    const auto converter = std::make_unique<LHCOConverter>(outputFile.get());
 
     i = 2;
     do
@@ -464,15 +448,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete converter;
-    delete outputFile;
-
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(converter) delete converter;
-    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }
