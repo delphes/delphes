@@ -65,22 +65,13 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesROOT";
   stringstream message;
-  TFile *inputFile = 0;
-  TFile *outputFile = 0;
   TStopwatch eventStopWatch;
-  ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0;
-  ExRootConfReader *confReader = 0;
-  Delphes *modularDelphes = 0;
-  DelphesFactory *factory = 0;
   GenParticle *gen;
-  HepMCEvent *element, *eve;
   Candidate *candidate;
   Int_t pdgCode;
 
   const Double_t c_light = 2.99792458E8;
 
-  CandidatesCollection allParticleOutputArray, stableParticleOutputArray, partonOutputArray;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
 
@@ -105,31 +96,30 @@ int main(int argc, char *argv[])
 
   try
   {
-    outputFile = TFile::Open(argv[2], "CREATE");
-
-    if(outputFile == NULL)
+    const auto outputFile = std::make_unique<TFile>(argv[2], "CREATE");
+    if(!outputFile)
     {
       message << "can't open " << argv[2] << endl;
       throw runtime_error(message.str());
     }
 
-    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
 
-    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
+    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
 
-    confReader = new ExRootConfReader;
+    const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
-    modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
-    modularDelphes->SetTreeWriter(treeWriter);
+    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
+    modularDelphes->SetConfReader(confReader.get());
+    modularDelphes->SetTreeWriter(treeWriter.get());
 
-    TChain *chain = new TChain("Delphes");
+    const auto chain = std::make_unique<TChain>("Delphes");
 
-    factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    DelphesFactory *factory = modularDelphes->GetFactory();
+    CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
+                         stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
+                         partonOutputArray = modularDelphes->ExportArray("partons");
 
     modularDelphes->InitTask();
 
@@ -138,11 +128,10 @@ int main(int argc, char *argv[])
       cout << "** Reading " << argv[i] << endl;
 
       chain->Add(argv[i]);
-      ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
+      const auto treeReader = std::make_unique<ExRootTreeReader>(chain.get());
 
-      inputFile = TFile::Open(argv[i]);
-
-      if(inputFile == NULL)
+      const auto inputFile = std::make_unique<TFile>(argv[i]);
+      if(!inputFile)
       {
         message << "can't open " << argv[i] << endl;
         throw runtime_error(message.str());
@@ -168,8 +157,8 @@ int main(int argc, char *argv[])
 
         // -- TBC need also to include event weights --
 
-        eve = (HepMCEvent *)branchHepMCEvent->At(0);
-        element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
+        HepMCEvent *eve = (HepMCEvent *)branchHepMCEvent->At(0);
+        HepMCEvent *element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
 
         element->Number = eventCounter;
 
@@ -241,8 +230,6 @@ int main(int argc, char *argv[])
       progressBar.Finish();
 
       inputFile->Close();
-
-      delete treeReader;
     }
 
     modularDelphes->FinishTask();
@@ -250,18 +237,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete modularDelphes;
-    delete confReader;
-    delete treeWriter;
-    delete outputFile;
-    delete chain;
-
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(treeWriter) delete treeWriter;
-    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }
