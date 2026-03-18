@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
 
 #if PYTHIA_VERSION_INTEGER > 8300
       // fill Pythia8 Weights - see https://pythia.org/latest-manual/CrossSectionsAndWeights.html
-      for(int iWeight = 0; iWeight < pythia->info.weightNameVector().size(); ++iWeight)
+      for(size_t iWeight = 0; iWeight < pythia->info.weightNameVector().size(); ++iWeight)
       {
         Weight *weight;
         weight = static_cast<Weight *>(branchWeight->NewEntry());
