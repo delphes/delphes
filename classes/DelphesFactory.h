@@ -46,18 +46,36 @@ public:
 
   virtual void Clear(Option_t *option = "");
 
-  TObjArray *NewPermanentArray();
+  bool Has(std::string_view collectionName) const;
+  template <typename T>
+  T &Book(std::string_view collectionName)
+  {
+    const std::string name{collectionName};
+    if(fMemorySlots.count(name) == 0)
+      fMemorySlots[name] = reinterpret_cast<void *>(new T);
+    return Attach<T>(collectionName);
+  }
+  template <typename T>
+  T &Attach(std::string_view collectionName)
+  {
+    if(!Has(collectionName)) throwAttachingFailure(collectionName);
+    return *reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]);
+  }
 
+  TObjArray *NewPermanentArray();
   TObjArray *NewArray() { return New<TObjArray>(); }
 
   Candidate *NewCandidate();
 
   TObject *New(TClass *cl);
-
   template <typename T>
   T *New() { return static_cast<T *>(New(T::Class())); }
 
 private:
+  void throwAttachingFailure(std::string_view collectionName) const;
+
+  std::map<std::string, void *> fMemorySlots;
+
   ExRootTreeBranch *fObjArrays; //!
 
 #if !defined(__CINT__) && !defined(__CLING__)
