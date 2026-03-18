@@ -402,7 +402,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
     if(candidate && code > 0) fInVertexMap[code] = index;
 
     position = factory->New<TLorentzVector>();
-    array = factory->Book<CandidatesCollection>("HepMC3Vertex");
+    array = std::make_shared<std::vector<Candidate *> >();
     position->SetXYZT(0.0, 0.0, 0.0, 0.0);
     fVertices.push_back(make_pair(position, array));
   }

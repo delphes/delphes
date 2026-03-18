@@ -89,9 +89,9 @@ int main(int argc, char *argv[])
     writer = new DelphesPileUpWriter(argv[1]);
 
     factory = new DelphesFactory("ObjectFactory");
-    allParticleOutputArray = factory->Book<CandidatesCollection>("allParticles");
-    stableParticleOutputArray = factory->Book<CandidatesCollection>("stableParticles");
-    partonOutputArray = factory->Book<CandidatesCollection>("partons");
+    allParticleOutputArray = std::make_shared<std::vector<Candidate *> >();
+    stableParticleOutputArray = std::make_shared<std::vector<Candidate *> >();
+    partonOutputArray = std::make_shared<std::vector<Candidate *> >();
 
     reader = new DelphesSTDHEPReader;
 
@@ -158,6 +158,9 @@ int main(int argc, char *argv[])
 
           factory->Clear();
           reader->Clear();
+          allParticleOutputArray->clear();
+          stableParticleOutputArray->clear();
+          partonOutputArray->clear();
         }
         progressBar.Update(ftello(inputFile), eventCounter);
       }

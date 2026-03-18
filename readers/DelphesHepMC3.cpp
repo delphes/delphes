@@ -203,6 +203,9 @@ int main(int argc, char *argv[])
 
           modularDelphes->Clear();
           reader->Clear();
+          allParticleOutputArray->clear();
+          stableParticleOutputArray->clear();
+          partonOutputArray->clear();
 
           readStopWatch.Start();
         }

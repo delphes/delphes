@@ -841,7 +841,7 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   void AddCandidate(Candidate *object);
-  TObjArray *GetCandidates();
+  const std::vector<Candidate *> &GetCandidates() const;
 
   Bool_t Overlaps(const Candidate *object) const;
 
@@ -851,7 +851,7 @@ public:
 
 private:
   DelphesFactory *fFactory; //!
-  TObjArray *fArray; //!
+  std::vector<Candidate *> fArray; //!
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
@@ -859,5 +859,6 @@ private:
 };
 
 using CandidatesCollection = std::shared_ptr<std::vector<Candidate *> >;
+//using CandidatesCollection = std::vector<Candidate *>;
 
 #endif // DelphesClasses_h

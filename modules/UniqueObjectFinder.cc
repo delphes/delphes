@@ -95,18 +95,13 @@ Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::const_iterator
     for(const auto &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
       if(fUseUniqueID)
       {
-        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID())
-          return kFALSE;
+        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID()) return kFALSE;
       }
       else
       {
-        if(candidate->Overlaps(previousCandidate))
-        {
-          return kFALSE;
-        }
+        if(candidate->Overlaps(previousCandidate)) return kFALSE;
       }
   }
-
   return kTRUE;
 }
 
