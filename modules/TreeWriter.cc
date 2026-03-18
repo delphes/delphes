@@ -38,6 +38,11 @@
 
 using namespace std;
 
+struct SortCandidates
+{
+  bool operator()(const Candidate *lhs, const Candidate *rhs) const { return lhs->Compare(rhs); }
+};
+
 class TreeWriter: public DelphesModule
 {
 public:
@@ -257,7 +262,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const CandidatesColle
 
   CompBase *compare = Candidate::fgCompare;
   Candidate::fgCompare = CompSumPT2<Candidate>::Instance();
-  //array->Sort(); //TODO sort wrt what?
+  std::sort(array->begin(), array->end(), SortCandidates{});
   Candidate::fgCompare = compare;
 
   // loop over all vertices
@@ -608,7 +613,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const CandidatesCollec
   Double_t pt, signPz, cosTheta, eta;
   const Double_t c_light = 2.99792458E8;
 
-  //array->Sort(); //TODO: sort wrt what?
+  std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all photons
   for(const auto &candidate : *array)
@@ -655,7 +660,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const CandidatesColl
   Double_t pt, signPz, cosTheta, eta;
   const Double_t c_light = 2.99792458E8;
 
-  //array->Sort(); // TODO: sort wrt what?
+  std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all electrons
   for(const auto &candidate : *array)
@@ -706,7 +711,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const CandidatesCollecti
 
   const Double_t c_light = 2.99792458E8;
 
-  //array->Sort();//TODO: sort wrt what?
+  std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all muons
   for(const auto &candidate : *array)
@@ -760,7 +765,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const CandidatesCollectio
   const Double_t c_light = 2.99792458E8;
   Int_t i;
 
-  //array->Sort(); //TODO: sort wrt what?
+  std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all jets
   for(const auto &candidate : *array)
@@ -881,7 +886,7 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const CandidatesCol
 
   const Double_t c_light = 2.99792458E8; // in unit of m/s
 
-  //array->Sort(); //TODO: sort wrt what?
+  std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all clusters
   for(const auto &candidate : *array)
