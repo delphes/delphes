@@ -295,15 +295,13 @@ Candidate::Candidate() :
 
 void Candidate::AddCandidate(Candidate *object)
 {
-  if(!fArray) fArray = fFactory->NewArray();
-  fArray->Add(object);
+  fArray.emplace_back(object);
 }
 
 //------------------------------------------------------------------------------
 
-TObjArray *Candidate::GetCandidates()
+const std::vector<Candidate *> &Candidate::GetCandidates() const
 {
-  if(!fArray) fArray = fFactory->NewArray();
   return fArray;
 }
 
@@ -311,26 +309,16 @@ TObjArray *Candidate::GetCandidates()
 
 Bool_t Candidate::Overlaps(const Candidate *object) const
 {
-  const Candidate *candidate;
-
   if(object->GetUniqueID() == GetUniqueID()) return kTRUE;
 
-  if(fArray)
+  for(const auto &candidate : fArray)
   {
-    TIter it(fArray);
-    while((candidate = static_cast<Candidate *>(it.Next())))
-    {
-      if(candidate->Overlaps(object)) return kTRUE;
-    }
+    if(candidate->Overlaps(object)) return kTRUE;
   }
 
-  if(object->fArray)
+  for(const auto &candidate : object->fArray)
   {
-    TIter it(object->fArray);
-    while((candidate = static_cast<Candidate *>(it.Next())))
-    {
-      if(candidate->Overlaps(this)) return kTRUE;
-    }
+    if(candidate->Overlaps(this)) return kTRUE;
   }
 
   return kFALSE;
@@ -350,7 +338,6 @@ TObject *Candidate::Clone(const char * /*newname*/) const
 void Candidate::Copy(TObject &obj) const
 {
   Candidate &object = static_cast<Candidate &>(obj);
-  Candidate *candidate;
 
   object.PID = PID;
   object.Status = Status;
@@ -481,19 +468,15 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
   object.TrackCovariance = TrackCovariance;
   object.fFactory = fFactory;
-  object.fArray = 0;
+  object.fArray.clear();
 
   // copy cluster timing info
   copy(ECalEnergyTimePairs.begin(), ECalEnergyTimePairs.end(), back_inserter(object.ECalEnergyTimePairs));
 
-  if(fArray && fArray->GetEntriesFast() > 0)
+  if(!fArray.empty())
   {
-    TIter itArray(fArray);
-    TObjArray *array = object.GetCandidates();
-    while((candidate = static_cast<Candidate *>(itArray.Next())))
-    {
-      array->Add(candidate);
-    }
+    for(const auto &candidate : fArray)
+      object.fArray.emplace_back(candidate);
   }
 }
 
@@ -623,5 +606,5 @@ void Candidate::Clear(Option_t * /*option*/)
   NSubJetsPruned = 0;
   NSubJetsSoftDropped = 0;
 
-  fArray = 0;
+  fArray.clear();
 }

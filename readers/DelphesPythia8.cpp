@@ -364,6 +364,9 @@ int main(int argc, char *argv[])
     errorCounter = 0;
     treeWriter->Clear();
     modularDelphes->Clear();
+    allParticleOutputArray->clear();
+    stableParticleOutputArray->clear();
+    partonOutputArray->clear();
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {

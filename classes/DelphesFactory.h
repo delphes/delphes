@@ -48,7 +48,7 @@ public:
 
   bool Has(std::string_view collectionName) const;
   template <typename T>
-  T &Book(std::string_view collectionName)
+  std::shared_ptr<T> Book(std::string_view collectionName)
   {
     const std::string name{collectionName};
     if(fMemorySlots.count(name) == 0)
@@ -56,10 +56,10 @@ public:
     return Attach<T>(collectionName);
   }
   template <typename T>
-  T &Attach(std::string_view collectionName)
+  std::shared_ptr<T> Attach(std::string_view collectionName)
   {
     if(!Has(collectionName)) throwAttachingFailure(collectionName);
-    return *reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]);
+    return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]));
   }
 
   TObjArray *NewPermanentArray();

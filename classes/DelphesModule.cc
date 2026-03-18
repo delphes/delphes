@@ -35,10 +35,7 @@
 
 #include "TClass.h"
 #include "TFolder.h"
-#include "TObjArray.h"
-#include "TROOT.h"
 
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -64,7 +61,7 @@ void DelphesModule::Finish() {}
 
 //------------------------------------------------------------------------------
 
-CandidatesCollection &DelphesModule::ImportArray(const char *name)
+CandidatesCollection DelphesModule::ImportArray(const char *name)
 {
   auto *factory = GetFactory();
   if(!factory)
@@ -76,12 +73,12 @@ CandidatesCollection &DelphesModule::ImportArray(const char *name)
     message << "' in module '" << GetName() << "'";
     throw std::runtime_error(message.str());
   }
-  return factory->Attach<CandidatesCollection>(name);
+  return factory->Attach<std::vector<Candidate *> >(name);
 }
 
 //------------------------------------------------------------------------------
 
-CandidatesCollection &DelphesModule::ExportArray(const char *name)
+CandidatesCollection DelphesModule::ExportArray(const char *name)
 {
   auto *factory = GetFactory();
   if(!factory)
@@ -94,7 +91,7 @@ CandidatesCollection &DelphesModule::ExportArray(const char *name)
     message << "Collection with name '" << name << "' and label '" << collectionLabel.str() << "'  was already booked in the memory slot.";
     throw std::runtime_error(message.str());
   }
-  return factory->Book<CandidatesCollection>(collectionLabel.str());
+  return factory->Book<std::vector<Candidate *> >(collectionLabel.str());
 }
 
 //------------------------------------------------------------------------------
