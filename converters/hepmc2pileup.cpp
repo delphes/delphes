@@ -22,15 +22,9 @@
 
 #include <signal.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
-
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
+#include <TApplication.h>
+#include <TLorentzVector.h>
+#include <TROOT.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -38,8 +32,6 @@
 #include "classes/DelphesPileUpWriter.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -59,10 +51,6 @@ int main(int argc, char *argv[])
   char appName[] = "hepmc2pileup";
   stringstream message;
   FILE *inputFile = 0;
-  DelphesFactory *factory = 0;
-  CandidatesCollection allParticleOutputArray, stableParticleOutputArray, partonOutputArray;
-  DelphesPileUpWriter *writer = 0;
-  DelphesHepMC2Reader *reader = 0;
   Int_t i;
   Long64_t length, eventCounter;
 
@@ -86,14 +74,14 @@ int main(int argc, char *argv[])
 
   try
   {
-    writer = new DelphesPileUpWriter(argv[1]);
+    const auto writer = std::make_unique<DelphesPileUpWriter>(argv[1]);
 
-    factory = new DelphesFactory("ObjectFactory");
-    allParticleOutputArray = std::make_shared<std::vector<Candidate *> >();
-    stableParticleOutputArray = std::make_shared<std::vector<Candidate *> >();
-    partonOutputArray = std::make_shared<std::vector<Candidate *> >();
+    const auto factory = std::make_unique<DelphesFactory>();
+    CandidatesCollection allParticleOutputArray = std::make_shared<std::vector<Candidate *> >(),
+                         stableParticleOutputArray = std::make_shared<std::vector<Candidate *> >(),
+                         partonOutputArray = std::make_shared<std::vector<Candidate *> >();
 
-    reader = new DelphesHepMC2Reader;
+    const auto reader = std::make_unique<DelphesHepMC2Reader>();
 
     i = 2;
     do
@@ -137,7 +125,7 @@ int main(int argc, char *argv[])
       eventCounter = 0;
       factory->Clear();
       reader->Clear();
-      while(reader->ReadBlock(factory, allParticleOutputArray,
+      while(reader->ReadBlock(factory.get(), allParticleOutputArray,
               stableParticleOutputArray, partonOutputArray)
         && !interrupted)
       {
@@ -178,15 +166,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete reader;
-    delete factory;
-    delete writer;
-
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(writer) delete writer;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }

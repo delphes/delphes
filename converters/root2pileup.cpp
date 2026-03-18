@@ -52,12 +52,6 @@ int main(int argc, char *argv[])
 {
   char appName[] = "root2pileup";
   stringstream message;
-  TChain *inputChain = 0;
-  ExRootTreeReader *treeReader = 0;
-  TClonesArray *branchParticle = 0;
-  TIterator *itParticle = 0;
-  GenParticle *particle = 0;
-  DelphesPileUpWriter *writer = 0;
   Long64_t entry, allEntries;
   Int_t i;
 
@@ -80,17 +74,17 @@ int main(int argc, char *argv[])
 
   try
   {
-    inputChain = new TChain("Delphes");
+    const auto inputChain = std::make_unique<TChain>("Delphes");
     for(i = 2; i < argc && !interrupted; ++i)
     {
       inputChain->Add(argv[i]);
     }
 
-    treeReader = new ExRootTreeReader(inputChain);
-    branchParticle = treeReader->UseBranch("Particle");
-    itParticle = branchParticle->MakeIterator();
+    const auto treeReader = std::make_unique<ExRootTreeReader>(inputChain.get());
+    TClonesArray *branchParticle = treeReader->UseBranch("Particle");
+    const auto itParticle = std::unique_ptr<TIterator>(branchParticle->MakeIterator());
 
-    writer = new DelphesPileUpWriter(argv[1]);
+    const auto writer = std::make_unique<DelphesPileUpWriter>(argv[1]);
 
     allEntries = treeReader->GetEntries();
     cout << "** Input file(s) contain(s) " << allEntries << " events" << endl;
@@ -108,6 +102,7 @@ int main(int argc, char *argv[])
         }
 
         itParticle->Reset();
+        GenParticle *particle = nullptr;
         while((particle = static_cast<GenParticle *>(itParticle->Next())))
         {
           writer->WriteParticle(particle->PID,
@@ -126,18 +121,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete writer;
-    delete itParticle;
-    delete treeReader;
-    delete inputChain;
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(writer) delete writer;
-    if(itParticle) delete itParticle;
-    if(treeReader) delete treeReader;
-    if(inputChain) delete inputChain;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }
