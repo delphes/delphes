@@ -30,9 +30,7 @@
 #include "ExRootAnalysis/ExRootTask.h"
 
 class TClass;
-class TObject;
 class TFolder;
-class TClonesArray;
 
 class Candidate;
 
@@ -45,12 +43,12 @@ class DelphesFactory;
 class DelphesModule: public ExRootTask
 {
 public:
-  DelphesModule();
-  virtual ~DelphesModule();
+  DelphesModule() = default;
+  virtual ~DelphesModule() = default;
 
-  virtual void Init();
-  virtual void Process();
-  virtual void Finish();
+  virtual void Init() {}
+  virtual void Process() {}
+  virtual void Finish() {}
 
   std::shared_ptr<std::vector<Candidate *> > ImportArray(const char *name);
   std::shared_ptr<std::vector<Candidate *> > ExportArray(const char *name);
@@ -61,16 +59,13 @@ public:
   ExRootResult *GetPlots();
   DelphesFactory *GetFactory();
 
-protected:
-  ExRootTreeWriter *fTreeWriter{nullptr};
+private:
   DelphesFactory *fFactory{nullptr};
 
-private:
+  ExRootTreeWriter *fTreeWriter{nullptr};
   ExRootResult *fPlots{nullptr};
 
-  TFolder *fPlotFolder{nullptr}, *fExportFolder{nullptr};
-
-  ClassDef(DelphesModule, 1)
+  TFolder *fPlotFolder{nullptr};
 };
 
 #endif /* DelphesModule_h */

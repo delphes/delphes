@@ -30,7 +30,6 @@
 
 #include "ExRootAnalysis/ExRootResult.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeReader.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
 #include "TClass.h"
@@ -40,26 +39,6 @@
 #include <stdexcept>
 
 using namespace std;
-
-DelphesModule::DelphesModule() {}
-
-//------------------------------------------------------------------------------
-
-DelphesModule::~DelphesModule() {}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::Init() {}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::Process() {}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::Finish() {}
-
-//------------------------------------------------------------------------------
 
 CandidatesCollection DelphesModule::ImportArray(const char *name)
 {
