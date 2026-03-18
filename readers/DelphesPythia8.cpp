@@ -230,24 +230,13 @@ int main(int argc, char *argv[])
   char appName[] = "DelphesPythia8";
   stringstream message;
   FILE *inputFile = 0;
-  TFile *outputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
-  ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
-  ExRootTreeBranch *branchEventLHEF = 0, *branchWeightLHEF = 0;
-  ExRootConfReader *confReader = 0;
-  Delphes *modularDelphes = 0;
-  DelphesFactory *factory = 0;
-  CandidatesCollection stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
-  CandidatesCollection stableParticleOutputArrayLHEF, allParticleOutputArrayLHEF, partonOutputArrayLHEF;
-  DelphesLHEFReader *reader = 0;
+  std::unique_ptr<DelphesLHEFReader> reader;
   Long64_t eventCounter, errorCounter;
   Long64_t numberOfEvents, timesAllowErrors;
   Bool_t spareFlag1;
   Int_t spareMode1;
   Double_t spareParm1, spareParm2;
-
-  Pythia8::Pythia *pythia = 0;
 
   if(argc != 4)
   {
@@ -270,33 +259,35 @@ int main(int argc, char *argv[])
 
   try
   {
-    outputFile = TFile::Open(argv[3], "CREATE");
-
-    if(outputFile == NULL)
+    const auto outputFile = std::make_unique<TFile>(argv[3], "CREATE");
+    if(!outputFile)
     {
       message << "can't create output file " << argv[3];
       throw runtime_error(message.str());
     }
 
-    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
 
-    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
+    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class()),
+                     *branchWeight = treeWriter->NewBranch("Weight", Weight::Class()),
+                     *branchEventLHEF = nullptr,
+                     *branchWeightLHEF = nullptr;
 
-    confReader = new ExRootConfReader;
+    const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
-    modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
-    modularDelphes->SetTreeWriter(treeWriter);
+    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
+    modularDelphes->SetConfReader(confReader.get());
+    modularDelphes->SetTreeWriter(treeWriter.get());
 
-    factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    DelphesFactory *factory = modularDelphes->GetFactory();
+    CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
+                         stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
+                         partonOutputArray = modularDelphes->ExportArray("partons");
+    CandidatesCollection stableParticleOutputArrayLHEF, allParticleOutputArrayLHEF, partonOutputArrayLHEF;
 
     // Initialize Pythia
-    pythia = new Pythia8::Pythia;
+    const auto pythia = std::make_unique<Pythia8::Pythia>();
 
     if(pythia == NULL)
     {
@@ -341,7 +332,7 @@ int main(int argc, char *argv[])
       inputFile = fopen(pythia->word("Beams:LHEF").c_str(), "r");
       if(inputFile)
       {
-        reader = new DelphesLHEFReader;
+        reader = std::make_unique<DelphesLHEFReader>();
         reader->SetInputFile(inputFile);
 
         branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
@@ -408,7 +399,7 @@ int main(int argc, char *argv[])
       readStopWatch.Stop();
 
       procStopWatch.Start();
-      ConvertInput(eventCounter, pythia, branchEvent, factory,
+      ConvertInput(eventCounter, pythia.get(), branchEvent, factory,
         allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
         &readStopWatch, &procStopWatch);
       modularDelphes->ProcessTask();
@@ -450,19 +441,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete reader;
-    delete pythia;
-    delete modularDelphes;
-    delete confReader;
-    delete treeWriter;
-    delete outputFile;
-
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(treeWriter) delete treeWriter;
-    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }

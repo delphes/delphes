@@ -22,15 +22,10 @@
 
 #include <signal.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
-
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
+#include <TApplication.h>
+#include <TFile.h>
+#include <TROOT.h>
+#include <TStopwatch.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -59,15 +54,7 @@ int main(int argc, char *argv[])
   char appName[] = "DelphesHepMC2";
   stringstream message;
   FILE *inputFile = 0;
-  TFile *outputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
-  ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0, *branchWeight = 0;
-  ExRootConfReader *confReader = 0;
-  Delphes *modularDelphes = 0;
-  DelphesFactory *factory = 0;
-  CandidatesCollection stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
-  DelphesHepMC2Reader *reader = 0;
   Int_t i, maxEvents, skipEvents;
   Long64_t length, eventCounter;
 
@@ -93,20 +80,19 @@ int main(int argc, char *argv[])
 
   try
   {
-    outputFile = TFile::Open(argv[2], "CREATE");
-
-    if(outputFile == NULL)
+    const auto outputFile = std::make_unique<TFile>(argv[2], "CREATE");
+    if(!outputFile)
     {
       message << "can't create output file " << argv[2];
       throw runtime_error(message.str());
     }
 
-    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
 
-    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-    branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
+    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class()),
+                     *branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
 
-    confReader = new ExRootConfReader;
+    const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
     maxEvents = confReader->GetInt("::MaxEvents", 0);
@@ -122,16 +108,16 @@ int main(int argc, char *argv[])
       throw runtime_error("SkipEvents must be zero or positive");
     }
 
-    modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
-    modularDelphes->SetTreeWriter(treeWriter);
+    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
+    modularDelphes->SetConfReader(confReader.get());
+    modularDelphes->SetTreeWriter(treeWriter.get());
 
-    factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    DelphesFactory *factory = modularDelphes->GetFactory();
+    CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
+                         stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
+                         partonOutputArray = modularDelphes->ExportArray("partons");
 
-    reader = new DelphesHepMC2Reader;
+    const auto reader = std::make_unique<DelphesHepMC2Reader>();
 
     modularDelphes->InitTask();
 
@@ -226,18 +212,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete reader;
-    delete modularDelphes;
-    delete confReader;
-    delete treeWriter;
-    delete outputFile;
-
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(treeWriter) delete treeWriter;
-    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }
