@@ -25,8 +25,8 @@
  *
  */
 
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
@@ -115,6 +115,22 @@ TObject *DelphesFactory::New(TClass *cl)
   object = branch->NewEntry();
   object->Clear();
   return object;
+}
+
+//------------------------------------------------------------------------------
+
+bool DelphesFactory::Has(std::string_view collectionName) const
+{
+  return fMemorySlots.count(std::string{collectionName}) > 0;
+}
+
+//------------------------------------------------------------------------------
+
+void DelphesFactory::throwAttachingFailure(std::string_view collectionName) const
+{
+  std::ostringstream os;
+  os << "Failed to attach memory segment to the collection name '" << collectionName << "'.";
+  throw std::runtime_error(os.str());
 }
 
 //------------------------------------------------------------------------------
