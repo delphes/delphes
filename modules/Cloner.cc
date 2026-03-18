@@ -28,8 +28,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include <TObjArray.h>
-
 class Cloner: public DelphesModule
 {
 public:
@@ -37,31 +35,26 @@ public:
 
   void Init() override
   {
-    // import input array(s)
+    // import input array
     fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-    fItInputArray.reset(fInputArray->MakeIterator());
 
-    // create output array(s)
+    // create output array
     fOutputArray = ExportArray(GetString("OutputArray", "jets"));
   }
   void Process() override
   {
-    Candidate *candidate;
-
+    fOutputArray->clear();
     // loop over all input candidates
-    fItInputArray->Reset();
-    while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+    for(const auto &candidate : *fInputArray)
     {
-      candidate = static_cast<Candidate *>(candidate->Clone());
-      fOutputArray->Add(candidate);
+      auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+      fOutputArray->emplace_back(new_candidate);
     }
   }
 
 private:
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------

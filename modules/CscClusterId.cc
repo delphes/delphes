@@ -32,7 +32,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -52,10 +51,8 @@ private:
   const std::unique_ptr<DelphesCscClusterFormula> fEtaFormula; //!
   Double_t fEtaCutMax;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -69,7 +66,6 @@ void CscClusterId::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
@@ -79,12 +75,12 @@ void CscClusterId::Init()
 
 void CscClusterId::Process()
 {
-  Candidate *candidate;
+  fOutputArray->clear();
+
   Double_t Ehad, decayR, decayZ, NStationEff, eta;
   Double_t signPz, cosTheta;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
@@ -103,7 +99,7 @@ void CscClusterId::Process()
     float eta_cut = fEtaFormula->Eval(decayR, decayZ);
     if(gRandom->Uniform() > NStationEff * (abs(eta) < fEtaCutMax) + (1.0 - NStationEff) * (abs(eta) < eta_cut)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

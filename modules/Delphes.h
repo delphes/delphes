@@ -30,9 +30,6 @@
 
 #include "classes/DelphesModule.h"
 
-class TFolder;
-class TObjArray;
-
 class ExRootTreeWriter;
 
 class DelphesFactory;
@@ -49,9 +46,7 @@ public:
 
   void Clear(Option_t *option = "");
 
-  virtual void Init();
-  virtual void Process();
-  virtual void Finish();
+  void Init() override;
 
 private:
   const std::unique_ptr<DelphesFactory> fFactory;

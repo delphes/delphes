@@ -27,7 +27,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -42,13 +41,10 @@ public:
 private:
   Double_t fDeltaR;
 
-  const TObjArray *fDressingInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItDressingInputArray; //!
+  CandidatesCollection fDressingInputArray; //!
+  CandidatesCollection fCandidateInputArray; //!
 
-  const TObjArray *fCandidateInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItCandidateInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -57,12 +53,9 @@ void LeptonDressing::Init()
 {
   fDeltaR = GetDouble("DeltaRMax", 0.4);
 
-  // import input arrasy
+  // import input arrays
   fDressingInputArray = ImportArray(GetString("DressingInputArray", "Calorimeter/photons"));
-  fItDressingInputArray.reset(fDressingInputArray->MakeIterator());
-
   fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"));
-  fItCandidateInputArray.reset(fCandidateInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
@@ -72,19 +65,18 @@ void LeptonDressing::Init()
 
 void LeptonDressing::Process()
 {
-  Candidate *candidate = nullptr, *dressing = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
   TLorentzVector momentum;
 
   // loop over all input candidate
-  fItCandidateInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItCandidateInputArray->Next())))
+  for(const auto &candidate : *fCandidateInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
     // loop over all input tracks
-    fItDressingInputArray->Reset();
     momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-    while((dressing = static_cast<Candidate *>(fItDressingInputArray->Next())))
+    for(const auto &dressing : *fDressingInputArray)
     {
       const TLorentzVector &dressingMomentum = dressing->Momentum;
       if(dressingMomentum.Pt() > 0.1)
@@ -96,13 +88,12 @@ void LeptonDressing::Process()
       }
     }
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
-    candidate->Momentum += momentum;
-    candidate->AddCandidate(mother);
+    new_candidate->Momentum += momentum;
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

@@ -32,7 +32,8 @@
 
 #include <stdio.h>
 
-class TObjArray;
+#include "classes/DelphesClasses.h"
+
 class TStopwatch;
 class TDatabasePDG;
 class TLorentzVector;
@@ -52,9 +53,9 @@ public:
   bool EventReady();
 
   bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    CandidatesCollection &allParticleOutputArray,
+    CandidatesCollection &stableParticleOutputArray,
+    CandidatesCollection &partonOutputArray);
 
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
@@ -66,9 +67,9 @@ private:
 
   void AnalyzeParticle(DelphesFactory *factory);
 
-  void FinalizeParticles(TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  void FinalizeParticles(CandidatesCollection &allParticleOutputArray,
+    CandidatesCollection &stableParticleOutputArray,
+    CandidatesCollection &partonOutputArray);
 
   FILE *fInputFile;
 
@@ -94,7 +95,7 @@ private:
   int fParticleCode, fPID, fParticleStatus, fOutVertexCode;
   double fPx, fPy, fPz, fE, fMass;
 
-  std::vector<std::pair<TLorentzVector *, TObjArray *> > fVertices;
+  std::vector<std::pair<TLorentzVector *, CandidatesCollection> > fVertices;
   std::vector<int> fParticles;
 
   std::map<int, int> fInVertexMap;

@@ -32,7 +32,8 @@
 
 #include <stdio.h>
 
-class TObjArray;
+#include "classes/DelphesClasses.h"
+
 class TStopwatch;
 class TDatabasePDG;
 class ExRootTreeBranch;
@@ -50,9 +51,9 @@ public:
   bool EventReady();
 
   bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    CandidatesCollection &allParticleOutputArray,
+    CandidatesCollection &stableParticleOutputArray,
+    CandidatesCollection &partonOutputArray);
 
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
@@ -61,11 +62,11 @@ public:
 
 private:
   void AnalyzeParticle(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+    CandidatesCollection &allParticleOutputArray,
+    CandidatesCollection &stableParticleOutputArray,
+    CandidatesCollection &partonOutputArray);
 
-  void FinalizeParticles(TObjArray *allParticleOutputArray);
+  void FinalizeParticles(const CandidatesCollection &allParticleOutputArray);
 
   FILE *fInputFile;
 

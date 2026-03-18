@@ -103,9 +103,9 @@ bool DelphesHepMC3Reader::EventReady()
 //---------------------------------------------------------------------------
 
 bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+  CandidatesCollection &allParticleOutputArray,
+  CandidatesCollection &stableParticleOutputArray,
+  CandidatesCollection &partonOutputArray)
 {
   map<int, pair<int, int> >::iterator itDaughterMap;
   char key, momentumUnit[4], positionUnit[3];
@@ -388,7 +388,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
 {
   int index;
   TLorentzVector *position;
-  TObjArray *array;
+  CandidatesCollection array;
   vector<int>::iterator itParticle;
   map<int, int>::iterator itVertexMap;
 
@@ -402,7 +402,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
     if(candidate && code > 0) fInVertexMap[code] = index;
 
     position = factory->New<TLorentzVector>();
-    array = factory->NewArray();
+    array = factory->Book<CandidatesCollection>("HepMC3Vertex");
     position->SetXYZT(0.0, 0.0, 0.0, 0.0);
     fVertices.push_back(make_pair(position, array));
   }
@@ -415,7 +415,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
 
   if(candidate)
   {
-    array->Add(candidate);
+    array->emplace_back(candidate);
   }
   else
   {
@@ -450,12 +450,12 @@ void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory)
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOutputArray,
+  CandidatesCollection &stableParticleOutputArray,
+  CandidatesCollection &partonOutputArray)
 {
   TLorentzVector *position;
-  TObjArray *array;
+  CandidatesCollection array;
   Candidate *candidate;
   Candidate *candidateDaughter;
   TParticlePDG *pdgParticle;
@@ -463,18 +463,17 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
   map<int, int>::iterator itVertexMap;
   map<int, pair<int, int> >::iterator itMotherMap;
   map<int, pair<int, int> >::iterator itDaughterMap;
-  size_t i;
-  int j, code, counter;
+  int code, counter;
 
   counter = 0;
-  for(i = 0; i < fVertices.size(); ++i)
+  for(size_t i = 0; i < fVertices.size(); ++i)
   {
     position = fVertices[i].first;
     array = fVertices[i].second;
 
-    for(j = 0; j < array->GetEntriesFast(); ++j)
+    for(size_t j = 0; j < array->size(); ++j)
     {
-      candidate = static_cast<Candidate *>(array->At(j));
+      candidate = static_cast<Candidate *>(array->at(j));
 
       candidate->Position = *position;
       if(fPositionCoefficient != 1.0)
@@ -523,7 +522,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
         }
       }
 
-      allParticleOutputArray->Add(candidate);
+      allParticleOutputArray->emplace_back(candidate);
 
       ++counter;
 
@@ -537,18 +536,18 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
 
       if(candidate->Status == 1)
       {
-        stableParticleOutputArray->Add(candidate);
+        stableParticleOutputArray->emplace_back(candidate);
       }
       else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
       {
-        partonOutputArray->Add(candidate);
+        partonOutputArray->emplace_back(candidate);
       }
     }
   }
 
-  for(j = 0; j < allParticleOutputArray->GetEntriesFast(); ++j)
+  for(size_t j = 0; j < allParticleOutputArray->size(); ++j)
   {
-    candidate = static_cast<Candidate *>(allParticleOutputArray->At(j));
+    candidate = static_cast<Candidate *>(allParticleOutputArray->at(j));
 
     itMotherMap = fMotherMap.find(candidate->M1);
     if(itMotherMap == fMotherMap.end())
@@ -581,7 +580,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
       {
         candidate->D1 = itDaughterMap->second.first;
         candidate->D2 = itDaughterMap->second.second;
-        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->At(candidate->D1));
+        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->at(candidate->D1));
         const TLorentzVector &decayPosition = candidateDaughter->Position;
         candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }

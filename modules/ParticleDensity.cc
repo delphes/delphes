@@ -30,7 +30,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TH2F.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -43,10 +42,8 @@ public:
   void Process() override;
 
 private:
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 
   Bool_t fUseMomentumVector; // !
   std::unique_ptr<TH2F> fHisto; //!
@@ -58,7 +55,6 @@ void ParticleDensity::Init()
 {
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -91,12 +87,12 @@ void ParticleDensity::Init()
 
 void ParticleDensity::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   fHisto->Reset();
 
   // loop over all input candidates to fill histogram
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     if(fUseMomentumVector)
       fHisto->Fill(candidate->Momentum.Eta(), candidate->Momentum.Phi());
@@ -108,8 +104,7 @@ void ParticleDensity::Process()
   fHisto->Scale(1., "width");
 
   // loop over all input candidates to assign multiplicity
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     Int_t ieta, iphi;
     if(fUseMomentumVector)
@@ -123,7 +118,7 @@ void ParticleDensity::Process()
       iphi = fHisto->GetYaxis()->FindBin(candidate->Position.Phi());
     }
     candidate->ParticleDensity = fHisto->GetBinContent(ieta, iphi);
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

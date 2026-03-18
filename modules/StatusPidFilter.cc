@@ -30,7 +30,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TMath.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -47,10 +46,8 @@ private:
 
   Bool_t fRequireNotPileup; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 namespace
@@ -116,31 +113,19 @@ bool hasBottom(int pdgCode)
   return false;
 }
 
-bool isTauDaughter(int pdgCode, int M1, const TObjArray *fInputArray)
+bool isTauDaughter(int pdgCode, int M1, const CandidatesCollection &fInputArray)
 {
   //not needed, just to speed up the code - can be further refined but gives only negligible improvement:
-  if(pdgCode == 15 || pdgCode < 11 || (pdgCode > 22 && pdgCode < 100) || pdgCode > 1000)
-    return false;
-
-  if(M1 < 0)
-    return false;
-
-  Candidate *mother = nullptr;
-  mother = static_cast<Candidate *>(fInputArray->At(M1));
-  if(TMath::Abs(mother->PID) == 15)
-    return true;
-
+  if(pdgCode == 15 || pdgCode < 11 || (pdgCode > 22 && pdgCode < 100) || pdgCode > 1000) return false;
+  if(M1 < 0) return false;
+  if(auto *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 15) return true;
   return false;
 }
 
-bool isWDaughter(int M1, const TObjArray *fInputArray)
+bool isWDaughter(int M1, const CandidatesCollection &fInputArray)
 {
   if(M1 < 0) return false;
-
-  Candidate *mother;
-  mother = static_cast<Candidate *>(fInputArray->At(M1));
-  if(TMath::Abs(mother->PID) == 24) return true;
-
+  if(auto *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 24) return true;
   return false;
 }
 
@@ -158,10 +143,8 @@ void StatusPidFilter::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
 }
 
@@ -169,12 +152,12 @@ void StatusPidFilter::Init()
 
 void StatusPidFilter::Process()
 {
-  Candidate *candidate = nullptr;
+  fOutputArray->clear();
+
   Int_t status, pdgCode;
   Bool_t pass;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     status = candidate->Status;
     pdgCode = TMath::Abs(candidate->PID);
@@ -223,7 +206,7 @@ void StatusPidFilter::Process()
     // not pileup particles
     if(fRequireNotPileup && (candidate->IsPU > 0)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

@@ -30,7 +30,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -52,11 +51,8 @@ private:
   Int_t fNtracks;
   Bool_t fUse3D;
 
-  const TObjArray *fTrackInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItTrackInputArray; //!
-
-  const TObjArray *fJetInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItJetInputArray; //!
+  CandidatesCollection fTrackInputArray; //!
+  CandidatesCollection fJetInputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -74,32 +70,23 @@ void TrackCountingBTagging::Init()
 
   fUse3D = GetBool("Use3D", false);
 
-  // import input array(s)
-
+  // import input arrays
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
-
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray.reset(fJetInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
 void TrackCountingBTagging::Process()
 {
-  Candidate *jet = nullptr, *track = nullptr;
-
   Double_t jpx, jpy, jpz;
   Double_t dr, tpt;
   Double_t xd, yd, zd, d0, dd0, dz, ddz, sip;
 
-  Int_t sign;
-
-  Int_t count;
+  Int_t sign, count;
 
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(const auto &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
     jpx = jetMomentum.Px();
@@ -107,11 +94,10 @@ void TrackCountingBTagging::Process()
     jpz = jetMomentum.Pz();
 
     // loop over all input tracks
-    fItTrackInputArray->Reset();
     count = 0;
-    // stop once we have enough tracks
-    while((track = static_cast<Candidate *>(fItTrackInputArray->Next())) and count < fNtracks)
+    for(const auto &track : *fTrackInputArray)
     {
+      if(count >= fNtracks) break; // stop once we have enough tracks
       const TLorentzVector &trkMomentum = track->Momentum;
       tpt = trkMomentum.Pt();
       if(tpt < fPtMin) continue;

@@ -30,7 +30,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include <set>
@@ -62,14 +61,12 @@ private:
 
   std::vector<Long64_t> fTowerHits;
 
-  const TObjArray *fTrackInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItTrackInputArray; //!
+  CandidatesCollection fTrackInputArray; //!
 
-  TObjArray *fTrackOutputArray{nullptr}; //!
-
-  TObjArray *fChargedHadronOutputArray{nullptr}; //!
-  TObjArray *fElectronOutputArray{nullptr}; //!
-  TObjArray *fMuonOutputArray{nullptr}; //!
+  CandidatesCollection fTrackOutputArray; //!
+  CandidatesCollection fChargedHadronOutputArray; //!
+  CandidatesCollection fElectronOutputArray; //!
+  CandidatesCollection fMuonOutputArray; //!
 
   void FillTrack();
 };
@@ -124,7 +121,6 @@ void DenseTrackFilter::Init()
   fEtaPhiRes = GetDouble("EtaPhiRes", 0.003);
 
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMergerProp/tracks"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   fTrackOutputArray = ExportArray(GetString("TrackOutputArray", "tracks"));
   fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
@@ -147,6 +143,11 @@ void DenseTrackFilter::Finish()
 
 void DenseTrackFilter::Process()
 {
+  fTrackOutputArray->clear();
+  fChargedHadronOutputArray->clear();
+  fElectronOutputArray->clear();
+  fMuonOutputArray->clear();
+
   Candidate *track = nullptr;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
@@ -163,9 +164,8 @@ void DenseTrackFilter::Process()
   fTowerHits.clear();
 
   // loop over all tracks
-  fItTrackInputArray->Reset();
   number = -1;
-  while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  for(const auto &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -225,7 +225,7 @@ void DenseTrackFilter::Process()
     if(flags & 1)
     {
       ++fTowerTrackHits;
-      track = static_cast<Candidate *>(fTrackInputArray->At(number));
+      track = static_cast<Candidate *>(fTrackInputArray->at(number));
       momentum = track->Momentum;
 
       if(momentum.Pt() > ptmax)
@@ -245,39 +245,38 @@ void DenseTrackFilter::Process()
 
 void DenseTrackFilter::FillTrack()
 {
-  Candidate *candidate = nullptr, *track = nullptr;
   Double_t pt, eta, phi, m;
   Int_t numberOfCandidates;
 
   // saving track with highest pT that hit the tower
   if(fTowerTrackHits < 1) return;
 
-  numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
+  numberOfCandidates = fBestTrack->GetCandidates().size();
   if(numberOfCandidates < 1) return;
 
-  track = static_cast<Candidate *>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
-  candidate = static_cast<Candidate *>(track->Clone());
-  pt = candidate->Momentum.Pt();
-  eta = candidate->Momentum.Eta();
-  phi = candidate->Momentum.Phi();
-  m = candidate->Momentum.M();
+  auto *track = static_cast<Candidate *>(fBestTrack->GetCandidates().at(numberOfCandidates - 1));
+  auto *new_candidate = static_cast<Candidate *>(track->Clone());
+  pt = new_candidate->Momentum.Pt();
+  eta = new_candidate->Momentum.Eta();
+  phi = new_candidate->Momentum.Phi();
+  m = new_candidate->Momentum.M();
 
   eta = gRandom->Gaus(eta, fEtaPhiRes);
   phi = gRandom->Gaus(phi, fEtaPhiRes);
-  candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-  candidate->AddCandidate(track);
+  new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+  new_candidate->AddCandidate(track);
 
-  fTrackOutputArray->Add(candidate);
-  switch(TMath::Abs(candidate->PID))
+  fTrackOutputArray->emplace_back(new_candidate);
+  switch(TMath::Abs(new_candidate->PID))
   {
   case 11:
-    fElectronOutputArray->Add(candidate);
+    fElectronOutputArray->emplace_back(new_candidate);
     break;
   case 13:
-    fMuonOutputArray->Add(candidate);
+    fMuonOutputArray->emplace_back(new_candidate);
     break;
   default:
-    fChargedHadronOutputArray->Add(candidate);
+    fChargedHadronOutputArray->emplace_back(new_candidate);
   }
 }
 

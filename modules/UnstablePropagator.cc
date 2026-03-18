@@ -31,7 +31,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -50,8 +49,7 @@ private:
 
   Bool_t fDebug;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
+  CandidatesCollection fInputArray; //!
 
   std::vector<Int_t> DaughterIndices(Candidate *candidate);
   void PrintPart(TString prefix, Candidate *candidate);
@@ -89,23 +87,19 @@ void UnstablePropagator::Init()
   // import array with output from filter/classifier module
 
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 }
 
 //------------------------------------------------------------------------------
 
 void UnstablePropagator::Process()
 {
-  Candidate *candidate = nullptr, *daughter = nullptr;
   TLorentzVector particlePosition, particleMomentum;
   Double_t pt2, q;
   Double_t lof, x, y, z;
 
-  fItInputArray->Reset();
-
   if(fDebug) cout << "-------------   new event -----------------" << endl;
 
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     particlePosition = candidate->Position;
     particleMomentum = candidate->Momentum;
@@ -147,7 +141,7 @@ void UnstablePropagator::Process()
       continue;
     }
 
-    daughter = static_cast<Candidate *>(fInputArray->At(daughters_indices.at(0)));
+    auto *daughter = static_cast<Candidate *>(fInputArray->at(daughters_indices.at(0)));
     lof = FlightDistance(candidate, daughter) * 1.0E-3;
 
     //fLmin = 0.01;
@@ -226,12 +220,12 @@ void UnstablePropagator::ComputeChainFlightDistances(TString prefix, Candidate *
   }
   else
   {
-    daughter = static_cast<Candidate *>(fInputArray->At(drange.at(0)));
+    daughter = static_cast<Candidate *>(fInputArray->at(drange.at(0)));
     mother->L = FlightDistance(mother, daughter);
     if(fDebug) cout << prefix << " flight distance: " << mother->L << endl;
     for(unsigned long i = 0; i < drange.size(); i++)
     {
-      daughter = static_cast<Candidate *>(fInputArray->At(drange.at(i)));
+      daughter = static_cast<Candidate *>(fInputArray->at(drange.at(i)));
       ComputeChainFlightDistances(prefix, daughter);
     }
   }
@@ -262,7 +256,7 @@ void UnstablePropagator::PropagateAndUpdateChain(TString prefix, Candidate *cand
     updatedPosition = PropagatedPosition(mother);
     for(unsigned long i = 0; i < drange.size(); i++)
     {
-      daughter = static_cast<Candidate *>(fInputArray->At(drange.at(i)));
+      daughter = static_cast<Candidate *>(fInputArray->at(drange.at(i)));
       //  if (fDebug) cout<<prefix<<" propagating and updating chain, daughter:"<<endl;
       if(fDebug) PrintPart(prefix, daughter);
       daughter->Position = updatedPosition;
@@ -412,10 +406,10 @@ Int_t UnstablePropagator::Index(Candidate *particle)
   }
   */
   Int_t j = -1;
-  for(Int_t i = 0; i < fInputArray->GetEntriesFast(); i++)
+  for(size_t i = 0; i < fInputArray->size(); i++)
   {
     j = i;
-    if(fInputArray->At(i)->GetUniqueID() == particle->GetUniqueID())
+    if(fInputArray->at(i)->GetUniqueID() == particle->GetUniqueID())
     {
       break;
     }

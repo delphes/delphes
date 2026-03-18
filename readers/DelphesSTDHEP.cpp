@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
   DelphesFactory *factory = 0;
-  TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
+  CandidatesCollection allParticleOutputArray, stableParticleOutputArray, partonOutputArray;
   DelphesSTDHEPReader *reader = 0;
   Int_t i, maxEvents, skipEvents;
   Long64_t length, eventCounter;

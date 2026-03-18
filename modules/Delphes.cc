@@ -32,21 +32,12 @@
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
 #include "ExRootAnalysis/ExRootConfReader.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
-#include "TDatabasePDG.h"
-#include "TFolder.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TROOT.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <TFolder.h>
+#include <TROOT.h>
+#include <TRandom3.h>
 
 #include <algorithm>
 #include <iostream>
@@ -58,8 +49,7 @@
 
 using namespace std;
 
-Delphes::Delphes(const char *name) :
-  fFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
+Delphes::Delphes(const char *name) : fFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
 {
   TFolder *folder;
 
@@ -143,13 +133,5 @@ void Delphes::Init()
     }
   }
 }
-
-//------------------------------------------------------------------------------
-
-void Delphes::Process() {}
-
-//------------------------------------------------------------------------------
-
-void Delphes::Finish() {}
 
 //------------------------------------------------------------------------------

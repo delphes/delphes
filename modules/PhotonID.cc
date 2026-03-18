@@ -34,7 +34,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -42,10 +41,9 @@ using namespace std;
 class PhotonID: public DelphesModule
 {
 public:
-  PhotonID() :
-    fPromptFormula(std::make_unique<DelphesFormula>()),
-    fNonPromptFormula(std::make_unique<DelphesFormula>()),
-    fFakeFormula(std::make_unique<DelphesFormula>()) {}
+  PhotonID() : fPromptFormula(std::make_unique<DelphesFormula>()),
+               fNonPromptFormula(std::make_unique<DelphesFormula>()),
+               fFakeFormula(std::make_unique<DelphesFormula>()) {}
 
   void Init() override;
   void Process() override;
@@ -55,18 +53,14 @@ private:
   const std::unique_ptr<DelphesFormula> fNonPromptFormula;
   const std::unique_ptr<DelphesFormula> fFakeFormula;
 
-  // import input arrays
-  const TObjArray *fInputPhotonArray{nullptr};
-  std::unique_ptr<TIterator> fItInputPhotonArray;
-
-  // use filtered collection for speed
-  const TObjArray *fInputGenArray{nullptr};
-  std::unique_ptr<TIterator> fItInputGenArray;
-
   Double_t fPTMin;
   Double_t fRelIsoMax;
 
-  TObjArray *fOutputArray{nullptr}; //!
+  // import input arrays
+  CandidatesCollection fInputPhotonArray;
+  CandidatesCollection fInputGenArray; // use filtered collection for speed
+
+  CandidatesCollection fOutputArray; //!
 
   Bool_t isFake(const Candidate *obj);
 };
@@ -82,11 +76,7 @@ void PhotonID::Init()
 
   // import input arrays
   fInputPhotonArray = ImportArray(GetString("InputPhotonArray", "PhotonIsolation/photons"));
-  fItInputPhotonArray.reset(fInputPhotonArray->MakeIterator());
-
-  // use filtered collection for speed
-  fInputGenArray = ImportArray(GetString("InputGenArray", "GenParticleFilter/filteredParticles"));
-  fItInputGenArray.reset(fInputGenArray->MakeIterator());
+  fInputGenArray = ImportArray(GetString("InputGenArray", "GenParticleFilter/filteredParticles")); // use filtered collection for speed
 
   // min pt to be considered, make sure this threshold is higher than threshold in particle filter
   fPTMin = GetDouble("PTMin", 10.0);
@@ -102,23 +92,21 @@ void PhotonID::Init()
 
 void PhotonID::Process()
 {
-  Candidate *candidate = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
   Double_t pt, eta, phi, e;
   Double_t relIso;
   Bool_t isolated;
 
   //cout<< "----  new event ---------"<<endl;
 
-  fItInputPhotonArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputPhotonArray->Next())))
+  for(const auto &candidate : *fInputPhotonArray)
   {
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->AddCandidate(candidate);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->AddCandidate(mother);
-
-    const TLorentzVector &candidatePosition = candidate->Position;
-    const TLorentzVector &candidateMomentum = candidate->Momentum;
+    const TLorentzVector &candidatePosition = new_candidate->Position;
+    const TLorentzVector &candidateMomentum = new_candidate->Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
@@ -129,20 +117,20 @@ void PhotonID::Process()
     //cout<< "              ---- photon -----: "<<pt<<","<<eta<<","<<phi<<endl;
 
     // find out if photon matches does not match photon in gen collection and apply fae efficiency
-    if(isFake(candidate))
+    if(isFake(new_candidate))
     {
       //cout<<"                    Fake!"<<endl;
 
       if(gRandom->Uniform() > fFakeFormula->Eval(pt, eta, phi, e)) continue;
       //cout<<"                    passed"<<endl;
-      candidate->Status = 3;
-      fOutputArray->Add(candidate);
+      new_candidate->Status = 3;
+      fOutputArray->emplace_back(new_candidate);
     }
 
     // if matches photon in gen collection
     else
     {
-      relIso = candidate->IsolationVar;
+      relIso = new_candidate->IsolationVar;
       isolated = (relIso < 0.3);
       //cout<<"                    Prompt!:   "<<relIso<<endl;
 
@@ -152,8 +140,8 @@ void PhotonID::Process()
         //cout<<"                       isolated!:   "<<relIso<<endl;
         if(gRandom->Uniform() > fPromptFormula->Eval(pt, eta, phi, e)) continue;
         //cout<<"                       passed"<<endl;
-        candidate->Status = 1;
-        fOutputArray->Add(candidate);
+        new_candidate->Status = 1;
+        fOutputArray->emplace_back(new_candidate);
       }
 
       // if non-isolated apply non-prompt formula
@@ -162,8 +150,8 @@ void PhotonID::Process()
         //cout<<"                       non-isolated!:   "<<relIso<<endl;
         if(gRandom->Uniform() > fNonPromptFormula->Eval(pt, eta, phi, e)) continue;
         //cout<<"                       passed"<<endl;
-        candidate->Status = 2;
-        fOutputArray->Add(candidate);
+        new_candidate->Status = 2;
+        fOutputArray->emplace_back(new_candidate);
       }
     }
   }
@@ -173,14 +161,10 @@ void PhotonID::Process()
 
 Bool_t PhotonID::isFake(const Candidate *obj)
 {
-
   const TLorentzVector &mom_rec = obj->Momentum;
 
   Bool_t matches = false;
-  fItInputGenArray->Reset();
-  Candidate *gen;
-
-  while((gen = static_cast<Candidate *>(fItInputGenArray->Next())))
+  for(const auto &gen : *fInputGenArray)
   {
     const TLorentzVector &mom_gen = gen->Momentum;
     Int_t status = gen->Status;

@@ -28,8 +28,6 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include <TObjArray.h>
-
 #include <vector>
 
 using namespace std;
@@ -41,14 +39,13 @@ public:
 
   void Init() override;
   void Process() override;
-  void Finish() override;
 
 private:
   Bool_t fUseUniqueID;
 
-  using InputMap = std::vector<std::pair<std::unique_ptr<TIterator>, TObjArray *> >;
+  using InputMap = std::vector<std::pair<CandidatesCollection, CandidatesCollection> >;
 
-  Bool_t Unique(Candidate *candidate, InputMap::iterator itInputMap);
+  Bool_t Unique(Candidate *candidate, InputMap::const_iterator itInputMap);
 
   InputMap fInputMap; //!
 };
@@ -64,77 +61,42 @@ void UniqueObjectFinder::Init()
 
   ExRootConfParam param = GetParam("InputArray");
   Long_t i, size;
-  const TObjArray *array = nullptr;
 
   fInputMap.clear();
 
   size = param.GetSize();
   for(i = 0; i < size / 2; ++i)
-  {
-    array = ImportArray(param[i * 2].GetString());
-    auto iterator = std::unique_ptr<TIterator>(array->MakeIterator());
-
-    fInputMap.push_back(make_pair(std::move(iterator), ExportArray(param[i * 2 + 1].GetString())));
-  }
-}
-
-//------------------------------------------------------------------------------
-
-void UniqueObjectFinder::Finish()
-{
-  fInputMap.clear();
+    fInputMap.emplace_back(std::make_pair(ImportArray(param[i * 2].GetString()), ExportArray(param[i * 2 + 1].GetString())));
 }
 
 //------------------------------------------------------------------------------
 
 void UniqueObjectFinder::Process()
 {
-  Candidate *candidate = nullptr;
-  InputMap::iterator itInputMap;
-  TObjArray *array = nullptr;
+  for(const auto &[input_collection, output_collection] : fInputMap)
+    output_collection->clear();
 
-  // loop over all input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
+  for(auto itInputMap = fInputMap.cbegin(); itInputMap != fInputMap.cend(); ++itInputMap) // loop over all input arrays
   {
-    auto &iterator = itInputMap->first;
-    array = itInputMap->second;
-
-    // loop over all candidates
-    iterator->Reset();
-    while((candidate = static_cast<Candidate *>(iterator->Next())))
+    for(const auto &candidate : *(itInputMap->first)) // loop over all candidates
     {
       if(Unique(candidate, itInputMap))
-      {
-        array->Add(candidate);
-      }
+        itInputMap->second->emplace_back(candidate);
     }
   }
 }
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::iterator itInputMap)
+Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::const_iterator itInputMap)
 {
-  Candidate *previousCandidate = nullptr;
-  InputMap::iterator previousItInputMap;
-  TObjArray *array = nullptr;
-
-  // loop over previous arrays
-  for(previousItInputMap = fInputMap.begin(); previousItInputMap != itInputMap; ++previousItInputMap)
-  {
-    array = previousItInputMap->second;
-    TIter iterator(array);
-
-    // loop over all candidates
-    iterator.Reset();
-    while((previousCandidate = static_cast<Candidate *>(iterator.Next())))
-    {
+  for(auto previousItInputMap = fInputMap.cbegin(); previousItInputMap != itInputMap; ++previousItInputMap)
+  { // loop over previous arrays
+    for(const auto &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
       if(fUseUniqueID)
       {
         if(candidate->GetUniqueID() == previousCandidate->GetUniqueID())
-        {
           return kFALSE;
-        }
       }
       else
       {
@@ -143,7 +105,6 @@ Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::iterator itInp
           return kFALSE;
         }
       }
-    }
   }
 
   return kTRUE;

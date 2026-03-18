@@ -14,7 +14,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -27,16 +26,12 @@ public:
   void Process() override;
 
 private:
-  TObjArray *fInputArray{nullptr};
+  CandidatesCollection fInputArray;
+  CandidatesCollection fTrackInputArray;
+  CandidatesCollection fJetInputArray;
+  CandidatesCollection fBeamSpotInputArray;
 
-  TObjArray *fTrackInputArray{nullptr};
-  TObjArray *fJetInputArray{nullptr};
-  TObjArray *fBeamSpotInputArray{nullptr};
-
-  std::unique_ptr<TIterator> fItTrackInputArray;
-  std::unique_ptr<TIterator> fItJetInputArray;
-
-  TObjArray *fOutputArray{nullptr};
+  CandidatesCollection fOutputArray;
 
   std::string fMethod;
 };
@@ -46,15 +41,9 @@ private:
 void VertexSorter::Init()
 {
   fInputArray = ImportArray(GetString("InputArray", "VertexFinder/vertices"));
-
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "VertexFinder/tracks"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
-
   if(string(GetString("JetInputArray", "")) != "")
-  {
     fJetInputArray = ImportArray(GetString("JetInputArray", ""));
-    fItJetInputArray.reset(fJetInputArray->MakeIterator());
-  }
 
   // import beamspot
   try
@@ -86,7 +75,9 @@ static Bool_t secondAscending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_
 
 void VertexSorter::Process()
 {
-  Candidate *candidate = nullptr, *jetCandidate = nullptr, *beamSpotCandidate = nullptr;
+  fOutputArray->clear();
+
+  Candidate *beamSpotCandidate = nullptr;
   map<Int_t, UInt_t> clusterIDToIndex;
   map<Int_t, UInt_t>::const_iterator itClusterIDToIndex;
   map<Int_t, Double_t> clusterIDToSumPT2;
@@ -94,23 +85,22 @@ void VertexSorter::Process()
   vector<pair<Int_t, Double_t> > sortedClusterIDs;
   vector<pair<Int_t, Double_t> >::const_iterator itSortedClusterIDs;
 
-  for(Int_t iCluster = 0; iCluster < fInputArray->GetEntries(); iCluster++)
+  for(size_t iCluster = 0; iCluster < fInputArray->size(); iCluster++)
   {
-    const Candidate &cluster = *((Candidate *)fInputArray->At(iCluster));
+    const Candidate &cluster = *((Candidate *)fInputArray->at(iCluster));
     clusterIDToIndex[cluster.ClusterIndex] = iCluster;
     clusterIDToSumPT2[cluster.ClusterIndex] = 0.0;
   }
 
   if(fMethod == "BTV")
   {
-    if(!fJetInputArray)
+    if(fJetInputArray->empty())
     {
       cout << "BTV PV sorting selected, but no jet collection given!" << endl;
       throw 0;
     }
 
-    fItTrackInputArray->Reset();
-    while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
+    for(const auto &candidate : *fTrackInputArray)
     {
       if(candidate->Momentum.Pt() < 1.0)
         continue;
@@ -119,8 +109,7 @@ void VertexSorter::Process()
       TLorentzVector p(candidate->Momentum.Px(), candidate->Momentum.Py(), candidate->Momentum.Pz(), candidate->Momentum.E());
       Bool_t isInJet = false;
 
-      fItJetInputArray->Reset();
-      while((jetCandidate = static_cast<Candidate *>(fItJetInputArray->Next())))
+      for(const auto &jetCandidate : *fJetInputArray)
       {
         if(jetCandidate->Momentum.Pt() < 30.0)
           continue;
@@ -143,29 +132,23 @@ void VertexSorter::Process()
   }
   else if(fMethod == "GenClosest")
   {
-    if(!fBeamSpotInputArray)
-    {
-      cout << "GenClosest PV sorting selected, but no beamspot collection given!" << endl;
-      throw 0;
-    }
-    if(!fBeamSpotInputArray->GetSize())
+    if(fBeamSpotInputArray->empty())
     {
       cout << "Beamspot collection is empty!" << endl;
       throw 0;
     }
 
-    beamSpotCandidate = (Candidate *)fBeamSpotInputArray->At(0);
-    for(Int_t iCluster = 0; iCluster < fInputArray->GetEntries(); iCluster++)
+    beamSpotCandidate = (Candidate *)fBeamSpotInputArray->at(0);
+    for(size_t iCluster = 0; iCluster < fInputArray->size(); iCluster++)
     {
-      const Candidate &cluster = *((Candidate *)fInputArray->At(iCluster));
+      const Candidate &cluster = *((Candidate *)fInputArray->at(iCluster));
       sortedClusterIDs.push_back(make_pair(cluster.ClusterIndex, fabs(cluster.Position.Z() - beamSpotCandidate->Position.Z())));
     }
     sort(sortedClusterIDs.begin(), sortedClusterIDs.end(), secondAscending);
   }
   else if(fMethod == "GenBest")
   {
-    fItTrackInputArray->Reset();
-    while((candidate = static_cast<Candidate *>(fItTrackInputArray->Next())))
+    for(const auto &candidate : *fTrackInputArray)
     {
       if(candidate->IsPU)
         continue;
@@ -192,14 +175,14 @@ void VertexSorter::Process()
   }
   for(itSortedClusterIDs = sortedClusterIDs.begin(); itSortedClusterIDs != sortedClusterIDs.end(); ++itSortedClusterIDs)
   {
-    Candidate *cluster = (Candidate *)fInputArray->At(clusterIDToIndex.at(itSortedClusterIDs->first));
+    Candidate *cluster = (Candidate *)fInputArray->at(clusterIDToIndex.at(itSortedClusterIDs->first));
     if(fMethod == "BTV")
       cluster->BTVSumPT2 = itSortedClusterIDs->second;
     else if(fMethod == "GenClosest")
       cluster->GenDeltaZ = itSortedClusterIDs->second;
     else if(fMethod == "GenBest")
       cluster->GenSumPT2 = itSortedClusterIDs->second;
-    fOutputArray->Add(cluster);
+    fOutputArray->emplace_back(cluster);
   }
 }
 

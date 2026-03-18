@@ -60,9 +60,7 @@ int main(int argc, char *argv[])
   stringstream message;
   FILE *inputFile = 0;
   DelphesFactory *factory = 0;
-  TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  TIterator *itParticle = 0;
-  Candidate *candidate = 0;
+  CandidatesCollection stableParticleOutputArray, allParticleOutputArray, partonOutputArray;
   DelphesPileUpWriter *writer = 0;
   DelphesSTDHEPReader *reader = 0;
   Int_t i;
@@ -91,11 +89,9 @@ int main(int argc, char *argv[])
     writer = new DelphesPileUpWriter(argv[1]);
 
     factory = new DelphesFactory("ObjectFactory");
-    allParticleOutputArray = factory->NewPermanentArray();
-    stableParticleOutputArray = factory->NewPermanentArray();
-    partonOutputArray = factory->NewPermanentArray();
-
-    itParticle = stableParticleOutputArray->MakeIterator();
+    allParticleOutputArray = factory->Book<CandidatesCollection>("allParticles");
+    stableParticleOutputArray = factory->Book<CandidatesCollection>("stableParticles");
+    partonOutputArray = factory->Book<CandidatesCollection>("partons");
 
     reader = new DelphesSTDHEPReader;
 
@@ -149,8 +145,7 @@ int main(int argc, char *argv[])
         {
           ++eventCounter;
 
-          itParticle->Reset();
-          while((candidate = static_cast<Candidate *>(itParticle->Next())))
+          for(const auto &candidate : *stableParticleOutputArray)
           {
             const TLorentzVector &position = candidate->Position;
             const TLorentzVector &momentum = candidate->Momentum;

@@ -32,7 +32,6 @@
 #include <TF1.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 #include <TVector3.h>
 
@@ -49,18 +48,15 @@ public:
   void Process() override;
 
 private:
-  Double_t fRadius, fRadius2, fHalfLength;
-  Double_t fEtaMin, fEtaMax;
-
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
-
   const std::unique_ptr<DelphesCylindricalFormula> fConversionMap; //!
   const std::unique_ptr<TF1> fDecayXsec; //!
 
+  Double_t fRadius, fRadius2, fHalfLength;
+  Double_t fEtaMin, fEtaMax;
   Double_t fStep;
+
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -80,12 +76,9 @@ void PhotonConversions::Init()
   fConversionMap->Compile(GetString("ConversionMap", "0.0"));
 
   // import array with output from filter/classifier module
-
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
-  // create output arrays
-
+  // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
 }
 
@@ -93,7 +86,8 @@ void PhotonConversions::Init()
 
 void PhotonConversions::Process()
 {
-  Candidate *candidate, *ep, *em;
+  fOutputArray->clear();
+
   TLorentzVector candidatePosition, candidateMomentum;
   TVector3 pos_i;
   Double_t px, py, pz, pt, pt2, e, eta, phi;
@@ -106,13 +100,11 @@ void PhotonConversions::Process()
   Double_t rate, p_conv, x1, x2;
   Bool_t converted;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-
     if(candidate->PID != 22)
     {
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
     }
     else
     {
@@ -205,8 +197,8 @@ void PhotonConversions::Process()
           x1 = fDecayXsec->GetRandom();
           x2 = 1 - x1;
 
-          ep = static_cast<Candidate *>(candidate->Clone());
-          em = static_cast<Candidate *>(candidate->Clone());
+          auto *ep = static_cast<Candidate *>(candidate->Clone());
+          auto *em = static_cast<Candidate *>(candidate->Clone());
 
           ep->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
           em->Position.SetXYZT(x_i * 1.0E3, y_i * 1.0E3, z_i * 1.0E3, candidatePosition.T() + nsteps * dt * e * 1.0E3);
@@ -223,13 +215,13 @@ void PhotonConversions::Process()
           ep->IsFromConversion = 1;
           em->IsFromConversion = 1;
 
-          fOutputArray->Add(em);
-          fOutputArray->Add(ep);
+          fOutputArray->emplace_back(em);
+          fOutputArray->emplace_back(ep);
 
           break;
         }
       }
-      if(!converted) fOutputArray->Add(candidate);
+      if(!converted) fOutputArray->emplace_back(candidate);
     }
   }
 }

@@ -39,7 +39,6 @@
 #include "ExRootAnalysis/ExRootResult.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 #include <algorithm>
 #include <vector>
@@ -73,13 +72,10 @@ private:
 
   std::vector<Int_t> fPdgCodes;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fParticleInputArray;
 
-  const TObjArray *fParticleInputArray{nullptr};
-  std::unique_ptr<TIterator> fItParticleInputArray;
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -112,12 +108,9 @@ void LLPFilter::Init()
   fRequireCharge = GetBool("RequireCharge", false);
   fCharge = GetInt("Charge", 1);
 
-  // import input array
+  // import input arrays
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
-
   fParticleInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
 
   param = GetParam("PdgCode");
   size = param.GetSize();
@@ -138,18 +131,14 @@ void LLPFilter::Init()
 
 void LLPFilter::Process()
 {
-  Candidate *candidate = nullptr;
-  Int_t pdgCode;
-  Double_t pt, eta;
-  Candidate *tempCandidate = nullptr;
+  fOutputArray->clear();
 
-  Candidate *daughter = nullptr;
-  Int_t daughterPdg;
+  Int_t pdgCode, daughterPdg;
+  Double_t pt, eta;
 
   // loop over particles to find LLP
-  fItInputArray->Reset();
   int index = -1;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     index++;
 
@@ -170,11 +159,9 @@ void LLPFilter::Process()
     // loop over particles to find LLP daughters and assign EM and hadronic energy
     candidate->Eem = 0.0;
     candidate->Ehad = 0.0;
-    fItParticleInputArray->Reset();
 
-    while((daughter = static_cast<Candidate *>(fItParticleInputArray->Next())))
+    for(const auto &daughter : *fParticleInputArray)
     {
-
       daughterPdg = daughter->PID;
       if(daughter->Status != 1) continue;
       if(daughter->IsPU) continue;
@@ -184,10 +171,10 @@ void LLPFilter::Process()
       const TLorentzVector &daughterMomentum = daughter->Momentum;
 
       // look for mother until find LLP or reach the top of the tree
-      tempCandidate = daughter;
+      Candidate *tempCandidate = daughter;
       while(tempCandidate->M1 != -1 && tempCandidate->M1 != index)
       {
-        tempCandidate = static_cast<Candidate *>(fParticleInputArray->At(tempCandidate->M1));
+        tempCandidate = static_cast<Candidate *>(fParticleInputArray->at(tempCandidate->M1));
       }
       if(tempCandidate->M1 == -1) continue;
 
@@ -205,12 +192,12 @@ void LLPFilter::Process()
         && sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2)) < fDecayRegionRMax
         && sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2)) > fDecayRegionRMin)
       {
-        fOutputArray->Add(candidate);
+        fOutputArray->emplace_back(candidate);
       }
     }
     else
     {
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
     }
   } //end of while loop
 }

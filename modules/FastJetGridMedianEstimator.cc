@@ -31,7 +31,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/ClusterSequenceArea.hh>
@@ -65,10 +64,8 @@ public:
 private:
   std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fRhoOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray;
+  CandidatesCollection fRhoOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -95,9 +92,7 @@ void FastJetGridMedianEstimator::Init()
   }
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
 }
@@ -113,7 +108,7 @@ void FastJetGridMedianEstimator::Finish()
 
 void FastJetGridMedianEstimator::Process()
 {
-  Candidate *candidate;
+  fRhoOutputArray->clear();
   TLorentzVector momentum;
   Int_t number;
   Double_t rho = 0;
@@ -127,9 +122,8 @@ void FastJetGridMedianEstimator::Process()
   inputList.clear();
 
   // loop over input objects
-  fItInputArray->Reset();
   number = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
@@ -146,11 +140,11 @@ void FastJetGridMedianEstimator::Process()
 
     rho = (*itEstimators)->rho();
 
-    candidate = factory->NewCandidate();
+    auto *candidate = factory->NewCandidate();
     candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
     candidate->Edges[0] = (*itEstimators)->rapmin();
     candidate->Edges[1] = (*itEstimators)->rapmax();
-    fRhoOutputArray->Add(candidate);
+    fRhoOutputArray->emplace_back(candidate);
   }
 }
 

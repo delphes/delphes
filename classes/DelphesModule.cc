@@ -24,9 +24,9 @@
  *
  */
 
-#include "classes/DelphesModule.h"
-
+#include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
 
 #include "ExRootAnalysis/ExRootResult.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
@@ -64,38 +64,37 @@ void DelphesModule::Finish() {}
 
 //------------------------------------------------------------------------------
 
-TObjArray *DelphesModule::ImportArray(const char *name)
+CandidatesCollection &DelphesModule::ImportArray(const char *name)
 {
-  stringstream message;
-  TObjArray *object;
-
-  object = static_cast<TObjArray *>(GetObject(Form("Export/%s", name), TObjArray::Class()));
-  if(!object)
+  auto *factory = GetFactory();
+  if(!factory)
+    throw std::runtime_error("Failed to retrieve the Delphes objects factory for module '" + std::string{GetName()} + "'.");
+  if(!factory->Has(name))
   {
+    std::ostringstream message;
     message << "can't access input list '" << name;
     message << "' in module '" << GetName() << "'";
-    throw runtime_error(message.str());
+    throw std::runtime_error(message.str());
   }
-
-  return object;
+  return factory->Attach<CandidatesCollection>(name);
 }
 
 //------------------------------------------------------------------------------
 
-TObjArray *DelphesModule::ExportArray(const char *name)
+CandidatesCollection &DelphesModule::ExportArray(const char *name)
 {
-  TObjArray *array;
-  if(!fExportFolder)
+  auto *factory = GetFactory();
+  if(!factory)
+    throw std::runtime_error("Failed to retrieve the Delphes objects factory for module '" + std::string{GetName()} + "'.");
+  std::ostringstream collectionLabel;
+  collectionLabel << GetName() << "/" << name;
+  if(factory->Has(name))
   {
-    fExportFolder = NewFolder("Export");
+    std::ostringstream message;
+    message << "Collection with name '" << name << "' and label '" << collectionLabel.str() << "'  was already booked in the memory slot.";
+    throw std::runtime_error(message.str());
   }
-
-  array = GetFactory()->NewPermanentArray();
-
-  array->SetName(name);
-  fExportFolder->Add(array);
-
-  return array;
+  return factory->Book<CandidatesCollection>(collectionLabel.str());
 }
 
 //------------------------------------------------------------------------------

@@ -29,15 +29,13 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesFilter.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootFilter.h"
-
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 
 using namespace std;
 
@@ -54,14 +52,12 @@ private:
   Double_t fEtaMax; //!
 
   std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
-  std::unique_ptr<ExRootFilter> fFilter;
+  std::unique_ptr<DelphesFilter> fFilter;
 
-  const TObjArray *fPartonInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItPartonInputArray; //!
+  CandidatesCollection fPartonInputArray; //!
+  CandidatesCollection fParticleInputArray; //!
 
-  const TObjArray *fParticleInputArray{nullptr}; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -71,17 +67,15 @@ void TaggingParticlesSkimmer::Init()
   fPTMin = GetDouble("PTMin", 15.0);
   fEtaMax = GetDouble("EtaMax", 2.5);
 
-  // import input array
+  // import input arrays
   fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray.reset(fPartonInputArray->MakeIterator());
-
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
 
   fClassifier = std::make_unique<TauTaggingPartonClassifier>(fParticleInputArray);
   fClassifier->fPTMin = GetDouble("PTMin", 15.0);
   fClassifier->fEtaMax = GetDouble("EtaMax", 2.5);
 
-  fFilter = std::make_unique<ExRootFilter>(fPartonInputArray);
+  fFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
 
   // output array
   fOutputArray = ExportArray(GetString("OutputArray", "taggingParticles"));
@@ -91,27 +85,25 @@ void TaggingParticlesSkimmer::Init()
 
 void TaggingParticlesSkimmer::Process()
 {
-  Candidate *candidate = nullptr, *tau = nullptr, *daughter = nullptr;
+  fOutputArray->clear();
+
   TLorentzVector tauMomentum;
   Double_t pt, eta;
-  TObjArray *tauArray = nullptr;
+  CandidatesCollection tauArray;
   Int_t pdgCode, i;
 
   // first select hadronic taus and replace them by visible part
   fFilter->Reset();
   tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
-  if(tauArray == 0) return;
-
-  TIter itTauArray(tauArray);
+  if(tauArray->empty()) return;
 
   // loop over all input taus
-  itTauArray.Reset();
-  while((tau = static_cast<Candidate *>(itTauArray.Next())))
+  for(const auto &tau : *tauArray)
   {
     if(tau->D1 < 0) continue;
 
-    if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+    if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
     {
       throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
     }
@@ -120,21 +112,20 @@ void TaggingParticlesSkimmer::Process()
 
     for(i = tau->D1; i <= tau->D2; ++i)
     {
-      daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
+      auto *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
       if(TMath::Abs(daughter->PID) == 16) continue;
       tauMomentum += daughter->Momentum;
     }
 
-    candidate = static_cast<Candidate *>(tau->Clone());
+    auto *candidate = static_cast<Candidate *>(tau->Clone());
     candidate->Momentum = tauMomentum;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 
   // then add all other partons (except tau's to avoid double counting)
 
-  fItPartonInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItPartonInputArray->Next())))
+  for(const auto &candidate : *fPartonInputArray)
   {
     pdgCode = TMath::Abs(candidate->PID);
     if(pdgCode == 15) continue;
@@ -145,7 +136,7 @@ void TaggingParticlesSkimmer::Process()
     eta = TMath::Abs(candidate->Momentum.Eta());
     if(eta > fEtaMax) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 

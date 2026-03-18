@@ -31,7 +31,6 @@
 #include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -48,10 +47,8 @@ private:
   const std::unique_ptr<DelphesFormula> fResolutionFormula;
   Int_t fVertexTimeMode;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -63,7 +60,6 @@ void TimeSmearing::Init()
 
   // import track input array
   fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -73,15 +69,15 @@ void TimeSmearing::Init()
 
 void TimeSmearing::Process()
 {
-  Candidate *candidate, *mother;
+  fOutputArray->clear();
+
   Double_t tf_smeared, tf;
   Double_t eta, energy;
   Double_t timeResolution;
 
   const Double_t c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -95,14 +91,13 @@ void TimeSmearing::Process()
     timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
     tf_smeared = gRandom->Gaus(tf, timeResolution);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
-    candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
-    candidate->ErrorT = timeResolution * 1.0E3 * c_light;
+    new_candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
+    new_candidate->ErrorT = timeResolution * 1.0E3 * c_light;
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

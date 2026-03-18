@@ -32,7 +32,6 @@
 #include <TrackCovariance/TrkUtil.h>
 
 #include <TLorentzVector.h>
-#include <TObjArray.h>
 #include <TVectorD.h>
 
 using namespace std;
@@ -56,10 +55,8 @@ private:
 
   const std::unique_ptr<TrkUtil> fTrackUtil;
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
 
 //------------------------------------------------------------------------------
@@ -89,7 +86,6 @@ void ClusterCounting::Init()
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // create output array
   fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
@@ -99,15 +95,14 @@ void ClusterCounting::Init()
 
 void ClusterCounting::Process()
 {
-  Candidate *candidate = nullptr, *mother = nullptr, *particle = nullptr;
+  fOutputArray->clear();
+
   Double_t mass, trackLength, Ncl;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
-
     // converting to meters
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     // converting to meters
     const TLorentzVector &candidatePosition = particle->Position * 1e-03;
@@ -118,19 +113,18 @@ void ClusterCounting::Process()
 
     trackLength = fTrackUtil->TrkLen(Par);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     Ncl = 0.;
     if(fTrackUtil->IonClusters(Ncl, mass, Par))
     {
-      candidate->Nclusters = Ncl;
-      candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
+      new_candidate->Nclusters = Ncl;
+      new_candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
     }
 
-    candidate->AddCandidate(mother);
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 

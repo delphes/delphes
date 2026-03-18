@@ -29,20 +29,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
-
-#include "TClonesArray.h"
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
+#include <TApplication.h>
+#include <TClonesArray.h>
+#include <TFile.h>
+#include <TROOT.h>
+#include <TStopwatch.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesStream.h"
+
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
@@ -84,7 +80,7 @@ int main(int argc, char *argv[])
 
   const Double_t c_light = 2.99792458E8;
 
-  TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
+  CandidatesCollection allParticleOutputArray, stableParticleOutputArray, partonOutputArray;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
 
@@ -216,17 +212,17 @@ int main(int argc, char *argv[])
           candidate->Charge = gen->Charge;
           candidate->Mass = gen->Mass;
 
-          allParticleOutputArray->Add(candidate);
+          allParticleOutputArray->emplace_back(candidate);
 
           pdgCode = TMath::Abs(gen->PID);
 
           if(gen->Status == 1)
           {
-            stableParticleOutputArray->Add(candidate);
+            stableParticleOutputArray->emplace_back(candidate);
           }
           else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
           {
-            partonOutputArray->Add(candidate);
+            partonOutputArray->emplace_back(candidate);
           }
         }
 

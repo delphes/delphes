@@ -29,48 +29,33 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include <TObjArray.h>
-
 class RecoPuFilter: public DelphesModule
 {
 public:
   RecoPuFilter() = default;
 
-  void Init() override;
-  void Process() override;
+  void Init() override
+  {
+    // import input array
+    fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
+
+    // create output array
+    fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
+  }
+  void Process() override
+  {
+    fOutputArray->clear();
+    for(const auto &candidate : *fInputArray)
+    {
+      if(candidate->IsRecoPU) continue;
+      fOutputArray->emplace_back(candidate);
+    }
+  }
 
 private:
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 };
-
-//------------------------------------------------------------------------------
-
-void RecoPuFilter::Init()
-{
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void RecoPuFilter::Process()
-{
-  Candidate *candidate = nullptr;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
-  {
-    if(candidate->IsRecoPU) continue;
-    fOutputArray->Add(candidate);
-  }
-}
 
 //------------------------------------------------------------------------------
 

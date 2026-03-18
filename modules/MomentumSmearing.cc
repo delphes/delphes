@@ -32,7 +32,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -50,10 +49,8 @@ private:
 
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  const TObjArray *fInputArray{nullptr}; //!
-  std::unique_ptr<TIterator> fItInputArray; //!
-
-  TObjArray *fOutputArray{nullptr}; //!
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
 
   Double_t fUseMomentumVector; //!
 };
@@ -65,9 +62,8 @@ void MomentumSmearing::Init()
   // read resolution formula
   fFormula->Compile(GetString("ResolutionFormula", "0.0"));
 
-  // import input arrays
+  // import input array
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray.reset(fInputArray->MakeIterator());
 
   // switch to compute momentum smearing based on momentum vector eta, phi
   fUseMomentumVector = GetBool("UseMomentumVector", false);
@@ -80,11 +76,11 @@ void MomentumSmearing::Init()
 
 void MomentumSmearing::Process()
 {
-  Candidate *candidate = nullptr, *mother = nullptr;
+  fOutputArray->clear();
+
   Double_t pt, eta, phi, e, m, res;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(const auto &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -111,16 +107,15 @@ void MomentumSmearing::Process()
 
     //if(pt <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-    //candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
-    candidate->TrackResolution = res;
-    candidate->AddCandidate(mother);
+    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    //new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
+    new_candidate->TrackResolution = res;
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 //----------------------------------------------------------------

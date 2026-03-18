@@ -858,4 +858,6 @@ private:
   ClassDef(Candidate, 6)
 };
 
+using CandidatesCollection = std::shared_ptr<std::vector<Candidate *> >;
+
 #endif // DelphesClasses_h

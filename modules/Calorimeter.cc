@@ -37,7 +37,6 @@
 
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include <algorithm>
@@ -52,10 +51,8 @@ class Calorimeter: public DelphesModule
 public:
   Calorimeter() : fECalResolutionFormula(std::make_unique<DelphesFormula>()),
                   fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
-                  fECalTowerTrackArray(std::make_unique<TObjArray>()),
-                  fItECalTowerTrackArray(fECalTowerTrackArray->MakeIterator()),
-                  fHCalTowerTrackArray(std::make_unique<TObjArray>()),
-                  fItHCalTowerTrackArray(fHCalTowerTrackArray->MakeIterator()) {}
+                  fECalTowerTrackArray(std::make_shared<std::vector<Candidate *> >()),
+                  fHCalTowerTrackArray(std::make_shared<std::vector<Candidate *> >()) {}
 
   void Init() override;
   void Process() override;
@@ -64,6 +61,9 @@ public:
 private:
   typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
   typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
+
+  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
+  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
   Candidate *fTower{nullptr};
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
@@ -101,27 +101,21 @@ private:
   std::vector<Double_t> fECalTrackFractions;
   std::vector<Double_t> fHCalTrackFractions;
 
-  const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
-  const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
+  // input collections
+  CandidatesCollection fParticleInputArray; //!
+  CandidatesCollection fTrackInputArray; //!
 
-  std::unique_ptr<TIterator> fItParticleInputArray; //!
-  std::unique_ptr<TIterator> fItTrackInputArray; //!
+  // stored output collections
+  CandidatesCollection fTowerOutputArray; //!
+  CandidatesCollection fPhotonOutputArray; //!
 
-  const TObjArray *fParticleInputArray{nullptr}; //!
-  const TObjArray *fTrackInputArray{nullptr}; //!
+  CandidatesCollection fEFlowTrackOutputArray; //!
+  CandidatesCollection fEFlowPhotonOutputArray; //!
+  CandidatesCollection fEFlowNeutralHadronOutputArray; //!
 
-  TObjArray *fTowerOutputArray{nullptr}; //!
-  TObjArray *fPhotonOutputArray{nullptr}; //!
-
-  TObjArray *fEFlowTrackOutputArray{nullptr}; //!
-  TObjArray *fEFlowPhotonOutputArray{nullptr}; //!
-  TObjArray *fEFlowNeutralHadronOutputArray{nullptr}; //!
-
-  const std::unique_ptr<TObjArray> fECalTowerTrackArray; //!
-  const std::unique_ptr<TIterator> fItECalTowerTrackArray; //!
-
-  const std::unique_ptr<TObjArray> fHCalTowerTrackArray; //!
-  const std::unique_ptr<TIterator> fItHCalTowerTrackArray; //!
+  // unstored collections
+  const CandidatesCollection fECalTowerTrackArray; //!
+  const CandidatesCollection fHCalTowerTrackArray; //!
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
@@ -215,10 +209,7 @@ void Calorimeter::Init()
 
   // import array with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fItParticleInputArray.reset(fParticleInputArray->MakeIterator());
-
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray.reset(fTrackInputArray->MakeIterator());
 
   // create output arrays
   fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -244,6 +235,12 @@ void Calorimeter::Finish()
 
 void Calorimeter::Process()
 {
+  fTowerOutputArray->clear();
+  fPhotonOutputArray->clear();
+  fEFlowTrackOutputArray->clear();
+  fEFlowPhotonOutputArray->clear();
+  fEFlowNeutralHadronOutputArray->clear();
+
   Candidate *particle, *track;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
@@ -271,10 +268,9 @@ void Calorimeter::Process()
   fHCalTrackFractions.clear();
 
   // loop over all particles
-  fItParticleInputArray->Reset();
   number = -1;
   fTowerRmax = 0.;
-  while((particle = static_cast<Candidate *>(fItParticleInputArray->Next())))
+  for(const auto &particle : *fParticleInputArray)
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
@@ -322,9 +318,8 @@ void Calorimeter::Process()
   }
 
   // loop over all tracks
-  fItTrackInputArray->Reset();
   number = -1;
-  while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  for(const auto &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -416,8 +411,8 @@ void Calorimeter::Process()
       fTowerTrackHits = 0;
       fTowerPhotonHits = 0;
 
-      fECalTowerTrackArray->Clear();
-      fHCalTowerTrackArray->Clear();
+      fECalTowerTrackArray->clear();
+      fHCalTowerTrackArray->clear();
     }
 
     // check for track hits
@@ -425,7 +420,7 @@ void Calorimeter::Process()
     {
       ++fTowerTrackHits;
 
-      track = static_cast<Candidate *>(fTrackInputArray->At(number));
+      track = static_cast<Candidate *>(fTrackInputArray->at(number));
       momentum = track->Momentum;
       position = track->Position;
 
@@ -450,7 +445,7 @@ void Calorimeter::Process()
           energyGuess = momentum.E();
 
         fECalTrackSigma += (track->TrackResolution) * energyGuess * (track->TrackResolution) * energyGuess;
-        fECalTowerTrackArray->Add(track);
+        fECalTowerTrackArray->emplace_back(track);
       }
 
       else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] > 1.0E-9)
@@ -463,12 +458,12 @@ void Calorimeter::Process()
           energyGuess = momentum.E();
 
         fHCalTrackSigma += (track->TrackResolution) * energyGuess * (track->TrackResolution) * energyGuess;
-        fHCalTowerTrackArray->Add(track);
+        fHCalTowerTrackArray->emplace_back(track);
       }
 
       else if(fECalTrackFractions[number] < 1.0E-9 && fHCalTrackFractions[number] < 1.0E-9)
       {
-        fEFlowTrackOutputArray->Add(track);
+        fEFlowTrackOutputArray->emplace_back(track);
       }
 
       continue;
@@ -477,7 +472,7 @@ void Calorimeter::Process()
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
 
-    particle = static_cast<Candidate *>(fParticleInputArray->At(number));
+    particle = static_cast<Candidate *>(fParticleInputArray->at(number));
     momentum = particle->Momentum;
     position = particle->Position;
 
@@ -508,7 +503,6 @@ void Calorimeter::Process()
 
 void Calorimeter::FinalizeTower()
 {
-  Candidate *track, *tower, *mother;
   Double_t energy, pt, eta, phi, r;
   Double_t ecalEnergy, hcalEnergy;
   Double_t ecalNeutralEnergy, hcalNeutralEnergy;
@@ -593,10 +587,10 @@ void Calorimeter::FinalizeTower()
   {
     if(fTowerPhotonHits > 0 && fTowerTrackHits == 0)
     {
-      fPhotonOutputArray->Add(fTower);
+      fPhotonOutputArray->emplace_back(fTower);
     }
 
-    fTowerOutputArray->Add(fTower);
+    fTowerOutputArray->emplace_back(fTower);
   }
 
   // fill energy flow candidates
@@ -614,7 +608,7 @@ void Calorimeter::FinalizeTower()
   if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
     // create new photon tower assuming null mass
-    tower = static_cast<Candidate *>(fTower->Clone());
+    auto *tower = static_cast<Candidate *>(fTower->Clone());
     pt = ecalNeutralEnergy / TMath::CosH(eta);
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalNeutralEnergy);
@@ -622,17 +616,15 @@ void Calorimeter::FinalizeTower()
     tower->Ehad = 0.0;
     tower->PID = 22;
 
-    fEFlowPhotonOutputArray->Add(tower);
+    fEFlowPhotonOutputArray->emplace_back(tower);
 
     //clone tracks
-    fItECalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate *>(fItECalTowerTrackArray->Next())))
+    for(const auto &track : *fECalTowerTrackArray)
     {
-      mother = track;
-      track = static_cast<Candidate *>(track->Clone());
-      track->AddCandidate(mother);
+      auto *new_track = static_cast<Candidate *>(track->Clone());
+      new_track->AddCandidate(track);
 
-      fEFlowTrackOutputArray->Add(track);
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 
@@ -646,16 +638,14 @@ void Calorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fECalTrackEnergy;
 
     //rescale tracks
-    fItECalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate *>(fItECalTowerTrackArray->Next())))
+    for(const auto &track : *fECalTowerTrackArray)
     {
-      mother = track;
-      track = static_cast<Candidate *>(track->Clone());
-      track->AddCandidate(mother);
+      auto *new_track = static_cast<Candidate *>(track->Clone());
+      new_track->AddCandidate(track);
 
-      track->Momentum *= rescaleFactor;
+      new_track->Momentum *= rescaleFactor;
 
-      fEFlowTrackOutputArray->Add(track);
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 
@@ -663,24 +653,22 @@ void Calorimeter::FinalizeTower()
   if(hcalNeutralEnergy > fHCalEnergyMin && hcalNeutralSigma > fHCalEnergySignificanceMin)
   {
     // create new photon tower
-    tower = static_cast<Candidate *>(fTower->Clone());
+    auto *tower = static_cast<Candidate *>(fTower->Clone());
     pt = hcalNeutralEnergy / TMath::CosH(eta);
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalNeutralEnergy);
     tower->Ehad = hcalNeutralEnergy;
     tower->Eem = 0.0;
 
-    fEFlowNeutralHadronOutputArray->Add(tower);
+    fEFlowNeutralHadronOutputArray->emplace_back(tower);
 
     //clone tracks
-    fItHCalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate *>(fItHCalTowerTrackArray->Next())))
+    for(const auto &track : *fHCalTowerTrackArray)
     {
-      mother = track;
-      track = static_cast<Candidate *>(track->Clone());
-      track->AddCandidate(mother);
+      auto *new_track = static_cast<Candidate *>(track->Clone());
+      new_track->AddCandidate(track);
 
-      fEFlowTrackOutputArray->Add(track);
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 
@@ -694,16 +682,14 @@ void Calorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fHCalTrackEnergy;
 
     //rescale tracks
-    fItHCalTowerTrackArray->Reset();
-    while((track = static_cast<Candidate *>(fItHCalTowerTrackArray->Next())))
+    for(const auto &track : *fHCalTowerTrackArray)
     {
-      mother = track;
-      track = static_cast<Candidate *>(track->Clone());
-      track->AddCandidate(mother);
-      track->Momentum *= rescaleFactor;
-      track->Momentum.SetPtEtaPhiM(track->Momentum.Pt() * rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
+      auto *new_track = static_cast<Candidate *>(track->Clone());
+      new_track->AddCandidate(track);
+      new_track->Momentum *= rescaleFactor;
+      new_track->Momentum.SetPtEtaPhiM(track->Momentum.Pt() * rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
 
-      fEFlowTrackOutputArray->Add(track);
+      fEFlowTrackOutputArray->emplace_back(new_track);
     }
   }
 }
