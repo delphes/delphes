@@ -45,35 +45,34 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesStream.h"
 
+#include "ExRootAnalysis/ExRootProgressBar.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
 using namespace std;
 
-static const int kBufferSize = 16384;
-
-//---------------------------------------------------------------------------
-
 DelphesHepMC3Reader::DelphesHepMC3Reader() :
-  fInputFile(0), fBuffer(0), fPDG(0),
-  fVertexCounter(-2), fParticleCounter(-1)
-{
-  fBuffer = new char[kBufferSize];
-
-  fPDG = TDatabasePDG::Instance();
-}
+  fPDG(TDatabasePDG::Instance()), fVertexCounter(-2), fParticleCounter(-1) {}
 
 //---------------------------------------------------------------------------
 
-DelphesHepMC3Reader::~DelphesHepMC3Reader()
+void DelphesHepMC3Reader::LoadInputFile(std::string_view inputFile)
 {
-  if(fBuffer) delete[] fBuffer;
-}
+  if(fInputFile) fclose(fInputFile); // unload previous streams
+  Clear(); // clear all buffers
+  if(fInputFile = fopen(std::string{inputFile}.data(), "r"); fInputFile == nullptr)
+  {
+    std::ostringstream message;
+    message << "can't open " << std::string{inputFile};
+    throw std::runtime_error(message.str());
+  }
+  fseek(fInputFile, 0L, SEEK_END);
+  int length = ftello(fInputFile);
+  fProgressBar = std::make_unique<ExRootProgressBar>(length);
+  fseek(fInputFile, 0L, SEEK_SET);
 
-//---------------------------------------------------------------------------
-
-void DelphesHepMC3Reader::SetInputFile(FILE *inputFile)
-{
-  fInputFile = inputFile;
+  if(length <= 0)
+    fclose(fInputFile);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -112,11 +111,11 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
   int rc, code;
   double weight;
 
-  if(!fgets(fBuffer, kBufferSize, fInputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return kFALSE;
 
-  DelphesStream bufferStream(fBuffer + 1);
+  DelphesStream bufferStream(fBuffer.data() + 1);
 
-  key = fBuffer[0];
+  key = fBuffer.at(0);
 
   if(key == 'E')
   {
@@ -135,7 +134,7 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
   }
   else if(key == 'U')
   {
-    rc = sscanf(fBuffer + 1, "%3s %2s", momentumUnit, positionUnit);
+    rc = sscanf(fBuffer.data() + 1, "%3s %2s", momentumUnit, positionUnit);
 
     if(rc != 2)
     {
@@ -338,8 +337,7 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eventNumber*/,
-  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
+void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch)
 {
   HepMCEvent *element;
 
@@ -363,7 +361,7 @@ void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eve
   element->PDF1 = fPDF1;
   element->PDF2 = fPDF2;
 
-  element->ReadTime = readStopWatch->RealTime();
+  element->ReadTime = fReadStopWatch.RealTime();
   element->ProcTime = procStopWatch->RealTime();
 }
 

@@ -31,32 +31,48 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesModuleFactory.h"
 
+#include <TStopwatch.h>
+
 class DelphesFactory;
 
+class ExRootProgressBar;
 class ExRootTreeBranch;
-
-class TObjArray;
-class TStopwatch;
 
 class DelphesReader
 {
 public:
   DelphesReader() = default;
-  virtual ~DelphesReader() = default;
+  virtual ~DelphesReader();
 
-  virtual void SetInputFile(FILE *inputFile) = 0;
+  virtual void LoadInputFile(std::string_view inputFile) {}
   virtual void Clear() = 0;
   virtual bool EventReady() = 0;
 
+  void SetSkipEvents(long long);
+  void SetMaxEvents(long long);
+  unsigned long long EventCounter() const { return fEventCounter; }
+
+  virtual bool ReadEvent(DelphesFactory *factory,
+    CandidatesCollection &allParticleOutputArray,
+    CandidatesCollection &stableParticleOutputArray,
+    CandidatesCollection &partonOutputArray);
+
+  virtual void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) = 0;
+  virtual void AnalyzeWeight(ExRootTreeBranch *branch) {}
+
+protected:
   virtual bool ReadBlock(DelphesFactory *factory,
     CandidatesCollection &allParticleOutputArray,
     CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray) = 0;
+    CandidatesCollection &partonOutputArray) { return false; }
 
-  virtual void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch) = 0;
+  FILE *fInputFile{nullptr};
+  std::unique_ptr<ExRootProgressBar> fProgressBar;
+  TStopwatch fReadStopWatch;
 
-  virtual void AnalyzeWeight(ExRootTreeBranch *branch) {}
+  long long fEventCounter{0ll};
+  long long fMaxEvents{-1ll};
+  long long fSkipEvents{-1ll};
 };
 
 /// Add an event reader to the list of handled modules

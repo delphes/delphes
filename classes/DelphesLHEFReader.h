@@ -41,31 +41,26 @@ class DelphesLHEFReader: public DelphesReader
 {
 public:
   DelphesLHEFReader();
-  ~DelphesLHEFReader();
 
-  void SetInputFile(FILE *inputFile) override;
+  void LoadInputFile(std::string_view) override;
   void Clear() override;
   bool EventReady() override;
 
-  bool ReadBlock(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray) override;
-
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch) override;
+  void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) override;
 
   void AnalyzeWeight(ExRootTreeBranch *branch);
 
 private:
+  bool ReadBlock(DelphesFactory *factory,
+    CandidatesCollection &allParticleOutputArray,
+    CandidatesCollection &stableParticleOutputArray,
+    CandidatesCollection &partonOutputArray) override;
   void AnalyzeParticle(DelphesFactory *factory,
     CandidatesCollection &allParticleOutputArray,
     CandidatesCollection &stableParticleOutputArray,
     CandidatesCollection &partonOutputArray);
 
-  FILE *fInputFile;
-
-  char *fBuffer;
+  std::array<char, 16384> fBuffer;
 
   TDatabasePDG *fPDG;
 

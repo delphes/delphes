@@ -45,7 +45,8 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesXDRReader.h"
 
-#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include <ExRootAnalysis/ExRootProgressBar.h>
+#include <ExRootAnalysis/ExRootTreeBranch.h>
 
 using namespace std;
 
@@ -54,26 +55,24 @@ static const int kBufferSize = 1000000;
 //---------------------------------------------------------------------------
 
 DelphesSTDHEPReader::DelphesSTDHEPReader() :
-  fInputFile(0), fBuffer(0), fPDG(0), fBlockType(-1)
-{
-  fBuffer = new uint8_t[kBufferSize * 96 + 24];
-
-  fPDG = TDatabasePDG::Instance();
-}
+  fInputFile(0), fPDG(TDatabasePDG::Instance()), fBlockType(-1) {}
 
 //---------------------------------------------------------------------------
 
-DelphesSTDHEPReader::~DelphesSTDHEPReader()
+void DelphesSTDHEPReader::LoadInputFile(std::string_view inputFile)
 {
-  if(fBuffer) delete fBuffer;
-}
-
-//---------------------------------------------------------------------------
-
-void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
-{
-  fInputFile = inputFile;
-  fReader[0].SetFile(inputFile);
+  if(fInputFile) fclose(fInputFile); // unload previous streams
+  Clear(); // clear all buffers
+  if(fInputFile = fopen(std::string{inputFile}.data(), "r"); fInputFile == nullptr)
+  {
+    std::ostringstream message;
+    message << "can't open " << std::string{inputFile};
+    throw std::runtime_error(message.str());
+  }
+  fReader[0].SetFile(fInputFile);
+  int length = ftello(fInputFile);
+  fProgressBar = std::make_unique<ExRootProgressBar>(length);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -157,7 +156,7 @@ void DelphesSTDHEPReader::SkipBytes(int size)
 
   if(rc != 0 && errno == ESPIPE)
   {
-    fReader[0].ReadRaw(fBuffer, size);
+    fReader[0].ReadRaw(fBuffer.data(), size);
   }
 }
 
@@ -184,14 +183,14 @@ void DelphesSTDHEPReader::ReadFileHeader()
   } version;
 
   // version
-  fReader[0].ReadString(fBuffer, 100);
-  if(fBuffer[0] == '\0' || fBuffer[1] == '\0')
+  fReader[0].ReadString(fBuffer.data(), 100);
+  if(fBuffer.at(0) == '\0' || fBuffer.at(1) == '\0')
     version = UNKNOWN;
-  else if(fBuffer[0] == '1')
+  else if(fBuffer.at(0) == '1')
     version = V1;
-  else if(strncmp((char *)fBuffer, "2.01", 4) == 0)
+  else if(strncmp((char *)fBuffer.data(), "2.01", 4) == 0)
     version = V21;
-  else if(fBuffer[0] == '2')
+  else if(fBuffer.at(0) == '2')
     version = V2;
   else
     version = UNKNOWN;
@@ -251,8 +250,8 @@ void DelphesSTDHEPReader::ReadFileHeader()
 void DelphesSTDHEPReader::ReadEventTable()
 {
   // version
-  fReader[0].ReadString(fBuffer, 100);
-  if(strncmp((char *)fBuffer, "1.00", 4) == 0)
+  fReader[0].ReadString(fBuffer.data(), 100);
+  if(strncmp((char *)fBuffer.data(), "1.00", 4) == 0)
   {
     SkipBytes(8);
 
@@ -262,7 +261,7 @@ void DelphesSTDHEPReader::ReadEventTable()
     SkipArray(4);
     SkipArray(4);
   }
-  else if(strncmp((char *)fBuffer, "2.00", 4) == 0)
+  else if(strncmp((char *)fBuffer.data(), "2.00", 4) == 0)
   {
     SkipBytes(12);
 
@@ -282,12 +281,12 @@ void DelphesSTDHEPReader::ReadEventHeader()
   int skipSize = 4;
 
   // version
-  fReader[0].ReadString(fBuffer, 100);
-  if(strncmp((char *)fBuffer, "2.00", 4) == 0)
+  fReader[0].ReadString(fBuffer.data(), 100);
+  if(strncmp((char *)fBuffer.data(), "2.00", 4) == 0)
   {
     skipNTuples = true;
   }
-  else if(strncmp((char *)fBuffer, "3.00", 4) == 0)
+  else if(strncmp((char *)fBuffer.data(), "3.00", 4) == 0)
   {
     skipNTuples = true;
     skipSize = 8;
@@ -325,12 +324,12 @@ void DelphesSTDHEPReader::ReadEventHeader()
 void DelphesSTDHEPReader::ReadSTDCM1()
 {
   // version
-  fReader[0].ReadString(fBuffer, 100);
+  fReader[0].ReadString(fBuffer.data(), 100);
 
   // skip 5*4 + 2*8 = 36 bytes
   SkipBytes(36);
 
-  if((strncmp((char *)fBuffer, "1.", 2) == 0) || (strncmp((char *)fBuffer, "2.", 2) == 0) || (strncmp((char *)fBuffer, "3.", 2) == 0) || (strncmp((char *)fBuffer, "4.", 2) == 0) || (strncmp((char *)fBuffer, "5.00", 4) == 0))
+  if((strncmp((char *)fBuffer.data(), "1.", 2) == 0) || (strncmp((char *)fBuffer.data(), "2.", 2) == 0) || (strncmp((char *)fBuffer.data(), "3.", 2) == 0) || (strncmp((char *)fBuffer.data(), "4.", 2) == 0) || (strncmp((char *)fBuffer.data(), "5.00", 4) == 0))
   {
     return;
   }
@@ -338,7 +337,7 @@ void DelphesSTDHEPReader::ReadSTDCM1()
   SkipArray(1);
   SkipArray(1);
 
-  if(strncmp((char *)fBuffer, "5.01", 4) == 0)
+  if(strncmp((char *)fBuffer.data(), "5.01", 4) == 0)
   {
     return;
   }
@@ -353,7 +352,7 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   uint32_t idhepSize, isthepSize, jmohepSize, jdahepSize, phepSize, vhepSize;
 
   // version
-  fReader[0].ReadString(fBuffer, 100);
+  fReader[0].ReadString(fBuffer.data(), 100);
 
   // Extracting the event number
   fReader[0].ReadValue(&fEventNumber, 4);
@@ -369,14 +368,14 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   // 4*n + 4*n + 8*n + 8*n + 40*n + 32*n +
   // 4 + 4 + 4 + 4 + 4 + 4 = 96*n + 24
 
-  fReader[0].ReadRaw(fBuffer, 96 * fEventSize + 24);
+  fReader[0].ReadRaw(fBuffer.data(), 96 * fEventSize + 24);
 
-  fReader[1].SetBuffer(fBuffer);
-  fReader[2].SetBuffer(fBuffer + 4 * 1 + 4 * 1 * fEventSize);
-  fReader[3].SetBuffer(fBuffer + 4 * 2 + 4 * 2 * fEventSize);
-  fReader[4].SetBuffer(fBuffer + 4 * 3 + 4 * 4 * fEventSize);
-  fReader[5].SetBuffer(fBuffer + 4 * 4 + 4 * 6 * fEventSize);
-  fReader[6].SetBuffer(fBuffer + 4 * 5 + 4 * 16 * fEventSize);
+  fReader[1].SetBuffer(fBuffer.data());
+  fReader[2].SetBuffer(fBuffer.data() + 4 * 1 + 4 * 1 * fEventSize);
+  fReader[3].SetBuffer(fBuffer.data() + 4 * 2 + 4 * 2 * fEventSize);
+  fReader[4].SetBuffer(fBuffer.data() + 4 * 3 + 4 * 4 * fEventSize);
+  fReader[5].SetBuffer(fBuffer.data() + 4 * 4 + 4 * 6 * fEventSize);
+  fReader[6].SetBuffer(fBuffer.data() + 4 * 5 + 4 * 16 * fEventSize);
 
   fReader[1].ReadValue(&idhepSize, 4);
   fReader[2].ReadValue(&isthepSize, 4);
@@ -427,8 +426,7 @@ void DelphesSTDHEPReader::ReadSTDHEP4()
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eventNumber*/,
-  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
+void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch)
 {
   LHEFEvent *element;
 
@@ -443,7 +441,7 @@ void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eve
   element->AlphaQED = fAlphaQED;
   element->AlphaQCD = fAlphaQCD;
 
-  element->ReadTime = readStopWatch->RealTime();
+  element->ReadTime = fReadStopWatch.RealTime();
   element->ProcTime = procStopWatch->RealTime();
 }
 

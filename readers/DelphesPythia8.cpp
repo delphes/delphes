@@ -229,7 +229,6 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesPythia8";
   stringstream message;
-  FILE *inputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
   std::unique_ptr<DelphesLHEFReader> reader;
   Long64_t eventCounter, errorCounter;
@@ -329,11 +328,10 @@ int main(int argc, char *argv[])
     // Check if particle gun
     if(!spareFlag1)
     {
-      inputFile = fopen(pythia->word("Beams:LHEF").c_str(), "r");
-      if(inputFile)
+      if(const auto inputFile = pythia->word("Beams:LHEF"); !inputFile.empty())
       {
         reader = std::make_unique<DelphesLHEFReader>();
-        reader->SetInputFile(inputFile);
+        reader->LoadInputFile(inputFile);
 
         branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
         branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
@@ -361,7 +359,8 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
+      if(!reader || !reader->ReadEvent(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF))
+        break;
 
       if(spareFlag1)
       {
@@ -407,7 +406,7 @@ int main(int argc, char *argv[])
 
       if(reader)
       {
-        reader->AnalyzeEvent(branchEventLHEF, eventCounter, &readStopWatch, &procStopWatch);
+        reader->AnalyzeEvent(branchEventLHEF, &procStopWatch);
         reader->AnalyzeWeight(branchWeightLHEF);
       }
 
