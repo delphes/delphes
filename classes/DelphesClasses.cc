@@ -473,11 +473,8 @@ void Candidate::Copy(TObject &obj) const
   // copy cluster timing info
   copy(ECalEnergyTimePairs.begin(), ECalEnergyTimePairs.end(), back_inserter(object.ECalEnergyTimePairs));
 
-  if(!fArray.empty())
-  {
-    for(const Candidate *candidate : fArray)
-      object.AddCandidate(candidate);
-  }
+  for(const Candidate *candidate : fArray)
+    object.AddCandidate(candidate);
 }
 
 //------------------------------------------------------------------------------
