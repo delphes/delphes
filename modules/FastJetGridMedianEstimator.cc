@@ -26,30 +26,11 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
 
-#include <fastjet/ClusterSequence.hh>
-#include <fastjet/ClusterSequenceArea.hh>
-#include <fastjet/JetDefinition.hh>
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/RectangularGrid.hh>
-#include <fastjet/Selector.hh>
-#include <fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh>
-#include <fastjet/contribs/Nsubjettiness/Njettiness.hh>
-#include <fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh>
-#include <fastjet/contribs/Nsubjettiness/Nsubjettiness.hh>
-#include <fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh>
-#include <fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh>
-#include <fastjet/plugins/SISCone/fastjet/SISConePlugin.hh>
 #include <fastjet/tools/GridMedianBackgroundEstimator.hh>
-#include <fastjet/tools/JetMedianBackgroundEstimator.hh>
-
-using namespace std;
-using namespace fastjet;
-using namespace fastjet::contrib;
 
 class FastJetGridMedianEstimator: public DelphesModule
 {
@@ -58,7 +39,10 @@ public:
 
   void Init() override;
   void Process() override;
-  void Finish() override;
+  void Finish() override
+  {
+    fEstimators.clear();
+  }
 
 private:
   std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
@@ -87,7 +71,7 @@ void FastJetGridMedianEstimator::Init()
     rapMax = param[i * 4 + 1].GetDouble();
     drap = param[i * 4 + 2].GetDouble();
     dphi = param[i * 4 + 3].GetDouble();
-    fEstimators.push_back(std::make_unique<GridMedianBackgroundEstimator>(rapMin, rapMax, drap, dphi));
+    fEstimators.push_back(std::make_unique<fastjet::GridMedianBackgroundEstimator>(rapMin, rapMax, drap, dphi));
   }
 
   // import input array
@@ -98,46 +82,28 @@ void FastJetGridMedianEstimator::Init()
 
 //------------------------------------------------------------------------------
 
-void FastJetGridMedianEstimator::Finish()
-{
-  fEstimators.clear();
-}
-
-//------------------------------------------------------------------------------
-
 void FastJetGridMedianEstimator::Process()
 {
   fRhoOutputArray->clear();
-  TLorentzVector momentum;
-  Int_t number;
-  Double_t rho = 0;
-  PseudoJet jet;
-  vector<PseudoJet> inputList, outputList;
-
-  vector<std::unique_ptr<GridMedianBackgroundEstimator> >::iterator itEstimators;
 
   DelphesFactory *factory = GetFactory();
 
-  inputList.clear();
-
-  // loop over input objects
-  number = 0;
-  for(Candidate *const &candidate : *fInputArray)
+  std::vector<fastjet::PseudoJet> inputList;
+  size_t number = 0;
+  for(Candidate *const &candidate : *fInputArray) // loop over input objects
   {
-    momentum = candidate->Momentum;
-    jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
-    jet.set_user_index(number);
-    inputList.push_back(jet);
-    ++number;
+    TLorentzVector &momentum = candidate->Momentum;
+    fastjet::PseudoJet &jet = inputList.emplace_back(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
+    jet.set_user_index(number++);
   }
 
   // compute rho and store it
-
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
+  for(std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> >::iterator itEstimators = fEstimators.begin();
+    itEstimators != fEstimators.end(); ++itEstimators)
   {
     (*itEstimators)->set_particles(inputList);
 
-    rho = (*itEstimators)->rho();
+    double rho = (*itEstimators)->rho();
 
     Candidate *candidate = factory->NewCandidate();
     candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
