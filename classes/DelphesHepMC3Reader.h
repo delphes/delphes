@@ -89,7 +89,7 @@ private:
   int fParticleCode, fPID, fParticleStatus, fOutVertexCode;
   double fPx, fPy, fPz, fE, fMass;
 
-  std::vector<std::pair<TLorentzVector *, CandidatesCollection> > fVertices;
+  std::vector<std::pair<std::shared_ptr<TLorentzVector>, CandidatesCollection> > fVertices;
   std::vector<int> fParticles;
 
   std::map<int, int> fInVertexMap;
