@@ -31,16 +31,9 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 
-#include <algorithm>
 #include <vector>
 
-#include <fastjet/ClusterSequence.hh>
 #include <fastjet/ClusterSequenceArea.hh>
-#include <fastjet/JetDefinition.hh>
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/Selector.hh>
-#include <fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh>
-#include <fastjet/contribs/Nsubjettiness/Njettiness.hh>
 #include <fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh>
 #include <fastjet/contribs/Nsubjettiness/Nsubjettiness.hh>
 #include <fastjet/contribs/RecursiveTools/SoftDrop.hh>
@@ -63,11 +56,14 @@ public:
 
   void Init() override;
   void Process() override;
-  void Finish() override;
+  void Finish() override
+  {
+    fEstimators.clear();
+  }
 
 private:
-  void *fPlugin{nullptr}; //!
-  void *fRecomb{nullptr}; //!
+  std::unique_ptr<JetDefinition::Plugin> fPlugin; //!
+  std::unique_ptr<JetDefinition::Recombiner> fRecomb; //!
 
   std::unique_ptr<fastjet::contrib::AxesDefinition> fAxesDef;
   std::unique_ptr<fastjet::contrib::MeasureDefinition> fMeasureDef;
@@ -165,8 +161,6 @@ private:
 
 void FastJetFinder::Init()
 {
-  JetDefinition::Plugin *plugin = nullptr;
-  JetDefinition::Recombiner *recomb = nullptr;
   ExRootConfParam param;
   Long_t i, size;
   Double_t etaMin, etaMax;
@@ -287,16 +281,16 @@ void FastJetFinder::Init()
   switch(fJetAlgorithm)
   {
   case 1:
-    plugin = new CDFJetCluPlugin(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
-    fDefinition = std::make_unique<JetDefinition>(plugin);
+    fPlugin = std::make_unique<CDFJetCluPlugin>(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
+    fDefinition = std::make_unique<JetDefinition>(fPlugin.get());
     break;
   case 2:
-    plugin = new CDFMidPointPlugin(fSeedThreshold, fConeRadius, fConeAreaFraction, fMaxPairSize, fMaxIterations, fOverlapThreshold);
-    fDefinition = std::make_unique<JetDefinition>(plugin);
+    fPlugin = std::make_unique<CDFMidPointPlugin>(fSeedThreshold, fConeRadius, fConeAreaFraction, fMaxPairSize, fMaxIterations, fOverlapThreshold);
+    fDefinition = std::make_unique<JetDefinition>(fPlugin.get());
     break;
   case 3:
-    plugin = new SISConePlugin(fConeRadius, fOverlapThreshold, fMaxIterations, fJetPTMin);
-    fDefinition = std::make_unique<JetDefinition>(plugin);
+    fPlugin = std::make_unique<SISConePlugin>(fConeRadius, fOverlapThreshold, fMaxIterations, fJetPTMin);
+    fDefinition = std::make_unique<JetDefinition>(fPlugin.get());
     break;
   case 4:
     fDefinition = std::make_unique<JetDefinition>(kt_algorithm, fParameterR);
@@ -309,8 +303,8 @@ void FastJetFinder::Init()
     fDefinition = std::make_unique<JetDefinition>(antikt_algorithm, fParameterR);
     break;
   case 7:
-    recomb = new WinnerTakeAllRecombiner();
-    fDefinition = std::make_unique<JetDefinition>(antikt_algorithm, fParameterR, recomb, Best);
+    fRecomb = std::make_unique<WinnerTakeAllRecombiner>();
+    fDefinition = std::make_unique<JetDefinition>(antikt_algorithm, fParameterR, fRecomb.get(), Best);
     break;
   case 8:
     fNjettinessPlugin = std::make_unique<NjettinessPlugin>(fN, Njettiness::wta_kt_axes, Njettiness::unnormalized_cutoff_measure, fBeta, fRcutOff);
@@ -331,9 +325,6 @@ void FastJetFinder::Init()
     fDefinition = std::make_unique<JetDefinition>(ee_kt_algorithm);
     break;
   }
-
-  fPlugin = plugin;
-  fRecomb = recomb;
 
   ClusterSequence::print_banner();
 
@@ -367,18 +358,6 @@ void FastJetFinder::Init()
 
 //------------------------------------------------------------------------------
 
-void FastJetFinder::Finish()
-{
-  vector<TEstimatorStruct>::iterator itEstimators;
-
-  fEstimators.clear();
-
-  if(fPlugin) delete static_cast<JetDefinition::Plugin *>(fPlugin);
-  if(fRecomb) delete static_cast<JetDefinition::Recombiner *>(fRecomb);
-}
-
-//------------------------------------------------------------------------------
-
 void FastJetFinder::Process()
 {
   fOutputArray->clear();
@@ -396,7 +375,7 @@ void FastJetFinder::Process()
   Int_t charge;
   Double_t rho = 0.0;
   PseudoJet jet, area;
-  ClusterSequence *sequence;
+  std::unique_ptr<ClusterSequence> sequence;
   vector<PseudoJet> inputList, outputList, subjets;
   vector<PseudoJet>::iterator itInputList, itOutputList;
   vector<TEstimatorStruct>::iterator itEstimators;
@@ -423,13 +402,9 @@ void FastJetFinder::Process()
 
   // construct jets
   if(fAreaDefinition)
-  {
-    sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
-  }
+    sequence = std::make_unique<ClusterSequenceArea>(inputList, *fDefinition, *fAreaDefinition);
   else
-  {
-    sequence = new ClusterSequence(inputList, *fDefinition);
-  }
+    sequence = std::make_unique<ClusterSequence>(inputList, *fDefinition);
 
   // compute rho and store it
   if(fComputeRho && fAreaDefinition)
@@ -453,18 +428,12 @@ void FastJetFinder::Process()
   {
     try
     {
-      // exclusive dcut mode
-      if(fDCut > 0.0)
-      {
+      if(fDCut > 0.0) // exclusive dcut mode
         outputList = sorted_by_pt(sequence->exclusive_jets(fDCut * fDCut));
-      }
-      else
-      {
-        // exclusive njet mode
+      else // exclusive njet mode
         outputList = sorted_by_pt(sequence->exclusive_jets(fNJets));
-      }
     }
-    catch(fastjet::Error &)
+    catch(const fastjet::Error &)
     {
       outputList.clear();
     }
@@ -618,7 +587,6 @@ void FastJetFinder::Process()
 
     if(fComputeSoftDrop)
     {
-
       contrib::SoftDrop softDrop(fBetaSoftDrop, fSymmetryCutSoftDrop, fR0SoftDrop);
       fastjet::PseudoJet softdrop_jet = softDrop(*itOutputList);
 
@@ -662,7 +630,6 @@ void FastJetFinder::Process()
 
     fOutputArray->emplace_back(candidate);
   }
-  delete sequence;
 }
 
 REGISTER_MODULE("FastJetFinder", FastJetFinder);
