@@ -18,8 +18,7 @@
 
 /** \class DelphesFactory
  *
- *  Class handling creation of Candidate,
- *  TObjArray and all other objects.
+ *  Class handling creation of Candidate, and all other objects.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
@@ -31,24 +30,17 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
 #include "TClass.h"
-#include "TObjArray.h"
 
 using namespace std;
 
 //------------------------------------------------------------------------------
 
-DelphesFactory::DelphesFactory(const char *name) :
-  TNamed(name, ""), fObjArrays(0)
-{
-  fObjArrays = new ExRootTreeBranch("PermanentObjArrays", TObjArray::Class(), 0);
-}
+DelphesFactory::DelphesFactory(const char *name) : TNamed(name, "") {}
 
 //------------------------------------------------------------------------------
 
 DelphesFactory::~DelphesFactory()
 {
-  if(fObjArrays) delete fObjArrays;
-
   map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
   for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
   {
@@ -60,12 +52,6 @@ DelphesFactory::~DelphesFactory()
 
 void DelphesFactory::Clear(Option_t * /*option*/)
 {
-  set<TObject *>::iterator itPool;
-  for(itPool = fPool.begin(); itPool != fPool.end(); ++itPool)
-  {
-    (*itPool)->Clear();
-  }
-
   TProcessID::SetObjectCount(0);
 
   map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
@@ -73,15 +59,6 @@ void DelphesFactory::Clear(Option_t * /*option*/)
   {
     itBranches->second->Clear();
   }
-}
-
-//------------------------------------------------------------------------------
-
-TObjArray *DelphesFactory::NewPermanentArray()
-{
-  TObjArray *array = static_cast<TObjArray *>(fObjArrays->NewEntry());
-  fPool.insert(array);
-  return array;
 }
 
 //------------------------------------------------------------------------------
