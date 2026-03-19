@@ -19,31 +19,15 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFormula.h"
 
-#include "TString.h"
-
 #include <stdexcept>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-DelphesFormula::DelphesFormula() :
-  TFormula()
-{
-}
+DelphesFormula::DelphesFormula() : TFormula() {}
 
 //------------------------------------------------------------------------------
 
-DelphesFormula::DelphesFormula(const char * /*name*/, const char * /*expression*/) :
-  TFormula()
-{
-}
-
-//------------------------------------------------------------------------------
-
-DelphesFormula::~DelphesFormula()
-{
-}
+DelphesFormula::DelphesFormula(const char * /*name*/, const char * /*expression*/) : TFormula() {}
 
 //------------------------------------------------------------------------------
 
@@ -79,9 +63,8 @@ Int_t DelphesFormula::Compile(const char *expression)
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi, Double_t energy, const Candidate *candidate)
+Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi, Double_t energy, const Candidate *candidate) const
 {
-
   Double_t d0 = 0., dz = 0., ctgTheta = 0., radius = 0., density = 0.;
   if(candidate)
   {
