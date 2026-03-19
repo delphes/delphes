@@ -44,6 +44,7 @@ public:
   DelphesReader() = default;
   virtual ~DelphesReader() = default;
 
+  virtual void SetInputFile(FILE *inputFile) = 0;
   virtual void Clear() = 0;
   virtual bool EventReady() = 0;
 

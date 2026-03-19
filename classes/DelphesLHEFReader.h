@@ -43,8 +43,7 @@ public:
   DelphesLHEFReader();
   ~DelphesLHEFReader();
 
-  void SetInputFile(FILE *inputFile);
-
+  void SetInputFile(FILE *inputFile) override;
   void Clear() override;
   bool EventReady() override;
 
