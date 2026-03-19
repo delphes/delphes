@@ -137,7 +137,7 @@ void LLPFilter::Process()
 
   // loop over particles to find LLP
   int index = -1;
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     index++;
 
@@ -159,7 +159,7 @@ void LLPFilter::Process()
     candidate->Eem = 0.0;
     candidate->Ehad = 0.0;
 
-    for(const auto &daughter : *fParticleInputArray)
+    for(Candidate *const &daughter : *fParticleInputArray)
     {
       daughterPdg = daughter->PID;
       if(daughter->Status != 1) continue;

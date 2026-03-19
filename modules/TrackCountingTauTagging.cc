@@ -93,7 +93,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
 
   for(i = tau->D1; i <= tau->D2; ++i)
   {
-    auto *daughter1 = static_cast<Candidate *>(fParticleInputArray->at(i));
+    Candidate *daughter1 = static_cast<Candidate *>(fParticleInputArray->at(i));
     pdgCode = TMath::Abs(daughter1->PID);
     if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
       return -1;
@@ -102,7 +102,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
       if(daughter1->D1 < 0) return -1;
       for(j = daughter1->D1; j <= daughter1->D2; ++j)
       {
-        auto *daughter2 = static_cast<Candidate *>(fParticleInputArray->at(j));
+        Candidate *daughter2 = static_cast<Candidate *>(fParticleInputArray->at(j));
         pdgCode = TMath::Abs(daughter2->PID);
         if(pdgCode == 11 || pdgCode == 13) return -1;
       }
@@ -133,7 +133,7 @@ void TrackCountingTauTagging::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
 
     fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
@@ -143,7 +143,7 @@ void TrackCountingTauTagging::Init()
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
     fEfficiencyMap[0] = std::move(formula);
@@ -183,7 +183,7 @@ void TrackCountingTauTagging::Process()
   CandidatesCollection tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
-  for(const auto &jet : *fJetInputArray)
+  for(Candidate *const &jet : *fJetInputArray)
   {
     identifier = 0;
     const TLorentzVector &jetMomentum = jet->Momentum;
@@ -194,7 +194,7 @@ void TrackCountingTauTagging::Process()
     e = jetMomentum.E();
 
     // loop over all input tracks
-    for(const auto &track : *fTrackInputArray)
+    for(Candidate *const &track : *fTrackInputArray)
     {
       if((track->Momentum).Pt() < fTrackPTMin) continue;
       if(jetMomentum.DeltaR(track->Momentum) <= fDeltaRTrack)
@@ -206,7 +206,7 @@ void TrackCountingTauTagging::Process()
 
     // loop over all input taus
     bool matchedTau = false;
-    for(const auto &tau : *tauArray)
+    for(Candidate *const &tau : *tauArray)
     {
       if(tau->D1 < 0) continue;
 
@@ -219,7 +219,7 @@ void TrackCountingTauTagging::Process()
 
       for(i = tau->D1; i <= tau->D2; ++i)
       {
-        auto *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
+        Candidate *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
         if(TMath::Abs(daughter->PID) == 16) continue;
         tauMomentum += daughter->Momentum;
       }
@@ -243,7 +243,7 @@ void TrackCountingTauTagging::Process()
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
-    auto &formula = itEfficiencyMap->second;
+    std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
 
     // apply an efficency formula
 

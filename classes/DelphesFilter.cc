@@ -80,7 +80,7 @@ CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, In
   if(itMap->second.first)
   {
     itMap->second.first = kFALSE;
-    for(const auto &element : *fCollection)
+    for(Candidate *const &element : *fCollection)
     {
       result = classifier->GetCategory(element);
       if(result < 0) continue;

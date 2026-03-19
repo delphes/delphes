@@ -82,7 +82,7 @@ void TimeOfFlight::Process()
   // first compute momenta of vertices based on reconstructed tracks
   ComputeVertexMomenta();
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
@@ -116,9 +116,9 @@ void TimeOfFlight::Process()
     {
       // same as 2 but attempt at estimate beta from vertex mass and momentum
       beta = 1.;
-      for(const auto &vertex : *fVertexInputArray)
+      for(Candidate *const &vertex : *fVertexInputArray)
       {
-        for(const auto &constituent : vertex->GetCandidates())
+        for(Candidate *const &constituent : vertex->GetCandidates())
         {
           if(particle == constituent)
           {
@@ -146,7 +146,7 @@ void TimeOfFlight::Process()
     beta = l / (c_light * tof);
 
     // calculate particle mass (i.e particle ID)
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     // update time at vertex based on option
     new_candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
@@ -163,14 +163,14 @@ void TimeOfFlight::Process()
 
 void TimeOfFlight::ComputeVertexMomenta()
 {
-  for(const auto &vertex : *fVertexInputArray)
+  for(Candidate *const &vertex : *fVertexInputArray)
   {
-    for(const auto &constituent : vertex->GetCandidates())
+    for(Candidate *const &constituent : vertex->GetCandidates())
     {
-      for(const auto &track : *fInputArray)
+      for(Candidate *const &track : *fInputArray)
       {
         // get gen part that generated track
-        if(auto *particle = static_cast<Candidate *>(track->GetCandidates().at(0)); particle == constituent)
+        if(Candidate *particle = static_cast<Candidate *>(track->GetCandidates().at(0)); particle == constituent)
           vertex->Momentum += track->Momentum;
 
       } // end track loop

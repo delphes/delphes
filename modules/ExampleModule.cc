@@ -92,7 +92,7 @@ void ExampleModule::Process()
   TLorentzVector candidatePosition, candidateMomentum;
 
   // loop over all input candidates
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     candidatePosition = candidate->Position;
     candidateMomentum = candidate->Momentum;

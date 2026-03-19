@@ -91,7 +91,7 @@ void TrackPileUpSubtractor::Process()
   Double_t pt, eta, phi, e;
 
   // find z position of primary vertex
-  for(const auto &candidate : *fVertexInputArray)
+  for(Candidate *const &candidate : *fVertexInputArray)
   {
     if(!candidate->IsPU)
     {
@@ -104,9 +104,9 @@ void TrackPileUpSubtractor::Process()
   for(const auto &[input_collection, output_collection] : fInputMap)
   {
     // loop over all candidates
-    for(const auto &candidate : *input_collection)
+    for(Candidate *const &candidate : *input_collection)
     {
-      auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
+      Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
       const TLorentzVector &candidateMomentum = particle->Momentum;
 
       eta = candidateMomentum.Eta();

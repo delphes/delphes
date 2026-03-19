@@ -106,7 +106,7 @@ void Merger::Process()
   for(const auto &input_collection : fInputList)
   {
     // loop over all candidates
-    for(const auto &candidate : *input_collection)
+    for(Candidate *const &candidate : *input_collection)
     {
       const TLorentzVector &candidateMomentum = candidate->Momentum;
 
@@ -119,7 +119,7 @@ void Merger::Process()
   }
 
   {
-    auto *candidate = factory->NewCandidate();
+    Candidate *candidate = factory->NewCandidate();
 
     candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
     candidate->Momentum = momentum;
@@ -127,7 +127,7 @@ void Merger::Process()
     fMomentumOutputArray->emplace_back(candidate);
   }
   {
-    auto *candidate = factory->NewCandidate();
+    Candidate *candidate = factory->NewCandidate();
 
     candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
     candidate->Momentum.SetPtEtaPhiE(sumPT, 0.0, 0.0, sumE);

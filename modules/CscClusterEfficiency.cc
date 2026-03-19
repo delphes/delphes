@@ -71,7 +71,7 @@ void CscClusterEfficiency::Process()
 
   Double_t Ehad, Eem, decayR, decayZ;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
     decayZ = abs(candidateDecayPosition.Z());

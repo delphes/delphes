@@ -116,7 +116,7 @@ void Delphes::Init()
     itModules = modules->find(name);
     if(itModules != modules->end())
     {
-      auto module_object = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
+      std::unique_ptr<DelphesModule> module_object = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
       task = NewTask(dynamic_cast<ExRootTask *>(module_object.release()), itModules->first);
       if(task)
       {

@@ -98,10 +98,10 @@ void ClusterCounting::Process()
 
   Double_t mass, trackLength, Ncl;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     // converting to meters
-    auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     // converting to meters
     const TLorentzVector &candidatePosition = particle->Position * 1e-03;
@@ -112,7 +112,7 @@ void ClusterCounting::Process()
 
     trackLength = fTrackUtil->TrkLen(Par);
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     Ncl = 0.;
     if(fTrackUtil->IonClusters(Ncl, mass, Par))

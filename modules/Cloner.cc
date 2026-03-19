@@ -43,12 +43,8 @@ public:
   void Process() override
   {
     fOutputArray->clear();
-    // loop over all input candidates
-    for(const auto &candidate : *fInputArray)
-    {
-      auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
-      fOutputArray->emplace_back(new_candidate);
-    }
+    for(Candidate *const &candidate : *fInputArray) // loop over all input candidates
+      fOutputArray->emplace_back(static_cast<Candidate *>(candidate->Clone()));
   }
 
 private:

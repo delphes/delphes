@@ -91,7 +91,7 @@ void ParticleDensity::Process()
   fHisto->Reset();
 
   // loop over all input candidates to fill histogram
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     if(fUseMomentumVector)
       fHisto->Fill(candidate->Momentum.Eta(), candidate->Momentum.Phi());
@@ -103,7 +103,7 @@ void ParticleDensity::Process()
   fHisto->Scale(1., "width");
 
   // loop over all input candidates to assign multiplicity
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     Int_t ieta, iphi;
     if(fUseMomentumVector)

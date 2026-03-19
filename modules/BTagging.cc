@@ -71,7 +71,7 @@ void BTagging::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
 
     fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
@@ -81,7 +81,7 @@ void BTagging::Init()
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
     fEfficiencyMap[0] = std::move(formula);
@@ -100,7 +100,7 @@ void BTagging::Process()
   std::map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
 
   // loop over all input jets
-  for(const auto &jet : *fJetInputArray)
+  for(Candidate *const &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
     eta = jetMomentum.Eta();
@@ -115,7 +115,7 @@ void BTagging::Process()
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
     {
-      auto &formula = itEfficiencyMap->second;
+      std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
 
       // apply an efficiency formula
       jet->BTag |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
@@ -128,7 +128,7 @@ void BTagging::Process()
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
     {
-      auto &formula = itEfficiencyMap->second;
+      std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
 
       // apply an efficiency formula
       jet->BTagAlgo |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;
@@ -141,7 +141,7 @@ void BTagging::Process()
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
     {
-      auto &formula = itEfficiencyMap->second;
+      std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
 
       // apply an efficiency formula
       jet->BTagPhys |= (gRandom->Uniform() <= formula->Eval(pt, eta, phi, e)) << fBitNumber;

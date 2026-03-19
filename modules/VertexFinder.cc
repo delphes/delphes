@@ -127,7 +127,7 @@ void VertexFinder::Process()
   }
 
   // Add tracks to the output array after updating their ClusterIndex.
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     if(candidate->Momentum.Pt() < fMinPT || fabs(candidate->Momentum.Eta()) > fMaxEta)
       continue;
@@ -170,7 +170,7 @@ void VertexFinder::createSeeds()
   UInt_t clusterIndex = 0, maxSeeds = 0;
 
   // Loop over all tracks, initializing some variables.
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     if(candidate->Momentum.Pt() < fMinPT || fabs(candidate->Momentum.Eta()) > fMaxEta)
       continue;

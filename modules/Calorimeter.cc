@@ -269,7 +269,7 @@ void Calorimeter::Process()
   // loop over all particles
   number = -1;
   fTowerRmax = 0.;
-  for(const auto &particle : *fParticleInputArray)
+  for(Candidate *const &particle : *fParticleInputArray)
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
@@ -318,7 +318,7 @@ void Calorimeter::Process()
 
   // loop over all tracks
   number = -1;
-  for(const auto &track : *fTrackInputArray)
+  for(Candidate *const &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -607,7 +607,7 @@ void Calorimeter::FinalizeTower()
   if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
     // create new photon tower assuming null mass
-    auto *tower = static_cast<Candidate *>(fTower->Clone());
+    Candidate *tower = static_cast<Candidate *>(fTower->Clone());
     pt = ecalNeutralEnergy / TMath::CosH(eta);
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalNeutralEnergy);
@@ -618,9 +618,9 @@ void Calorimeter::FinalizeTower()
     fEFlowPhotonOutputArray->emplace_back(tower);
 
     //clone tracks
-    for(const auto &track : *fECalTowerTrackArray)
+    for(Candidate *const &track : *fECalTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track->Clone());
+      Candidate *new_track = static_cast<Candidate *>(track->Clone());
       new_track->AddCandidate(track);
 
       fEFlowTrackOutputArray->emplace_back(new_track);
@@ -637,9 +637,9 @@ void Calorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fECalTrackEnergy;
 
     //rescale tracks
-    for(const auto &track : *fECalTowerTrackArray)
+    for(Candidate *const &track : *fECalTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track->Clone());
+      Candidate *new_track = static_cast<Candidate *>(track->Clone());
       new_track->AddCandidate(track);
 
       new_track->Momentum *= rescaleFactor;
@@ -652,7 +652,7 @@ void Calorimeter::FinalizeTower()
   if(hcalNeutralEnergy > fHCalEnergyMin && hcalNeutralSigma > fHCalEnergySignificanceMin)
   {
     // create new photon tower
-    auto *tower = static_cast<Candidate *>(fTower->Clone());
+    Candidate *tower = static_cast<Candidate *>(fTower->Clone());
     pt = hcalNeutralEnergy / TMath::CosH(eta);
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalNeutralEnergy);
@@ -662,9 +662,9 @@ void Calorimeter::FinalizeTower()
     fEFlowNeutralHadronOutputArray->emplace_back(tower);
 
     //clone tracks
-    for(const auto &track : *fHCalTowerTrackArray)
+    for(Candidate *const &track : *fHCalTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track->Clone());
+      Candidate *new_track = static_cast<Candidate *>(track->Clone());
       new_track->AddCandidate(track);
 
       fEFlowTrackOutputArray->emplace_back(new_track);
@@ -681,9 +681,9 @@ void Calorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fHCalTrackEnergy;
 
     //rescale tracks
-    for(const auto &track : *fHCalTowerTrackArray)
+    for(Candidate *const &track : *fHCalTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track->Clone());
+      Candidate *new_track = static_cast<Candidate *>(track->Clone());
       new_track->AddCandidate(track);
       new_track->Momentum *= rescaleFactor;
       new_track->Momentum.SetPtEtaPhiM(track->Momentum.Pt() * rescaleFactor, track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());

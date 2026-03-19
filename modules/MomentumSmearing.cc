@@ -79,7 +79,7 @@ void MomentumSmearing::Process()
 
   Double_t pt, eta, phi, e, m, res;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -106,7 +106,7 @@ void MomentumSmearing::Process()
 
     //if(pt <= 0.0) continue;
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
     new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);

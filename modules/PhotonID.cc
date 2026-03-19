@@ -99,9 +99,9 @@ void PhotonID::Process()
 
   //cout<< "----  new event ---------"<<endl;
 
-  for(const auto &candidate : *fInputPhotonArray)
+  for(Candidate *const &candidate : *fInputPhotonArray)
   {
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->AddCandidate(candidate);
 
     const TLorentzVector &candidatePosition = new_candidate->Position;
@@ -163,7 +163,7 @@ Bool_t PhotonID::isFake(const Candidate *obj)
   const TLorentzVector &mom_rec = obj->Momentum;
 
   Bool_t matches = false;
-  for(const auto &gen : *fInputGenArray)
+  for(Candidate *const &gen : *fInputGenArray)
   {
     const TLorentzVector &mom_gen = gen->Momentum;
     Int_t status = gen->Status;

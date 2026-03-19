@@ -71,10 +71,10 @@ void ImpactParameterSmearing::Process()
   Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
   Double_t pt, eta, px, py, phi, e;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     // take momentum before smearing (otherwise apply double smearing on d0)
-    auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
@@ -106,7 +106,7 @@ void ImpactParameterSmearing::Process()
     dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->Xd = xd;
     new_candidate->Yd = yd;
     new_candidate->Zd = zd;

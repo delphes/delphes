@@ -220,7 +220,7 @@ void TrackSmearing::Process()
     fin->Close();
   }
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->InitialPosition;
@@ -325,7 +325,7 @@ void TrackSmearing::Process()
     while(phi > TMath::Pi()) phi -= TMath::TwoPi();
     while(phi <= -TMath::Pi()) phi += TMath::TwoPi();
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->D0 = d0;
     new_candidate->DZ = dz;
     new_candidate->P = p;

@@ -130,7 +130,7 @@ void PileUpJetID::Process()
   TLorentzVector momentum, area;
 
   // loop over all input candidates
-  for(const auto &candidate : *fJetInputArray)
+  for(Candidate *const &candidate : *fJetInputArray)
   {
     momentum = candidate->Momentum;
     area = candidate->Area;
@@ -154,7 +154,7 @@ void PileUpJetID::Process()
 
     if(fUseConstituents)
     {
-      for(const auto &constituent : candidate->GetCandidates())
+      for(Candidate *const &constituent : candidate->GetCandidates())
       {
         float pt = constituent->Momentum.Pt();
         float dr = candidate->Momentum.DeltaR(constituent->Momentum);
@@ -208,7 +208,7 @@ void PileUpJetID::Process()
     else
     {
       // Not using constituents, using dr
-      for(const auto &trk : *fTrackInputArray)
+      for(Candidate *const &trk : *fTrackInputArray)
       {
         if(trk->Momentum.DeltaR(candidate->Momentum) < fParameterR)
         {
@@ -236,7 +236,7 @@ void PileUpJetID::Process()
           }
         }
       }
-      for(const auto &constituent : *fNeutralInputArray)
+      for(Candidate *const &constituent : *fNeutralInputArray)
       {
         if(constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR)
         {
@@ -329,7 +329,7 @@ void PileUpJetID::Process()
     {
       if(fUseConstituents)
       {
-        for(const auto &constituent : candidate->GetCandidates())
+        for(Candidate *const &constituent : candidate->GetCandidates())
         {
           if(constituent->Charge == 0 && constituent->Momentum.Pt() > fNeutralPTMin)
           {
@@ -340,7 +340,7 @@ void PileUpJetID::Process()
       }
       else
       { // use DeltaR
-        for(const auto &constituent : *fNeutralInputArray)
+        for(Candidate *const &constituent : *fNeutralInputArray)
         {
           if(constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR && constituent->Momentum.Pt() > fNeutralPTMin)
           {

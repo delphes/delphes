@@ -98,7 +98,7 @@ void TaggingParticlesSkimmer::Process()
   if(tauArray->empty()) return;
 
   // loop over all input taus
-  for(const auto &tau : *tauArray)
+  for(Candidate *const &tau : *tauArray)
   {
     if(tau->D1 < 0) continue;
 
@@ -111,12 +111,12 @@ void TaggingParticlesSkimmer::Process()
 
     for(i = tau->D1; i <= tau->D2; ++i)
     {
-      auto *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
+      Candidate *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
       if(TMath::Abs(daughter->PID) == 16) continue;
       tauMomentum += daughter->Momentum;
     }
 
-    auto *candidate = static_cast<Candidate *>(tau->Clone());
+    Candidate *candidate = static_cast<Candidate *>(tau->Clone());
     candidate->Momentum = tauMomentum;
 
     fOutputArray->emplace_back(candidate);
@@ -124,7 +124,7 @@ void TaggingParticlesSkimmer::Process()
 
   // then add all other partons (except tau's to avoid double counting)
 
-  for(const auto &candidate : *fPartonInputArray)
+  for(Candidate *const &candidate : *fPartonInputArray)
   {
     pdgCode = TMath::Abs(candidate->PID);
     if(pdgCode == 15) continue;

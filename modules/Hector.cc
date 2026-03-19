@@ -100,7 +100,7 @@ void Hector::Process()
 
   const Double_t c_light = 2.99792458E8;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -137,7 +137,7 @@ void Hector::Process()
 
     particle.propagate(fDistance);
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
     new_candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
     new_candidate->AddCandidate(candidate);

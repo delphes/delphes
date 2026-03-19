@@ -76,7 +76,7 @@ void DecayFilter::Process()
   Double_t m, t, p, bgct, L, l;
 
   // loop over all input candidates
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     // get particle information from PDG
     TParticlePDG *pdg = pdgdb->GetParticle(candidate->PID);

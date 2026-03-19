@@ -274,7 +274,7 @@ void DualReadoutCalorimeter::Process()
 
   //cout<<"--------- new event ---------- "<<endl;
 
-  for(const auto &particle : *fParticleInputArray)
+  for(Candidate *const &particle : *fParticleInputArray)
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
@@ -323,7 +323,7 @@ void DualReadoutCalorimeter::Process()
 
   // loop over all tracks
   number = -1;
-  for(const auto &track : *fTrackInputArray)
+  for(Candidate *const &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -528,7 +528,7 @@ void DualReadoutCalorimeter::FinalizeTower()
   if(debug) cout << "New Tower: " << fECalTowerEnergy << "," << fHCalTowerEnergy << "," << fHCalTowerEnergy << "," << fTowerEta << endl;
 
   if(debug) cout << "   gen particles in tower :" << fTower->GetCandidates().size() << endl;
-  for(const auto &candidate : fTower->GetCandidates())
+  for(Candidate *const &candidate : fTower->GetCandidates())
   {
     //cout<<": " << <<endl;
     TLorentzVector mom = candidate->Momentum;
@@ -691,7 +691,7 @@ void DualReadoutCalorimeter::FinalizeTower()
   if(neutralSignificance > neutralMinPFSignificance)
   {
 
-    auto *tower = static_cast<Candidate *>(fTower->Clone());
+    Candidate *tower = static_cast<Candidate *>(fTower->Clone());
     if(isPureEM)
     {
       tower->Eem = neutralEnergy;
@@ -722,9 +722,9 @@ void DualReadoutCalorimeter::FinalizeTower()
     if(debug) cout << "       " << endl;
 
     // now clone tracks
-    for(const auto &track : *fTowerTrackArray)
+    for(Candidate *const &track : *fTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track->Clone());
+      Candidate *new_track = static_cast<Candidate *>(track->Clone());
       new_track->AddCandidate(track);
       fEFlowTrackOutputArray->emplace_back(new_track);
     }
@@ -746,9 +746,9 @@ void DualReadoutCalorimeter::FinalizeTower()
     rescaleFactor = bestEnergyEstimate / fTrackEnergy;
 
     //rescale tracks
-    for(const auto &track : *fTowerTrackArray)
+    for(Candidate *const &track : *fTowerTrackArray)
     {
-      auto *new_track = static_cast<Candidate *>(track->Clone());
+      Candidate *new_track = static_cast<Candidate *>(track->Clone());
       new_track->AddCandidate(track);
       new_track->Momentum.SetPtEtaPhiM(new_track->Momentum.Pt() * rescaleFactor, new_track->Momentum.Eta(), new_track->Momentum.Phi(), new_track->Momentum.M());
       if(debug) cout << "  track Momentum: " << new_track->PID << ", " << new_track->Momentum.Pt() << ", " << new_track->Momentum.Eta() << ", " << new_track->Momentum.M() << endl;

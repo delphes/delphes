@@ -51,7 +51,7 @@ public:
   void Process() override;
 
 private:
-  void FillParticles(Candidate *candidate, TRefArray *array);
+  void FillParticles(Candidate *const &candidate, TRefArray *array);
 
   void ProcessParticles(ExRootTreeBranch *branch, const CandidatesCollection &array);
   void ProcessVertices(ExRootTreeBranch *branch, const CandidatesCollection &array);
@@ -157,10 +157,10 @@ void TreeWriter::Init()
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
+void TreeWriter::FillParticles(Candidate *const &candidate, TRefArray *array)
 {
   std::set<Candidate *> unique_particles;
-  for(const auto &sub_candidate : candidate->GetCandidates())
+  for(Candidate *const &sub_candidate : candidate->GetCandidates())
   {
     // particle
     if(sub_candidate->GetCandidates().empty())
@@ -170,7 +170,7 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     }
 
     // track
-    if(auto *sub_sub_candidate = static_cast<Candidate *>(sub_candidate->GetCandidates().at(0));
+    if(Candidate *const &sub_sub_candidate = static_cast<Candidate *>(sub_candidate->GetCandidates().at(0));
       sub_sub_candidate->GetCandidates().empty())
     {
       unique_particles.insert(sub_sub_candidate);
@@ -178,17 +178,17 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     }
 
     // tower
-    for(const auto &sub_sub_candidate : sub_candidate->GetCandidates())
+    for(Candidate *const &sub_sub_candidate : sub_candidate->GetCandidates())
     {
       if(sub_sub_candidate->GetCandidates().empty()) continue;
-      if(auto *sub_sub_sub_candidate = static_cast<Candidate *>(sub_sub_candidate->GetCandidates().at(0));
+      if(Candidate *sub_sub_sub_candidate = static_cast<Candidate *>(sub_sub_candidate->GetCandidates().at(0));
         sub_sub_sub_candidate && sub_sub_sub_candidate->GetCandidates().empty())
         unique_particles.insert(sub_sub_sub_candidate);
     }
   }
 
   array->Clear();
-  for(const auto &item : unique_particles)
+  for(Candidate *const &item : unique_particles)
     array->Add(item);
 }
 
@@ -201,12 +201,12 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const CandidatesColl
   const Double_t c_light = 2.99792458E8;
 
   // loop over all particles
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
 
-    auto *entry = static_cast<GenParticle *>(branch->NewEntry());
+    GenParticle *entry = static_cast<GenParticle *>(branch->NewEntry());
 
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
@@ -265,7 +265,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const CandidatesColle
   Candidate::fgCompare = compare;
 
   // loop over all vertices
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     index = candidate->ClusterIndex;
     ndf = candidate->ClusterNDF;
@@ -285,7 +285,7 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const CandidatesColle
     zError = candidate->PositionError.Z();
     tError = candidate->PositionError.T() * 1.0E-3 / c_light;
 
-    auto *entry = static_cast<Vertex *>(branch->NewEntry());
+    Vertex *entry = static_cast<Vertex *>(branch->NewEntry());
 
     entry->Index = index;
     entry->NDF = ndf;
@@ -306,9 +306,9 @@ void TreeWriter::ProcessVertices(ExRootTreeBranch *branch, const CandidatesColle
     entry->ErrorT = tError;
 
     entry->Constituents.Clear();
-    for(const auto &constituent : candidate->GetCandidates())
+    for(Candidate *const &constituent : candidate->GetCandidates())
     {
-      entry->Constituents.Add(constituent);
+      entry->Constituents.Add(const_cast<Candidate *>(constituent));
     }
   }
 }
@@ -321,7 +321,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const CandidatesCollect
   const Double_t c_light = 2.99792458E8;
 
   // loop over all tracks
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &position = candidate->Position;
 
@@ -329,7 +329,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const CandidatesCollect
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
 
-    auto *entry = static_cast<Track *>(branch->NewEntry());
+    Track *entry = static_cast<Track *>(branch->NewEntry());
 
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
@@ -403,7 +403,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const CandidatesCollect
     entry->C = candidate->C;
     entry->Mass = m;
 
-    auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
     //const TLorentzVector &initialPosition = particle->Position;
     const TLorentzVector &initialPosition = candidate->InitialPosition;
 
@@ -431,7 +431,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const CandidatesCollect
   const Double_t c_light = 2.99792458E8;
 
   // loop over all towers
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
@@ -441,7 +441,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const CandidatesCollect
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    auto *entry = static_cast<Tower *>(branch->NewEntry());
+    Tower *entry = static_cast<Tower *>(branch->NewEntry());
 
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
@@ -482,7 +482,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const C
   const Double_t c_light = 2.99792458E8;
 
   // loop over all tracks
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &position = candidate->Position;
 
@@ -490,7 +490,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const C
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
 
-    auto *entry = static_cast<ParticleFlowCandidate *>(branch->NewEntry());
+    ParticleFlowCandidate *entry = static_cast<ParticleFlowCandidate *>(branch->NewEntry());
 
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
@@ -615,7 +615,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const CandidatesCollec
   std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all photons
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     //TIter it1(candidate->GetCandidates());
     const TLorentzVector &momentum = candidate->Momentum;
@@ -626,7 +626,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const CandidatesCollec
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    auto *entry = static_cast<Photon *>(branch->NewEntry());
+    Photon *entry = static_cast<Photon *>(branch->NewEntry());
 
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
@@ -662,7 +662,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const CandidatesColl
   std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all electrons
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
@@ -672,7 +672,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const CandidatesColl
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    auto *entry = static_cast<Electron *>(branch->NewEntry());
+    Electron *entry = static_cast<Electron *>(branch->NewEntry());
 
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
@@ -713,7 +713,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const CandidatesCollecti
   std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all muons
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
@@ -723,7 +723,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const CandidatesCollecti
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    auto *entry = static_cast<Muon *>(branch->NewEntry());
+    Muon *entry = static_cast<Muon *>(branch->NewEntry());
 
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
@@ -767,7 +767,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const CandidatesCollectio
   std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all jets
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
@@ -777,7 +777,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const CandidatesCollectio
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    auto *entry = static_cast<Jet *>(branch->NewEntry());
+    Jet *entry = static_cast<Jet *>(branch->NewEntry());
 
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
@@ -810,7 +810,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const CandidatesCollectio
     entry->Constituents.Clear();
     ecalEnergy = 0.0;
     hcalEnergy = 0.0;
-    for(const auto &constituent : candidate->GetCandidates())
+    for(Candidate *const &constituent : candidate->GetCandidates())
     {
       entry->Constituents.Add(constituent);
       ecalEnergy += constituent->Eem;
@@ -870,7 +870,7 @@ void TreeWriter::ProcessMissingET(ExRootTreeBranch *branch, const CandidatesColl
   {
     const TLorentzVector &momentum = array->at(0)->Momentum;
 
-    auto *entry = static_cast<MissingET *>(branch->NewEntry());
+    MissingET *entry = static_cast<MissingET *>(branch->NewEntry());
 
     entry->Eta = (-momentum).Eta();
     entry->Phi = (-momentum).Phi();
@@ -888,7 +888,7 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const CandidatesCol
   std::sort(array->begin(), array->end(), SortCandidates{});
 
   // loop over all clusters
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->DecayPosition;
@@ -897,7 +897,7 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const CandidatesCol
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
-    auto *entry = static_cast<CscCluster *>(branch->NewEntry());
+    CscCluster *entry = static_cast<CscCluster *>(branch->NewEntry());
 
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID());
@@ -933,7 +933,7 @@ void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, const CandidatesColle
   // get the first entry
   if(!array->empty())
   {
-    auto *entry = static_cast<ScalarHT *>(branch->NewEntry());
+    ScalarHT *entry = static_cast<ScalarHT *>(branch->NewEntry());
     entry->HT = array->at(0)->Momentum.Pt();
   }
 }
@@ -943,11 +943,11 @@ void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, const CandidatesColle
 void TreeWriter::ProcessRho(ExRootTreeBranch *branch, const CandidatesCollection &array)
 {
   // loop over all rho
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &momentum = candidate->Momentum;
 
-    auto *entry = static_cast<Rho *>(branch->NewEntry());
+    Rho *entry = static_cast<Rho *>(branch->NewEntry());
 
     entry->Rho = momentum.E();
     entry->Edges[0] = candidate->Edges[0];
@@ -962,7 +962,7 @@ void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const CandidatesCollect
   // get the first entry
   if(!array->empty())
   {
-    auto *entry = static_cast<Weight *>(branch->NewEntry());
+    Weight *entry = static_cast<Weight *>(branch->NewEntry());
     entry->Weight = array->at(0)->Momentum.E();
   }
 }
@@ -972,12 +972,12 @@ void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const CandidatesCollect
 void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, const CandidatesCollection &array)
 {
   // loop over all roman pot hits
-  for(const auto &candidate : *array)
+  for(Candidate *const &candidate : *array)
   {
     const TLorentzVector &position = candidate->Position;
     const TLorentzVector &momentum = candidate->Momentum;
 
-    auto *entry = static_cast<HectorHit *>(branch->NewEntry());
+    HectorHit *entry = static_cast<HectorHit *>(branch->NewEntry());
 
     entry->E = momentum.E();
 

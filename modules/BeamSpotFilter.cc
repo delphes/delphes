@@ -26,7 +26,7 @@ public:
   {
     fOutputArray->clear();
     Bool_t passed = false;
-    for(const auto &candidate : *fInputArray)
+    for(Candidate *const &candidate : *fInputArray)
     {
       if(passed) break;
       if(candidate->IsPU == 0) passed = true;

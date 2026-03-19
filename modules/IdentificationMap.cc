@@ -67,7 +67,7 @@ void IdentificationMap::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 3; ++i)
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 3 + 2].GetString());
     pdg = param[i * 3].GetInt();
     fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i * 3 + 1].GetInt(), std::move(formula))));
@@ -77,7 +77,7 @@ void IdentificationMap::Init()
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile("1.0");
 
     fEfficiencyMap.insert(make_pair(0, make_pair(0, std::move(formula))));
@@ -110,7 +110,7 @@ void IdentificationMap::Process()
 
   Double_t p, r, total;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -137,7 +137,7 @@ void IdentificationMap::Process()
     // loop over sub-map for this PID
     for(TMisIDMap::iterator it = range.first; it != range.second; ++it)
     {
-      auto &formula = (it->second).second;
+      std::unique_ptr<DelphesFormula> &formula = (it->second).second;
       pdgCodeOut = (it->second).first;
 
       p = formula->Eval(pt, eta, phi, e);
@@ -145,7 +145,7 @@ void IdentificationMap::Process()
       if(total <= r && r < total + p)
       {
         // change PID of particle
-        auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+        Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
         if(pdgCodeOut != 0) new_candidate->PID = charge * pdgCodeOut;
         fOutputArray->emplace_back(new_candidate);
         break;

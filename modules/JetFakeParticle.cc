@@ -74,7 +74,7 @@ void JetFakeParticle::Init()
 
   for(i = 0; i < size / 2; ++i)
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
     pdgCode = param[i * 2].GetInt();
 
@@ -90,7 +90,7 @@ void JetFakeParticle::Init()
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
     fEfficiencyMap[0] = std::move(formula);
@@ -128,7 +128,7 @@ void JetFakeParticle::Process()
 
   Double_t p, r, rs, total;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidateMomentum.Eta();
@@ -143,7 +143,7 @@ void JetFakeParticle::Process()
     // loop over map for this jet
     for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
     {
-      auto &formula = itEfficiencyMap->second;
+      std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
       pdgCodeOut = itEfficiencyMap->first;
 
       p = formula->Eval(pt, eta, phi, e);

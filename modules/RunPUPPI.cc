@@ -190,7 +190,7 @@ void RunPUPPI::Process()
   std::vector<RecoObj> puppiInputVector;
   puppiInputVector.clear();
   // Loop on charge track candidate
-  for(const auto &candidate : *fTrackInputArray)
+  for(Candidate *const &candidate : *fTrackInputArray)
   {
     momentum = candidate->Momentum;
     RecoObj curRecoObj;
@@ -239,7 +239,7 @@ void RunPUPPI::Process()
   }
 
   // Loop on neutral calo cells
-  for(const auto &candidate : *fNeutralInputArray)
+  for(Candidate *const &candidate : *fNeutralInputArray)
   {
     momentum = candidate->Momentum;
     RecoObj curRecoObj;
