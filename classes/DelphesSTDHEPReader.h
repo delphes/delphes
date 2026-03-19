@@ -53,8 +53,7 @@ public:
   DelphesSTDHEPReader();
   ~DelphesSTDHEPReader();
 
-  void SetInputFile(FILE *inputFile);
-
+  void SetInputFile(FILE *inputFile) override;
   void Clear() override;
   bool EventReady() override;
 
