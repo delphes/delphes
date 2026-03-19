@@ -31,8 +31,6 @@
 #include "classes/DelphesPileUpWriter.h"
 #include "classes/DelphesSTDHEPReader.h"
 
-#include "ExRootAnalysis/ExRootProgressBar.h"
-
 using namespace std;
 
 //---------------------------------------------------------------------------
@@ -50,9 +48,7 @@ int main(int argc, char *argv[])
 {
   char appName[] = "stdhep2pileup";
   stringstream message;
-  FILE *inputFile = 0;
   Int_t i;
-  Long64_t length, eventCounter;
 
   if(argc < 2)
   {
@@ -91,74 +87,36 @@ int main(int argc, char *argv[])
       if(i == argc || strncmp(argv[i], "-", 2) == 0)
       {
         cout << "** Reading standard input" << endl;
-        inputFile = stdin;
-        length = -1;
+        //inputFile = stdin;
+        //length = -1;
+        throw;
       }
       else
       {
         cout << "** Reading " << argv[i] << endl;
-        inputFile = fopen(argv[i], "rb");
-
-        if(inputFile == NULL)
-        {
-          message << "can't open " << argv[i];
-          throw runtime_error(message.str());
-        }
-
-        fseek(inputFile, 0L, SEEK_END);
-        length = ftello(inputFile);
-        fseek(inputFile, 0L, SEEK_SET);
-
-        if(length <= 0)
-        {
-          fclose(inputFile);
-          ++i;
-          continue;
-        }
+        reader->LoadInputFile(argv[i]);
       }
-
-      reader->SetInputFile(inputFile);
-
-      ExRootProgressBar progressBar(length);
 
       // Loop over all objects
-      eventCounter = 0;
       factory->Clear();
       reader->Clear();
-      while(reader->ReadBlock(factory.get(), allParticleOutputArray,
-              stableParticleOutputArray, partonOutputArray)
+      while(reader->ReadEvent(factory.get(), allParticleOutputArray, stableParticleOutputArray, partonOutputArray)
         && !interrupted)
       {
-        if(reader->EventReady())
+        for(const auto &candidate : *stableParticleOutputArray)
         {
-          ++eventCounter;
-
-          for(const auto &candidate : *stableParticleOutputArray)
-          {
-            const TLorentzVector &position = candidate->Position;
-            const TLorentzVector &momentum = candidate->Momentum;
-            writer->WriteParticle(candidate->PID,
-              position.X(), position.Y(), position.Z(), position.T(),
-              momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
-          }
-
-          writer->WriteEntry();
-
-          factory->Clear();
-          reader->Clear();
-          allParticleOutputArray->clear();
-          stableParticleOutputArray->clear();
-          partonOutputArray->clear();
+          const TLorentzVector &position = candidate->Position;
+          const TLorentzVector &momentum = candidate->Momentum;
+          writer->WriteParticle(candidate->PID,
+            position.X(), position.Y(), position.Z(), position.T(),
+            momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
         }
-        progressBar.Update(ftello(inputFile), eventCounter);
+
+        writer->WriteEntry();
+
+        factory->Clear();
+        reader->Clear();
       }
-
-      fseek(inputFile, 0L, SEEK_END);
-      progressBar.Update(ftello(inputFile), eventCounter, kTRUE);
-      progressBar.Finish();
-
-      if(inputFile != stdin) fclose(inputFile);
-
       ++i;
     } while(i < argc);
 

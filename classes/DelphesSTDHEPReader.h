@@ -51,21 +51,19 @@ public:
   };
 
   DelphesSTDHEPReader();
-  ~DelphesSTDHEPReader();
 
-  void SetInputFile(FILE *inputFile) override;
+  void LoadInputFile(std::string_view) override;
   void Clear() override;
   bool EventReady() override;
 
+  void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) override;
+
+private:
   bool ReadBlock(DelphesFactory *factory,
     CandidatesCollection &allParticleOutputArray,
     CandidatesCollection &stableParticleOutputArray,
     CandidatesCollection &partonOutputArray) override;
 
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch) override;
-
-private:
   void AnalyzeParticles(DelphesFactory *factory,
     CandidatesCollection &allParticleOutputArray,
     CandidatesCollection &stableParticleOutputArray,
@@ -85,7 +83,7 @@ private:
 
   DelphesXDRReader fReader[7];
 
-  uint8_t *fBuffer;
+  std::array<uint8_t, 1000000 * 96 + 24> fBuffer;
 
   TDatabasePDG *fPDG;
 

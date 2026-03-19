@@ -53,10 +53,8 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesHepMC2";
   stringstream message;
-  FILE *inputFile = 0;
-  TStopwatch readStopWatch, procStopWatch;
-  Int_t i, maxEvents, skipEvents;
-  Long64_t length, eventCounter;
+  TStopwatch procStopWatch;
+  Int_t i;
 
   if(argc < 3)
   {
@@ -95,19 +93,6 @@ int main(int argc, char *argv[])
     const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
-    maxEvents = confReader->GetInt("::MaxEvents", 0);
-    skipEvents = confReader->GetInt("::SkipEvents", 0);
-
-    if(maxEvents < 0)
-    {
-      throw runtime_error("MaxEvents must be zero or positive");
-    }
-
-    if(skipEvents < 0)
-    {
-      throw runtime_error("SkipEvents must be zero or positive");
-    }
-
     const auto modularDelphes = std::make_unique<Delphes>("Delphes");
     modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetTreeWriter(treeWriter.get());
@@ -118,6 +103,8 @@ int main(int argc, char *argv[])
                          partonOutputArray = modularDelphes->ExportArray("partons");
 
     const auto reader = std::make_unique<DelphesHepMC2Reader>();
+    reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
+    reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
 
     modularDelphes->InitTask();
 
@@ -129,81 +116,36 @@ int main(int argc, char *argv[])
       if(i == argc || strncmp(argv[i], "-", 2) == 0)
       {
         cout << "** Reading standard input" << endl;
-        inputFile = stdin;
-        length = -1;
+        //inputFile = stdin;
+        //length = -1;
+        throw;
       }
       else
       {
         cout << "** Reading " << argv[i] << endl;
-        inputFile = fopen(argv[i], "r");
-
-        if(inputFile == NULL)
-        {
-          message << "can't open " << argv[i];
-          throw runtime_error(message.str());
-        }
-
-        fseek(inputFile, 0L, SEEK_END);
-        length = ftello(inputFile);
-        fseek(inputFile, 0L, SEEK_SET);
-
-        if(length <= 0)
-        {
-          fclose(inputFile);
-          ++i;
-          continue;
-        }
+        reader->LoadInputFile(argv[i]);
       }
 
-      reader->SetInputFile(inputFile);
-
-      ExRootProgressBar progressBar(length);
-
       // Loop over all objects
-      eventCounter = 0;
       treeWriter->Clear();
       modularDelphes->Clear();
       reader->Clear();
-      readStopWatch.Start();
-      while((maxEvents <= 0 || eventCounter - skipEvents < maxEvents) && reader->ReadBlock(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
+      while(reader->ReadEvent(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
       {
-        if(reader->EventReady())
-        {
-          ++eventCounter;
+        procStopWatch.Start();
+        modularDelphes->ProcessTask();
+        procStopWatch.Stop();
 
-          readStopWatch.Stop();
+        reader->AnalyzeEvent(branchEvent, &procStopWatch);
+        reader->AnalyzeWeight(branchWeight);
 
-          if(eventCounter > skipEvents)
-          {
-            procStopWatch.Start();
-            modularDelphes->ProcessTask();
-            procStopWatch.Stop();
+        treeWriter->Fill();
 
-            reader->AnalyzeEvent(branchEvent, eventCounter, &readStopWatch, &procStopWatch);
-            reader->AnalyzeWeight(branchWeight);
+        treeWriter->Clear();
 
-            treeWriter->Fill();
-
-            treeWriter->Clear();
-          }
-
-          modularDelphes->Clear();
-          reader->Clear();
-          allParticleOutputArray->clear();
-          stableParticleOutputArray->clear();
-          partonOutputArray->clear();
-
-          readStopWatch.Start();
-        }
-        progressBar.Update(ftello(inputFile), eventCounter);
+        modularDelphes->Clear();
+        reader->Clear();
       }
-
-      fseek(inputFile, 0L, SEEK_END);
-      progressBar.Update(ftello(inputFile), eventCounter, kTRUE);
-      progressBar.Finish();
-
-      if(inputFile != stdin) fclose(inputFile);
-
       ++i;
     } while(i < argc);
 

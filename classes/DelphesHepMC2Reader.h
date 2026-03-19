@@ -40,23 +40,20 @@ class DelphesHepMC2Reader: public DelphesReader
 {
 public:
   DelphesHepMC2Reader();
-  ~DelphesHepMC2Reader();
 
-  void SetInputFile(FILE *inputFile) override;
+  void LoadInputFile(std::string_view) override;
   void Clear() override;
   bool EventReady() override;
 
+  void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) override;
+  void AnalyzeWeight(ExRootTreeBranch *branch) override;
+
+private:
   bool ReadBlock(DelphesFactory *factory,
     CandidatesCollection &allParticleOutputArray,
     CandidatesCollection &stableParticleOutputArray,
     CandidatesCollection &partonOutputArray) override;
 
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch) override;
-
-  void AnalyzeWeight(ExRootTreeBranch *branch) override;
-
-private:
   void AnalyzeParticle(DelphesFactory *factory,
     CandidatesCollection &allParticleOutputArray,
     CandidatesCollection &stableParticleOutputArray,
@@ -65,8 +62,7 @@ private:
   void FinalizeParticles(const CandidatesCollection &allParticleOutputArray);
 
   FILE *fInputFile;
-
-  char *fBuffer;
+  std::array<char, 16384> fBuffer;
 
   TDatabasePDG *fPDG;
 

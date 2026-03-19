@@ -24,7 +24,10 @@
  *
  */
 
+#include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
+#include "classes/DelphesStream.h"
 
 #include <iostream>
 #include <sstream>
@@ -38,11 +41,8 @@
 #include "TParticlePDG.h"
 #include "TStopwatch.h"
 
-#include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesStream.h"
-
-#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include <ExRootAnalysis/ExRootProgressBar.h>
+#include <ExRootAnalysis/ExRootTreeBranch.h>
 
 using namespace std;
 
@@ -51,27 +51,29 @@ static const int kBufferSize = 16384;
 //---------------------------------------------------------------------------
 
 DelphesLHEFReader::DelphesLHEFReader() :
-  fInputFile(0), fBuffer(0), fPDG(0),
-  fEventReady(kFALSE), fEventCounter(-1), fParticleCounter(-1), fCrossSection(1)
-
-{
-  fBuffer = new char[kBufferSize];
-
-  fPDG = TDatabasePDG::Instance();
-}
+  fPDG(TDatabasePDG::Instance()),
+  fEventReady(kFALSE), fEventCounter(-1), fParticleCounter(-1), fCrossSection(1) {}
 
 //---------------------------------------------------------------------------
 
-DelphesLHEFReader::~DelphesLHEFReader()
+void DelphesLHEFReader::LoadInputFile(std::string_view inputFile)
 {
-  if(fBuffer) delete[] fBuffer;
-}
+  if(fInputFile) fclose(fInputFile); // unload previous streams
+  Clear(); // clear all buffers
+  if(fInputFile = fopen(std::string{inputFile}.data(), "r"); fInputFile == nullptr)
+  {
+    std::ostringstream message;
+    message << "can't open " << std::string{inputFile};
+    throw std::runtime_error(message.str());
+  }
+  fseek(fInputFile, 0L, SEEK_END);
+  int length = ftello(fInputFile);
+  fProgressBar = std::make_unique<ExRootProgressBar>(length);
+  fseek(fInputFile, 0L, SEEK_SET);
 
-//---------------------------------------------------------------------------
-
-void DelphesLHEFReader::SetInputFile(FILE *inputFile)
-{
-  fInputFile = inputFile;
+  if(length <= 0)
+    fclose(fInputFile);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -102,16 +104,16 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
   char *pch;
   double weight, xsec;
 
-  if(!fgets(fBuffer, kBufferSize, fInputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return kFALSE;
 
-  if(strstr(fBuffer, "<event>"))
+  if(strstr(fBuffer.data(), "<event>"))
   {
     Clear();
     fEventCounter = 1;
   }
   else if(fEventCounter > 0)
   {
-    DelphesStream bufferStream(fBuffer);
+    DelphesStream bufferStream(fBuffer.data());
 
     rc = bufferStream.ReadInt(fParticleCounter)
       && bufferStream.ReadInt(fProcessID)
@@ -131,7 +133,7 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
   }
   else if(fParticleCounter > 0)
   {
-    DelphesStream bufferStream(fBuffer);
+    DelphesStream bufferStream(fBuffer.data());
 
     rc = bufferStream.ReadInt(fPID)
       && bufferStream.ReadInt(fStatus)
@@ -157,9 +159,9 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
     --fParticleCounter;
   }
-  else if(strstr(fBuffer, "<wgt"))
+  else if(strstr(fBuffer.data(), "<wgt"))
   {
-    pch = strpbrk(fBuffer, "\"'");
+    pch = strpbrk(fBuffer.data(), "\"'");
     if(!pch)
     {
       cerr << "** ERROR: "
@@ -170,7 +172,7 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
     DelphesStream idStream(pch + 1);
     rc = idStream.ReadInt(id);
 
-    pch = strchr(fBuffer, '>');
+    pch = strchr(fBuffer.data(), '>');
     if(!pch)
     {
       cerr << "** ERROR: "
@@ -190,9 +192,9 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
     fWeightList.push_back(make_pair(id, weight));
   }
-  else if(strstr(fBuffer, "<xsecinfo"))
+  else if(strstr(fBuffer.data(), "<xsecinfo"))
   {
-    pch = strstr(fBuffer, "totxsec");
+    pch = strstr(fBuffer.data(), "totxsec");
     if(!pch)
     {
       cerr << "** ERROR: "
@@ -220,7 +222,7 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
     fCrossSection = xsec;
   }
-  else if(strstr(fBuffer, "</event>"))
+  else if(strstr(fBuffer.data(), "</event>"))
   {
     fEventReady = kTRUE;
   }
@@ -230,13 +232,12 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
 //---------------------------------------------------------------------------
 
-void DelphesLHEFReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
+void DelphesLHEFReader::AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch)
 {
   LHEFEvent *element;
 
   element = static_cast<LHEFEvent *>(branch->NewEntry());
-  element->Number = eventNumber;
+  element->Number = fEventCounter;
 
   element->ProcessID = fProcessID;
   element->Weight = fWeight;
@@ -246,7 +247,7 @@ void DelphesLHEFReader::AnalyzeEvent(ExRootTreeBranch *branch, long long eventNu
   element->AlphaQED = fAlphaQED;
   element->AlphaQCD = fAlphaQCD;
 
-  element->ReadTime = readStopWatch->RealTime();
+  element->ReadTime = fReadStopWatch.RealTime();
   element->ProcTime = procStopWatch->RealTime();
 }
 
