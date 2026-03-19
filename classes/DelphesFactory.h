@@ -33,7 +33,6 @@
 #include <map>
 #include <set>
 
-class TObjArray;
 class Candidate;
 
 class ExRootTreeBranch;
@@ -62,9 +61,6 @@ public:
     return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]));
   }
 
-  TObjArray *NewPermanentArray();
-  TObjArray *NewArray() { return New<TObjArray>(); }
-
   Candidate *NewCandidate();
 
   TObject *New(TClass *cl);
@@ -76,13 +72,9 @@ private:
 
   std::map<std::string, void *> fMemorySlots;
 
-  ExRootTreeBranch *fObjArrays; //!
-
 #if !defined(__CINT__) && !defined(__CLING__)
   std::map<const TClass *, ExRootTreeBranch *> fBranches; //!
 #endif
-
-  std::set<TObject *> fPool; //!
 
   ClassDef(DelphesFactory, 1)
 };
