@@ -11,15 +11,7 @@
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 
-#include <sstream>
 #include <stdexcept>
-
-using namespace std;
-
-typedef map<Int_t, CandidatesCollection> TCategoryMap;
-typedef map<ExRootClassifier *, pair<Bool_t, TCategoryMap> > TClassifierMap;
-
-//------------------------------------------------------------------------------
 
 DelphesFilter::DelphesFilter(const CandidatesCollection &collection) : fCollection(collection) {}
 
@@ -27,31 +19,23 @@ DelphesFilter::DelphesFilter(const CandidatesCollection &collection) : fCollecti
 
 void DelphesFilter::Reset(ExRootClassifier *classifier)
 {
-  TClassifierMap::iterator itMap;
-  TCategoryMap::iterator itSubMap;
   if(classifier)
   {
-    itMap = fMap.find(classifier);
+    TClassifierMap::iterator itMap = fMap.find(classifier);
     if(itMap != fMap.end())
     {
       itMap->second.first = kTRUE;
-      for(itSubMap = itMap->second.second.begin();
-        itSubMap != itMap->second.second.end(); ++itSubMap)
-      {
+      for(TCategoryMap::iterator itSubMap = itMap->second.second.begin(); itSubMap != itMap->second.second.end(); ++itSubMap)
         itSubMap->second->clear();
-      }
     }
   }
   else
   {
-    for(itMap = fMap.begin(); itMap != fMap.end(); ++itMap)
+    for(TClassifierMap::iterator itMap = fMap.begin(); itMap != fMap.end(); ++itMap)
     {
       itMap->second.first = kTRUE;
-      for(itSubMap = itMap->second.second.begin();
-        itSubMap != itMap->second.second.end(); ++itSubMap)
-      {
+      for(TCategoryMap::iterator itSubMap = itMap->second.second.begin(); itSubMap != itMap->second.second.end(); ++itSubMap)
         itSubMap->second->clear();
-      }
     }
   }
 }
@@ -60,20 +44,15 @@ void DelphesFilter::Reset(ExRootClassifier *classifier)
 
 CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, Int_t category)
 {
-  Int_t result;
-  TCategoryMap::iterator itSubMap;
-  pair<TCategoryMap::iterator, bool> pairSubMap;
-  pair<TClassifierMap::iterator, bool> pairMap;
-
   TClassifierMap::iterator itMap = fMap.find(classifier);
   if(itMap == fMap.end())
   {
-    pairMap = fMap.insert(make_pair(classifier, make_pair(kTRUE, TCategoryMap())));
+    std::pair<TClassifierMap::iterator, bool> pairMap = fMap.insert(
+      std::make_pair(classifier, std::make_pair(kTRUE, TCategoryMap())));
     if(!pairMap.second)
     {
-      throw runtime_error("can't insert category map");
+      throw std::runtime_error("can't insert category map");
     }
-
     itMap = pairMap.first;
   }
 
@@ -82,15 +61,16 @@ CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, In
     itMap->second.first = kFALSE;
     for(Candidate *const &element : *fCollection)
     {
-      result = classifier->GetCategory(element);
+      int result = classifier->GetCategory(element);
       if(result < 0) continue;
-      itSubMap = itMap->second.second.find(result);
+      TCategoryMap::iterator itSubMap = itMap->second.second.find(result);
       if(itSubMap == itMap->second.second.end())
       {
-        pairSubMap = itMap->second.second.insert(make_pair(result, std::make_shared<std::vector<Candidate *> >()));
+        std::pair<TCategoryMap::iterator, bool> pairSubMap = itMap->second.second.insert(
+          std::make_pair(result, std::make_shared<std::vector<Candidate *> >()));
         if(!pairSubMap.second)
         {
-          throw runtime_error("can't insert category");
+          throw std::runtime_error("can't insert category");
         }
 
         itSubMap = pairSubMap.first;
@@ -98,8 +78,7 @@ CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, In
       itSubMap->second->emplace_back(element);
     }
   }
-
-  itSubMap = itMap->second.second.find(category);
+  TCategoryMap::iterator itSubMap = itMap->second.second.find(category);
   return (itSubMap != itMap->second.second.end()) ? itSubMap->second : 0;
 }
 
