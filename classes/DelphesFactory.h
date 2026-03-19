@@ -31,7 +31,7 @@
 #include "TNamed.h"
 
 #include <map>
-#include <set>
+#include <vector>
 
 class Candidate;
 
@@ -41,7 +41,6 @@ class DelphesFactory: public TNamed
 {
 public:
   DelphesFactory(const char *name = "ObjectFactory");
-  ~DelphesFactory();
 
   virtual void Clear(Option_t *option = "");
 
@@ -63,20 +62,13 @@ public:
 
   Candidate *NewCandidate();
 
-  TObject *New(TClass *cl);
-  template <typename T>
-  T *New() { return static_cast<T *>(New(T::Class())); }
-
 private:
   void throwAttachingFailure(std::string_view collectionName) const;
 
   std::map<std::string, void *> fMemorySlots;
+  std::vector<std::unique_ptr<TObject> > fCandidates;
 
-#if !defined(__CINT__) && !defined(__CLING__)
-  std::map<const TClass *, ExRootTreeBranch *> fBranches; //!
-#endif
-
-  ClassDef(DelphesFactory, 1)
+  ClassDef(DelphesFactory, 2)
 };
 
 #endif /* DelphesFactory */

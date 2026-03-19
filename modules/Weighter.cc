@@ -28,6 +28,8 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
 
+#include <set>
+
 using namespace std;
 
 class Weighter: public DelphesModule
