@@ -58,7 +58,12 @@ public:
   void AddInfo(const char *name, Double_t value);
 
   ExRootResult *GetPlots();
-  DelphesFactory *GetFactory();
+
+  void SetFactory(DelphesFactory *factory) { fFactory = factory; }
+  virtual DelphesFactory *GetFactory() const;
+
+  void SetTreeWriter(ExRootTreeWriter *treeWriter) { fTreeWriter = treeWriter; }
+  virtual ExRootTreeWriter *GetTreeWriter() const;
 
 private:
   DelphesFactory *fFactory{nullptr};

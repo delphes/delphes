@@ -40,16 +40,14 @@ public:
   Delphes(const char *name = "Delphes");
   ~Delphes();
 
-  void SetTreeWriter(ExRootTreeWriter *treeWriter);
-
-  DelphesFactory *GetFactory() const { return fFactory.get(); }
+  void Init() override;
+  DelphesFactory *GetFactory() const override;
 
   void Clear(Option_t *option = "");
 
-  void Init() override;
-
 private:
-  const std::unique_ptr<DelphesFactory> fFactory;
+  std::unique_ptr<DelphesFactory> fDelphesFactory;
+  ExRootTreeWriter *fTreeWriter{nullptr};
 };
 
 #endif /* Delphes_h */
