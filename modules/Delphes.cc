@@ -34,7 +34,6 @@
 #include "ExRootAnalysis/ExRootConfReader.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
-#include <TFolder.h>
 #include <TROOT.h>
 #include <TRandom3.h>
 
@@ -48,47 +47,20 @@
 
 using namespace std;
 
-Delphes::Delphes(const char *name) : fFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
+Delphes::Delphes(const char *name) : fDelphesFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
 {
-  TFolder *folder;
-
-  folder = new TFolder(name, "");
-
   SetName(name);
-  SetFolder(folder);
-
-  folder->Add(this);
-  folder->Add(fFactory.get());
-
-  gROOT->GetListOfBrowsables()->Add(folder);
 }
 
 //------------------------------------------------------------------------------
 
-Delphes::~Delphes()
-{
-  TFolder *folder = GetFolder();
-  if(folder)
-  {
-    gROOT->GetListOfBrowsables()->Remove(folder);
-    folder->Clear();
-    delete folder;
-  }
-}
+Delphes::~Delphes() {}
 
 //------------------------------------------------------------------------------
 
 void Delphes::Clear(Option_t * /*option*/)
 {
-  if(fFactory) fFactory->Clear();
-}
-
-//------------------------------------------------------------------------------
-
-void Delphes::SetTreeWriter(ExRootTreeWriter *treeWriter)
-{
-  treeWriter->SetName("TreeWriter");
-  GetFolder()->Add(treeWriter);
+  if(fDelphesFactory) fDelphesFactory->Clear();
 }
 
 //------------------------------------------------------------------------------
@@ -98,7 +70,6 @@ void Delphes::Init()
   stringstream message;
   ExRootConfReader *confReader = GetConfReader();
   confReader->SetName("ConfReader");
-  GetFolder()->Add(confReader);
 
   TString name;
   ExRootTask *task;
@@ -116,13 +87,12 @@ void Delphes::Init()
     itModules = modules->find(name);
     if(itModules != modules->end())
     {
-      std::unique_ptr<DelphesModule> module_object = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
-      task = NewTask(dynamic_cast<ExRootTask *>(module_object.release()), itModules->first);
+      std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
+      moduleObject->SetFactory(GetFactory());
+      moduleObject->SetTreeWriter(GetTreeWriter());
+      task = NewTask(dynamic_cast<ExRootTask *>(moduleObject.release()), itModules->first);
       if(task)
-      {
-        task->SetFolder(GetFolder());
         Add(task);
-      }
     }
     else
     {
@@ -132,5 +102,9 @@ void Delphes::Init()
     }
   }
 }
+
+//------------------------------------------------------------------------------
+
+DelphesFactory *Delphes::GetFactory() const { return fDelphesFactory.get(); }
 
 //------------------------------------------------------------------------------

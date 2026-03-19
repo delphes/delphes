@@ -77,34 +77,14 @@ CandidatesCollection DelphesModule::ExportArray(const char *name)
 
 ExRootTreeBranch *DelphesModule::NewBranch(const char *name, TClass *cl)
 {
-  stringstream message;
-  if(!fTreeWriter)
-  {
-    fTreeWriter = static_cast<ExRootTreeWriter *>(GetObject("TreeWriter", ExRootTreeWriter::Class()));
-    if(!fTreeWriter)
-    {
-      message << "can't access access tree writer";
-      throw runtime_error(message.str());
-    }
-  }
-  return fTreeWriter->NewBranch(name, cl);
+  return GetTreeWriter()->NewBranch(name, cl);
 }
 
 //------------------------------------------------------------------------------
 
 void DelphesModule::AddInfo(const char *name, Double_t value)
 {
-  stringstream message;
-  if(!fTreeWriter)
-  {
-    fTreeWriter = static_cast<ExRootTreeWriter *>(GetObject("TreeWriter", ExRootTreeWriter::Class()));
-    if(!fTreeWriter)
-    {
-      message << "can't access access tree writer";
-      throw runtime_error(message.str());
-    }
-  }
-  fTreeWriter->AddInfo(name, value);
+  GetTreeWriter()->AddInfo(name, value);
 }
 
 //------------------------------------------------------------------------------
@@ -121,17 +101,28 @@ ExRootResult *DelphesModule::GetPlots()
 
 //------------------------------------------------------------------------------
 
-DelphesFactory *DelphesModule::GetFactory()
+DelphesFactory *DelphesModule::GetFactory() const
 {
-  stringstream message;
   if(!fFactory)
   {
-    fFactory = static_cast<DelphesFactory *>(GetObject("ObjectFactory", DelphesFactory::Class()));
-    if(!fFactory)
-    {
-      message << "can't access access object factory";
-      throw runtime_error(message.str());
-    }
+    std::ostringstream message;
+    message << "can't access access object factory for module '" << GetName() << "'.";
+    throw std::runtime_error(message.str());
   }
   return fFactory;
 }
+
+//------------------------------------------------------------------------------
+
+ExRootTreeWriter *DelphesModule::GetTreeWriter() const
+{
+  if(!fTreeWriter)
+  {
+    std::ostringstream message;
+    message << "can't access access tree writer for module '" << GetName() << "'.";
+    throw std::runtime_error(message.str());
+  }
+  return fTreeWriter;
+}
+
+//------------------------------------------------------------------------------
