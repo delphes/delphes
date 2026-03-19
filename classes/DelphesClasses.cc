@@ -293,9 +293,9 @@ Candidate::Candidate() :
 
 //------------------------------------------------------------------------------
 
-void Candidate::AddCandidate(Candidate *object)
+void Candidate::AddCandidate(const Candidate *object)
 {
-  fArray.emplace_back(object);
+  fArray.push_back(const_cast<Candidate *>(object));
 }
 
 //------------------------------------------------------------------------------
@@ -311,12 +311,12 @@ Bool_t Candidate::Overlaps(const Candidate *object) const
 {
   if(object->GetUniqueID() == GetUniqueID()) return kTRUE;
 
-  for(const auto &candidate : fArray)
+  for(const Candidate *candidate : fArray)
   {
     if(candidate->Overlaps(object)) return kTRUE;
   }
 
-  for(const auto &candidate : object->fArray)
+  for(const Candidate *candidate : object->fArray)
   {
     if(candidate->Overlaps(this)) return kTRUE;
   }
@@ -475,8 +475,8 @@ void Candidate::Copy(TObject &obj) const
 
   if(!fArray.empty())
   {
-    for(const auto &candidate : fArray)
-      object.fArray.emplace_back(candidate);
+    for(const Candidate *candidate : fArray)
+      object.AddCandidate(candidate);
   }
 }
 
