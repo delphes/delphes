@@ -36,6 +36,8 @@
 #include <TMath.h>
 #include <TRandom3.h>
 
+#include <set>
+
 using namespace std;
 
 class SimpleCalorimeter: public DelphesModule

@@ -27,70 +27,23 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-
-#include "TClass.h"
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
 DelphesFactory::DelphesFactory(const char *name) : TNamed(name, "") {}
-
-//------------------------------------------------------------------------------
-
-DelphesFactory::~DelphesFactory()
-{
-  map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
-  for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
-  {
-    delete(itBranches->second);
-  }
-}
 
 //------------------------------------------------------------------------------
 
 void DelphesFactory::Clear(Option_t * /*option*/)
 {
   TProcessID::SetObjectCount(0);
-
-  map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
-  for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
-  {
-    itBranches->second->Clear();
-  }
+  fCandidates.clear();
 }
 
 //------------------------------------------------------------------------------
 
 Candidate *DelphesFactory::NewCandidate()
 {
-  Candidate *object = New<Candidate>();
+  Candidate *object = static_cast<Candidate *>(fCandidates.emplace_back(std::make_unique<Candidate>()).get());
   object->SetFactory(this);
   TProcessID::AssignID(object);
-  return object;
-}
-
-//------------------------------------------------------------------------------
-
-TObject *DelphesFactory::New(TClass *cl)
-{
-  TObject *object = 0;
-  ExRootTreeBranch *branch = 0;
-  map<const TClass *, ExRootTreeBranch *>::iterator it = fBranches.find(cl);
-
-  if(it != fBranches.end())
-  {
-    branch = it->second;
-  }
-  else
-  {
-    branch = new ExRootTreeBranch(cl->GetName(), cl, 0);
-    fBranches.insert(make_pair(cl, branch));
-  }
-
-  object = branch->NewEntry();
-  object->Clear();
   return object;
 }
 
