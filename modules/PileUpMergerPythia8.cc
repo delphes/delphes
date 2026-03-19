@@ -146,7 +146,7 @@ void PileUpMergerPythia8::Process()
   vx = 0.0;
   vy = 0.0;
   numberOfParticles = fInputArray->size();
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     vx += candidate->Position.X();
     vy += candidate->Position.Y();

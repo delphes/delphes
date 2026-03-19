@@ -117,11 +117,11 @@ void TrackCovariance::Process()
   Double_t ZinPos = fGeometry->GetZminPos();
   Double_t ZinNeg = fGeometry->GetZminNeg();
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
 
     // converting to meters
-    auto *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     // converting to meters
     const TLorentzVector &candidatePosition = particle->Position * 1e-03;
@@ -168,7 +168,7 @@ void TrackCovariance::Process()
       track.SetScale(fChargedHadronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     new_candidate->Momentum.SetVectM(track.GetObsP(), mass);
 

@@ -42,7 +42,7 @@ using namespace std;
 
 CandidatesCollection DelphesModule::ImportArray(const char *name)
 {
-  auto *factory = GetFactory();
+  DelphesFactory *factory = GetFactory();
   if(!factory)
     throw std::runtime_error("Failed to retrieve the Delphes objects factory for module '" + std::string{GetName()} + "'.");
   if(!factory->Has(name))
@@ -59,7 +59,7 @@ CandidatesCollection DelphesModule::ImportArray(const char *name)
 
 CandidatesCollection DelphesModule::ExportArray(const char *name)
 {
-  auto *factory = GetFactory();
+  DelphesFactory *factory = GetFactory();
   if(!factory)
     throw std::runtime_error("Failed to retrieve the Delphes objects factory for module '" + std::string{GetName()} + "'.");
   std::ostringstream collectionLabel;

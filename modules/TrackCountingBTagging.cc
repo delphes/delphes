@@ -85,7 +85,7 @@ void TrackCountingBTagging::Process()
   Int_t sign, count;
 
   // loop over all input jets
-  for(const auto &jet : *fJetInputArray)
+  for(Candidate *const &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
     jpx = jetMomentum.Px();
@@ -94,7 +94,7 @@ void TrackCountingBTagging::Process()
 
     // loop over all input tracks
     count = 0;
-    for(const auto &track : *fTrackInputArray)
+    for(Candidate *const &track : *fTrackInputArray)
     {
       if(count >= fNtracks) break; // stop once we have enough tracks
       const TLorentzVector &trkMomentum = track->Momentum;

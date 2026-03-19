@@ -99,7 +99,7 @@ void VertexSorter::Process()
       throw 0;
     }
 
-    for(const auto &candidate : *fTrackInputArray)
+    for(Candidate *const &candidate : *fTrackInputArray)
     {
       if(candidate->Momentum.Pt() < 1.0)
         continue;
@@ -108,7 +108,7 @@ void VertexSorter::Process()
       TLorentzVector p(candidate->Momentum.Px(), candidate->Momentum.Py(), candidate->Momentum.Pz(), candidate->Momentum.E());
       Bool_t isInJet = false;
 
-      for(const auto &jetCandidate : *fJetInputArray)
+      for(Candidate *const &jetCandidate : *fJetInputArray)
       {
         if(jetCandidate->Momentum.Pt() < 30.0)
           continue;
@@ -147,7 +147,7 @@ void VertexSorter::Process()
   }
   else if(fMethod == "GenBest")
   {
-    for(const auto &candidate : *fTrackInputArray)
+    for(Candidate *const &candidate : *fTrackInputArray)
     {
       if(candidate->IsPU)
         continue;

@@ -76,7 +76,7 @@ void TruthVertexFinder::Process()
   TLorentzVector vertexPosition(0., 0., 0., 0.);
 
   nvtx = 0;
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
@@ -85,7 +85,7 @@ void TruthVertexFinder::Process()
 
     // check whether vertex already included, if so add particle
     Bool_t old_vertex = false;
-    for(auto &vertex : *fVertexOutputArray)
+    for(Candidate *const &vertex : *fVertexOutputArray)
     {
       const TLorentzVector &vertexPosition = vertex->Position;
       // check whether spatial difference is < 1 um, in that case assume it is the same vertex
@@ -104,7 +104,7 @@ void TruthVertexFinder::Process()
     // else fill new vertex
     if(!old_vertex)
     {
-      auto *vertex = factory->NewCandidate();
+      Candidate *vertex = factory->NewCandidate();
       vertex->Position = candidatePosition;
       vertex->ClusterIndex = nvtx;
 

@@ -122,7 +122,7 @@ void FastJetGridMedianEstimator::Process()
 
   // loop over input objects
   number = 0;
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
@@ -139,7 +139,7 @@ void FastJetGridMedianEstimator::Process()
 
     rho = (*itEstimators)->rho();
 
-    auto *candidate = factory->NewCandidate();
+    Candidate *candidate = factory->NewCandidate();
     candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
     candidate->Edges[0] = (*itEstimators)->rapmin();
     candidate->Edges[1] = (*itEstimators)->rapmax();

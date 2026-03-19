@@ -117,14 +117,14 @@ bool isTauDaughter(int pdgCode, int M1, const CandidatesCollection &fInputArray)
   //not needed, just to speed up the code - can be further refined but gives only negligible improvement:
   if(pdgCode == 15 || pdgCode < 11 || (pdgCode > 22 && pdgCode < 100) || pdgCode > 1000) return false;
   if(M1 < 0) return false;
-  if(auto *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 15) return true;
+  if(Candidate *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 15) return true;
   return false;
 }
 
 bool isWDaughter(int M1, const CandidatesCollection &fInputArray)
 {
   if(M1 < 0) return false;
-  if(auto *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 24) return true;
+  if(Candidate *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 24) return true;
   return false;
 }
 
@@ -156,7 +156,7 @@ void StatusPidFilter::Process()
   Int_t status, pdgCode;
   Bool_t pass;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     status = candidate->Status;
     pdgCode = TMath::Abs(candidate->PID);

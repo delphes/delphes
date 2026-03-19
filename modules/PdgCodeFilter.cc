@@ -103,7 +103,7 @@ void PdgCodeFilter::Process()
   Bool_t pass;
   Double_t pt;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;

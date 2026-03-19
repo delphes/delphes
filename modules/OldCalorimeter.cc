@@ -211,7 +211,7 @@ void OldCalorimeter::Process()
 
   // loop over all particles
   number = -1;
-  for(const auto &particle : *fParticleInputArray)
+  for(Candidate *const &particle : *fParticleInputArray)
   {
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
@@ -258,7 +258,7 @@ void OldCalorimeter::Process()
 
   // loop over all tracks
   number = -1;
-  for(const auto &track : *fTrackInputArray)
+  for(Candidate *const &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -473,7 +473,7 @@ void OldCalorimeter::FinalizeTower()
   // fill energy flow candidates
   if(fTowerTrackAllHits == fTowerAllHits)
   {
-    for(const auto &track : *fTowerTrackArray)
+    for(Candidate *const &track : *fTowerTrackArray)
     {
       fEFlowTrackOutputArray->emplace_back(track);
     }
@@ -495,7 +495,7 @@ void OldCalorimeter::FinalizeTower()
         // create new tower
         tower = factory->NewCandidate();
 
-        for(const auto &particle : *fTowerHCalArray)
+        for(Candidate *const &particle : *fTowerHCalArray)
         {
           tower->AddCandidate(particle);
         }
@@ -526,7 +526,7 @@ void OldCalorimeter::FinalizeTower()
         // create new tower
         tower = factory->NewCandidate();
 
-        for(const auto &particle : *fTowerECalArray)
+        for(Candidate *const &particle : *fTowerECalArray)
         {
           tower->AddCandidate(particle);
         }
@@ -553,7 +553,7 @@ void OldCalorimeter::FinalizeTower()
 
     if(towerTrackArray)
     {
-      for(const auto &track : **towerTrackArray)
+      for(Candidate *const &track : **towerTrackArray)
       {
         fEFlowTrackOutputArray->emplace_back(track);
       }

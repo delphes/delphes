@@ -77,7 +77,7 @@ void UniqueObjectFinder::Process()
 
   for(auto itInputMap = fInputMap.cbegin(); itInputMap != fInputMap.cend(); ++itInputMap) // loop over all input arrays
   {
-    for(const auto &candidate : *(itInputMap->first)) // loop over all candidates
+    for(Candidate *const &candidate : *(itInputMap->first)) // loop over all candidates
     {
       if(Unique(candidate, itInputMap))
         itInputMap->second->emplace_back(candidate);
@@ -91,7 +91,7 @@ Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::const_iterator
 {
   for(auto previousItInputMap = fInputMap.cbegin(); previousItInputMap != itInputMap; ++previousItInputMap)
   { // loop over previous arrays
-    for(const auto &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
+    for(Candidate *const &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
       if(fUseUniqueID)
       {
         if(candidate->GetUniqueID() == previousCandidate->GetUniqueID()) return kFALSE;

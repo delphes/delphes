@@ -164,7 +164,7 @@ void DenseTrackFilter::Process()
 
   // loop over all tracks
   number = -1;
-  for(const auto &track : *fTrackInputArray)
+  for(Candidate *const &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
     ++number;
@@ -253,8 +253,8 @@ void DenseTrackFilter::FillTrack()
   numberOfCandidates = fBestTrack->GetCandidates().size();
   if(numberOfCandidates < 1) return;
 
-  auto *track = static_cast<Candidate *>(fBestTrack->GetCandidates().at(numberOfCandidates - 1));
-  auto *new_candidate = static_cast<Candidate *>(track->Clone());
+  Candidate *track = static_cast<Candidate *>(fBestTrack->GetCandidates().at(numberOfCandidates - 1));
+  Candidate *new_candidate = static_cast<Candidate *>(track->Clone());
   pt = new_candidate->Momentum.Pt();
   eta = new_candidate->Momentum.Eta();
   phi = new_candidate->Momentum.Phi();

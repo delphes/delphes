@@ -74,7 +74,7 @@ void Efficiency::Process()
   fOutputArray->clear();
   Double_t pt, eta, phi, e;
 
-  for(auto *candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;

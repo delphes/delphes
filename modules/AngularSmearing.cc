@@ -84,7 +84,7 @@ void AngularSmearing::Process()
   fOutputArray->clear();
   Double_t pt, eta, phi, e, m;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidateMomentum.Eta();
@@ -99,7 +99,7 @@ void AngularSmearing::Process()
 
     if(pt <= 0.0) continue;
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
     new_candidate->AddCandidate(candidate);
 

@@ -132,7 +132,7 @@ void Isolation::Process()
   isolationArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
-  for(const auto &candidate : *fCandidateInputArray)
+  for(Candidate *const &candidate : *fCandidateInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = TMath::Abs(candidateMomentum.Eta());
@@ -141,7 +141,7 @@ void Isolation::Process()
     rho = 0.0;
     if(fRhoInputArray)
     {
-      for(const auto &object : *fRhoInputArray)
+      for(Candidate *const &object : *fRhoInputArray)
         if(eta >= object->Edges[0] && eta < object->Edges[1])
           rho = object->Momentum.Pt();
     }
@@ -153,7 +153,7 @@ void Isolation::Process()
     sumChargedPU = 0.0;
     sumAllParticles = 0.0;
 
-    for(const auto &isolation : *isolationArray)
+    for(Candidate *const &isolation : *isolationArray)
     {
       const TLorentzVector &isolationMomentum = isolation->Momentum;
 
@@ -181,7 +181,7 @@ void Isolation::Process()
     rho = 0.0;
     if(fRhoInputArray)
     {
-      for(const auto &object : *fRhoInputArray)
+      for(Candidate *const &object : *fRhoInputArray)
         if(eta >= object->Edges[0] && eta < object->Edges[1])
           rho = object->Momentum.Pt();
     }

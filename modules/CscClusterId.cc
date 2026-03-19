@@ -79,7 +79,7 @@ void CscClusterId::Process()
   Double_t Ehad, decayR, decayZ, NStationEff, eta;
   Double_t signPz, cosTheta;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;

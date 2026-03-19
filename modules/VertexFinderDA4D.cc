@@ -149,7 +149,7 @@ void VertexFinderDA4D::Process()
     cout << " start processing vertices ..." << endl;
     cout << " Found " << fInputArray->size() << " input tracks" << endl;
     //loop over input tracks
-    for(const auto &candidate : *fInputArray)
+    for(Candidate *const &candidate : *fInputArray)
     {
       pos = candidate->InitialPosition;
       mom = candidate->Momentum;
@@ -167,7 +167,7 @@ void VertexFinderDA4D::Process()
   }
 
   //loop over vertex candidates
-  for(const auto &candidate : *ClusterArray)
+  for(Candidate *const &candidate : *ClusterArray)
   {
     double meantime = 0.;
     double expv_x2 = 0.;
@@ -186,7 +186,7 @@ void VertexFinderDA4D::Process()
     if(fVerbose) cout << "this vertex has: " << candidate->GetCandidates().size() << " tracks" << endl;
 
     // loop over tracks belonging to this vertex
-    for(const auto &track : candidate->GetCandidates())
+    for(Candidate *const &track : candidate->GetCandidates())
     {
       itr++;
       // TBC: the time is in ns for now TBC
@@ -337,7 +337,7 @@ vector<Candidate *> VertexFinderDA4D::vertices()
   Double_t z, dz, t, dt, d0, d0error;
 
   // loop over input tracks
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     //TBC everything in cm
     z = candidate->DZ / 10;
@@ -556,7 +556,7 @@ vector<Candidate *> VertexFinderDA4D::vertices()
   for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
   {
     DelphesFactory *factory = GetFactory();
-    auto *candidate = factory->NewCandidate();
+    Candidate *candidate = factory->NewCandidate();
 
     //cout<<"new vertex"<<endl;
     //GlobalPoint pos(0, 0, k->z);

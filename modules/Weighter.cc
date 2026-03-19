@@ -129,7 +129,7 @@ void Weighter::Process()
 
   // loop over all particles
   fCodeSet.clear();
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     if(candidate->Status != 3) continue;
 
@@ -161,7 +161,7 @@ void Weighter::Process()
     }
   }
 
-  auto *candidate = factory->NewCandidate();
+  Candidate *candidate = factory->NewCandidate();
   candidate->Momentum.SetPtEtaPhiE(weight, 0.0, 0.0, weight);
   fOutputArray->emplace_back(candidate);
 }

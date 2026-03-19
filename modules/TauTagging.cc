@@ -85,7 +85,7 @@ void TauTagging::Init()
   fEfficiencyMap.clear();
   for(i = 0; i < size / 2; ++i)
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile(param[i * 2 + 1].GetString());
 
     fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
@@ -95,7 +95,7 @@ void TauTagging::Init()
   itEfficiencyMap = fEfficiencyMap.find(0);
   if(itEfficiencyMap == fEfficiencyMap.end())
   {
-    auto formula = std::make_unique<DelphesFormula>();
+    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
     formula->Compile("0.0");
 
     fEfficiencyMap[0] = std::move(formula);
@@ -137,9 +137,8 @@ void TauTagging::Process()
   tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
-  for(const auto &jet : *fJetInputArray)
+  for(Candidate *const &jet : *fJetInputArray)
   {
-
     const TLorentzVector &jetMomentum = jet->Momentum;
     pdgCode = 0;
     charge = gRandom->Uniform() > 0.5 ? 1 : -1;
@@ -151,7 +150,7 @@ void TauTagging::Process()
     // loop over all input taus
     if(tauArray)
     {
-      for(const auto &tau : *tauArray)
+      for(Candidate *const &tau : *tauArray)
       {
         if(tau->D1 < 0) continue;
 
@@ -164,7 +163,7 @@ void TauTagging::Process()
 
         for(i = tau->D1; i <= tau->D2; ++i)
         {
-          const auto *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
+          Candidate *const &daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
           if(TMath::Abs(daughter->PID) == 16) continue;
           tauMomentum += daughter->Momentum;
         }
@@ -183,7 +182,7 @@ void TauTagging::Process()
     {
 
       Double_t drMin = fDeltaR;
-      for(const auto *part : *fPartonInputArray)
+      for(Candidate *const &part : *fPartonInputArray)
       {
         if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13)
         {
@@ -208,7 +207,7 @@ void TauTagging::Process()
     {
       itEfficiencyMap = fEfficiencyMap.find(0);
     }
-    auto &formula = itEfficiencyMap->second;
+    std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
 
     // apply an efficency formula
     eff = formula->Eval(pt, eta, phi, e);

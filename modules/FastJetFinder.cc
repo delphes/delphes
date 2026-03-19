@@ -412,7 +412,7 @@ void FastJetFinder::Process()
 
   // loop over input objects
   number = 0;
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());

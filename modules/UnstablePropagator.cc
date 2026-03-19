@@ -98,7 +98,7 @@ void UnstablePropagator::Process()
 
   if(fDebug) cout << "-------------   new event -----------------" << endl;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     particlePosition = candidate->Position;
     particleMomentum = candidate->Momentum;
@@ -140,7 +140,7 @@ void UnstablePropagator::Process()
       continue;
     }
 
-    auto *daughter = static_cast<Candidate *>(fInputArray->at(daughters_indices.at(0)));
+    Candidate *daughter = static_cast<Candidate *>(fInputArray->at(daughters_indices.at(0)));
     lof = FlightDistance(candidate, daughter) * 1.0E-3;
 
     //fLmin = 0.01;

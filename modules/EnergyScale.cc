@@ -70,7 +70,7 @@ void EnergyScale::Process()
   TLorentzVector momentum;
   Double_t scale;
 
-  for(const auto &candidate : *fInputArray)
+  for(Candidate *const &candidate : *fInputArray)
   {
     momentum = candidate->Momentum;
 
@@ -78,7 +78,7 @@ void EnergyScale::Process()
 
     if(scale > 0.0) momentum *= scale;
 
-    auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->Momentum = momentum;
 
     fOutputArray->emplace_back(new_candidate);

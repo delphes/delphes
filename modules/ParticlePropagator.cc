@@ -134,10 +134,10 @@ void ParticlePropagator::Process()
     beamSpotPosition = beamSpotCandidate.Position;
   }
 
-  for(const auto &candidate : *fInputArray)
+  for(const Candidate *candidate : *fInputArray)
   {
     if(candidate->GetCandidates().empty())
-      particle = candidate;
+      particle = const_cast<Candidate *>(candidate);
     else
       particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
@@ -174,7 +174,7 @@ void ParticlePropagator::Process()
 
     if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
     {
-      auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+      Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
       new_candidate->InitialPosition = particlePosition;
       new_candidate->Position = particlePosition;
@@ -201,7 +201,7 @@ void ParticlePropagator::Process()
 
       l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
 
-      auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+      Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
       new_candidate->InitialPosition = particlePosition;
       new_candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
@@ -321,7 +321,7 @@ void ParticlePropagator::Process()
           particle->Phi = particleMomentum.Phi();
         }
 
-        auto *new_candidate = static_cast<Candidate *>(candidate->Clone());
+        Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
         new_candidate->InitialPosition = particlePosition;
         new_candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * c_light * 1.0E3);
