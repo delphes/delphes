@@ -491,3 +491,5 @@ void DelphesHepMC2Reader::FinalizeParticles(const CandidatesCollection &allParti
 }
 
 //---------------------------------------------------------------------------
+
+REGISTER_READER("HepMC2", DelphesHepMC2Reader);

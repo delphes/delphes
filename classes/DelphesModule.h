@@ -26,6 +26,7 @@
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
+#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootTask.h"
 
@@ -67,5 +68,17 @@ private:
 
   TFolder *fPlotFolder{nullptr};
 };
+
+/// Add a processing module to the list of handled modules
+#define REGISTER_MODULE(name, obj)                                                           \
+  struct BUILDER_NAME(obj)                                                                   \
+  {                                                                                          \
+    BUILDER_NAME(obj)() { DelphesProcessingModuleFactory::Get().RegisterModule<obj>(name); } \
+  };                                                                                         \
+  static const BUILDER_NAME(obj) gDelphesModule##obj;                                        \
+  static_assert(true, "")
+
+/// A documentation generator factory
+DEFINE_FACTORY(DelphesProcessingModuleFactory, DelphesModule, "Processing modules factory");
 
 #endif /* DelphesModule_h */

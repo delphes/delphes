@@ -1,11 +1,12 @@
 /*
- *  TDAnalyser: a toolset for the analysis of timing detectors data
- *  Copyright (C) 2024-2025  Laurent Forthomme <laurent.forthomme@cern.ch>
+ *  Delphes: a framework for fast simulation of a generic collider experiment
+ *  Copyright (C) 2012-2026  Universite catholique de Louvain (UCL), Belgium
+ *                           AGH University of Krakow, Poland
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
- *  any later version.
+ *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,8 +22,13 @@
 
 #include <algorithm>
 #include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 /// Name of the object Builder
 #define BUILDER_NAME(obj) obj##Builder
@@ -62,7 +68,7 @@ public:
     static_assert(std::is_base_of_v<T, U>,
       "\n\n  *** Failed to register a module with improper inheritance into the factory. ***\n");
     if(Has(name))
-      throw std::invalid_argument("\n\n  *** Factory of " + fType + " modules detected a duplicate " + fType + " registration for name '" + name + "'! ***\n");
+      ThrowDuplicateError(name);
     fBuildersMap.insert(std::make_pair(name, &BuildModule<U>));
   }
   /// Build one instance of a named module
@@ -70,10 +76,8 @@ public:
   {
     if(fBuildersMap.count(name) > 0)
       return fBuildersMap.at(name)();
-    std::string list;
-    for(const auto &module_name : Modules())
-      list += "\n     * " + module_name;
-    throw std::invalid_argument("\n\n  *** Failed to build a " + fType + " module with name '" + name + "' ***\n\n     List of " + fType + " modules handled:" + list + "\n");
+    ThrowBuildError(name);
+    throw;
   }
 
   typedef std::unique_ptr<T> (*Builder)(); ///< constructor type for a module definition
@@ -93,6 +97,22 @@ protected:
   explicit DelphesModuleFactory(std::string type) : fType(std::move(type)) {}
 
 private:
+  void ThrowDuplicateError(std::string_view name) const
+  {
+    std::ostringstream message;
+    message << "\n\n  *** Factory of " << fType << " modules detected a duplicate " << fType << " registration for name '" << name << "'! ***\n";
+    throw std::invalid_argument(message.str());
+  }
+  void ThrowBuildError(std::string_view name) const
+  {
+    std::ostringstream message;
+    message << "\n\n  *** Failed to build a " << fType << " module with name '" << std::string{name} + "' ***\n\n"
+            << "     List of " + fType + " modules handled:\n";
+    for(const auto &module_name : Modules())
+      message << "     * " << module_name << "\n";
+    throw std::invalid_argument(message.str());
+  }
+
   /// Build a module with its parameters set
   template <typename U>
   static std::unique_ptr<T> BuildModule()
@@ -102,18 +122,5 @@ private:
   std::unordered_map<std::string, Builder> fBuildersMap; ///< database of modules handled by this instance
   const std::string fType; ///< modules created by this factory
 };
-
-/// Add a documentation generator to the list of handled modules
-#define REGISTER_MODULE(name, obj)                                                           \
-  struct BUILDER_NAME(obj)                                                                   \
-  {                                                                                          \
-    BUILDER_NAME(obj)() { DelphesProcessingModuleFactory::Get().RegisterModule<obj>(name); } \
-  };                                                                                         \
-  static const BUILDER_NAME(obj) gDelphesModule##obj;                                        \
-  static_assert(true, "")
-
-class DelphesModule;
-/// A documentation generator factory
-DEFINE_FACTORY(DelphesProcessingModuleFactory, DelphesModule, "Processing modules factory");
 
 #endif

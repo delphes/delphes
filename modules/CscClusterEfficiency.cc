@@ -28,7 +28,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCscClusterFormula.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
 #include <TRandom3.h>

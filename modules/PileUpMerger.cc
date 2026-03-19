@@ -27,7 +27,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 

@@ -30,7 +30,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFilter.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 
