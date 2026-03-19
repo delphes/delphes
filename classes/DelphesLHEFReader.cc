@@ -312,3 +312,5 @@ void DelphesLHEFReader::AnalyzeParticle(DelphesFactory *factory,
 }
 
 //---------------------------------------------------------------------------
+
+REGISTER_READER("LHEF", DelphesLHEFReader);

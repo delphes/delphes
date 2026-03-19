@@ -520,3 +520,5 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
 }
 
 //---------------------------------------------------------------------------
+
+REGISTER_READER("STDHEP", DelphesSTDHEPReader);

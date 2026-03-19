@@ -8,7 +8,6 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 #include <TLorentzVector.h>
 #include <TMath.h>

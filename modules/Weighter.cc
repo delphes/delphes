@@ -27,7 +27,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 using namespace std;
 

@@ -33,7 +33,6 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 #include <TDatabasePDG.h>
 #include <TMath.h>

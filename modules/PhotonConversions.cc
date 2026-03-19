@@ -27,7 +27,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCylindricalFormula.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 #include <TF1.h>
 #include <TLorentzVector.h>

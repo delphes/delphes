@@ -589,3 +589,5 @@ void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOut
 }
 
 //---------------------------------------------------------------------------
+
+REGISTER_READER("HepMC3", DelphesHepMC3Reader);

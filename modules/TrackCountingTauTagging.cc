@@ -16,7 +16,6 @@
 #include "classes/DelphesFilter.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 #include "ExRootAnalysis/ExRootClassifier.h"
 

@@ -27,7 +27,6 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesModule.h"
-#include "classes/DelphesModuleFactory.h"
 
 class RecoPuFilter: public DelphesModule
 {
