@@ -840,7 +840,7 @@ public:
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
 
-  void AddCandidate(Candidate *object);
+  void AddCandidate(const Candidate *object);
   const std::vector<Candidate *> &GetCandidates() const;
 
   Bool_t Overlaps(const Candidate *object) const;
@@ -855,7 +855,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 6)
+  ClassDef(Candidate, 7)
 };
 
 using CandidatesCollection = std::shared_ptr<std::vector<Candidate *> >;
