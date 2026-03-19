@@ -385,7 +385,7 @@ void DelphesHepMC3Reader::AnalyzeWeight(ExRootTreeBranch *branch)
 void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate)
 {
   int index;
-  TLorentzVector *position;
+  std::shared_ptr<TLorentzVector> position;
   CandidatesCollection array;
   vector<int>::iterator itParticle;
   map<int, int>::iterator itVertexMap;
@@ -399,7 +399,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
     fOutVertexMap[code] = index;
     if(candidate && code > 0) fInVertexMap[code] = index;
 
-    position = factory->New<TLorentzVector>();
+    position = std::make_shared<TLorentzVector>();
     array = std::make_shared<std::vector<Candidate *> >();
     position->SetXYZT(0.0, 0.0, 0.0, 0.0);
     fVertices.push_back(make_pair(position, array));
@@ -466,7 +466,7 @@ void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOut
   counter = 0;
   for(size_t i = 0; i < fVertices.size(); ++i)
   {
-    position = fVertices[i].first;
+    position = fVertices[i].first.get();
     array = fVertices[i].second;
 
     for(size_t j = 0; j < array->size(); ++j)
