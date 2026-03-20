@@ -59,6 +59,7 @@ public:
     if(!Has(collectionName)) throwAttachingFailure(collectionName);
     return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]));
   }
+  std::vector<std::string> GetCollections() const;
 
   Candidate *NewCandidate();
 
