@@ -49,7 +49,9 @@ CandidatesCollection DelphesModule::ImportArray(const char *name)
   {
     std::ostringstream message;
     message << "can't access input list '" << name;
-    message << "' in module '" << GetName() << "'";
+    message << "' in module '" << GetName() << "'. List of collections registered:\n";
+    for(const std::string &collectionName : factory->GetCollections())
+      message << " * " << collectionName << std::endl;
     throw std::runtime_error(message.str());
   }
   return factory->Attach<std::vector<Candidate *> >(name);

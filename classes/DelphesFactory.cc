@@ -56,6 +56,16 @@ bool DelphesFactory::Has(std::string_view collectionName) const
 
 //------------------------------------------------------------------------------
 
+std::vector<std::string> DelphesFactory::GetCollections() const
+{
+  std::vector<std::string> collections;
+  for(const auto &[collectionName, collectionPtr] : fMemorySlots)
+    collections.emplace_back(collectionName);
+  return collections;
+}
+
+//------------------------------------------------------------------------------
+
 void DelphesFactory::throwAttachingFailure(std::string_view collectionName) const
 {
   std::ostringstream os;
