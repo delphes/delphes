@@ -58,10 +58,8 @@ void Delphes::Init()
     throw std::runtime_error("Failed to initialise the main Delphes module with no reader declared.");
 
   ExRootConfReader *confReader = GetConfReader();
-  confReader->SetName("ConfReader");
 
   const ExRootConfReader::ExRootTaskMap *modules = confReader->GetModules();
-  ExRootConfReader::ExRootTaskMap::const_iterator itModules;
 
   gRandom->SetSeed(confReader->GetInt("::RandomSeed", 0));
 
@@ -69,27 +67,55 @@ void Delphes::Init()
   for(int i = 0; i < param.GetSize(); ++i)
   {
     TString name = param[i].GetString(); // retrieve the module name
-    itModules = modules->find(name);
-    if(itModules != modules->end()) // found the module in the execution path
-    {
-      std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
-      moduleObject->SetFactory(GetFactory());
-      if(moduleObject->IsWriter())
-      {
-        DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
-        writerModule->SetOutputFile(GetOutputFile());
-      }
-      if(ExRootTask *task = NewTask(dynamic_cast<ExRootTask *>(moduleObject.release()), itModules->first); task)
-        Add(task);
-    }
-    else
+    if(modules->count(name) == 0)
     {
       std::ostringstream message;
       message << "module '" << name;
       message << "' is specified in ExecutionPath but not configured.";
       throw std::runtime_error(message.str());
     }
+    const std::string &delphesModuleName = modules->at(name).Data();
+    std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(delphesModuleName);
+    moduleObject->SetFactory(GetFactory());
+    moduleObject->SetConfReader(GetConfReader());
+    moduleObject->SetName(name);
+    if(moduleObject->IsWriter())
+    {
+      DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
+      writerModule->SetOutputFile(GetOutputFile());
+    }
+    fModules.emplace_back(std::make_pair(name, std::move(moduleObject)));
   }
+}
+
+//------------------------------------------------------------------------------
+
+void Delphes::InitTask()
+{
+  Init();
+  for(const auto &[moduleName, moduleObject] : fModules)
+  {
+    std::cout << std::left;
+    std::cout << std::setw(30) << "** INFO: initializing module";
+    std::cout << std::setw(25) << moduleName << std::endl;
+    moduleObject->Init();
+  }
+}
+
+//------------------------------------------------------------------------------
+
+void Delphes::ProcessTask()
+{
+  for(const auto &[moduleName, moduleObject] : fModules)
+    moduleObject->Process();
+}
+
+//------------------------------------------------------------------------------
+
+void Delphes::FinishTask()
+{
+  for(const auto &[moduleName, moduleObject] : fModules)
+    moduleObject->Finish();
 }
 
 //------------------------------------------------------------------------------
