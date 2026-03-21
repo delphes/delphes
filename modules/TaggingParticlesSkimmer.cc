@@ -34,7 +34,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -112,7 +111,7 @@ void TaggingParticlesSkimmer::Process()
     for(i = tau->D1; i <= tau->D2; ++i)
     {
       Candidate *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
-      if(TMath::Abs(daughter->PID) == 16) continue;
+      if(std::abs(daughter->PID) == 16) continue;
       tauMomentum += daughter->Momentum;
     }
 
@@ -126,13 +125,13 @@ void TaggingParticlesSkimmer::Process()
 
   for(Candidate *const &candidate : *fPartonInputArray)
   {
-    pdgCode = TMath::Abs(candidate->PID);
+    pdgCode = std::abs(candidate->PID);
     if(pdgCode == 15) continue;
 
     pt = candidate->Momentum.Pt();
     if(pt < fPTMin) continue;
 
-    eta = TMath::Abs(candidate->Momentum.Eta());
+    eta = std::fabs(candidate->Momentum.Eta());
     if(eta > fEtaMax) continue;
 
     fOutputArray->emplace_back(candidate);

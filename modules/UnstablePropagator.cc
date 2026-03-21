@@ -29,7 +29,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -112,12 +111,12 @@ void UnstablePropagator::Process()
     //if (fDebug) PrintPart("", candidate);
 
     // check that particle position is inside the cylinder
-    if(TMath::Hypot(x, y) > fRadiusMax || TMath::Abs(z) > fHalfLengthMax)
+    if(std::hypot(x, y) > fRadiusMax || std::fabs(z) > fHalfLengthMax)
     {
       continue;
     }
 
-    if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
+    if(std::fabs(q) < 1.0E-9 || std::fabs(fBz) < 1.0E-9)
     {
       continue;
     }
@@ -302,23 +301,23 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
 
   //if (fDebug) cout << "propagating from : "<<x<<", "<<y<<", "<<z<<",  lof:"<<lof<<", tof: "<<tof<<endl;
 
-  if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
+  if(std::hypot(x, y) > fRadius || std::fabs(z) > fHalfLength)
   {
     return particlePosition;
   }
 
   // neutral propagation
-  else if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
+  else if(std::fabs(q) < 1.0E-9 || std::fabs(fBz) < 1.0E-9)
   {
     // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
 
     /*
     tmp = px * y - py * x;
-    t_r = (TMath::Sqrt(pt2 * fRadius2 - tmp * tmp) - px * x - py * y) / pt2;
+    t_r = (std::sqrt(pt2 * fRadius2 - tmp * tmp) - px * x - py * y) / pt2;
 
-    t_z = (TMath::Sign(fHalfLength, pz) - z) / pz;
+    t_z = (fHalfLength * pz / std::fabs(pz) - z) / pz;
 
-    t = TMath::Min(t_r, t_z);
+    t = std::min(t_r, t_z);
     */
 
     // TODO: check that l and t within cilinder
@@ -327,7 +326,7 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
     x_t = x + px * t;
     y_t = y + py * t;
     z_t = z + pz * t;
-    // Double_t l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
+    // Double_t l = std::sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
     //if (fDebug) cout << "propagated neutral length: "<<l<<endl;
     particlePosition.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
   }
@@ -344,11 +343,11 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
     omega = q * fBz / gammam; // omega is here in [89875518/s]
     r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
 
-    phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
+    phi_0 = std::atan2(py, px); // [rad] in [-pi, pi]
 
     // 2. helix axis coordinates
-    x_c = x + r * TMath::Sin(phi_0);
-    y_c = y - r * TMath::Cos(phi_0);
+    x_c = x + r * std::sin(phi_0);
+    y_c = y - r * std::cos(phi_0);
 
     vz = pz * c_light / e;
 
@@ -356,13 +355,13 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
 
     t = tof; // in seconds
     phi_t = phi_0 - omega * t;
-    x_t = x_c - r * TMath::Sin(phi_t);
-    y_t = y_c + r * TMath::Cos(phi_t);
+    x_t = x_c - r * std::sin(phi_t);
+    y_t = y_c + r * std::cos(phi_t);
     z_t = z + vz * t;
-    r_t = TMath::Hypot(x_t, y_t);
+    r_t = std::hypot(x_t, y_t);
 
     // lenght of the path from production to tracker
-    // l = t * TMath::Hypot(vz, r * omega);
+    // l = t * std::hypot(vz, r * omega);
     //if (fDebug) cout << "propagated to: X: "<<x_t<<" Y: "<<y_t<<" Z: "<<z_t<<"  length: "<<l<<endl;
 
     if(r_t > 0.0)

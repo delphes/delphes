@@ -30,7 +30,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -121,19 +120,14 @@ void MomentumSmearing::Process()
 
 Double_t MomentumSmearing::LogNormal(Double_t mean, Double_t sigma)
 {
-  Double_t a, b;
-
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
-    a = TMath::Log(mean) - 0.5 * b * b;
-
-    return TMath::Exp(a + b * gRandom->Gaus(0.0, 1.0));
+    const double b = std::sqrt(std::log((1.0 + (sigma * sigma) / (mean * mean)))),
+                 a = std::log(mean) - 0.5 * b * b;
+    return std::exp(a + b * gRandom->Gaus(0.0, 1.0));
   }
   else
-  {
     return 0.0;
-  }
 }
 
 //------------------------------------------------------------------------------

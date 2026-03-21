@@ -37,7 +37,6 @@
 #include <TrackCovariance/SolGridCov.h>
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -155,11 +154,11 @@ void TrackCovariance::Process()
     // *******************************
 
     // apply rescaling factors to resolution
-    if(TMath::Abs(candidate->PID) == 11)
+    if(std::abs(candidate->PID) == 11)
     {
       track.SetScale(fElectronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
-    else if(TMath::Abs(candidate->PID) == 13)
+    else if(std::abs(candidate->PID) == 13)
     {
       track.SetScale(fMuonScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
@@ -202,13 +201,13 @@ void TrackCovariance::Process()
     new_candidate->PT = pt;
     new_candidate->Charge = q;
 
-    dd0 = TMath::Sqrt(track.GetCov()(0, 0)) * 1e03;
-    ddz = TMath::Sqrt(track.GetCov()(3, 3)) * 1e03;
-    dphi = TMath::Sqrt(track.GetCov()(1, 1));
-    dct = TMath::Sqrt(track.GetCov()(4, 4));
-    dpt = 2 * TMath::Sqrt(track.GetCov()(2, 2)) * pt * pt / (0.2998 * fBz);
-    dp = TMath::Sqrt((1. + ct * ct) * dpt * dpt + 4 * pt * pt * ct * ct * dct * dct / (1. + ct * ct) / (1. + ct * ct));
-    dC = TMath::Sqrt(track.GetCov()(2, 2)) * 1e-03;
+    dd0 = std::sqrt(track.GetCov()(0, 0)) * 1e03;
+    ddz = std::sqrt(track.GetCov()(3, 3)) * 1e03;
+    dphi = std::sqrt(track.GetCov()(1, 1));
+    dct = std::sqrt(track.GetCov()(4, 4));
+    dpt = 2 * std::sqrt(track.GetCov()(2, 2)) * pt * pt / (0.2998 * fBz);
+    dp = std::sqrt((1. + ct * ct) * dpt * dpt + 4 * pt * pt * ct * ct * dct * dct / (1. + ct * ct) / (1. + ct * ct));
+    dC = std::sqrt(track.GetCov()(2, 2)) * 1e-03;
 
     new_candidate->ErrorD0 = dd0;
     new_candidate->ErrorDZ = ddz;

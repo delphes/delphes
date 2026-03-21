@@ -30,7 +30,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -78,7 +77,7 @@ void JetFakeParticle::Init()
     formula->Compile(param[i * 2 + 1].GetString());
     pdgCode = param[i * 2].GetInt();
 
-    if(TMath::Abs(pdgCode) != 11 && TMath::Abs(pdgCode) != 13 && TMath::Abs(pdgCode) != 22)
+    if(std::abs(pdgCode) != 11 && std::abs(pdgCode) != 13 && std::abs(pdgCode) != 22)
     {
       throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
     }
@@ -154,11 +153,11 @@ void JetFakeParticle::Process()
 
         // convert jet
 
-        if(TMath::Abs(pdgCodeOut) == 11 || TMath::Abs(pdgCodeOut) == 13)
+        if(std::abs(pdgCodeOut) == 11 || std::abs(pdgCodeOut) == 13)
         {
           if(candidate->Charge != 0)
           {
-            fake->Charge = candidate->Charge / TMath::Abs(candidate->Charge);
+            fake->Charge = candidate->Charge / std::abs(candidate->Charge);
           }
           else
           {
@@ -167,11 +166,11 @@ void JetFakeParticle::Process()
           }
         }
 
-        if(TMath::Abs(pdgCodeOut) == 22) fake->PID = 22;
+        if(std::abs(pdgCodeOut) == 22) fake->PID = 22;
 
-        if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->emplace_back(fake);
-        if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->emplace_back(fake);
-        if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->emplace_back(fake);
+        if(std::abs(pdgCodeOut) == 11) fElectronOutputArray->emplace_back(fake);
+        if(std::abs(pdgCodeOut) == 13) fMuonOutputArray->emplace_back(fake);
+        if(std::abs(pdgCodeOut) == 22) fPhotonOutputArray->emplace_back(fake);
 
         break;
       }

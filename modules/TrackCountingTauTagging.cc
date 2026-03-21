@@ -20,7 +20,6 @@
 #include "ExRootAnalysis/ExRootClassifier.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -77,10 +76,10 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
   const TLorentzVector &momentum = tau->Momentum;
   Int_t pdgCode, i, j;
 
-  pdgCode = TMath::Abs(tau->PID);
+  pdgCode = std::abs(tau->PID);
   if(pdgCode != 15) return -1;
 
-  if(momentum.Pt() <= fPTMin || TMath::Abs(momentum.Eta()) > fEtaMax) return -1;
+  if(momentum.Pt() <= fPTMin || std::fabs(momentum.Eta()) > fEtaMax) return -1;
 
   if(tau->D1 < 0) return -1;
 
@@ -94,7 +93,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
   for(i = tau->D1; i <= tau->D2; ++i)
   {
     Candidate *daughter1 = static_cast<Candidate *>(fParticleInputArray->at(i));
-    pdgCode = TMath::Abs(daughter1->PID);
+    pdgCode = std::abs(daughter1->PID);
     if(pdgCode == 11 || pdgCode == 13 || pdgCode == 15)
       return -1;
     else if(pdgCode == 24)
@@ -103,7 +102,7 @@ Int_t TrackCountingTauTaggingPartonClassifier::GetCategory(TObject *object)
       for(j = daughter1->D1; j <= daughter1->D2; ++j)
       {
         Candidate *daughter2 = static_cast<Candidate *>(fParticleInputArray->at(j));
-        pdgCode = TMath::Abs(daughter2->PID);
+        pdgCode = std::abs(daughter2->PID);
         if(pdgCode == 11 || pdgCode == 13) return -1;
       }
     }
@@ -220,7 +219,7 @@ void TrackCountingTauTagging::Process()
       for(i = tau->D1; i <= tau->D2; ++i)
       {
         Candidate *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
-        if(TMath::Abs(daughter->PID) == 16) continue;
+        if(std::abs(daughter->PID) == 16) continue;
         tauMomentum += daughter->Momentum;
       }
 

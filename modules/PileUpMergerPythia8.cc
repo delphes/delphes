@@ -32,7 +32,6 @@
 
 #include <TDatabasePDG.h>
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include <Pythia.h>
@@ -195,7 +194,7 @@ void PileUpMergerPythia8::Process()
     dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
     dz *= 1.0E3; // necessary in order to make z in mm
 
-    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
+    dphi = gRandom->Uniform(-M_PI, M_PI);
 
     vx = 0.0;
     vy = 0.0;

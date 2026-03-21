@@ -30,7 +30,6 @@
 
 #include <TF1.h>
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 #include <TVector3.h>
 
@@ -114,7 +113,7 @@ void PhotonConversions::Process()
       z = candidatePosition.Z() * 1.0E-3;
 
       // check that particle position is inside the cylinder
-      if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength) continue;
+      if(std::hypot(x, y) > fRadius || std::fabs(z) > fHalfLength) continue;
 
       px = candidateMomentum.Px();
       py = candidateMomentum.Py();
@@ -138,13 +137,13 @@ void PhotonConversions::Process()
       }
 
       tmp = px * x + py * y;
-      discr = TMath::Sqrt(discr2);
+      discr = std::sqrt(discr2);
       t1 = (-tmp + discr) / pt2;
       t2 = (-tmp - discr) / pt2;
       t = (t1 < 0.0) ? t2 : t1;
 
       z_t = z + pz * t;
-      if(TMath::Abs(z_t) > fHalfLength)
+      if(std::fabs(z_t) > fHalfLength)
       {
         t3 = (+fHalfLength - z) / pz;
         t4 = (-fHalfLength - z) / pz;
@@ -156,7 +155,7 @@ void PhotonConversions::Process()
       y_t = y + py * t;
       z_t = z + pz * t;
 
-      r_t = TMath::Sqrt(x_t * x_t + y_t * y_t + z_t * z_t);
+      r_t = std::sqrt(x_t * x_t + y_t * y_t + z_t * z_t);
 
       // here starts conversion code
       nsteps = Int_t(r_t / fStep);
@@ -178,14 +177,14 @@ void PhotonConversions::Process()
 
         // convert photon position into cylindrical coordinates, cylindrical r,phi,z !!
 
-        r_i = TMath::Sqrt(x_i * x_i + y_i * y_i);
+        r_i = std::sqrt(x_i * x_i + y_i * y_i);
         phi_i = pos_i.Phi();
 
         // read conversion rate/meter from card
         rate = fConversionMap->Eval(r_i, phi_i, z_i);
 
         // convert into conversion probability
-        p_conv = 1 - TMath::Exp(-7.0 / 9.0 * fStep * rate);
+        p_conv = 1 - std::exp(-7.0 / 9.0 * fStep * rate);
 
         // case conversion occurs
         if(gRandom->Uniform() < p_conv)

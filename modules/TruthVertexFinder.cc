@@ -29,7 +29,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -89,11 +88,11 @@ void TruthVertexFinder::Process()
     {
       const TLorentzVector &vertexPosition = vertex->Position;
       // check whether spatial difference is < 1 um, in that case assume it is the same vertex
-      if(TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
+      if(std::fabs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
       {
         old_vertex = true;
         vertex->AddCandidate(candidate);
-        if(TMath::Abs(candidate->Charge) > 0)
+        if(std::fabs(candidate->Charge) > 0)
         {
           vertex->ClusterNDF += 1;
           vertex->GenSumPT2 += pt * pt;
@@ -108,7 +107,7 @@ void TruthVertexFinder::Process()
       vertex->Position = candidatePosition;
       vertex->ClusterIndex = nvtx;
 
-      if(TMath::Abs(candidate->Charge) > 0)
+      if(std::fabs(candidate->Charge) > 0)
       {
         vertex->ClusterNDF = 1;
         vertex->GenSumPT2 = pt * pt;

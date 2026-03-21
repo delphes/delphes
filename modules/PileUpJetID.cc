@@ -10,7 +10,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -189,7 +188,7 @@ void PileUpJetID::Process()
         float tow_sumW = 0;
         for(size_t i = 0; i < constituent->ECalEnergyTimePairs.size(); i++)
         {
-          float w = TMath::Sqrt(constituent->ECalEnergyTimePairs[i].first);
+          float w = std::sqrt(constituent->ECalEnergyTimePairs[i].first);
           if(fAverageEachTower)
           {
             tow_sumW += w;
@@ -279,7 +278,7 @@ void PileUpJetID::Process()
     candidate->NNeutrals = nn;
     if(sumpt > 0.)
     {
-      candidate->PTD = TMath::Sqrt(sumptsq) / sumpt;
+      candidate->PTD = std::sqrt(sumptsq) / sumpt;
       for(int i = 0; i < 5; i++)
       {
         candidate->FracPt[i] = pt_ann[i] / sumpt;

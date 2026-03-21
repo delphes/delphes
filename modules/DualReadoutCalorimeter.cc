@@ -31,7 +31,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include <iostream>
@@ -283,7 +282,7 @@ void DualReadoutCalorimeter::Process()
     if(particlePosition.Perp() > fTowerRmax)
       fTowerRmax = particlePosition.Perp();
 
-    pdgCode = TMath::Abs(particle->PID);
+    pdgCode = std::abs(particle->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -328,7 +327,7 @@ void DualReadoutCalorimeter::Process()
     const TLorentzVector &trackPosition = track->Position;
     ++number;
 
-    pdgCode = TMath::Abs(track->PID);
+    pdgCode = std::abs(track->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -598,9 +597,9 @@ void DualReadoutCalorimeter::FinalizeTower()
   // check whether barrel or endcap tower
 
   // endcap
-  if(TMath::Abs(fTower->Position.Pt() - fTowerRmax) > 1.e-06 && TMath::Abs(eta) > 0.)
+  if(std::fabs(fTower->Position.Pt() - fTowerRmax) > 1.e-06 && std::fabs(eta) > 0.)
   {
-    r = fTower->Position.Z() / TMath::SinH(eta);
+    r = fTower->Position.Z() / std::sinh(eta);
   }
   // barrel
   else
@@ -628,7 +627,7 @@ void DualReadoutCalorimeter::FinalizeTower()
   {
     // assume massless photon hypothesis
     fTower->PID = 22;
-    pt = energy / TMath::CosH(eta);
+    pt = energy / std::cosh(eta);
     fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   }
   // if hadronic fraction > 0, use HCAL resolution
@@ -638,8 +637,8 @@ void DualReadoutCalorimeter::FinalizeTower()
     // assume pion hypothesis for hadronic deposit. This can be corrected later by accessing particle energy in the output
     fTower->PID = 211;
     Double_t mass = 0.13957;
-    Double_t p = (energy > mass) ? TMath::Sqrt(energy * energy - mass * mass) : 0.;
-    pt = p / TMath::CosH(eta);
+    Double_t p = (energy > mass) ? std::sqrt(energy * energy - mass * mass) : 0.;
+    pt = p / std::cosh(eta);
     fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   }
 
@@ -661,7 +660,7 @@ void DualReadoutCalorimeter::FinalizeTower()
   // now do particle-flow
   // ---------------------------------------------------------------------------
 
-  fTrackSigma = TMath::Sqrt(fTrackSigma);
+  fTrackSigma = std::sqrt(fTrackSigma);
   neutralEnergy = max((energy - fTrackEnergy), 0.0);
 
   if(isPureEM)
@@ -674,7 +673,7 @@ void DualReadoutCalorimeter::FinalizeTower()
   }
 
   // combined track calo resolution
-  trackCaloSigma = TMath::Sqrt(fTrackSigma * fTrackSigma + caloSigma * caloSigma);
+  trackCaloSigma = std::sqrt(fTrackSigma * fTrackSigma + caloSigma * caloSigma);
   neutralSignificance = (trackCaloSigma > 0) ? neutralEnergy / trackCaloSigma : 0.;
 
   if(debug) cout << "Doing PF here: " << endl;
@@ -697,7 +696,7 @@ void DualReadoutCalorimeter::FinalizeTower()
       tower->Eem = neutralEnergy;
       tower->Ehad = 0.0;
       tower->PID = 22;
-      pt = neutralEnergy / TMath::CosH(eta);
+      pt = neutralEnergy / std::cosh(eta);
       tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
       fEFlowPhotonOutputArray->emplace_back(tower);
     }
@@ -707,8 +706,8 @@ void DualReadoutCalorimeter::FinalizeTower()
       tower->Ehad = neutralEnergy;
       tower->PID = 130;
       Double_t mass = 0.497611;
-      Double_t p = (neutralEnergy > mass) ? TMath::Sqrt(neutralEnergy * neutralEnergy - mass * mass) : 0.;
-      pt = p / TMath::CosH(eta);
+      Double_t p = (neutralEnergy > mass) ? std::sqrt(neutralEnergy * neutralEnergy - mass * mass) : 0.;
+      pt = p / std::cosh(eta);
       if(p > 0)
       {
         tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
@@ -761,19 +760,14 @@ void DualReadoutCalorimeter::FinalizeTower()
 
 Double_t DualReadoutCalorimeter::LogNormal(Double_t mean, Double_t sigma)
 {
-  Double_t a, b;
-
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
-    a = TMath::Log(mean) - 0.5 * b * b;
-
-    return TMath::Exp(a + b * gRandom->Gaus(0.0, 1.0));
+    const double b = std::sqrt(std::log((1.0 + (sigma * sigma) / (mean * mean)))),
+                 a = std::log(mean) - 0.5 * b * b;
+    return std::exp(a + b * gRandom->Gaus(0.0, 1.0));
   }
   else
-  {
     return 0.0;
-  }
 }
 
 //------------------------------------------------------------------------------

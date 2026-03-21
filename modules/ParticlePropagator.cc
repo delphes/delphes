@@ -31,7 +31,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -155,7 +154,7 @@ void ParticlePropagator::Process()
     q = particle->Charge;
 
     // check that particle position is inside the cylinder
-    if(TMath::Hypot(x, y) > fRadiusMax || TMath::Abs(z) > fHalfLengthMax)
+    if(std::hypot(x, y) > fRadiusMax || std::fabs(z) > fHalfLengthMax)
     {
       continue;
     }
@@ -172,7 +171,7 @@ void ParticlePropagator::Process()
       continue;
     }
 
-    if(TMath::Hypot(x, y) > fRadius || TMath::Abs(z) > fHalfLength)
+    if(std::hypot(x, y) > fRadius || std::fabs(z) > fHalfLength)
     {
       Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
@@ -185,21 +184,21 @@ void ParticlePropagator::Process()
 
       fOutputArray->emplace_back(new_candidate);
     }
-    else if(TMath::Abs(q) < 1.0E-9 || TMath::Abs(fBz) < 1.0E-9)
+    else if(std::fabs(q) < 1.0E-9 || std::fabs(fBz) < 1.0E-9)
     {
       // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
       tmp = px * y - py * x;
-      t_r = (TMath::Sqrt(pt2 * fRadius2 - tmp * tmp) - px * x - py * y) / pt2;
+      t_r = (std::sqrt(pt2 * fRadius2 - tmp * tmp) - px * x - py * y) / pt2;
 
-      t_z = (TMath::Sign(fHalfLength, pz) - z) / pz;
+      t_z = (fHalfLength * pz / std::fabs(pz) - z) / pz;
 
-      t = TMath::Min(t_r, t_z);
+      t = std::min(t_r, t_z);
 
       x_t = x + px * t;
       y_t = y + py * t;
       z_t = z + pz * t;
 
-      l = TMath::Sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
+      l = std::sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
 
       Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
@@ -212,9 +211,9 @@ void ParticlePropagator::Process()
 
       fOutputArray->emplace_back(new_candidate);
 
-      if(TMath::Abs(q) > 1.0E-9)
+      if(std::fabs(q) > 1.0E-9)
       {
-        switch(TMath::Abs(new_candidate->PID))
+        switch(std::abs(new_candidate->PID))
         {
         case 11:
           fElectronOutputArray->emplace_back(new_candidate);
@@ -244,69 +243,69 @@ void ParticlePropagator::Process()
       omega = q * fBz / gammam; // omega is here in [89875518/s]
       r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
 
-      phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
+      phi_0 = std::atan2(py, px); // [rad] in [-pi, pi]
 
       // 2. helix axis coordinates
-      x_c = x + r * TMath::Sin(phi_0);
-      y_c = y - r * TMath::Cos(phi_0);
-      r_c = TMath::Hypot(x_c, y_c);
+      x_c = x + r * std::sin(phi_0);
+      y_c = y - r * std::cos(phi_0);
+      r_c = std::hypot(x_c, y_c);
 
       // time of closest approach
-      td = (phi_0 + TMath::ATan2(x_c, y_c)) / omega;
+      td = (phi_0 + std::atan2(x_c, y_c)) / omega;
 
       // remove all the modulo pi that might have come from the atan
-      pio = TMath::Abs(TMath::Pi() / omega);
-      while(TMath::Abs(td) > 0.5 * pio)
+      pio = std::fabs(M_PI / omega);
+      while(std::fabs(td) > 0.5 * pio)
       {
-        td -= TMath::Sign(1.0, td) * pio;
+        td -= td / std::fabs(td) * pio;
       }
 
       vz = pz * c_light / e;
 
       // calculate coordinates of closest approach to z axis
       phid = phi_0 - omega * td;
-      xd = x_c - r * TMath::Sin(phid);
-      yd = y_c + r * TMath::Cos(phid);
+      xd = x_c - r * std::sin(phid);
+      yd = y_c + r * std::cos(phid);
       zd = z + vz * td;
 
       // momentum at closest approach
-      px = pt * TMath::Cos(phid);
-      py = pt * TMath::Sin(phid);
+      px = pt * std::cos(phid);
+      py = pt * std::sin(phid);
 
       particleMomentum.SetPtEtaPhiE(pt, particleMomentum.Eta(), phid, particleMomentum.E());
 
       // calculate additional track parameters (correct for beamspot position)
       d0 = ((xd - bsx) * py - (yd - bsy) * px) / pt;
       dz = zd - bsz;
-      ctgTheta = 1.0 / TMath::Tan(particleMomentum.Theta());
+      ctgTheta = 1.0 / std::tan(particleMomentum.Theta());
 
-      // 3. time evaluation t = TMath::Min(t_r, t_z)
+      // 3. time evaluation t = std::min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
-      t_z = (vz == 0.0) ? 1.0E99 : (TMath::Sign(fHalfLength, pz) - z) / vz;
+      t_z = (vz == 0.0) ? 1.0E99 : (fHalfLength * pz / std::fabs(pz) - z) / vz;
 
-      if(r_c + TMath::Abs(r) < fRadius)
+      if(r_c + std::fabs(r) < fRadius)
       {
         // helix does not cross the cylinder sides
         t = t_z;
       }
       else
       {
-        alpha = TMath::ACos((r * r + r_c * r_c - fRadius * fRadius) / (2 * TMath::Abs(r) * r_c));
-        t_r = td + TMath::Abs(alpha / omega);
+        alpha = std::acos((r * r + r_c * r_c - fRadius * fRadius) / (2 * std::fabs(r) * r_c));
+        t_r = td + std::fabs(alpha / omega);
 
-        t = TMath::Min(t_r, t_z);
+        t = std::min(t_r, t_z);
       }
 
       // 4. position in terms of x(t), y(t), z(t)
       phi_t = phi_0 - omega * t;
-      x_t = x_c - r * TMath::Sin(phi_t);
-      y_t = y_c + r * TMath::Cos(phi_t);
+      x_t = x_c - r * std::sin(phi_t);
+      y_t = y_c + r * std::cos(phi_t);
       z_t = z + vz * t;
-      r_t = TMath::Hypot(x_t, y_t);
+      r_t = std::hypot(x_t, y_t);
 
       // lenght of the path from production to tracker
-      l = t * TMath::Hypot(vz, r * omega);
+      l = t * std::hypot(vz, r * omega);
 
       if(r_t > 0.0)
       {
@@ -337,7 +336,7 @@ void ParticlePropagator::Process()
         new_candidate->AddCandidate(candidate);
 
         fOutputArray->emplace_back(new_candidate);
-        switch(TMath::Abs(new_candidate->PID))
+        switch(std::abs(new_candidate->PID))
         {
         case 11:
           fElectronOutputArray->emplace_back(new_candidate);

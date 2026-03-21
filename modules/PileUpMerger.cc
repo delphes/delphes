@@ -32,7 +32,6 @@
 
 #include <TDatabasePDG.h>
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -164,7 +163,7 @@ void PileUpMerger::Process()
 
     fParticleOutputArray->emplace_back(candidate);
 
-    if(TMath::Abs(candidate->Charge) > 1.0E-9)
+    if(std::fabs(candidate->Charge) > 1.0E-9)
     {
       nch++;
       sumpt2 += pt * pt;
@@ -210,7 +209,7 @@ void PileUpMerger::Process()
   {
     do
     {
-      entry = TMath::Nint(gRandom->Rndm() * allEntries);
+      entry = std::ceil(gRandom->Rndm() * allEntries);
     } while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
@@ -222,7 +221,7 @@ void PileUpMerger::Process()
     dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
     dz *= 1.0E3; // necessary in order to make z in mm
 
-    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
+    dphi = gRandom->Uniform(-M_PI, M_PI);
 
     vx = 0.0;
     vy = 0.0;
@@ -261,7 +260,7 @@ void PileUpMerger::Process()
       vy += candidate->Position.Y();
 
       ++numberOfParticles;
-      if(TMath::Abs(candidate->Charge) > 1.0E-9)
+      if(std::fabs(candidate->Charge) > 1.0E-9)
       {
         nch++;
         sumpt2 += pt * pt;
