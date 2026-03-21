@@ -25,6 +25,7 @@ else()
 endif()
 
 add_library(classes OBJECT ${sources} ClassesDict.cxx)
+target_include_directories(classes PUBLIC ${YAML_CPP_INCLUDE_DIR} ${YAML_CPP_INCLUDE_DIRS})
 
 # install public headers
 install(FILES ${headers} DESTINATION include/classes)
