@@ -32,6 +32,10 @@
 #include "classes/DelphesReader.h"
 #include "modules/Delphes.h"
 
+#include "PyDelphesConfReader.h"
+
+#include <ExRootAnalysis/ExRootProgressBar.h>
+
 #include <dlfcn.h>
 
 namespace py = pybind11;
@@ -53,6 +57,23 @@ public:
     ProcessTask();
     Clear();
     GetReader()->Clear();
+  }
+  py::dict GetModules() const
+  {
+    py::dict modulesObj;
+    //TODO: implement
+    return modulesObj;
+  }
+  void SetModules(const py::dict &modulesObj)
+  {
+    for(const std::pair<py::handle, py::handle> &moduleObj : modulesObj)
+    {
+      const std::string moduleName = moduleObj.first.cast<std::string>();
+      if(py::isinstance<py::dict>(moduleObj.second))
+      {
+        const DelphesParameters moduleParams = PyDelphesConfReader{moduleObj.second.cast<py::dict>()}.Parameters();
+      }
+    }
   }
 
 private:
@@ -76,13 +97,19 @@ PYBIND11_MODULE(DelphesPython, m)
       if(const char *err = dlerror(); err != nullptr) message << "\n\t" << err;
       throw std::runtime_error(message.str());
     } }, "Load an external library into the runtime environment");
+  m.def("Module", [](std::string moduleType, const py::kwargs &moduleArgs) -> py::dict {
+    py::dict paramsObj = moduleArgs;
+    paramsObj[py::str("ModuleType")] = py::str(moduleType);
+    return paramsObj; }, "Define a processing module configuration");
 
   py::class_<PyDelphes>(m, "Delphes")
     .def(py::init<>())
     .def_property("reader", &PyDelphes::GetReader, &PyDelphes::SetReader, "Reader module used in event consumption")
+    .def_property("modules", &PyDelphes::GetModules, &PyDelphes::SetModules, "Processing modules chain definition")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
+
   py::class_<DelphesReader>(m, "Reader")
-    .def(py::init([](std::string name, const py::kwargs &) { return DelphesReaderFactory::Get().Build(name); }));
-  py::class_<DelphesModule>(m, "Module")
-    .def(py::init([](std::string name, const py::kwargs &) { return DelphesProcessingModuleFactory::Get().Build(name); }));
+    .def(py::init([](std::string readerType, const py::kwargs &readerArgs) {
+      return DelphesReaderFactory::Get().Build(readerType, PyDelphesConfReader{readerArgs}.Parameters());
+    }));
 }
