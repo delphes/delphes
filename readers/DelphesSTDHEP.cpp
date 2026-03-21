@@ -22,7 +22,6 @@
 
 #include <signal.h>
 
-#include <TApplication.h>
 #include <TROOT.h>
 #include <TStopwatch.h>
 
@@ -70,10 +69,6 @@ int main(int argc, char *argv[])
   signal(SIGINT, SignalHandler);
 
   gROOT->SetBatch();
-
-  int appargc = 1;
-  char *appargv[] = {appName};
-  TApplication app(appName, &appargc, appargv);
 
   try
   {
