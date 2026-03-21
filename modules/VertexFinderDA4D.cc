@@ -11,7 +11,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TMatrixT.h>
 
 using namespace std;
@@ -217,10 +216,10 @@ void VertexFinderDA4D::Process()
 
     meantime = meantime / normw;
     expv_x2 = expv_x2 / normw;
-    errtime = TMath::Sqrt((expv_x2 - meantime * meantime) / itr);
+    errtime = std::sqrt((expv_x2 - meantime * meantime) / itr);
     meanpos = meanpos / normpos;
     meanerr2 = meanerr2 / normpos;
-    errpos = TMath::Sqrt(meanerr2 / itr);
+    errpos = std::sqrt(meanerr2 / itr);
 
     candidate->Position.SetXYZT(0.0, 0.0, meanpos * 10.0, meantime * c_light);
     candidate->PositionError.SetXYZT(0.0, 0.0, errpos * 10.0, errtime * c_light);
@@ -365,7 +364,7 @@ vector<Candidate *> VertexFinderDA4D::vertices()
     if(fD0CutOff > 0)
     {
 
-      d0 = TMath::Abs(candidate->D0) / 10.0;
+      d0 = std::fabs(candidate->D0) / 10.0;
       d0error = candidate->ErrorD0 / 10.0;
 
       tr.pi = 1. / (1. + exp((d0 * d0) / (d0error * d0error) - fD0CutOff * fD0CutOff)); // reduce weight for high ip tracks

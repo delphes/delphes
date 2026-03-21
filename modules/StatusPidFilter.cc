@@ -28,8 +28,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesModule.h"
 
-#include <TMath.h>
-
 using namespace std;
 
 class StatusPidFilter: public DelphesModule
@@ -51,7 +49,7 @@ private:
 
 namespace
 {
-// integer power (faster than TMath::Pow() + cast to integer)
+// integer power (faster than std::pow() + cast to integer)
 int ipow(int base, int exp)
 {
   int result = 1;
@@ -117,14 +115,14 @@ bool isTauDaughter(int pdgCode, int M1, const CandidatesCollection &fInputArray)
   //not needed, just to speed up the code - can be further refined but gives only negligible improvement:
   if(pdgCode == 15 || pdgCode < 11 || (pdgCode > 22 && pdgCode < 100) || pdgCode > 1000) return false;
   if(M1 < 0) return false;
-  if(Candidate *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 15) return true;
+  if(Candidate *mother = static_cast<Candidate *>(fInputArray->at(M1)); std::abs(mother->PID) == 15) return true;
   return false;
 }
 
 bool isWDaughter(int M1, const CandidatesCollection &fInputArray)
 {
   if(M1 < 0) return false;
-  if(Candidate *mother = static_cast<Candidate *>(fInputArray->at(M1)); TMath::Abs(mother->PID) == 24) return true;
+  if(Candidate *mother = static_cast<Candidate *>(fInputArray->at(M1)); std::abs(mother->PID) == 24) return true;
   return false;
 }
 
@@ -159,7 +157,7 @@ void StatusPidFilter::Process()
   for(Candidate *const &candidate : *fInputArray)
   {
     status = candidate->Status;
-    pdgCode = TMath::Abs(candidate->PID);
+    pdgCode = std::abs(candidate->PID);
 
     pass = kFALSE;
 

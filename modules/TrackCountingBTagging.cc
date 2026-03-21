@@ -28,7 +28,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -101,7 +100,7 @@ void TrackCountingBTagging::Process()
       tpt = trkMomentum.Pt();
       if(tpt < fPtMin) continue;
 
-      d0 = TMath::Abs(track->D0);
+      d0 = std::fabs(track->D0);
       if(d0 > fIPmax) continue;
 
       dr = jetMomentum.DeltaR(trkMomentum);
@@ -110,20 +109,20 @@ void TrackCountingBTagging::Process()
       xd = track->Xd;
       yd = track->Yd;
       zd = track->Zd;
-      dd0 = TMath::Abs(track->ErrorD0);
-      dz = TMath::Abs(track->DZ);
-      ddz = TMath::Abs(track->ErrorDZ);
+      dd0 = std::fabs(track->ErrorD0);
+      dz = std::fabs(track->DZ);
+      ddz = std::fabs(track->ErrorDZ);
 
       if(fUse3D)
       {
         sign = (jpx * xd + jpy * yd + jpz * zd > 0.0) ? 1 : -1;
         //add transverse and longitudinal significances in quadrature
-        sip = sign * TMath::Sqrt(TMath::Power(d0 / dd0, 2) + TMath::Power(dz / ddz, 2));
+        sip = sign * std::sqrt(std::pow(d0 / dd0, 2) + std::pow(dz / ddz, 2));
       }
       else
       {
         sign = (jpx * xd + jpy * yd > 0.0) ? 1 : -1;
-        sip = sign * d0 / TMath::Abs(dd0);
+        sip = sign * d0 / std::fabs(dd0);
       }
 
       if(sip > fSigMin) count++;

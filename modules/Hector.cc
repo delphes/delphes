@@ -28,7 +28,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include "Hector/H_BeamLine.h"
@@ -106,20 +105,20 @@ void Hector::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     pz = candidateMomentum.Pz();
 
-    if(TMath::Abs(candidateMomentum.Eta()) <= fEtaMin || TMath::Sign(pz, Double_t(fDirection)) != pz) continue;
+    if(std::fabs(candidateMomentum.Eta()) <= fEtaMin || pz * fDirection / std::abs(fDirection) != pz) continue;
 
     x = 1.0E3 * candidatePosition.X();
     y = 1.0E3 * candidatePosition.Y();
     z = 1.0E-3 * candidatePosition.Z();
 
-    //    tx = 1.0E6 * TMath::ATan(candidateMomentum.Px()/pz);
-    //    ty = 1.0E6 * TMath::ATan(candidateMomentum.Py()/pz);
+    //    tx = 1.0E6 * std::atan(candidateMomentum.Px()/pz);
+    //    ty = 1.0E6 * std::atan(candidateMomentum.Py()/pz);
 
     tx = 0.0;
     ty = 0.0;
 
-    theta = TMath::Hypot(TMath::ATan(candidateMomentum.Px() / pz), TMath::ATan(candidateMomentum.Py() / pz));
-    distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / TMath::Cos(theta);
+    theta = std::hypot(std::atan(candidateMomentum.Px() / pz), std::atan(candidateMomentum.Py() / pz));
+    distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / std::cos(theta);
     time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
 
     H_BeamParticle particle(candidate->Mass, candidate->Charge);

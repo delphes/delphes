@@ -32,7 +32,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -167,8 +166,8 @@ Bool_t PhotonID::isFake(const Candidate *obj)
   {
     const TLorentzVector &mom_gen = gen->Momentum;
     Int_t status = gen->Status;
-    Int_t pdgCode = TMath::Abs(gen->PID);
-    Float_t dPtOverPt = TMath::Abs((mom_gen.Pt() - mom_rec.Pt()) / mom_rec.Pt());
+    Int_t pdgCode = std::abs(gen->PID);
+    Float_t dPtOverPt = std::fabs((mom_gen.Pt() - mom_rec.Pt()) / mom_rec.Pt());
     Float_t deltaR = mom_gen.DeltaR(mom_rec);
 
     if(status != 1) continue;

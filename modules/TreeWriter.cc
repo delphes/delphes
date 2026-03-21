@@ -32,7 +32,6 @@
 
 #include <TFile.h>
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TROOT.h>
 
 #include <set>
@@ -230,7 +229,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, const CandidatesColl
     entry->SetUniqueID(candidate->GetUniqueID());
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
     rapidity = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Rapidity());
@@ -341,7 +340,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const CandidatesCollect
   {
     const TLorentzVector &position = candidate->Position;
 
-    cosTheta = TMath::Abs(position.CosTheta());
+    cosTheta = std::fabs(position.CosTheta());
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
 
@@ -405,9 +404,9 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, const CandidatesCollect
     p = momentum.P();
     phi = momentum.Phi();
     m = momentum.M();
-    ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
+    ctgTheta = (std::tan(momentum.Theta()) != 0) ? 1 / std::tan(momentum.Theta()) : 1e10;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : momentum.Eta());
 
@@ -453,7 +452,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, const CandidatesCollect
     const TLorentzVector &position = candidate->Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -502,7 +501,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const C
   {
     const TLorentzVector &position = candidate->Position;
 
-    cosTheta = TMath::Abs(position.CosTheta());
+    cosTheta = std::fabs(position.CosTheta());
     signz = (position.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : position.Eta());
 
@@ -518,7 +517,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const C
 
     entry->Charge = candidate->Charge;
 
-    if(TMath::Abs(entry->Charge) > 0.)
+    if(std::fabs(entry->Charge) > 0.)
     {
       entry->HardEnergyFraction = entry->IsPU ? 0.0 : 1.0;
     }
@@ -581,9 +580,9 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, const C
     p = momentum.P();
     phi = momentum.Phi();
     m = momentum.M();
-    ctgTheta = (TMath::Tan(momentum.Theta()) != 0) ? 1 / TMath::Tan(momentum.Theta()) : 1e10;
+    ctgTheta = (std::tan(momentum.Theta()) != 0) ? 1 / std::tan(momentum.Theta()) : 1e10;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signz * 999.9 : momentum.Eta());
 
@@ -638,7 +637,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, const CandidatesCollec
     const TLorentzVector &position = candidate->Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -684,7 +683,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, const CandidatesColl
     const TLorentzVector &position = candidate->Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -735,7 +734,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, const CandidatesCollecti
     const TLorentzVector &position = candidate->Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -789,7 +788,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, const CandidatesCollectio
     const TLorentzVector &position = candidate->Position;
 
     pt = momentum.Pt();
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
@@ -909,7 +908,7 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, const CandidatesCol
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->DecayPosition;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 

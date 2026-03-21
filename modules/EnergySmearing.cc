@@ -30,7 +30,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -91,7 +90,7 @@ void EnergySmearing::Process()
     Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
+    pt = (energy > m) ? std::sqrt(energy * energy - m * m) / std::cosh(eta) : 0;
     new_candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
     new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
     new_candidate->AddCandidate(candidate);

@@ -34,7 +34,6 @@
 #include "ExRootAnalysis/ExRootClassifier.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 using namespace std;
 
@@ -135,7 +134,7 @@ void Isolation::Process()
   for(Candidate *const &candidate : *fCandidateInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = TMath::Abs(candidateMomentum.Eta());
+    eta = std::fabs(candidateMomentum.Eta());
 
     // find rho
     rho = 0.0;
@@ -187,8 +186,8 @@ void Isolation::Process()
     }
 
     // correct sum for pile-up contamination
-    sumDBeta = sumChargedNoPU + TMath::Max(sumNeutral - 0.5 * sumChargedPU, 0.0);
-    sumRhoCorr = sumChargedNoPU + TMath::Max(sumNeutral - TMath::Max(rho, 0.0) * fDeltaRMax * fDeltaRMax * TMath::Pi(), 0.0);
+    sumDBeta = sumChargedNoPU + std::max(sumNeutral - 0.5 * sumChargedPU, 0.0);
+    sumRhoCorr = sumChargedNoPU + std::max(sumNeutral - std::max(rho, 0.0) * fDeltaRMax * fDeltaRMax * M_PI, 0.0);
     ratioDBeta = sumDBeta / candidateMomentum.Pt();
     ratioRhoCorr = sumRhoCorr / candidateMomentum.Pt();
 

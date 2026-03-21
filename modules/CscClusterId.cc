@@ -30,7 +30,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 using namespace std;
@@ -87,7 +86,7 @@ void CscClusterId::Process()
     decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
     Ehad = candidate->Ehad;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
+    cosTheta = std::fabs(momentum.CosTheta());
     signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
     eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 

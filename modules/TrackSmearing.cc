@@ -14,7 +14,6 @@
 
 #include <TFile.h>
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TProfile2D.h>
 #include <TRandom3.h>
 
@@ -244,7 +243,7 @@ void TrackSmearing::Process()
       Int_t xbin, ybin;
 
       xbin = pt < d0ErrorHist->GetXaxis()->GetXmax() ? d0ErrorHist->GetXaxis()->FindBin(pt) : d0ErrorHist->GetXaxis()->GetBinCenter(d0ErrorHist->GetXaxis()->GetNbins());
-      ybin = d0ErrorHist->GetYaxis()->FindBin(TMath::Abs(eta));
+      ybin = d0ErrorHist->GetYaxis()->FindBin(std::fabs(eta));
       d0Error = d0ErrorHist->GetBinContent(xbin, ybin);
       if(!d0Error)
         d0Error = -1.0;
@@ -259,7 +258,7 @@ void TrackSmearing::Process()
       Int_t xbin, ybin;
 
       xbin = pt < dzErrorHist->GetXaxis()->GetXmax() ? dzErrorHist->GetXaxis()->FindBin(pt) : dzErrorHist->GetXaxis()->GetBinCenter(dzErrorHist->GetXaxis()->GetNbins());
-      ybin = dzErrorHist->GetYaxis()->FindBin(TMath::Abs(eta));
+      ybin = dzErrorHist->GetYaxis()->FindBin(std::fabs(eta));
       dzError = dzErrorHist->GetBinContent(xbin, ybin);
       if(!dzError)
         dzError = -1.0;
@@ -274,7 +273,7 @@ void TrackSmearing::Process()
       Int_t xbin, ybin;
 
       xbin = pt < pErrorHist->GetXaxis()->GetXmax() ? pErrorHist->GetXaxis()->FindBin(pt) : pErrorHist->GetXaxis()->GetBinCenter(pErrorHist->GetXaxis()->GetNbins());
-      ybin = pErrorHist->GetYaxis()->FindBin(TMath::Abs(eta));
+      ybin = pErrorHist->GetYaxis()->FindBin(std::fabs(eta));
       pError = pErrorHist->GetBinContent(xbin, ybin) * p;
       if(!pError)
         pError = -1.0;
@@ -289,7 +288,7 @@ void TrackSmearing::Process()
       Int_t xbin, ybin;
 
       xbin = pt < ctgThetaErrorHist->GetXaxis()->GetXmax() ? ctgThetaErrorHist->GetXaxis()->FindBin(pt) : ctgThetaErrorHist->GetXaxis()->GetBinCenter(ctgThetaErrorHist->GetXaxis()->GetNbins());
-      ybin = ctgThetaErrorHist->GetYaxis()->FindBin(TMath::Abs(eta));
+      ybin = ctgThetaErrorHist->GetYaxis()->FindBin(std::fabs(eta));
       ctgThetaError = ctgThetaErrorHist->GetBinContent(xbin, ybin);
       if(!ctgThetaError)
         ctgThetaError = -1.0;
@@ -304,7 +303,7 @@ void TrackSmearing::Process()
       Int_t xbin, ybin;
 
       xbin = pt < phiErrorHist->GetXaxis()->GetXmax() ? phiErrorHist->GetXaxis()->FindBin(pt) : phiErrorHist->GetXaxis()->GetBinCenter(phiErrorHist->GetXaxis()->GetNbins());
-      ybin = phiErrorHist->GetYaxis()->FindBin(TMath::Abs(eta));
+      ybin = phiErrorHist->GetYaxis()->FindBin(std::fabs(eta));
       phiError = phiErrorHist->GetBinContent(xbin, ybin);
       if(!phiError)
         phiError = -1.0;
@@ -322,8 +321,8 @@ void TrackSmearing::Process()
     }
 
     if(p < 0.0) continue;
-    while(phi > TMath::Pi()) phi -= TMath::TwoPi();
-    while(phi <= -TMath::Pi()) phi += TMath::TwoPi();
+    while(phi > M_PI) phi -= 2. * M_PI;
+    while(phi <= -M_PI) phi += 2. * M_PI;
 
     Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     new_candidate->D0 = d0;
@@ -332,11 +331,11 @@ void TrackSmearing::Process()
     new_candidate->CtgTheta = ctgTheta;
     new_candidate->Phi = phi;
 
-    theta = TMath::ACos(ctgTheta / TMath::Sqrt(1.0 + ctgTheta * ctgTheta));
-    new_candidate->Momentum.SetPx(p * TMath::Cos(phi) * TMath::Sin(theta));
-    new_candidate->Momentum.SetPy(p * TMath::Sin(phi) * TMath::Sin(theta));
-    new_candidate->Momentum.SetPz(p * TMath::Cos(theta));
-    new_candidate->Momentum.SetE(TMath::Sqrt(p * p + m * m));
+    theta = std::acos(ctgTheta / std::sqrt(1.0 + ctgTheta * ctgTheta));
+    new_candidate->Momentum.SetPx(p * std::cos(phi) * std::sin(theta));
+    new_candidate->Momentum.SetPy(p * std::sin(phi) * std::sin(theta));
+    new_candidate->Momentum.SetPz(p * std::cos(theta));
+    new_candidate->Momentum.SetE(std::sqrt(p * p + m * m));
     new_candidate->PT = new_candidate->Momentum.Pt();
 
     x = position.X();
@@ -367,14 +366,14 @@ void TrackSmearing::Process()
     q = new_candidate->Charge;
 
     r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
-    phi_0 = TMath::ATan2(py, px); // [rad] in [-pi, pi]
+    phi_0 = std::atan2(py, px); // [rad] in [-pi, pi]
 
     // 2. helix axis coordinates
-    x_c = x + r * TMath::Sin(phi_0);
-    y_c = y - r * TMath::Cos(phi_0);
-    r_c = TMath::Hypot(x_c, y_c);
+    x_c = x + r * std::sin(phi_0);
+    y_c = y - r * std::cos(phi_0);
+    r_c = std::hypot(x_c, y_c);
 
-    rcu = TMath::Abs(r);
+    rcu = std::fabs(r);
     rc2 = r_c * r_c;
 
     // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
@@ -382,7 +381,7 @@ void TrackSmearing::Process()
     xd = (rc2 > 0.0) ? xd / rc2 : -999;
     yd = y_c * (-rcu * r_c + rc2);
     yd = (rc2 > 0.0) ? yd / rc2 : -999;
-    zd = z + (TMath::Sqrt(xd * xd + yd * yd) - TMath::Sqrt(x * x + y * y)) * pz / pt;
+    zd = z + (std::sqrt(xd * xd + yd * yd) - std::sqrt(x * x + y * y)) * pz / pt;
 
     new_candidate->Xd = xd * 1.0E3;
     new_candidate->Yd = yd * 1.0E3;

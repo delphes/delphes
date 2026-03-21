@@ -164,7 +164,7 @@ void TauTagging::Process()
         for(i = tau->D1; i <= tau->D2; ++i)
         {
           Candidate *const &daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
-          if(TMath::Abs(daughter->PID) == 16) continue;
+          if(std::abs(daughter->PID) == 16) continue;
           tauMomentum += daughter->Momentum;
         }
 
@@ -184,17 +184,17 @@ void TauTagging::Process()
       Double_t drMin = fDeltaR;
       for(Candidate *const &part : *fPartonInputArray)
       {
-        if(TMath::Abs(part->PID) == 11 || TMath::Abs(part->PID) == 13)
+        if(std::abs(part->PID) == 11 || std::abs(part->PID) == 13)
         {
           tauMomentum = part->Momentum;
           if(tauMomentum.Pt() < fClassifier->fPTMin) continue;
-          if(TMath::Abs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
+          if(std::fabs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
 
           Double_t dr = jetMomentum.DeltaR(tauMomentum);
           if(dr < drMin)
           {
             drMin = dr;
-            pdgCode = TMath::Abs(part->PID);
+            pdgCode = std::abs(part->PID);
             charge = part->Charge;
           }
         }

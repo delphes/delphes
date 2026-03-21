@@ -17,7 +17,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include <set>
@@ -216,7 +215,7 @@ void OldCalorimeter::Process()
     const TLorentzVector &particlePosition = particle->Position;
     ++number;
 
-    pdgCode = TMath::Abs(particle->PID);
+    pdgCode = std::abs(particle->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -263,7 +262,7 @@ void OldCalorimeter::Process()
     const TLorentzVector &trackPosition = track->Position;
     ++number;
 
-    pdgCode = TMath::Abs(track->PID);
+    pdgCode = std::abs(track->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -447,7 +446,7 @@ void OldCalorimeter::FinalizeTower()
   eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
   phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
 
-  pt = energy / TMath::CosH(eta);
+  pt = energy / std::cosh(eta);
 
   fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
@@ -500,7 +499,7 @@ void OldCalorimeter::FinalizeTower()
           tower->AddCandidate(particle);
         }
 
-        pt = hcalEnergy / TMath::CosH(eta);
+        pt = hcalEnergy / std::cosh(eta);
 
         tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
         tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalEnergy);
@@ -531,7 +530,7 @@ void OldCalorimeter::FinalizeTower()
           tower->AddCandidate(particle);
         }
 
-        pt = ecalEnergy / TMath::CosH(eta);
+        pt = ecalEnergy / std::cosh(eta);
 
         tower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
         tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalEnergy);
@@ -569,19 +568,14 @@ void OldCalorimeter::FinalizeTower()
 
 Double_t OldCalorimeter::LogNormal(Double_t mean, Double_t sigma)
 {
-  Double_t a, b;
-
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
-    a = TMath::Log(mean) - 0.5 * b * b;
-
-    return TMath::Exp(a + b * gRandom->Gaus(0, 1));
+    const double b = std::sqrt(std::log((1.0 + (sigma * sigma) / (mean * mean)))),
+                 a = std::log(mean) - 0.5 * b * b;
+    return std::exp(a + b * gRandom->Gaus(0, 1));
   }
   else
-  {
     return 0.0;
-  }
 }
 
 //------------------------------------------------------------------------------

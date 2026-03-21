@@ -35,7 +35,6 @@
 #include "ExRootAnalysis/ExRootResult.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include <algorithm>
@@ -278,7 +277,7 @@ void Calorimeter::Process()
     if(particlePosition.Perp() > fTowerRmax)
       fTowerRmax = particlePosition.Perp();
 
-    pdgCode = TMath::Abs(particle->PID);
+    pdgCode = std::abs(particle->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -323,7 +322,7 @@ void Calorimeter::Process()
     const TLorentzVector &trackPosition = track->Position;
     ++number;
 
-    pdgCode = TMath::Abs(track->PID);
+    pdgCode = std::abs(track->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -543,7 +542,7 @@ void Calorimeter::FinalizeTower()
     phi = fTowerPhi;
   }
 
-  pt = energy / TMath::CosH(eta);
+  pt = energy / std::cosh(eta);
 
   // Time calculation for tower
   fTower->NTimeHits = 0;
@@ -552,15 +551,15 @@ void Calorimeter::FinalizeTower()
 
   for(size_t i = 0; i < fTower->ECalEnergyTimePairs.size(); ++i)
   {
-    weight = TMath::Power((fTower->ECalEnergyTimePairs[i].first), 2);
+    weight = std::pow((fTower->ECalEnergyTimePairs[i].first), 2);
     sumWeightedTime += weight * fTower->ECalEnergyTimePairs[i].second;
     sumWeight += weight;
     fTower->NTimeHits++;
   }
 
   // check whether barrel or endcap tower
-  if(fTower->Position.Perp() < fTowerRmax && TMath::Abs(eta) > 0.)
-    r = fTower->Position.Z() / TMath::SinH(eta);
+  if(fTower->Position.Perp() < fTowerRmax && std::fabs(eta) > 0.)
+    r = fTower->Position.Z() / std::sinh(eta);
   else
     r = fTower->Position.Pt();
 
@@ -593,22 +592,22 @@ void Calorimeter::FinalizeTower()
   }
 
   // fill energy flow candidates
-  fECalTrackSigma = TMath::Sqrt(fECalTrackSigma);
-  fHCalTrackSigma = TMath::Sqrt(fHCalTrackSigma);
+  fECalTrackSigma = std::sqrt(fECalTrackSigma);
+  fHCalTrackSigma = std::sqrt(fHCalTrackSigma);
 
   //compute neutral excesses
   ecalNeutralEnergy = max((ecalEnergy - fECalTrackEnergy), 0.0);
   hcalNeutralEnergy = max((hcalEnergy - fHCalTrackEnergy), 0.0);
 
-  ecalNeutralSigma = ecalNeutralEnergy / TMath::Sqrt(fECalTrackSigma * fECalTrackSigma + ecalSigma * ecalSigma);
-  hcalNeutralSigma = hcalNeutralEnergy / TMath::Sqrt(fHCalTrackSigma * fHCalTrackSigma + hcalSigma * hcalSigma);
+  ecalNeutralSigma = ecalNeutralEnergy / std::sqrt(fECalTrackSigma * fECalTrackSigma + ecalSigma * ecalSigma);
+  hcalNeutralSigma = hcalNeutralEnergy / std::sqrt(fHCalTrackSigma * fHCalTrackSigma + hcalSigma * hcalSigma);
 
   // if ecal neutral excess is significant, simply create neutral EflowPhoton tower and clone each track into eflowtrack
   if(ecalNeutralEnergy > fECalEnergyMin && ecalNeutralSigma > fECalEnergySignificanceMin)
   {
     // create new photon tower assuming null mass
     Candidate *tower = static_cast<Candidate *>(fTower->Clone());
-    pt = ecalNeutralEnergy / TMath::CosH(eta);
+    pt = ecalNeutralEnergy / std::cosh(eta);
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, ecalNeutralEnergy);
     tower->Eem = ecalNeutralEnergy;
@@ -653,7 +652,7 @@ void Calorimeter::FinalizeTower()
   {
     // create new photon tower
     Candidate *tower = static_cast<Candidate *>(fTower->Clone());
-    pt = hcalNeutralEnergy / TMath::CosH(eta);
+    pt = hcalNeutralEnergy / std::cosh(eta);
 
     tower->Momentum.SetPtEtaPhiE(pt, eta, phi, hcalNeutralEnergy);
     tower->Ehad = hcalNeutralEnergy;
@@ -697,19 +696,15 @@ void Calorimeter::FinalizeTower()
 
 Double_t Calorimeter::LogNormal(Double_t mean, Double_t sigma)
 {
-  Double_t a, b;
-
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
-    a = TMath::Log(mean) - 0.5 * b * b;
+    const double b = std::sqrt(std::log((1.0 + (sigma * sigma) / (mean * mean)))),
+                 a = std::log(mean) - 0.5 * b * b;
 
-    return TMath::Exp(a + b * gRandom->Gaus(0.0, 1.0));
+    return std::exp(a + b * gRandom->Gaus(0.0, 1.0));
   }
   else
-  {
     return 0.0;
-  }
 }
 
 //------------------------------------------------------------------------------

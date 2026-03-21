@@ -33,7 +33,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include <set>
@@ -296,7 +295,7 @@ void SimpleCalorimeter::Process()
     if(particlePosition.Perp() > fTowerRmax)
       fTowerRmax = particlePosition.Perp();
 
-    pdgCode = TMath::Abs(particle->PID);
+    pdgCode = std::abs(particle->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -344,7 +343,7 @@ void SimpleCalorimeter::Process()
     const TLorentzVector &trackPosition = track->Position;
     ++number;
 
-    pdgCode = TMath::Abs(track->PID);
+    pdgCode = std::abs(track->PID);
 
     itFractionMap = fFractionMap.find(pdgCode);
     if(itFractionMap == fFractionMap.end())
@@ -461,8 +460,8 @@ void SimpleCalorimeter::Process()
 
       energy = momentum.E() * fTrackFractions[number];
 
-      fTrackTime += TMath::Sqrt(energy) * position.T();
-      fTrackTimeWeight += TMath::Sqrt(energy);
+      fTrackTime += std::sqrt(energy) * position.T();
+      fTrackTimeWeight += std::sqrt(energy);
 
       if(fTrackFractions[number] > 1.0E-9)
       {
@@ -559,12 +558,12 @@ void SimpleCalorimeter::FinalizeTower()
     phi = fTowerPhi;
   }
 
-  pt = energy / TMath::CosH(eta);
+  pt = energy / std::cosh(eta);
 
   // endcap
-  if(TMath::Abs(fTower->Position.Pt() - fTowerRmax) > 1.e-06 && TMath::Abs(eta) > 0.)
+  if(std::fabs(fTower->Position.Pt() - fTowerRmax) > 1.e-06 && std::fabs(eta) > 0.)
   {
-    r = fTower->Position.Z() / TMath::SinH(eta);
+    r = fTower->Position.Z() / std::sinh(eta);
   }
   // barrel
   else
@@ -596,18 +595,18 @@ void SimpleCalorimeter::FinalizeTower()
 
   //compute neutral excess
 
-  fTrackSigma = TMath::Sqrt(fTrackSigma);
+  fTrackSigma = std::sqrt(fTrackSigma);
   neutralEnergy = max((energy - fTrackEnergy), 0.0);
 
   //compute sigma_trk total
-  neutralSigma = neutralEnergy / TMath::Sqrt(fTrackSigma * fTrackSigma + sigma * sigma);
+  neutralSigma = neutralEnergy / std::sqrt(fTrackSigma * fTrackSigma + sigma * sigma);
 
   // if neutral excess is significant, simply create neutral Eflow tower and clone each track into eflowtrack
   if(neutralEnergy > fEnergyMin && neutralSigma > fEnergySignificanceMin)
   {
     // create new photon tower
     Candidate *tower = static_cast<Candidate *>(fTower->Clone());
-    pt = neutralEnergy / TMath::CosH(eta);
+    pt = neutralEnergy / std::cosh(eta);
 
     tower->Eem = (!fIsEcal) ? 0 : neutralEnergy;
     tower->Ehad = (fIsEcal) ? 0 : neutralEnergy;
@@ -660,19 +659,14 @@ void SimpleCalorimeter::FinalizeTower()
 
 Double_t SimpleCalorimeter::LogNormal(Double_t mean, Double_t sigma)
 {
-  Double_t a, b;
-
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
-    a = TMath::Log(mean) - 0.5 * b * b;
-
-    return TMath::Exp(a + b * gRandom->Gaus(0.0, 1.0));
+    const double b = std::sqrt(std::log((1.0 + (sigma * sigma) / (mean * mean)))),
+                 a = std::log(mean) - 0.5 * b * b;
+    return std::exp(a + b * gRandom->Gaus(0.0, 1.0));
   }
   else
-  {
     return 0.0;
-  }
 }
 
 //------------------------------------------------------------------------------

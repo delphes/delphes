@@ -28,7 +28,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 #include <TRandom3.h>
 
 #include <set>
@@ -266,7 +265,7 @@ void DenseTrackFilter::FillTrack()
   new_candidate->AddCandidate(track);
 
   fTrackOutputArray->emplace_back(new_candidate);
-  switch(TMath::Abs(new_candidate->PID))
+  switch(std::abs(new_candidate->PID))
   {
   case 11:
     fElectronOutputArray->emplace_back(new_candidate);

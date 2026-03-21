@@ -29,7 +29,6 @@
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
-#include <TMath.h>
 
 #include <vector>
 
@@ -484,8 +483,8 @@ void FastJetFinder::Process()
       if(itInputList->user_index() < 0) continue;
       constituent = static_cast<Candidate *>(fInputArray->at(itInputList->user_index()));
 
-      deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
-      dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
+      deta = std::fabs(momentum.Eta() - constituent->Momentum.Eta());
+      dphi = std::fabs(momentum.DeltaPhi(constituent->Momentum));
       if(deta > detaMax) detaMax = deta;
       if(dphi > dphiMax) dphiMax = dphi;
 
@@ -500,8 +499,8 @@ void FastJetFinder::Process()
         chargedEnergyFraction += constituent->Momentum.E();
       }
 
-      time += TMath::Sqrt(constituent->Momentum.E()) * (constituent->Position.T());
-      timeWeight += TMath::Sqrt(constituent->Momentum.E());
+      time += std::sqrt(constituent->Momentum.E()) * (constituent->Position.T());
+      timeWeight += std::sqrt(constituent->Momentum.E());
 
       charge += constituent->Charge;
 

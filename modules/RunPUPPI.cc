@@ -198,17 +198,17 @@ void RunPUPPI::Process()
     curRecoObj.eta = momentum.Eta();
     curRecoObj.phi = momentum.Phi();
     curRecoObj.m = momentum.M();
-    particle = static_cast<Candidate *>(candidate->GetCandidates().at(0)); //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
-    //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
+    particle = static_cast<Candidate *>(candidate->GetCandidates().at(0)); //if(fApplyNoLep && std::abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
+    //if(fApplyNoLep && std::abs(candidate->PID) == 13) continue;
     if(candidate->IsRecoPU and candidate->Charge != 0)
     { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
       curRecoObj.id = 2;
       curRecoObj.vtxId = 0.7 * (fPVInputArray->size()); //Hack apply reco vtx efficiency of 70% for calibration
-      if(TMath::Abs(candidate->PID) == 11)
+      if(std::abs(candidate->PID) == 11)
         curRecoObj.pfType = 2;
-      else if(TMath::Abs(candidate->PID) == 13)
+      else if(std::abs(candidate->PID) == 13)
         curRecoObj.pfType = 3;
-      else if(TMath::Abs(candidate->PID) == 22)
+      else if(std::abs(candidate->PID) == 22)
         curRecoObj.pfType = 4;
       else
         curRecoObj.pfType = 1;
@@ -218,11 +218,11 @@ void RunPUPPI::Process()
     {
       curRecoObj.id = 1; // charge from LV
       curRecoObj.vtxId = 1; // from PV
-      if(TMath::Abs(candidate->PID) == 11)
+      if(std::abs(candidate->PID) == 11)
         curRecoObj.pfType = 2;
-      else if(TMath::Abs(candidate->PID) == 13)
+      else if(std::abs(candidate->PID) == 13)
         curRecoObj.pfType = 3;
-      else if(TMath::Abs(candidate->PID) == 22)
+      else if(std::abs(candidate->PID) == 22)
         curRecoObj.pfType = 4;
       else
         curRecoObj.pfType = 1;
@@ -253,11 +253,11 @@ void RunPUPPI::Process()
     {
       curRecoObj.id = 0; // neutrals have id==0
       curRecoObj.vtxId = 0; // neutrals have vtxId==0
-      if(TMath::Abs(candidate->PID) == 11)
+      if(std::abs(candidate->PID) == 11)
         curRecoObj.pfType = 2;
-      else if(TMath::Abs(candidate->PID) == 13)
+      else if(std::abs(candidate->PID) == 13)
         curRecoObj.pfType = 3;
-      else if(TMath::Abs(candidate->PID) == 22)
+      else if(std::abs(candidate->PID) == 22)
         curRecoObj.pfType = 4;
       else
         curRecoObj.pfType = 5;
