@@ -29,11 +29,8 @@
 #include "classes/DelphesModule.h"
 
 #include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 
-#include "TClass.h"
-#include "TFolder.h"
+#include <TFolder.h>
 
 #include <sstream>
 #include <stdexcept>
@@ -77,20 +74,6 @@ CandidatesCollection DelphesModule::ExportArray(const char *name)
 
 //------------------------------------------------------------------------------
 
-ExRootTreeBranch *DelphesModule::NewBranch(const char *name, TClass *cl)
-{
-  return GetTreeWriter()->NewBranch(name, cl);
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::AddInfo(const char *name, Double_t value)
-{
-  GetTreeWriter()->AddInfo(name, value);
-}
-
-//------------------------------------------------------------------------------
-
 ExRootResult *DelphesModule::GetPlots()
 {
   if(!fPlots)
@@ -112,19 +95,6 @@ DelphesFactory *DelphesModule::GetFactory() const
     throw std::runtime_error(message.str());
   }
   return fFactory;
-}
-
-//------------------------------------------------------------------------------
-
-ExRootTreeWriter *DelphesModule::GetTreeWriter() const
-{
-  if(!fTreeWriter)
-  {
-    std::ostringstream message;
-    message << "can't access access tree writer for module '" << GetName() << "'.";
-    throw std::runtime_error(message.str());
-  }
-  return fTreeWriter;
 }
 
 //------------------------------------------------------------------------------

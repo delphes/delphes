@@ -22,8 +22,6 @@
 
 #include <signal.h>
 
-#include <TApplication.h>
-#include <TFile.h>
 #include <TROOT.h>
 #include <TStopwatch.h>
 
@@ -68,50 +66,28 @@ int main(int argc, char *argv[])
 
   gROOT->SetBatch();
 
-  int appargc = 1;
-  char *appargv[] = {appName};
-  TApplication app(appName, &appargc, appargv);
-
   try
   {
-    const auto outputFile = std::make_unique<TFile>(argv[3], "CREATE");
-
-    if(!outputFile)
-    {
-      std::ostringstream message;
-      message << "can't create output file " << argv[3];
-      throw std::runtime_error(message.str());
-    }
-
-    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
-
-    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class()),
-                     *branchWeight = treeWriter->NewBranch("Weight", Weight::Class());
-
     const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[2]);
-
-    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
-    modularDelphes->SetConfReader(confReader.get());
-    modularDelphes->SetTreeWriter(treeWriter.get());
-
-    DelphesFactory *factory = modularDelphes->GetFactory();
-    CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
-                         stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
-                         partonOutputArray = modularDelphes->ExportArray("partons");
 
     const auto reader = DelphesReaderFactory::Get().Build(argv[1]);
     reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
     reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
 
+    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
+    modularDelphes->SetConfReader(confReader.get());
+    modularDelphes->SetOutputFile(argv[3]);
+    modularDelphes->SetReader(reader.get());
+
     modularDelphes->InitTask();
 
-    i = 3;
+    i = 4;
     do
     {
       if(interrupted) break;
 
-      if(i == argc || strncmp(argv[i], "-", 3) == 0)
+      if(i == argc || strncmp(argv[i], "-", 2) == 0)
       {
         std::cout << "** Reading standard input" << std::endl;
         throw;
@@ -125,21 +101,15 @@ int main(int argc, char *argv[])
       }
 
       // Loop over all objects
-      treeWriter->Clear();
       modularDelphes->Clear();
       reader->Clear();
-      while(reader->ReadEvent(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
+      while(reader->ReadEvent() && !interrupted)
       {
         procStopWatch.Start();
         modularDelphes->ProcessTask();
         procStopWatch.Stop();
 
-        reader->AnalyzeEvent(branchEvent, &procStopWatch);
-        reader->AnalyzeWeight(branchWeight);
-
-        treeWriter->Fill();
-
-        treeWriter->Clear();
+        reader->AnalyzeEvent(&procStopWatch);
 
         modularDelphes->Clear();
         reader->Clear();
@@ -149,7 +119,6 @@ int main(int argc, char *argv[])
     } while(i < argc);
 
     modularDelphes->FinishTask();
-    treeWriter->Write();
 
     std::cout << "** Exiting..." << std::endl;
 

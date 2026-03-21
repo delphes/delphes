@@ -77,6 +77,14 @@ void DelphesSTDHEPReader::LoadInputFile(std::string_view inputFile)
 
 //---------------------------------------------------------------------------
 
+void DelphesSTDHEPReader::SetFactory(DelphesFactory *factory)
+{
+  DelphesReader::SetFactory(factory);
+  fEventInfo = GetFactory()->Book<LHEFEvent>("Event");
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesSTDHEPReader::Clear()
 {
   fBlockType = -1;
@@ -91,10 +99,7 @@ bool DelphesSTDHEPReader::EventReady()
 
 //---------------------------------------------------------------------------
 
-bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
-  CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+bool DelphesSTDHEPReader::ReadBlock()
 {
   fReader[0].ReadValue(&fBlockType, 4);
 
@@ -121,14 +126,12 @@ bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
   else if(fBlockType == MCFIO_STDHEP)
   {
     ReadSTDHEP();
-    AnalyzeParticles(factory, allParticleOutputArray,
-      stableParticleOutputArray, partonOutputArray);
+    AnalyzeParticles();
   }
   else if(fBlockType == MCFIO_STDHEP4)
   {
     ReadSTDHEP();
-    AnalyzeParticles(factory, allParticleOutputArray,
-      stableParticleOutputArray, partonOutputArray);
+    AnalyzeParticles();
     ReadSTDHEP4();
   }
   else
@@ -426,31 +429,26 @@ void DelphesSTDHEPReader::ReadSTDHEP4()
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch)
+void DelphesSTDHEPReader::AnalyzeEvent(TStopwatch *procStopWatch)
 {
-  LHEFEvent *element;
+  LHEFEvent &element = *fEventInfo;
 
-  element = static_cast<LHEFEvent *>(branch->NewEntry());
+  element.Number = fEventNumber;
 
-  element->Number = fEventNumber;
+  element.ProcessID = 0;
 
-  element->ProcessID = 0;
+  element.Weight = fWeight;
+  element.ScalePDF = fScale[0];
+  element.AlphaQED = fAlphaQED;
+  element.AlphaQCD = fAlphaQCD;
 
-  element->Weight = fWeight;
-  element->ScalePDF = fScale[0];
-  element->AlphaQED = fAlphaQED;
-  element->AlphaQCD = fAlphaQCD;
-
-  element->ReadTime = fReadStopWatch.RealTime();
-  element->ProcTime = procStopWatch->RealTime();
+  element.ReadTime = fReadStopWatch.RealTime();
+  element.ProcTime = procStopWatch->RealTime();
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
-  CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+void DelphesSTDHEPReader::AnalyzeParticles()
 {
   Candidate *candidate;
   TParticlePDG *pdgParticle;
@@ -481,7 +479,7 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
     fReader[6].ReadValue(&z, 8);
     fReader[6].ReadValue(&t, 8);
 
-    candidate = factory->NewCandidate();
+    candidate = GetFactory()->NewCandidate();
 
     candidate->PID = pid;
     pdgCode = TMath::Abs(candidate->PID);
@@ -502,17 +500,17 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
 
     candidate->Position.SetXYZT(x, y, z, t);
 
-    allParticleOutputArray->emplace_back(candidate);
+    fAllParticleOutputArray->emplace_back(candidate);
 
     if(!pdgParticle) continue;
 
     if(status == 1)
     {
-      stableParticleOutputArray->emplace_back(candidate);
+      fStableParticleOutputArray->emplace_back(candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
-      partonOutputArray->emplace_back(candidate);
+      fPartonOutputArray->emplace_back(candidate);
     }
   }
 }

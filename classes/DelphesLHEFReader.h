@@ -37,28 +37,27 @@
 
 class TDatabasePDG;
 
+class DelphesWriter;
+
 class DelphesLHEFReader: public DelphesReader
 {
 public:
   DelphesLHEFReader();
 
+  void SetFactory(DelphesFactory *factory) override;
+
   void LoadInputFile(std::string_view) override;
   void Clear() override;
   bool EventReady() override;
 
-  void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) override;
-
-  void AnalyzeWeight(ExRootTreeBranch *branch);
+  void AnalyzeEvent(TStopwatch *procStopWatch) override;
 
 private:
-  bool ReadBlock(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray) override;
-  void AnalyzeParticle(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray);
+  bool ReadBlock() override;
+  void AnalyzeParticle();
+
+  std::shared_ptr<LHEFEvent> fEventInfo;
+  std::shared_ptr<std::vector<LHEFWeight> > fWeightInfo;
 
   std::array<char, 16384> fBuffer;
 

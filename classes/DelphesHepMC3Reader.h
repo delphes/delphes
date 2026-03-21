@@ -44,26 +44,25 @@ class DelphesHepMC3Reader: public DelphesReader
 public:
   DelphesHepMC3Reader();
 
+  void SetFactory(DelphesFactory *factory) override;
+
   void LoadInputFile(std::string_view) override;
   void Clear() override;
   bool EventReady() override;
 
-  void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) override;
-  void AnalyzeWeight(ExRootTreeBranch *branch) override;
+  void AnalyzeEvent(TStopwatch *procStopWatch) override;
 
 private:
-  bool ReadBlock(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray) override;
+  bool ReadBlock() override;
 
-  void AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate = 0);
+  void AnalyzeVertex(int code, Candidate *candidate = 0);
 
-  void AnalyzeParticle(DelphesFactory *factory);
+  void AnalyzeParticle();
 
-  void FinalizeParticles(CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray);
+  void FinalizeParticles();
+
+  std::shared_ptr<HepMCEvent> fEventObject;
+  std::shared_ptr<std::vector<Weight> > fWeightsObject;
 
   FILE *fInputFile{nullptr};
 

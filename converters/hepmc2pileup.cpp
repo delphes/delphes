@@ -73,11 +73,9 @@ int main(int argc, char *argv[])
     const auto writer = std::make_unique<DelphesPileUpWriter>(argv[1]);
 
     const auto factory = std::make_unique<DelphesFactory>();
-    CandidatesCollection allParticleOutputArray = std::make_shared<std::vector<Candidate *> >(),
-                         stableParticleOutputArray = std::make_shared<std::vector<Candidate *> >(),
-                         partonOutputArray = std::make_shared<std::vector<Candidate *> >();
 
     const auto reader = std::make_unique<DelphesHepMC2Reader>();
+    reader->SetFactory(factory.get());
 
     i = 2;
     do
@@ -100,8 +98,8 @@ int main(int argc, char *argv[])
       // Loop over all objects
       factory->Clear();
       reader->Clear();
-      while(reader->ReadEvent(factory.get(), allParticleOutputArray, stableParticleOutputArray, partonOutputArray)
-        && !interrupted)
+      CandidatesCollection stableParticleOutputArray = factory->Attach<std::vector<Candidate *> >("stableParticles");
+      while(reader->ReadEvent() && !interrupted)
       {
         for(const auto &candidate : *stableParticleOutputArray)
         {
