@@ -27,6 +27,7 @@
 
 #include <ExRootAnalysis/ExRootProgressBar.h>
 
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesReader.h"
 
 DelphesReader::~DelphesReader()
@@ -39,6 +40,25 @@ DelphesReader::~DelphesReader()
 
     if(fInputFile != stdin) fclose(fInputFile);
   }
+}
+
+//---------------------------------------------------------------------------
+
+void DelphesReader::SetFactory(DelphesFactory *factory)
+{
+  fFactory = factory;
+  fAllParticleOutputArray = GetFactory()->Book<std::vector<Candidate *> >("Delphes/allParticles");
+  fStableParticleOutputArray = GetFactory()->Book<std::vector<Candidate *> >("Delphes/stableParticles");
+  fPartonOutputArray = GetFactory()->Book<std::vector<Candidate *> >("Delphes/partons");
+}
+
+//---------------------------------------------------------------------------
+
+DelphesFactory *DelphesReader::GetFactory() const
+{
+  if(!fFactory)
+    throw std::runtime_error("Failed to retrieve the objects factory for the reader module.");
+  return fFactory;
 }
 
 //---------------------------------------------------------------------------
@@ -63,20 +83,18 @@ void DelphesReader::SetMaxEvents(long long maxEvents)
 
 //---------------------------------------------------------------------------
 
-bool DelphesReader::ReadEvent(DelphesFactory *factory,
-  CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+bool DelphesReader::ReadEvent()
 {
   if(fMaxEvents > 0 && fEventCounter - fSkipEvents >= fMaxEvents)
     return false;
+  // initialise the collections if not already done
 
   fReadStopWatch.Start();
   Clear();
-  allParticleOutputArray->clear();
-  stableParticleOutputArray->clear();
-  partonOutputArray->clear();
-  while(ReadBlock(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray))
+  fAllParticleOutputArray->clear();
+  fStableParticleOutputArray->clear();
+  fPartonOutputArray->clear();
+  while(ReadBlock())
   {
     if(EventReady())
     {

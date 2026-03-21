@@ -52,22 +52,18 @@ public:
 
   DelphesSTDHEPReader();
 
+  void SetFactory(DelphesFactory *factory) override;
+
   void LoadInputFile(std::string_view) override;
   void Clear() override;
   bool EventReady() override;
 
-  void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) override;
+  void AnalyzeEvent(TStopwatch *procStopWatch) override;
 
 private:
-  bool ReadBlock(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray) override;
+  bool ReadBlock() override;
 
-  void AnalyzeParticles(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray);
+  void AnalyzeParticles();
 
   void SkipBytes(int size);
   void SkipArray(int elsize);
@@ -80,6 +76,8 @@ private:
   void ReadSTDHEP4();
 
   FILE *fInputFile;
+
+  std::shared_ptr<LHEFEvent> fEventInfo;
 
   DelphesXDRReader fReader[7];
 

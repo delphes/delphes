@@ -30,24 +30,27 @@
 
 #include "classes/DelphesModule.h"
 
-class ExRootTreeWriter;
-
-class DelphesFactory;
+class DelphesReader;
 
 class Delphes: public DelphesModule
 {
 public:
-  Delphes(const char *name = "Delphes");
-  ~Delphes();
+  explicit Delphes(const char *name = "Delphes");
 
   void Init() override;
   DelphesFactory *GetFactory() const override;
+
+  void SetReader(DelphesReader *reader);
+
+  void SetOutputFile(std::string_view outputFile) { fOutputFile = outputFile; }
+  const std::string &GetOutputFile() const { return fOutputFile; }
 
   void Clear(Option_t *option = "");
 
 private:
   std::unique_ptr<DelphesFactory> fDelphesFactory;
-  ExRootTreeWriter *fTreeWriter{nullptr};
+  DelphesReader *fReader{nullptr};
+  std::string fOutputFile;
 };
 
 #endif /* Delphes_h */

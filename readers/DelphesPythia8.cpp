@@ -28,7 +28,6 @@
 
 #include <TApplication.h>
 #include <TDatabasePDG.h>
-#include <TFile.h>
 #include <TParticlePDG.h>
 #include <TROOT.h>
 #include <TStopwatch.h>
@@ -47,7 +46,7 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
-  ExRootTreeBranch *branch, DelphesFactory *factory,
+  HepMCEvent &element, DelphesFactory *factory,
   CandidatesCollection &stableParticleOutputArray,
   CandidatesCollection &allParticleOutputArray,
   CandidatesCollection &partonOutputArray,
@@ -55,7 +54,6 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 {
   int i;
 
-  HepMCEvent *element;
   Candidate *candidate;
   TDatabasePDG *pdg;
   TParticlePDG *pdgParticle;
@@ -67,28 +65,26 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   Double_t x_decay, y_decay, z_decay, t_decay;
 
   // event information
-  element = static_cast<HepMCEvent *>(branch->NewEntry());
+  element.Number = eventCounter;
 
-  element->Number = eventCounter;
+  element.ProcessID = pythia->info.code();
+  element.MPI = 1;
+  element.Weight = pythia->info.weight();
 
-  element->ProcessID = pythia->info.code();
-  element->MPI = 1;
-  element->Weight = pythia->info.weight();
+  element.Scale = pythia->info.QRen();
+  element.AlphaQED = pythia->info.alphaEM();
+  element.AlphaQCD = pythia->info.alphaS();
 
-  element->Scale = pythia->info.QRen();
-  element->AlphaQED = pythia->info.alphaEM();
-  element->AlphaQCD = pythia->info.alphaS();
+  element.ID1 = pythia->info.id1();
+  element.ID2 = pythia->info.id2();
+  element.X1 = pythia->info.x1();
+  element.X2 = pythia->info.x2();
+  element.ScalePDF = pythia->info.QFac();
+  element.PDF1 = pythia->info.pdf1();
+  element.PDF2 = pythia->info.pdf2();
 
-  element->ID1 = pythia->info.id1();
-  element->ID2 = pythia->info.id2();
-  element->X1 = pythia->info.x1();
-  element->X2 = pythia->info.x2();
-  element->ScalePDF = pythia->info.QFac();
-  element->PDF1 = pythia->info.pdf1();
-  element->PDF2 = pythia->info.pdf2();
-
-  element->ReadTime = readStopWatch->RealTime();
-  element->ProcTime = procStopWatch->RealTime();
+  element.ReadTime = readStopWatch->RealTime();
+  element.ProcTime = procStopWatch->RealTime();
 
   pdg = TDatabasePDG::Instance();
 
@@ -228,14 +224,8 @@ void fillPartons(int id, double pMax, double etaMax,
 int main(int argc, char *argv[])
 {
   char appName[] = "DelphesPythia8";
-  stringstream message;
   TStopwatch readStopWatch, procStopWatch;
   std::unique_ptr<DelphesLHEFReader> reader;
-  Long64_t eventCounter, errorCounter;
-  Long64_t numberOfEvents, timesAllowErrors;
-  Bool_t spareFlag1;
-  Int_t spareMode1;
-  Double_t spareParm1, spareParm2;
 
   if(argc != 4)
   {
@@ -258,31 +248,21 @@ int main(int argc, char *argv[])
 
   try
   {
-    const auto outputFile = std::make_unique<TFile>(argv[3], "CREATE");
-    if(!outputFile)
-    {
-      message << "can't create output file " << argv[3];
-      throw runtime_error(message.str());
-    }
-
-    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
-
-    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class()),
-                     *branchWeight = treeWriter->NewBranch("Weight", Weight::Class()),
-                     *branchEventLHEF = nullptr,
-                     *branchWeightLHEF = nullptr;
-
     const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
     const auto modularDelphes = std::make_unique<Delphes>("Delphes");
     modularDelphes->SetConfReader(confReader.get());
-    modularDelphes->SetTreeWriter(treeWriter.get());
+    modularDelphes->SetOutputFile(argv[3]);
 
-    DelphesFactory *factory = modularDelphes->GetFactory();
-    CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
-                         stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
-                         partonOutputArray = modularDelphes->ExportArray("partons");
+    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event");
+    std::shared_ptr<std::vector<Weight> > weightsInfo = modularDelphes->GetFactory()->Book<std::vector<Weight> >("Weight");
+    std::shared_ptr<HepMCEvent> eventInfoLHEF;
+    std::shared_ptr<std::vector<Weight> > weightsInfoLHEF;
+
+    CandidatesCollection allParticleOutputArray = modularDelphes->ImportArray("Delphes/allParticles"),
+                         stableParticleOutputArray = modularDelphes->ImportArray("Delphes/stableParticles"),
+                         partonOutputArray = modularDelphes->ImportArray("Delphespartons");
     CandidatesCollection stableParticleOutputArrayLHEF, allParticleOutputArrayLHEF, partonOutputArrayLHEF;
 
     // Initialize Pythia
@@ -312,18 +292,19 @@ int main(int argc, char *argv[])
     // Read in commands from configuration file
     if(!pythia->readFile(argv[2]))
     {
-      message << "can't read Pythia8 configuration file " << argv[2] << endl;
-      throw runtime_error(message.str());
+      std::ostringstream message;
+      message << "can't read Pythia8 configuration file " << argv[2] << std::endl;
+      throw std::runtime_error(message.str());
     }
 
     // Extract settings to be used in the main program
-    numberOfEvents = pythia->mode("Main:numberOfEvents");
-    timesAllowErrors = pythia->mode("Main:timesAllowErrors");
+    int numberOfEvents = pythia->mode("Main:numberOfEvents");
+    int timesAllowErrors = pythia->mode("Main:timesAllowErrors");
 
-    spareFlag1 = pythia->flag("Main:spareFlag1");
-    spareMode1 = pythia->mode("Main:spareMode1");
-    spareParm1 = pythia->parm("Main:spareParm1");
-    spareParm2 = pythia->parm("Main:spareParm2");
+    bool spareFlag1 = pythia->flag("Main:spareFlag1");
+    int spareMode1 = pythia->mode("Main:spareMode1");
+    double spareParm1 = pythia->parm("Main:spareParm1");
+    double spareParm2 = pythia->parm("Main:spareParm2");
 
     // Check if particle gun
     if(!spareFlag1)
@@ -333,12 +314,12 @@ int main(int argc, char *argv[])
         reader = std::make_unique<DelphesLHEFReader>();
         reader->LoadInputFile(inputFile);
 
-        branchEventLHEF = treeWriter->NewBranch("EventLHEF", LHEFEvent::Class());
-        branchWeightLHEF = treeWriter->NewBranch("WeightLHEF", LHEFWeight::Class());
+        eventInfoLHEF = modularDelphes->GetFactory()->Book<HepMCEvent>("EventLHEF");
+        weightsInfoLHEF = modularDelphes->GetFactory()->Book<std::vector<Weight> >("WeightLHEF");
 
-        allParticleOutputArrayLHEF = modularDelphes->ExportArray("allParticlesLHEF");
-        stableParticleOutputArrayLHEF = modularDelphes->ExportArray("stableParticlesLHEF");
-        partonOutputArrayLHEF = modularDelphes->ExportArray("partonsLHEF");
+        allParticleOutputArrayLHEF = modularDelphes->ImportArray("Delphes/allParticlesLHEF");
+        stableParticleOutputArrayLHEF = modularDelphes->ImportArray("Delphes/stableParticlesLHEF");
+        partonOutputArrayLHEF = modularDelphes->ImportArray("Delphes/partonsLHEF");
       }
     }
 
@@ -350,16 +331,17 @@ int main(int argc, char *argv[])
     ExRootProgressBar progressBar(-1);
 
     // Loop over all events
-    errorCounter = 0;
-    treeWriter->Clear();
+    int errorCounter = 0;
+    weightsInfo->clear();
     modularDelphes->Clear();
     allParticleOutputArray->clear();
     stableParticleOutputArray->clear();
     partonOutputArray->clear();
     readStopWatch.Start();
+    int eventCounter = 0;
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      if(!reader || !reader->ReadEvent(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF))
+      if(!reader || !reader->ReadEvent())
         break;
 
       if(spareFlag1)
@@ -398,31 +380,24 @@ int main(int argc, char *argv[])
       readStopWatch.Stop();
 
       procStopWatch.Start();
-      ConvertInput(eventCounter, pythia.get(), branchEvent, factory,
+      ConvertInput(eventCounter, pythia.get(), *eventInfo, modularDelphes->GetFactory(),
         allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
         &readStopWatch, &procStopWatch);
       modularDelphes->ProcessTask();
       procStopWatch.Stop();
 
       if(reader)
-      {
-        reader->AnalyzeEvent(branchEventLHEF, &procStopWatch);
-        reader->AnalyzeWeight(branchWeightLHEF);
-      }
+        reader->AnalyzeEvent(&procStopWatch); //FIXME ensure we use LHEF
 
 #if PYTHIA_VERSION_INTEGER > 8300
       // fill Pythia8 Weights - see https://pythia.org/latest-manual/CrossSectionsAndWeights.html
       for(size_t iWeight = 0; iWeight < pythia->info.weightNameVector().size(); ++iWeight)
       {
-        Weight *weight;
-        weight = static_cast<Weight *>(branchWeight->NewEntry());
-        weight->Weight = pythia->info.weightValueVector()[iWeight];
+        Weight &weight = weightsInfo->emplace_back();
+        weight.Weight = pythia->info.weightValueVector()[iWeight];
       }
 #endif
 
-      treeWriter->Fill();
-
-      treeWriter->Clear();
       modularDelphes->Clear();
       if(reader) reader->Clear();
 
@@ -436,7 +411,6 @@ int main(int argc, char *argv[])
     pythia->stat();
 
     modularDelphes->FinishTask();
-    treeWriter->Write();
 
     cout << "** Exiting..." << endl;
 

@@ -96,23 +96,12 @@ int main(int argc, char *argv[])
 
   try
   {
-    const auto outputFile = std::make_unique<TFile>(argv[2], "CREATE");
-    if(!outputFile)
-    {
-      message << "can't open " << argv[2] << endl;
-      throw runtime_error(message.str());
-    }
-
-    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
-
-    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-
     const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
     const auto modularDelphes = std::make_unique<Delphes>("Delphes");
     modularDelphes->SetConfReader(confReader.get());
-    modularDelphes->SetTreeWriter(treeWriter.get());
+    modularDelphes->SetOutputFile(argv[2]);
 
     const auto chain = std::make_unique<TChain>("Delphes");
 
@@ -120,6 +109,7 @@ int main(int argc, char *argv[])
     CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
                          stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
                          partonOutputArray = modularDelphes->ExportArray("partons");
+    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event");
 
     modularDelphes->InitTask();
 
@@ -149,36 +139,34 @@ int main(int argc, char *argv[])
       // Loop over all objects
       eventCounter = 0;
       modularDelphes->Clear();
-      treeWriter->Clear();
       for(Int_t entry = 0; entry < numberOfEvents && !interrupted; ++entry)
       {
-
         treeReader->ReadEntry(entry);
 
         // -- TBC need also to include event weights --
 
         HepMCEvent *eve = (HepMCEvent *)branchHepMCEvent->At(0);
-        HepMCEvent *element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
+        HepMCEvent &element = *eventInfo;
 
-        element->Number = eventCounter;
+        element.Number = eventCounter;
 
-        element->ProcessID = eve->ProcessID;
-        element->MPI = eve->MPI;
-        element->Weight = eve->Weight;
-        element->Scale = eve->Scale;
-        element->AlphaQED = eve->AlphaQED;
-        element->AlphaQCD = eve->AlphaQCD;
+        element.ProcessID = eve->ProcessID;
+        element.MPI = eve->MPI;
+        element.Weight = eve->Weight;
+        element.Scale = eve->Scale;
+        element.AlphaQED = eve->AlphaQED;
+        element.AlphaQCD = eve->AlphaQCD;
 
-        element->ID1 = eve->ID1;
-        element->ID2 = eve->ID2;
-        element->X1 = eve->X1;
-        element->X2 = eve->X2;
-        element->ScalePDF = eve->ScalePDF;
-        element->PDF1 = eve->PDF1;
-        element->PDF2 = eve->PDF2;
+        element.ID1 = eve->ID1;
+        element.ID2 = eve->ID2;
+        element.X1 = eve->X1;
+        element.X2 = eve->X2;
+        element.ScalePDF = eve->ScalePDF;
+        element.PDF1 = eve->PDF1;
+        element.PDF2 = eve->PDF2;
 
-        element->ReadTime = eve->ReadTime;
-        element->ProcTime = eve->ProcTime;
+        element.ReadTime = eve->ReadTime;
+        element.ProcTime = eve->ProcTime;
 
         for(Int_t j = 0; j < branchParticle->GetEntriesFast(); j++)
         {
@@ -217,10 +205,7 @@ int main(int argc, char *argv[])
 
         modularDelphes->ProcessTask();
 
-        treeWriter->Fill();
-
         modularDelphes->Clear();
-        treeWriter->Clear();
 
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
@@ -233,7 +218,6 @@ int main(int argc, char *argv[])
     }
 
     modularDelphes->FinishTask();
-    treeWriter->Write();
 
     cout << "** Exiting..." << endl;
 

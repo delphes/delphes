@@ -59,7 +59,6 @@ DelphesLHEFReader::DelphesLHEFReader() :
 void DelphesLHEFReader::LoadInputFile(std::string_view inputFile)
 {
   if(fInputFile) fclose(fInputFile); // unload previous streams
-  Clear(); // clear all buffers
   if(fInputFile = fopen(std::string{inputFile}.data(), "r"); fInputFile == nullptr)
   {
     std::ostringstream message;
@@ -78,12 +77,22 @@ void DelphesLHEFReader::LoadInputFile(std::string_view inputFile)
 
 //---------------------------------------------------------------------------
 
+void DelphesLHEFReader::SetFactory(DelphesFactory *factory)
+{
+  DelphesReader::SetFactory(factory);
+  fEventInfo = GetFactory()->Book<LHEFEvent>("Event");
+  fWeightInfo = GetFactory()->Book<std::vector<LHEFWeight> >("Weights");
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesLHEFReader::Clear()
 {
   fEventReady = kFALSE;
   fEventCounter = -1;
   fParticleCounter = -1;
   fWeightList.clear();
+  fWeightInfo->clear();
 }
 
 //---------------------------------------------------------------------------
@@ -95,10 +104,7 @@ bool DelphesLHEFReader::EventReady()
 
 //---------------------------------------------------------------------------
 
-bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
-  CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+bool DelphesLHEFReader::ReadBlock()
 {
   int rc, id;
   char *pch;
@@ -154,8 +160,7 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
       return kFALSE;
     }
 
-    AnalyzeParticle(factory, allParticleOutputArray,
-      stableParticleOutputArray, partonOutputArray);
+    AnalyzeParticle();
 
     --fParticleCounter;
   }
@@ -232,53 +237,40 @@ bool DelphesLHEFReader::ReadBlock(DelphesFactory *factory,
 
 //---------------------------------------------------------------------------
 
-void DelphesLHEFReader::AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch)
+void DelphesLHEFReader::AnalyzeEvent(TStopwatch *procStopWatch)
 {
-  LHEFEvent *element;
+  LHEFEvent &element = *fEventInfo;
+  element.Number = fEventCounter;
 
-  element = static_cast<LHEFEvent *>(branch->NewEntry());
-  element->Number = fEventCounter;
+  element.ProcessID = fProcessID;
+  element.Weight = fWeight;
+  element.CrossSection = fCrossSection;
 
-  element->ProcessID = fProcessID;
-  element->Weight = fWeight;
-  element->CrossSection = fCrossSection;
+  element.ScalePDF = fScalePDF;
+  element.AlphaQED = fAlphaQED;
+  element.AlphaQCD = fAlphaQCD;
 
-  element->ScalePDF = fScalePDF;
-  element->AlphaQED = fAlphaQED;
-  element->AlphaQCD = fAlphaQCD;
+  element.ReadTime = fReadStopWatch.RealTime();
+  element.ProcTime = procStopWatch->RealTime();
 
-  element->ReadTime = fReadStopWatch.RealTime();
-  element->ProcTime = procStopWatch->RealTime();
-}
-
-//---------------------------------------------------------------------------
-
-void DelphesLHEFReader::AnalyzeWeight(ExRootTreeBranch *branch)
-{
-  LHEFWeight *element;
-  vector<pair<int, double> >::const_iterator itWeightList;
-
-  for(itWeightList = fWeightList.begin(); itWeightList != fWeightList.end(); ++itWeightList)
+  for(std::vector<pair<int, double> >::const_iterator itWeightList = fWeightList.begin();
+    itWeightList != fWeightList.end(); ++itWeightList)
   {
-    element = static_cast<LHEFWeight *>(branch->NewEntry());
-
-    element->ID = itWeightList->first;
-    element->Weight = itWeightList->second;
+    LHEFWeight &weight = fWeightInfo->emplace_back();
+    weight.ID = itWeightList->first;
+    weight.Weight = itWeightList->second;
   }
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesLHEFReader::AnalyzeParticle(DelphesFactory *factory,
-  CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+void DelphesLHEFReader::AnalyzeParticle()
 {
   Candidate *candidate;
   TParticlePDG *pdgParticle;
   int pdgCode;
 
-  candidate = factory->NewCandidate();
+  candidate = GetFactory()->NewCandidate();
 
   candidate->PID = fPID;
   pdgCode = TMath::Abs(candidate->PID);
@@ -298,17 +290,17 @@ void DelphesLHEFReader::AnalyzeParticle(DelphesFactory *factory,
   candidate->D1 = -1;
   candidate->D2 = -1;
 
-  allParticleOutputArray->emplace_back(candidate);
+  fAllParticleOutputArray->emplace_back(candidate);
 
   if(!pdgParticle) return;
 
   if(fStatus == 1)
   {
-    stableParticleOutputArray->emplace_back(candidate);
+    fStableParticleOutputArray->emplace_back(candidate);
   }
   else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
   {
-    partonOutputArray->emplace_back(candidate);
+    fPartonOutputArray->emplace_back(candidate);
   }
 }
 

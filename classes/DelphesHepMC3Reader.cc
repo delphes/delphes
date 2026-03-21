@@ -77,6 +77,15 @@ void DelphesHepMC3Reader::LoadInputFile(std::string_view inputFile)
 
 //---------------------------------------------------------------------------
 
+void DelphesHepMC3Reader::SetFactory(DelphesFactory *factory)
+{
+  DelphesReader::SetFactory(factory);
+  fEventObject = GetFactory()->Book<HepMCEvent>("Event");
+  fWeightsObject = GetFactory()->Book<std::vector<Weight> >("Weight");
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesHepMC3Reader::Clear()
 {
   fWeights.clear();
@@ -90,6 +99,7 @@ void DelphesHepMC3Reader::Clear()
   fOutVertexMap.clear();
   fMotherMap.clear();
   fDaughterMap.clear();
+  fWeightsObject->clear();
 }
 
 //---------------------------------------------------------------------------
@@ -101,10 +111,7 @@ bool DelphesHepMC3Reader::EventReady()
 
 //---------------------------------------------------------------------------
 
-bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
-  CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+bool DelphesHepMC3Reader::ReadBlock()
 {
   map<int, pair<int, int> >::iterator itDaughterMap;
   char key, momentumUnit[4], positionUnit[3];
@@ -301,7 +308,7 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
       }
     }
 
-    AnalyzeVertex(factory, fVertexCode);
+    AnalyzeVertex(fVertexCode);
   }
   else if(key == 'P' && fParticleCounter > 0)
   {
@@ -324,12 +331,12 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
       return kFALSE;
     }
 
-    AnalyzeParticle(factory);
+    AnalyzeParticle();
   }
 
   if(EventReady())
   {
-    FinalizeParticles(allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+    FinalizeParticles();
   }
 
   return kTRUE;
@@ -337,52 +344,42 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch)
+void DelphesHepMC3Reader::AnalyzeEvent(TStopwatch *procStopWatch)
 {
-  HepMCEvent *element;
+  HepMCEvent &element = *fEventObject;
 
-  element = static_cast<HepMCEvent *>(branch->NewEntry());
-  element->Number = fEventNumber;
+  element.Number = fEventNumber;
 
-  element->ProcessID = fProcessID;
-  element->MPI = fMPI;
-  element->Weight = fWeights.size() > 0 ? fWeights[0] : 1.0;
-  element->CrossSection = fCrossSection;
-  element->CrossSectionError = fCrossSectionError;
-  element->Scale = fScale;
-  element->AlphaQED = fAlphaQED;
-  element->AlphaQCD = fAlphaQCD;
+  element.ProcessID = fProcessID;
+  element.MPI = fMPI;
+  element.Weight = fWeights.size() > 0 ? fWeights[0] : 1.0;
+  element.CrossSection = fCrossSection;
+  element.CrossSectionError = fCrossSectionError;
+  element.Scale = fScale;
+  element.AlphaQED = fAlphaQED;
+  element.AlphaQCD = fAlphaQCD;
 
-  element->ID1 = fID1;
-  element->ID2 = fID2;
-  element->X1 = fX1;
-  element->X2 = fX2;
-  element->ScalePDF = fScalePDF;
-  element->PDF1 = fPDF1;
-  element->PDF2 = fPDF2;
+  element.ID1 = fID1;
+  element.ID2 = fID2;
+  element.X1 = fX1;
+  element.X2 = fX2;
+  element.ScalePDF = fScalePDF;
+  element.PDF1 = fPDF1;
+  element.PDF2 = fPDF2;
 
-  element->ReadTime = fReadStopWatch.RealTime();
-  element->ProcTime = procStopWatch->RealTime();
-}
+  element.ReadTime = fReadStopWatch.RealTime();
+  element.ProcTime = procStopWatch->RealTime();
 
-//---------------------------------------------------------------------------
-
-void DelphesHepMC3Reader::AnalyzeWeight(ExRootTreeBranch *branch)
-{
-  Weight *element;
-  vector<double>::const_iterator itWeights;
-
-  for(itWeights = fWeights.begin(); itWeights != fWeights.end(); ++itWeights)
+  for(std::vector<double>::const_iterator itWeights = fWeights.begin(); itWeights != fWeights.end(); ++itWeights)
   {
-    element = static_cast<Weight *>(branch->NewEntry());
-
-    element->Weight = *itWeights;
+    Weight &weight = fWeightsObject->emplace_back();
+    weight.Weight = *itWeights;
   }
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate)
+void DelphesHepMC3Reader::AnalyzeVertex(int code, Candidate *candidate)
 {
   int index;
   std::shared_ptr<TLorentzVector> position;
@@ -427,30 +424,22 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory)
+void DelphesHepMC3Reader::AnalyzeParticle()
 {
-  Candidate *candidate;
-
-  candidate = factory->NewCandidate();
+  Candidate *candidate = GetFactory()->NewCandidate();
 
   candidate->PID = fPID;
-
   candidate->Status = fParticleStatus;
-
   candidate->Mass = fMass;
-
   candidate->Momentum.SetPxPyPzE(fPx, fPy, fPz, fE);
-
   candidate->D1 = fParticleCode;
 
-  AnalyzeVertex(factory, fOutVertexCode, candidate);
+  AnalyzeVertex(fOutVertexCode, candidate);
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOutputArray,
-  CandidatesCollection &stableParticleOutputArray,
-  CandidatesCollection &partonOutputArray)
+void DelphesHepMC3Reader::FinalizeParticles()
 {
   TLorentzVector *position;
   CandidatesCollection array;
@@ -520,7 +509,7 @@ void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOut
         }
       }
 
-      allParticleOutputArray->emplace_back(candidate);
+      fAllParticleOutputArray->emplace_back(candidate);
 
       ++counter;
 
@@ -534,18 +523,18 @@ void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOut
 
       if(candidate->Status == 1)
       {
-        stableParticleOutputArray->emplace_back(candidate);
+        fStableParticleOutputArray->emplace_back(candidate);
       }
       else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
       {
-        partonOutputArray->emplace_back(candidate);
+        fPartonOutputArray->emplace_back(candidate);
       }
     }
   }
 
-  for(size_t j = 0; j < allParticleOutputArray->size(); ++j)
+  for(size_t j = 0; j < fAllParticleOutputArray->size(); ++j)
   {
-    candidate = static_cast<Candidate *>(allParticleOutputArray->at(j));
+    candidate = static_cast<Candidate *>(fAllParticleOutputArray->at(j));
 
     itMotherMap = fMotherMap.find(candidate->M1);
     if(itMotherMap == fMotherMap.end())
@@ -578,7 +567,7 @@ void DelphesHepMC3Reader::FinalizeParticles(CandidatesCollection &allParticleOut
       {
         candidate->D1 = itDaughterMap->second.first;
         candidate->D2 = itDaughterMap->second.second;
-        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->at(candidate->D1));
+        candidateDaughter = static_cast<Candidate *>(fAllParticleOutputArray->at(candidate->D1));
         const TLorentzVector &decayPosition = candidateDaughter->Position;
         candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }

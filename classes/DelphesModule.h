@@ -36,8 +36,6 @@ class TFolder;
 class Candidate;
 
 class ExRootResult;
-class ExRootTreeBranch;
-class ExRootTreeWriter;
 
 class DelphesFactory;
 
@@ -54,21 +52,16 @@ public:
   std::shared_ptr<std::vector<Candidate *> > ImportArray(const char *name);
   std::shared_ptr<std::vector<Candidate *> > ExportArray(const char *name);
 
-  ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
-  void AddInfo(const char *name, Double_t value);
-
   ExRootResult *GetPlots();
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
   virtual DelphesFactory *GetFactory() const;
 
-  void SetTreeWriter(ExRootTreeWriter *treeWriter) { fTreeWriter = treeWriter; }
-  virtual ExRootTreeWriter *GetTreeWriter() const;
+  virtual bool IsWriter() const { return false; }
 
 private:
   DelphesFactory *fFactory{nullptr};
 
-  ExRootTreeWriter *fTreeWriter{nullptr};
   ExRootResult *fPlots{nullptr};
 
   TFolder *fPlotFolder{nullptr};

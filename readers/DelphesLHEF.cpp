@@ -22,19 +22,14 @@
 
 #include <signal.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
-
-#include "TFile.h"
-#include "TStopwatch.h"
+#include <TApplication.h>
+#include <TROOT.h>
+#include <TStopwatch.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
 #include "modules/Delphes.h"
-
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -78,33 +73,17 @@ int main(int argc, char *argv[])
 
   try
   {
-    const auto outputFile = std::make_unique<TFile>(argv[2], "CREATE");
-    if(!outputFile)
-    {
-      message << "can't create output file " << argv[2];
-      throw runtime_error(message.str());
-    }
-
-    const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
-
-    ExRootTreeBranch *branchEvent = treeWriter->NewBranch("Event", LHEFEvent::Class()),
-                     *branchWeight = treeWriter->NewBranch("Weight", LHEFWeight::Class());
-
     const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
-
-    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
-    modularDelphes->SetConfReader(confReader.get());
-    modularDelphes->SetTreeWriter(treeWriter.get());
-
-    auto *factory = modularDelphes->GetFactory();
-    auto allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    auto stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    auto partonOutputArray = modularDelphes->ExportArray("partons");
 
     const auto reader = std::make_unique<DelphesLHEFReader>();
     reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
     reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
+
+    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
+    modularDelphes->SetConfReader(confReader.get());
+    modularDelphes->SetReader(reader.get());
+    modularDelphes->SetOutputFile(argv[2]);
 
     modularDelphes->InitTask();
 
@@ -127,34 +106,24 @@ int main(int argc, char *argv[])
       }
 
       // Loop over all objects
-      treeWriter->Clear();
       modularDelphes->Clear();
       reader->Clear();
-      while(reader->ReadEvent(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray) && !interrupted)
+      while(reader->ReadEvent() && !interrupted)
       {
         procStopWatch.Start();
         modularDelphes->ProcessTask();
         procStopWatch.Stop();
 
-        reader->AnalyzeEvent(branchEvent, &procStopWatch);
-        reader->AnalyzeWeight(branchWeight);
-
-        treeWriter->Fill();
-
-        treeWriter->Clear();
+        reader->AnalyzeEvent(&procStopWatch);
 
         modularDelphes->Clear();
         reader->Clear();
-        allParticleOutputArray->clear();
-        stableParticleOutputArray->clear();
-        partonOutputArray->clear();
       }
 
       ++i;
     } while(i < argc);
 
     modularDelphes->FinishTask();
-    treeWriter->Write();
 
     cout << "** Exiting..." << endl;
 

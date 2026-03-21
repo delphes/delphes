@@ -30,31 +30,18 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesReader.h"
+#include "classes/DelphesWriter.h"
 
-#include "ExRootAnalysis/ExRootConfReader.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
+#include <ExRootAnalysis/ExRootConfReader.h>
 
-#include <TROOT.h>
 #include <TRandom3.h>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-#include <stdio.h>
-#include <string.h>
-
-using namespace std;
-
-Delphes::Delphes(const char *name) : fDelphesFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
+Delphes::Delphes(const char *name) :
+  fDelphesFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
 {
   SetName(name);
 }
-
-//------------------------------------------------------------------------------
-
-Delphes::~Delphes() {}
 
 //------------------------------------------------------------------------------
 
@@ -67,40 +54,50 @@ void Delphes::Clear(Option_t * /*option*/)
 
 void Delphes::Init()
 {
-  stringstream message;
+  if(!fReader)
+    throw std::runtime_error("Failed to initialise the main Delphes module with no reader declared.");
+
   ExRootConfReader *confReader = GetConfReader();
   confReader->SetName("ConfReader");
 
-  TString name;
-  ExRootTask *task;
   const ExRootConfReader::ExRootTaskMap *modules = confReader->GetModules();
   ExRootConfReader::ExRootTaskMap::const_iterator itModules;
 
-  ExRootConfParam param = confReader->GetParam("::ExecutionPath");
-  Long_t i, size = param.GetSize();
-
   gRandom->SetSeed(confReader->GetInt("::RandomSeed", 0));
 
-  for(i = 0; i < size; ++i)
+  ExRootConfParam param = confReader->GetParam("::ExecutionPath");
+  for(int i = 0; i < param.GetSize(); ++i)
   {
-    name = param[i].GetString();
+    TString name = param[i].GetString(); // retrieve the module name
     itModules = modules->find(name);
-    if(itModules != modules->end())
+    if(itModules != modules->end()) // found the module in the execution path
     {
       std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(itModules->second.Data());
       moduleObject->SetFactory(GetFactory());
-      moduleObject->SetTreeWriter(GetTreeWriter());
-      task = NewTask(dynamic_cast<ExRootTask *>(moduleObject.release()), itModules->first);
-      if(task)
+      if(moduleObject->IsWriter())
+      {
+        DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
+        writerModule->SetOutputFile(GetOutputFile());
+      }
+      if(ExRootTask *task = NewTask(dynamic_cast<ExRootTask *>(moduleObject.release()), itModules->first); task)
         Add(task);
     }
     else
     {
+      std::ostringstream message;
       message << "module '" << name;
       message << "' is specified in ExecutionPath but not configured.";
-      throw runtime_error(message.str());
+      throw std::runtime_error(message.str());
     }
   }
+}
+
+//------------------------------------------------------------------------------
+
+void Delphes::SetReader(DelphesReader *reader)
+{
+  fReader = reader;
+  fReader->SetFactory(GetFactory());
 }
 
 //------------------------------------------------------------------------------

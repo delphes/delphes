@@ -44,6 +44,9 @@ public:
   DelphesReader() = default;
   virtual ~DelphesReader();
 
+  virtual void SetFactory(DelphesFactory *factory);
+  DelphesFactory *GetFactory() const;
+
   virtual void LoadInputFile(std::string_view inputFile) {}
   virtual void Clear() = 0;
   virtual bool EventReady() = 0;
@@ -52,19 +55,17 @@ public:
   void SetMaxEvents(long long);
   unsigned long long EventCounter() const { return fEventCounter; }
 
-  virtual bool ReadEvent(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray);
-
-  virtual void AnalyzeEvent(ExRootTreeBranch *branch, TStopwatch *procStopWatch) = 0;
-  virtual void AnalyzeWeight(ExRootTreeBranch *branch) {}
+  virtual bool ReadEvent();
+  virtual void AnalyzeEvent(TStopwatch *procStopWatch) = 0;
 
 protected:
-  virtual bool ReadBlock(DelphesFactory *factory,
-    CandidatesCollection &allParticleOutputArray,
-    CandidatesCollection &stableParticleOutputArray,
-    CandidatesCollection &partonOutputArray) { return false; }
+  virtual bool ReadBlock() { return false; }
+
+  DelphesFactory *fFactory{nullptr};
+
+  CandidatesCollection fAllParticleOutputArray;
+  CandidatesCollection fStableParticleOutputArray;
+  CandidatesCollection fPartonOutputArray;
 
   FILE *fInputFile{nullptr};
   std::unique_ptr<ExRootProgressBar> fProgressBar;
