@@ -30,6 +30,9 @@ ENDIF(SET_RPATH)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
+# Declare yaml-cpp dependency
+find_package(yaml-cpp REQUIRED)
+
 # Declare ROOT dependency
 find_package(ROOT REQUIRED COMPONENTS EG Eve Gui GuiHtml)
 set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
@@ -75,7 +78,7 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:TrackCovariance>
 )
 
-target_link_libraries(Delphes PUBLIC ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
+target_link_libraries(Delphes PUBLIC ${YAML_CPP_LIBRARIES} ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
 
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes PUBLIC ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
