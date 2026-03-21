@@ -28,17 +28,16 @@
  *
  */
 
-#include "TNamed.h"
-
 #include <map>
+#include <memory>
 #include <vector>
 
 class Candidate;
 
-class DelphesFactory: public TNamed
+class DelphesFactory
 {
 public:
-  explicit DelphesFactory(const char *name = "ObjectFactory");
+  DelphesFactory() = default;
 
   virtual void Clear(Option_t *option = ""); ///< Clear all collections booked in this factory
 
@@ -67,9 +66,7 @@ private:
   void ThrowAttachingFailure(std::string_view collectionName) const;
 
   std::map<std::string, void *> fMemorySlots;
-  std::vector<std::unique_ptr<TObject> > fCandidates;
-
-  ClassDef(DelphesFactory, 2)
+  std::vector<std::unique_ptr<Candidate> > fCandidates;
 };
 
 #endif /* DelphesFactory */

@@ -38,7 +38,7 @@
 #include <TRandom3.h>
 
 Delphes::Delphes(const char *name) :
-  fDelphesFactory(std::make_unique<DelphesFactory>("ObjectFactory"))
+  fDelphesFactory(std::make_unique<DelphesFactory>())
 {
   SetName(name);
 }
