@@ -21,10 +21,10 @@
 
 /** \class DelphesFactory
  *
- *  Class handling creation of Candidate,
- *  TObjArray and all other objects.
+ *  Class handling creation of Candidate, and all other objects.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author L. Forthomme - AGH, Krakow
  *
  */
 
@@ -35,16 +35,15 @@
 
 class Candidate;
 
-class ExRootTreeBranch;
-
 class DelphesFactory: public TNamed
 {
 public:
-  DelphesFactory(const char *name = "ObjectFactory");
+  explicit DelphesFactory(const char *name = "ObjectFactory");
 
-  virtual void Clear(Option_t *option = "");
+  virtual void Clear(Option_t *option = ""); ///< Clear all collections booked in this factory
 
-  bool Has(std::string_view collectionName) const;
+  bool Has(std::string_view collectionName) const; ///< Is the collection already booked?
+  /// Book the memory segment for a new collection
   template <typename T>
   std::shared_ptr<T> Book(std::string_view collectionName)
   {
@@ -53,18 +52,19 @@ public:
       fMemorySlots[name] = reinterpret_cast<void *>(new T);
     return Attach<T>(collectionName);
   }
+  /// Attach a pointer to a collection handled by this factory
   template <typename T>
   std::shared_ptr<T> Attach(std::string_view collectionName)
   {
-    if(!Has(collectionName)) throwAttachingFailure(collectionName);
+    if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
     return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]));
   }
-  std::vector<std::string> GetCollections() const;
+  std::vector<std::string> GetCollections() const; ///< Retrieve the name of all collections booked
 
-  Candidate *NewCandidate();
+  Candidate *NewCandidate(); ///< Construct a new candidate to fill a collection
 
 private:
-  void throwAttachingFailure(std::string_view collectionName) const;
+  void ThrowAttachingFailure(std::string_view collectionName) const;
 
   std::map<std::string, void *> fMemorySlots;
   std::vector<std::unique_ptr<TObject> > fCandidates;

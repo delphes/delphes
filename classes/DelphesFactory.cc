@@ -21,6 +21,7 @@
  *  Class handling creation of Candidate, and all other objects.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author L. Forthomme - AGH, Krakow
  *
  */
 
@@ -66,7 +67,7 @@ std::vector<std::string> DelphesFactory::GetCollections() const
 
 //------------------------------------------------------------------------------
 
-void DelphesFactory::throwAttachingFailure(std::string_view collectionName) const
+void DelphesFactory::ThrowAttachingFailure(std::string_view collectionName) const
 {
   std::ostringstream os;
   os << "Failed to attach memory segment to the collection name '" << collectionName << "'.";
