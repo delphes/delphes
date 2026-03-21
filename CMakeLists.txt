@@ -58,6 +58,7 @@ endfunction()
 # Define location of all other external dependencies
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
 
+add_subdirectory(addons)
 add_subdirectory(classes)
 add_subdirectory(converters)
 add_subdirectory(display)
