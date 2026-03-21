@@ -28,10 +28,6 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 
-DelphesFactory::DelphesFactory(const char *name) : TNamed(name, "") {}
-
-//------------------------------------------------------------------------------
-
 void DelphesFactory::Clear(Option_t * /*option*/)
 {
   TProcessID::SetObjectCount(0);
