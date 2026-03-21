@@ -42,6 +42,10 @@ public:
 
   void SetReader(DelphesReader *reader);
 
+  void InitTask();
+  void ProcessTask();
+  void FinishTask();
+
   void SetOutputFile(std::string_view outputFile) { fOutputFile = outputFile; }
   const std::string &GetOutputFile() const { return fOutputFile; }
 
@@ -50,6 +54,9 @@ public:
 private:
   std::unique_ptr<DelphesFactory> fDelphesFactory;
   DelphesReader *fReader{nullptr};
+
+  std::vector<std::pair<std::string, std::unique_ptr<DelphesModule> > > fModules;
+
   std::string fOutputFile;
 };
 

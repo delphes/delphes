@@ -28,18 +28,13 @@
  */
 #include "classes/DelphesModuleFactory.h"
 
-#include "ExRootAnalysis/ExRootTask.h"
-
-class TClass;
-class TFolder;
+#include <ExRootAnalysis/ExRootConfReader.h>
 
 class Candidate;
 
-class ExRootResult;
-
 class DelphesFactory;
 
-class DelphesModule: public ExRootTask
+class DelphesModule
 {
 public:
   DelphesModule() = default;
@@ -52,19 +47,32 @@ public:
   std::shared_ptr<std::vector<Candidate *> > ImportArray(const char *name);
   std::shared_ptr<std::vector<Candidate *> > ExportArray(const char *name);
 
-  ExRootResult *GetPlots();
+  void SetName(std::string_view moduleName) { fName = moduleName; }
+  const std::string &GetName() const { return fName; }
+
+  void SetConfReader(ExRootConfReader *conf) { fConfReader = conf; }
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
   virtual DelphesFactory *GetFactory() const;
 
   virtual bool IsWriter() const { return false; }
 
+protected:
+  ExRootConfReader *GetConfReader() const { return fConfReader; }
+
+  int GetInt(const char *name, int defaultValue, int index = -1);
+  long GetLong(const char *name, long defaultValue, int index = -1);
+  double GetDouble(const char *name, double defaultValue, int index = -1);
+  bool GetBool(const char *name, bool defaultValue, int index = -1);
+  const char *GetString(const char *name, const char *defaultValue, int index = -1);
+  ExRootConfParam GetParam(const char *name);
+  const ExRootConfReader::ExRootTaskMap *GetModules();
+
 private:
+  std::string fName;
   DelphesFactory *fFactory{nullptr};
 
-  ExRootResult *fPlots{nullptr};
-
-  TFolder *fPlotFolder{nullptr};
+  ExRootConfReader *fConfReader{nullptr}; //!
 };
 
 /// Add a processing module to the list of handled modules

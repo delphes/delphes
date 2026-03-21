@@ -28,10 +28,6 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include <TFolder.h>
-
 #include <sstream>
 #include <stdexcept>
 
@@ -74,18 +70,6 @@ CandidatesCollection DelphesModule::ExportArray(const char *name)
 
 //------------------------------------------------------------------------------
 
-ExRootResult *DelphesModule::GetPlots()
-{
-  if(!fPlots)
-  {
-    fPlots = new ExRootResult();
-    fPlots->SetFolder(GetFolder());
-  }
-  return fPlots;
-}
-
-//------------------------------------------------------------------------------
-
 DelphesFactory *DelphesModule::GetFactory() const
 {
   if(!fFactory)
@@ -95,6 +79,104 @@ DelphesFactory *DelphesModule::GetFactory() const
     throw std::runtime_error(message.str());
   }
   return fFactory;
+}
+
+//------------------------------------------------------------------------------
+
+const ExRootConfReader::ExRootTaskMap *DelphesModule::GetModules()
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetModules();
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+ExRootConfParam DelphesModule::GetParam(const char *name)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetParam(TString(GetName()) + "::" + name);
+  }
+  else
+  {
+    return ExRootConfParam(TString(GetName()) + "::" + name, 0, 0);
+  }
+}
+
+//------------------------------------------------------------------------------
+
+int DelphesModule::GetInt(const char *name, int defaultValue, int index)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetInt(TString(GetName()) + "::" + name, defaultValue, index);
+  }
+  else
+  {
+    return defaultValue;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+long DelphesModule::GetLong(const char *name, long defaultValue, int index)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetLong(TString(GetName()) + "::" + name, defaultValue, index);
+  }
+  else
+  {
+    return defaultValue;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+double DelphesModule::GetDouble(const char *name, double defaultValue, int index)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetDouble(TString(GetName()) + "::" + name, defaultValue, index);
+  }
+  else
+  {
+    return defaultValue;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+bool DelphesModule::GetBool(const char *name, bool defaultValue, int index)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetBool(TString(GetName()) + "::" + name, defaultValue, index);
+  }
+  else
+  {
+    return defaultValue;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+const char *DelphesModule::GetString(const char *name, const char *defaultValue, int index)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetString(TString(GetName()) + "::" + name, defaultValue, index);
+  }
+  else
+  {
+    return defaultValue;
+  }
 }
 
 //------------------------------------------------------------------------------
