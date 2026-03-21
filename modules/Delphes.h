@@ -41,6 +41,7 @@ public:
   DelphesFactory *GetFactory() const override;
 
   void SetReader(DelphesReader *reader);
+  DelphesReader *GetReader() const { return fReader; }
 
   void InitTask();
   void ProcessTask();
