@@ -25,13 +25,64 @@
  *
  */
 
-namespace delphes
-{
-class Module
+#include <pybind11/pybind11.h>
+
+#include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
+#include "classes/DelphesReader.h"
+#include "modules/Delphes.h"
+
+#include <dlfcn.h>
+
+namespace py = pybind11;
+
+class PyDelphes: public Delphes
 {
 public:
-  explicit Module() {}
+  PyDelphes() {}
+  ~PyDelphes() { FinishTask(); }
+
+  void Next()
+  {
+    if(!fIsInitialised)
+    {
+      InitTask();
+      fIsInitialised = true;
+    }
+    GetReader()->ReadEvent();
+    ProcessTask();
+    Clear();
+    GetReader()->Clear();
+  }
 
 private:
+  bool fIsInitialised{false};
 };
-} // namespace delphes
+
+PYBIND11_MODULE(DelphesPython, m)
+{
+  m.doc() = R"pbdoc(
+    Delphes Python plugin
+    ---------------------
+
+    A Python wrapper for the processing of events through the Delphes framework.
+  )pbdoc";
+
+  m.def("load", [](std::string libraryName) {
+    if(::dlopen(libraryName.data(), RTLD_LAZY | RTLD_GLOBAL) == nullptr)
+    {
+      std::ostringstream message;
+      message << "Failed to load library " << libraryName << ".";
+      if(const char *err = dlerror(); err != nullptr) message << "\n\t" << err;
+      throw std::runtime_error(message.str());
+    } }, "Load an external library into the runtime environment");
+
+  py::class_<PyDelphes>(m, "Delphes")
+    .def(py::init<>())
+    .def_property("reader", &PyDelphes::GetReader, &PyDelphes::SetReader, "Reader module used in event consumption")
+    .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
+  py::class_<DelphesReader>(m, "Reader")
+    .def(py::init([](std::string name, const py::kwargs &) { return DelphesReaderFactory::Get().Build(name); }));
+  py::class_<DelphesModule>(m, "Module")
+    .def(py::init([](std::string name, const py::kwargs &) { return DelphesProcessingModuleFactory::Get().Build(name); }));
+}
