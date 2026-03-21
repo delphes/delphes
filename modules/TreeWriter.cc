@@ -37,8 +37,6 @@
 
 #include <set>
 
-using namespace std;
-
 struct SortCandidates
 {
   bool operator()(const Candidate *lhs, const Candidate *rhs) const { return lhs->Compare(rhs); }
@@ -51,7 +49,6 @@ public:
   ~TreeWriter()
   {
     if(fTreeWriter) fTreeWriter->Write();
-    if(fOutputFile) fOutputFile->Close();
   }
 
   void Init() override;
@@ -133,7 +130,7 @@ void TreeWriter::Init()
   fClassMap[HectorHit::Class()] = &TreeWriter::ProcessHectorHit;
 
   TBranchMap::iterator itBranchMap;
-  map<TClass *, TProcessMethod>::iterator itClassMap;
+  std::map<TClass *, TProcessMethod>::iterator itClassMap;
 
   // read branch configuration and
   // import array with output from filter/classifier/jetfinder modules

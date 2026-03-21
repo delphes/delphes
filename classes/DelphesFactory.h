@@ -57,7 +57,7 @@ public:
   std::shared_ptr<T> Attach(std::string_view collectionName)
   {
     if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
-    return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]));
+    return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]), [](T *) {});
   }
   std::vector<std::string> GetCollections() const; ///< Retrieve the name of all collections booked
 
