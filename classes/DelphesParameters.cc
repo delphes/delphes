@@ -271,6 +271,13 @@ bool DelphesParameters::Has<std::vector<DelphesParameters> >(const std::string &
   return false;
 }
 
+void DelphesParameters::ThrowInvalidConversion(std::string_view keyName) const
+{
+  std::ostringstream message;
+  message << "Invalid conversion requested for key with name '" << keyName << "'.";
+  throw std::runtime_error(message.str());
+}
+
 std::ostream &operator<<(std::ostream &os, const DelphesParameters &params) { return os << params.fNode; }
 
 namespace YAML

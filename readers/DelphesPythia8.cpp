@@ -35,6 +35,7 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
+#include "classes/DelphesTCLConfReader.h"
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
@@ -248,7 +249,7 @@ int main(int argc, char *argv[])
 
   try
   {
-    const auto confReader = std::make_unique<ExRootConfReader>();
+    const auto confReader = std::make_unique<DelphesTCLConfReader>();
     confReader->ReadFile(argv[1]);
 
     const auto modularDelphes = std::make_unique<Delphes>("Delphes");

@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <TApplication.h>
 #include <TClonesArray.h>
 #include <TFile.h>
 #include <TROOT.h>
@@ -38,17 +37,14 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesStream.h"
+#include "classes/DelphesTCLConfReader.h"
 
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
-
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 
@@ -90,13 +86,9 @@ int main(int argc, char *argv[])
 
   gROOT->SetBatch();
 
-  int appargc = 1;
-  char *appargv[] = {appName};
-  TApplication app(appName, &appargc, appargv);
-
   try
   {
-    const auto confReader = std::make_unique<ExRootConfReader>();
+    const auto confReader = std::make_unique<DelphesTCLConfReader>();
     confReader->ReadFile(argv[1]);
 
     const auto modularDelphes = std::make_unique<Delphes>("Delphes");

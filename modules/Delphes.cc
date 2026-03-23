@@ -31,6 +31,7 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesReader.h"
+#include "classes/DelphesTCLConfReader.h"
 #include "classes/DelphesWriter.h"
 
 #include <ExRootAnalysis/ExRootConfReader.h>
@@ -47,7 +48,7 @@ Delphes::Delphes(const char *name) :
 
 //------------------------------------------------------------------------------
 
-void Delphes::Clear(Option_t * /*option*/)
+void Delphes::Clear()
 {
   if(fDelphesFactory) fDelphesFactory->Clear();
 }
@@ -58,35 +59,33 @@ void Delphes::Init()
 {
   if(!fReader)
     throw std::runtime_error("Failed to initialise the main Delphes module with no reader declared.");
+  if(!fConfReader)
+    throw std::runtime_error("Failed to initialise the main Delphes module with no user configuration reader declared.");
 
-  ExRootConfReader *confReader = GetConfReader();
+  //const ExRootConfReader::ExRootTaskMap *modules = confReader->GetModules();//FIXME
+  const auto userConfig = fConfReader->Parameters();
+  gRandom->SetSeed(userConfig.Get<int>("RandomSeed", 0));
 
-  const ExRootConfReader::ExRootTaskMap *modules = confReader->GetModules();
-
-  gRandom->SetSeed(confReader->GetInt("::RandomSeed", 0));
-
-  ExRootConfParam param = confReader->GetParam("::ExecutionPath");
-  for(int i = 0; i < param.GetSize(); ++i)
+  for(const std::string &moduleName : userConfig.Get<std::vector<std::string> >("ExecutionPath"))
   {
-    TString name = param[i].GetString(); // retrieve the module name
-    if(modules->count(name) == 0)
+    if(!userConfig.Has<DelphesParameters>(moduleName))
     {
       std::ostringstream message;
-      message << "module '" << name;
+      message << "module '" << moduleName;
       message << "' is specified in ExecutionPath but not configured.";
       throw std::runtime_error(message.str());
     }
-    const std::string &delphesModuleName = modules->at(name).Data();
-    std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(delphesModuleName);
-    moduleObject->SetName(name);
+    const DelphesParameters moduleParams = userConfig.Get<DelphesParameters>(moduleName);
+    const std::string moduleTypeFromParams = moduleParams.Get<std::string>("ModuleType", moduleName);
+    std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(moduleTypeFromParams, moduleParams);
+    moduleObject->SetName(moduleName);
     moduleObject->SetFactory(GetFactory());
-    moduleObject->SetConfReader(GetConfReader());
     if(moduleObject->IsWriter())
     {
       DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
       writerModule->SetOutputFile(GetOutputFile());
     }
-    fModules.emplace_back(std::make_pair(name, std::move(moduleObject)));
+    fModules.emplace_back(std::make_pair(moduleName, std::move(moduleObject)));
   }
 }
 

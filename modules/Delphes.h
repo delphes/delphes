@@ -30,6 +30,7 @@
 
 #include "classes/DelphesModule.h"
 
+class DelphesConfReader;
 class DelphesReader;
 
 class Delphes: public DelphesModule
@@ -40,6 +41,7 @@ public:
   void Init() override;
   DelphesFactory *GetFactory() const override;
 
+  void SetConfReader(DelphesConfReader *conf) { fConfReader = conf; }
   void SetReader(DelphesReader *reader);
   DelphesReader *GetReader() const { return fReader; }
 
@@ -50,10 +52,11 @@ public:
   void SetOutputFile(std::string_view outputFile) { fOutputFile = outputFile; }
   const std::string &GetOutputFile() const { return fOutputFile; }
 
-  void Clear(Option_t *option = "");
+  void Clear();
 
 private:
   std::unique_ptr<DelphesFactory> fDelphesFactory;
+  DelphesConfReader *fConfReader{nullptr};
   DelphesReader *fReader{nullptr};
 
   std::vector<std::pair<std::string, std::unique_ptr<DelphesModule> > > fModules;
