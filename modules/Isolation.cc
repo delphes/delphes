@@ -44,14 +44,14 @@ class IsolationClassifier: public ExRootClassifier
 public:
   IsolationClassifier() {}
 
-  Int_t GetCategory(TObject *object)
+  int GetCategory(TObject *object)
   {
     Candidate *track = static_cast<Candidate *>(object);
     if(const TLorentzVector &momentum = track->Momentum; momentum.Pt() < fPTMin) return -1;
     return 0;
   }
 
-  Double_t fPTMin;
+  double fPTMin;
 };
 
 //------------------------------------------------------------------------------
@@ -59,19 +59,40 @@ public:
 class Isolation: public DelphesModule
 {
 public:
-  Isolation() : fClassifier(std::make_unique<IsolationClassifier>()) {}
+  explicit Isolation(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fDeltaRMax(Steer<double>("DeltaRMax", 0.5)),
+    fPTRatioMax(Steer<double>("PTRatioMax", 0.1)),
+    fPTSumMax(Steer<double>("PTSumMax", 5.0)),
+    fDeltaRMin(Steer<double>("DeltaRMin", 0.01)),
+    fUsePTSum(Steer<bool>("UsePTSum", false)),
+    fUseRhoCorrection(Steer<bool>("UseRhoCorrection", true)),
+    fUseMiniCone(Steer<bool>("UseMiniCone", false)),
+    fClassifier(std::make_unique<IsolationClassifier>())
+  {
+    fClassifier->fPTMin = Steer<double>("PTMin", 0.5);
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fIsolationInputArray = ImportArray(Steer<std::string>("IsolationInputArray", "Delphes/partons"));
+    fCandidateInputArray = ImportArray(Steer<std::string>("CandidateInputArray", "Calorimeter/electrons"));
+    if(const std::string rhoInputArrayName = Steer<std::string>("RhoInputArray", ""); !rhoInputArrayName.empty())
+      fRhoInputArray = ImportArray(rhoInputArrayName);
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "electrons"));
+
+    fFilter = std::make_unique<DelphesFilter>(fIsolationInputArray);
+  }
   void Process() override;
 
 private:
-  Double_t fDeltaRMax;
-  Double_t fPTRatioMax;
-  Double_t fPTSumMax;
-  Double_t fDeltaRMin;
-  Bool_t fUsePTSum;
-  Bool_t fUseRhoCorrection;
-  Bool_t fUseMiniCone;
+  const double fDeltaRMax;
+  const double fPTRatioMax;
+  const double fPTSumMax;
+  const double fDeltaRMin;
+  const bool fUsePTSum;
+  const bool fUseRhoCorrection;
+  const bool fUseMiniCone;
 
   const std::unique_ptr<IsolationClassifier> fClassifier; //!
 
@@ -86,45 +107,16 @@ private:
 
 //------------------------------------------------------------------------------
 
-void Isolation::Init()
-{
-  const char *rhoInputArrayName;
-
-  fDeltaRMax = GetDouble("DeltaRMax", 0.5);
-  fPTRatioMax = GetDouble("PTRatioMax", 0.1);
-  fPTSumMax = GetDouble("PTSumMax", 5.0);
-  fUsePTSum = GetBool("UsePTSum", false);
-  fUseRhoCorrection = GetBool("UseRhoCorrection", true);
-  fDeltaRMin = GetDouble("DeltaRMin", 0.01);
-  fUseMiniCone = GetBool("UseMiniCone", false);
-  fClassifier->fPTMin = GetDouble("PTMin", 0.5);
-
-  // import input arrays
-  fIsolationInputArray = ImportArray(GetString("IsolationInputArray", "Delphes/partons"));
-  fFilter = std::make_unique<DelphesFilter>(fIsolationInputArray);
-
-  fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "Calorimeter/electrons"));
-
-  rhoInputArrayName = GetString("RhoInputArray", "");
-  if(rhoInputArrayName[0] != '\0')
-    fRhoInputArray = ImportArray(rhoInputArrayName);
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
-}
-
-//------------------------------------------------------------------------------
-
 void Isolation::Process()
 {
   fOutputArray->clear();
 
   CandidatesCollection isolationArray;
-  Double_t sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
-  Double_t sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
-  Bool_t pass = kFALSE;
-  Double_t eta = 0.0;
-  Double_t rho = 0.0;
+  double sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
+  double sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
+  bool pass = kFALSE;
+  double eta = 0.0;
+  double rho = 0.0;
 
   // select isolation objects
   fFilter->Reset();

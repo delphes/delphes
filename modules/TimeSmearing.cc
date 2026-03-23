@@ -37,14 +37,23 @@ using namespace std;
 class TimeSmearing: public DelphesModule
 {
 public:
-  TimeSmearing() : fResolutionFormula(std::make_unique<DelphesFormula>()) {}
+  explicit TimeSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fResolutionFormula(std::make_unique<DelphesFormula>())
+  {
+    // read time resolution formula in seconds
+    fResolutionFormula->Compile(Steer<std::string>("TimeResolution", "30e-12"));
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "MuonMomentumSmearing/muons"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks"));
+  }
   void Process() override;
 
 private:
   const std::unique_ptr<DelphesFormula> fResolutionFormula;
-  Int_t fVertexTimeMode;
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
@@ -52,43 +61,25 @@ private:
 
 //------------------------------------------------------------------------------
 
-void TimeSmearing::Init()
-{
-  // read time resolution formula in seconds
-  fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
-
-  // import track input array
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
 void TimeSmearing::Process()
 {
   fOutputArray->clear();
 
-  Double_t tf_smeared, tf;
-  Double_t eta, energy;
-  Double_t timeResolution;
-
-  const Double_t c_light = 2.99792458E8;
+  const double c_light = 2.99792458E8;
 
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-    tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
+    const double tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
-    eta = candidateMomentum.Eta();
-    energy = candidateMomentum.E();
+    const double eta = candidateMomentum.Eta();
+    const double energy = candidateMomentum.E();
 
     // apply smearing formula
-    timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
-    tf_smeared = gRandom->Gaus(tf, timeResolution);
+    const double timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
+    const double tf_smeared = gRandom->Gaus(tf, timeResolution);
 
     Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 

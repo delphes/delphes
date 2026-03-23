@@ -14,58 +14,50 @@
 
 #include <TLorentzVector.h>
 
-using namespace std;
-
 class VertexSorter: public DelphesModule
 {
 public:
-  VertexSorter() = default;
+  explicit VertexSorter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fMethod(Steer<std::string>("Method", "BTV")) {}
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "VertexFinder/vertices"));
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "VertexFinder/tracks"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "clusters"));
+    if(const std::string jetInputArray = Steer<std::string>("JetInputArray", ""); !jetInputArray.empty())
+      fJetInputArray = ImportArray(jetInputArray);
+
+    // import beamspot
+    try
+    {
+      fBeamSpotInputArray = ImportArray(Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+    }
+    catch(const std::runtime_error &e)
+    {
+    }
+  }
   void Process() override;
 
 private:
+  const std::string fMethod;
+
   CandidatesCollection fInputArray;
   CandidatesCollection fTrackInputArray;
   CandidatesCollection fJetInputArray;
   CandidatesCollection fBeamSpotInputArray;
-
   CandidatesCollection fOutputArray;
-
-  std::string fMethod;
 };
 
 //------------------------------------------------------------------------------
 
-void VertexSorter::Init()
-{
-  fInputArray = ImportArray(GetString("InputArray", "VertexFinder/vertices"));
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "VertexFinder/tracks"));
-  if(string(GetString("JetInputArray", "")) != "")
-    fJetInputArray = ImportArray(GetString("JetInputArray", ""));
-
-  // import beamspot
-  try
-  {
-    fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-  }
-  catch(runtime_error &e)
-  {
-  }
-
-  fOutputArray = ExportArray(GetString("OutputArray", "clusters"));
-
-  fMethod = GetString("Method", "BTV");
-}
-
-//------------------------------------------------------------------------------
-
-static Bool_t secondDescending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
+static bool secondDescending(std::pair<unsigned int, double> pair0, std::pair<unsigned int, double> pair1)
 {
   return (pair0.second > pair1.second);
 }
 
-static Bool_t secondAscending(pair<UInt_t, Double_t> pair0, pair<UInt_t, Double_t> pair1)
+static bool secondAscending(std::pair<unsigned int, double> pair0, std::pair<unsigned int, double> pair1)
 {
   return (pair0.second < pair1.second);
 }
@@ -77,12 +69,12 @@ void VertexSorter::Process()
   fOutputArray->clear();
 
   Candidate *beamSpotCandidate = nullptr;
-  map<Int_t, UInt_t> clusterIDToIndex;
-  map<Int_t, UInt_t>::const_iterator itClusterIDToIndex;
-  map<Int_t, Double_t> clusterIDToSumPT2;
-  map<Int_t, Double_t>::const_iterator itClusterIDToSumPT2;
-  vector<pair<Int_t, Double_t> > sortedClusterIDs;
-  vector<pair<Int_t, Double_t> >::const_iterator itSortedClusterIDs;
+  std::map<int, unsigned int> clusterIDToIndex;
+  std::map<int, unsigned int>::const_iterator itClusterIDToIndex;
+  std::map<int, double> clusterIDToSumPT2;
+  std::map<int, double>::const_iterator itClusterIDToSumPT2;
+  std::vector<std::pair<int, double> > sortedClusterIDs;
+  std::vector<std::pair<int, double> >::const_iterator itSortedClusterIDs;
 
   for(size_t iCluster = 0; iCluster < fInputArray->size(); iCluster++)
   {
@@ -95,7 +87,7 @@ void VertexSorter::Process()
   {
     if(fJetInputArray->empty())
     {
-      cout << "BTV PV sorting selected, but no jet collection given!" << endl;
+      std::cout << "BTV PV sorting selected, but no jet collection given!" << std::endl;
       throw 0;
     }
 
@@ -106,7 +98,7 @@ void VertexSorter::Process()
       if(candidate->ClusterIndex < 0)
         continue;
       TLorentzVector p(candidate->Momentum.Px(), candidate->Momentum.Py(), candidate->Momentum.Pz(), candidate->Momentum.E());
-      Bool_t isInJet = false;
+      bool isInJet = false;
 
       for(Candidate *const &jetCandidate : *fJetInputArray)
       {
@@ -126,14 +118,14 @@ void VertexSorter::Process()
     }
 
     for(itClusterIDToSumPT2 = clusterIDToSumPT2.begin(); itClusterIDToSumPT2 != clusterIDToSumPT2.end(); ++itClusterIDToSumPT2)
-      sortedClusterIDs.push_back(make_pair(itClusterIDToSumPT2->first, itClusterIDToSumPT2->second));
+      sortedClusterIDs.push_back(std::make_pair(itClusterIDToSumPT2->first, itClusterIDToSumPT2->second));
     sort(sortedClusterIDs.begin(), sortedClusterIDs.end(), secondDescending);
   }
   else if(fMethod == "GenClosest")
   {
     if(fBeamSpotInputArray->empty())
     {
-      cout << "Beamspot collection is empty!" << endl;
+      std::cout << "Beamspot collection is empty!" << std::endl;
       throw 0;
     }
 
@@ -141,7 +133,7 @@ void VertexSorter::Process()
     for(size_t iCluster = 0; iCluster < fInputArray->size(); iCluster++)
     {
       const Candidate &cluster = *((Candidate *)fInputArray->at(iCluster));
-      sortedClusterIDs.push_back(make_pair(cluster.ClusterIndex, fabs(cluster.Position.Z() - beamSpotCandidate->Position.Z())));
+      sortedClusterIDs.push_back(std::make_pair(cluster.ClusterIndex, fabs(cluster.Position.Z() - beamSpotCandidate->Position.Z())));
     }
     sort(sortedClusterIDs.begin(), sortedClusterIDs.end(), secondAscending);
   }
@@ -160,16 +152,16 @@ void VertexSorter::Process()
     }
 
     for(itClusterIDToSumPT2 = clusterIDToSumPT2.begin(); itClusterIDToSumPT2 != clusterIDToSumPT2.end(); ++itClusterIDToSumPT2)
-      sortedClusterIDs.push_back(make_pair(itClusterIDToSumPT2->first, itClusterIDToSumPT2->second));
+      sortedClusterIDs.push_back(std::make_pair(itClusterIDToSumPT2->first, itClusterIDToSumPT2->second));
     sort(sortedClusterIDs.begin(), sortedClusterIDs.end(), secondDescending);
   }
   else
   {
-    cout << "\"" << fMethod << "\" is not a valid sorting method!" << endl;
-    cout << "Valid methods are:" << endl;
-    cout << "  BTV" << endl;
-    cout << "  GenClosest" << endl;
-    cout << "  GenBest" << endl;
+    std::cout << "\"" << fMethod << "\" is not a valid sorting method!" << std::endl;
+    std::cout << "Valid methods are:" << std::endl;
+    std::cout << "  BTV" << std::endl;
+    std::cout << "  GenClosest" << std::endl;
+    std::cout << "  GenBest" << std::endl;
     throw 0;
   }
   for(itSortedClusterIDs = sortedClusterIDs.begin(); itSortedClusterIDs != sortedClusterIDs.end(); ++itSortedClusterIDs)

@@ -50,7 +50,8 @@
 
 using namespace std;
 
-DelphesHepMC3Reader::DelphesHepMC3Reader() :
+DelphesHepMC3Reader::DelphesHepMC3Reader(const DelphesParameters &readerParams) :
+  DelphesReader(readerParams),
   fPDG(TDatabasePDG::Instance()), fVertexCounter(-2), fParticleCounter(-1) {}
 
 //---------------------------------------------------------------------------

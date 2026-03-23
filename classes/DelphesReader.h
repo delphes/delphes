@@ -41,7 +41,7 @@ class ExRootTreeBranch;
 class DelphesReader
 {
 public:
-  DelphesReader() = default;
+  explicit DelphesReader(const DelphesParameters & = DelphesParameters{}) {}
   virtual ~DelphesReader();
 
   virtual void SetFactory(DelphesFactory *factory);

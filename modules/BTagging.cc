@@ -37,13 +37,33 @@
 class BTagging: public DelphesModule
 {
 public:
-  BTagging() = default;
+  explicit BTagging(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fBitNumber(Steer<int>("BitNumber", 0))
+  {
+    for(const std::pair<int, std::string> &efficiencyFormula :
+      Steer<std::vector<std::pair<int, std::string> > >("EfficiencyFormula", {}))
+    {
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile(efficiencyFormula.second);
+      fEfficiencyMap[efficiencyFormula.first] = std::move(formula);
+    }
+    if(fEfficiencyMap.count(0) == 0)
+    { // set default efficiency formula
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile("0.0");
+      fEfficiencyMap[0] = std::move(formula);
+    }
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+  }
   void Process() override;
 
 private:
-  Int_t fBitNumber;
+  const Int_t fBitNumber;
 
 #if !defined(__CINT__) && !defined(__CLING__)
   std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
@@ -53,44 +73,6 @@ private:
 };
 
 using namespace std;
-
-//------------------------------------------------------------------------------
-
-void BTagging::Init()
-{
-  std::map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
-  ExRootConfParam param;
-  Int_t i, size;
-
-  fBitNumber = GetInt("BitNumber", 0);
-
-  // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
-
-  fEfficiencyMap.clear();
-  for(i = 0; i < size / 2; ++i)
-  {
-    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
-    formula->Compile(param[i * 2 + 1].GetString());
-
-    fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
-  }
-
-  // set default efficiency formula
-  itEfficiencyMap = fEfficiencyMap.find(0);
-  if(itEfficiencyMap == fEfficiencyMap.end())
-  {
-    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
-    formula->Compile("0.0");
-
-    fEfficiencyMap[0] = std::move(formula);
-  }
-
-  // import input array(s)
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-}
 
 //------------------------------------------------------------------------------
 

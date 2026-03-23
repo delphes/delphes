@@ -50,7 +50,8 @@ static const int kBufferSize = 16384;
 
 //---------------------------------------------------------------------------
 
-DelphesLHEFReader::DelphesLHEFReader() :
+DelphesLHEFReader::DelphesLHEFReader(const DelphesParameters &readerParams) :
+  DelphesReader(readerParams),
   fPDG(TDatabasePDG::Instance()),
   fEventReady(kFALSE), fEventCounter(-1), fParticleCounter(-1), fCrossSection(1) {}
 

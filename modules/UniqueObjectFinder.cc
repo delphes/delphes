@@ -29,44 +29,34 @@
 
 #include <vector>
 
-using namespace std;
-
 class UniqueObjectFinder: public DelphesModule
 {
 public:
-  UniqueObjectFinder() = default;
+  explicit UniqueObjectFinder(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fUseUniqueID(Steer<bool>("UseUniqueID", false)) // use GetUniqueID algorithm to find unique objects (faster than the default Overlaps method)
+  {
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    // import arrays with output from other modules
+    for(const std::pair<std::string, std::string> &collectionsLabel :
+      Steer<std::vector<std::pair<std::string, std::string> > >("InputArray"))
+      fInputMap.emplace_back(std::make_pair(
+        ImportArray(collectionsLabel.first),
+        ExportArray(collectionsLabel.second)));
+  }
   void Process() override;
 
 private:
-  Bool_t fUseUniqueID;
-
   using InputMap = std::vector<std::pair<CandidatesCollection, CandidatesCollection> >;
+  bool Unique(Candidate *candidate, InputMap::const_iterator itInputMap);
 
-  Bool_t Unique(Candidate *candidate, InputMap::const_iterator itInputMap);
+  const bool fUseUniqueID;
 
   InputMap fInputMap; //!
 };
-
-//------------------------------------------------------------------------------
-
-void UniqueObjectFinder::Init()
-{
-  // use GetUniqueID algorithm to find unique objects (faster than the default Overlaps method)
-  fUseUniqueID = GetBool("UseUniqueID", false);
-
-  // import arrays with output from other modules
-
-  ExRootConfParam param = GetParam("InputArray");
-  Long_t i, size;
-
-  fInputMap.clear();
-
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
-    fInputMap.emplace_back(std::make_pair(ImportArray(param[i * 2].GetString()), ExportArray(param[i * 2 + 1].GetString())));
-}
 
 //------------------------------------------------------------------------------
 
@@ -87,21 +77,19 @@ void UniqueObjectFinder::Process()
 
 //------------------------------------------------------------------------------
 
-Bool_t UniqueObjectFinder::Unique(Candidate *candidate, InputMap::const_iterator itInputMap)
+bool UniqueObjectFinder::Unique(Candidate *candidate, InputMap::const_iterator itInputMap)
 {
   for(auto previousItInputMap = fInputMap.cbegin(); previousItInputMap != itInputMap; ++previousItInputMap)
   { // loop over previous arrays
     for(Candidate *const &previousCandidate : *(previousItInputMap->second)) // loop over all candidates
       if(fUseUniqueID)
       {
-        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID()) return kFALSE;
+        if(candidate->GetUniqueID() == previousCandidate->GetUniqueID()) return false;
       }
-      else
-      {
-        if(candidate->Overlaps(previousCandidate)) return kFALSE;
-      }
+      else if(candidate->Overlaps(previousCandidate))
+        return false;
   }
-  return kTRUE;
+  return true;
 }
 
 //------------------------------------------------------------------------------

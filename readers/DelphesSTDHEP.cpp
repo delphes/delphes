@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetOutputFile(argv[2]);
 
-    const auto reader = std::make_unique<DelphesSTDHEPReader>();
+    const auto reader = std::make_unique<DelphesSTDHEPReader>(DelphesParameters{});
     reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
     reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
 

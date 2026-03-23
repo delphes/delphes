@@ -36,9 +36,19 @@ using namespace std;
 class ImpactParameterSmearing: public DelphesModule
 {
 public:
-  ImpactParameterSmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
+  explicit ImpactParameterSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormula->Compile(Steer<std::string>("ResolutionFormula", "0.0"));
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "TrackMerger/tracks"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks"));
+  }
   void Process() override;
 
 private:
@@ -50,26 +60,9 @@ private:
 
 //------------------------------------------------------------------------------
 
-void ImpactParameterSmearing::Init()
-{
-  // read resolution formula
-  fFormula->Compile(GetString("ResolutionFormula", "0.0"));
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
 void ImpactParameterSmearing::Process()
 {
   fOutputArray->clear();
-
-  Double_t xd, yd, zd, d0, sx, sy, sz, dd0;
-  Double_t pt, eta, px, py, phi, e;
 
   for(Candidate *const &candidate : *fInputArray)
   {
@@ -78,32 +71,29 @@ void ImpactParameterSmearing::Process()
 
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
-    eta = candidateMomentum.Eta();
-    pt = candidateMomentum.Pt();
-    phi = candidateMomentum.Phi();
-    e = candidateMomentum.E();
+    const double pt = candidateMomentum.Pt();
+    const double eta = candidateMomentum.Eta();
+    const double phi = candidateMomentum.Phi();
+    const double e = candidateMomentum.E();
 
-    px = candidateMomentum.Px();
-    py = candidateMomentum.Py();
+    const double px = candidateMomentum.Px();
+    const double py = candidateMomentum.Py();
 
     // calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
-    xd = candidate->Xd;
-    yd = candidate->Yd;
-    zd = candidate->Zd;
+    double xd = candidate->Xd, yd = candidate->Yd, zd = candidate->Zd;
 
     // calculate smeared values
-    sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
-    sy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
-    sz = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    const double sx = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    const double sy = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    const double sz = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     xd += sx;
     yd += sy;
     zd += sz;
 
     // calculate impact parameter (after-smearing)
-    d0 = (xd * py - yd * px) / pt;
-
-    dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
+    const double d0 = (xd * py - yd * px) / pt;
+    const double dd0 = gRandom->Gaus(0.0, fFormula->Eval(pt, eta, phi, e));
 
     // fill smeared values in candidate
     Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());

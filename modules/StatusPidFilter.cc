@@ -33,15 +33,23 @@ using namespace std;
 class StatusPidFilter: public DelphesModule
 {
 public:
-  StatusPidFilter() = default;
+  explicit StatusPidFilter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPTMin(Steer<double>("PTMin", 0.5)), // PT threshold
+    fRequireNotPileup(Steer<bool>("RequireNotPileup", false)) // keep or remove pileup particles
+  {
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "filteredParticles"));
+  }
   void Process() override;
 
 private:
-  Double_t fPTMin; //!
-
-  Bool_t fRequireNotPileup; //!
+  const double fPTMin; //!
+  const bool fRequireNotPileup; //!
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
@@ -130,55 +138,35 @@ bool isWDaughter(int M1, const CandidatesCollection &fInputArray)
 
 //------------------------------------------------------------------------------
 
-void StatusPidFilter::Init()
-{
-  // PT threshold
-  fPTMin = GetDouble("PTMin", 0.5);
-
-  // keep or remove pileup particles
-  fRequireNotPileup = GetBool("RequireNotPileup", false);
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
-}
-
-//------------------------------------------------------------------------------
-
 void StatusPidFilter::Process()
 {
   fOutputArray->clear();
 
-  Int_t status, pdgCode;
-  Bool_t pass;
-
   for(Candidate *const &candidate : *fInputArray)
   {
-    status = candidate->Status;
-    pdgCode = std::abs(candidate->PID);
+    const int status = candidate->Status;
+    const int pdgCode = std::abs(candidate->PID);
 
-    pass = kFALSE;
+    bool pass = false;
 
     // Store all SUSY particles
-    if(pdgCode >= 1000001 && pdgCode <= 1000039) pass = kTRUE;
+    if(pdgCode >= 1000001 && pdgCode <= 1000039) pass = true;
 
     // hard scattering particles (first condition for Py6, second for Py8)
-    if(status == 3) pass = kTRUE;
-    if(status > 20 && status < 30) pass = kTRUE;
+    if(status == 3) pass = true;
+    if(status > 20 && status < 30) pass = true;
 
     // electrons, muons, taus and neutrinos
-    if(pdgCode > 10 && pdgCode < 17) pass = kTRUE;
+    if(pdgCode > 10 && pdgCode < 17) pass = true;
 
     // heavy quarks
-    if(pdgCode == 4 || pdgCode == 5 || pdgCode == 6) pass = kTRUE;
+    if(pdgCode == 4 || pdgCode == 5 || pdgCode == 6) pass = true;
 
     // Gauge bosons and other fundamental bosons
-    if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
+    if(pdgCode > 22 && pdgCode < 43) pass = true;
 
     //Stable photons
-    if(pdgCode == 22 && status == 1) pass = kTRUE;
+    if(pdgCode == 22 && status == 1) pass = true;
 
     // logic ported from HepPDF: http://lcgapp.cern.ch/project/simu/HepPDT/HepPDT.2.05.02/html/ParticleID_8cc-source.html#l00081
     bool is_b_hadron = hasBottom(pdgCode);
@@ -187,14 +175,14 @@ void StatusPidFilter::Process()
     bool is_tau_daughter = isTauDaughter(pdgCode, candidate->M1, fInputArray);
 
     if(is_b_hadron)
-      pass = kTRUE;
+      pass = true;
 
     if(is_tau_daughter)
-      pass = kTRUE;
+      pass = true;
 
     bool is_W_daughter = isWDaughter(candidate->M1, fInputArray);
     if(is_W_daughter)
-      pass = kTRUE;
+      pass = true;
 
     // fPTMin not applied to b_hadrons / b_quarks to allow for b-enriched sample stitching
     // fPTMin not applied to tau decay products to allow visible-tau four momentum determination

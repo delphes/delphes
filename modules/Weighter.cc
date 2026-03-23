@@ -30,21 +30,45 @@
 
 #include <set>
 
-using namespace std;
-
 class Weighter: public DelphesModule
 {
 public:
-  Weighter() = default;
+  explicit Weighter(const DelphesParameters &moduleParams) : DelphesModule(moduleParams)
+  {
+    for(const std::pair<std::vector<int>, double> &weightValue :
+      Steer<std::vector<std::pair<std::vector<int>, double> > >("Weight"))
+    {
+      if(const size_t sizeCodes = weightValue.first.size(); sizeCodes < 1 || sizeCodes > 4)
+        throw std::runtime_error("only 1, 2, 3 or 4 PDG codes can be specified per weight");
+      TIndexStruct index;
+      std::memset(index.codes, 0, 4 * sizeof(int));
+      size_t j = 0;
+      for(const int &code : weightValue.first)
+      {
+        index.codes[j++] = code;
+        fWeightSet.insert(code);
+      }
+      std::sort(index.codes, index.codes + 4);
+      fWeightMap[index] = weightValue.second;
+    }
 
-  void Init() override;
+    TIndexStruct index;
+    std::memset(index.codes, 0, 4 * sizeof(int));
+    fWeightMap[index] = 1.0;
+  }
+
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "weight"));
+  }
   void Process() override;
 
 private:
 #if !defined(__CINT__) && !defined(__CLING__)
   struct TIndexStruct
   {
-    Int_t codes[4];
+    int codes[4];
     bool operator<(const TIndexStruct &value) const
     {
       for(size_t i = 0; i < 4; ++i)
@@ -53,8 +77,8 @@ private:
     }
   };
 
-  std::set<Int_t> fWeightSet, fCodeSet;
-  std::map<TIndexStruct, Double_t> fWeightMap;
+  std::set<int> fWeightSet, fCodeSet;
+  std::map<TIndexStruct, double> fWeightMap;
 #endif
 
   CandidatesCollection fInputArray; //!
@@ -63,67 +87,9 @@ private:
 
 //------------------------------------------------------------------------------
 
-void Weighter::Init()
-{
-  ExRootConfParam param, paramCodes;
-  Int_t i, j, size, sizeCodes;
-  Int_t code;
-  TIndexStruct index;
-  Double_t weight;
-
-  fWeightSet.clear();
-
-  // set default weight value
-  fWeightMap.clear();
-  memset(index.codes, 0, 4 * sizeof(Int_t));
-  fWeightMap[index] = 1.0;
-
-  // read weights
-  param = GetParam("Weight");
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
-  {
-    paramCodes = param[i * 2];
-    sizeCodes = paramCodes.GetSize();
-    weight = param[i * 2 + 1].GetDouble();
-
-    if(sizeCodes < 1 || sizeCodes > 4)
-    {
-      throw runtime_error("only 1, 2, 3 or 4 PDG codes can be specified per weight");
-    }
-
-    memset(index.codes, 0, 4 * sizeof(Int_t));
-
-    for(j = 0; j < sizeCodes; ++j)
-    {
-      code = paramCodes[j].GetInt();
-      index.codes[j] = code;
-      fWeightSet.insert(code);
-    }
-
-    sort(index.codes, index.codes + 4);
-
-    fWeightMap[index] = weight;
-  }
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "weight"));
-}
-
-//------------------------------------------------------------------------------
-
 void Weighter::Process()
 {
   fOutputArray->clear();
-
-  Int_t i;
-  TIndexStruct index;
-  Double_t weight;
-  set<Int_t>::iterator itCodeSet;
-  map<TIndexStruct, Double_t>::iterator itWeightMap;
 
   DelphesFactory *factory = GetFactory();
 
@@ -132,33 +98,25 @@ void Weighter::Process()
   for(Candidate *const &candidate : *fInputArray)
   {
     if(candidate->Status != 3) continue;
-
     if(fWeightSet.find(candidate->PID) == fWeightSet.end()) continue;
 
     fCodeSet.insert(candidate->PID);
   }
 
   // find default weight value
-  memset(index.codes, 0, 4 * sizeof(Int_t));
-  itWeightMap = fWeightMap.find(index);
-  weight = itWeightMap->second;
+  TIndexStruct index;
+  std::memset(index.codes, 0, 4 * sizeof(int));
+  double weight = fWeightMap.at(index);
 
   if(fCodeSet.size() <= 4)
   {
-    i = 0;
-    for(itCodeSet = fCodeSet.begin(); itCodeSet != fCodeSet.end(); ++itCodeSet)
-    {
-      index.codes[i] = *itCodeSet;
-      ++i;
-    }
+    size_t i = 0;
+    for(const int &codeSet : fCodeSet)
+      index.codes[i++] = codeSet;
 
-    sort(index.codes, index.codes + 4);
-
-    itWeightMap = fWeightMap.find(index);
-    if(itWeightMap != fWeightMap.end())
-    {
-      weight = itWeightMap->second;
-    }
+    std::sort(index.codes, index.codes + 4);
+    if(fWeightMap.count(index) > 0)
+      weight = fWeightMap.at(index);
   }
 
   Candidate *candidate = factory->NewCandidate();

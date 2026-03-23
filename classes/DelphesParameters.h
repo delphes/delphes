@@ -142,6 +142,13 @@ struct convert<std::unordered_map<size_t, size_t> >
   static Node encode(const std::unordered_map<size_t, size_t> &);
   static bool decode(const Node &, std::unordered_map<size_t, size_t> &);
 };
+/// conversion rules between a YAML node and an unordered map of strings
+template <>
+struct convert<std::unordered_map<size_t, std::string> >
+{
+  static Node encode(const std::unordered_map<size_t, std::string> &);
+  static bool decode(const Node &, std::unordered_map<size_t, std::string> &);
+};
 /// conversion rules between a YAML node and an unordered map of integers
 template <>
 struct convert<DelphesParameters>

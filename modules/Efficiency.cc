@@ -36,50 +36,42 @@ using namespace std;
 class Efficiency: public DelphesModule
 {
 public:
-  Efficiency() : fFormula(std::make_unique<DelphesFormula>()) {}
+  explicit Efficiency(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fUseMomentumVector(Steer<bool>("UseMomentumVector", false)), // switch to compute efficiency based on momentum vector eta, phi
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read efficiency formula
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0"));
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles")); // create output array
+  }
   void Process() override;
 
 private:
+  const Double_t fUseMomentumVector; //!
+
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
-
-  Double_t fUseMomentumVector; //!
 };
-
-//------------------------------------------------------------------------------
-
-void Efficiency::Init()
-{
-  // read efficiency formula
-  fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // switch to compute efficiency based on momentum vector eta, phi
-  fUseMomentumVector = GetBool("UseMomentumVector", false);
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
 
 //------------------------------------------------------------------------------
 
 void Efficiency::Process()
 {
   fOutputArray->clear();
-  Double_t pt, eta, phi, e;
-
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
+    double eta = candidatePosition.Eta();
+    double phi = candidatePosition.Phi();
 
     if(fUseMomentumVector)
     {
@@ -87,8 +79,8 @@ void Efficiency::Process()
       phi = candidateMomentum.Phi();
     }
 
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
+    const double pt = candidateMomentum.Pt();
+    const double e = candidateMomentum.E();
 
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, candidate)) continue;

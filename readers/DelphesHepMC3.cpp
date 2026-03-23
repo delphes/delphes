@@ -30,8 +30,9 @@
 #include "classes/DelphesHepMC3Reader.h"
 #include "modules/Delphes.h"
 
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
+#include <ExRootAnalysis/ExRootProgressBar.h>
+#include <ExRootAnalysis/ExRootTreeBranch.h>
+#include <ExRootAnalysis/ExRootTreeWriter.h>
 
 using namespace std;
 
@@ -78,7 +79,7 @@ int main(int argc, char *argv[])
     modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetOutputFile(argv[2]);
 
-    const auto reader = std::make_unique<DelphesHepMC3Reader>();
+    const auto reader = std::make_unique<DelphesHepMC3Reader>(DelphesParameters{});
     reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
     reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
 

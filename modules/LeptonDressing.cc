@@ -27,18 +27,23 @@
 
 #include <TLorentzVector.h>
 
-using namespace std;
-
 class LeptonDressing: public DelphesModule
 {
 public:
-  LeptonDressing() = default;
+  explicit LeptonDressing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fDeltaR(Steer<double>("DeltaRMax", 0.4)) {}
 
-  void Init() override;
+  void Init() override
+  {
+    fDressingInputArray = ImportArray(Steer<std::string>("DressingInputArray", "Calorimeter/photons"));
+    fCandidateInputArray = ImportArray(Steer<std::string>("CandidateInputArray", "UniqueObjectFinder/electrons"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "electrons"));
+  }
   void Process() override;
 
 private:
-  Double_t fDeltaR;
+  const double fDeltaR;
 
   CandidatesCollection fDressingInputArray; //!
   CandidatesCollection fCandidateInputArray; //!
@@ -48,25 +53,9 @@ private:
 
 //------------------------------------------------------------------------------
 
-void LeptonDressing::Init()
-{
-  fDeltaR = GetDouble("DeltaRMax", 0.4);
-
-  // import input arrays
-  fDressingInputArray = ImportArray(GetString("DressingInputArray", "Calorimeter/photons"));
-  fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "UniqueObjectFinder/electrons"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
-}
-
-//------------------------------------------------------------------------------
-
 void LeptonDressing::Process()
 {
   fOutputArray->clear();
-
-  TLorentzVector momentum;
 
   // loop over all input candidate
   for(Candidate *const &candidate : *fCandidateInputArray)
@@ -74,17 +63,12 @@ void LeptonDressing::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
     // loop over all input tracks
-    momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
+    TLorentzVector momentum;
     for(Candidate *const &dressing : *fDressingInputArray)
     {
       const TLorentzVector &dressingMomentum = dressing->Momentum;
-      if(dressingMomentum.Pt() > 0.1)
-      {
-        if(candidateMomentum.DeltaR(dressingMomentum) <= fDeltaR)
-        {
-          momentum += dressingMomentum;
-        }
-      }
+      if(dressingMomentum.Pt() > 0.1 && candidateMomentum.DeltaR(dressingMomentum) <= fDeltaR)
+        momentum += dressingMomentum;
     }
 
     Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());

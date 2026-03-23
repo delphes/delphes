@@ -30,18 +30,24 @@
 
 #include <TLorentzVector.h>
 
-using namespace std;
-
 class TruthVertexFinder: public DelphesModule
 {
 public:
-  TruthVertexFinder() = default;
+  explicit TruthVertexFinder(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fResolution(Steer<double>("Resolution", 1E-06)) // resolution in meters
+  {
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/stableParticles"));
+    fVertexOutputArray = ExportArray(Steer<std::string>("VertexOutputArray", "vertices"));
+  }
   void Process() override;
 
 private:
-  Double_t fResolution; //!
+  const double fResolution; //!
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fVertexOutputArray; //!
@@ -49,41 +55,22 @@ private:
 
 //------------------------------------------------------------------------------
 
-void TruthVertexFinder::Init()
-{
-  fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-
-  // create output array
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-}
-
-//------------------------------------------------------------------------------
-
 void TruthVertexFinder::Process()
 {
   fVertexOutputArray->clear();
 
-  Int_t nvtx = -1;
-  Float_t pt;
-  DelphesFactory *factory = nullptr;
+  DelphesFactory *factory = GetFactory();
 
-  factory = GetFactory();
-
-  TLorentzVector vertexPosition(0., 0., 0., 0.);
-
-  nvtx = 0;
+  int nvtx = 0;
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-    pt = candidateMomentum.Pt();
+    const double pt = candidateMomentum.Pt();
 
     // check whether vertex already included, if so add particle
-    Bool_t old_vertex = false;
+    bool old_vertex = false;
     for(Candidate *const &vertex : *fVertexOutputArray)
     {
       const TLorentzVector &vertexPosition = vertex->Position;

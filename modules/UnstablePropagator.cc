@@ -35,65 +35,58 @@ using namespace std;
 class UnstablePropagator: public DelphesModule
 {
 public:
-  UnstablePropagator() = default;
+  explicit UnstablePropagator(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fRadius(Steer<double>("Radius", 1.0)),
+    fRadius2(fRadius * fRadius),
+    fHalfLength(Steer<double>("HalfLength", 3.0)),
+    fBz(Steer<double>("Bz", 0.0)),
+    fLmin(Steer<double>("Lmin", 1.0E-03)),
+    fRadiusMax(Steer<double>("RadiusMax", fRadius)),
+    fHalfLengthMax(Steer<double>("HalfLengthMax", fHalfLength)),
+    fDebug(Steer<bool>("Debug"))
+  {
+    if(fRadius < 1.0E-2)
+      throw std::runtime_error("ERROR: magnetic field radius is too low");
+    if(fHalfLength < 1.0E-2)
+      throw std::runtime_error("ERROR: magnetic field length is too low");
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles")); // import array with output from filter/classifier module
+  }
   void Process() override;
 
 private:
-  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
-  Double_t fBz;
-  Double_t fLmin; // minimum
-
-  Bool_t fDebug;
-
-  CandidatesCollection fInputArray; //!
-
-  std::vector<Int_t> DaughterIndices(Candidate *candidate);
+  std::vector<int> DaughterIndices(Candidate *candidate);
   void PrintPart(TString prefix, Candidate *candidate);
-  Double_t FlightDistance(Candidate *mother, Candidate *daughter);
-  Int_t Index(Candidate *candidate);
+  double FlightDistance(Candidate *mother, Candidate *daughter);
+  int Index(Candidate *candidate);
   void ComputeChainFlightDistances(TString prefix, Candidate *candidate);
   void PropagateAndUpdateChain(TString prefix, Candidate *candidate);
   TLorentzVector PropagatedPosition(Candidate *candidate);
+
+  const double fRadius;
+  const double fRadius2;
+  const double fHalfLength;
+  const double fBz;
+  const double fLmin; // minimum
+  const double fRadiusMax;
+  const double fHalfLengthMax;
+
+  const bool fDebug;
+
+  CandidatesCollection fInputArray; //!
 };
-
-//------------------------------------------------------------------------------
-
-void UnstablePropagator::Init()
-{
-  fRadius = GetDouble("Radius", 1.0);
-  fRadius2 = fRadius * fRadius;
-  fHalfLength = GetDouble("HalfLength", 3.0);
-  fBz = GetDouble("Bz", 0.0);
-  fLmin = GetDouble("Lmin", 1.0E-03);
-
-  fDebug = false;
-  if(fRadius < 1.0E-2)
-  {
-    cout << "ERROR: magnetic field radius is too low\n";
-    return;
-  }
-  if(fHalfLength < 1.0E-2)
-  {
-    cout << "ERROR: magnetic field length is too low\n";
-    return;
-  }
-
-  fRadiusMax = GetDouble("RadiusMax", fRadius);
-  fHalfLengthMax = GetDouble("HalfLengthMax", fHalfLength);
-  // import array with output from filter/classifier module
-
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-}
 
 //------------------------------------------------------------------------------
 
 void UnstablePropagator::Process()
 {
   TLorentzVector particlePosition, particleMomentum;
-  Double_t pt2, q;
-  Double_t lof, x, y, z;
+  double pt2, q;
+  double lof, x, y, z;
 
   if(fDebug) cout << "-------------   new event -----------------" << endl;
 
@@ -132,7 +125,7 @@ void UnstablePropagator::Process()
       continue;
     }
 
-    std::vector<Int_t> daughters_indices = DaughterIndices(candidate);
+    std::vector<int> daughters_indices = DaughterIndices(candidate);
 
     if(daughters_indices.size() == 0)
     {
@@ -157,15 +150,15 @@ void UnstablePropagator::Process()
 
 //------------------------------------------------------------------------------
 
-std::vector<Int_t> UnstablePropagator::DaughterIndices(Candidate *candidate)
+std::vector<int> UnstablePropagator::DaughterIndices(Candidate *candidate)
 {
-  std::vector<Int_t> indices;
+  std::vector<int> indices;
 
-  Int_t d1 = candidate->D1;
-  Int_t d2 = candidate->D2;
+  int d1 = candidate->D1;
+  int d2 = candidate->D2;
 
-  Int_t maxd = max(d1, d2);
-  Int_t mind = min(d1, d2);
+  int maxd = max(d1, d2);
+  int mind = min(d1, d2);
 
   if(maxd < 0)
   {
@@ -182,7 +175,7 @@ std::vector<Int_t> UnstablePropagator::DaughterIndices(Candidate *candidate)
   }
   else
   {
-    for(Int_t i = d1; i <= d2; ++i)
+    for(int i = d1; i <= d2; ++i)
     {
       indices.push_back(i);
     }
@@ -193,7 +186,7 @@ std::vector<Int_t> UnstablePropagator::DaughterIndices(Candidate *candidate)
 //------------------------------------------------------------------------------
 
 // returns flight distance in mm
-Double_t UnstablePropagator::FlightDistance(Candidate *mother, Candidate *daughter)
+double UnstablePropagator::FlightDistance(Candidate *mother, Candidate *daughter)
 {
   TVector3 vector = mother->Position.Vect() - daughter->Position.Vect();
   return vector.Mag();
@@ -205,7 +198,7 @@ void UnstablePropagator::ComputeChainFlightDistances(TString prefix, Candidate *
 {
   Candidate *daughter = nullptr, *mother = nullptr;
   mother = candidate;
-  std::vector<Int_t> drange = DaughterIndices(mother);
+  std::vector<int> drange = DaughterIndices(mother);
 
   if(fDebug) cout << prefix << " computing chain flight distances" << endl;
   if(fDebug) PrintPart(prefix, mother);
@@ -236,7 +229,7 @@ void UnstablePropagator::PropagateAndUpdateChain(TString prefix, Candidate *cand
   Candidate *daughter = nullptr, *mother = nullptr;
   TLorentzVector updatedPosition;
   mother = candidate;
-  std::vector<Int_t> drange = DaughterIndices(mother);
+  std::vector<int> drange = DaughterIndices(mother);
 
   //if (fDebug) cout<<prefix<<" propagating and updating chain, mother:"<<endl;
   if(fDebug) PrintPart(prefix, mother);
@@ -270,15 +263,15 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
 {
 
   TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
-  Double_t px, py, pz, pt, e, q;
-  Double_t x, y, z, t, r;
-  Double_t x_c, y_c, phi_0;
-  Double_t x_t, y_t, z_t, r_t, phi_t;
-  Double_t gammam, omega;
-  Double_t vz;
-  Double_t tof, lof;
+  double px, py, pz, pt, e, q;
+  double x, y, z, t, r;
+  double x_c, y_c, phi_0;
+  double x_t, y_t, z_t, r_t, phi_t;
+  double gammam, omega;
+  double vz;
+  double tof, lof;
 
-  const Double_t c_light = 2.99792458E8;
+  const double c_light = 2.99792458E8;
 
   particlePosition = candidate->Position;
   particleMomentum = candidate->Momentum;
@@ -326,7 +319,7 @@ TLorentzVector UnstablePropagator::PropagatedPosition(Candidate *candidate)
     x_t = x + px * t;
     y_t = y + py * t;
     z_t = z + pz * t;
-    // Double_t l = std::sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
+    // double l = std::sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
     //if (fDebug) cout << "propagated neutral length: "<<l<<endl;
     particlePosition.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * e * 1.0E3);
   }
@@ -390,9 +383,9 @@ void UnstablePropagator::PrintPart(TString prefix, Candidate *candidate)
 
 //------------------------------------------------------------------------------
 
-Int_t UnstablePropagator::Index(Candidate *particle)
+int UnstablePropagator::Index(Candidate *particle)
 {
-  /*Int_t i=-1;
+  /*int i=-1;
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
   {
@@ -403,7 +396,7 @@ Int_t UnstablePropagator::Index(Candidate *particle)
     }
   }
   */
-  Int_t j = -1;
+  int j = -1;
   for(size_t i = 0; i < fInputArray->size(); i++)
   {
     j = i;

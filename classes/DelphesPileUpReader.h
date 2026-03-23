@@ -35,8 +35,7 @@ class DelphesXDRReader;
 class DelphesPileUpReader
 {
 public:
-  DelphesPileUpReader(const char *fileName);
-
+  explicit DelphesPileUpReader(std::string_view fileName);
   ~DelphesPileUpReader();
 
   bool ReadParticle(int32_t &pid,

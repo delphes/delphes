@@ -37,16 +37,51 @@ using namespace std;
 class ParticlePropagator: public DelphesModule
 {
 public:
-  ParticlePropagator() = default;
+  explicit ParticlePropagator(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fRadius(Steer<double>("Radius", 1.0)),
+    fRadius2(fRadius * fRadius),
+    fHalfLength(Steer<double>("HalfLength", 3.0)),
+    fBz(Steer<double>("Bz", 0.0)),
+    fRadiusMax(Steer<double>("RadiusMax", fRadius)),
+    fHalfLengthMax(Steer<double>("HalfLengthMax", fHalfLength))
+  {
+    if(fRadius < 1.0E-2)
+      throw std::runtime_error("ERROR: magnetic field radius is too low");
+    if(fHalfLength < 1.0E-2)
+      throw std::runtime_error("ERROR: magnetic field length is too low");
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    // import array with output from filter/classifier module
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+    fNeutralOutputArray = ExportArray(Steer<std::string>("NeutralOutputArray", "neutralParticles"));
+    fChargedHadronOutputArray = ExportArray(Steer<std::string>("ChargedHadronOutputArray", "chargedHadrons"));
+    fElectronOutputArray = ExportArray(Steer<std::string>("ElectronOutputArray", "electrons"));
+    fMuonOutputArray = ExportArray(Steer<std::string>("MuonOutputArray", "muons"));
+    // import beamspot
+    try
+    {
+      fBeamSpotInputArray = ImportArray(Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+    }
+    catch(runtime_error &e)
+    {
+    }
+  }
   void Process() override;
 
 private:
-  Double_t fRadius, fRadius2, fRadiusMax, fHalfLength, fHalfLengthMax;
-  Double_t fBz;
+  const double fRadius;
+  const double fRadius2;
+  const double fHalfLength;
+  const double fBz;
+  const double fRadiusMax;
+  const double fHalfLengthMax;
 
   CandidatesCollection fInputArray; //!
+
   CandidatesCollection fBeamSpotInputArray; //!
 
   CandidatesCollection fOutputArray; //!
@@ -58,47 +93,6 @@ private:
 
 //------------------------------------------------------------------------------
 
-void ParticlePropagator::Init()
-{
-  fRadius = GetDouble("Radius", 1.0);
-  fRadius2 = fRadius * fRadius;
-  fHalfLength = GetDouble("HalfLength", 3.0);
-  fBz = GetDouble("Bz", 0.0);
-  if(fRadius < 1.0E-2)
-  {
-    cout << "ERROR: magnetic field radius is too low\n";
-    return;
-  }
-  if(fHalfLength < 1.0E-2)
-  {
-    cout << "ERROR: magnetic field length is too low\n";
-    return;
-  }
-
-  fRadiusMax = GetDouble("RadiusMax", fRadius);
-  fHalfLengthMax = GetDouble("HalfLengthMax", fHalfLength);
-
-  // import array with output from filter/classifier module
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  // import beamspot
-  try
-  {
-    fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-  }
-  catch(runtime_error &e)
-  {
-  }
-  // create output arrays
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-  fNeutralOutputArray = ExportArray(GetString("NeutralOutputArray", "neutralParticles"));
-  fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
-  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons"));
-  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons"));
-}
-
-//------------------------------------------------------------------------------
-
 void ParticlePropagator::Process()
 {
   fOutputArray->clear();
@@ -107,32 +101,16 @@ void ParticlePropagator::Process()
   fElectronOutputArray->clear();
   fMuonOutputArray->clear();
 
-  Candidate *particle = nullptr;
-  TLorentzVector particlePosition, particleMomentum, beamSpotPosition;
-  Double_t px, py, pz, pt, pt2, e, q;
-  Double_t x, y, z, t, r;
-  Double_t x_c, y_c, r_c, phi_0;
-  Double_t x_t, y_t, z_t, r_t, phi_t;
-  Double_t t_r, t_z;
-  Double_t tmp;
-  Double_t gammam, omega;
-  Double_t xd, yd, zd;
-  Double_t l, d0, dz, ctgTheta, alpha;
-  Double_t bsx, bsy, bsz;
-  Double_t td, pio, phid, vz;
+  const double c_light = 2.99792458E8;
 
-  const Double_t c_light = 2.99792458E8;
-
-  if(!fBeamSpotInputArray || fBeamSpotInputArray->empty())
-  {
-    beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  }
-  else
+  TLorentzVector beamSpotPosition;
+  if(fBeamSpotInputArray && !fBeamSpotInputArray->empty())
   {
     Candidate &beamSpotCandidate = *((Candidate *)fBeamSpotInputArray->at(0));
     beamSpotPosition = beamSpotCandidate.Position;
   }
 
+  Candidate *particle = nullptr;
   for(const Candidate *candidate : *fInputArray)
   {
     if(candidate->GetCandidates().empty())
@@ -140,18 +118,11 @@ void ParticlePropagator::Process()
     else
       particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
-    particlePosition = particle->Position;
-    particleMomentum = particle->Momentum;
+    const TLorentzVector &particlePosition = particle->Position, &particleMomentum = particle->Momentum;
 
-    x = particlePosition.X() * 1.0E-3;
-    y = particlePosition.Y() * 1.0E-3;
-    z = particlePosition.Z() * 1.0E-3;
-
-    bsx = beamSpotPosition.X() * 1.0E-3;
-    bsy = beamSpotPosition.Y() * 1.0E-3;
-    bsz = beamSpotPosition.Z() * 1.0E-3;
-
-    q = particle->Charge;
+    const double x = particlePosition.X() * 1.0E-3, y = particlePosition.Y() * 1.0E-3, z = particlePosition.Z() * 1.0E-3;
+    const double bsx = beamSpotPosition.X() * 1.0E-3, bsy = beamSpotPosition.Y() * 1.0E-3, bsz = beamSpotPosition.Z() * 1.0E-3;
+    const double q = particle->Charge;
 
     // check that particle position is inside the cylinder
     if(std::hypot(x, y) > fRadiusMax || std::fabs(z) > fHalfLengthMax)
@@ -159,12 +130,10 @@ void ParticlePropagator::Process()
       continue;
     }
 
-    px = particleMomentum.Px();
-    py = particleMomentum.Py();
-    pz = particleMomentum.Pz();
-    pt = particleMomentum.Pt();
-    pt2 = particleMomentum.Perp2();
-    e = particleMomentum.E();
+    const double px = particleMomentum.Px(), py = particleMomentum.Py(), pz = particleMomentum.Pz();
+    const double pt = particleMomentum.Pt();
+    const double pt2 = particleMomentum.Perp2();
+    const double e = particleMomentum.E();
 
     if(pt2 < 1.0E-9)
     {
@@ -187,18 +156,15 @@ void ParticlePropagator::Process()
     else if(std::fabs(q) < 1.0E-9 || std::fabs(fBz) < 1.0E-9)
     {
       // solve pt2*t^2 + 2*(px*x + py*y)*t - (fRadius2 - x*x - y*y) = 0
-      tmp = px * y - py * x;
-      t_r = (std::sqrt(pt2 * fRadius2 - tmp * tmp) - px * x - py * y) / pt2;
+      const double tmp = px * y - py * x;
+      const double t_r = (std::sqrt(pt2 * fRadius2 - tmp * tmp) - px * x - py * y) / pt2;
+      const double t_z = (fHalfLength * pz / std::fabs(pz) - z) / pz;
 
-      t_z = (fHalfLength * pz / std::fabs(pz) - z) / pz;
+      const double t = std::min(t_r, t_z);
 
-      t = std::min(t_r, t_z);
+      const double x_t = x + px * t, y_t = y + py * t, z_t = z + pz * t;
 
-      x_t = x + px * t;
-      y_t = y + py * t;
-      z_t = z + pz * t;
-
-      l = std::sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
+      const double l = std::sqrt((x_t - x) * (x_t - x) + (y_t - y) * (y_t - y) + (z_t - z) * (z_t - z));
 
       Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
@@ -239,51 +205,51 @@ void ParticlePropagator::Process()
       //    gyration frequency omega = q * Bz / (gammam)
       //    helix radius r = p_{T0} / (omega * gammam)
 
-      gammam = e * 1.0E9 / (c_light * c_light); // gammam in [eV/c^2]
-      omega = q * fBz / gammam; // omega is here in [89875518/s]
-      r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
+      const double gammam = e * 1.0E9 / (c_light * c_light); // gammam in [eV/c^2]
+      const double omega = q * fBz / gammam; // omega is here in [89875518/s]
+      const double r = pt / (q * fBz) * 1.0E9 / c_light; // in [m]
 
-      phi_0 = std::atan2(py, px); // [rad] in [-pi, pi]
+      const double phi_0 = std::atan2(py, px); // [rad] in [-pi, pi]
 
       // 2. helix axis coordinates
-      x_c = x + r * std::sin(phi_0);
-      y_c = y - r * std::cos(phi_0);
-      r_c = std::hypot(x_c, y_c);
+      const double x_c = x + r * std::sin(phi_0),
+                   y_c = y - r * std::cos(phi_0),
+                   r_c = std::hypot(x_c, y_c);
 
       // time of closest approach
-      td = (phi_0 + std::atan2(x_c, y_c)) / omega;
+      double td = (phi_0 + std::atan2(x_c, y_c)) / omega;
 
       // remove all the modulo pi that might have come from the atan
-      pio = std::fabs(M_PI / omega);
+      double pio = std::fabs(M_PI / omega);
       while(std::fabs(td) > 0.5 * pio)
-      {
         td -= td / std::fabs(td) * pio;
-      }
 
-      vz = pz * c_light / e;
+      const double vz = pz * c_light / e;
 
       // calculate coordinates of closest approach to z axis
-      phid = phi_0 - omega * td;
-      xd = x_c - r * std::sin(phid);
-      yd = y_c + r * std::cos(phid);
-      zd = z + vz * td;
+      const double phid = phi_0 - omega * td;
+      const double xd = x_c - r * std::sin(phid),
+                   yd = y_c + r * std::cos(phid),
+                   zd = z + vz * td;
 
       // momentum at closest approach
-      px = pt * std::cos(phid);
-      py = pt * std::sin(phid);
+      const double px = pt * std::cos(phid);
+      const double py = pt * std::sin(phid);
 
-      particleMomentum.SetPtEtaPhiE(pt, particleMomentum.Eta(), phid, particleMomentum.E());
+      TLorentzVector particleMomentumAst;
+      particleMomentumAst.SetPtEtaPhiE(pt, particleMomentum.Eta(), phid, particleMomentum.E());
 
       // calculate additional track parameters (correct for beamspot position)
-      d0 = ((xd - bsx) * py - (yd - bsy) * px) / pt;
-      dz = zd - bsz;
-      ctgTheta = 1.0 / std::tan(particleMomentum.Theta());
+      const double d0 = ((xd - bsx) * py - (yd - bsy) * px) / pt,
+                   dz = zd - bsz;
+      const double ctgTheta = 1.0 / std::tan(particleMomentumAst.Theta());
 
       // 3. time evaluation t = std::min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
-      t_z = (vz == 0.0) ? 1.0E99 : (fHalfLength * pz / std::fabs(pz) - z) / vz;
+      const double t_z = (vz == 0.0) ? 1.0E99 : (fHalfLength * pz / std::fabs(pz) - z) / vz;
 
+      double t = 0.;
       if(r_c + std::fabs(r) < fRadius)
       {
         // helix does not cross the cylinder sides
@@ -291,21 +257,21 @@ void ParticlePropagator::Process()
       }
       else
       {
-        alpha = std::acos((r * r + r_c * r_c - fRadius * fRadius) / (2 * std::fabs(r) * r_c));
-        t_r = td + std::fabs(alpha / omega);
+        const double alpha = std::acos((r * r + r_c * r_c - fRadius * fRadius) / (2 * std::fabs(r) * r_c));
+        const double t_r = td + std::fabs(alpha / omega);
 
         t = std::min(t_r, t_z);
       }
 
       // 4. position in terms of x(t), y(t), z(t)
-      phi_t = phi_0 - omega * t;
-      x_t = x_c - r * std::sin(phi_t);
-      y_t = y_c + r * std::cos(phi_t);
-      z_t = z + vz * t;
-      r_t = std::hypot(x_t, y_t);
+      const double phi_t = phi_0 - omega * t;
+      const double x_t = x_c - r * std::sin(phi_t),
+                   y_t = y_c + r * std::cos(phi_t),
+                   z_t = z + vz * t,
+                   r_t = std::hypot(x_t, y_t);
 
       // lenght of the path from production to tracker
-      l = t * std::hypot(vz, r * omega);
+      const double l = t * std::hypot(vz, r * omega);
 
       if(r_t > 0.0)
       {
@@ -314,10 +280,10 @@ void ParticlePropagator::Process()
         {
           particle->D0 = d0 * 1.0E3;
           particle->DZ = dz * 1.0E3;
-          particle->P = particleMomentum.P();
+          particle->P = particleMomentumAst.P();
           particle->PT = pt;
           particle->CtgTheta = ctgTheta;
-          particle->Phi = particleMomentum.Phi();
+          particle->Phi = particleMomentumAst.Phi();
         }
 
         Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
@@ -325,7 +291,7 @@ void ParticlePropagator::Process()
         new_candidate->InitialPosition = particlePosition;
         new_candidate->Position.SetXYZT(x_t * 1.0E3, y_t * 1.0E3, z_t * 1.0E3, particlePosition.T() + t * c_light * 1.0E3);
 
-        new_candidate->Momentum = particleMomentum;
+        new_candidate->Momentum = particleMomentumAst;
 
         new_candidate->L = l * 1.0E3;
 

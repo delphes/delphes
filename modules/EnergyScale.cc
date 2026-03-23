@@ -36,10 +36,35 @@ using namespace std;
 class EnergyScale: public DelphesModule
 {
 public:
-  EnergyScale() : fFormula(std::make_unique<DelphesFormula>()) {}
+  explicit EnergyScale(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormula->Compile(Steer<std::string>("ScaleFormula", "0.0"));
+  }
 
-  void Init() override;
-  void Process() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input arrays
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets")); // create output array
+  }
+  void Process() override
+  {
+    fOutputArray->clear();
+    for(Candidate *const &candidate : *fInputArray)
+    {
+      TLorentzVector momentum = candidate->Momentum;
+
+      const double scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
+      if(scale > 0.0) momentum *= scale;
+
+      Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
+      new_candidate->Momentum = momentum;
+
+      fOutputArray->emplace_back(new_candidate);
+    }
+  }
 
 private:
   const std::unique_ptr<DelphesFormula> fFormula; //!
@@ -47,43 +72,6 @@ private:
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
 };
-
-//------------------------------------------------------------------------------
-
-void EnergyScale::Init()
-{
-  // read resolution formula
-  fFormula->Compile(GetString("ScaleFormula", "0.0"));
-
-  // import input arrays
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void EnergyScale::Process()
-{
-  fOutputArray->clear();
-  TLorentzVector momentum;
-  Double_t scale;
-
-  for(Candidate *const &candidate : *fInputArray)
-  {
-    momentum = candidate->Momentum;
-
-    scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
-
-    if(scale > 0.0) momentum *= scale;
-
-    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
-    new_candidate->Momentum = momentum;
-
-    fOutputArray->emplace_back(new_candidate);
-  }
-}
 
 //------------------------------------------------------------------------------
 

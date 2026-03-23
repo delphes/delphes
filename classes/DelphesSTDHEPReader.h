@@ -50,7 +50,7 @@ public:
     MCFIO_STDHEP4 = 201
   };
 
-  DelphesSTDHEPReader();
+  explicit DelphesSTDHEPReader(const DelphesParameters &);
 
   void SetFactory(DelphesFactory *factory) override;
 

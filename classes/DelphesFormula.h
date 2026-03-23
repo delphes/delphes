@@ -30,7 +30,7 @@ public:
   explicit DelphesFormula(const char *name, const char *expression);
   ~DelphesFormula() = default;
 
-  Int_t Compile(const char *expression);
+  Int_t Compile(std::string_view expression);
 
   Double_t Eval(Double_t pt,
     Double_t eta = 0, Double_t phi = 0, Double_t energy = 0,

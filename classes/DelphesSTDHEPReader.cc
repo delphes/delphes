@@ -54,7 +54,8 @@ static const int kBufferSize = 1000000;
 
 //---------------------------------------------------------------------------
 
-DelphesSTDHEPReader::DelphesSTDHEPReader() :
+DelphesSTDHEPReader::DelphesSTDHEPReader(const DelphesParameters &readerParams) :
+  DelphesReader(readerParams),
   fInputFile(0), fPDG(TDatabasePDG::Instance()), fBlockType(-1) {}
 
 //---------------------------------------------------------------------------

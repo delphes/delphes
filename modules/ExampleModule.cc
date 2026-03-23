@@ -39,19 +39,32 @@ using namespace std;
 class ExampleModule: public DelphesModule
 {
 public:
-  ExampleModule() : fFormula(std::make_unique<DelphesFormula>()) {}
+  explicit ExampleModule(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fIntParam(Steer<int>("IntParam", 10)),
+    fDoubleParam(Steer<double>("DoubleParam", 1.0)),
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "0.4"));
+    for(const double &param : Steer<std::vector<double> >("ArrayParam"))
+      fArrayParam.push_back(param);
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input array(s)
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets")); // create output array(s)
+  }
   void Process() override;
   void Finish() override {}
 
 private:
-  Int_t fIntParam;
-  Double_t fDoubleParam;
-
-  std::deque<Double_t> fArrayParam;
+  const int fIntParam;
+  const double fDoubleParam;
 
   const std::unique_ptr<DelphesFormula> fFormula; //!
+
+  std::deque<double> fArrayParam;
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
@@ -59,46 +72,15 @@ private:
 
 //------------------------------------------------------------------------------
 
-void ExampleModule::Init()
-{
-  // read parameters
-  fIntParam = GetInt("IntParam", 10);
-  fDoubleParam = GetDouble("DoubleParam", 1.0);
-  fFormula->Compile(GetString("EfficiencyFormula", "0.4"));
-
-  ExRootConfParam param = GetParam("ArrayParam");
-  Long_t i, size;
-  fArrayParam.clear();
-
-  size = param.GetSize();
-  for(i = 0; i < size; ++i)
-  {
-    fArrayParam.push_back(param[i].GetDouble());
-  }
-
-  // import input array(s)
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-
-  // create output array(s)
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
 void ExampleModule::Process()
 {
   fOutputArray->clear();
 
-  TLorentzVector candidatePosition, candidateMomentum;
-
   // loop over all input candidates
   for(Candidate *const &candidate : *fInputArray)
   {
-    candidatePosition = candidate->Position;
-    candidateMomentum = candidate->Momentum;
-
     // apply an efficency formula
-    if(gRandom->Uniform() <= fFormula->Eval(candidateMomentum.Pt(), candidatePosition.Eta()))
+    if(gRandom->Uniform() <= fFormula->Eval(candidate->Momentum.Pt(), candidate->Position.Eta()))
       fOutputArray->emplace_back(candidate);
   }
 }

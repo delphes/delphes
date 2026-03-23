@@ -30,15 +30,12 @@
 class Cloner: public DelphesModule
 {
 public:
-  Cloner() = default;
+  using DelphesModule::DelphesModule;
 
   void Init() override
   {
-    // import input array
-    fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-
-    // create output array
-    fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets")); // create output array
   }
   void Process() override
   {

@@ -44,9 +44,14 @@ using namespace std;
 class DecayFilter: public DelphesModule
 {
 public:
-  DecayFilter() = default;
+  using DelphesModule::DelphesModule;
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks")); // create output array
+  }
+
   void Process() override;
 
 private:
@@ -56,24 +61,12 @@ private:
 
 //------------------------------------------------------------------------------
 
-void DecayFilter::Init()
-{
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
 void DecayFilter::Process()
 {
   fOutputArray->clear();
 
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
-  const Double_t c = TMath::C(); // [m/s]
-  Double_t m, t, p, bgct, L, l;
+  const double c = TMath::C(); // [m/s]
 
   // loop over all input candidates
   for(Candidate *const &candidate : *fInputArray)
@@ -85,8 +78,8 @@ void DecayFilter::Process()
       fOutputArray->emplace_back(candidate);
       continue;
     }
-    m = pdg->Mass();
-    t = pdg->Lifetime(); // [s]
+    const double m = pdg->Mass();
+    const double t = pdg->Lifetime(); // [s]
     if(t == 0.)
     { // does not decay
       fOutputArray->emplace_back(candidate);
@@ -94,12 +87,12 @@ void DecayFilter::Process()
     }
 
     // compute boosted decay length (beta gamma c tau)
-    p = candidate->P;
-    bgct = p / m * c * t; // [m]
+    const double p = candidate->P;
+    const double bgct = p / m * c * t; // [m]
 
     // get full trajectory length and generate random decay length
-    L = candidate->L * 1.0E-3; // [m]
-    l = gRandom->Exp(bgct);
+    const double L = candidate->L * 1.0E-3; // [m]
+    const double l = gRandom->Exp(bgct);
 
     // if random decay happens before end of trajectory, reject track
     if(l < L) continue;

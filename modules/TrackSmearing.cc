@@ -22,18 +22,106 @@ using namespace std;
 class TrackSmearing: public DelphesModule
 {
 public:
-  TrackSmearing() :
+  explicit TrackSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fBz(Steer<double>("Bz", 0.0)),
+    fApplyToPileUp(Steer<bool>("ApplyToPileUp", true)),
     fD0Formula(std::make_unique<DelphesFormula>()),
     fDZFormula(std::make_unique<DelphesFormula>()),
     fPFormula(std::make_unique<DelphesFormula>()),
     fCtgThetaFormula(std::make_unique<DelphesFormula>()),
-    fPhiFormula(std::make_unique<DelphesFormula>()) {}
+    fPhiFormula(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    // TODO: preload the files to avoid unnecessary I/O
 
-  void Init() override;
+    // !!! IF WE WANT TO KEEP ROOT INPUT !!!
+    if(const std::string d0ResolutionFormula = Steer<std::string>("D0ResolutionFormula", "0.0");
+      d0ResolutionFormula != "0.0")
+    {
+      fD0Formula->Compile(d0ResolutionFormula);
+      fUseD0Formula = true;
+    }
+    else
+    {
+      fD0ResolutionFile = Steer<std::string>("D0ResolutionFile", "errors.root");
+      fD0ResolutionHist = Steer<std::string>("D0ResolutionHist", "d0");
+      fUseD0Formula = false;
+    }
+
+    if(const std::string dzResolutionFormula = Steer<std::string>("DZResolutionFormula", "0.0");
+      dzResolutionFormula != "0.0")
+    {
+      fDZFormula->Compile(dzResolutionFormula);
+      fUseDZFormula = true;
+    }
+    else
+    {
+      fDZResolutionFile = Steer<std::string>("DZResolutionFile", "errors.root");
+      fDZResolutionHist = Steer<std::string>("DZResolutionHist", "dz");
+      fUseDZFormula = false;
+    }
+
+    if(const std::string pResolutionFormula = Steer<std::string>("PResolutionFormula", "0.0");
+      pResolutionFormula != "0.0")
+    {
+      fPFormula->Compile(pResolutionFormula);
+      fUsePFormula = true;
+    }
+    else
+    {
+      fPResolutionFile = Steer<std::string>("PResolutionFile", "errors.root");
+      fPResolutionHist = Steer<std::string>("PResolutionHist", "p");
+      fUsePFormula = false;
+    }
+
+    if(const std::string ctgThetaFormula = Steer<std::string>("CtgThetaResolutionFormula", "0.0");
+      ctgThetaFormula != "0.0")
+    {
+      fCtgThetaFormula->Compile(ctgThetaFormula);
+      fUseCtgThetaFormula = true;
+    }
+    else
+    {
+      fCtgThetaResolutionFile = Steer<std::string>("CtgThetaResolutionFile", "errors.root");
+      fCtgThetaResolutionHist = Steer<std::string>("CtgThetaResolutionHist", "ctgTheta");
+      fUseCtgThetaFormula = false;
+    }
+
+    if(const std::string phiResolutionFormula = Steer<std::string>("PhiResolutionFormula", "0.0");
+      phiResolutionFormula != "0.0")
+    {
+      fPhiFormula->Compile(phiResolutionFormula);
+      fUsePhiFormula = true;
+    }
+    else
+    {
+      fPhiResolutionFile = Steer<std::string>("PhiResolutionFile", "errors.root");
+      fPhiResolutionHist = Steer<std::string>("PhiResolutionHist", "phi");
+      fUsePhiFormula = false;
+    }
+  }
+
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+    // import beamspot
+    try
+    {
+      fBeamSpotInputArray = ImportArray(Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
+    }
+    catch(const std::runtime_error &)
+    {
+    }
+  }
   void Process() override;
 
 private:
-  Double_t ptError(const Double_t, const Double_t, const Double_t, const Double_t);
+  double ptError(const double, const double, const double, const double);
+
+  const double fBz;
+  const bool fApplyToPileUp;
 
   const std::unique_ptr<DelphesFormula> fD0Formula; //!
   const std::unique_ptr<DelphesFormula> fDZFormula; //!
@@ -41,29 +129,25 @@ private:
   const std::unique_ptr<DelphesFormula> fCtgThetaFormula; //!
   const std::unique_ptr<DelphesFormula> fPhiFormula; //!
 
-  Double_t fBz;
-
   std::string fD0ResolutionFile;
   std::string fD0ResolutionHist;
-  Bool_t fUseD0Formula;
+  bool fUseD0Formula;
 
   std::string fDZResolutionFile;
   std::string fDZResolutionHist;
-  Bool_t fUseDZFormula;
+  bool fUseDZFormula;
 
   std::string fPResolutionFile;
   std::string fPResolutionHist;
-  Bool_t fUsePFormula;
+  bool fUsePFormula;
 
   std::string fCtgThetaResolutionFile;
   std::string fCtgThetaResolutionHist;
-  Bool_t fUseCtgThetaFormula;
+  bool fUseCtgThetaFormula;
 
   std::string fPhiResolutionFile;
   std::string fPhiResolutionHist;
-  Bool_t fUsePhiFormula;
-
-  Bool_t fApplyToPileUp;
+  bool fUsePhiFormula;
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fBeamSpotInputArray; //!
@@ -73,102 +157,17 @@ private:
 
 //------------------------------------------------------------------------------
 
-void TrackSmearing::Init()
-{
-  fBz = GetDouble("Bz", 0.0);
-
-  // read resolution formula
-
-  // !!! IF WE WANT TO KEEP ROOT INPUT !!!
-  if(string(GetString("D0ResolutionFormula", "0.0")) != "0.0")
-  {
-    fD0Formula->Compile(GetString("D0ResolutionFormula", "0.0"));
-    fUseD0Formula = true;
-  }
-  else
-  {
-    fD0ResolutionFile = GetString("D0ResolutionFile", "errors.root");
-    fD0ResolutionHist = GetString("D0ResolutionHist", "d0");
-    fUseD0Formula = false;
-  }
-  if(string(GetString("DZResolutionFormula", "0.0")) != "0.0")
-  {
-    fDZFormula->Compile(GetString("DZResolutionFormula", "0.0"));
-    fUseDZFormula = true;
-  }
-  else
-  {
-    fDZResolutionFile = GetString("DZResolutionFile", "errors.root");
-    fDZResolutionHist = GetString("DZResolutionHist", "dz");
-    fUseDZFormula = false;
-  }
-  if(string(GetString("PResolutionFormula", "0.0")) != "0.0")
-  {
-    fPFormula->Compile(GetString("PResolutionFormula", "0.0"));
-    fUsePFormula = true;
-  }
-  else
-  {
-    fPResolutionFile = GetString("PResolutionFile", "errors.root");
-    fPResolutionHist = GetString("PResolutionHist", "p");
-    fUsePFormula = false;
-  }
-  if(string(GetString("CtgThetaResolutionFormula", "0.0")) != "0.0")
-  {
-    fCtgThetaFormula->Compile(GetString("CtgThetaResolutionFormula", "0.0"));
-    fUseCtgThetaFormula = true;
-  }
-  else
-  {
-    fCtgThetaResolutionFile = GetString("CtgThetaResolutionFile", "errors.root");
-    fCtgThetaResolutionHist = GetString("CtgThetaResolutionHist", "ctgTheta");
-    fUseCtgThetaFormula = false;
-  }
-  if(string(GetString("PhiResolutionFormula", "0.0")) != "0.0")
-  {
-    fPhiFormula->Compile(GetString("PhiResolutionFormula", "0.0"));
-    fUsePhiFormula = true;
-  }
-  else
-  {
-    fPhiResolutionFile = GetString("PhiResolutionFile", "errors.root");
-    fPhiResolutionHist = GetString("PhiResolutionHist", "phi");
-    fUsePhiFormula = false;
-  }
-
-  fApplyToPileUp = GetBool("ApplyToPileUp", true);
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // import beamspot
-  try
-  {
-    fBeamSpotInputArray = ImportArray(GetString("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-  }
-  catch(const std::runtime_error &)
-  {
-  }
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
 void TrackSmearing::Process()
 {
   fOutputArray->clear();
 
   TLorentzVector beamSpotPosition;
-  Double_t pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
-  Double_t x, y, z, t, px, py, pz, theta;
-  Double_t q, r;
-  Double_t x_c, y_c, r_c, phi_0;
-  Double_t rcu, rc2, xd, yd, zd;
-  const Double_t c_light = 2.99792458E8;
+  double pt, eta, e, m, d0, d0Error, trueD0, dz, dzError, trueDZ, p, pError, trueP, ctgTheta, ctgThetaError, trueCtgTheta, phi, phiError, truePhi;
+  double x, y, z, t, px, py, pz, theta;
+  double q, r;
+  double x_c, y_c, r_c, phi_0;
+  double rcu, rc2, xd, yd, zd;
+  const double c_light = 2.99792458E8;
   TProfile2D *d0ErrorHist = NULL,
              *dzErrorHist = NULL,
              *pErrorHist = NULL,
@@ -240,7 +239,7 @@ void TrackSmearing::Process()
       d0Error = fD0Formula->Eval(pt, eta, phi, e, candidate);
     else
     {
-      Int_t xbin, ybin;
+      int xbin, ybin;
 
       xbin = pt < d0ErrorHist->GetXaxis()->GetXmax() ? d0ErrorHist->GetXaxis()->FindBin(pt) : d0ErrorHist->GetXaxis()->GetBinCenter(d0ErrorHist->GetXaxis()->GetNbins());
       ybin = d0ErrorHist->GetYaxis()->FindBin(std::fabs(eta));
@@ -255,7 +254,7 @@ void TrackSmearing::Process()
       dzError = fDZFormula->Eval(pt, eta, phi, e, candidate);
     else
     {
-      Int_t xbin, ybin;
+      int xbin, ybin;
 
       xbin = pt < dzErrorHist->GetXaxis()->GetXmax() ? dzErrorHist->GetXaxis()->FindBin(pt) : dzErrorHist->GetXaxis()->GetBinCenter(dzErrorHist->GetXaxis()->GetNbins());
       ybin = dzErrorHist->GetYaxis()->FindBin(std::fabs(eta));
@@ -270,7 +269,7 @@ void TrackSmearing::Process()
       pError = fPFormula->Eval(pt, eta, phi, e, candidate) * p;
     else
     {
-      Int_t xbin, ybin;
+      int xbin, ybin;
 
       xbin = pt < pErrorHist->GetXaxis()->GetXmax() ? pErrorHist->GetXaxis()->FindBin(pt) : pErrorHist->GetXaxis()->GetBinCenter(pErrorHist->GetXaxis()->GetNbins());
       ybin = pErrorHist->GetYaxis()->FindBin(std::fabs(eta));
@@ -285,7 +284,7 @@ void TrackSmearing::Process()
       ctgThetaError = fCtgThetaFormula->Eval(pt, eta, phi, e, candidate);
     else
     {
-      Int_t xbin, ybin;
+      int xbin, ybin;
 
       xbin = pt < ctgThetaErrorHist->GetXaxis()->GetXmax() ? ctgThetaErrorHist->GetXaxis()->FindBin(pt) : ctgThetaErrorHist->GetXaxis()->GetBinCenter(ctgThetaErrorHist->GetXaxis()->GetNbins());
       ybin = ctgThetaErrorHist->GetYaxis()->FindBin(std::fabs(eta));
@@ -300,7 +299,7 @@ void TrackSmearing::Process()
       phiError = fPhiFormula->Eval(pt, eta, phi, e, candidate);
     else
     {
-      Int_t xbin, ybin;
+      int xbin, ybin;
 
       xbin = pt < phiErrorHist->GetXaxis()->GetXmax() ? phiErrorHist->GetXaxis()->FindBin(pt) : phiErrorHist->GetXaxis()->GetBinCenter(phiErrorHist->GetXaxis()->GetNbins());
       ybin = phiErrorHist->GetYaxis()->FindBin(std::fabs(eta));
@@ -403,9 +402,9 @@ void TrackSmearing::Process()
   }
 }
 
-Double_t TrackSmearing::ptError(const Double_t p, const Double_t ctgTheta, const Double_t dP, const Double_t dCtgTheta)
+double TrackSmearing::ptError(const double p, const double ctgTheta, const double dP, const double dCtgTheta)
 {
-  Double_t a, b;
+  double a, b;
   a = (p * p * ctgTheta * ctgTheta * dCtgTheta * dCtgTheta) / ((ctgTheta * ctgTheta + 1) * (ctgTheta * ctgTheta + 1) * (ctgTheta * ctgTheta + 1));
   b = (dP * dP) / (ctgTheta * ctgTheta + 1);
   return sqrt(a + b);

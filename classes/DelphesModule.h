@@ -26,7 +26,9 @@
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
+
 #include "classes/DelphesModuleFactory.h"
+#include "classes/DelphesParameters.h"
 
 #include <ExRootAnalysis/ExRootConfReader.h>
 
@@ -37,15 +39,15 @@ class DelphesFactory;
 class DelphesModule
 {
 public:
-  DelphesModule() = default;
+  explicit DelphesModule(const DelphesParameters &);
   virtual ~DelphesModule() = default;
 
   virtual void Init() {}
   virtual void Process() {}
   virtual void Finish() {}
 
-  std::shared_ptr<std::vector<Candidate *> > ImportArray(const char *name);
-  std::shared_ptr<std::vector<Candidate *> > ExportArray(const char *name);
+  std::shared_ptr<std::vector<Candidate *> > ImportArray(std::string_view name);
+  std::shared_ptr<std::vector<Candidate *> > ExportArray(std::string_view name);
 
   void SetName(std::string_view moduleName) { fName = moduleName; }
   const std::string &GetName() const { return fName; }
@@ -60,19 +62,24 @@ public:
 protected:
   ExRootConfReader *GetConfReader() const { return fConfReader; }
 
-  int GetInt(const char *name, int defaultValue, int index = -1);
-  long GetLong(const char *name, long defaultValue, int index = -1);
-  double GetDouble(const char *name, double defaultValue, int index = -1);
-  bool GetBool(const char *name, bool defaultValue, int index = -1);
-  const char *GetString(const char *name, const char *defaultValue, int index = -1);
-  ExRootConfParam GetParam(const char *name);
   const ExRootConfReader::ExRootTaskMap *GetModules();
+
+  template <typename T>
+  T Steer(std::string_view keyName, T defaultValue = T{}) const
+  {
+    return fModuleParams.Get<T>(std::string{keyName}, defaultValue);
+  }
+  std::string Steer(std::string_view keyName, std::string_view defaultValue = {}) const
+  {
+    return fModuleParams.Get<std::string>(std::string{keyName}, std::string{defaultValue});
+  }
 
 private:
   std::string fName;
   DelphesFactory *fFactory{nullptr};
 
   ExRootConfReader *fConfReader{nullptr}; //!
+  const DelphesParameters fModuleParams;
 };
 
 /// Add a processing module to the list of handled modules

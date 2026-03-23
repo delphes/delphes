@@ -38,19 +38,43 @@ using namespace std;
 class ClusterCounting: public DelphesModule
 {
 public:
-  ClusterCounting() : fTrackUtil(std::make_unique<TrkUtil>()) {}
+  ClusterCounting(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    // geometric acceptance
+    fRmin(Steer<double>("Rmin", 0.)),
+    fRmax(Steer<double>("Rmax", 0.)),
+    fZmin(Steer<double>("Zmin", 0.)),
+    fZmax(Steer<double>("Zmax", 0.)),
+    fBz(Steer<double>("Bz", 0.)), // magnetic field
+    fGasOption(Steer<int>("GasOption", 0)),
+    fTrackUtil(std::make_unique<TrkUtil>())
+  {
+    // initialize drift chamber geometry and gas mix
+    fTrackUtil->SetBfield(fBz);
+    fTrackUtil->SetDchBoundaries(fRmin, fRmax, fZmin, fZmax);
+    fTrackUtil->SetGasMix(fGasOption);
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "TrackMerger/tracks")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks")); // create output array
+  }
   void Process() override;
 
 private:
-  Double_t fRmin;
-  Double_t fRmax;
-  Double_t fZmin;
-  Double_t fZmax;
-  Double_t fBz;
+  const double fRmin;
+  const double fRmax;
+  const double fZmin;
+  const double fZmax;
+  const double fBz;
 
-  Int_t fGasOption;
+  // gas mix option: 0
+  // 0:  Helium 90 - Isobutane 10
+  // 1:  Helium 100
+  // 2:  Argon 50 - Ethane 50
+  // 3:  Argon 100
+  const int fGasOption;
 
   const std::unique_ptr<TrkUtil> fTrackUtil;
 
@@ -60,43 +84,11 @@ private:
 
 //------------------------------------------------------------------------------
 
-void ClusterCounting::Init()
-{
-  // geometric acceptance
-  fRmin = GetDouble("Rmin", 0.);
-  fRmax = GetDouble("Rmax", 0.);
-  fZmin = GetDouble("Zmin", 0.);
-  fZmax = GetDouble("Zmax", 0.);
-
-  // magnetic field
-  fBz = GetDouble("Bz", 0.);
-
-  // gas mix option: 0
-  // 0:  Helium 90 - Isobutane 10
-  // 1:  Helium 100
-  // 2:  Argon 50 - Ethane 50
-  // 3:  Argon 100
-  fGasOption = GetInt("GasOption", 0);
-
-  // initialize drift chamber geometry and gas mix
-  fTrackUtil->SetBfield(fBz);
-  fTrackUtil->SetDchBoundaries(fRmin, fRmax, fZmin, fZmax);
-  fTrackUtil->SetGasMix(fGasOption);
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
 void ClusterCounting::Process()
 {
   fOutputArray->clear();
 
-  Double_t mass, trackLength, Ncl;
+  double mass, trackLength, Ncl;
 
   for(Candidate *const &candidate : *fInputArray)
   {

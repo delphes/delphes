@@ -39,20 +39,42 @@ using namespace std;
 class Hector: public DelphesModule
 {
 public:
-  Hector() = default;
+  explicit Hector(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    //
+    fDirection(Steer<int>("Direction", 1)),
+    fBeamLineLength(Steer<double>("BeamLineLength", 430.0)),
+    fDistance(Steer<double>("Distance", 420.0)),
+    fOffsetX(Steer<double>("OffsetX", 0.0)),
+    fOffsetS(Steer<double>("OffsetS", 120.0)),
+    fSigmaE(Steer<double>("SigmaE", 0.0)),
+    fSigmaX(Steer<double>("SigmaX", 0.0)),
+    fSigmaY(Steer<double>("SigmaY", 0.0)),
+    fSigmaT(Steer<double>("SigmaT", 0.0)),
+    fEtaMin(Steer<double>("EtaMin", 5.0)),
+    fBeamLine(std::make_unique<H_BeamLine>(fDirection, fBeamLineLength + 0.1))
+  {
+    fBeamLine->fill(Steer<std::string>("BeamLineFile", "cards/LHCB1IR5_5TeV.tfs"), fDirection, moduleParams.Get<std::string>("IPName", "IP5"));
+    fBeamLine->offsetElements(fOffsetS, fOffsetX);
+    fBeamLine->calcMatrix();
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "hits"));
+  }
   void Process() override;
 
 private:
-  Int_t fDirection;
+  const int fDirection;
 
-  Double_t fBeamLineLength, fDistance;
-  Double_t fOffsetX, fOffsetS;
-  Double_t fSigmaE, fSigmaX, fSigmaY, fSigmaT;
-  Double_t fEtaMin;
+  const double fBeamLineLength, fDistance;
+  const double fOffsetX, fOffsetS;
+  const double fSigmaE, fSigmaX, fSigmaY, fSigmaT;
+  const double fEtaMin;
 
-  std::unique_ptr<H_BeamLine> fBeamLine;
+  const std::unique_ptr<H_BeamLine> fBeamLine;
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
@@ -60,66 +82,32 @@ private:
 
 //------------------------------------------------------------------------------
 
-void Hector::Init()
-{
-  // read Hector parameters
-
-  fDirection = GetInt("Direction", 1);
-  fBeamLineLength = GetDouble("BeamLineLength", 430.0);
-  fDistance = GetDouble("Distance", 420.0);
-  fOffsetX = GetDouble("OffsetX", 0.0);
-  fOffsetS = GetDouble("OffsetS", 120.0);
-  fSigmaE = GetDouble("SigmaE", 0.0);
-  fSigmaX = GetDouble("SigmaX", 0.0);
-  fSigmaY = GetDouble("SigmaY", 0.0);
-  fSigmaT = GetDouble("SigmaT", 0.0);
-  fEtaMin = GetDouble("EtaMin", 5.0);
-
-  fBeamLine = std::make_unique<H_BeamLine>(fDirection, fBeamLineLength + 0.1);
-  fBeamLine->fill(GetString("BeamLineFile", "cards/LHCB1IR5_5TeV.tfs"), fDirection, GetString("IPName", "IP5"));
-  fBeamLine->offsetElements(fOffsetS, fOffsetX);
-  fBeamLine->calcMatrix();
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "hits"));
-}
-
-//------------------------------------------------------------------------------
-
 void Hector::Process()
 {
   fOutputArray->clear();
 
-  Double_t pz;
-  Double_t x, y, z, tx, ty, theta;
-  Double_t distance, time;
-
-  const Double_t c_light = 2.99792458E8;
+  const double c_light = 2.99792458E8;
 
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    pz = candidateMomentum.Pz();
+    const double pz = candidateMomentum.Pz();
 
     if(std::fabs(candidateMomentum.Eta()) <= fEtaMin || pz * fDirection / std::abs(fDirection) != pz) continue;
 
-    x = 1.0E3 * candidatePosition.X();
-    y = 1.0E3 * candidatePosition.Y();
-    z = 1.0E-3 * candidatePosition.Z();
+    const double x = 1.0E3 * candidatePosition.X(),
+                 y = 1.0E3 * candidatePosition.Y(),
+                 z = 1.0E-3 * candidatePosition.Z();
 
-    //    tx = 1.0E6 * std::atan(candidateMomentum.Px()/pz);
-    //    ty = 1.0E6 * std::atan(candidateMomentum.Py()/pz);
+    //const double tx = 1.0E6 * std::atan(candidateMomentum.Px() / pz),
+    //             ty = 1.0E6 * std::atan(candidateMomentum.Py() / pz);
 
-    tx = 0.0;
-    ty = 0.0;
+    const double tx = 0.0, ty = 0.0;
 
-    theta = std::hypot(std::atan(candidateMomentum.Px() / pz), std::atan(candidateMomentum.Py() / pz));
-    distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / std::cos(theta);
-    time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
+    const double theta = std::hypot(std::atan(candidateMomentum.Px() / pz), std::atan(candidateMomentum.Py() / pz));
+    const double distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / std::cos(theta);
+    const double time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
 
     H_BeamParticle particle(candidate->Mass, candidate->Charge);
     //    particle.set4Momentum(candidateMomentum);

@@ -34,7 +34,7 @@
 class DelphesWriter: public DelphesModule
 {
 public:
-  DelphesWriter() = default;
+  using DelphesModule::DelphesModule;
   virtual ~DelphesWriter() = default;
 
   void SetOutputFile(std::string_view outputFile) { fOutputFile = outputFile; }
