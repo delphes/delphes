@@ -44,7 +44,29 @@ struct SortCandidates
 class TreeWriter: public DelphesWriter
 {
 public:
-  TreeWriter() = default;
+  explicit TreeWriter(const DelphesParameters &moduleParams) :
+    DelphesWriter(moduleParams)
+  {
+    fClassMap[GenParticle::Class()] = &TreeWriter::ProcessParticles;
+    fClassMap[Vertex::Class()] = &TreeWriter::ProcessVertices;
+    fClassMap[Track::Class()] = &TreeWriter::ProcessTracks;
+    fClassMap[Tower::Class()] = &TreeWriter::ProcessTowers;
+    fClassMap[ParticleFlowCandidate::Class()] = &TreeWriter::ProcessParticleFlowCandidates;
+    fClassMap[Photon::Class()] = &TreeWriter::ProcessPhotons;
+    fClassMap[Electron::Class()] = &TreeWriter::ProcessElectrons;
+    fClassMap[Muon::Class()] = &TreeWriter::ProcessMuons;
+    fClassMap[CscCluster::Class()] = &TreeWriter::ProcessCscCluster;
+    fClassMap[Jet::Class()] = &TreeWriter::ProcessJets;
+    fClassMap[MissingET::Class()] = &TreeWriter::ProcessMissingET;
+    fClassMap[ScalarHT::Class()] = &TreeWriter::ProcessScalarHT;
+    fClassMap[Rho::Class()] = &TreeWriter::ProcessRho;
+    fClassMap[Weight::Class()] = &TreeWriter::ProcessWeight;
+    fClassMap[HectorHit::Class()] = &TreeWriter::ProcessHectorHit;
+
+    for(const std::pair<std::string, double> &info :
+      Steer<std::vector<std::pair<std::string, double> > >("Info"))
+      AddInfo(info.first.data(), info.second);
+  }
   ~TreeWriter()
   {
     if(fTreeWriter) fTreeWriter->Write();
@@ -110,66 +132,24 @@ void TreeWriter::Init()
     throw std::runtime_error(message.str());
   }
   fTreeWriter = std::make_unique<ExRootTreeWriter>(fOutputFile.get(), "Delphes");
-  fTreeWriter->Clear();
 
-  fClassMap[GenParticle::Class()] = &TreeWriter::ProcessParticles;
-  fClassMap[Vertex::Class()] = &TreeWriter::ProcessVertices;
-  fClassMap[Track::Class()] = &TreeWriter::ProcessTracks;
-  fClassMap[Tower::Class()] = &TreeWriter::ProcessTowers;
-  fClassMap[ParticleFlowCandidate::Class()] = &TreeWriter::ProcessParticleFlowCandidates;
-  fClassMap[Photon::Class()] = &TreeWriter::ProcessPhotons;
-  fClassMap[Electron::Class()] = &TreeWriter::ProcessElectrons;
-  fClassMap[Muon::Class()] = &TreeWriter::ProcessMuons;
-  fClassMap[CscCluster::Class()] = &TreeWriter::ProcessCscCluster;
-  fClassMap[Jet::Class()] = &TreeWriter::ProcessJets;
-  fClassMap[MissingET::Class()] = &TreeWriter::ProcessMissingET;
-  fClassMap[ScalarHT::Class()] = &TreeWriter::ProcessScalarHT;
-  fClassMap[Rho::Class()] = &TreeWriter::ProcessRho;
-  fClassMap[Weight::Class()] = &TreeWriter::ProcessWeight;
-  fClassMap[HectorHit::Class()] = &TreeWriter::ProcessHectorHit;
-
-  TBranchMap::iterator itBranchMap;
-  std::map<TClass *, TProcessMethod>::iterator itClassMap;
-
-  // read branch configuration and
   // import array with output from filter/classifier/jetfinder modules
-
-  ExRootConfParam param = GetParam("Branch");
-
-  int size = param.GetSize();
-  for(int i = 0; i < size / 3; ++i)
+  for(const std::array<std::string, 3> &branchInfo :
+    Steer<std::vector<std::array<std::string, 3> > >("Branch"))
   {
-    TString branchInputArray = param[i * 3].GetString();
-    TString branchName = param[i * 3 + 1].GetString();
-    TString branchClassName = param[i * 3 + 2].GetString();
-
-    TClass *branchClass = gROOT->GetClass(branchClassName);
+    const std::string &branchInputArray = branchInfo.at(0), &branchName = branchInfo.at(1), &branchClassName = branchInfo.at(2);
+    TClass *branchClass = gROOT->GetClass(branchClassName.data());
     if(!branchClass)
-    {
-      std::cerr << "** ERROR: cannot find class '" << branchClassName << "'" << std::endl;
-      continue;
-    }
+      throw std::runtime_error("** ERROR: cannot find class '" + branchClassName + "'");
 
-    itClassMap = fClassMap.find(branchClass);
-    if(itClassMap == fClassMap.end())
-    {
-      std::cerr << "** ERROR: cannot create branch for class '" << branchClassName << "'" << std::endl;
-      continue;
-    }
+    if(fClassMap.count(branchClass) == 0)
+      throw std::runtime_error("** ERROR: cannot create branch for class '" + branchClassName + "'");
 
     fBranchMap.insert(std::make_pair(
-      fTreeWriter->NewBranch(branchName, branchClass), // ExRootAnalysis tree branch
-      std::make_pair(itClassMap->second, ImportArray(branchInputArray))));
+      fTreeWriter->NewBranch(branchName.data(), branchClass), // ExRootAnalysis tree branch
+      std::make_pair(fClassMap.at(branchClass), ImportArray(branchInputArray))));
   }
-
-  param = GetParam("Info");
-  for(int i = 0; i < param.GetSize() / 2; ++i)
-  {
-    TString infoName = param[i * 2].GetString();
-    Double_t infoValue = param[i * 2 + 1].GetDouble();
-
-    AddInfo(infoName, infoValue);
-  }
+  fTreeWriter->Clear();
 }
 
 //------------------------------------------------------------------------------

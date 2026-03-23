@@ -33,38 +33,27 @@ using namespace std;
 class ConstituentFilter: public DelphesModule
 {
 public:
-  ConstituentFilter() = default;
+  explicit ConstituentFilter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetPTMin(Steer<double>("JetPTMin", 0.0)) {}
 
-  void Init() override;
+  void Init() override
+  {
+    // import input arrays
+    for(const std::string &inputArray : Steer<std::vector<std::string> >("JetInputArray"))
+      fInputList.emplace_back(ImportArray(inputArray));
+    for(const std::pair<std::string, std::string> &constituents :
+      Steer<std::vector<std::pair<std::string, std::string> > >("ConstituentInputArray"))
+      fInputMap.emplace_back(std::make_pair(ImportArray(constituents.first), ExportArray(constituents.second)));
+  }
   void Process() override;
 
 private:
-  Double_t fJetPTMin;
+  const double fJetPTMin;
 
   std::vector<CandidatesCollection> fInputList; //!
   std::vector<std::pair<CandidatesCollection, CandidatesCollection> > fInputMap; //!
 };
-
-//------------------------------------------------------------------------------
-
-void ConstituentFilter::Init()
-{
-  ExRootConfParam param;
-  Long_t i, size;
-
-  fJetPTMin = GetDouble("JetPTMin", 0.0);
-
-  // import input arrays
-  param = GetParam("JetInputArray");
-  size = param.GetSize();
-  for(i = 0; i < size; ++i)
-    fInputList.emplace_back(ImportArray(param[i].GetString()));
-
-  param = GetParam("ConstituentInputArray");
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
-    fInputMap.emplace_back(std::make_pair(ImportArray(param[i * 2].GetString()), ExportArray(param[i * 2 + 1].GetString())));
-}
 
 //------------------------------------------------------------------------------
 

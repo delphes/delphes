@@ -42,7 +42,7 @@ class Weight;
 class DelphesHepMC2Reader: public DelphesReader
 {
 public:
-  DelphesHepMC2Reader();
+  explicit DelphesHepMC2Reader(const DelphesParameters &);
 
   void SetFactory(DelphesFactory *factory) override;
 

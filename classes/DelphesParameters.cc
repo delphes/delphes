@@ -306,7 +306,22 @@ bool convert<std::unordered_map<size_t, size_t> >::decode(const Node &node,
   return true;
 }
 
-/// conversion rules between a YAML node and parameters list
+Node convert<std::unordered_map<size_t, std::string> >::encode(const std::unordered_map<size_t, std::string> &value)
+{
+  const std::vector<std::pair<size_t, std::string> > vectorView(value.begin(), value.end());
+  return convert<std::vector<std::pair<size_t, std::string> > >::encode(vectorView);
+}
+
+bool convert<std::unordered_map<size_t, std::string> >::decode(const Node &node,
+  std::unordered_map<size_t, std::string> &value)
+{
+  if(!node)
+    return false;
+  const std::vector<std::pair<size_t, std::string> > vector = node.as<std::vector<std::pair<size_t, std::string> > >();
+  value = std::unordered_map(vector.begin(), vector.end());
+  return true;
+}
+
 Node convert<DelphesParameters>::encode(const DelphesParameters &params)
 {
   if(params.Empty())

@@ -34,10 +34,12 @@
 #include "classes/DelphesWriter.h"
 
 #include <ExRootAnalysis/ExRootConfReader.h>
+#include <ExRootAnalysis/ExRootProgressBar.h>
 
 #include <TRandom3.h>
 
 Delphes::Delphes(const char *name) :
+  DelphesModule(DelphesParameters{}),
   fDelphesFactory(std::make_unique<DelphesFactory>())
 {
   SetName(name);
@@ -76,9 +78,9 @@ void Delphes::Init()
     }
     const std::string &delphesModuleName = modules->at(name).Data();
     std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(delphesModuleName);
+    moduleObject->SetName(name);
     moduleObject->SetFactory(GetFactory());
     moduleObject->SetConfReader(GetConfReader());
-    moduleObject->SetName(name);
     if(moduleObject->IsWriter())
     {
       DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());

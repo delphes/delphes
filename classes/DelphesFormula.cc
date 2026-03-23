@@ -31,11 +31,10 @@ DelphesFormula::DelphesFormula(const char * /*name*/, const char * /*expression*
 
 //------------------------------------------------------------------------------
 
-Int_t DelphesFormula::Compile(const char *expression)
+Int_t DelphesFormula::Compile(std::string_view expression)
 {
   TString buffer;
-  const char *it;
-  for(it = expression; *it; ++it)
+  for(const char *it = expression.data(); *it; ++it)
   {
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);

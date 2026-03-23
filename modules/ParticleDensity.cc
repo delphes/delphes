@@ -35,52 +35,32 @@ using namespace std;
 class ParticleDensity: public DelphesModule
 {
 public:
-  ParticleDensity() = default;
+  explicit ParticleDensity(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fUseMomentumVector(Steer<bool>("UseMomentumVector", false))
+  {
+    // create multiplicity histogram
+    const std::vector<float> binsEta = Steer<std::vector<float> >("EtaBins"),
+                             binsPhi = Steer<std::vector<float> >("PhiBins");
+    fHisto = std::make_unique<TH2F>(
+      "hParticleDensity", ";#eta;#varphi;d^{2}N/d#etad#varphi",
+      binsEta.size(), binsEta.data(), binsPhi.size(), binsPhi.data());
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks"));
+  }
   void Process() override;
 
 private:
+  const bool fUseMomentumVector; // !
+  std::unique_ptr<TH2F> fHisto; //!
+
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
-
-  Bool_t fUseMomentumVector; // !
-  std::unique_ptr<TH2F> fHisto; //!
 };
-
-//------------------------------------------------------------------------------
-
-void ParticleDensity::Init()
-{
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-
-  // create multiplicity histogram
-  ExRootConfParam paramEta = GetParam("EtaBins");
-  const Long_t sizeEta = paramEta.GetSize();
-  Int_t nbinsEta = sizeEta - 1;
-  std::vector<Float_t> binsEta(static_cast<size_t>(sizeEta));
-  for(Int_t i = 0; i < sizeEta; ++i)
-  {
-    binsEta[i] = paramEta[i].GetDouble();
-  }
-
-  ExRootConfParam paramPhi = GetParam("PhiBins");
-  const Long_t sizePhi = paramPhi.GetSize();
-  Int_t nbinsPhi = sizePhi - 1;
-  std::vector<Float_t> binsPhi(static_cast<size_t>(sizePhi));
-  for(Int_t i = 0; i < sizePhi; ++i)
-  {
-    binsPhi[i] = paramPhi[i].GetDouble();
-  }
-
-  fHisto = std::make_unique<TH2F>("hParticleDensity", ";#eta;#varphi;d^{2}N/d#etad#varphi", nbinsEta, binsEta.data(), nbinsPhi, binsPhi.data());
-
-  fUseMomentumVector = GetBool("UseMomentumVector", false);
-}
 
 //------------------------------------------------------------------------------
 

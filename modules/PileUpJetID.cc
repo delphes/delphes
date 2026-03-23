@@ -16,23 +16,57 @@ using namespace std;
 class PileUpJetID: public DelphesModule
 {
 public:
-  PileUpJetID() = default;
+  explicit PileUpJetID(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetPTMin(Steer<double>("JetPTMin", 20.0)),
+    fParameterR(Steer<double>("ParameterR", 0.5)),
+    //
+    fUseConstituents(Steer<int>("UseConstituents", 0)),
+    fMeanSqDeltaRMaxBarrel(Steer<double>("MeanSqDeltaRMaxBarrel", 0.1)),
+    fBetaMinBarrel(Steer<double>("BetaMinBarrel", 0.1)),
+    fMeanSqDeltaRMaxEndcap(Steer<double>("MeanSqDeltaRMaxEndcap", 0.1)),
+    fBetaMinEndcap(Steer<double>("BetaMinEndcap", 0.1)),
+    fMeanSqDeltaRMaxForward(Steer<double>("MeanSqDeltaRMaxForward", 0.1)),
+    //
+    fJetPTMinForNeutrals(Steer<double>("JetPTMinForNeutrals", 20.0)),
+    fNeutralPTMin(Steer<double>("NeutralPTMin", 2.0))
+  {
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "ParticlePropagator/tracks"));
+    fNeutralInputArray = ImportArray(Steer<std::string>("NeutralInputArray", "ParticlePropagator/tracks"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets"));
+    fNeutralsInPassingJets = ExportArray(Steer<std::string>("NeutralsInPassingJets", "eflowtowers"));
+  }
   void Process() override;
 
 private:
-  Double_t fJetPTMin;
-  Double_t fParameterR;
+  const double fJetPTMin;
+  const double fParameterR;
 
-  Double_t fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
-  Double_t fBetaMinBarrel; // |eta| < 2.5
-  Double_t fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
-  Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
-  Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
+  // If set to true, may have weird results for PFCHS
+  // If set to false, uses everything within dR < fParameterR even if in other jets &c.
+  // Results should be very similar for PF
+  const int fUseConstituents;
 
-  Double_t fNeutralPTMin;
-  Double_t fJetPTMinForNeutrals;
+  const double fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
+  const double fBetaMinBarrel; // |eta| < 2.5
+  const double fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
+  const double fBetaMinEndcap; // 1.5 < |eta| < 4.0
+  const double fMeanSqDeltaRMaxForward; // |eta| > 4.0
+
+  const double fJetPTMinForNeutrals;
+  const double fNeutralPTMin;
+
+  CandidatesCollection fJetInputArray; //!
+  CandidatesCollection fTrackInputArray; // SCZ
+  CandidatesCollection fNeutralInputArray;
+
+  CandidatesCollection fOutputArray; //!
+  CandidatesCollection fNeutralsInPassingJets; // SCZ
 
   /*
 JAY
@@ -76,48 +110,8 @@ MeanSqDeltaR
 0.2
   */
 
-  // If set to true, may have weird results for PFCHS
-  // If set to false, uses everything within dR < fParameterR even if in other jets &c.
-  // Results should be very similar for PF
-  Int_t fUseConstituents;
-
-  Bool_t fAverageEachTower;
-
-  CandidatesCollection fJetInputArray; //!
-  CandidatesCollection fTrackInputArray; // SCZ
-  CandidatesCollection fNeutralInputArray;
-
-  CandidatesCollection fOutputArray; //!
-  CandidatesCollection fNeutralsInPassingJets; // SCZ
+  const bool fAverageEachTower{false}; // for timing
 };
-
-//------------------------------------------------------------------------------
-
-void PileUpJetID::Init()
-{
-  fJetPTMin = GetDouble("JetPTMin", 20.0);
-  fParameterR = GetDouble("ParameterR", 0.5);
-  fUseConstituents = GetInt("UseConstituents", 0);
-
-  fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel", 0.1);
-  fBetaMinBarrel = GetDouble("BetaMinBarrel", 0.1);
-  fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap", 0.1);
-  fBetaMinEndcap = GetDouble("BetaMinEndcap", 0.1);
-  fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward", 0.1);
-  fJetPTMinForNeutrals = GetDouble("JetPTMinForNeutrals", 20.0);
-  fNeutralPTMin = GetDouble("NeutralPTMin", 2.0);
-
-  fAverageEachTower = false; // for timing
-
-  // import input arrays
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "ParticlePropagator/tracks"));
-
-  // create output arrays
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-  fNeutralsInPassingJets = ExportArray(GetString("NeutralsInPassingJets", "eflowtowers"));
-}
 
 //------------------------------------------------------------------------------
 
@@ -297,11 +291,11 @@ void PileUpJetID::Process()
 
     // New stuff
     /*
-    fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel",0.1);
-    fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
-    fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap",0.1);
-    fBetaMinEndcap = GetDouble("BetaMinEndcap",0.1);
-    fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward",0.1);
+    fMeanSqDeltaRMaxBarrel = Steer<double>("MeanSqDeltaRMaxBarrel",0.1);
+    fBetaMinBarrel = Steer<double>("BetaMinBarrel",0.1);
+    fMeanSqDeltaRMaxEndcap = Steer<double>("MeanSqDeltaRMaxEndcap",0.1);
+    fBetaMinEndcap = Steer<double>("BetaMinEndcap",0.1);
+    fMeanSqDeltaRMaxForward = Steer<double>("MeanSqDeltaRMaxForward",0.1);
     */
 
     bool passId = false;

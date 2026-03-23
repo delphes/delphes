@@ -22,6 +22,8 @@
 
 #include <signal.h>
 
+#include <ExRootAnalysis/ExRootProgressBar.h>
+
 #include <TApplication.h>
 #include <TLorentzVector.h>
 #include <TROOT.h>
@@ -74,7 +76,7 @@ int main(int argc, char *argv[])
 
     const auto factory = std::make_unique<DelphesFactory>();
 
-    const auto reader = std::make_unique<DelphesHepMC2Reader>();
+    const auto reader = std::make_unique<DelphesHepMC2Reader>(DelphesParameters{});
     reader->SetFactory(factory.get());
 
     i = 2;

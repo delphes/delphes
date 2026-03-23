@@ -38,52 +38,29 @@
 
 #include <vector>
 
-using namespace std;
-
 class Merger: public DelphesModule
 {
 public:
-  Merger() = default;
+  using DelphesModule::DelphesModule;
 
-  void Init() override;
+  void Init() override
+  {
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "candidates"));
+    fMomentumOutputArray = ExportArray(Steer<std::string>("MomentumOutputArray", "momentum"));
+    fEnergyOutputArray = ExportArray(Steer<std::string>("EnergyOutputArray", "energy"));
+    // import arrays with output from other modules
+    for(const std::string &inputList : Steer<std::vector<std::string> >("InputArray"))
+      fInputList.emplace_back(ImportArray(inputList));
+  }
   void Process() override;
-  void Finish() override;
 
 private:
-  std::vector<CandidatesCollection> fInputList; //!
-
   CandidatesCollection fOutputArray; //!
   CandidatesCollection fMomentumOutputArray; //!
   CandidatesCollection fEnergyOutputArray; //!
+
+  std::vector<CandidatesCollection> fInputList; //!
 };
-
-//------------------------------------------------------------------------------
-
-void Merger::Init()
-{
-  // import arrays with output from other modules
-
-  ExRootConfParam param = GetParam("InputArray");
-  Long_t i, size;
-
-  size = param.GetSize();
-  for(i = 0; i < size; ++i)
-  {
-    fInputList.emplace_back(ImportArray(param[i].GetString()));
-  }
-
-  // create output arrays
-  fOutputArray = ExportArray(GetString("OutputArray", "candidates"));
-  fMomentumOutputArray = ExportArray(GetString("MomentumOutputArray", "momentum"));
-  fEnergyOutputArray = ExportArray(GetString("EnergyOutputArray", "energy"));
-}
-
-//------------------------------------------------------------------------------
-
-void Merger::Finish()
-{
-  fInputList.clear();
-}
 
 //------------------------------------------------------------------------------
 
@@ -94,13 +71,9 @@ void Merger::Process()
   fEnergyOutputArray->clear();
 
   TLorentzVector momentum;
-  Double_t sumPT, sumE;
+  double sumPT = 0., sumE = 0.;
 
   DelphesFactory *factory = GetFactory();
-
-  momentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-  sumPT = 0;
-  sumE = 0;
 
   // loop over all input arrays
   for(const auto &input_collection : fInputList)

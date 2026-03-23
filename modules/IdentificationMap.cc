@@ -37,11 +37,33 @@ using namespace std;
 class IdentificationMap: public DelphesModule
 {
 public:
-  IdentificationMap() = default;
+  explicit IdentificationMap(const DelphesParameters &moduleParams) : DelphesModule(moduleParams)
+  {
+    // read efficiency formulas
+    for(const std::pair<int, std::pair<int, std::string> > efficiencyFormula :
+      Steer<std::unordered_map<int, std::pair<int, std::string> > >("EfficiencyFormula"))
+    {
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile(efficiencyFormula.second.second);
+      const int pdg = efficiencyFormula.first;
+      const int pdg2 = efficiencyFormula.second.first;
+      fEfficiencyMap.insert(std::make_pair(pdg, make_pair(pdg2, std::move(formula))));
+    }
+    // set default efficiency formula
+    if(fEfficiencyMap.count(0) == 0)
+    {
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile("1.0");
+      fEfficiencyMap.insert(std::make_pair(0, std::make_pair(0, std::move(formula))));
+    }
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+  }
   void Process() override;
-  void Finish() override;
 
 private:
   typedef std::multimap<Int_t, std::pair<Int_t, std::unique_ptr<DelphesFormula> > > TMisIDMap; //!
@@ -54,93 +76,41 @@ private:
 
 //------------------------------------------------------------------------------
 
-void IdentificationMap::Init()
-{
-  TMisIDMap::iterator itEfficiencyMap;
-  ExRootConfParam param;
-  Int_t i, size, pdg;
-
-  // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
-
-  fEfficiencyMap.clear();
-  for(i = 0; i < size / 3; ++i)
-  {
-    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
-    formula->Compile(param[i * 3 + 2].GetString());
-    pdg = param[i * 3].GetInt();
-    fEfficiencyMap.insert(make_pair(pdg, make_pair(param[i * 3 + 1].GetInt(), std::move(formula))));
-  }
-
-  // set default efficiency formula
-  itEfficiencyMap = fEfficiencyMap.find(0);
-  if(itEfficiencyMap == fEfficiencyMap.end())
-  {
-    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
-    formula->Compile("1.0");
-
-    fEfficiencyMap.insert(make_pair(0, make_pair(0, std::move(formula))));
-  }
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void IdentificationMap::Finish()
-{
-  fEfficiencyMap.clear();
-}
-
-//------------------------------------------------------------------------------
-
 void IdentificationMap::Process()
 {
   fOutputArray->clear();
-
-  Double_t pt, eta, phi, e;
-  TMisIDMap::iterator itEfficiencyMap;
-  pair<TMisIDMap::iterator, TMisIDMap::iterator> range;
-  Int_t pdgCodeIn, pdgCodeOut, charge;
-
-  Double_t p, r, total;
 
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
+    const double eta = candidatePosition.Eta();
+    const double phi = candidatePosition.Phi();
+    const double pt = candidateMomentum.Pt();
+    const double e = candidateMomentum.E();
 
-    pdgCodeIn = candidate->PID;
-    charge = candidate->Charge;
+    const int pdgCodeIn = candidate->PID;
+    const int charge = candidate->Charge;
 
     // first check that PID of this particle is specified in the map
     // otherwise, look for PID = 0
 
-    itEfficiencyMap = fEfficiencyMap.find(pdgCodeIn);
+    //TMisIDMap::iterator itEfficiencyMap = fEfficiencyMap.find(pdgCodeIn);
 
-    range = fEfficiencyMap.equal_range(pdgCodeIn);
+    std::pair<TMisIDMap::iterator, TMisIDMap::iterator> range = fEfficiencyMap.equal_range(pdgCodeIn);
     if(range.first == range.second) range = fEfficiencyMap.equal_range(-pdgCodeIn);
     if(range.first == range.second) range = fEfficiencyMap.equal_range(0);
 
-    r = gRandom->Uniform();
-    total = 0.0;
+    const double r = gRandom->Uniform();
+    double total = 0.;
 
     // loop over sub-map for this PID
     for(TMisIDMap::iterator it = range.first; it != range.second; ++it)
     {
       std::unique_ptr<DelphesFormula> &formula = (it->second).second;
-      pdgCodeOut = (it->second).first;
+      const int pdgCodeOut = (it->second).first;
 
-      p = formula->Eval(pt, eta, phi, e);
+      const double p = formula->Eval(pt, eta, phi, e);
 
       if(total <= r && r < total + p)
       {

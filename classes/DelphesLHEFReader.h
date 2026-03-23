@@ -42,7 +42,7 @@ class DelphesWriter;
 class DelphesLHEFReader: public DelphesReader
 {
 public:
-  DelphesLHEFReader();
+  explicit DelphesLHEFReader(const DelphesParameters &);
 
   void SetFactory(DelphesFactory *factory) override;
 

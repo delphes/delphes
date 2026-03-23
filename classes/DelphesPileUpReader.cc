@@ -43,7 +43,7 @@ static const int kRecordSize = 9;
 
 //------------------------------------------------------------------------------
 
-DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
+DelphesPileUpReader::DelphesPileUpReader(std::string_view fileName) :
   fEntries(0), fEntrySize(0), fCounter(0),
   fPileUpFile(0), fIndex(0), fBuffer(0),
   fInputReader(0), fIndexReader(0), fBufferReader(0)
@@ -59,7 +59,7 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   fIndexReader->SetBuffer(fIndex);
   fBufferReader->SetBuffer(fBuffer);
 
-  fPileUpFile = fopen(fileName, "rb");
+  fPileUpFile = fopen(fileName.data(), "rb");
 
   if(fPileUpFile == NULL)
   {

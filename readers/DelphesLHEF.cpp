@@ -22,6 +22,8 @@
 
 #include <signal.h>
 
+#include <ExRootAnalysis/ExRootProgressBar.h>
+
 #include <TROOT.h>
 #include <TStopwatch.h>
 
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
     const auto confReader = std::make_unique<ExRootConfReader>();
     confReader->ReadFile(argv[1]);
 
-    const auto reader = std::make_unique<DelphesLHEFReader>();
+    const auto reader = std::make_unique<DelphesLHEFReader>(DelphesParameters{});
     reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
     reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
 

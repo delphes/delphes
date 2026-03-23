@@ -42,13 +42,13 @@ class PartonClassifier: public ExRootClassifier
 {
 public:
   PartonClassifier() {}
-  Int_t GetCategory(TObject *object)
+  int GetCategory(TObject *object)
   {
     // select parton in the parton list
 
     Candidate *parton = static_cast<Candidate *>(object);
     const TLorentzVector &momentum = parton->Momentum;
-    Int_t pdgCode;
+    int pdgCode;
 
     // inside the eta && momentum range (be a little bit larger that the tracking coverage
     if(momentum.Pt() <= fPTMin || std::fabs(momentum.Eta()) > fEtaMax) return -1;
@@ -61,7 +61,7 @@ public:
 
     return 0;
   }
-  Double_t fEtaMax, fPTMin;
+  double fEtaMax, fPTMin;
 };
 
 //------------------------------------------------------------------------------
@@ -70,13 +70,13 @@ class ParticleLHEFClassifier: public ExRootClassifier
 {
 public:
   ParticleLHEFClassifier() {}
-  Int_t GetCategory(TObject *object)
+  int GetCategory(TObject *object)
   {
     // select parton in the parton list
 
     Candidate *particleLHEF = static_cast<Candidate *>(object);
     const TLorentzVector &momentum = particleLHEF->Momentum;
-    Int_t pdgCode;
+    int pdgCode;
 
     // inside the eta && momentum range (be a little bit larger that the tracking coverage
     if(momentum.Pt() <= fPTMin || std::fabs(momentum.Eta()) > fEtaMax) return -1;
@@ -88,7 +88,7 @@ public:
 
     return 0;
   }
-  Double_t fEtaMax, fPTMin;
+  double fEtaMax, fPTMin;
 };
 
 //------------------------------------------------------------------------------
@@ -96,62 +96,53 @@ public:
 class JetFlavorAssociation: public DelphesModule
 {
 public:
-  JetFlavorAssociation() :
+  explicit JetFlavorAssociation(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fDeltaR(Steer<double>("DeltaR", 0.5)),
+    fPartonFilter(std::make_unique<DelphesFilter>(fPartonInputArray)),
     fPartonClassifier(std::make_unique<PartonClassifier>()),
-    fParticleLHEFClassifier(std::make_unique<ParticleLHEFClassifier>()) {}
+    fParticleLHEFClassifier(std::make_unique<ParticleLHEFClassifier>())
+  {
+    fPartonClassifier->fPTMin = Steer<double>("PartonPTMin", 0.0);
+    fPartonClassifier->fEtaMax = Steer<double>("PartonEtaMax", 2.5);
 
-  void Init() override;
+    fParticleLHEFClassifier->fPTMin = Steer<double>("PartonPTMin", 0.0);
+    fParticleLHEFClassifier->fEtaMax = Steer<double>("PartonEtaMax", 2.5);
+  }
+
+  void Init() override
+  {
+    fPartonInputArray = ImportArray(Steer<std::string>("PartonInputArray", "Delphes/partons"));
+    fParticleInputArray = ImportArray(Steer<std::string>("ParticleInputArray", "Delphes/allParticles"));
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+    try
+    {
+      fParticleLHEFInputArray = ImportArray(Steer<std::string>("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"));
+      fParticleLHEFFilter = std::make_unique<DelphesFilter>(fParticleLHEFInputArray);
+    }
+    catch(runtime_error &)
+    {
+    }
+  }
   void Process() override;
 
   void GetAlgoFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray);
   void GetPhysicsFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray);
 
 private:
-  Double_t fDeltaR;
+  const double fDeltaR;
 
+  const std::unique_ptr<DelphesFilter> fPartonFilter;
   const std::unique_ptr<PartonClassifier> fPartonClassifier; //!
   const std::unique_ptr<ParticleLHEFClassifier> fParticleLHEFClassifier; //!
 
-  std::unique_ptr<DelphesFilter> fPartonFilter;
   std::unique_ptr<DelphesFilter> fParticleLHEFFilter;
 
   CandidatesCollection fPartonInputArray; //!
   CandidatesCollection fParticleInputArray; //!
-  CandidatesCollection fParticleLHEFInputArray; //!
   CandidatesCollection fJetInputArray; //!
+  CandidatesCollection fParticleLHEFInputArray; //!
 };
-
-//------------------------------------------------------------------------------
-
-void JetFlavorAssociation::Init()
-{
-  ExRootConfParam param;
-
-  fDeltaR = GetDouble("DeltaR", 0.5);
-
-  fPartonClassifier->fPTMin = GetDouble("PartonPTMin", 0.0);
-  fPartonClassifier->fEtaMax = GetDouble("PartonEtaMax", 2.5);
-
-  fParticleLHEFClassifier->fPTMin = GetDouble("PartonPTMin", 0.0);
-  fParticleLHEFClassifier->fEtaMax = GetDouble("PartonEtaMax", 2.5);
-
-  // import input array(s)
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fPartonFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
-
-  fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
-
-  try
-  {
-    fParticleLHEFInputArray = ImportArray(GetString("ParticleLHEFInputArray", "Delphes/allParticlesLHEF"));
-    fParticleLHEFFilter = std::make_unique<DelphesFilter>(fParticleLHEFInputArray);
-  }
-  catch(runtime_error &)
-  {
-  }
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-}
 
 //------------------------------------------------------------------------------
 

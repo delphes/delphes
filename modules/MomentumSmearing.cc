@@ -37,38 +37,33 @@ using namespace std;
 class MomentumSmearing: public DelphesModule
 {
 public:
-  MomentumSmearing() : fFormula(std::make_unique<DelphesFormula>()) {}
+  explicit MomentumSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    // switch to compute momentum smearing based on momentum vector eta, phi
+    fUseMomentumVector(Steer<bool>("UseMomentumVector", false)),
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormula->Compile(Steer<std::string>("ResolutionFormula", "0.0"));
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+  }
   void Process() override;
 
 private:
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
+  const double fUseMomentumVector; //!
+
   const std::unique_ptr<DelphesFormula> fFormula; //!
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fOutputArray; //!
-
-  Double_t fUseMomentumVector; //!
 };
-
-//------------------------------------------------------------------------------
-
-void MomentumSmearing::Init()
-{
-  // read resolution formula
-  fFormula->Compile(GetString("ResolutionFormula", "0.0"));
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // switch to compute momentum smearing based on momentum vector eta, phi
-  fUseMomentumVector = GetBool("UseMomentumVector", false);
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
 
 //------------------------------------------------------------------------------
 
@@ -76,31 +71,29 @@ void MomentumSmearing::Process()
 {
   fOutputArray->clear();
 
-  Double_t pt, eta, phi, e, m, res;
-
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
 
+    double eta = candidatePosition.Eta();
+    double phi = candidatePosition.Phi();
     if(fUseMomentumVector)
     {
       eta = candidateMomentum.Eta();
       phi = candidateMomentum.Phi();
     }
 
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
-    m = candidateMomentum.M();
-    res = fFormula->Eval(pt, eta, phi, e, candidate);
+    const double e = candidateMomentum.E();
+    const double m = candidateMomentum.M();
+    double res = fFormula->Eval(candidateMomentum.Pt(), eta, phi, e, candidate);
 
     // apply smearing formula
     //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
 
     res = (res > 1.0) ? 1.0 : res;
 
+    double pt = 0.;
     pt = LogNormal(pt, res * pt);
 
     //if(pt <= 0.0) continue;

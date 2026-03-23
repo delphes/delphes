@@ -49,7 +49,8 @@
 
 using namespace std;
 
-DelphesHepMC2Reader::DelphesHepMC2Reader() :
+DelphesHepMC2Reader::DelphesHepMC2Reader(const DelphesParameters &readerParams) :
+  DelphesReader(readerParams),
   fInputFile(0), fPDG(TDatabasePDG::Instance()),
   fVertexCounter(-1), fInCounter(-1), fOutCounter(-1),
   fParticleCounter(0) {}

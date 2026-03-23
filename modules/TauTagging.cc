@@ -43,109 +43,75 @@ using namespace std;
 class TauTagging: public DelphesModule
 {
 public:
-  TauTagging() = default;
+  explicit TauTagging(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fBitNumber(Steer<int>("BitNumber", 0)),
+    fDeltaR(Steer<double>("DeltaR", 0.5))
+  {
+    for(const std::pair<int, std::string> &efficiencyFormula :
+      Steer<std::vector<std::pair<int, std::string> > >("EfficiencyFormula"))
+    {
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile(efficiencyFormula.second);
+      fEfficiencyMap[efficiencyFormula.first] = std::move(formula);
+    }
+    // set default efficiency formula
+    if(fEfficiencyMap.count(0) == 0)
+    {
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile("0.0");
+      fEfficiencyMap[0] = std::move(formula);
+    }
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fParticleInputArray = ImportArray(Steer<std::string>("ParticleInputArray", "Delphes/allParticles"));
+    fPartonInputArray = ImportArray(Steer<std::string>("PartonInputArray", "Delphes/partons"));
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+
+    fClassifier = std::make_unique<TauTaggingPartonClassifier>(fParticleInputArray);
+    fClassifier->fPTMin = Steer<double>("TauPTMin", 1.0);
+    fClassifier->fEtaMax = Steer<double>("TauEtaMax", 2.5);
+
+    fFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
+  }
   void Process() override;
-  void Finish() override;
 
 private:
-  Int_t fBitNumber;
-
-  Double_t fDeltaR;
-
-#if !defined(__CINT__) && !defined(__CLING__)
-  std::map<Int_t, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
-#endif
-
-  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
-  std::unique_ptr<DelphesFilter> fFilter;
+  const int fBitNumber;
+  const double fDeltaR;
 
   CandidatesCollection fParticleInputArray; //!
   CandidatesCollection fPartonInputArray; //!
   CandidatesCollection fJetInputArray; //!
+
+  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<DelphesFilter> fFilter;
+
+#if !defined(__CINT__) && !defined(__CLING__)
+  std::map<int, std::unique_ptr<DelphesFormula> > fEfficiencyMap; //!
+#endif
 };
-
-//------------------------------------------------------------------------------
-
-void TauTagging::Init()
-{
-  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
-  ExRootConfParam param;
-  Int_t i, size;
-
-  fBitNumber = GetInt("BitNumber", 0);
-
-  fDeltaR = GetDouble("DeltaR", 0.5);
-
-  // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
-
-  fEfficiencyMap.clear();
-  for(i = 0; i < size / 2; ++i)
-  {
-    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
-    formula->Compile(param[i * 2 + 1].GetString());
-
-    fEfficiencyMap[param[i * 2].GetInt()] = std::move(formula);
-  }
-
-  // set default efficiency formula
-  itEfficiencyMap = fEfficiencyMap.find(0);
-  if(itEfficiencyMap == fEfficiencyMap.end())
-  {
-    std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
-    formula->Compile("0.0");
-
-    fEfficiencyMap[0] = std::move(formula);
-  }
-
-  // import input array(s)
-
-  fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
-
-  fClassifier = std::make_unique<TauTaggingPartonClassifier>(fParticleInputArray);
-  fClassifier->fPTMin = GetDouble("TauPTMin", 1.0);
-  fClassifier->fEtaMax = GetDouble("TauEtaMax", 2.5);
-
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void TauTagging::Finish()
-{
-  fEfficiencyMap.clear();
-}
 
 //------------------------------------------------------------------------------
 
 void TauTagging::Process()
 {
-  TLorentzVector tauMomentum;
-  Double_t pt, eta, phi, e, eff;
-  CandidatesCollection tauArray;
-  map<Int_t, std::unique_ptr<DelphesFormula> >::iterator itEfficiencyMap;
-  Int_t pdgCode, charge, i;
-
   // select taus
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
+  CandidatesCollection tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
   for(Candidate *const &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
-    pdgCode = 0;
-    charge = gRandom->Uniform() > 0.5 ? 1 : -1;
-    eta = jetMomentum.Eta();
-    phi = jetMomentum.Phi();
-    pt = jetMomentum.Pt();
-    e = jetMomentum.E();
+    int pdgCode = 0;
+    int charge = gRandom->Uniform() > 0.5 ? 1 : -1;
+    const double eta = jetMomentum.Eta();
+    const double phi = jetMomentum.Phi();
+    const double pt = jetMomentum.Pt();
+    const double e = jetMomentum.E();
 
     // loop over all input taus
     if(tauArray)
@@ -159,9 +125,8 @@ void TauTagging::Process()
           throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
         }
 
-        tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-
-        for(i = tau->D1; i <= tau->D2; ++i)
+        TLorentzVector tauMomentum;
+        for(int i = tau->D1; i <= tau->D2; ++i)
         {
           Candidate *const &daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
           if(std::abs(daughter->PID) == 16) continue;
@@ -181,16 +146,16 @@ void TauTagging::Process()
     if(pdgCode == 0)
     {
 
-      Double_t drMin = fDeltaR;
+      double drMin = fDeltaR;
       for(Candidate *const &part : *fPartonInputArray)
       {
         if(std::abs(part->PID) == 11 || std::abs(part->PID) == 13)
         {
-          tauMomentum = part->Momentum;
+          TLorentzVector &tauMomentum = part->Momentum;
           if(tauMomentum.Pt() < fClassifier->fPTMin) continue;
           if(std::fabs(tauMomentum.Eta()) > fClassifier->fEtaMax) continue;
 
-          Double_t dr = jetMomentum.DeltaR(tauMomentum);
+          double dr = jetMomentum.DeltaR(tauMomentum);
           if(dr < drMin)
           {
             drMin = dr;
@@ -202,15 +167,11 @@ void TauTagging::Process()
     }
 
     // find an efficency formula
-    itEfficiencyMap = fEfficiencyMap.find(pdgCode);
-    if(itEfficiencyMap == fEfficiencyMap.end())
-    {
-      itEfficiencyMap = fEfficiencyMap.find(0);
-    }
-    std::unique_ptr<DelphesFormula> &formula = itEfficiencyMap->second;
+    std::unique_ptr<DelphesFormula> &formula =
+      fEfficiencyMap.count(pdgCode) == 0 ? fEfficiencyMap.at(0) : fEfficiencyMap.at(pdgCode);
 
     // apply an efficency formula
-    eff = formula->Eval(pt, eta, phi, e);
+    const double eff = formula->Eval(pt, eta, phi, e);
     jet->TauFlavor = pdgCode;
     jet->TauTag |= (gRandom->Uniform() <= eff) << fBitNumber;
     jet->TauWeight = eff;

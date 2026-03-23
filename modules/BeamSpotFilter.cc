@@ -12,15 +12,12 @@
 class BeamSpotFilter: public DelphesModule
 {
 public:
-  BeamSpotFilter() = default;
+  using DelphesModule::DelphesModule;
 
   void Init() override
   {
-    // import input array
-    fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-
-    // create output array
-    fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "filteredParticles"));
   }
   void Process() override
   {

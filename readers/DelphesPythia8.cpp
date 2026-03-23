@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
     {
       if(const auto inputFile = pythia->word("Beams:LHEF"); !inputFile.empty())
       {
-        reader = std::make_unique<DelphesLHEFReader>();
+        reader = std::make_unique<DelphesLHEFReader>(DelphesParameters{});
         reader->LoadInputFile(inputFile);
 
         eventInfoLHEF = modularDelphes->GetFactory()->Book<HepMCEvent>("EventLHEF");

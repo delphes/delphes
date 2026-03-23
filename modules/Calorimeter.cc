@@ -47,57 +47,99 @@ using namespace std;
 class Calorimeter: public DelphesModule
 {
 public:
-  Calorimeter() : fECalResolutionFormula(std::make_unique<DelphesFormula>()),
-                  fHCalResolutionFormula(std::make_unique<DelphesFormula>()),
-                  fECalTowerTrackArray(std::make_shared<std::vector<Candidate *> >()),
-                  fHCalTowerTrackArray(std::make_shared<std::vector<Candidate *> >()) {}
+  explicit Calorimeter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fTimingEnergyMin(Steer<double>("TimingEnergyMin", 4.)), // read min E value for timing measurement in ECAL
+    fECalEnergyMin(Steer<double>("ECalEnergyMin", 0.0)), // read min E value for towers to be saved
+    fHCalEnergyMin(Steer<double>("HCalEnergyMin", 0.0)),
+    fECalEnergySignificanceMin(Steer<double>("ECalEnergySignificanceMin", 0.0)),
+    fHCalEnergySignificanceMin(Steer<double>("HCalEnergySignificanceMin", 0.0)),
+    fSmearTowerCenter(Steer<bool>("SmearTowerCenter", true)), // switch on or off the dithering of the center of calorimeter towers
+    fPhiBins(Steer<std::unordered_map<double, std::vector<double> > >("EtaPhiBins")),
+    fFractionMap(Steer<TFractionMap>("EnergyFraction")), // ECAL/HCAL energy fractions
+    fECalTowerTrackArray(std::make_shared<std::vector<Candidate *> >()),
+    fHCalTowerTrackArray(std::make_shared<std::vector<Candidate *> >()),
+    fECalResolutionFormula(std::make_unique<DelphesFormula>()),
+    fHCalResolutionFormula(std::make_unique<DelphesFormula>())
+  {
+    for(const std::pair<double, std::vector<double> > etaPhiBins : fPhiBins) // auto would avoid a copy
+      fEtaBins.emplace_back(etaPhiBins.first);
+    std::sort(fEtaBins.begin(), fEtaBins.end());
 
-  void Init() override;
+    // set default energy fractions values
+    fFractionMap[0] = std::make_pair(0., 1.);
+
+    // read resolution formulas
+    fECalResolutionFormula->Compile(Steer<std::string>("ECalResolutionFormula", "0"));
+    fHCalResolutionFormula->Compile(Steer<std::string>("HCalResolutionFormula", "0"));
+  }
+
+  void Init() override
+  {
+    // import array with output from other modules
+    fParticleInputArray = ImportArray(Steer<std::string>("ParticleInputArray", "ParticlePropagator/particles"));
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "ParticlePropagator/tracks"));
+    // create output arrays
+    fTowerOutputArray = ExportArray(Steer<std::string>("TowerOutputArray", "towers"));
+    fPhotonOutputArray = ExportArray(Steer<std::string>("PhotonOutputArray", "photons"));
+    fEFlowTrackOutputArray = ExportArray(Steer<std::string>("EFlowTrackOutputArray", "eflowTracks"));
+    fEFlowPhotonOutputArray = ExportArray(Steer<std::string>("EFlowPhotonOutputArray", "eflowPhotons"));
+    fEFlowNeutralHadronOutputArray = ExportArray(Steer<std::string>("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
+  }
   void Process() override;
-  void Finish() override;
 
 private:
-  typedef std::map<Long64_t, std::pair<Double_t, Double_t> > TFractionMap; //!
-  typedef std::map<Double_t, std::set<Double_t> > TBinMap; //!
+  typedef std::map<Long64_t, std::pair<double, Double_t> > TFractionMap; //!
+  typedef std::map<double, std::set<Double_t> > TBinMap; //!
+
+  void FinalizeTower();
+  double LogNormal(Double_t mean, Double_t sigma);
+
+  const double fTimingEnergyMin;
+  // For timing
+  // So far this flag needs to be false
+  // Curved extrapolation not supported
+  const bool fElectronsFromTrack{false};
+  const double fECalEnergyMin;
+  const double fHCalEnergyMin;
+
+  const double fECalEnergySignificanceMin;
+  const double fHCalEnergySignificanceMin;
+
+  const bool fSmearTowerCenter;
+
+  const std::unordered_map<double, std::vector<double> > fPhiBins;
+  std::vector<double> fEtaBins;
+
+  TFractionMap fFractionMap; //!
+
+  // unstored collections
+  const CandidatesCollection fECalTowerTrackArray; //!
+  const CandidatesCollection fHCalTowerTrackArray; //!
 
   const std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
   const std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
 
+  double fTowerRmax;
+  int fTowerTrackHits, fTowerPhotonHits;
+
+  double fECalTrackSigma;
+  double fHCalTrackSigma;
+
   Candidate *fTower{nullptr};
-  Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
-  Double_t fECalTowerEnergy, fHCalTowerEnergy;
-  Double_t fECalTrackEnergy, fHCalTrackEnergy;
+  double fTowerEta, fTowerPhi, fTowerEdges[4];
+  double fECalTowerEnergy, fHCalTowerEnergy;
+  double fECalTrackEnergy, fHCalTrackEnergy;
 
-  Double_t fTimingEnergyMin;
-  Bool_t fElectronsFromTrack;
-  Double_t fTowerRmax;
-
-  Int_t fTowerTrackHits, fTowerPhotonHits;
-
-  Double_t fECalEnergyMin;
-  Double_t fHCalEnergyMin;
-
-  Double_t fECalEnergySignificanceMin;
-  Double_t fHCalEnergySignificanceMin;
-
-  Double_t fECalTrackSigma;
-  Double_t fHCalTrackSigma;
-
-  Bool_t fSmearTowerCenter;
-
-  TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
-
-  std::vector<Double_t> fEtaBins;
-  std::vector<std::vector<Double_t> *> fPhiBins;
 
   std::vector<Long64_t> fTowerHits;
 
-  std::vector<Double_t> fECalTowerFractions;
-  std::vector<Double_t> fHCalTowerFractions;
+  std::vector<double> fECalTowerFractions;
+  std::vector<double> fHCalTowerFractions;
 
-  std::vector<Double_t> fECalTrackFractions;
-  std::vector<Double_t> fHCalTrackFractions;
+  std::vector<double> fECalTrackFractions;
+  std::vector<double> fHCalTrackFractions;
 
   // input collections
   CandidatesCollection fParticleInputArray; //!
@@ -110,124 +152,7 @@ private:
   CandidatesCollection fEFlowTrackOutputArray; //!
   CandidatesCollection fEFlowPhotonOutputArray; //!
   CandidatesCollection fEFlowNeutralHadronOutputArray; //!
-
-  // unstored collections
-  const CandidatesCollection fECalTowerTrackArray; //!
-  const CandidatesCollection fHCalTowerTrackArray; //!
-
-  void FinalizeTower();
-  Double_t LogNormal(Double_t mean, Double_t sigma);
 };
-
-//------------------------------------------------------------------------------
-
-void Calorimeter::Init()
-{
-  ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
-  Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
-  Double_t ecalFraction, hcalFraction;
-  TBinMap::iterator itEtaBin;
-  set<Double_t>::iterator itPhiBin;
-  vector<Double_t> *phiBins;
-
-  // read eta and phi bins
-  param = GetParam("EtaPhiBins");
-  size = param.GetSize();
-  fBinMap.clear();
-  fEtaBins.clear();
-  fPhiBins.clear();
-  for(i = 0; i < size / 2; ++i)
-  {
-    paramEtaBins = param[i * 2];
-    sizeEtaBins = paramEtaBins.GetSize();
-    paramPhiBins = param[i * 2 + 1];
-    sizePhiBins = paramPhiBins.GetSize();
-
-    for(j = 0; j < sizeEtaBins; ++j)
-    {
-      for(k = 0; k < sizePhiBins; ++k)
-      {
-        fBinMap[paramEtaBins[j].GetDouble()].insert(paramPhiBins[k].GetDouble());
-      }
-    }
-  }
-
-  // for better performance we transform map of sets to parallel vectors:
-  // vector< double > and vector< vector< double >* >
-  for(itEtaBin = fBinMap.begin(); itEtaBin != fBinMap.end(); ++itEtaBin)
-  {
-    fEtaBins.push_back(itEtaBin->first);
-    phiBins = new vector<double>(itEtaBin->second.size());
-    fPhiBins.push_back(phiBins);
-    phiBins->clear();
-    for(itPhiBin = itEtaBin->second.begin(); itPhiBin != itEtaBin->second.end(); ++itPhiBin)
-    {
-      phiBins->push_back(*itPhiBin);
-    }
-  }
-
-  // read energy fractions for different particles
-  param = GetParam("EnergyFraction");
-  size = param.GetSize();
-
-  // set default energy fractions values
-  fFractionMap.clear();
-  fFractionMap[0] = make_pair(0.0, 1.0);
-
-  for(i = 0; i < size / 2; ++i)
-  {
-    paramFractions = param[i * 2 + 1];
-
-    ecalFraction = paramFractions[0].GetDouble();
-    hcalFraction = paramFractions[1].GetDouble();
-
-    fFractionMap[param[i * 2].GetInt()] = make_pair(ecalFraction, hcalFraction);
-  }
-
-  // read min E value for timing measurement in ECAL
-  fTimingEnergyMin = GetDouble("TimingEnergyMin", 4.);
-  // For timing
-  // So far this flag needs to be false
-  // Curved extrapolation not supported
-  fElectronsFromTrack = false;
-
-  // read min E value for towers to be saved
-  fECalEnergyMin = GetDouble("ECalEnergyMin", 0.0);
-  fHCalEnergyMin = GetDouble("HCalEnergyMin", 0.0);
-
-  fECalEnergySignificanceMin = GetDouble("ECalEnergySignificanceMin", 0.0);
-  fHCalEnergySignificanceMin = GetDouble("HCalEnergySignificanceMin", 0.0);
-
-  // switch on or off the dithering of the center of calorimeter towers
-  fSmearTowerCenter = GetBool("SmearTowerCenter", true);
-
-  // read resolution formulas
-  fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
-  fHCalResolutionFormula->Compile(GetString("HCalResolutionFormula", "0"));
-
-  // import array with output from other modules
-  fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-
-  // create output arrays
-  fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
-  fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "photons"));
-
-  fEFlowTrackOutputArray = ExportArray(GetString("EFlowTrackOutputArray", "eflowTracks"));
-  fEFlowPhotonOutputArray = ExportArray(GetString("EFlowPhotonOutputArray", "eflowPhotons"));
-  fEFlowNeutralHadronOutputArray = ExportArray(GetString("EFlowNeutralHadronOutputArray", "eflowNeutralHadrons"));
-}
-
-//------------------------------------------------------------------------------
-
-void Calorimeter::Finish()
-{
-  vector<vector<Double_t> *>::iterator itPhiBin;
-  for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
-  {
-    delete *itPhiBin;
-  }
-}
 
 //------------------------------------------------------------------------------
 
@@ -242,19 +167,15 @@ void Calorimeter::Process()
   Candidate *particle, *track;
   TLorentzVector position, momentum;
   Short_t etaBin, phiBin, flags;
-  Int_t number;
+  int number;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
-  Double_t ecalFraction, hcalFraction;
-  Double_t ecalEnergy, hcalEnergy;
-  Double_t ecalSigma, hcalSigma;
-  Double_t energyGuess;
-  Int_t pdgCode;
+  double ecalFraction, hcalFraction;
+  double ecalEnergy, hcalEnergy;
+  double ecalSigma, hcalSigma;
+  double energyGuess;
+  int pdgCode;
 
   TFractionMap::iterator itFractionMap;
-
-  vector<Double_t>::iterator itEtaBin;
-  vector<Double_t>::iterator itPhiBin;
-  vector<Double_t> *phiBins;
 
   vector<Long64_t>::iterator itTowerHits;
 
@@ -294,17 +215,17 @@ void Calorimeter::Process()
     if(ecalFraction < 1.0E-9 && hcalFraction < 1.0E-9) continue;
 
     // find eta bin [1, fEtaBins.size - 1]
-    itEtaBin = lower_bound(fEtaBins.begin(), fEtaBins.end(), particlePosition.Eta());
+    std::vector<double>::const_iterator itEtaBin = std::lower_bound(fEtaBins.begin(), fEtaBins.end(), particlePosition.Eta());
     if(itEtaBin == fEtaBins.begin() || itEtaBin == fEtaBins.end()) continue;
-    etaBin = distance(fEtaBins.begin(), itEtaBin);
+    etaBin = std::distance(fEtaBins.cbegin(), itEtaBin);
 
     // phi bins for given eta bin
-    phiBins = fPhiBins[etaBin];
+    const std::vector<double> &phiBins = fPhiBins.at(*itEtaBin);
 
     // find phi bin [1, phiBins.size - 1]
-    itPhiBin = lower_bound(phiBins->begin(), phiBins->end(), particlePosition.Phi());
-    if(itPhiBin == phiBins->begin() || itPhiBin == phiBins->end()) continue;
-    phiBin = distance(phiBins->begin(), itPhiBin);
+    std::vector<double>::const_iterator itPhiBin = std::lower_bound(phiBins.begin(), phiBins.end(), particlePosition.Phi());
+    if(itPhiBin == phiBins.begin() || itPhiBin == phiBins.end()) continue;
+    phiBin = std::distance(phiBins.cbegin(), itPhiBin);
 
     flags = 0;
     flags |= (pdgCode == 11 || pdgCode == 22) << 1;
@@ -337,17 +258,17 @@ void Calorimeter::Process()
     fHCalTrackFractions.push_back(hcalFraction);
 
     // find eta bin [1, fEtaBins.size - 1]
-    itEtaBin = lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
+    std::vector<double>::const_iterator itEtaBin = std::lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
     if(itEtaBin == fEtaBins.begin() || itEtaBin == fEtaBins.end()) continue;
-    etaBin = distance(fEtaBins.begin(), itEtaBin);
+    etaBin = distance(fEtaBins.cbegin(), itEtaBin);
 
     // phi bins for given eta bin
-    phiBins = fPhiBins[etaBin];
+    const std::vector<double> &phiBins = fPhiBins.at(*itEtaBin);
 
     // find phi bin [1, phiBins.size - 1]
-    itPhiBin = lower_bound(phiBins->begin(), phiBins->end(), trackPosition.Phi());
-    if(itPhiBin == phiBins->begin() || itPhiBin == phiBins->end()) continue;
-    phiBin = distance(phiBins->begin(), itPhiBin);
+    std::vector<double>::const_iterator itPhiBin = std::lower_bound(phiBins.begin(), phiBins.end(), trackPosition.Phi());
+    if(itPhiBin == phiBins.begin() || itPhiBin == phiBins.end()) continue;
+    phiBin = std::distance(phiBins.cbegin(), itPhiBin);
 
     flags = 1;
 
@@ -386,16 +307,16 @@ void Calorimeter::Process()
       etaBin = (towerHit >> 48) & 0x000000000000FFFFLL;
 
       // phi bins for given eta bin
-      phiBins = fPhiBins[etaBin];
+      const std::vector<double> &phiBins = fPhiBins.at(fEtaBins.at(etaBin));
 
       // calculate eta and phi of the tower's center
-      fTowerEta = 0.5 * (fEtaBins[etaBin - 1] + fEtaBins[etaBin]);
-      fTowerPhi = 0.5 * ((*phiBins)[phiBin - 1] + (*phiBins)[phiBin]);
+      fTowerEta = 0.5 * (fEtaBins.at(etaBin - 1) + fEtaBins.at(etaBin));
+      fTowerPhi = 0.5 * (phiBins.at(phiBin - 1) + phiBins.at(phiBin));
 
-      fTowerEdges[0] = fEtaBins[etaBin - 1];
-      fTowerEdges[1] = fEtaBins[etaBin];
-      fTowerEdges[2] = (*phiBins)[phiBin - 1];
-      fTowerEdges[3] = (*phiBins)[phiBin];
+      fTowerEdges[0] = fEtaBins.at(etaBin - 1);
+      fTowerEdges[1] = fEtaBins.at(etaBin);
+      fTowerEdges[2] = phiBins.at(phiBin - 1);
+      fTowerEdges[3] = phiBins.at(phiBin);
 
       fECalTowerEnergy = 0.0;
       fHCalTowerEnergy = 0.0;
@@ -501,14 +422,14 @@ void Calorimeter::Process()
 
 void Calorimeter::FinalizeTower()
 {
-  Double_t energy, pt, eta, phi, r;
-  Double_t ecalEnergy, hcalEnergy;
-  Double_t ecalNeutralEnergy, hcalNeutralEnergy;
+  double energy, pt, eta, phi, r;
+  double ecalEnergy, hcalEnergy;
+  double ecalNeutralEnergy, hcalNeutralEnergy;
 
-  Double_t ecalSigma, hcalSigma;
-  Double_t ecalNeutralSigma, hcalNeutralSigma;
+  double ecalSigma, hcalSigma;
+  double ecalNeutralSigma, hcalNeutralSigma;
 
-  Double_t weightTrack, weightCalo, bestEnergyEstimate, rescaleFactor;
+  double weightTrack, weightCalo, bestEnergyEstimate, rescaleFactor;
 
   TLorentzVector momentum;
   TFractionMap::iterator itFractionMap;
@@ -694,7 +615,7 @@ void Calorimeter::FinalizeTower()
 
 //------------------------------------------------------------------------------
 
-Double_t Calorimeter::LogNormal(Double_t mean, Double_t sigma)
+double Calorimeter::LogNormal(Double_t mean, Double_t sigma)
 {
   if(mean > 0.0)
   {

@@ -51,7 +51,63 @@ using namespace fastjet::contrib;
 class FastJetFinder: public DelphesModule
 {
 public:
-  FastJetFinder() = default;
+  explicit FastJetFinder(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetAlgorithm(Steer<int>("JetAlgorithm", 6)),
+    fParameterR(Steer<double>("ParameterR", 0.5)),
+    fParameterP(Steer<double>("ParameterP", -1.0)),
+    //
+    fJetPTMin(Steer<double>("JetPTMin", 10.0)),
+    fConeRadius(Steer<double>("ConeRadius", 0.5)),
+    fSeedThreshold(Steer<double>("SeedThreshold", 1.0)),
+    fConeAreaFraction(Steer<double>("ConeAreaFraction", 1.0)),
+    fMaxIterations(Steer<int>("MaxIterations", 100)),
+    fMaxPairSize(Steer<int>("MaxPairSize", 2)),
+    fIratch(Steer<int>("Iratch", 1)),
+    fAdjacencyCut(Steer<int>("AdjacencyCut", 2)),
+    fOverlapThreshold(Steer<double>("OverlapThreshold", 0.75)),
+    //-- Exclusive clustering for e+e- collisions --
+    fNJets(Steer<int>("NJets", 2)),
+    fExclusiveClustering(Steer<bool>("ExclusiveClustering", false)),
+    fDCut(Steer<double>("DCut", 0.0)),
+    //-- Valencia Linear Collider algorithm
+    fGamma(Steer<double>("Gamma", 1.0)),
+    //-- N(sub)jettiness parameters --
+    fComputeNsubjettiness(Steer<bool>("ComputeNsubjettiness", false)),
+    fBeta(Steer<double>("Beta", 1.0)),
+    fAxisMode(Steer<int>("AxisMode", 1)),
+    fRcutOff(Steer<double>("RcutOff", 0.8)), // used only if Njettiness is used as jet clustering algo (case 8)
+    fN(Steer<int>("N", 2)), // used only if Njettiness is used as jet clustering algo (case 8)
+    //-- Trimming parameters --
+    fComputeTrimming(Steer<bool>("ComputeTrimming", false)),
+    fRTrim(Steer<double>("RTrim", 0.2)),
+    fPtFracTrim(Steer<double>("PtFracTrim", 0.05)),
+    //-- Pruning parameters --
+    fComputePruning(Steer<bool>("ComputePruning", false)),
+    fZcutPrun(Steer<double>("ZcutPrun", 0.1)),
+    fRcutPrun(Steer<double>("RcutPrun", 0.5)),
+    fRPrun(Steer<double>("RPrun", 0.8)),
+    //-- SoftDrop parameters --
+    fComputeSoftDrop(Steer<bool>("ComputeSoftDrop", false)),
+    fBetaSoftDrop(Steer<double>("BetaSoftDrop", 0.0)),
+    fSymmetryCutSoftDrop(Steer<double>("SymmetryCutSoftDrop", 0.1)),
+    fR0SoftDrop(Steer<double>("R0SoftDrop=", 0.8)),
+    // ---  Jet Area Parameters ---
+    fAreaAlgorithm(Steer<int>("AreaAlgorithm", 0)),
+    fComputeRho(Steer<bool>("ComputeRho", false)),
+    // - ghost based areas -
+    fGhostEtaMax(Steer<double>("GhostEtaMax", 5.0)),
+    fRepeat(Steer<int>("Repeat", 1)),
+    fGhostArea(Steer<double>("GhostArea", 0.01)),
+    fGridScatter(Steer<double>("GridScatter", 1.0)),
+    fPtScatter(Steer<double>("PtScatter", 0.1)),
+    fMeanGhostPt(Steer<double>("MeanGhostPt", 1.0E-100)),
+    // - voronoi based areas -
+    fEffectiveRfact(Steer<double>("EffectiveRfact", 1.0)),
+    //
+    fRhoEtaRange(Steer<std::vector<std::pair<double, double> > >("RhoEtaRange", {}))
+  {
+  }
 
   void Init() override;
   void Process() override;
@@ -61,6 +117,80 @@ public:
   }
 
 private:
+  const int fJetAlgorithm;
+  const double fParameterR;
+  const double fParameterP;
+
+  const double fJetPTMin;
+  const double fConeRadius;
+  const double fSeedThreshold;
+  const double fConeAreaFraction;
+  const int fMaxIterations;
+  const int fMaxPairSize;
+  const int fIratch;
+  const int fAdjacencyCut;
+  const double fOverlapThreshold;
+
+  //-- Exclusive clustering for e+e- collisions --
+  const int fNJets;
+  const bool fExclusiveClustering;
+  const double fDCut;
+
+  //-- Valencia Linear Collider algorithm
+  const double fGamma;
+
+  //-- N (sub)jettiness parameters --
+  const bool fComputeNsubjettiness;
+  const double fBeta;
+  const int fAxisMode;
+  const double fRcutOff;
+  const int fN;
+
+  //-- Trimming parameters --
+  const bool fComputeTrimming;
+  const double fRTrim;
+  const double fPtFracTrim;
+
+  //-- Pruning parameters --
+  const bool fComputePruning;
+  const double fZcutPrun;
+  const double fRcutPrun;
+  const double fRPrun;
+
+  //-- SoftDrop parameters --
+  const bool fComputeSoftDrop;
+  const double fBetaSoftDrop;
+  const double fSymmetryCutSoftDrop;
+  const double fR0SoftDrop;
+
+  // --- FastJet Area method --------
+  std::unique_ptr<fastjet::AreaDefinition> fAreaDefinition;
+  const int fAreaAlgorithm;
+  const bool fComputeRho;
+
+  // -- ghost based areas --
+  const double fGhostEtaMax;
+  const int fRepeat;
+  const double fGhostArea;
+  const double fGridScatter;
+  const double fPtScatter;
+  const double fMeanGhostPt;
+
+  // -- voronoi areas --
+  const double fEffectiveRfact;
+
+  const std::vector<std::pair<double, double> > fRhoEtaRange;
+
+#if !defined(__CINT__) && !defined(__CLING__)
+  struct TEstimatorStruct
+  {
+    std::unique_ptr<fastjet::JetMedianBackgroundEstimator> estimator;
+    double etaMin, etaMax;
+  };
+
+  std::vector<TEstimatorStruct> fEstimators; //!
+#endif
+
   std::unique_ptr<JetDefinition::Plugin> fPlugin; //!
   std::unique_ptr<JetDefinition::Recombiner> fRecomb; //!
 
@@ -70,84 +200,6 @@ private:
   std::unique_ptr<fastjet::contrib::NjettinessPlugin> fNjettinessPlugin; //!
   std::unique_ptr<fastjet::contrib::ValenciaPlugin> fValenciaPlugin; //!
   std::unique_ptr<fastjet::JetDefinition> fDefinition; //!
-
-  Int_t fJetAlgorithm;
-  Double_t fParameterR;
-  Double_t fParameterP;
-
-  Double_t fJetPTMin;
-  Double_t fConeRadius;
-  Double_t fSeedThreshold;
-  Double_t fConeAreaFraction;
-  Int_t fMaxIterations;
-  Int_t fMaxPairSize;
-  Int_t fIratch;
-  Int_t fAdjacencyCut;
-  Double_t fOverlapThreshold;
-
-  //-- Exclusive clustering for e+e- collisions --
-
-  Int_t fNJets;
-  Double_t fDCut;
-  Bool_t fExclusiveClustering;
-
-  //-- Valencia Linear Collider algorithm
-  Double_t fGamma;
-
-  //-- N (sub)jettiness parameters --
-
-  Bool_t fComputeNsubjettiness;
-  Double_t fBeta;
-  Int_t fAxisMode;
-  Double_t fRcutOff;
-  Int_t fN;
-
-  //-- Trimming parameters --
-
-  Bool_t fComputeTrimming;
-  Double_t fRTrim;
-  Double_t fPtFracTrim;
-
-  //-- Pruning parameters --
-
-  Bool_t fComputePruning;
-  Double_t fZcutPrun;
-  Double_t fRcutPrun;
-  Double_t fRPrun;
-
-  //-- SoftDrop parameters --
-
-  Bool_t fComputeSoftDrop;
-  Double_t fBetaSoftDrop;
-  Double_t fSymmetryCutSoftDrop;
-  Double_t fR0SoftDrop;
-
-  // --- FastJet Area method --------
-
-  std::unique_ptr<fastjet::AreaDefinition> fAreaDefinition;
-  Int_t fAreaAlgorithm;
-  Bool_t fComputeRho;
-
-  // -- ghost based areas --
-  Double_t fGhostEtaMax;
-  Int_t fRepeat;
-  Double_t fGhostArea;
-  Double_t fGridScatter;
-  Double_t fPtScatter;
-  Double_t fMeanGhostPt;
-
-  // -- voronoi areas --
-  Double_t fEffectiveRfact;
-
-#if !defined(__CINT__) && !defined(__CLING__)
-  struct TEstimatorStruct
-  {
-    std::unique_ptr<fastjet::JetMedianBackgroundEstimator> estimator;
-    Double_t etaMin, etaMax;
-  };
-
-  std::vector<TEstimatorStruct> fEstimators; //!
-#endif
 
   CandidatesCollection fInputArray; //!
 
@@ -160,47 +212,11 @@ private:
 
 void FastJetFinder::Init()
 {
-  ExRootConfParam param;
-  Long_t i, size;
-  Double_t etaMin, etaMax;
   TEstimatorStruct estimatorStruct;
 
   // define algorithm
 
-  fJetAlgorithm = GetInt("JetAlgorithm", 6);
-  fParameterR = GetDouble("ParameterR", 0.5);
-  fParameterP = GetDouble("ParameterP", -1.0);
-
-  fConeRadius = GetDouble("ConeRadius", 0.5);
-  fSeedThreshold = GetDouble("SeedThreshold", 1.0);
-  fConeAreaFraction = GetDouble("ConeAreaFraction", 1.0);
-  fMaxIterations = GetInt("MaxIterations", 100);
-  fMaxPairSize = GetInt("MaxPairSize", 2);
-  fIratch = GetInt("Iratch", 1);
-  fAdjacencyCut = GetInt("AdjacencyCut", 2);
-  fOverlapThreshold = GetDouble("OverlapThreshold", 0.75);
-
-  fJetPTMin = GetDouble("JetPTMin", 10.0);
-
-  //-- N(sub)jettiness parameters --
-
-  fComputeNsubjettiness = GetBool("ComputeNsubjettiness", false);
-  fBeta = GetDouble("Beta", 1.0);
-  fAxisMode = GetInt("AxisMode", 1);
-  fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
-  fN = GetInt("N", 2); // used only if Njettiness is used as jet clustering algo (case 8)
-
-  //-- Exclusive clustering for e+e- collisions --
-
-  fNJets = GetInt("NJets", 2);
-  fExclusiveClustering = GetBool("ExclusiveClustering", false);
-  fDCut = GetDouble("DCut", 0.0);
-
-  //-- Valencia Linear Collider algorithm
-
-  fGamma = GetDouble("Gamma", 1.0);
   //fBeta parameter see above
-
   fMeasureDef = std::make_unique<NormalizedMeasure>(fBeta, fParameterR);
 
   switch(fAxisMode)
@@ -218,42 +234,6 @@ void FastJetFinder::Init()
   case 4:
     fAxesDef = std::make_unique<OnePass_KT_Axes>();
   }
-
-  //-- Trimming parameters --
-
-  fComputeTrimming = GetBool("ComputeTrimming", false);
-  fRTrim = GetDouble("RTrim", 0.2);
-  fPtFracTrim = GetDouble("PtFracTrim", 0.05);
-
-  //-- Pruning parameters --
-
-  fComputePruning = GetBool("ComputePruning", false);
-  fZcutPrun = GetDouble("ZcutPrun", 0.1);
-  fRcutPrun = GetDouble("RcutPrun", 0.5);
-  fRPrun = GetDouble("RPrun", 0.8);
-
-  //-- SoftDrop parameters --
-
-  fComputeSoftDrop = GetBool("ComputeSoftDrop", false);
-  fBetaSoftDrop = GetDouble("BetaSoftDrop", 0.0);
-  fSymmetryCutSoftDrop = GetDouble("SymmetryCutSoftDrop", 0.1);
-  fR0SoftDrop = GetDouble("R0SoftDrop=", 0.8);
-
-  // ---  Jet Area Parameters ---
-
-  fAreaAlgorithm = GetInt("AreaAlgorithm", 0);
-  fComputeRho = GetBool("ComputeRho", false);
-
-  // - ghost based areas -
-  fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
-  fRepeat = GetInt("Repeat", 1);
-  fGhostArea = GetDouble("GhostArea", 0.01);
-  fGridScatter = GetDouble("GridScatter", 1.0);
-  fPtScatter = GetDouble("PtScatter", 0.1);
-  fMeanGhostPt = GetDouble("MeanGhostPt", 1.0E-100);
-
-  // - voronoi based areas -
-  fEffectiveRfact = GetDouble("EffectiveRfact", 1.0);
 
   switch(fAreaAlgorithm)
   {
@@ -330,29 +310,22 @@ void FastJetFinder::Init()
   if(fComputeRho && fAreaDefinition)
   {
     // read eta ranges
-
-    param = GetParam("RhoEtaRange");
-    size = param.GetSize();
-
     fEstimators.clear();
-    for(i = 0; i < size / 2; ++i)
+    for(const std::pair<double, double> &etaMinMax : fRhoEtaRange)
     {
-      etaMin = param[i * 2].GetDouble();
-      etaMax = param[i * 2 + 1].GetDouble();
       TEstimatorStruct &estimatorStruct = fEstimators.emplace_back();
-      estimatorStruct.estimator = std::make_unique<JetMedianBackgroundEstimator>(SelectorRapRange(etaMin, etaMax), *fDefinition, *fAreaDefinition);
-      estimatorStruct.etaMin = etaMin;
-      estimatorStruct.etaMax = etaMax;
+      estimatorStruct.estimator = std::make_unique<JetMedianBackgroundEstimator>(
+        SelectorRapRange(etaMinMax.first, etaMinMax.second),
+        *fDefinition, *fAreaDefinition);
+      estimatorStruct.etaMin = etaMinMax.first;
+      estimatorStruct.etaMax = etaMinMax.second;
     }
   }
 
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-
-  // create output arrays
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-  fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
-  fConstituentsOutputArray = ExportArray(GetString("ConstituentsOutputArray", "constituents"));
+  fInputArray = ImportArray(Steer<std::string>("InputArray", "Calorimeter/towers"));
+  fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets"));
+  fRhoOutputArray = ExportArray(Steer<std::string>("RhoOutputArray", "rho"));
+  fConstituentsOutputArray = ExportArray(Steer<std::string>("ConstituentsOutputArray", "constituents"));
 }
 
 //------------------------------------------------------------------------------
@@ -366,23 +339,23 @@ void FastJetFinder::Process()
   Candidate *candidate = nullptr, *constituent = nullptr;
   TLorentzVector momentum;
 
-  Double_t deta, dphi, detaMax, dphiMax;
-  Double_t time, timeWeight;
-  Double_t neutralEnergyFraction, chargedEnergyFraction;
+  double deta, dphi, detaMax, dphiMax;
+  double time, timeWeight;
+  double neutralEnergyFraction, chargedEnergyFraction;
 
-  Int_t number, ncharged, nneutrals;
-  Int_t charge;
-  Double_t rho = 0.0;
+  int number, ncharged, nneutrals;
+  int charge;
+  double rho = 0.0;
   PseudoJet jet, area;
   std::unique_ptr<ClusterSequence> sequence;
   vector<PseudoJet> inputList, outputList, subjets;
   vector<PseudoJet>::iterator itInputList, itOutputList;
   vector<TEstimatorStruct>::iterator itEstimators;
-  Double_t excl_ymerge12 = 0.0;
-  Double_t excl_ymerge23 = 0.0;
-  Double_t excl_ymerge34 = 0.0;
-  Double_t excl_ymerge45 = 0.0;
-  Double_t excl_ymerge56 = 0.0;
+  double excl_ymerge12 = 0.0;
+  double excl_ymerge23 = 0.0;
+  double excl_ymerge34 = 0.0;
+  double excl_ymerge45 = 0.0;
+  double excl_ymerge56 = 0.0;
 
   DelphesFactory *factory = GetFactory();
 

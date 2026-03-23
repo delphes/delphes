@@ -39,62 +39,49 @@ using namespace std;
 class PhotonID: public DelphesModule
 {
 public:
-  PhotonID() : fPromptFormula(std::make_unique<DelphesFormula>()),
-               fNonPromptFormula(std::make_unique<DelphesFormula>()),
-               fFakeFormula(std::make_unique<DelphesFormula>()) {}
+  explicit PhotonID(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPTMin(Steer<double>("PTMin", 10.0)), // min pt to be considered, make sure this threshold is higher than threshold in particle filter
+    fRelIsoMax(Steer<double>("fRelIsoMax", 0.3)), // to be tuned, since FS and delphes have different isolation profiles
+    fPromptFormula(std::make_unique<DelphesFormula>()),
+    fNonPromptFormula(std::make_unique<DelphesFormula>()),
+    fFakeFormula(std::make_unique<DelphesFormula>())
+  {
+    // read PhotonID formulae
+    fPromptFormula->Compile(Steer<std::string>("PromptFormula", "1.0"));
+    fNonPromptFormula->Compile(Steer<std::string>("NonPromptFormula", "1.0"));
+    fFakeFormula->Compile(Steer<std::string>("FakeFormula", "1.0"));
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputPhotonArray = ImportArray(Steer<std::string>("InputPhotonArray", "PhotonIsolation/photons"));
+    fInputGenArray = ImportArray(Steer<std::string>("InputGenArray", "GenParticleFilter/filteredParticles")); // use filtered collection for speed
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "photons"));
+  }
   void Process() override;
 
 private:
+  bool isFake(const Candidate *obj);
+
+  const double fPTMin;
+  const double fRelIsoMax;
+
   const std::unique_ptr<DelphesFormula> fPromptFormula;
   const std::unique_ptr<DelphesFormula> fNonPromptFormula;
   const std::unique_ptr<DelphesFormula> fFakeFormula;
 
-  Double_t fPTMin;
-  Double_t fRelIsoMax;
-
-  // import input arrays
   CandidatesCollection fInputPhotonArray;
   CandidatesCollection fInputGenArray; // use filtered collection for speed
 
   CandidatesCollection fOutputArray; //!
-
-  Bool_t isFake(const Candidate *obj);
 };
-
-//------------------------------------------------------------------------------
-
-void PhotonID::Init()
-{
-  // read PhotonID formulae
-  fPromptFormula->Compile(GetString("PromptFormula", "1.0"));
-  fNonPromptFormula->Compile(GetString("NonPromptFormula", "1.0"));
-  fFakeFormula->Compile(GetString("FakeFormula", "1.0"));
-
-  // import input arrays
-  fInputPhotonArray = ImportArray(GetString("InputPhotonArray", "PhotonIsolation/photons"));
-  fInputGenArray = ImportArray(GetString("InputGenArray", "GenParticleFilter/filteredParticles")); // use filtered collection for speed
-
-  // min pt to be considered, make sure this threshold is higher than threshold in particle filter
-  fPTMin = GetDouble("PTMin", 10.0);
-
-  // to be tuned, since FS and delphes have different isolation profiles
-  fRelIsoMax = GetDouble("fRelIsoMax", 0.3);
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "photons"));
-}
 
 //------------------------------------------------------------------------------
 
 void PhotonID::Process()
 {
   fOutputArray->clear();
-
-  Double_t pt, eta, phi, e;
-  Double_t relIso;
-  Bool_t isolated;
 
   //cout<< "----  new event ---------"<<endl;
 
@@ -105,10 +92,10 @@ void PhotonID::Process()
 
     const TLorentzVector &candidatePosition = new_candidate->Position;
     const TLorentzVector &candidateMomentum = new_candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
+    const double eta = candidatePosition.Eta();
+    const double phi = candidatePosition.Phi();
+    const double pt = candidateMomentum.Pt();
+    const double e = candidateMomentum.E();
 
     if(pt < fPTMin) continue;
 
@@ -128,8 +115,8 @@ void PhotonID::Process()
     // if matches photon in gen collection
     else
     {
-      relIso = new_candidate->IsolationVar;
-      isolated = (relIso < 0.3);
+      const double relIso = new_candidate->IsolationVar;
+      const bool isolated = (relIso < 0.3);
       //cout<<"                    Prompt!:   "<<relIso<<endl;
 
       // if isolated apply prompt formula
@@ -157,18 +144,18 @@ void PhotonID::Process()
 
 //------------------------------------------------------------------------------
 
-Bool_t PhotonID::isFake(const Candidate *obj)
+bool PhotonID::isFake(const Candidate *obj)
 {
   const TLorentzVector &mom_rec = obj->Momentum;
 
-  Bool_t matches = false;
+  bool matches = false;
   for(Candidate *const &gen : *fInputGenArray)
   {
     const TLorentzVector &mom_gen = gen->Momentum;
-    Int_t status = gen->Status;
-    Int_t pdgCode = std::abs(gen->PID);
-    Float_t dPtOverPt = std::fabs((mom_gen.Pt() - mom_rec.Pt()) / mom_rec.Pt());
-    Float_t deltaR = mom_gen.DeltaR(mom_rec);
+    int status = gen->Status;
+    int pdgCode = std::abs(gen->PID);
+    float dPtOverPt = std::fabs((mom_gen.Pt() - mom_rec.Pt()) / mom_rec.Pt());
+    float deltaR = mom_gen.DeltaR(mom_rec);
 
     if(status != 1) continue;
     if(pdgCode != 22) continue;

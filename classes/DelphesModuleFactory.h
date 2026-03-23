@@ -30,6 +30,8 @@
 #include <utility>
 #include <vector>
 
+#include "classes/DelphesParameters.h"
+
 /// Name of the object Builder
 #define BUILDER_NAME(obj) obj##Builder
 /// Define a new factory instance for the definition of modules
@@ -72,15 +74,15 @@ public:
     fBuildersMap.insert(std::make_pair(name, &BuildModule<U>));
   }
   /// Build one instance of a named module
-  std::unique_ptr<T> Build(const std::string &name) const
+  std::unique_ptr<T> Build(const std::string &name, const DelphesParameters &moduleParams = DelphesParameters{}) const
   {
     if(fBuildersMap.count(name) > 0)
-      return fBuildersMap.at(name)();
+      return fBuildersMap.at(name)(moduleParams);
     ThrowBuildError(name);
     throw;
   }
 
-  typedef std::unique_ptr<T> (*Builder)(); ///< constructor type for a module definition
+  typedef std::unique_ptr<T> (*Builder)(const DelphesParameters &); ///< constructor type for a module definition
   bool Has(const std::string &name) const { return fBuildersMap.count(name) > 0; } ///< is a named module registered?
   const std::string &Type() const { return fType; } ///< module types in factory
   /// List of module names registered in the factory
@@ -115,9 +117,9 @@ private:
 
   /// Build a module with its parameters set
   template <typename U>
-  static std::unique_ptr<T> BuildModule()
+  static std::unique_ptr<T> BuildModule(const DelphesParameters &moduleParams)
   {
-    return std::make_unique<U>();
+    return std::make_unique<U>(moduleParams);
   }
   std::unordered_map<std::string, Builder> fBuildersMap; ///< database of modules handled by this instance
   const std::string fType; ///< modules created by this factory

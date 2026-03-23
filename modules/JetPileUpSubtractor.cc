@@ -29,18 +29,23 @@
 
 #include <TLorentzVector.h>
 
-using namespace std;
-
 class JetPileUpSubtractor: public DelphesModule
 {
 public:
-  JetPileUpSubtractor() = default;
+  explicit JetPileUpSubtractor(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetPTMin(Steer<double>("JetPTMin", 20.0)) {}
 
-  void Init() override;
+  void Init() override
+  {
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+    fRhoInputArray = ImportArray(Steer<std::string>("RhoInputArray", "Rho/rho"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets"));
+  }
   void Process() override;
 
 private:
-  Double_t fJetPTMin;
+  const double fJetPTMin;
 
   CandidatesCollection fJetInputArray; //!
   CandidatesCollection fRhoInputArray; //!
@@ -50,43 +55,23 @@ private:
 
 //------------------------------------------------------------------------------
 
-void JetPileUpSubtractor::Init()
-{
-  fJetPTMin = GetDouble("JetPTMin", 20.0);
-
-  // import input arrays
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
 void JetPileUpSubtractor::Process()
 {
   fOutputArray->clear();
 
-  TLorentzVector momentum, area;
-  Double_t eta = 0.0;
-  Double_t rho = 0.0;
-
   // loop over all input candidates
   for(Candidate *const &candidate : *fJetInputArray)
   {
-    momentum = candidate->Momentum;
-    area = candidate->Area;
-    eta = momentum.Eta();
+    TLorentzVector momentum = candidate->Momentum;
+    const TLorentzVector area = candidate->Area;
+    const double eta = momentum.Eta();
 
     // find rho
-    rho = 0.0;
+    double rho = 0.;
     for(Candidate *const &object : *fRhoInputArray)
     {
       if(eta >= object->Edges[0] && eta < object->Edges[1])
-      {
         rho = object->Momentum.Pt();
-      }
     }
 
     // apply pile-up correction

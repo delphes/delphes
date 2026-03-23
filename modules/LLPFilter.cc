@@ -33,43 +33,61 @@
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
 #include <TLorentzVector.h>
 
 #include <algorithm>
 #include <vector>
 
-using namespace std;
-
 class LLPFilter: public DelphesModule
 {
 public:
-  LLPFilter() = default;
+  explicit LLPFilter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPTMin(Steer<double>("PTMin", 0.0)), // PT threshold
+    fInvert(Steer<bool>("Invert", false)),
+    fDaughterNumber(Steer<int>("DaughterNumber", 0)),
+    fRequireDecayRegion(Steer<bool>("RequireDecayRegion", 0)),
+    fDecayRegionRMax(Steer<double>("DecayRegionRMax", 0.0)), //mm
+    fDecayRegionRMin(Steer<double>("DecayRegionRMin", 0.0)), //mm
+    fDecayRegionZMax(Steer<double>("DecayRegionZMax", 0.0)), //mm
+    fDecayRegionZMin(Steer<double>("DecayRegionZMin", 0.0)), //mm
+    fDecayRegionEtaMax(Steer<double>("DecayRegionEtaMax", 0.0)), // requirement on abs(eta)
+    fDecayRegionEtaMin(Steer<double>("DecayRegionEtaMin", 0.0)), //requirement on abs(eta)
+    fRequireNotPileup(Steer<bool>("RequireNotPileup", false)), // no pileup
+    fRequireStatus(Steer<bool>("RequireStatus", false)),
+    fStatus(Steer<int>("Status", 1)),
+    fRequireCharge(Steer<bool>("RequireCharge", false)),
+    fCharge(Steer<int>("Charge", 1)),
+    fPdgCodes(Steer<std::vector<int> >("PdgCode")) // PdgCodes to be filtered out from the data card
+  {
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fParticleInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "filteredParticles"));
+  }
   void Process() override;
 
 private:
-  Double_t fPTMin; //!
-  Bool_t fRequireDecayRegion;
-  Double_t fDecayRegionRMax;
-  Double_t fDecayRegionRMin;
-  Double_t fDecayRegionZMax;
-  Double_t fDecayRegionZMin;
-  Double_t fDecayRegionEtaMax;
-  Double_t fDecayRegionEtaMin;
-  Int_t fDaughterNumber;
-  Bool_t fInvert; //!
-  Bool_t fRequireStatus; //!
-  Int_t fStatus; //!
-  Bool_t fRequireCharge; //!
-  Int_t fCharge; //!
-  Bool_t fRequireNotPileup; //!
+  const double fPTMin; //!
+  const bool fInvert; //!
+  const int fDaughterNumber;
+  const bool fRequireDecayRegion;
+  const double fDecayRegionRMax;
+  const double fDecayRegionRMin;
+  const double fDecayRegionZMax;
+  const double fDecayRegionZMin;
+  const double fDecayRegionEtaMax;
+  const double fDecayRegionEtaMin;
+  const bool fRequireNotPileup; //!
+  const bool fRequireStatus; //!
+  const int fStatus; //!
+  const bool fRequireCharge; //!
+  const int fCharge; //!
 
-  std::vector<Int_t> fPdgCodes;
+  const std::vector<int> fPdgCodes;
 
   CandidatesCollection fInputArray; //!
   CandidatesCollection fParticleInputArray;
@@ -79,61 +97,9 @@ private:
 
 //------------------------------------------------------------------------------
 
-void LLPFilter::Init()
-{
-  ExRootConfParam param;
-  Size_t i, size;
-
-  // PT threshold
-  fPTMin = GetDouble("PTMin", 0.0);
-
-  fInvert = GetBool("Invert", false);
-  fDaughterNumber = GetInt("DaughterNumber", 0);
-  fRequireDecayRegion = GetBool("RequireDecayRegion", 0);
-
-  fDecayRegionRMax = GetDouble("DecayRegionRMax", 0.0); //mm
-  fDecayRegionRMin = GetDouble("DecayRegionRMin", 0.0); //mm
-  fDecayRegionZMax = GetDouble("DecayRegionZMax", 0.0); //mm
-  fDecayRegionZMin = GetDouble("DecayRegionZMin", 0.0); //mm
-  fDecayRegionEtaMax = GetDouble("DecayRegionEtaMax", 0.0); // requirement on abs(eta)
-  fDecayRegionEtaMin = GetDouble("DecayRegionEtaMin", 0.0); //requirement on abs(eta)
-
-  // no pileup
-  fRequireNotPileup = GetBool("RequireNotPileup", false);
-
-  fRequireStatus = GetBool("RequireStatus", false);
-  fStatus = GetInt("Status", 1);
-
-  fRequireCharge = GetBool("RequireCharge", false);
-  fCharge = GetInt("Charge", 1);
-
-  // import input arrays
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fParticleInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-
-  param = GetParam("PdgCode");
-  size = param.GetSize();
-
-  // read PdgCodes to be filtered out from the data card
-
-  fPdgCodes.clear();
-  for(i = 0; i < size; ++i)
-  {
-    fPdgCodes.push_back(param[i].GetInt());
-  }
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
-}
-
-//------------------------------------------------------------------------------
-
 void LLPFilter::Process()
 {
   fOutputArray->clear();
-
-  Int_t pdgCode, daughterPdg;
-  Double_t pt, eta;
 
   // loop over particles to find LLP
   int index = -1;
@@ -142,17 +108,17 @@ void LLPFilter::Process()
     index++;
 
     //all distance units are in mm
-    pdgCode = candidate->PID;
+    const int pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
-    pt = candidateMomentum.Pt();
-    eta = candidateMomentum.Eta();
-    if(pt < fPTMin) continue;
-    if(fDaughterNumber > 0)
-    {
-      if(candidate->D2 - candidate->D1 != fDaughterNumber) continue; //require at least fDaughterNumber daughters
-    }
-    if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end()) continue; //require pdgID is one of the LLP id
+
+    if(const double pt = candidateMomentum.Pt(); pt < fPTMin) continue;
+
+    //require at least fDaughterNumber daughters
+    if(fDaughterNumber > 0 && candidate->D2 - candidate->D1 != fDaughterNumber) continue;
+
+    const double eta = candidateMomentum.Eta();
+    if(std::find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end()) continue; //require pdgID is one of the LLP id
     if(fRequireStatus && (candidate->Status != fStatus)) continue;
 
     // loop over particles to find LLP daughters and assign EM and hadronic energy
@@ -161,11 +127,11 @@ void LLPFilter::Process()
 
     for(Candidate *const &daughter : *fParticleInputArray)
     {
-      daughterPdg = daughter->PID;
+      const int daughterPdg = daughter->PID;
       if(daughter->Status != 1) continue;
       if(daughter->IsPU) continue;
-      if(abs(daughterPdg) == 12 || abs(daughterPdg) == 14 || abs(daughterPdg) == 16 || abs(daughterPdg) == 13) continue; // ignore neutrinos and muons
-      if(abs(daughterPdg) > 1000000) continue; //ignore BSM particles
+      if(std::abs(daughterPdg) == 12 || std::abs(daughterPdg) == 14 || std::abs(daughterPdg) == 16 || std::abs(daughterPdg) == 13) continue; // ignore neutrinos and muons
+      if(std::abs(daughterPdg) > 1000000) continue; //ignore BSM particles
 
       const TLorentzVector &daughterMomentum = daughter->Momentum;
 
@@ -178,7 +144,7 @@ void LLPFilter::Process()
       if(tempCandidate->M1 == -1) continue;
 
       // assign LLP EM or hadronic energy, depending on the daughter ID
-      if(abs(daughterPdg) == 11 || abs(daughterPdg) == 22 || abs(daughterPdg) == 111)
+      if(std::abs(daughterPdg) == 11 || std::abs(daughterPdg) == 22 || std::abs(daughterPdg) == 111)
         candidate->Eem += daughterMomentum.E();
       else
         candidate->Ehad += daughterMomentum.E();
@@ -186,18 +152,15 @@ void LLPFilter::Process()
 
     if(fRequireDecayRegion)
     {
-      if(abs(eta) < fDecayRegionEtaMax && abs(eta) > fDecayRegionEtaMin
-        && abs(candidateDecayPosition.Z()) < fDecayRegionZMax && abs(candidateDecayPosition.Z()) > fDecayRegionZMin
-        && sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2)) < fDecayRegionRMax
-        && sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2)) > fDecayRegionRMin)
-      {
+      if(const double absEta = std::fabs(eta),
+        candidateDecayPositionR = std::hypot(candidateDecayPosition.X(), candidateDecayPosition.Y());
+        absEta < fDecayRegionEtaMax && absEta > fDecayRegionEtaMin
+        && std::fabs(candidateDecayPosition.Z()) < fDecayRegionZMax && std::fabs(candidateDecayPosition.Z()) > fDecayRegionZMin
+        && candidateDecayPositionR < fDecayRegionRMax && candidateDecayPositionR > fDecayRegionRMin)
         fOutputArray->emplace_back(candidate);
-      }
     }
     else
-    {
       fOutputArray->emplace_back(candidate);
-    }
   } //end of while loop
 }
 

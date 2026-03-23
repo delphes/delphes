@@ -28,6 +28,7 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
+#include "classes/DelphesParameters.h"
 
 #include <TLorentzVector.h>
 #include <TRandom3.h>
@@ -35,10 +36,21 @@
 class AngularSmearing: public DelphesModule
 {
 public:
-  AngularSmearing() :
-    fFormulaEta(std::make_unique<DelphesFormula>()), fFormulaPhi(std::make_unique<DelphesFormula>()) {}
+  AngularSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormulaEta(std::make_unique<DelphesFormula>()),
+    fFormulaPhi(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormulaEta->Compile(Steer<std::string>("EtaResolutionFormula", "0.0"));
+    fFormulaPhi->Compile(Steer<std::string>("PhiResolutionFormula", "0.0"));
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+  }
   void Process() override;
 
 private:
@@ -48,21 +60,6 @@ private:
   CandidatesCollection fInputArray;
   CandidatesCollection fOutputArray;
 };
-
-//------------------------------------------------------------------------------
-
-void AngularSmearing::Init()
-{
-  // read resolution formula
-  fFormulaEta->Compile(GetString("EtaResolutionFormula", "0.0"));
-  fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
 
 //------------------------------------------------------------------------------
 

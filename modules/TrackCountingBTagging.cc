@@ -34,20 +34,37 @@ using namespace std;
 class TrackCountingBTagging: public DelphesModule
 {
 public:
-  TrackCountingBTagging() = default;
+  explicit TrackCountingBTagging(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fBitNumber(Steer<int>("BitNumber", 0)),
+    //
+    fPtMin(Steer<double>("TrackPtMin", 1.0)),
+    fDeltaR(Steer<double>("DeltaR", 0.3)),
+    fIPmax(Steer<double>("TrackIPMax", 2.0)),
+    //
+    fSigMin(Steer<double>("SigMin", 6.5)),
+    fNtracks(Steer<int>("Ntracks", 3)),
+    //
+    fUse3D(Steer<bool>("Use3D", false))
+  {
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "Calorimeter/eflowTracks"));
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+  }
   void Process() override;
 
 private:
-  Int_t fBitNumber;
+  const int fBitNumber;
 
-  Double_t fPtMin;
-  Double_t fDeltaR;
-  Double_t fIPmax;
-  Double_t fSigMin;
-  Int_t fNtracks;
-  Bool_t fUse3D;
+  const double fPtMin;
+  const double fDeltaR;
+  const double fIPmax;
+  const double fSigMin;
+  const int fNtracks;
+  const bool fUse3D;
 
   CandidatesCollection fTrackInputArray; //!
   CandidatesCollection fJetInputArray; //!
@@ -55,64 +72,38 @@ private:
 
 //------------------------------------------------------------------------------
 
-void TrackCountingBTagging::Init()
-{
-  fBitNumber = GetInt("BitNumber", 0);
-
-  fPtMin = GetDouble("TrackPtMin", 1.0);
-  fDeltaR = GetDouble("DeltaR", 0.3);
-  fIPmax = GetDouble("TrackIPMax", 2.0);
-
-  fSigMin = GetDouble("SigMin", 6.5);
-  fNtracks = GetInt("Ntracks", 3);
-
-  fUse3D = GetBool("Use3D", false);
-
-  // import input arrays
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"));
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-}
-
-//------------------------------------------------------------------------------
-
 void TrackCountingBTagging::Process()
 {
-  Double_t jpx, jpy, jpz;
-  Double_t dr, tpt;
-  Double_t xd, yd, zd, d0, dd0, dz, ddz, sip;
-
-  Int_t sign, count;
-
   // loop over all input jets
   for(Candidate *const &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
-    jpx = jetMomentum.Px();
-    jpy = jetMomentum.Py();
-    jpz = jetMomentum.Pz();
+    const double jpx = jetMomentum.Px(), jpy = jetMomentum.Py(), jpz = jetMomentum.Pz();
 
     // loop over all input tracks
-    count = 0;
+    int count = 0;
     for(Candidate *const &track : *fTrackInputArray)
     {
       if(count >= fNtracks) break; // stop once we have enough tracks
       const TLorentzVector &trkMomentum = track->Momentum;
-      tpt = trkMomentum.Pt();
+      const double tpt = trkMomentum.Pt();
       if(tpt < fPtMin) continue;
 
-      d0 = std::fabs(track->D0);
+      const double d0 = std::fabs(track->D0);
       if(d0 > fIPmax) continue;
 
-      dr = jetMomentum.DeltaR(trkMomentum);
+      const double dr = jetMomentum.DeltaR(trkMomentum);
       if(dr > fDeltaR) continue;
 
-      xd = track->Xd;
-      yd = track->Yd;
-      zd = track->Zd;
-      dd0 = std::fabs(track->ErrorD0);
-      dz = std::fabs(track->DZ);
-      ddz = std::fabs(track->ErrorDZ);
+      const double xd = track->Xd,
+                   yd = track->Yd,
+                   zd = track->Zd;
+      const double dd0 = std::fabs(track->ErrorD0);
+      const double dz = std::fabs(track->DZ);
+      const double ddz = std::fabs(track->ErrorDZ);
 
+      double sip = 0.;
+      int sign = -1;
       if(fUse3D)
       {
         sign = (jpx * xd + jpy * yd + jpz * zd > 0.0) ? 1 : -1;

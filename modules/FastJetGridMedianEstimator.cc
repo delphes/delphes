@@ -35,14 +35,21 @@
 class FastJetGridMedianEstimator: public DelphesModule
 {
 public:
-  FastJetGridMedianEstimator() = default;
-
-  void Init() override;
-  void Process() override;
-  void Finish() override
+  explicit FastJetGridMedianEstimator(const DelphesParameters &moduleParams) : DelphesModule(moduleParams)
   {
-    fEstimators.clear();
+    for(const std::array<double, 4> &gridRange : Steer<std::vector<std::array<double, 4> > >("GridRange"))
+    {
+      const double rapMin = gridRange.at(0), rapMax = gridRange.at(1), drap = gridRange.at(2), dphi = gridRange.at(3);
+      fEstimators.push_back(std::make_unique<fastjet::GridMedianBackgroundEstimator>(rapMin, rapMax, drap, dphi));
+    }
   }
+
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Calorimeter/towers"));
+    fRhoOutputArray = ExportArray(Steer<std::string>("RhoOutputArray", "rho"));
+  }
+  void Process() override;
 
 private:
   std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
@@ -50,35 +57,6 @@ private:
   CandidatesCollection fInputArray;
   CandidatesCollection fRhoOutputArray; //!
 };
-
-//------------------------------------------------------------------------------
-
-void FastJetGridMedianEstimator::Init()
-{
-  ExRootConfParam param;
-  Long_t i, size;
-  Double_t drap, dphi, rapMin, rapMax;
-
-  // read rapidity ranges
-
-  param = GetParam("GridRange");
-  size = param.GetSize();
-
-  fEstimators.clear();
-  for(i = 0; i < size / 4; ++i)
-  {
-    rapMin = param[i * 4].GetDouble();
-    rapMax = param[i * 4 + 1].GetDouble();
-    drap = param[i * 4 + 2].GetDouble();
-    dphi = param[i * 4 + 3].GetDouble();
-    fEstimators.push_back(std::make_unique<fastjet::GridMedianBackgroundEstimator>(rapMin, rapMax, drap, dphi));
-  }
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-
-  fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
-}
 
 //------------------------------------------------------------------------------
 

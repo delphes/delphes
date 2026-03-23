@@ -37,9 +37,19 @@ using namespace std;
 class CscClusterEfficiency: public DelphesModule
 {
 public:
-  CscClusterEfficiency() : fFormula(std::make_unique<DelphesCscClusterFormula>()) {}
+  explicit CscClusterEfficiency(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormula(std::make_unique<DelphesCscClusterFormula>())
+  {
+    // read CscClusterEfficiency formula
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0").data());
+  }
 
-  void Init() override;
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles")); // create output array
+  }
   void Process() override;
 
 private:
@@ -51,33 +61,16 @@ private:
 
 //------------------------------------------------------------------------------
 
-void CscClusterEfficiency::Init()
-{
-  // read CscClusterEfficiency formula
-  fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
 void CscClusterEfficiency::Process()
 {
   fOutputArray->clear();
-
-  Double_t Ehad, Eem, decayR, decayZ;
-
   for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
-    decayZ = abs(candidateDecayPosition.Z());
-    decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
-    Ehad = candidate->Ehad;
-    Eem = candidate->Eem;
+    double decayZ = abs(candidateDecayPosition.Z());
+    double decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
+    double Ehad = candidate->Ehad;
+    double Eem = candidate->Eem;
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(decayR, decayZ, Ehad, Eem)) continue;
 
