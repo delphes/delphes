@@ -30,8 +30,6 @@
 #include "classes/DelphesModuleFactory.h"
 #include "classes/DelphesParameters.h"
 
-#include <ExRootAnalysis/ExRootConfReader.h>
-
 class Candidate;
 
 class DelphesFactory;
@@ -52,18 +50,12 @@ public:
   void SetName(std::string_view moduleName) { fName = moduleName; }
   const std::string &GetName() const { return fName; }
 
-  void SetConfReader(ExRootConfReader *conf) { fConfReader = conf; }
-
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
   virtual DelphesFactory *GetFactory() const;
 
   virtual bool IsWriter() const { return false; }
 
 protected:
-  ExRootConfReader *GetConfReader() const { return fConfReader; }
-
-  const ExRootConfReader::ExRootTaskMap *GetModules();
-
   template <typename T>
   T Steer(std::string_view keyName, T defaultValue = T{}) const
   {
@@ -78,7 +70,6 @@ private:
   std::string fName;
   DelphesFactory *fFactory{nullptr};
 
-  ExRootConfReader *fConfReader{nullptr}; //!
   const DelphesParameters fModuleParams;
 };
 

@@ -84,17 +84,3 @@ DelphesFactory *DelphesModule::GetFactory() const
 }
 
 //------------------------------------------------------------------------------
-
-const ExRootConfReader::ExRootTaskMap *DelphesModule::GetModules()
-{
-  if(fConfReader)
-  {
-    return fConfReader->GetModules();
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-//------------------------------------------------------------------------------

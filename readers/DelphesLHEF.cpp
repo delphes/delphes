@@ -30,6 +30,7 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesLHEFReader.h"
+#include "classes/DelphesTCLConfReader.h"
 #include "modules/Delphes.h"
 
 using namespace std;
@@ -70,12 +71,13 @@ int main(int argc, char *argv[])
 
   try
   {
-    const auto confReader = std::make_unique<ExRootConfReader>();
+    const auto confReader = std::make_unique<DelphesTCLConfReader>();
     confReader->ReadFile(argv[1]);
 
     const auto reader = std::make_unique<DelphesLHEFReader>(DelphesParameters{});
-    reader->SetMaxEvents(confReader->GetInt("::MaxEvents", 0));
-    reader->SetSkipEvents(confReader->GetInt("::SkipEvents", 0));
+    const auto userParams = confReader->Parameters();
+    reader->SetMaxEvents(userParams.Get<int>("MaxEvents", 0));
+    reader->SetSkipEvents(userParams.Get<int>("SkipEvents", 0));
 
     const auto modularDelphes = std::make_unique<Delphes>("Delphes");
     modularDelphes->SetConfReader(confReader.get());

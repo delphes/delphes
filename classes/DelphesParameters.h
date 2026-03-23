@@ -81,9 +81,17 @@ public:
   template <typename T>
   T Get(const std::string &key, const T &defaultValue = T()) const
   {
-    if(YAML::Node node = fNode[key]; node.IsDefined())
-      return node.as<T>(defaultValue);
-    return defaultValue;
+    try
+    {
+      if(YAML::Node node = fNode[key]; node.IsDefined())
+        return node.as<T>(defaultValue);
+      return defaultValue;
+    }
+    catch(...)
+    {
+      ThrowInvalidConversion(key);
+      throw;
+    }
   }
   /// retrieve a parameter with the given key and cast it to a given type
   /// \tparam T expected a stored parameter type
@@ -102,6 +110,8 @@ public:
   }
 
 private:
+  void ThrowInvalidConversion(std::string_view keyName) const;
+
   YAML::Node fNode{YAML::NodeType::Map}; ///< base node for the parameter collection
 };
 static const DelphesParameters kDefaultParameters = DelphesParameters().Set("invalid", true);
