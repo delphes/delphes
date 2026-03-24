@@ -42,8 +42,8 @@ public:
     fEtaFormula(std::make_unique<DelphesCscClusterFormula>())
   {
     // read efficiency formula
-    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0").data());
-    fEtaFormula->Compile(Steer<std::string>("EtaCutFormula", "1.0").data());
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0"));
+    fEtaFormula->Compile(Steer<std::string>("EtaCutFormula", "1.0"));
   }
 
   void Init() override

@@ -42,7 +42,7 @@ public:
     fFormula(std::make_unique<DelphesCscClusterFormula>())
   {
     // read CscClusterEfficiency formula
-    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0").data());
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0"));
   }
 
   void Init() override
