@@ -49,7 +49,7 @@ public:
     fConversionMap(std::make_unique<DelphesCylindricalFormula>()),
     fDecayXsec(std::make_unique<TF1>("decayXsec", "1.0 - 4.0/3.0 * x * (1.0 - x)", 0.0, 1.0))
   {
-    fConversionMap->Compile(Steer<std::string>("ConversionMap", "0.0").data());
+    fConversionMap->Compile(Steer<std::string>("ConversionMap", "0.0"));
   }
 
   void Init() override

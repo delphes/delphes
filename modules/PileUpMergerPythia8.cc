@@ -65,7 +65,7 @@ public:
     //
     fFunction(std::make_unique<DelphesTF2>())
   {
-    fFunction->Compile(Steer<std::string>("VertexDistributionFormula", "0.0").data());
+    fFunction->Compile(Steer<std::string>("VertexDistributionFormula", "0.0"));
     fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
   }
 
