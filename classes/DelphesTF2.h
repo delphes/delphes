@@ -19,18 +19,16 @@
 #ifndef DelphesTF2_h
 #define DelphesTF2_h
 
-#include "TF2.h"
+#include <TF2.h>
 
 class DelphesTF2: public TF2
 {
 public:
   DelphesTF2();
+  explicit DelphesTF2(std::string_view name, std::string_view expression);
+  ~DelphesTF2() = default;
 
-  DelphesTF2(const char *name, const char *expression);
-
-  ~DelphesTF2();
-
-  Int_t Compile(const char *expression);
+  int Compile(std::string_view expression);
 };
 
 #endif /* DelphesTF2_h */

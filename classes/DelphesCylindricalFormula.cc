@@ -18,11 +18,7 @@
 
 #include "classes/DelphesCylindricalFormula.h"
 
-#include "TString.h"
-
 #include <stdexcept>
-
-using namespace std;
 
 //------------------------------------------------------------------------------
 
@@ -33,24 +29,18 @@ DelphesCylindricalFormula::DelphesCylindricalFormula() :
 
 //------------------------------------------------------------------------------
 
-DelphesCylindricalFormula::DelphesCylindricalFormula(const char * /*name*/, const char * /*expression*/) :
+DelphesCylindricalFormula::DelphesCylindricalFormula(std::string_view /*name*/, std::string_view /*expression*/) :
   TFormula()
 {
 }
 
 //------------------------------------------------------------------------------
 
-DelphesCylindricalFormula::~DelphesCylindricalFormula()
-{
-}
-
-//------------------------------------------------------------------------------
-
-Int_t DelphesCylindricalFormula::Compile(const char *expression)
+Int_t DelphesCylindricalFormula::Compile(std::string_view expression)
 {
   TString buffer;
   const char *it;
-  for(it = expression; *it; ++it)
+  for(it = expression.data(); *it; ++it)
   {
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
@@ -59,17 +49,15 @@ Int_t DelphesCylindricalFormula::Compile(const char *expression)
   buffer.ReplaceAll("phi", "y");
   buffer.ReplaceAll("z", "z");
   if(TFormula::Compile(buffer) != 0)
-  {
-    throw runtime_error("Invalid formula.");
-  }
+    throw std::runtime_error("Invalid formula.");
   return 0;
 }
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesCylindricalFormula::Eval(Double_t r, Double_t phi, Double_t z)
+double DelphesCylindricalFormula::Eval(double r, double phi, double z) const
 {
-  Double_t x[3] = {r, phi, z};
+  double x[3] = {r, phi, z};
   return EvalPar(x);
 }
 

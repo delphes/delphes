@@ -25,14 +25,12 @@ class DelphesCylindricalFormula: public TFormula
 {
 public:
   DelphesCylindricalFormula();
+  DelphesCylindricalFormula(std::string_view name, std::string_view expression);
+  ~DelphesCylindricalFormula() = default;
 
-  DelphesCylindricalFormula(const char *name, const char *expression);
+  int Compile(std::string_view expression);
 
-  ~DelphesCylindricalFormula();
-
-  Int_t Compile(const char *expression);
-
-  Double_t Eval(Double_t r, Double_t phi = 0, Double_t z = 0);
+  double Eval(double r, double phi = 0, double z = 0) const;
 };
 
 #endif /* DelphesCylindricalFormula_h */
