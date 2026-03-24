@@ -12,13 +12,6 @@
 #include <tcl/tcl.h>
 
 #include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-
-using namespace std;
 
 static Tcl_ObjCmdProc ModuleObjCmdProc;
 static Tcl_ObjCmdProc SourceObjCmdProc;
@@ -36,23 +29,18 @@ DelphesTCLConfReader::DelphesTCLConfReader() :
 
 void DelphesTCLConfReader::ReadFile(std::string_view fileName)
 {
-  std::ifstream inputFileStream(std::string{fileName}, ios::in | ios::ate);
+  std::ifstream inputFileStream(std::string{fileName}, std::ios::in);
   if(!inputFileStream.is_open())
   {
     std::ostringstream message;
     message << "can't open configuration file " << fileName;
     throw std::runtime_error(message.str());
   }
-
-  const int length = inputFileStream.tellg();
-  inputFileStream.seekg(0, ios::beg);
-  inputFileStream.clear();
-  std::vector<char> buffer(length + 1, 0);
-  inputFileStream.read(buffer.data(), length);
+  std::string buffer((std::istreambuf_iterator<char>(inputFileStream)), std::istreambuf_iterator<char>());
 
   Tcl_Obj *cmdObjPtr = Tcl_NewObj();
   cmdObjPtr->bytes = buffer.data();
-  cmdObjPtr->length = length;
+  cmdObjPtr->length = buffer.size();
 
   Tcl_IncrRefCount(cmdObjPtr);
 
@@ -70,6 +58,7 @@ void DelphesTCLConfReader::ReadFile(std::string_view fileName)
   Tcl_DecrRefCount(cmdObjPtr);
 
   ParseValue(nullptr, "::ExecutionPath", "ExecutionPath", fParams);
+  ParseValue(nullptr, "::RandomSeed", "RandomSeed", fParams);
 
   for(const std::string &moduleName : fParams.Get<std::vector<std::string> >("ExecutionPath"))
   {
@@ -149,10 +138,6 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
   Tcl_Obj *object = nullptr;
   if(tclObject)
     object = const_cast<Tcl_Obj *>(tclObject);
-  else if(int length; tclObject && Tcl_ListObjLength(fTclInterp.get(), const_cast<Tcl_Obj *>(tclObject), &length) == TCL_OK) // we have a list/collection
-  {
-    throw std::runtime_error("Dictionary-like browsing is not supported by this version of TCL.");
-  }
   else // retrieve from the global environment
   {
     Tcl_Obj *variableName = Tcl_NewStringObj(const_cast<char *>(tclName.data()), -1); // build the key name object
@@ -160,9 +145,8 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
   }
   if(!object)
   {
-    std::ostringstream message;
-    message << "Failed to retrieve object with key '" << tclName << "' from object.";
-    throw std::runtime_error(message.str());
+    //std::cout << "Failed to retrieve object with key '" << tclName << "' from object.";
+    return;
   }
 
   const std::string delphesKeyName = keyName.empty() ? std::string{tclName} : std::string{keyName};
@@ -436,7 +420,7 @@ int ModuleObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Ob
 int SourceObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
   DelphesTCLConfReader *reader = static_cast<DelphesTCLConfReader *>(clientData);
-  stringstream fileName;
+  std::ostringstream fileName;
 
   if(objc != 2)
   {
