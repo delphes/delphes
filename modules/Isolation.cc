@@ -114,9 +114,9 @@ void Isolation::Process()
   CandidatesCollection isolationArray;
   double sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
   double sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
-  bool pass = kFALSE;
-  double eta = 0.0;
-  double rho = 0.0;
+  bool pass = false;
+  double eta = 0.;
+  double rho = 0.;
 
   // select isolation objects
   fFilter->Reset();
@@ -129,7 +129,7 @@ void Isolation::Process()
     eta = std::fabs(candidateMomentum.Eta());
 
     // find rho
-    rho = 0.0;
+    rho = 0.;
     if(fRhoInputArray)
     {
       for(Candidate *const &object : *fRhoInputArray)

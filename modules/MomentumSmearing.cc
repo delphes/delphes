@@ -93,8 +93,8 @@ void MomentumSmearing::Process()
 
     res = (res > 1.0) ? 1.0 : res;
 
-    double pt = 0.;
-    pt = LogNormal(pt, res * pt);
+    const double candidatePt = candidateMomentum.Pt();
+    const double pt = LogNormal(candidatePt, res * candidatePt);
 
     //if(pt <= 0.0) continue;
 

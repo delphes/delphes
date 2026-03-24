@@ -62,8 +62,8 @@ private:
 
 void UniqueObjectFinder::Process()
 {
-  for(const auto &[input_collection, output_collection] : fInputMap)
-    output_collection->clear();
+  for(const auto &[inputCollection, outputCollection] : fInputMap)
+    outputCollection->clear();
 
   for(auto itInputMap = fInputMap.cbegin(); itInputMap != fInputMap.cend(); ++itInputMap) // loop over all input arrays
   {
