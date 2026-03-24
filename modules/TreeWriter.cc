@@ -65,7 +65,7 @@ public:
 
     for(const std::pair<std::string, double> &info :
       Steer<std::vector<std::pair<std::string, double> > >("Info"))
-      AddInfo(info.first.data(), info.second);
+      AddInfo(info.first, info.second);
   }
   ~TreeWriter()
   {
@@ -84,6 +84,10 @@ public:
     }
     fTreeWriter->Fill();
     fTreeWriter->Clear();
+  }
+  void AddInfo(std::string_view name, double value) override
+  {
+    fExtraInfo[std::string{name}] = value;
   }
 
 private:
@@ -118,6 +122,7 @@ private:
 
   std::map<TClass *, TProcessMethod> fClassMap; //!
 #endif
+  std::map<std::string, double> fExtraInfo;
 };
 
 //------------------------------------------------------------------------------
@@ -132,6 +137,8 @@ void TreeWriter::Init()
     throw std::runtime_error(message.str());
   }
   fTreeWriter = std::make_unique<ExRootTreeWriter>(fOutputFile.get(), "Delphes");
+  for(const std::pair<std::string, double> extraInfo : fExtraInfo)
+    fTreeWriter->AddInfo(extraInfo.first.data(), extraInfo.second);
 
   // import array with output from filter/classifier/jetfinder modules
   for(const std::array<std::string, 3> &branchInfo :
