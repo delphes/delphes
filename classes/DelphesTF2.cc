@@ -18,46 +18,33 @@
 
 #include "classes/DelphesTF2.h"
 
-#include "RVersion.h"
-#include "TString.h"
+#include <RVersion.h>
+#include <TString.h>
 
 #include <stdexcept>
 
-using namespace std;
-
 //------------------------------------------------------------------------------
 
-DelphesTF2::DelphesTF2() :
-  TF2()
+DelphesTF2::DelphesTF2() : TF2()
 {
-
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 22, 7)
-  fFormula = std::unique_ptr<TFormula>(new TFormula());
+  fFormula = std::make_unique<TFormula>();
 #elif ROOT_VERSION_CODE >= ROOT_VERSION(6, 3, 0)
-  fFormula = new TFormula();
+  fFormula = new TFormula;
 #endif
 }
 
 //------------------------------------------------------------------------------
 
-DelphesTF2::DelphesTF2(const char *name, const char *expression) :
-  TF2(name, expression)
-{
-}
+DelphesTF2::DelphesTF2(std::string_view name, std::string_view expression) : TF2(name.data(), expression.data()) {}
 
 //------------------------------------------------------------------------------
 
-DelphesTF2::~DelphesTF2()
-{
-}
-
-//------------------------------------------------------------------------------
-
-Int_t DelphesTF2::Compile(const char *expression)
+int DelphesTF2::Compile(std::string_view expression)
 {
   TString buffer;
   const char *it;
-  for(it = expression; *it; ++it)
+  for(it = expression.data(); *it; ++it)
   {
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
@@ -69,9 +56,7 @@ Int_t DelphesTF2::Compile(const char *expression)
 #else
   if(fFormula->Compile(buffer) != 0)
 #endif
-  {
-    throw runtime_error("Invalid formula.");
-  }
+    throw std::runtime_error("Invalid formula.");
   return 0;
 }
 
