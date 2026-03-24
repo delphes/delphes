@@ -105,6 +105,12 @@ bool DelphesReader::ReadEvent()
         fReadStopWatch.Stop();
         return true;
       }
+      else if(fSkipEvents > 0)
+      {
+        fAllParticleOutputArray->clear();
+        fStableParticleOutputArray->clear();
+        fPartonOutputArray->clear();
+      }
       continue;
     }
   }

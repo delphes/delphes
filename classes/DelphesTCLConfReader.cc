@@ -58,7 +58,9 @@ void DelphesTCLConfReader::ReadFile(std::string_view fileName)
   Tcl_DecrRefCount(cmdObjPtr);
 
   ParseValue(nullptr, "::ExecutionPath", "ExecutionPath", fParams);
+  ParseValue(nullptr, "::MaxEvents", "MaxEvents", fParams);
   ParseValue(nullptr, "::RandomSeed", "RandomSeed", fParams);
+  ParseValue(nullptr, "::SkipEvents", "SkipEvents", fParams);
 
   for(const std::string &moduleName : fParams.Get<std::vector<std::string> >("ExecutionPath"))
   {
