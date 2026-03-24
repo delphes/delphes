@@ -52,7 +52,8 @@ public:
     fPhiBins(Steer<std::unordered_map<double, std::vector<double> > >("EtaPhiBins")),
     fFractionMap(Steer<TFractionMap>("EnergyFraction")), // energy fractions for different particles
     //
-    fResolutionFormula(std::make_unique<DelphesFormula>())
+    fResolutionFormula(std::make_unique<DelphesFormula>()),
+    fTowerTrackArray(std::make_shared<std::vector<Candidate *> >())
   {
     for(const std::pair<double, std::vector<double> > etaPhiBins : fPhiBins) // auto would avoid a copy
       fEtaBins.emplace_back(etaPhiBins.first);
@@ -154,6 +155,8 @@ private:
   }
 
   const std::unique_ptr<DelphesFormula> fResolutionFormula; //!
+  // unsaved collection
+  const CandidatesCollection fTowerTrackArray; //!
 
   CandidatesCollection fParticleInputArray; //!
   CandidatesCollection fTrackInputArray; //!
@@ -162,8 +165,6 @@ private:
 
   CandidatesCollection fEFlowTrackOutputArray; //!
   CandidatesCollection fEFlowTowerOutputArray; //!
-
-  CandidatesCollection fTowerTrackArray; //!
 };
 
 //------------------------------------------------------------------------------
