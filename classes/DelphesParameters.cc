@@ -274,7 +274,8 @@ bool DelphesParameters::Has<std::vector<DelphesParameters> >(const std::string &
 void DelphesParameters::ThrowInvalidConversion(std::string_view keyName) const
 {
   std::ostringstream message;
-  message << "Invalid conversion requested for key with name '" << keyName << "'.";
+  message << "Invalid conversion requested for key with name '" << keyName << "'. Full parameters block:\n"
+          << *this;
   throw std::runtime_error(message.str());
 }
 

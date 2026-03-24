@@ -45,6 +45,18 @@ private:
   std::string Run(std::string_view command) const; //FIXME for debugging only!
   std::string TrimmedName(std::string_view keyName) const;
 
+  std::vector<Tcl_Obj *> GetObjVector(Tcl_Obj *) const;
+  template <typename T>
+  T Get(Tcl_Obj *) const { return T{}; }
+  template <typename T>
+  std::vector<T> GetVector(Tcl_Obj *objPtr) const
+  {
+    std::vector<T> outputColl;
+    for(Tcl_Obj *const &subObjPtr : GetObjVector(objPtr))
+      outputColl.emplace_back(Get<T>(subObjPtr));
+    return outputColl;
+  }
+
   struct TclInterpDeleter
   {
     void operator()(Tcl_Interp *tclInterp) const { Tcl_DeleteInterp(tclInterp); }

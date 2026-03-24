@@ -75,17 +75,29 @@ void Delphes::Init()
       message << "' is specified in ExecutionPath but not configured.";
       throw std::runtime_error(message.str());
     }
-    const DelphesParameters moduleParams = userConfig.Get<DelphesParameters>(moduleName);
-    const std::string moduleTypeFromParams = moduleParams.Get<std::string>("ModuleType", moduleName);
-    std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(moduleTypeFromParams, moduleParams);
-    moduleObject->SetName(moduleName);
-    moduleObject->SetFactory(GetFactory());
-    if(moduleObject->IsWriter())
+    try
     {
-      DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
-      writerModule->SetOutputFile(GetOutputFile());
+      const DelphesParameters moduleParams = userConfig.Get<DelphesParameters>(moduleName);
+      const std::string moduleTypeFromParams = moduleParams.Get<std::string>("ModuleType", moduleName);
+      std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(moduleTypeFromParams, moduleParams);
+      moduleObject->SetName(moduleName);
+      moduleObject->SetFactory(GetFactory());
+      if(moduleObject->IsWriter())
+      {
+        DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
+        writerModule->SetOutputFile(GetOutputFile());
+      }
+      fModules.emplace_back(std::make_pair(moduleName, std::move(moduleObject)));
     }
-    fModules.emplace_back(std::make_pair(moduleName, std::move(moduleObject)));
+    catch(const std::runtime_error &error)
+    {
+      std::ostringstream message;
+      message << "Failed to build '" << moduleName << "' module. Error: " << error.what();
+      if(userConfig.Has<DelphesParameters>(moduleName))
+        message << "\nParameters:\n"
+                << userConfig.Get<DelphesParameters>(moduleName);
+      throw std::runtime_error(message.str());
+    }
   }
 }
 

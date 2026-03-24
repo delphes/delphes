@@ -33,14 +33,6 @@ DelphesTCLConfReader::DelphesTCLConfReader() :
 
 //------------------------------------------------------------------------------
 
-std::string DelphesTCLConfReader::Run(std::string_view command) const
-{
-  if(Tcl_Eval(fTclInterp.get(), const_cast<char *>(command.data())) != TCL_OK) return "nil";
-  return Tcl_GetStringFromObj(Tcl_GetObjResult(fTclInterp.get()), 0);
-}
-
-//------------------------------------------------------------------------------
-
 void DelphesTCLConfReader::ReadFile(std::string_view fileName)
 {
   std::ifstream inputFileStream(std::string{fileName}, ios::in | ios::ate);
@@ -86,10 +78,65 @@ void DelphesTCLConfReader::ReadFile(std::string_view fileName)
     fParams.Set(moduleName, moduleParams);
   }
 
-  //std::cout << ">>> " << Run("namespace children ::ScalarHT") << std::endl;
-  //std::cout << ">>> " << Run("info vars ::ScalarHT::*") << std::endl;
-
   //std::cout << fParams << std::endl;
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+std::string DelphesTCLConfReader::Get<std::string>(Tcl_Obj *objPtr) const
+{
+  return Tcl_GetStringFromObj(objPtr, 0);
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+int DelphesTCLConfReader::Get<int>(Tcl_Obj *objPtr) const
+{
+  if(int result; Tcl_GetIntFromObj(fTclInterp.get(), objPtr, &result) == TCL_OK)
+    return result;
+  std::ostringstream message;
+  message << "Failed to cast object at " << objPtr << " to integer.";
+  if(Tcl_Obj *error = Tcl_GetObjResult(fTclInterp.get()); error)
+    message << " Tcl error: " << Get<std::string>(error);
+  throw std::runtime_error(message.str());
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+double DelphesTCLConfReader::Get<double>(Tcl_Obj *objPtr) const
+{
+  if(double result; Tcl_GetDoubleFromObj(fTclInterp.get(), objPtr, &result) == TCL_OK)
+    return result;
+  std::ostringstream message;
+  message << "Failed to cast object at " << objPtr << " to double floating point number.";
+  if(Tcl_Obj *error = Tcl_GetObjResult(fTclInterp.get()); error)
+    message << " Tcl error: " << Get<std::string>(error);
+  throw std::runtime_error(message.str());
+}
+
+//------------------------------------------------------------------------------
+
+std::vector<Tcl_Obj *> DelphesTCLConfReader::GetObjVector(Tcl_Obj *objPtr) const
+{
+  Tcl_Obj **objVectorPtr = nullptr;
+  if(int length; Tcl_ListObjGetElements(fTclInterp.get(), objPtr, &length, &objVectorPtr) == TCL_OK)
+    return std::vector<Tcl_Obj *>(objVectorPtr, objVectorPtr + length);
+  std::ostringstream message;
+  message << "Failed to retrieve length of object at " << objPtr << ". Is it really a vector?";
+  if(Tcl_Obj *error = Tcl_GetObjResult(fTclInterp.get()); error)
+    message << " Error: " << Get<std::string>(error);
+  throw std::runtime_error(message.str());
+}
+
+//------------------------------------------------------------------------------
+
+std::string DelphesTCLConfReader::Run(std::string_view command) const
+{
+  if(Tcl_Eval(fTclInterp.get(), const_cast<char *>(command.data())) != TCL_OK) return "nil";
+  return Get<std::string>(Tcl_GetObjResult(fTclInterp.get()));
 }
 
 //------------------------------------------------------------------------------
@@ -139,26 +186,141 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
           doubleCollection.emplace_back(result);
         else if(int result; Tcl_GetBooleanFromObj(fTclInterp.get(), object, &result) == TCL_OK)
           boolCollection.emplace_back(result);
-        else if(std::string result = Tcl_GetStringFromObj(subObject, 0); !result.empty())
+        else if(const std::string result = Get<std::string>(subObject); !result.empty())
           stringCollection.emplace_back(result);
       }
     }
-    if(!longCollection.empty()) delphesParams.Set(delphesKeyName, longCollection);
-    if(!intCollection.empty()) delphesParams.Set(delphesKeyName, intCollection);
-    if(!doubleCollection.empty()) delphesParams.Set(delphesKeyName, doubleCollection);
-    if(!boolCollection.empty()) delphesParams.Set(delphesKeyName, boolCollection);
-    if(!stringCollection.empty())
+
+    //------------------------------------------------------------------------------
+    // here starts the hacky part to match TCL cards to structured configurations
+    //------------------------------------------------------------------------------
+
+    if(delphesKeyName == "Branch"
+      && stringCollection.size() > 1 && stringCollection.size() % 3 == 0)
     {
-      if(delphesKeyName.find("Formula") != std::string::npos)
+      std::vector<std::array<std::string, 3> > branchesInfo;
+      for(size_t i = 0; i < stringCollection.size() / 3; ++i)
+        branchesInfo.emplace_back(std::array{
+          stringCollection.at(3 * i), stringCollection.at(3 * i + 1), stringCollection.at(3 * i + 2)});
+      delphesParams.Set(delphesKeyName, branchesInfo);
+      return;
+    }
+    if(delphesKeyName == "EtaPhiBins")
+    {
+      std::unordered_map<double, std::vector<double> > etaPhiBins;
+      const std::vector<Tcl_Obj *> objColl = GetObjVector(object);
+      for(size_t i = 0; i < objColl.size() / 2; ++i)
+      {
+        const std::vector<Tcl_Obj *> etaBinsObj = GetObjVector(objColl.at(2 * i)); // eta binning
+        const std::vector<Tcl_Obj *> phiBinsObj = GetObjVector(objColl.at(2 * i + 1)); // phi binning
+        for(Tcl_Obj *const &etaValueObj : etaBinsObj)
+        {
+          const double etaValue = Get<double>(etaValueObj);
+          for(Tcl_Obj *const &phiValueObj : phiBinsObj)
+            etaPhiBins[etaValue].emplace_back(Get<double>(phiValueObj));
+        }
+      }
+      delphesParams.Set(delphesKeyName, etaPhiBins);
+      return;
+    }
+    if(delphesKeyName == "EnergyFraction")
+    {
+      std::unordered_map<unsigned long long, double> singleEnergyFraction;
+      std::unordered_map<unsigned long long, std::pair<double, double> > doubleEnergyFraction;
+      const std::vector<Tcl_Obj *> objColl = GetObjVector(object);
+      // read energy fractions for different particles
+      for(size_t i = 0; i < objColl.size() / 2; ++i)
+      {
+        const int pdgId = Get<int>(objColl.at(2 * i));
+        if(const std::vector<double> energyFractions = GetVector<double>(objColl.at(2 * i + 1)); energyFractions.size() == 1)
+          singleEnergyFraction[pdgId] = energyFractions.at(0);
+        else if(energyFractions.size() == 2)
+          doubleEnergyFraction[pdgId] = std::make_pair(energyFractions.at(0), energyFractions.at(1));
+      }
+      if(!singleEnergyFraction.empty())
+        delphesParams.Set(delphesKeyName, singleEnergyFraction);
+      else if(!doubleEnergyFraction.empty())
+        delphesParams.Set(delphesKeyName, doubleEnergyFraction);
+      return;
+    }
+    if(delphesKeyName.find("Formula") != std::string::npos)
+    {
+      if(doubleCollection.size() == longCollection.size())
+      { //FIXME: hacky way to ensure {pdgId -> formula} are parsed correctly
+        std::unordered_map<long, std::string> intBasedFormula;
+        for(size_t i = 0; i < longCollection.size(); ++i)
+          intBasedFormula[longCollection.at(i)] = std::to_string(doubleCollection.at(i));
+        delphesParams.Set(delphesKeyName, intBasedFormula);
+        return;
+      }
+      if(stringCollection.size() == longCollection.size())
+      { //FIXME: hacky way to ensure {pdgId -> formula} are parsed correctly
+        std::unordered_map<long, std::string> intBasedFormula;
+        for(size_t i = 0; i < longCollection.size(); ++i)
+          intBasedFormula[longCollection.at(i)] = stringCollection.at(i);
+        delphesParams.Set(delphesKeyName, intBasedFormula);
+        return;
+      }
       { //FIXME: hacky way to ensure formulas are parsed as full strings
-        if(std::string result = Tcl_GetStringFromObj(object, 0); !result.empty())
+        if(const std::string result = Get<std::string>(object); !result.empty())
         { //FIXME check if reasonable
           delphesParams.Set(delphesKeyName, result);
           return;
         }
       }
-      delphesParams.Set(delphesKeyName, stringCollection);
     }
+    if(delphesKeyName == "RhoEtaRange"
+      && !doubleCollection.empty() && doubleCollection.size() % 2 == 0)
+    {
+      std::vector<std::pair<double, double> > valuesRanges;
+      for(size_t i = 0; i < doubleCollection.size() / 2; ++i)
+        valuesRanges.emplace_back(std::make_pair(doubleCollection.at(2 * i), doubleCollection.at(2 * i + 1)));
+      delphesParams.Set(delphesKeyName, valuesRanges);
+      return;
+    }
+    if(delphesKeyName == "InputArray"
+      && stringCollection.size() > 1 && stringCollection.size() % 2 == 0
+      && stringCollection.at(1).find("/") == std::string::npos)
+    {
+      std::vector<std::pair<std::string, std::string> > inputOutputArrays;
+      for(size_t i = 0; i < stringCollection.size() / 2; ++i)
+        inputOutputArrays.emplace_back(std::make_pair(stringCollection.at(2 * i), stringCollection.at(2 * i + 1)));
+      delphesParams.Set(delphesKeyName, inputOutputArrays);
+      return;
+    }
+    if(delphesKeyName.find("Array") != std::string::npos && stringCollection.size() == 1)
+    {
+      delphesParams.Set(delphesKeyName, stringCollection.at(0));
+      return;
+    }
+
+    //------------------------------------------------------------------------------
+    // end of the hacky part, you may now breathe normally
+    //------------------------------------------------------------------------------
+
+    if(!longCollection.empty())
+    {
+      if(longCollection.size() == 1)
+        delphesParams.Set(delphesKeyName, longCollection);
+      else
+        delphesParams.Set(delphesKeyName, longCollection);
+    }
+    if(!intCollection.empty())
+    {
+      if(intCollection.size() == 1)
+        delphesParams.Set(delphesKeyName, intCollection);
+      else
+        delphesParams.Set(delphesKeyName, intCollection);
+    }
+    if(!doubleCollection.empty())
+    {
+      if(doubleCollection.size() == 1)
+        delphesParams.Set(delphesKeyName, doubleCollection.at(0));
+      else
+        delphesParams.Set(delphesKeyName, doubleCollection);
+    }
+    if(!boolCollection.empty()) delphesParams.Set(delphesKeyName, boolCollection);
+    if(!stringCollection.empty()) delphesParams.Set(delphesKeyName, stringCollection);
   }
   else if(long result; Tcl_GetLongFromObj(fTclInterp.get(), object, &result) == TCL_OK)
     delphesParams.Set(delphesKeyName, result);
@@ -168,8 +330,8 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
     delphesParams.Set(delphesKeyName, result);
   else if(int result; Tcl_GetBooleanFromObj(fTclInterp.get(), object, &result) == TCL_OK)
     delphesParams.Set(delphesKeyName, static_cast<bool>(result));
-  else if(std::string result = Tcl_GetStringFromObj(object, 0); !result.empty()) //FIXME check if reasonable
-    delphesParams.Set(delphesKeyName, result);
+  else if(const std::string result = Get<std::string>(object); !result.empty())
+    delphesParams.Set(delphesKeyName, result); // fallback solution: parse everything as a string
 }
 
 //------------------------------------------------------------------------------
@@ -192,7 +354,7 @@ std::vector<std::string> DelphesTCLConfReader::ChildrenList(std::string_view nam
   for(int i = 0; i < length; ++i)
   {
     if(Tcl_Obj *subObject = nullptr; Tcl_ListObjIndex(fTclInterp.get(), namespaceChildren, i, &subObject) == TCL_OK && subObject)
-      childrenList[i] = Tcl_GetStringFromObj(subObject, 0);
+      childrenList[i] = Get<std::string>(subObject);
   }
   return childrenList;
 }
@@ -206,7 +368,7 @@ std::string DelphesTCLConfReader::TrimmedName(std::string_view keyName) const
   if(Tcl_Eval(fTclInterp.get(), const_cast<char *>(command.str().data())) == TCL_OK)
   {
     if(Tcl_Obj *trimmedSubObject = Tcl_GetObjResult(fTclInterp.get()); trimmedSubObject)
-      return Tcl_GetStringFromObj(trimmedSubObject, 0);
+      return Get<std::string>(trimmedSubObject);
   }
   return std::string{keyName};
 }
