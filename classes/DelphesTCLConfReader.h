@@ -5,24 +5,15 @@
  *
  *  Class handling TCL input card parsing
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author L. Forthomme - AGH, Krakow
+ *  \note Based on ExRootConfReader by P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
+#include "classes/DelphesConfReader.h"
 #include "classes/DelphesParameters.h"
 
 #include <tcl/tcl.h>
-
-//------------------------------------------------------------------------------
-
-class DelphesConfReader
-{
-public:
-  DelphesConfReader() = default;
-
-  virtual void ReadFile(std::string_view fileName) = 0;
-  virtual const DelphesParameters &Parameters() const = 0;
-};
 
 //------------------------------------------------------------------------------
 
