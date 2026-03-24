@@ -68,7 +68,8 @@ void DelphesTCLConfReader::ReadFile(std::string_view fileName)
     fParams.Set(moduleName, moduleParams);
   }
 
-  //std::cout << fParams << std::endl;
+  std::ofstream outputCard("lastrun.yaml");
+  outputCard << fParams;
 }
 
 //------------------------------------------------------------------------------
@@ -138,10 +139,13 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
   Tcl_Obj *object = nullptr;
   if(tclObject)
     object = const_cast<Tcl_Obj *>(tclObject);
-  else // retrieve from the global environment
-  {
-    Tcl_Obj *variableName = Tcl_NewStringObj(const_cast<char *>(tclName.data()), -1); // build the key name object
-    object = Tcl_ObjGetVar2(fTclInterp.get(), variableName, 0, TCL_GLOBAL_ONLY);
+  else
+  { // retrieve from the global environment
+    if(Tcl_Obj *varNameObj = Tcl_NewStringObj(const_cast<char *>(tclName.data()), -1); varNameObj) // build the key name object
+      object = Tcl_ObjGetVar2(fTclInterp.get(), varNameObj, 0, TCL_GLOBAL_ONLY);
+    else
+      throw std::runtime_error("Failed to build a Tcl string for the variable name '" + std::string{tclName} + "'. "
+        + "Please check the status of your interpreter.");
   }
   if(!object)
   {
@@ -223,7 +227,7 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
     }
     if(delphesKeyName.find("Formula") != std::string::npos)
     {
-      if(doubleCollection.size() == intCollection.size())
+      if(!intCollection.empty() && doubleCollection.size() == intCollection.size())
       { //FIXME: hacky way to ensure {pdgId -> formula} are parsed correctly
         std::unordered_map<long, std::string> intBasedFormula;
         for(size_t i = 0; i < intCollection.size(); ++i)
@@ -231,7 +235,7 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
         delphesParams.Set(delphesKeyName, intBasedFormula);
         return;
       }
-      if(stringCollection.size() == intCollection.size())
+      if(!intCollection.empty() && stringCollection.size() == intCollection.size())
       { //FIXME: hacky way to ensure {pdgId -> formula} are parsed correctly
         std::unordered_map<long, std::string> intBasedFormula;
         for(size_t i = 0; i < intCollection.size(); ++i)
@@ -247,7 +251,7 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
         }
       }
     }
-    if(delphesKeyName == "RhoEtaRange"
+    if(delphesKeyName == "RhoEtaRange" // tweak for FastJetFinder module
       && !doubleCollection.empty() && doubleCollection.size() % 2 == 0)
     {
       std::vector<std::pair<double, double> > valuesRanges;
