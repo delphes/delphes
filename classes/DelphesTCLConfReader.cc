@@ -2,7 +2,8 @@
  *
  *  Class handling TCL input card parsing
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author L. Forthomme - AGH, Krakow
+ *  \note Based on ExRootConfReader by P. Demin - UCL, Louvain-la-Neuve
  *
  */
 
@@ -166,29 +167,23 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
 
   const std::string delphesKeyName = keyName.empty() ? std::string{tclName} : std::string{keyName};
 
-  if(int length; Tcl_ListObjLength(fTclInterp.get(), object, &length) == TCL_OK)
+  if(const std::vector<Tcl_Obj *> collObj = GetObjVector(object); collObj.size() > 1)
   { // we have a list/collection
     // with this version of TCL, only flat lists are supported, no need to parse dictionaries
-    std::vector<long> longCollection;
     std::vector<int> intCollection;
     std::vector<double> doubleCollection;
     std::vector<bool> boolCollection;
     std::vector<std::string> stringCollection;
-    for(int i = 0; i < length; ++i)
+    for(Tcl_Obj *const &subObject : collObj)
     {
-      if(Tcl_Obj *subObject = nullptr; Tcl_ListObjIndex(fTclInterp.get(), object, i, &subObject) == TCL_OK)
-      {
-        if(long result; Tcl_GetLongFromObj(fTclInterp.get(), subObject, &result) == TCL_OK)
-          longCollection.emplace_back(result);
-        else if(int result; Tcl_GetIntFromObj(fTclInterp.get(), subObject, &result) == TCL_OK)
-          intCollection.emplace_back(result);
-        else if(double result; Tcl_GetDoubleFromObj(fTclInterp.get(), subObject, &result) == TCL_OK)
-          doubleCollection.emplace_back(result);
-        else if(int result; Tcl_GetBooleanFromObj(fTclInterp.get(), object, &result) == TCL_OK)
-          boolCollection.emplace_back(result);
-        else if(const std::string result = Get<std::string>(subObject); !result.empty())
-          stringCollection.emplace_back(result);
-      }
+      if(int result; Tcl_GetIntFromObj(fTclInterp.get(), subObject, &result) == TCL_OK)
+        intCollection.emplace_back(result);
+      else if(double result; Tcl_GetDoubleFromObj(fTclInterp.get(), subObject, &result) == TCL_OK)
+        doubleCollection.emplace_back(result);
+      else if(int result; Tcl_GetBooleanFromObj(fTclInterp.get(), object, &result) == TCL_OK)
+        boolCollection.emplace_back(result);
+      else if(const std::string result = Get<std::string>(subObject); !result.empty())
+        stringCollection.emplace_back(result);
     }
 
     //------------------------------------------------------------------------------
@@ -203,24 +198,6 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
         branchesInfo.emplace_back(std::array{
           stringCollection.at(3 * i), stringCollection.at(3 * i + 1), stringCollection.at(3 * i + 2)});
       delphesParams.Set(delphesKeyName, branchesInfo);
-      return;
-    }
-    if(delphesKeyName == "EtaPhiBins")
-    {
-      std::unordered_map<double, std::vector<double> > etaPhiBins;
-      const std::vector<Tcl_Obj *> objColl = GetObjVector(object);
-      for(size_t i = 0; i < objColl.size() / 2; ++i)
-      {
-        const std::vector<Tcl_Obj *> etaBinsObj = GetObjVector(objColl.at(2 * i)); // eta binning
-        const std::vector<Tcl_Obj *> phiBinsObj = GetObjVector(objColl.at(2 * i + 1)); // phi binning
-        for(Tcl_Obj *const &etaValueObj : etaBinsObj)
-        {
-          const double etaValue = Get<double>(etaValueObj);
-          for(Tcl_Obj *const &phiValueObj : phiBinsObj)
-            etaPhiBins[etaValue].emplace_back(Get<double>(phiValueObj));
-        }
-      }
-      delphesParams.Set(delphesKeyName, etaPhiBins);
       return;
     }
     if(delphesKeyName == "EnergyFraction")
@@ -243,21 +220,38 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
         delphesParams.Set(delphesKeyName, doubleEnergyFraction);
       return;
     }
+    if(delphesKeyName.find("EtaPhiBins") != std::string::npos)
+    {
+      std::unordered_map<double, std::vector<double> > etaPhiBins;
+      const std::vector<Tcl_Obj *> objColl = GetObjVector(object);
+      for(size_t i = 0; i < objColl.size() / 2; ++i)
+      {
+        const std::vector<Tcl_Obj *> phiBinsObj = GetObjVector(objColl.at(2 * i + 1)); // phi binning
+        for(Tcl_Obj *const &etaValueObj : GetObjVector(objColl.at(2 * i))) // eta binning
+        {
+          const double etaValue = Get<double>(etaValueObj);
+          for(Tcl_Obj *const &phiValueObj : phiBinsObj)
+            etaPhiBins[etaValue].emplace_back(Get<double>(phiValueObj));
+        }
+      }
+      delphesParams.Set(delphesKeyName, etaPhiBins);
+      return;
+    }
     if(delphesKeyName.find("Formula") != std::string::npos)
     {
-      if(doubleCollection.size() == longCollection.size())
+      if(doubleCollection.size() == intCollection.size())
       { //FIXME: hacky way to ensure {pdgId -> formula} are parsed correctly
         std::unordered_map<long, std::string> intBasedFormula;
-        for(size_t i = 0; i < longCollection.size(); ++i)
-          intBasedFormula[longCollection.at(i)] = std::to_string(doubleCollection.at(i));
+        for(size_t i = 0; i < intCollection.size(); ++i)
+          intBasedFormula[intCollection.at(i)] = std::to_string(doubleCollection.at(i));
         delphesParams.Set(delphesKeyName, intBasedFormula);
         return;
       }
-      if(stringCollection.size() == longCollection.size())
+      if(stringCollection.size() == intCollection.size())
       { //FIXME: hacky way to ensure {pdgId -> formula} are parsed correctly
         std::unordered_map<long, std::string> intBasedFormula;
-        for(size_t i = 0; i < longCollection.size(); ++i)
-          intBasedFormula[longCollection.at(i)] = stringCollection.at(i);
+        for(size_t i = 0; i < intCollection.size(); ++i)
+          intBasedFormula[intCollection.at(i)] = stringCollection.at(i);
         delphesParams.Set(delphesKeyName, intBasedFormula);
         return;
       }
@@ -298,13 +292,6 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
     // end of the hacky part, you may now breathe normally
     //------------------------------------------------------------------------------
 
-    if(!longCollection.empty())
-    {
-      if(longCollection.size() == 1)
-        delphesParams.Set(delphesKeyName, longCollection);
-      else
-        delphesParams.Set(delphesKeyName, longCollection);
-    }
     if(!intCollection.empty())
     {
       if(intCollection.size() == 1)
@@ -319,8 +306,20 @@ void DelphesTCLConfReader::ParseValue(const Tcl_Obj *tclObject,
       else
         delphesParams.Set(delphesKeyName, doubleCollection);
     }
-    if(!boolCollection.empty()) delphesParams.Set(delphesKeyName, boolCollection);
-    if(!stringCollection.empty()) delphesParams.Set(delphesKeyName, stringCollection);
+    if(!boolCollection.empty())
+    {
+      if(boolCollection.size() == 1)
+        delphesParams.Set(delphesKeyName, boolCollection);
+      else
+        delphesParams.Set(delphesKeyName, boolCollection);
+    }
+    if(!stringCollection.empty())
+    {
+      if(stringCollection.size() == 1)
+        delphesParams.Set(delphesKeyName, stringCollection);
+      else
+        delphesParams.Set(delphesKeyName, stringCollection);
+    }
   }
   else if(long result; Tcl_GetLongFromObj(fTclInterp.get(), object, &result) == TCL_OK)
     delphesParams.Set(delphesKeyName, result);
