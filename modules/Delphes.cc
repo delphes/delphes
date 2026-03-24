@@ -34,7 +34,6 @@
 #include "classes/DelphesTCLConfReader.h"
 #include "classes/DelphesWriter.h"
 
-#include <ExRootAnalysis/ExRootConfReader.h>
 #include <ExRootAnalysis/ExRootProgressBar.h>
 
 #include <TRandom3.h>
@@ -62,7 +61,6 @@ void Delphes::Init()
   if(!fConfReader)
     throw std::runtime_error("Failed to initialise the main Delphes module with no user configuration reader declared.");
 
-  //const ExRootConfReader::ExRootTaskMap *modules = confReader->GetModules();//FIXME
   const auto userConfig = fConfReader->Parameters();
   gRandom->SetSeed(userConfig.Get<int>("RandomSeed", 0));
 
