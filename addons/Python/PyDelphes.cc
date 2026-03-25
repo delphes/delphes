@@ -41,6 +41,8 @@ namespace py = pybind11;
 
 PyDelphes::~PyDelphes() { FinishTask(); }
 
+//------------------------------------------------------------------------------
+
 void PyDelphes::Init()
 {
   for(const std::string &moduleName : fConfig.Get<std::vector<std::string> >("ExecutionPath"))
@@ -78,6 +80,8 @@ void PyDelphes::Init()
   }
 }
 
+//------------------------------------------------------------------------------
+
 void PyDelphes::Next()
 {
   if(!fIsInitialised)
@@ -91,6 +95,8 @@ void PyDelphes::Next()
   GetReader()->Clear();
 }
 
+//------------------------------------------------------------------------------
+
 py::dict PyDelphes::GetModules() const
 {
   py::dict modulesObj;
@@ -98,14 +104,16 @@ py::dict PyDelphes::GetModules() const
   return modulesObj;
 }
 
+//------------------------------------------------------------------------------
+
 void PyDelphes::SetModules(const py::dict &modulesObj)
 {
   for(const std::pair<py::handle, py::handle> &moduleObj : modulesObj)
   {
     const std::string moduleName = moduleObj.first.cast<std::string>();
     if(py::isinstance<py::dict>(moduleObj.second))
-    {
-      const DelphesParameters moduleParams = PyDelphesConfReader{moduleObj.second.cast<py::dict>()}.Parameters();
-    }
+      fConfig.Set(moduleName, PyDelphesConfReader{moduleObj.second.cast<py::dict>()}.Parameters());
   }
 }
+
+//------------------------------------------------------------------------------
