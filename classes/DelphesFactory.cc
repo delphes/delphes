@@ -28,7 +28,7 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 
-void DelphesFactory::Clear(Option_t * /*option*/)
+void DelphesFactory::Clear()
 {
   TProcessID::SetObjectCount(0);
   fCandidates.clear();

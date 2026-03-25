@@ -39,7 +39,7 @@ class DelphesFactory
 public:
   DelphesFactory() = default;
 
-  virtual void Clear(Option_t *option = ""); ///< Clear all collections booked in this factory
+  virtual void Clear(); ///< Clear all collections booked in this factory
 
   bool Has(std::string_view collectionName) const; ///< Is the collection already booked?
   /// Book the memory segment for a new collection
