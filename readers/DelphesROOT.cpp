@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
                          stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
                          partonOutputArray = modularDelphes->ExportArray("partons");
-    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event");
+    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event", true);
 
     modularDelphes->InitTask();
 

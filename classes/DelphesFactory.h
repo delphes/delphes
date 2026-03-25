@@ -44,11 +44,13 @@ public:
   bool Has(std::string_view collectionName) const; ///< Is the collection already booked?
   /// Book the memory segment for a new collection
   template <typename T>
-  std::shared_ptr<T> Book(std::string_view collectionName)
+  std::shared_ptr<T> Book(std::string_view collectionName, bool forExport)
   {
     const std::string name{collectionName};
     if(fMemorySlots.count(name) == 0)
       fMemorySlots[name] = reinterpret_cast<void *>(new T);
+    if(forExport)
+      fExportCollections.emplace_back(std::make_pair(name, &typeid(T)));
     return Attach<T>(collectionName);
   }
   /// Attach a pointer to a collection handled by this factory
@@ -58,7 +60,14 @@ public:
     if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
     return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]), [](T *) {});
   }
+  void *Attach(std::string_view collectionName) const
+  {
+    if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
+    return fMemorySlots.at(std::string{collectionName});
+  }
   std::vector<std::string> GetCollections() const; ///< Retrieve the name of all collections booked
+  /// Retrieve the list of collections to be exported automatically
+  const std::vector<std::pair<std::string, const std::type_info *> > &GetExportCollections() const { return fExportCollections; }
 
   Candidate *NewCandidate(); ///< Construct a new candidate to fill a collection
 
@@ -66,6 +75,7 @@ private:
   void ThrowAttachingFailure(std::string_view collectionName) const;
 
   std::map<std::string, void *> fMemorySlots;
+  std::vector<std::pair<std::string, const std::type_info *> > fExportCollections;
   std::vector<std::unique_ptr<Candidate> > fCandidates;
 };
 

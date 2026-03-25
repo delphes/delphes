@@ -81,7 +81,7 @@ void DelphesSTDHEPReader::LoadInputFile(std::string_view inputFile)
 void DelphesSTDHEPReader::SetFactory(DelphesFactory *factory)
 {
   DelphesReader::SetFactory(factory);
-  fEventInfo = GetFactory()->Book<LHEFEvent>("Event");
+  fEventInfo = GetFactory()->Book<LHEFEvent>("Event", true);
 }
 
 //---------------------------------------------------------------------------
