@@ -27,7 +27,6 @@
 
 #include <pybind11/pybind11.h>
 
-#include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesReader.h"
 #include "modules/Delphes.h"
@@ -54,15 +53,20 @@ void PyDelphes::Init()
       message << "' is specified in ExecutionPath but not configured.";
       throw std::runtime_error(message.str());
     }
+    DelphesFactory *factory = GetFactory();
+    if(!factory)
+      throw std::runtime_error("Delphes factory was not initialised for this PyDelphes module.");
+    fDelphesEvent = std::make_unique<PyDelphesEvent>(*factory);
     try
     {
       const DelphesParameters moduleParams = fConfig.Get<DelphesParameters>(moduleName);
       const std::string moduleTypeFromParams = moduleParams.Get<std::string>("ModuleType", moduleName);
       std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(moduleTypeFromParams, moduleParams);
       moduleObject->SetName(moduleName);
-      moduleObject->SetFactory(GetFactory());
+      moduleObject->SetFactory(factory);
       if(moduleObject->IsWriter())
       {
+        std::cout << "output file: " << GetOutputFile() << std::endl;
         DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
         writerModule->SetOutputFile(GetOutputFile());
       }
@@ -82,27 +86,39 @@ void PyDelphes::Init()
 
 //------------------------------------------------------------------------------
 
-void PyDelphes::Next()
+void PyDelphes::SetReader(DelphesReader *readerObj)
 {
+  Delphes::SetReader(readerObj);
+  readerObj->SetFactory(GetFactory());
+  readerObj->SetMaxEvents(fConfig.Get<int>("MaxEvents", 0));
+  readerObj->SetSkipEvents(fConfig.Get<int>("SkipEvents", 0));
+  readerObj->Clear();
+}
+
+//------------------------------------------------------------------------------
+
+const PyDelphesEvent &PyDelphes::Next()
+{
+  DelphesReader *eventReader = GetReader();
+  if(!eventReader)
+    throw std::runtime_error("Event reader object is not yet initialised.");
   if(!fIsInitialised)
   {
     InitTask();
     fIsInitialised = true;
   }
-  GetReader()->ReadEvent();
+  Clear();
+  std::cout << __PRETTY_FUNCTION__ << ":" << eventReader << std::endl;
+  eventReader->ReadEvent();
   ProcessTask();
   Clear();
-  GetReader()->Clear();
+  eventReader->Clear();
+  return *fDelphesEvent;
 }
 
 //------------------------------------------------------------------------------
 
-py::dict PyDelphes::GetModules() const
-{
-  py::dict modulesObj;
-  //TODO: implement
-  return modulesObj;
-}
+py::dict PyDelphes::GetModules() const { return py::dict{}; /*fConfig*/ } //TODO: make UI a bit better
 
 //------------------------------------------------------------------------------
 

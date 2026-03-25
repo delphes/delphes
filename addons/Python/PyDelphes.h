@@ -36,18 +36,34 @@ namespace pybind11
 class dict;
 } // namespace pybind11
 
+class DelphesFactory;
+
+class PyDelphesEvent
+{
+public:
+  explicit PyDelphesEvent(const DelphesFactory &factory) : fFactory(factory) {}
+  CandidatesCollection Get() const;
+
+private:
+  const DelphesFactory &fFactory;
+};
+
 class PyDelphes: public Delphes
 {
 public:
   PyDelphes() {}
   ~PyDelphes();
 
+  void SetReader(DelphesReader *readerObj) override;
+
   void Init() override;
-  void Next();
+  const PyDelphesEvent &Next();
   pybind11::dict GetModules() const;
   void SetModules(const pybind11::dict &modulesObj);
 
 private:
+  std::unique_ptr<DelphesReader> fEventReader;
+  std::unique_ptr<PyDelphesEvent> fDelphesEvent;
   DelphesParameters fConfig;
   bool fIsInitialised{false};
 };
