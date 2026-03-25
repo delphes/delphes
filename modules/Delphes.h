@@ -42,7 +42,8 @@ public:
   DelphesFactory *GetFactory() const override;
 
   void SetConfReader(DelphesConfReader *conf) { fConfReader = conf; }
-  void SetReader(DelphesReader *reader);
+
+  virtual void SetReader(DelphesReader *reader);
   DelphesReader *GetReader() const { return fReader; }
 
   void InitTask();
