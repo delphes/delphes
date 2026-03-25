@@ -40,7 +40,7 @@ public:
   PyDelphesConfReader() = default;
   explicit PyDelphesConfReader(const pybind11::dict &);
 
-  void ReadFile(std::string_view fileName) override {}
+  void ReadFile(std::string_view fileName) override;
   const DelphesParameters &Parameters() const override { return fParams; }
 
 private:

@@ -35,6 +35,14 @@ namespace py = pybind11;
 
 PyDelphesConfReader::PyDelphesConfReader(const py::dict &dict) { fParams = ParseDict(dict); }
 
+//------------------------------------------------------------------------------
+
+void PyDelphesConfReader::ReadFile(std::string_view fileName)
+{
+}
+
+//------------------------------------------------------------------------------
+
 DelphesParameters PyDelphesConfReader::ParseDict(const py::dict &dictObj) const
 {
   DelphesParameters paramsObj;
@@ -73,6 +81,7 @@ DelphesParameters PyDelphesConfReader::ParseDict(const py::dict &dictObj) const
       throw std::runtime_error(message.str());
     }
   }
-  std::cout << paramsObj << std::endl;
   return paramsObj;
 }
+
+//------------------------------------------------------------------------------

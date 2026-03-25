@@ -40,6 +40,8 @@
 
 namespace py = pybind11;
 
+//------------------------------------------------------------------------------
+
 PYBIND11_MODULE(DelphesPython, m)
 {
   m.doc() = R"pbdoc(
@@ -49,27 +51,34 @@ PYBIND11_MODULE(DelphesPython, m)
     A Python wrapper for the processing of events through the Delphes framework.
   )pbdoc";
 
-  m.def("load", [](std::string libraryName) {
+  m.def("load", [](std::string_view libraryName) {
     if(::dlopen(libraryName.data(), RTLD_LAZY | RTLD_GLOBAL) == nullptr)
     {
       std::ostringstream message;
-      message << "Failed to load library " << libraryName << ".";
-      if(const char *err = dlerror(); err != nullptr) message << "\n\t" << err;
-      throw std::runtime_error(message.str());
-    } }, "Load an external library into the runtime environment");
+      message << "Failed to load library '" << libraryName << "'.";
+      if(const char *err = dlerror(); err != nullptr) message << " " << err;
+      throw py::import_error(message.str());
+    }
+    py::print("Successfully loaded the library", libraryName, "into the runtime environment."); }, "Load an external library into the runtime environment");
+
+  // mimick Module as an actual Python object, while it is only a translator for a Python dictionary
   m.def("Module", [](std::string moduleType, const py::kwargs &moduleArgs) -> py::dict {
     py::dict paramsObj = moduleArgs;
     paramsObj[py::str("ModuleType")] = py::str(moduleType);
     return paramsObj; }, "Define a processing module configuration");
 
-  py::class_<PyDelphes>(m, "Delphes")
+  // on the other hand, Reader are realy Python objects
+  py::class_<DelphesReader>(m, "Reader", "External event reader object")
+    .def(py::init([](std::string readerType, const py::kwargs &readerArgs) {
+      return DelphesReaderFactory::Get().Build(readerType, PyDelphesConfReader{readerArgs}.Parameters());
+    }));
+
+  // this is where all the magic is done
+  py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
     .def(py::init<>())
     .def_property("reader", &PyDelphes::GetReader, &PyDelphes::SetReader, "Reader module used in event consumption")
     .def_property("modules", &PyDelphes::GetModules, &PyDelphes::SetModules, "Processing modules chain definition")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
-
-  py::class_<DelphesReader>(m, "Reader")
-    .def(py::init([](std::string readerType, const py::kwargs &readerArgs) {
-      return DelphesReaderFactory::Get().Build(readerType, PyDelphesConfReader{readerArgs}.Parameters());
-    }));
 }
+
+//------------------------------------------------------------------------------
