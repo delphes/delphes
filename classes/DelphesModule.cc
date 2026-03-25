@@ -67,7 +67,7 @@ CandidatesCollection DelphesModule::ExportArray(std::string_view name)
     message << "Collection with name '" << name << "' and label '" << collectionLabel.str() << "'  was already booked in the memory slot.";
     throw std::runtime_error(message.str());
   }
-  return factory->Book<std::vector<Candidate *> >(collectionLabel.str());
+  return factory->Book<std::vector<Candidate *> >(collectionLabel.str(), false);
 }
 
 //------------------------------------------------------------------------------

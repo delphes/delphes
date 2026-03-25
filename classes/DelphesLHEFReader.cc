@@ -81,8 +81,8 @@ void DelphesLHEFReader::LoadInputFile(std::string_view inputFile)
 void DelphesLHEFReader::SetFactory(DelphesFactory *factory)
 {
   DelphesReader::SetFactory(factory);
-  fEventInfo = GetFactory()->Book<LHEFEvent>("Event");
-  fWeightInfo = GetFactory()->Book<std::vector<LHEFWeight> >("Weights");
+  fEventInfo = GetFactory()->Book<LHEFEvent>("Event", true);
+  fWeightInfo = GetFactory()->Book<std::vector<LHEFWeight> >("Weights", true);
 }
 
 //---------------------------------------------------------------------------

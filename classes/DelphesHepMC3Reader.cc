@@ -81,8 +81,8 @@ void DelphesHepMC3Reader::LoadInputFile(std::string_view inputFile)
 void DelphesHepMC3Reader::SetFactory(DelphesFactory *factory)
 {
   DelphesReader::SetFactory(factory);
-  fEventObject = GetFactory()->Book<HepMCEvent>("Event");
-  fWeightsObject = GetFactory()->Book<std::vector<Weight> >("Weight");
+  fEventObject = GetFactory()->Book<HepMCEvent>("Event", true);
+  fWeightsObject = GetFactory()->Book<std::vector<Weight> >("Weight", true);
 }
 
 //---------------------------------------------------------------------------

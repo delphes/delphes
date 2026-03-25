@@ -256,8 +256,8 @@ int main(int argc, char *argv[])
     modularDelphes->SetConfReader(confReader.get());
     modularDelphes->SetOutputFile(argv[3]);
 
-    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event");
-    std::shared_ptr<std::vector<Weight> > weightsInfo = modularDelphes->GetFactory()->Book<std::vector<Weight> >("Weight");
+    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event", true);
+    std::shared_ptr<std::vector<Weight> > weightsInfo = modularDelphes->GetFactory()->Book<std::vector<Weight> >("Weight", true);
     std::shared_ptr<HepMCEvent> eventInfoLHEF;
     std::shared_ptr<std::vector<Weight> > weightsInfoLHEF;
 
@@ -315,8 +315,8 @@ int main(int argc, char *argv[])
         reader = std::make_unique<DelphesLHEFReader>(DelphesParameters{});
         reader->LoadInputFile(inputFile);
 
-        eventInfoLHEF = modularDelphes->GetFactory()->Book<HepMCEvent>("EventLHEF");
-        weightsInfoLHEF = modularDelphes->GetFactory()->Book<std::vector<Weight> >("WeightLHEF");
+        eventInfoLHEF = modularDelphes->GetFactory()->Book<HepMCEvent>("EventLHEF", true);
+        weightsInfoLHEF = modularDelphes->GetFactory()->Book<std::vector<Weight> >("WeightLHEF", true);
 
         allParticleOutputArrayLHEF = modularDelphes->ImportArray("Delphes/allParticlesLHEF");
         stableParticleOutputArrayLHEF = modularDelphes->ImportArray("Delphes/stableParticlesLHEF");
