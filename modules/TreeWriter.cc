@@ -25,6 +25,7 @@
  */
 
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesWriter.h"
 
 #include <ExRootAnalysis/ExRootTreeBranch.h>
@@ -32,7 +33,6 @@
 
 #include <TFile.h>
 #include <TLorentzVector.h>
-#include <TROOT.h>
 
 #include <set>
 
@@ -60,8 +60,17 @@ public:
     fClassMap[MissingET::Class()] = &TreeWriter::ProcessMissingET;
     fClassMap[ScalarHT::Class()] = &TreeWriter::ProcessScalarHT;
     fClassMap[Rho::Class()] = &TreeWriter::ProcessRho;
-    fClassMap[Weight::Class()] = &TreeWriter::ProcessWeight;
     fClassMap[HectorHit::Class()] = &TreeWriter::ProcessHectorHit;
+
+    // in case we are coping with vectors, we let ExRootAnalysis/ROOT know about the base object
+    fExtraTypeInfos[&typeid(std::vector<Weight>)] = &typeid(Weight);
+    fExtraTypeInfos[&typeid(std::vector<LHEFWeight>)] = &typeid(LHEFWeight);
+
+    fExtraClassMap[&typeid(std::vector<Weight>)] = &TreeWriter::ProcessWeight;
+    fExtraClassMap[&typeid(LHEFWeight)] = &TreeWriter::ProcessLHEFWeight;
+    fExtraClassMap[&typeid(LHEFEvent)] = &TreeWriter::ProcessLHEFEvent;
+    fExtraClassMap[&typeid(LHCOEvent)] = &TreeWriter::ProcessLHCOEvent;
+    fExtraClassMap[&typeid(HepMCEvent)] = &TreeWriter::ProcessHepMCEvent;
 
     for(const std::pair<std::string, double> &info :
       Steer<std::vector<std::pair<std::string, double> > >("Info"))
@@ -78,6 +87,11 @@ public:
     if(!fTreeWriter) // safety check for output tree writer
       throw std::runtime_error("Output tree writer was not properly initialised.");
     for(const auto &[branch, method_array] : fBranchMap)
+    {
+      auto &[method, array] = method_array;
+      (this->*method)(branch, array);
+    }
+    for(const auto &[branch, method_array] : fExtraBranchMap)
     {
       auto &[method, array] = method_array;
       (this->*method)(branch, array);
@@ -107,11 +121,17 @@ private:
   void ProcessMissingET(ExRootTreeBranch *branch, const CandidatesCollection &array);
   void ProcessScalarHT(ExRootTreeBranch *branch, const CandidatesCollection &array);
   void ProcessRho(ExRootTreeBranch *branch, const CandidatesCollection &array);
-  void ProcessWeight(ExRootTreeBranch *branch, const CandidatesCollection &array);
   void ProcessHectorHit(ExRootTreeBranch *branch, const CandidatesCollection &array);
+
+  void ProcessWeight(ExRootTreeBranch *branch, void *const &);
+  void ProcessLHEFWeight(ExRootTreeBranch *branch, void *const &);
+  void ProcessLHEFEvent(ExRootTreeBranch *branch, void *const &);
+  void ProcessLHCOEvent(ExRootTreeBranch *branch, void *const &);
+  void ProcessHepMCEvent(ExRootTreeBranch *branch, void *const &);
 
 #if !defined(__CINT__) && !defined(__CLING__)
   typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, const CandidatesCollection &); //!
+  typedef void (TreeWriter::*TVoidProcessMethod)(ExRootTreeBranch *, void *const &); //!
 
   typedef std::map<ExRootTreeBranch *, std::pair<TProcessMethod, CandidatesCollection> > TBranchMap; //!
 
@@ -123,6 +143,10 @@ private:
   std::map<TClass *, TProcessMethod> fClassMap; //!
 #endif
   std::map<std::string, double> fExtraInfo;
+  std::unordered_map<ExRootTreeBranch *, std::pair<TVoidProcessMethod, void *> > fExtraBranchMap;
+  std::unordered_map<const std::type_info *, const std::type_info *> fExtraTypeInfos;
+  std::unordered_map<const std::type_info *, TVoidProcessMethod> fExtraClassMap; //!
+  std::unordered_map<std::string, void *> fMemorySlots;
 };
 
 //------------------------------------------------------------------------------
@@ -145,7 +169,7 @@ void TreeWriter::Init()
     Steer<std::vector<std::array<std::string, 3> > >("Branch"))
   {
     const std::string &branchInputArray = branchInfo.at(0), &branchName = branchInfo.at(1), &branchClassName = branchInfo.at(2);
-    TClass *branchClass = gROOT->GetClass(branchClassName.data());
+    TClass *branchClass = TClass::GetClass(branchClassName.data());
     if(!branchClass)
       throw std::runtime_error("** ERROR: cannot find class '" + branchClassName + "'");
 
@@ -155,6 +179,28 @@ void TreeWriter::Init()
     fBranchMap.insert(std::make_pair(
       fTreeWriter->NewBranch(branchName.data(), branchClass), // ExRootAnalysis tree branch
       std::make_pair(fClassMap.at(branchClass), ImportArray(branchInputArray))));
+  }
+  for(const std::pair<std::string, const std::type_info *> &branchInfo : GetFactory()->GetExportCollections())
+  {
+    const std::type_info *typeInfo = nullptr;
+    if(fExtraClassMap.count(branchInfo.second) == 0)
+    {
+      if(fExtraTypeInfos.count(branchInfo.second) > 0)
+        typeInfo = fExtraTypeInfos.at(branchInfo.second);
+    }
+    else
+      typeInfo = branchInfo.second;
+    if(typeInfo == nullptr)
+    {
+      std::cerr << "** WARNING: did not find a proper conversion rule for '" << branchInfo.first << "' object "
+                << "with (mangled) type '" << branchInfo.second->name() << "'. Will not store it into the output tree.";
+      continue;
+    }
+    TClass *branchClass = TClass::GetClass(*typeInfo);
+    fMemorySlots[branchInfo.first] = GetFactory()->Attach(branchInfo.first);
+    fExtraBranchMap.insert(std::make_pair(
+      fTreeWriter->NewBranch(branchInfo.first.data(), branchClass), // ExRootAnalysis tree branch
+      std::make_pair(fExtraClassMap.at(typeInfo), fMemorySlots.at(branchInfo.first))));
   }
   fTreeWriter->Clear();
 }
@@ -959,14 +1005,51 @@ void TreeWriter::ProcessRho(ExRootTreeBranch *branch, const CandidatesCollection
 
 //------------------------------------------------------------------------------
 
-void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, const CandidatesCollection &array)
+void TreeWriter::ProcessWeight(ExRootTreeBranch *branch, void *const &array)
 {
-  // get the first entry
-  if(!array->empty())
+  std::vector<Weight> *weightsArray = reinterpret_cast<std::vector<Weight> *>(array);
+  for(const Weight &weight : *weightsArray)
   {
-    Weight *entry = static_cast<Weight *>(branch->NewEntry());
-    entry->Weight = array->at(0)->Momentum.E();
+    Weight *element = static_cast<Weight *>(branch->NewEntry());
+    element->Weight = weight.Weight;
   }
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessLHEFWeight(ExRootTreeBranch *branch, void *const &array)
+{
+  std::vector<LHEFWeight> *weightsArray = reinterpret_cast<std::vector<LHEFWeight> *>(array);
+  for(const LHEFWeight &weight : *weightsArray)
+  {
+    LHEFWeight *element = static_cast<LHEFWeight *>(branch->NewEntry());
+    element->ID = weight.ID;
+    element->Weight = weight.Weight;
+  }
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessHepMCEvent(ExRootTreeBranch *branch, void *const &array)
+{
+  HepMCEvent *entry = static_cast<HepMCEvent *>(branch->NewEntry());
+  *entry = *reinterpret_cast<HepMCEvent *>(array);
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessLHEFEvent(ExRootTreeBranch *branch, void *const &array)
+{
+  LHEFEvent *entry = static_cast<LHEFEvent *>(branch->NewEntry());
+  *entry = *reinterpret_cast<LHEFEvent *>(array);
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessLHCOEvent(ExRootTreeBranch *branch, void *const &array)
+{
+  LHCOEvent *entry = static_cast<LHCOEvent *>(branch->NewEntry());
+  *entry = *reinterpret_cast<LHCOEvent *>(array);
 }
 
 //------------------------------------------------------------------------------
