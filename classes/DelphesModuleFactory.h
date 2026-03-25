@@ -58,11 +58,6 @@ public:
   virtual ~DelphesModuleFactory() = default; ///< Default destructor
   void operator=(const DelphesModuleFactory &) = delete; ///< Disabled assignment operator
 
-  static DelphesModuleFactory &Get()
-  {
-    static DelphesModuleFactory instance;
-    return instance;
-  }
   /// Register a named module in the database
   template <typename U>
   void RegisterModule(const std::string &name)
