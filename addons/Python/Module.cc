@@ -30,55 +30,15 @@
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesReader.h"
-#include "modules/Delphes.h"
 
+#include "PyDelphes.h"
 #include "PyDelphesConfReader.h"
-
-#include <ExRootAnalysis/ExRootProgressBar.h>
 
 #include <dlfcn.h>
 
+#include <ExRootAnalysis/ExRootProgressBar.h>
+
 namespace py = pybind11;
-
-class PyDelphes: public Delphes
-{
-public:
-  PyDelphes() {}
-  ~PyDelphes() { FinishTask(); }
-
-  void Next()
-  {
-    if(!fIsInitialised)
-    {
-      InitTask();
-      fIsInitialised = true;
-    }
-    GetReader()->ReadEvent();
-    ProcessTask();
-    Clear();
-    GetReader()->Clear();
-  }
-  py::dict GetModules() const
-  {
-    py::dict modulesObj;
-    //TODO: implement
-    return modulesObj;
-  }
-  void SetModules(const py::dict &modulesObj)
-  {
-    for(const std::pair<py::handle, py::handle> &moduleObj : modulesObj)
-    {
-      const std::string moduleName = moduleObj.first.cast<std::string>();
-      if(py::isinstance<py::dict>(moduleObj.second))
-      {
-        const DelphesParameters moduleParams = PyDelphesConfReader{moduleObj.second.cast<py::dict>()}.Parameters();
-      }
-    }
-  }
-
-private:
-  bool fIsInitialised{false};
-};
 
 PYBIND11_MODULE(DelphesPython, m)
 {

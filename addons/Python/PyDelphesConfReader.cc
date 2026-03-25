@@ -25,6 +25,8 @@
  *
  */
 
+#include <pybind11/stl.h>
+
 #include "PyDelphesConfReader.h"
 
 #include <iostream> //FIXME
