@@ -101,7 +101,8 @@ bool DelphesReader::ReadEvent()
       ++fEventCounter;
       if(fEventCounter > fSkipEvents)
       {
-        fProgressBar->Update(ftello(fInputFile), fEventCounter);
+        if(fInputFile)
+          fProgressBar->Update(ftello(fInputFile), fEventCounter);
         fReadStopWatch.Stop();
         return true;
       }
