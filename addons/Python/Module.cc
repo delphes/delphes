@@ -26,8 +26,8 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-#include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesReader.h"
 
@@ -61,17 +61,29 @@ PYBIND11_MODULE(DelphesPython, m)
     }
     py::print("Successfully loaded the library", libraryName, "into the runtime environment."); }, "Load an external library into the runtime environment");
 
-  // mimick Module as an actual Python object, while it is only a translator for a Python dictionary
-  m.def("Module", [](std::string moduleType, const py::kwargs &moduleArgs) -> py::dict {
+  // mimic Module as an actual Python object, while it is only a translator for a Python dictionary
+  m.def("Module", [](std::string_view moduleType, const py::kwargs &moduleArgs) -> py::dict {
     py::dict paramsObj = moduleArgs;
     paramsObj[py::str("ModuleType")] = py::str(moduleType);
     return paramsObj; }, "Define a processing module configuration");
 
-  // on the other hand, Reader are realy Python objects
+  // on the other hand, Reader are really Python objects
   py::class_<DelphesReader>(m, "Reader", "External event reader object")
-    .def(py::init([](std::string readerType, const py::kwargs &readerArgs) {
-      return DelphesReaderFactory::Get().Build(readerType, PyDelphesConfReader{readerArgs}.Parameters());
+    .def(py::init([](std::string_view readerType, const py::kwargs &readerArgs) {
+      std::unique_ptr<DelphesReader> readerObj = DelphesReaderFactory::Get().Build(std::string{readerType}, PyDelphesConfReader{readerArgs}.Parameters());
+      if(readerArgs.contains("inputFiles"))
+      {
+        if(const std::vector<std::string> inputFiles = readerArgs["inputFiles"].cast<std::vector<std::string> >(); !inputFiles.empty())
+        {
+          readerObj->LoadInputFile(inputFiles.at(0));
+          readerObj->Clear();
+        }
+        //TODO: manage multi-files inputs
+      }
+      return readerObj;
     }));
+
+  py::class_<PyDelphesEvent>(m, "_DelphesEvent", "Event collections content");
 
   // this is where all the magic is done
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
