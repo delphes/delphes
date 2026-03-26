@@ -35,7 +35,7 @@ DelphesReader::~DelphesReader()
   if(fInputFile)
   {
     fseek(fInputFile, 0L, SEEK_END);
-    fProgressBar->Update(ftello(fInputFile), fEventCounter, kTRUE);
+    fProgressBar->Update(ftello(fInputFile), fEventCounter, true);
     fProgressBar->Finish();
 
     if(fInputFile != stdin) fclose(fInputFile);

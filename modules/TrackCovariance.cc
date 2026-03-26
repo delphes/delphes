@@ -116,7 +116,7 @@ void TrackCovariance::Process()
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
     bool inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
-    bool Accept = kTRUE;
+    bool Accept = true;
     if(inside)
       Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
     else

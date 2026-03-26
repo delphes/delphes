@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i, maxEvents, skipEvents;
   Long64_t eventCounter, numberOfEvents;
-  Bool_t firstEvent = kTRUE;
+  Bool_t firstEvent = true;
 
   if(argc < 4)
   {
@@ -411,7 +411,7 @@ int main(int argc, char *argv[])
             allParticleOutputArray, stableParticleOutputArray, partonOutputArray, firstEvent);
           modularDelphes->ProcessTask();
 
-          firstEvent = kFALSE;
+          firstEvent = false;
 
           treeWriter->Fill();
 
@@ -423,7 +423,7 @@ int main(int argc, char *argv[])
         ++eventCounter;
       }
 
-      progressBar.Update(eventCounter, eventCounter, kTRUE);
+      progressBar.Update(eventCounter, eventCounter, true);
       progressBar.Finish();
 
       inputFile->Close();
