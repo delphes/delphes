@@ -62,34 +62,23 @@ private:
   std::shared_ptr<HepMCEvent> fEventObject;
   std::shared_ptr<std::vector<Weight> > fWeights;
 
-  FILE *fInputFile;
+  FILE *fInputFile{nullptr};
   std::array<char, 16384> fBuffer;
 
-  TDatabasePDG *fPDG;
+  TDatabasePDG *fPDG{nullptr};
 
-  int fEventNumber, fMPI, fProcessID, fSignalCode, fVertexCounter, fBeamCode[2];
-  double fScale, fAlphaQCD, fAlphaQED;
+  int fVertexCounter{-1};
+  double fMomentumCoefficient{1.}, fPositionCoefficient{1.};
 
-  double fMomentumCoefficient, fPositionCoefficient;
-
-  int fStateSize;
   std::vector<int> fState;
 
-  int fWeightSize;
-  std::vector<double> fWeight;
+  int fOutVertexCode{-1}, fVertexID{-1}, fInCounter{-1}, fOutCounter{-1};
+  double fX{0.}, fY{0.}, fZ{0.}, fT{0.};
 
-  double fCrossSection, fCrossSectionError;
+  int fParticleCode{0}, fPID{0}, fStatus{0}, fInVertexCode{-1};
+  double fPx{0.}, fPy{0.}, fPz{0.}, fE{0.}, fMass{0.}, fTheta{0.}, fPhi{0.};
 
-  int fID1, fID2;
-  double fX1, fX2, fScalePDF, fPDF1, fPDF2;
-
-  int fOutVertexCode, fVertexID, fInCounter, fOutCounter;
-  double fX, fY, fZ, fT;
-
-  int fParticleCode, fPID, fStatus, fInVertexCode;
-  double fPx, fPy, fPz, fE, fMass, fTheta, fPhi;
-
-  int fParticleCounter;
+  int fParticleCounter{0};
 
   std::map<int, std::pair<int, int> > fMotherMap;
   std::map<int, std::pair<int, int> > fDaughterMap;

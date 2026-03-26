@@ -75,7 +75,7 @@ private:
   void ReadSTDHEP();
   void ReadSTDHEP4();
 
-  FILE *fInputFile;
+  FILE *fInputFile{nullptr};
 
   std::shared_ptr<LHEFEvent> fEventInfo;
 
@@ -83,14 +83,10 @@ private:
 
   std::array<uint8_t, 1000000 * 96 + 24> fBuffer;
 
-  TDatabasePDG *fPDG;
+  TDatabasePDG *fPDG{nullptr};
 
-  uint32_t fEntries;
-  int32_t fBlockType, fEventNumber, fEventSize;
-  double fWeight, fAlphaQCD, fAlphaQED;
-
-  uint32_t fScaleSize;
-  double fScale[10];
+  int32_t fBlockType{-1}, fEventNumber, fEventSize;
+  std::vector<double> fScale;
 };
 
 #endif // DelphesSTDHEPReader_h

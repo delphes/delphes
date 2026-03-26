@@ -53,7 +53,7 @@ static const int kBufferSize = 16384;
 DelphesLHEFReader::DelphesLHEFReader(const DelphesParameters &readerParams) :
   DelphesReader(readerParams),
   fPDG(TDatabasePDG::Instance()),
-  fEventReady(false), fEventCounter(-1), fParticleCounter(-1), fCrossSection(1) {}
+  fEventReady(false) {}
 
 //---------------------------------------------------------------------------
 
@@ -73,7 +73,6 @@ void DelphesLHEFReader::LoadInputFile(std::string_view inputFile)
 
   if(length <= 0)
     fclose(fInputFile);
-  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -90,17 +89,10 @@ void DelphesLHEFReader::SetFactory(DelphesFactory *factory)
 void DelphesLHEFReader::Clear()
 {
   fEventReady = false;
-  fEventCounter = -1;
+  fEventInfo->Number = -1;
+  fEventInfo->CrossSection = 0.; //TODO: read this?
   fParticleCounter = -1;
-  fWeightList.clear();
   fWeightInfo->clear();
-}
-
-//---------------------------------------------------------------------------
-
-bool DelphesLHEFReader::EventReady()
-{
-  return fEventReady;
 }
 
 //---------------------------------------------------------------------------
@@ -116,18 +108,25 @@ bool DelphesLHEFReader::ReadBlock()
   if(strstr(fBuffer.data(), "<event>"))
   {
     Clear();
-    fEventCounter = 1;
+    fEventInfo->Number = 1;
   }
-  else if(fEventCounter > 0)
+  else if(fEventInfo->Number > 0)
   {
     DelphesStream bufferStream(fBuffer.data());
 
+    double eventWeight, scalePDF, alphaQED, alphaQCD;
     rc = bufferStream.ReadInt(fParticleCounter)
-      && bufferStream.ReadInt(fProcessID)
-      && bufferStream.ReadDbl(fWeight)
-      && bufferStream.ReadDbl(fScalePDF)
-      && bufferStream.ReadDbl(fAlphaQED)
-      && bufferStream.ReadDbl(fAlphaQCD);
+      && bufferStream.ReadInt(fEventInfo->ProcessID)
+      && bufferStream.ReadDbl(eventWeight)
+      && bufferStream.ReadDbl(scalePDF)
+      && bufferStream.ReadDbl(alphaQED)
+      && bufferStream.ReadDbl(alphaQCD);
+
+    // double -> float
+    fEventInfo->Weight = eventWeight;
+    fEventInfo->ScalePDF = scalePDF;
+    fEventInfo->AlphaQED = alphaQED;
+    fEventInfo->AlphaQCD = alphaQCD;
 
     if(!rc)
     {
@@ -136,7 +135,7 @@ bool DelphesLHEFReader::ReadBlock()
       return false;
     }
 
-    --fEventCounter;
+    --fEventInfo->Number;
   }
   else if(fParticleCounter > 0)
   {
@@ -196,7 +195,9 @@ bool DelphesLHEFReader::ReadBlock()
       return false;
     }
 
-    fWeightList.push_back(make_pair(id, weight));
+    LHEFWeight &weightInfo = fWeightInfo->emplace_back();
+    weightInfo.ID = id;
+    weightInfo.Weight = weight;
   }
   else if(strstr(fBuffer.data(), "<xsecinfo"))
   {
@@ -226,7 +227,7 @@ bool DelphesLHEFReader::ReadBlock()
       return false;
     }
 
-    fCrossSection = xsec;
+    fEventInfo->CrossSection = xsec;
   }
   else if(strstr(fBuffer.data(), "</event>"))
   {
@@ -239,27 +240,8 @@ bool DelphesLHEFReader::ReadBlock()
 
 void DelphesLHEFReader::AnalyzeEvent(TStopwatch *procStopWatch)
 {
-  LHEFEvent &element = *fEventInfo;
-  element.Number = fEventCounter;
-
-  element.ProcessID = fProcessID;
-  element.Weight = fWeight;
-  element.CrossSection = fCrossSection;
-
-  element.ScalePDF = fScalePDF;
-  element.AlphaQED = fAlphaQED;
-  element.AlphaQCD = fAlphaQCD;
-
-  element.ReadTime = fReadStopWatch.RealTime();
-  element.ProcTime = procStopWatch->RealTime();
-
-  for(std::vector<pair<int, double> >::const_iterator itWeightList = fWeightList.begin();
-    itWeightList != fWeightList.end(); ++itWeightList)
-  {
-    LHEFWeight &weight = fWeightInfo->emplace_back();
-    weight.ID = itWeightList->first;
-    weight.Weight = itWeightList->second;
-  }
+  fEventInfo->ReadTime = fReadStopWatch.RealTime();
+  fEventInfo->ProcTime = procStopWatch->RealTime();
 }
 
 //---------------------------------------------------------------------------

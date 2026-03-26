@@ -68,25 +68,17 @@ private:
 
   std::array<char, 16384> fBuffer;
 
-  TDatabasePDG *fPDG;
+  TDatabasePDG *fPDG{nullptr};
 
-  int fEventNumber, fMPI, fProcessID, fVertexCounter, fParticleCounter;
-  double fScale, fAlphaQCD, fAlphaQED;
+  double fMomentumCoefficient{1.}, fPositionCoefficient{1.};
 
-  double fMomentumCoefficient, fPositionCoefficient;
-
+  int fVertexCounter{0}, fParticleCounter{0};
   std::vector<double> fWeights;
 
-  double fCrossSection, fCrossSectionError;
+  double fX{0.}, fY{0.}, fZ{0.}, fT{0.};
 
-  int fID1, fID2;
-  double fX1, fX2, fScalePDF, fPDF1, fPDF2;
-
-  int fVertexCode, fVertexStatus;
-  double fX, fY, fZ, fT;
-
-  int fParticleCode, fPID, fParticleStatus, fOutVertexCode;
-  double fPx, fPy, fPz, fE, fMass;
+  int fParticleCode{0}, fPID{0}, fParticleStatus{0}, fOutVertexCode{0};
+  double fPx{0.}, fPy{0.}, fPz{0.}, fE{0.}, fMass{0.};
 
   std::vector<std::pair<std::shared_ptr<TLorentzVector>, CandidatesCollection> > fVertices;
   std::vector<int> fParticles;

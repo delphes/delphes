@@ -48,7 +48,7 @@ public:
 
   void LoadInputFile(std::string_view) override;
   void Clear() override;
-  bool EventReady() override;
+  bool EventReady() override { return fEventReady; }
 
   void AnalyzeEvent(TStopwatch *procStopWatch) override;
 
@@ -61,19 +61,14 @@ private:
 
   std::array<char, 16384> fBuffer;
 
-  TDatabasePDG *fPDG;
+  TDatabasePDG *fPDG{nullptr};
 
-  bool fEventReady;
+  bool fEventReady{false};
 
-  int fEventCounter;
+  int fParticleCounter{-1};
 
-  int fParticleCounter, fProcessID;
-  double fCrossSection, fWeight, fScalePDF, fAlphaQCD, fAlphaQED;
-
-  int fPID, fStatus, fM1, fM2, fC1, fC2;
-  double fPx, fPy, fPz, fE, fMass;
-
-  std::vector<std::pair<int, double> > fWeightList;
+  int fPID{0}, fStatus{0}, fM1{-1}, fM2{-1}, fC1{-1}, fC2{-1};
+  double fPx{0.}, fPy{0.}, fPz{0.}, fE{0.}, fMass{0.};
 };
 
 #endif // DelphesLHEFReader_h
