@@ -309,19 +309,19 @@ const std::vector<Candidate *> &Candidate::GetCandidates() const
 
 Bool_t Candidate::Overlaps(const Candidate *object) const
 {
-  if(object->GetUniqueID() == GetUniqueID()) return kTRUE;
+  if(object->GetUniqueID() == GetUniqueID()) return true;
 
   for(const Candidate *candidate : fArray)
   {
-    if(candidate->Overlaps(object)) return kTRUE;
+    if(candidate->Overlaps(object)) return true;
   }
 
   for(const Candidate *candidate : object->fArray)
   {
-    if(candidate->Overlaps(this)) return kTRUE;
+    if(candidate->Overlaps(this)) return true;
   }
 
-  return kFALSE;
+  return false;
 }
 
 //------------------------------------------------------------------------------

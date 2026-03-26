@@ -37,7 +37,7 @@ class CompBase
 {
 public:
   virtual ~CompBase() {}
-  virtual Bool_t IsSortable(const TObject *) const { return kTRUE; }
+  virtual Bool_t IsSortable(const TObject *) const { return true; }
   virtual Int_t Compare(const TObject *obj1, const TObject *obj2) const = 0;
 };
 
@@ -46,7 +46,7 @@ public:
 class SortableObject: public TObject
 {
 public:
-  Bool_t IsSortable() const { return GetCompare() ? GetCompare()->IsSortable(this) : kFALSE; }
+  Bool_t IsSortable() const { return GetCompare() ? GetCompare()->IsSortable(this) : false; }
   Int_t Compare(const TObject *obj) const { return GetCompare()->Compare(this, obj); }
 
   virtual const CompBase *GetCompare() const = 0;

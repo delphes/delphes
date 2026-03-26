@@ -53,7 +53,7 @@ static const int kBufferSize = 16384;
 DelphesLHEFReader::DelphesLHEFReader(const DelphesParameters &readerParams) :
   DelphesReader(readerParams),
   fPDG(TDatabasePDG::Instance()),
-  fEventReady(kFALSE), fEventCounter(-1), fParticleCounter(-1), fCrossSection(1) {}
+  fEventReady(false), fEventCounter(-1), fParticleCounter(-1), fCrossSection(1) {}
 
 //---------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ void DelphesLHEFReader::SetFactory(DelphesFactory *factory)
 
 void DelphesLHEFReader::Clear()
 {
-  fEventReady = kFALSE;
+  fEventReady = false;
   fEventCounter = -1;
   fParticleCounter = -1;
   fWeightList.clear();
@@ -111,7 +111,7 @@ bool DelphesLHEFReader::ReadBlock()
   char *pch;
   double weight, xsec;
 
-  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return false;
 
   if(strstr(fBuffer.data(), "<event>"))
   {
@@ -133,7 +133,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid event format" << endl;
-      return kFALSE;
+      return false;
     }
 
     --fEventCounter;
@@ -158,7 +158,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid particle format" << endl;
-      return kFALSE;
+      return false;
     }
 
     AnalyzeParticle();
@@ -172,7 +172,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid weight format" << endl;
-      return kFALSE;
+      return false;
     }
 
     DelphesStream idStream(pch + 1);
@@ -183,7 +183,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid weight format" << endl;
-      return kFALSE;
+      return false;
     }
 
     DelphesStream weightStream(pch + 1);
@@ -193,7 +193,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid weight format" << endl;
-      return kFALSE;
+      return false;
     }
 
     fWeightList.push_back(make_pair(id, weight));
@@ -205,7 +205,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid cross section format" << endl;
-      return kFALSE;
+      return false;
     }
 
     pch = strpbrk(pch + 1, "\"'");
@@ -213,7 +213,7 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid cross section format" << endl;
-      return kFALSE;
+      return false;
     }
 
     DelphesStream xsecStream(pch + 1);
@@ -223,17 +223,16 @@ bool DelphesLHEFReader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid cross section format" << endl;
-      return kFALSE;
+      return false;
     }
 
     fCrossSection = xsec;
   }
   else if(strstr(fBuffer.data(), "</event>"))
   {
-    fEventReady = kTRUE;
+    fEventReady = true;
   }
-
-  return kTRUE;
+  return true;
 }
 
 //---------------------------------------------------------------------------

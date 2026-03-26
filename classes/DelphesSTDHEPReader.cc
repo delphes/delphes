@@ -104,7 +104,7 @@ bool DelphesSTDHEPReader::ReadBlock()
 {
   fReader[0].ReadValue(&fBlockType, 4);
 
-  if(feof(fInputFile)) return kFALSE;
+  if(feof(fInputFile)) return false;
 
   SkipBytes(4);
 
@@ -140,7 +140,7 @@ bool DelphesSTDHEPReader::ReadBlock()
     throw runtime_error("Unsupported block type.");
   }
 
-  return kTRUE;
+  return true;
 }
 
 //---------------------------------------------------------------------------

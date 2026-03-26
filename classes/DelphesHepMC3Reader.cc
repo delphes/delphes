@@ -119,7 +119,7 @@ bool DelphesHepMC3Reader::ReadBlock()
   int rc, code;
   double weight;
 
-  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return false;
 
   DelphesStream bufferStream(fBuffer.data() + 1);
 
@@ -137,7 +137,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid event format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'U')
@@ -148,7 +148,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid units format" << endl;
-      return kFALSE;
+      return false;
     }
 
     if(strncmp(momentumUnit, "GEV", 3) == 0)
@@ -184,7 +184,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid MPI format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("signal_process_id"))
@@ -195,7 +195,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid process ID format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("event_scale"))
@@ -206,7 +206,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid event scale format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("alphaQCD"))
@@ -217,7 +217,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid alphaQCD format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("alphaQED"))
@@ -228,7 +228,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid alphaQED format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("GenCrossSection"))
@@ -240,7 +240,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid cross section format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("GenPdfInfo"))
@@ -257,7 +257,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid PDF format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'V')
@@ -276,7 +276,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid vertex format" << endl;
-      return kFALSE;
+      return false;
     }
 
     rc = bufferStream.FindChr('[');
@@ -285,7 +285,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid vertex format" << endl;
-      return kFALSE;
+      return false;
     }
 
     while(bufferStream.ReadInt(code))
@@ -305,7 +305,7 @@ bool DelphesHepMC3Reader::ReadBlock()
       {
         cerr << "** ERROR: "
              << "invalid vertex format" << endl;
-        return kFALSE;
+        return false;
       }
     }
 
@@ -329,7 +329,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid particle format" << endl;
-      return kFALSE;
+      return false;
     }
 
     AnalyzeParticle();
@@ -340,7 +340,7 @@ bool DelphesHepMC3Reader::ReadBlock()
     FinalizeParticles();
   }
 
-  return kTRUE;
+  return true;
 }
 
 //---------------------------------------------------------------------------

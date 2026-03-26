@@ -122,7 +122,7 @@ bool DelphesHepMC2Reader::ReadBlock()
   int i, rc, state;
   double weight;
 
-  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return false;
 
   DelphesStream bufferStream(fBuffer.data() + 1);
 
@@ -148,7 +148,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid event format" << endl;
-      return kFALSE;
+      return false;
     }
 
     for(i = 0; i < fStateSize; ++i)
@@ -163,7 +163,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid event format" << endl;
-      return kFALSE;
+      return false;
     }
 
     for(i = 0; i < fWeightSize; ++i)
@@ -176,7 +176,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid event format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'U')
@@ -187,7 +187,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid units format" << endl;
-      return kFALSE;
+      return false;
     }
 
     if(strncmp(momentumUnit, "GEV", 3) == 0)
@@ -217,7 +217,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid cross section format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'F')
@@ -234,7 +234,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid PDF format" << endl;
-      return kFALSE;
+      return false;
     }
   }
   else if(key == 'V' && fVertexCounter > 0)
@@ -252,7 +252,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid vertex format" << endl;
-      return kFALSE;
+      return false;
     }
     --fVertexCounter;
   }
@@ -274,7 +274,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     {
       cerr << "** ERROR: "
            << "invalid particle format" << endl;
-      return kFALSE;
+      return false;
     }
 
     if(fInVertexCode < 0)
@@ -322,7 +322,7 @@ bool DelphesHepMC2Reader::ReadBlock()
     FinalizeParticles();
   }
 
-  return kTRUE;
+  return true;
 }
 
 //---------------------------------------------------------------------------
