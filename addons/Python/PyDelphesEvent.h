@@ -17,49 +17,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \class PyDelphes' module
+/** \class PyDelpheEvent
  *
- *  Binding module for Python
+ *  Event I/O helper for Python bindings
  *
  *  \author L. Forthomme - AGH, Kraków
  *
  */
 
-#ifndef Python_PyDelphes_h
-#define Python_PyDelphes_h
+#ifndef Python_PyDelphesEvent_h
+#define Python_PyDelphesEvent_h
 
-#include "modules/Delphes.h"
-
-namespace pybind11
-{
-class dict;
-} // namespace pybind11
+#include <vector>
 
 class DelphesFactory;
-class PyDelphesEvent;
+class Candidate;
 
-class PyDelphes: public Delphes
+class PyDelphesEvent
 {
 public:
-  PyDelphes() {}
-  ~PyDelphes();
-
-  void SetReaderObj(DelphesReader *);
-  const pybind11::dict &GetReaderConfig() const { return fReaderConfig; }
-  void SetReaderConfig(const pybind11::dict &);
-
-  void Init() override;
-  const PyDelphesEvent &Next();
-  const pybind11::dict &GetModules() const;
-  void SetModules(const pybind11::dict &);
+  explicit PyDelphesEvent(const DelphesFactory &factory) : fFactory(factory) {}
+  std::vector<Candidate *> *Get(std::string_view) const;
 
 private:
-  std::unique_ptr<DelphesReader> fEventReader;
-  std::unique_ptr<PyDelphesEvent> fDelphesEvent;
-  pybind11::dict fReaderConfig;
-  pybind11::dict fConfig;
-  pybind11::dict fLastProcessingConfig;
-  bool fIsInitialised{false};
+  const DelphesFactory &fFactory;
 };
 
 #endif

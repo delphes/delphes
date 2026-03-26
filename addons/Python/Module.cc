@@ -25,18 +25,20 @@
  *
  */
 
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
 #include "classes/DelphesReader.h"
 
 #include "PyDelphes.h"
 #include "PyDelphesConfReader.h"
+#include "PyDelphesEvent.h"
 
 #include <dlfcn.h>
 
 #include <ExRootAnalysis/ExRootProgressBar.h>
+#include <TStopwatch.h>
 
 namespace py = pybind11;
 
@@ -67,30 +69,29 @@ PYBIND11_MODULE(DelphesPython, m)
     paramsObj[py::str("ModuleType")] = py::str(moduleType);
     return paramsObj; }, "Define a processing module configuration");
 
-  // on the other hand, Reader are really Python objects
-  py::class_<DelphesReader>(m, "Reader", "External event reader object")
-    .def(py::init([](std::string_view readerType, const py::kwargs &readerArgs) {
-      std::unique_ptr<DelphesReader> readerObj = DelphesReaderFactory::Get().Build(std::string{readerType}, PyDelphesConfReader{readerArgs}.Parameters());
-      if(readerArgs.contains("inputFiles"))
-      {
-        if(const std::vector<std::string> inputFiles = readerArgs["inputFiles"].cast<std::vector<std::string> >(); !inputFiles.empty())
-        {
-          readerObj->LoadInputFile(inputFiles.at(0));
-          readerObj->Clear();
-        }
-        //TODO: manage multi-files inputs
-      }
-      return readerObj;
-    }));
+  // mimic Reader as an actual Python object, while it is only a translator for a Python dictionary
+  m.def("Reader", [](std::string_view moduleType, const py::kwargs &readerArgs) -> py::dict {
+    py::dict paramsObj = readerArgs;
+    paramsObj[py::str("ReaderType")] = py::str(moduleType);
+    return paramsObj; }, "Define an external event reader configuration");
 
-  py::class_<PyDelphesEvent>(m, "_DelphesEvent", "Event collections content");
+  py::class_<PyDelphesEvent>(m, "_DelphesEvent", py::dynamic_attr(), "Event collections content")
+    .def("__getitem__", &PyDelphesEvent::Get, "Retrieve a collection from the event");
 
   // this is where all the magic is done
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
     .def(py::init<>())
-    .def_property("reader", &PyDelphes::GetReader, &PyDelphes::SetReader, "Reader module used in event consumption")
+    .def_property("reader", &PyDelphes::GetReaderConfig, &PyDelphes::SetReaderConfig, "Reader module used in event consumption")
     .def_property("modules", &PyDelphes::GetModules, &PyDelphes::SetModules, "Processing modules chain definition")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
+
+  py::class_<Candidate, std::unique_ptr<Candidate, py::nodelete> >(m, "Candidate")
+    .def(py::init<>())
+    .def_property_readonly("pt", [](Candidate *self) {
+      std::cout << "--> " << self << std::endl;
+      if (!self) return -1.f;
+      return self->PT; });
+  //.def_readwrite("pt", &Candidate::PT);
 }
 
 //------------------------------------------------------------------------------
