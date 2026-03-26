@@ -27,6 +27,7 @@
 
 #include "classes/SortableObject.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesRNTupleClasses.h"
 
 #ifdef __CINT__
 
@@ -59,5 +60,11 @@
 #pragma link C++ class HectorHit+;
 
 #pragma link C++ class Candidate+;
+
+#pragma link C++ class DelphesRNTuple::Electron+;
+#pragma link C++ class DelphesRNTuple::GenParticle+;
+#pragma link C++ class DelphesRNTuple::Jet+;
+#pragma link C++ class DelphesRNTuple::Muon+;
+#pragma link C++ class DelphesRNTuple::Photon+;
 
 #endif

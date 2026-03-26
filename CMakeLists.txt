@@ -79,6 +79,7 @@ add_library(Delphes SHARED
 )
 
 target_link_libraries(Delphes PUBLIC ${YAML_CPP_LIBRARIES} ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
+target_link_libraries(Delphes PUBLIC ROOT::ROOTNTuple)
 
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes PUBLIC ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
