@@ -28,6 +28,7 @@
  */
 
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
 
 #include <TLorentzVector.h>
@@ -62,13 +63,9 @@ public:
     fElectronOutputArray = ExportArray(Steer<std::string>("ElectronOutputArray", "electrons"));
     fMuonOutputArray = ExportArray(Steer<std::string>("MuonOutputArray", "muons"));
     // import beamspot
-    try
-    {
-      fBeamSpotInputArray = ImportArray(Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-    }
-    catch(runtime_error &e)
-    {
-    }
+    if(const std::string beamSpotArrayLabel = Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle");
+      !beamSpotArrayLabel.empty() && GetFactory()->Has(beamSpotArrayLabel))
+      fBeamSpotInputArray = ImportArray(beamSpotArrayLabel);
   }
   void Process() override;
 

@@ -9,6 +9,7 @@
  */
 
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
 #include "classes/DelphesModule.h"
 
@@ -107,13 +108,9 @@ public:
     fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
     fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
     // import beamspot
-    try
-    {
-      fBeamSpotInputArray = ImportArray(Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle"));
-    }
-    catch(const std::runtime_error &)
-    {
-    }
+    if(const std::string beamSpotLabel = Steer<std::string>("BeamSpotInputArray", "BeamSpotFilter/beamSpotParticle");
+      !beamSpotLabel.empty() && GetFactory()->Has(beamSpotLabel))
+      fBeamSpotInputArray = ImportArray(beamSpotLabel);
   }
   void Process() override;
 
