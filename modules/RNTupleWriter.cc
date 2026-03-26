@@ -32,6 +32,7 @@
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
 #include <TFile.h>
+
 #include <functional>
 
 struct SortCandidates
@@ -57,30 +58,58 @@ public:
     for(const std::array<std::string, 3> &branchInfo : Steer<std::vector<std::array<std::string, 3> > >("Branch"))
     {
       const std::string &branchInputArray = branchInfo.at(0), &branchName = branchInfo.at(1), &branchClassName = branchInfo.at(2);
-      if(branchClassName == "CscCluster") eventModel->MakeField<std::vector<CscCluster> >(branchName);
-      if(branchClassName == "Electron") eventModel->MakeField<std::vector<DelphesRNTuple::Electron> >(branchName);
-      if(branchClassName == "GenParticle") eventModel->MakeField<std::vector<DelphesRNTuple::GenParticle> >(branchName);
-      if(branchClassName == "HectorHit") eventModel->MakeField<std::vector<HectorHit> >(branchName);
-      if(branchClassName == "Jet") eventModel->MakeField<std::vector<DelphesRNTuple::Jet> >(branchName);
-      if(branchClassName == "MissingET") eventModel->MakeField<MissingET>(branchName);
-      if(branchClassName == "Muon") eventModel->MakeField<std::vector<DelphesRNTuple::Muon> >(branchName);
-      if(branchClassName == "ParticleFlowCandidate") eventModel->MakeField<std::vector<ParticleFlowCandidate> >(branchName);
-      if(branchClassName == "Photon") eventModel->MakeField<std::vector<DelphesRNTuple::Photon> >(branchName);
-      if(branchClassName == "Rho") eventModel->MakeField<Rho>(branchName);
-      if(branchClassName == "ScalarHT") eventModel->MakeField<ScalarHT>(branchName);
-      //if(branchClassName == "TauJet") eventModel->MakeField<std::vector<TauJet> >(branchName);
-      if(branchClassName == "Tower") eventModel->MakeField<std::vector<Tower> >(branchName);
-      if(branchClassName == "Track") eventModel->MakeField<std::vector<Track> >(branchName);
-
+      if(branchClassName == "CscCluster")
+        eventModel->MakeField<std::vector<CscCluster> >(branchName);
+      else if(branchClassName == "Electron")
+        eventModel->MakeField<std::vector<DelphesRNTuple::Electron> >(branchName);
+      else if(branchClassName == "GenParticle")
+        eventModel->MakeField<std::vector<DelphesRNTuple::GenParticle> >(branchName);
+      else if(branchClassName == "HectorHit")
+        eventModel->MakeField<std::vector<HectorHit> >(branchName);
+      else if(branchClassName == "Jet")
+        eventModel->MakeField<std::vector<DelphesRNTuple::Jet> >(branchName);
+      else if(branchClassName == "MissingET")
+        eventModel->MakeField<MissingET>(branchName);
+      else if(branchClassName == "Muon")
+        eventModel->MakeField<std::vector<DelphesRNTuple::Muon> >(branchName);
+      else if(branchClassName == "ParticleFlowCandidate")
+        eventModel->MakeField<std::vector<ParticleFlowCandidate> >(branchName);
+      else if(branchClassName == "Photon")
+        eventModel->MakeField<std::vector<DelphesRNTuple::Photon> >(branchName);
+      else if(branchClassName == "Rho")
+        eventModel->MakeField<Rho>(branchName);
+      else if(branchClassName == "ScalarHT")
+        eventModel->MakeField<ScalarHT>(branchName);
+      //else if(branchClassName == "TauJet") eventModel->MakeField<std::vector<TauJet> >(branchName);
+      else if(branchClassName == "Tower")
+        eventModel->MakeField<std::vector<Tower> >(branchName);
+      else if(branchClassName == "Track")
+        eventModel->MakeField<std::vector<Track> >(branchName);
+      else
+      {
+        std::cout << "** WARNING: branch class name '" << branchName << "' is not supported for output." << std::endl;
+        continue;
+      }
       fObjTypes[branchInputArray] = std::make_pair(branchClassName, branchName);
     }
     for(const std::pair<std::string, const std::type_info *> &branchInfo : GetFactory()->GetExportCollections())
     {
-      if(*branchInfo.second == typeid(std::vector<Weight>)) eventModel->MakeField<std::vector<Weight> >(branchInfo.first);
-      if(*branchInfo.second == typeid(std::vector<LHEFWeight>)) eventModel->MakeField<std::vector<LHEFWeight> >(branchInfo.first);
-      if(*branchInfo.second == typeid(LHEFEvent)) eventModel->MakeField<LHEFEvent>(branchInfo.first);
-      if(*branchInfo.second == typeid(LHCOEvent)) eventModel->MakeField<LHCOEvent>(branchInfo.first);
-      if(*branchInfo.second == typeid(HepMCEvent)) eventModel->MakeField<HepMCEvent>(branchInfo.first);
+      if(*branchInfo.second == typeid(std::vector<Weight>))
+        eventModel->MakeField<std::vector<Weight> >(branchInfo.first);
+      else if(*branchInfo.second == typeid(std::vector<LHEFWeight>))
+        eventModel->MakeField<std::vector<LHEFWeight> >(branchInfo.first);
+      else if(*branchInfo.second == typeid(LHEFEvent))
+        eventModel->MakeField<LHEFEvent>(branchInfo.first);
+      else if(*branchInfo.second == typeid(LHCOEvent))
+        eventModel->MakeField<LHCOEvent>(branchInfo.first);
+      else if(*branchInfo.second == typeid(HepMCEvent))
+        eventModel->MakeField<HepMCEvent>(branchInfo.first);
+      else
+      {
+        std::cout << "** WARNING: branch name '" << branchInfo.first << "' with class type '"
+                  << branchInfo.second->name() << "' is not supported for output." << std::endl;
+        continue;
+      }
     }
     fEventWriter = ROOT::RNTupleWriter::Append(std::move(eventModel), "Delphes", *fOutputFile);
 
@@ -107,20 +136,15 @@ public:
     for(const std::pair<std::string, const std::type_info *> &branchInfo : GetFactory()->GetExportCollections())
     {
       if(*branchInfo.second == typeid(std::vector<Weight>))
-        *eventEntry->GetPtr<std::vector<Weight> >(branchInfo.first) =
-          *GetFactory()->Attach<std::vector<Weight> >(branchInfo.first);
-      if(*branchInfo.second == typeid(std::vector<LHEFWeight>))
-        *eventEntry->GetPtr<std::vector<LHEFWeight> >(branchInfo.first) =
-          *GetFactory()->Attach<std::vector<LHEFWeight> >(branchInfo.first);
-      if(*branchInfo.second == typeid(LHEFEvent))
-        *eventEntry->GetPtr<LHEFEvent>(branchInfo.first) =
-          *GetFactory()->Attach<LHEFEvent>(branchInfo.first);
-      if(*branchInfo.second == typeid(LHCOEvent))
-        *eventEntry->GetPtr<LHCOEvent>(branchInfo.first) =
-          *GetFactory()->Attach<LHCOEvent>(branchInfo.first);
-      if(*branchInfo.second == typeid(HepMCEvent))
-        *eventEntry->GetPtr<HepMCEvent>(branchInfo.first) =
-          *GetFactory()->Attach<HepMCEvent>(branchInfo.first);
+        *eventEntry->GetPtr<std::vector<Weight> >(branchInfo.first) = *GetFactory()->Attach<std::vector<Weight> >(branchInfo.first);
+      else if(*branchInfo.second == typeid(std::vector<LHEFWeight>))
+        *eventEntry->GetPtr<std::vector<LHEFWeight> >(branchInfo.first) = *GetFactory()->Attach<std::vector<LHEFWeight> >(branchInfo.first);
+      else if(*branchInfo.second == typeid(LHEFEvent))
+        *eventEntry->GetPtr<LHEFEvent>(branchInfo.first) = *GetFactory()->Attach<LHEFEvent>(branchInfo.first);
+      else if(*branchInfo.second == typeid(LHCOEvent))
+        *eventEntry->GetPtr<LHCOEvent>(branchInfo.first) = *GetFactory()->Attach<LHCOEvent>(branchInfo.first);
+      else if(*branchInfo.second == typeid(HepMCEvent))
+        *eventEntry->GetPtr<HepMCEvent>(branchInfo.first) = *GetFactory()->Attach<HepMCEvent>(branchInfo.first);
     }
     fEventWriter->Fill(*eventEntry);
   }
