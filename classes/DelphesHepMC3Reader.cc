@@ -24,31 +24,19 @@
  *
  */
 
-#include "classes/DelphesHepMC3Reader.h"
-
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-#include <map>
-#include <vector>
-
-#include <stdio.h>
-
-#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesHepMC3Reader.h"
 #include "classes/DelphesStream.h"
 
-#include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include <TDatabasePDG.h>
+#include <TLorentzVector.h>
+#include <TParticlePDG.h>
+#include <TStopwatch.h>
 
-using namespace std;
+#include <ExRootAnalysis/ExRootProgressBar.h>
+
+#include <stdio.h>
 
 DelphesHepMC3Reader::DelphesHepMC3Reader(const DelphesParameters &readerParams) :
   DelphesReader(readerParams),
@@ -114,7 +102,7 @@ bool DelphesHepMC3Reader::EventReady()
 
 bool DelphesHepMC3Reader::ReadBlock()
 {
-  map<int, pair<int, int> >::iterator itDaughterMap;
+  std::map<int, std::pair<int, int> >::iterator itDaughterMap;
   char key, momentumUnit[4], positionUnit[3];
   int rc, code;
   double weight;
@@ -129,14 +117,17 @@ bool DelphesHepMC3Reader::ReadBlock()
   {
     Clear();
 
-    rc = bufferStream.ReadInt(fEventNumber)
+    int eventNumber;
+
+    rc = bufferStream.ReadInt(eventNumber)
       && bufferStream.ReadInt(fVertexCounter)
       && bufferStream.ReadInt(fParticleCounter);
 
+    fEventObject->Number = eventNumber; // int -> long
+
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event format" << endl;
+      std::cerr << "** ERROR: invalid event format" << std::endl;
       return false;
     }
   }
@@ -146,28 +137,19 @@ bool DelphesHepMC3Reader::ReadBlock()
 
     if(rc != 2)
     {
-      cerr << "** ERROR: "
-           << "invalid units format" << endl;
+      std::cerr << "** ERROR: invalid units format" << std::endl;
       return false;
     }
 
     if(strncmp(momentumUnit, "GEV", 3) == 0)
-    {
       fMomentumCoefficient = 1.0;
-    }
     else if(strncmp(momentumUnit, "MEV", 3) == 0)
-    {
       fMomentumCoefficient = 0.001;
-    }
 
     if(strncmp(positionUnit, "MM", 3) == 0)
-    {
       fPositionCoefficient = 1.0;
-    }
     else if(strncmp(positionUnit, "CM", 3) == 0)
-    {
       fPositionCoefficient = 10.0;
-    }
   }
   else if(key == 'W')
   {
@@ -178,90 +160,104 @@ bool DelphesHepMC3Reader::ReadBlock()
   }
   else if(key == 'A' && bufferStream.FindStr("mpi"))
   {
-    rc = bufferStream.ReadInt(fMPI);
+    rc = bufferStream.ReadInt(fEventObject->MPI);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid MPI format" << endl;
+      std::cerr << "** ERROR: invalid MPI format" << std::endl;
       return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("signal_process_id"))
   {
-    rc = bufferStream.ReadInt(fProcessID);
+    rc = bufferStream.ReadInt(fEventObject->ProcessID);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid process ID format" << endl;
+      std::cerr << "** ERROR: invalid process ID format" << std::endl;
       return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("event_scale"))
   {
-    rc = bufferStream.ReadDbl(fScale);
+    double scale;
+    rc = bufferStream.ReadDbl(scale);
+    fEventObject->Scale = scale; // double -> float
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event scale format" << endl;
+      std::cerr << "** ERROR: invalid event scale format" << std::endl;
       return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("alphaQCD"))
   {
-    rc = bufferStream.ReadDbl(fAlphaQCD);
+    double alphaQCD;
+    rc = bufferStream.ReadDbl(alphaQCD);
+    fEventObject->AlphaQCD = alphaQCD; // double -> float
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid alphaQCD format" << endl;
+      std::cerr << "** ERROR: invalid alphaQCD format" << std::endl;
       return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("alphaQED"))
   {
-    rc = bufferStream.ReadDbl(fAlphaQED);
+    double alphaQED;
+    rc = bufferStream.ReadDbl(alphaQED);
+    fEventObject->AlphaQED = alphaQED; // double -> float
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid alphaQED format" << endl;
+      std::cerr << "** ERROR: invalid alphaQED format" << std::endl;
       return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("GenCrossSection"))
   {
-    rc = bufferStream.ReadDbl(fCrossSection)
-      && bufferStream.ReadDbl(fCrossSectionError);
+    double crossSection, crossSectionError;
+    rc = bufferStream.ReadDbl(crossSection)
+      && bufferStream.ReadDbl(crossSectionError);
+
+    // double -> float
+    fEventObject->CrossSection = crossSection;
+    fEventObject->CrossSectionError = crossSectionError;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid cross section format" << endl;
+      std::cerr << "** ERROR: invalid cross section format" << std::endl;
       return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("GenPdfInfo"))
   {
-    rc = bufferStream.ReadInt(fID1)
-      && bufferStream.ReadInt(fID2)
-      && bufferStream.ReadDbl(fX1)
-      && bufferStream.ReadDbl(fX2)
-      && bufferStream.ReadDbl(fScalePDF)
-      && bufferStream.ReadDbl(fPDF1)
-      && bufferStream.ReadDbl(fPDF2);
+    double scalePDF, x1, x2, pdf1, pdf2;
+
+    rc = bufferStream.ReadInt(fEventObject->ID1)
+      && bufferStream.ReadInt(fEventObject->ID2)
+      && bufferStream.ReadDbl(x1)
+      && bufferStream.ReadDbl(x2)
+      && bufferStream.ReadDbl(scalePDF)
+      && bufferStream.ReadDbl(pdf1)
+      && bufferStream.ReadDbl(pdf2);
+
+    // double -> float
+    fEventObject->X1 = x1;
+    fEventObject->X2 = x2;
+    fEventObject->ScalePDF = scalePDF;
+    fEventObject->PDF1 = pdf1;
+    fEventObject->PDF2 = pdf2;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid PDF format" << endl;
+      std::cerr << "** ERROR: invalid PDF format" << std::endl;
       return false;
     }
   }
   else if(key == 'V')
   {
+    int vertexCode, vertexStatus;
     fParticles.clear();
 
     fX = 0.0;
@@ -269,13 +265,12 @@ bool DelphesHepMC3Reader::ReadBlock()
     fZ = 0.0;
     fT = 0.0;
 
-    rc = bufferStream.ReadInt(fVertexCode)
-      && bufferStream.ReadInt(fVertexStatus);
+    rc = bufferStream.ReadInt(vertexCode)
+      && bufferStream.ReadInt(vertexStatus);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid vertex format" << endl;
+      std::cerr << "** ERROR: invalid vertex format" << std::endl;
       return false;
     }
 
@@ -283,8 +278,7 @@ bool DelphesHepMC3Reader::ReadBlock()
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid vertex format" << endl;
+      std::cerr << "** ERROR: invalid vertex format" << std::endl;
       return false;
     }
 
@@ -303,13 +297,12 @@ bool DelphesHepMC3Reader::ReadBlock()
 
       if(!rc)
       {
-        cerr << "** ERROR: "
-             << "invalid vertex format" << endl;
+        std::cerr << "** ERROR: invalid vertex format" << std::endl;
         return false;
       }
     }
 
-    AnalyzeVertex(fVertexCode);
+    AnalyzeVertex(vertexCode);
   }
   else if(key == 'P' && fParticleCounter > 0)
   {
@@ -327,8 +320,7 @@ bool DelphesHepMC3Reader::ReadBlock()
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid particle format" << endl;
+      std::cerr << "** ERROR: invalid particle format" << std::endl;
       return false;
     }
 
@@ -349,24 +341,7 @@ void DelphesHepMC3Reader::AnalyzeEvent(TStopwatch *procStopWatch)
 {
   HepMCEvent &element = *fEventObject;
 
-  element.Number = fEventNumber;
-
-  element.ProcessID = fProcessID;
-  element.MPI = fMPI;
   element.Weight = fWeights.size() > 0 ? fWeights[0] : 1.0;
-  element.CrossSection = fCrossSection;
-  element.CrossSectionError = fCrossSectionError;
-  element.Scale = fScale;
-  element.AlphaQED = fAlphaQED;
-  element.AlphaQCD = fAlphaQCD;
-
-  element.ID1 = fID1;
-  element.ID2 = fID2;
-  element.X1 = fX1;
-  element.X2 = fX2;
-  element.ScalePDF = fScalePDF;
-  element.PDF1 = fPDF1;
-  element.PDF2 = fPDF2;
 
   element.ReadTime = fReadStopWatch.RealTime();
   element.ProcTime = procStopWatch->RealTime();
@@ -385,8 +360,8 @@ void DelphesHepMC3Reader::AnalyzeVertex(int code, Candidate *candidate)
   int index;
   std::shared_ptr<TLorentzVector> position;
   CandidatesCollection array;
-  vector<int>::iterator itParticle;
-  map<int, int>::iterator itVertexMap;
+  std::vector<int>::iterator itParticle;
+  std::map<int, int>::iterator itVertexMap;
 
   itVertexMap = fOutVertexMap.find(code);
   if(itVertexMap == fOutVertexMap.end())
@@ -400,7 +375,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(int code, Candidate *candidate)
     position = std::make_shared<TLorentzVector>();
     array = std::make_shared<std::vector<Candidate *> >();
     position->SetXYZT(0.0, 0.0, 0.0, 0.0);
-    fVertices.push_back(make_pair(position, array));
+    fVertices.push_back(std::make_pair(position, array));
   }
   else
   {
@@ -448,9 +423,9 @@ void DelphesHepMC3Reader::FinalizeParticles()
   Candidate *candidateDaughter;
   TParticlePDG *pdgParticle;
   int pdgCode;
-  map<int, int>::iterator itVertexMap;
-  map<int, pair<int, int> >::iterator itMotherMap;
-  map<int, pair<int, int> >::iterator itDaughterMap;
+  std::map<int, int>::iterator itVertexMap;
+  std::map<int, std::pair<int, int> >::iterator itMotherMap;
+  std::map<int, std::pair<int, int> >::iterator itDaughterMap;
   int code, counter;
 
   counter = 0;
@@ -479,7 +454,7 @@ void DelphesHepMC3Reader::FinalizeParticles()
       itDaughterMap = fDaughterMap.find(i);
       if(itDaughterMap == fDaughterMap.end())
       {
-        fDaughterMap[i] = make_pair(counter, counter);
+        fDaughterMap[i] = std::make_pair(counter, counter);
       }
       else
       {
@@ -502,7 +477,7 @@ void DelphesHepMC3Reader::FinalizeParticles()
         itMotherMap = fMotherMap.find(code);
         if(itMotherMap == fMotherMap.end())
         {
-          fMotherMap[code] = make_pair(counter, -1);
+          fMotherMap[code] = std::make_pair(counter, -1);
         }
         else
         {

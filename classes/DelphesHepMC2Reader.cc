@@ -24,36 +24,24 @@
  *
  */
 
-#include "classes/DelphesHepMC2Reader.h"
-
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-#include <map>
-#include <vector>
-
-#include <stdio.h>
-
-#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesHepMC2Reader.h"
 #include "classes/DelphesStream.h"
 
 #include <ExRootAnalysis/ExRootProgressBar.h>
-#include <ExRootAnalysis/ExRootTreeBranch.h>
 
-using namespace std;
+#include <TDatabasePDG.h>
+#include <TLorentzVector.h>
+#include <TParticlePDG.h>
+#include <TStopwatch.h>
+
+#include <iostream>
+
+#include <stdio.h>
 
 DelphesHepMC2Reader::DelphesHepMC2Reader(const DelphesParameters &readerParams) :
-  DelphesReader(readerParams),
-  fInputFile(0), fPDG(TDatabasePDG::Instance()),
-  fVertexCounter(-1), fInCounter(-1), fOutCounter(-1),
-  fParticleCounter(0) {}
+  DelphesReader(readerParams), fPDG(TDatabasePDG::Instance()) {}
 
 //---------------------------------------------------------------------------
 
@@ -90,10 +78,7 @@ void DelphesHepMC2Reader::SetFactory(DelphesFactory *factory)
 
 void DelphesHepMC2Reader::Clear()
 {
-  fStateSize = 0;
   fState.clear();
-  fWeightSize = 0;
-  fWeight.clear();
   fMomentumCoefficient = 1.0;
   fPositionCoefficient = 1.0;
   fVertexCounter = -1;
@@ -116,8 +101,8 @@ bool DelphesHepMC2Reader::EventReady()
 
 bool DelphesHepMC2Reader::ReadBlock()
 {
-  map<int, pair<int, int> >::iterator itMotherMap;
-  map<int, pair<int, int> >::iterator itDaughterMap;
+  std::map<int, std::pair<int, int> >::iterator itMotherMap;
+  std::map<int, std::pair<int, int> >::iterator itDaughterMap;
   char key, momentumUnit[4], positionUnit[3];
   int i, rc, state;
   double weight;
@@ -132,50 +117,62 @@ bool DelphesHepMC2Reader::ReadBlock()
   {
     Clear();
 
-    rc = bufferStream.ReadInt(fEventNumber)
-      && bufferStream.ReadInt(fMPI)
-      && bufferStream.ReadDbl(fScale)
-      && bufferStream.ReadDbl(fAlphaQCD)
-      && bufferStream.ReadDbl(fAlphaQED)
-      && bufferStream.ReadInt(fProcessID)
-      && bufferStream.ReadInt(fSignalCode)
+    int eventNumber, signalCode, stateSize;
+    std::array<int, 2> beamCode;
+    double scale, alphaQED, alphaQCD;
+    rc = bufferStream.ReadInt(eventNumber)
+      && bufferStream.ReadInt(fEventObject->MPI)
+      && bufferStream.ReadDbl(scale)
+      && bufferStream.ReadDbl(alphaQCD)
+      && bufferStream.ReadDbl(alphaQED)
+      && bufferStream.ReadInt(fEventObject->ProcessID)
+      && bufferStream.ReadInt(signalCode)
       && bufferStream.ReadInt(fVertexCounter)
-      && bufferStream.ReadInt(fBeamCode[0])
-      && bufferStream.ReadInt(fBeamCode[1])
-      && bufferStream.ReadInt(fStateSize);
+      && bufferStream.ReadInt(beamCode.at(0))
+      && bufferStream.ReadInt(beamCode.at(1))
+      && bufferStream.ReadInt(stateSize);
+
+    // int -> long
+    fEventObject->Number = eventNumber;
+    // double -> float
+    fEventObject->Scale = scale;
+    fEventObject->AlphaQED = alphaQED;
+    fEventObject->AlphaQCD = alphaQCD;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid event format" << std::endl;
       return false;
     }
 
-    for(i = 0; i < fStateSize; ++i)
+    for(i = 0; i < stateSize; ++i)
     {
       rc = rc && bufferStream.ReadInt(state);
       fState.push_back(state);
     }
 
-    rc = rc && bufferStream.ReadInt(fWeightSize);
+    int weightSize;
+    rc = rc && bufferStream.ReadInt(weightSize);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid event format" << std::endl;
       return false;
     }
 
-    for(i = 0; i < fWeightSize; ++i)
+    for(i = 0; i < weightSize; ++i)
     {
       rc = rc && bufferStream.ReadDbl(weight);
-      fWeight.push_back(weight);
+      Weight &weightInfo = fWeights->emplace_back();
+      weightInfo.Weight = weight;
     }
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid event format" << std::endl;
       return false;
     }
   }
@@ -185,55 +182,60 @@ bool DelphesHepMC2Reader::ReadBlock()
 
     if(rc != 2)
     {
-      cerr << "** ERROR: "
-           << "invalid units format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid units format" << std::endl;
       return false;
     }
 
     if(strncmp(momentumUnit, "GEV", 3) == 0)
-    {
       fMomentumCoefficient = 1.0;
-    }
     else if(strncmp(momentumUnit, "MEV", 3) == 0)
-    {
       fMomentumCoefficient = 0.001;
-    }
 
     if(strncmp(positionUnit, "MM", 3) == 0)
-    {
       fPositionCoefficient = 1.0;
-    }
     else if(strncmp(positionUnit, "CM", 3) == 0)
-    {
       fPositionCoefficient = 10.0;
-    }
   }
   else if(key == 'C')
   {
-    rc = bufferStream.ReadDbl(fCrossSection)
-      && bufferStream.ReadDbl(fCrossSectionError);
+    double crossSection, crossSectionError;
+    rc = bufferStream.ReadDbl(crossSection)
+      && bufferStream.ReadDbl(crossSectionError);
+
+    // double-> float
+    fEventObject->CrossSection = crossSection;
+    fEventObject->CrossSectionError = crossSectionError;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid cross section format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid cross section format" << std::endl;
       return false;
     }
   }
   else if(key == 'F')
   {
-    rc = bufferStream.ReadInt(fID1)
-      && bufferStream.ReadInt(fID2)
-      && bufferStream.ReadDbl(fX1)
-      && bufferStream.ReadDbl(fX2)
-      && bufferStream.ReadDbl(fScalePDF)
-      && bufferStream.ReadDbl(fPDF1)
-      && bufferStream.ReadDbl(fPDF2);
+    double x1, x2, scalePDF, pdf1, pdf2;
+    rc = bufferStream.ReadInt(fEventObject->ID1)
+      && bufferStream.ReadInt(fEventObject->ID2)
+      && bufferStream.ReadDbl(x1)
+      && bufferStream.ReadDbl(x2)
+      && bufferStream.ReadDbl(scalePDF)
+      && bufferStream.ReadDbl(pdf1)
+      && bufferStream.ReadDbl(pdf2);
+
+    // double -> float
+    fEventObject->X1 = x1;
+    fEventObject->X2 = x2;
+    fEventObject->ScalePDF = scalePDF;
+    fEventObject->PDF1 = pdf1;
+    fEventObject->PDF2 = pdf2;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid PDF format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid PDF format" << std::endl;
       return false;
     }
   }
@@ -250,8 +252,8 @@ bool DelphesHepMC2Reader::ReadBlock()
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid vertex format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid vertex format" << std::endl;
       return false;
     }
     --fVertexCounter;
@@ -272,8 +274,8 @@ bool DelphesHepMC2Reader::ReadBlock()
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid particle format" << endl;
+      std::cerr << "** ERROR: "
+                << "invalid particle format" << std::endl;
       return false;
     }
 
@@ -282,7 +284,7 @@ bool DelphesHepMC2Reader::ReadBlock()
       itMotherMap = fMotherMap.find(fInVertexCode);
       if(itMotherMap == fMotherMap.end())
       {
-        fMotherMap[fInVertexCode] = make_pair(fParticleCounter, -1);
+        fMotherMap[fInVertexCode] = std::make_pair(fParticleCounter, -1);
       }
       else
       {
@@ -295,7 +297,7 @@ bool DelphesHepMC2Reader::ReadBlock()
       itDaughterMap = fDaughterMap.find(fOutVertexCode);
       if(itDaughterMap == fDaughterMap.end())
       {
-        fDaughterMap[fOutVertexCode] = make_pair(fParticleCounter, fParticleCounter);
+        fDaughterMap[fOutVertexCode] = std::make_pair(fParticleCounter, fParticleCounter);
       }
       else
       {
@@ -318,9 +320,7 @@ bool DelphesHepMC2Reader::ReadBlock()
   }
 
   if(EventReady())
-  {
     FinalizeParticles();
-  }
 
   return true;
 }
@@ -329,35 +329,9 @@ bool DelphesHepMC2Reader::ReadBlock()
 
 void DelphesHepMC2Reader::AnalyzeEvent(TStopwatch *procStopWatch)
 {
-  HepMCEvent &element = *fEventObject;
-
-  element.Number = fEventNumber;
-
-  element.ProcessID = fProcessID;
-  element.MPI = fMPI;
-  element.Weight = fWeight.size() > 0 ? fWeight[0] : 1.0;
-  element.CrossSection = fCrossSection;
-  element.CrossSectionError = fCrossSectionError;
-  element.Scale = fScale;
-  element.AlphaQED = fAlphaQED;
-  element.AlphaQCD = fAlphaQCD;
-
-  element.ID1 = fID1;
-  element.ID2 = fID2;
-  element.X1 = fX1;
-  element.X2 = fX2;
-  element.ScalePDF = fScalePDF;
-  element.PDF1 = fPDF1;
-  element.PDF2 = fPDF2;
-
-  element.ReadTime = fReadStopWatch.RealTime();
-  element.ProcTime = procStopWatch->RealTime();
-
-  for(std::vector<double>::const_iterator itWeight = fWeight.begin(); itWeight != fWeight.end(); ++itWeight)
-  {
-    Weight &weight = fWeights->emplace_back();
-    weight.Weight = *itWeight;
-  }
+  fEventObject->Weight = fWeights->size() > 0 ? fWeights->at(0).Weight : 1.0;
+  fEventObject->ReadTime = fReadStopWatch.RealTime();
+  fEventObject->ProcTime = procStopWatch->RealTime();
 }
 
 //---------------------------------------------------------------------------
@@ -381,9 +355,7 @@ void DelphesHepMC2Reader::AnalyzeParticle()
 
   candidate->Momentum.SetPxPyPzE(fPx, fPy, fPz, fE);
   if(fMomentumCoefficient != 1.0)
-  {
     candidate->Momentum *= fMomentumCoefficient;
-  }
 
   candidate->M2 = 1;
   candidate->D2 = 1;
@@ -430,8 +402,8 @@ void DelphesHepMC2Reader::FinalizeParticles()
 {
   Candidate *candidate;
   Candidate *candidateDaughter;
-  map<int, pair<int, int> >::iterator itMotherMap;
-  map<int, pair<int, int> >::iterator itDaughterMap;
+  std::map<int, std::pair<int, int> >::iterator itMotherMap;
+  std::map<int, std::pair<int, int> >::iterator itDaughterMap;
 
   for(size_t i = 0; i < fAllParticleOutputArray->size(); ++i)
   {
