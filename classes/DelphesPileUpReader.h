@@ -27,9 +27,12 @@
  *
  */
 
+#include <array>
+#include <memory>
+#include <string_view>
+
 #include <stdint.h>
 #include <stdio.h>
-#include <string>
 
 class DelphesXDRReader;
 
@@ -48,18 +51,22 @@ public:
   int64_t GetEntries() const { return fEntries; }
 
 private:
-  int64_t fEntries;
+  static constexpr size_t kIndexSize = 10000000;
+  static constexpr size_t kBufferSize = 1000000;
+  static constexpr size_t kRecordSize = 9;
 
-  int32_t fEntrySize;
-  int32_t fCounter;
+  int64_t fEntries{0};
 
-  FILE *fPileUpFile;
-  uint8_t *fIndex;
-  uint8_t *fBuffer;
+  int32_t fEntrySize{0};
+  int32_t fCounter{0};
 
-  DelphesXDRReader *fInputReader;
-  DelphesXDRReader *fIndexReader;
-  DelphesXDRReader *fBufferReader;
+  FILE *fPileUpFile{nullptr};
+  std::array<uint8_t, kIndexSize * 8> fIndex;
+  std::array<uint8_t, kBufferSize * kRecordSize * 4> fBuffer;
+
+  const std::unique_ptr<DelphesXDRReader> fInputReader;
+  const std::unique_ptr<DelphesXDRReader> fIndexReader;
+  const std::unique_ptr<DelphesXDRReader> fBufferReader;
 };
 
 #endif // DelphesPileUpReader_h

@@ -26,80 +26,44 @@
 
 #include "classes/DelphesXDRWriter.h"
 
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
-//------------------------------------------------------------------------------
-
-DelphesXDRWriter::DelphesXDRWriter() :
-  fFile(0), fBuffer(0), fOffset(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesXDRWriter::SetFile(FILE *file)
-{
-  fFile = file;
-}
+#include <array>
 
 //------------------------------------------------------------------------------
 
 void DelphesXDRWriter::SetBuffer(void *buffer)
 {
-  fBuffer = (uint8_t *)buffer;
+  fBuffer = reinterpret_cast<uint8_t *>(buffer);
   fOffset = 0;
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesXDRWriter::SetOffset(int offset)
-{
-  fOffset = offset;
 }
 
 //------------------------------------------------------------------------------
 
 void DelphesXDRWriter::WriteRaw(void *value, int size)
 {
-  int rndup;
-
-  rndup = size % 4;
-  if(rndup > 0)
-  {
-    rndup = 4 - rndup;
-  }
-
+  int rndup = size % 4;
+  if(rndup > 0) rndup = 4 - rndup;
   if(fFile)
-  {
     fwrite(value, 1, size + rndup, fFile);
-  }
 }
 
 //------------------------------------------------------------------------------
 
 void DelphesXDRWriter::WriteValue(void *value, int size)
 {
-  int i;
-  uint8_t *src, buffer[8];
-
-  src = (uint8_t *)value;
-
+  const uint8_t *src = reinterpret_cast<uint8_t *>(value);
   if(fBuffer)
   {
-    for(i = 0; i < size; ++i) fBuffer[fOffset + i] = src[size - 1 - i];
+    for(int i = 0; i < size; ++i) fBuffer[fOffset + i] = src[size - 1 - i];
     fOffset += size;
   }
   else if(fFile)
   {
-    for(i = 0; i < size; ++i) buffer[i] = src[size - 1 - i];
-    WriteRaw(buffer, size);
+    std::array<uint8_t, 8> buffer;
+    for(int i = 0; i < size; ++i) buffer[i] = src[size - 1 - i];
+    WriteRaw(buffer.data(), size);
   }
   else
-  {
     return;
-  }
 }
 
 //------------------------------------------------------------------------------

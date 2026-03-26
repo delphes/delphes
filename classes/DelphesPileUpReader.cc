@@ -25,46 +25,29 @@
  */
 
 #include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesXDRReader.h"
 
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
 #include <stdint.h>
 #include <stdio.h>
 
-#include "classes/DelphesXDRReader.h"
-
-using namespace std;
-
-static const int kIndexSize = 10000000;
-static const int kBufferSize = 1000000;
-static const int kRecordSize = 9;
-
 //------------------------------------------------------------------------------
 
 DelphesPileUpReader::DelphesPileUpReader(std::string_view fileName) :
-  fEntries(0), fEntrySize(0), fCounter(0),
-  fPileUpFile(0), fIndex(0), fBuffer(0),
-  fInputReader(0), fIndexReader(0), fBufferReader(0)
+  fInputReader(std::make_unique<DelphesXDRReader>()),
+  fIndexReader(std::make_unique<DelphesXDRReader>()),
+  fBufferReader(std::make_unique<DelphesXDRReader>())
 {
-  stringstream message;
+  fIndexReader->SetBuffer(fIndex.data());
+  fBufferReader->SetBuffer(fBuffer.data());
 
-  fIndex = new uint8_t[kIndexSize * 8];
-  fBuffer = new uint8_t[kBufferSize * kRecordSize * 4];
-  fInputReader = new DelphesXDRReader;
-  fIndexReader = new DelphesXDRReader;
-  fBufferReader = new DelphesXDRReader;
-
-  fIndexReader->SetBuffer(fIndex);
-  fBufferReader->SetBuffer(fBuffer);
-
-  fPileUpFile = fopen(fileName.data(), "rb");
-
-  if(fPileUpFile == NULL)
+  if(fPileUpFile = fopen(fileName.data(), "rb"); fPileUpFile == nullptr)
   {
+    std::ostringstream message;
     message << "can't open pile-up file " << fileName;
-    throw runtime_error(message.str());
+    throw std::runtime_error(message.str());
   }
 
   fInputReader->SetFile(fPileUpFile);
@@ -73,15 +56,22 @@ DelphesPileUpReader::DelphesPileUpReader(std::string_view fileName) :
   fseeko(fPileUpFile, -8, SEEK_END);
   fInputReader->ReadValue(&fEntries, 8);
 
-  if(fEntries < 0 || fEntries >= kIndexSize)
+  if(fEntries < 0)
   {
+    std::ostringstream message;
     message << "invalid number of events in pile-up file " << fileName;
-    throw runtime_error(message.str());
+    throw std::runtime_error(message.str());
+  }
+  if(static_cast<size_t>(fEntries) >= kIndexSize)
+  {
+    std::ostringstream message;
+    message << "too many events in pile-up file " << fileName;
+    throw std::runtime_error(message.str());
   }
 
   // read index of events
   fseeko(fPileUpFile, -8 - 8 * fEntries, SEEK_END);
-  fInputReader->ReadRaw(fIndex, fEntries * 8);
+  fInputReader->ReadRaw(fIndex.data(), fEntries * 8);
 }
 
 //------------------------------------------------------------------------------
@@ -89,11 +79,6 @@ DelphesPileUpReader::DelphesPileUpReader(std::string_view fileName) :
 DelphesPileUpReader::~DelphesPileUpReader()
 {
   if(fPileUpFile) fclose(fPileUpFile);
-  if(fBufferReader) delete fBufferReader;
-  if(fIndexReader) delete fIndexReader;
-  if(fInputReader) delete fInputReader;
-  if(fBuffer) delete[] fBuffer;
-  if(fIndex) delete[] fIndex;
 }
 
 //------------------------------------------------------------------------------
@@ -123,24 +108,24 @@ bool DelphesPileUpReader::ReadParticle(int32_t &pid,
 
 bool DelphesPileUpReader::ReadEntry(int64_t entry)
 {
-  int64_t offset;
-
   if(entry >= fEntries) return false;
 
   // read event position
   fIndexReader->SetOffset(8 * entry);
+
+  int64_t offset;
   fIndexReader->ReadValue(&offset, 8);
 
   // read event
   fseeko(fPileUpFile, offset, SEEK_SET);
   fInputReader->ReadValue(&fEntrySize, 4);
 
-  if(fEntrySize < 0 || fEntrySize >= kBufferSize)
-  {
-    throw runtime_error("invalid number of particles in pile-up event");
-  }
+  if(fEntrySize < 0)
+    throw std::runtime_error("invalid number of particles in pile-up event");
+  if(static_cast<size_t>(fEntrySize) >= kBufferSize)
+    throw std::runtime_error("too many particles in pile-up event");
 
-  fInputReader->ReadRaw(fBuffer, fEntrySize * kRecordSize * 4);
+  fInputReader->ReadRaw(fBuffer.data(), fEntrySize * kRecordSize * 4);
   fBufferReader->SetOffset(0);
   fCounter = 0;
 
