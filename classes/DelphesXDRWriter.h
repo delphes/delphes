@@ -33,20 +33,20 @@
 class DelphesXDRWriter
 {
 public:
-  DelphesXDRWriter();
+  DelphesXDRWriter() = default;
 
-  void SetFile(FILE *file);
+  void SetFile(FILE *file) { fFile = file; }
   void SetBuffer(void *buffer);
-  void SetOffset(int offset);
+  void SetOffset(int offset) { fOffset = offset; }
 
   void WriteRaw(void *value, int size);
   void WriteValue(void *value, int size);
 
 private:
-  FILE *fFile;
-  uint8_t *fBuffer;
+  FILE *fFile{nullptr};
+  uint8_t *fBuffer{nullptr};
 
-  int fOffset;
+  int fOffset{0};
 };
 
 #endif // DelphesXDRWriter_h
