@@ -55,6 +55,10 @@ public:
 
   void Clear();
 
+protected:
+  void ClearModules() { fModules.clear(); }
+  void AddModule(std::string_view moduleName, std::unique_ptr<DelphesModule> &moduleObject);
+
 private:
   std::unique_ptr<DelphesFactory> fDelphesFactory;
   DelphesConfReader *fConfReader{nullptr};
