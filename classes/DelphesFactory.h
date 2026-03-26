@@ -30,6 +30,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 class Candidate;
@@ -55,10 +56,10 @@ public:
   }
   /// Attach a pointer to a collection handled by this factory
   template <typename T>
-  std::shared_ptr<T> Attach(std::string_view collectionName)
+  std::shared_ptr<T> Attach(std::string_view collectionName) const
   {
     if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
-    return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots[std::string{collectionName}]), [](T *) {});
+    return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots.at(std::string{collectionName})), [](T *) {});
   }
   void *Attach(std::string_view collectionName) const
   {
