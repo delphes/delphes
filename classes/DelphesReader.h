@@ -71,7 +71,7 @@ protected:
   std::unique_ptr<ExRootProgressBar> fProgressBar;
   TStopwatch fReadStopWatch;
 
-  long long fEventCounter{0ll};
+  unsigned long long fEventCounter{0ll};
   long long fMaxEvents{-1ll};
   long long fSkipEvents{-1ll};
 };

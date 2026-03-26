@@ -85,7 +85,7 @@ void DelphesReader::SetMaxEvents(long long maxEvents)
 
 bool DelphesReader::ReadEvent()
 {
-  if(fMaxEvents > 0 && fEventCounter - fSkipEvents >= fMaxEvents)
+  if(fMaxEvents > 0 && fEventCounter - fSkipEvents >= static_cast<unsigned long long>(fMaxEvents))
     return false;
   // initialise the collections if not already done
 
@@ -99,7 +99,7 @@ bool DelphesReader::ReadEvent()
     if(EventReady())
     {
       ++fEventCounter;
-      if(fEventCounter > fSkipEvents)
+      if(fEventCounter > static_cast<unsigned long long>(fSkipEvents))
       {
         if(fInputFile)
           fProgressBar->Update(ftello(fInputFile), fEventCounter);
