@@ -54,12 +54,33 @@ void Delphes::Clear()
 
 //------------------------------------------------------------------------------
 
+void Delphes::SetReader(DelphesReader *reader)
+{
+  fReader = reader;
+  fReader->SetFactory(GetFactory());
+}
+
+//------------------------------------------------------------------------------
+
+DelphesFactory *Delphes::GetFactory() const { return fDelphesFactory.get(); }
+
+//------------------------------------------------------------------------------
+
+void Delphes::AddModule(std::string_view moduleName, std::unique_ptr<DelphesModule> &moduleObject)
+{
+  fModules.emplace_back(std::make_pair(moduleName, std::move(moduleObject)));
+}
+
+//------------------------------------------------------------------------------
+
 void Delphes::Init()
 {
   if(!fReader)
     throw std::runtime_error("Failed to initialise the main Delphes module with no reader declared.");
   if(!fConfReader)
     throw std::runtime_error("Failed to initialise the main Delphes module with no user configuration reader declared.");
+
+  ClearModules(); // start by removing all modules registered
 
   const auto userConfig = fConfReader->Parameters();
   gRandom->SetSeed(userConfig.Get<int>("RandomSeed", 0));
@@ -85,7 +106,7 @@ void Delphes::Init()
         DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
         writerModule->SetOutputFile(GetOutputFile());
       }
-      fModules.emplace_back(std::make_pair(moduleName, std::move(moduleObject)));
+      AddModule(moduleName, moduleObject);
     }
     catch(const std::runtime_error &error)
     {
@@ -128,17 +149,5 @@ void Delphes::FinishTask()
   for(const auto &[moduleName, moduleObject] : fModules)
     moduleObject->Finish();
 }
-
-//------------------------------------------------------------------------------
-
-void Delphes::SetReader(DelphesReader *reader)
-{
-  fReader = reader;
-  fReader->SetFactory(GetFactory());
-}
-
-//------------------------------------------------------------------------------
-
-DelphesFactory *Delphes::GetFactory() const { return fDelphesFactory.get(); }
 
 //------------------------------------------------------------------------------
