@@ -22,12 +22,12 @@
 
 #include "classes/DelphesParameters.h"
 
-std::vector<std::string> splitString(const std::string &str, char delim)
+std::vector<std::string> splitString(std::string_view str, char delim)
 {
   std::vector<std::string> out;
   if(str.empty())
     return out;
-  std::istringstream iss(str);
+  std::istringstream iss(std::string{str});
   size_t counter = 0;
   std::string segment;
   while(std::getline(iss, segment, '\"'))
@@ -139,12 +139,12 @@ DelphesParameters &DelphesParameters::operator+=(const DelphesParameters &oth)
   }
 }
 
-DelphesParameters DelphesParameters::loadYAML(const std::string &input_filename)
+DelphesParameters DelphesParameters::LoadYAML(std::string_view input_filename)
 {
-  return DelphesParameters{YAML::LoadFile(input_filename)};
+  return DelphesParameters{YAML::LoadFile(std::string{input_filename})};
 }
 
-DelphesParameters &DelphesParameters::Feed(const std::string &key_value)
+DelphesParameters &DelphesParameters::Feed(std::string_view key_value)
 {
   if(std::vector<std::string> tokens = splitString(key_value, ':'); tokens.size() > 1)
   {
@@ -158,20 +158,24 @@ DelphesParameters &DelphesParameters::Feed(const std::string &key_value)
   else if(const std::vector<std::string> kv = splitString(key_value, '='); kv.size() == 2)
     Set(kv.at(0), kv.at(1));
   else
-    throw std::runtime_error("Failed to unpack key1[:key2[:...]]=value from input string '" + key_value + "'.");
+  {
+    std::ostringstream message;
+    message << "Failed to unpack key1[:key2[:...]]=value from input string '" << key_value << "'.";
+    throw std::runtime_error(message.str());
+  }
   return *this;
 }
 
 bool DelphesParameters::Empty() const { return !fNode || fNode.size() == 0; }
 
-DelphesParameters &DelphesParameters::Erase(const std::string &key)
+DelphesParameters &DelphesParameters::Erase(std::string_view key)
 {
   if(fNode[key].IsDefined())
     fNode.remove(key);
   return *this;
 }
 
-std::string DelphesParameters::GetString(const std::string &key) const
+std::string DelphesParameters::GetString(std::string_view key) const
 {
   if(auto node = fNode[key]; node.IsDefined())
   {
@@ -240,7 +244,7 @@ std::vector<std::string> DelphesParameters::Keys() const
 }
 
 template <>
-bool DelphesParameters::Has<DelphesParameters>(const std::string &key) const
+bool DelphesParameters::Has<DelphesParameters>(std::string_view key) const
 {
   // particular case for parameters, as in yaml-cpp, all parameters are technically "Node"s,
   // hence be built/recast as "DelphesParameters" objects
@@ -255,7 +259,7 @@ bool DelphesParameters::Has<DelphesParameters>(const std::string &key) const
 }
 
 template <>
-bool DelphesParameters::Has<std::vector<DelphesParameters> >(const std::string &key) const
+bool DelphesParameters::Has<std::vector<DelphesParameters> >(std::string_view key) const
 {
   // particular case for a vector of parameters, as in yaml-cpp, all parameters are technically "Node"s,
   // hence be built/recast as "DelphesParameters" objects

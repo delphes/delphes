@@ -35,9 +35,9 @@ public:
   DelphesParameters &operator+=(const DelphesParameters &); ///< add parameters to this parameter object
   DelphesParameters operator+(const DelphesParameters &) const; ///< parameters concatenation operator
 
-  static DelphesParameters loadYAML(const std::string &); ///< load the configuration from a YAML file
+  static DelphesParameters LoadYAML(std::string_view); ///< load the configuration from a YAML file
 
-  DelphesParameters &Feed(const std::string &); ///< feed a string to steer this parameter block
+  DelphesParameters &Feed(std::string_view); ///< feed a string to steer this parameter block
 
   const YAML::Node &node() const { return fNode; } ///< retrieve the base node of this parameters container
   bool operator==(const DelphesParameters &oth) const { return oth.fNode == fNode; } ///< equality operator
@@ -46,12 +46,12 @@ public:
   virtual bool Empty() const; ///< does this parameter block contain any parameters?
 
   std::vector<std::string> Keys() const; ///< list of all parameter keys handled
-  DelphesParameters &Erase(const std::string &key); ///< remove a given parameter according to its key
-  std::string GetString(const std::string &key) const; ///< string-value of a parameter according to its key
+  DelphesParameters &Erase(std::string_view key); ///< remove a given parameter according to its key
+  std::string GetString(std::string_view key) const; ///< string-value of a parameter according to its key
 
   /// does this parameters block contain a given key?
   template <typename T>
-  bool Has(const std::string &key) const
+  bool Has(std::string_view key) const
   {
     if(YAML::Node node = fNode[key]; node.IsDefined())
     {
@@ -79,7 +79,7 @@ public:
   }
   /// retrieve a parameter with the given key
   template <typename T>
-  T Get(const std::string &key, const T &defaultValue = T()) const
+  T Get(std::string_view key, const T &defaultValue = T()) const
   {
     try
     {
@@ -97,13 +97,13 @@ public:
   /// \tparam T expected a stored parameter type
   /// \tparam U type to cast the parameter to
   template <typename T, typename U>
-  U GetAs(const std::string &key, const U &defaultValue = U()) const
+  U GetAs(std::string_view key, const U &defaultValue = U()) const
   {
     return static_cast<U>(Get<T>(key, static_cast<T>(defaultValue)));
   }
   /// set a parameter value
   template <typename T>
-  DelphesParameters &Set(const std::string &key, const T &value)
+  DelphesParameters &Set(std::string_view key, const T &value)
   {
     fNode[key] = value;
     return *this;
@@ -119,22 +119,22 @@ static const DelphesParameters kDefaultParameters = DelphesParameters().Set("inv
 using char_array = const char *;
 
 template <>
-inline bool DelphesParameters::Has<char_array>(const std::string &key) const
+inline bool DelphesParameters::Has<char_array>(std::string_view key) const
 {
   return Has<std::string>(key);
 }
 
 template <>
-inline DelphesParameters &DelphesParameters::Set(const std::string &key, const char_array &value)
+inline DelphesParameters &DelphesParameters::Set(std::string_view key, const char_array &value)
 {
   return Set(key, std::string(value));
 }
 
 template <>
-bool DelphesParameters::Has<DelphesParameters>(const std::string &key) const;
+bool DelphesParameters::Has<DelphesParameters>(std::string_view key) const;
 
 template <>
-bool DelphesParameters::Has<std::vector<DelphesParameters> >(const std::string &key) const;
+bool DelphesParameters::Has<std::vector<DelphesParameters> >(std::string_view key) const;
 
 namespace YAML
 {
