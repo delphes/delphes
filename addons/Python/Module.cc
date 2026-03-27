@@ -75,7 +75,7 @@ PYBIND11_MODULE(DelphesPython, m)
     return paramsObj; }, "Define an external event reader configuration");
 
   py::class_<PyDelphesEvent>(m, "_DelphesEvent", py::dynamic_attr(), "Event collections content")
-    .def("__getitem__", &PyDelphesEvent::Get, "Retrieve a collection from the event");
+    .def("__getitem__", &PyDelphesEvent::Get<std::vector<Candidate *> >, "Retrieve a collection from the event");
 
   // this is where all the magic is done
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")

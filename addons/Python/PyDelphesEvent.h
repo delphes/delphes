@@ -31,13 +31,16 @@
 #include <vector>
 
 class DelphesFactory;
-class Candidate;
 
 class PyDelphesEvent
 {
 public:
   explicit PyDelphesEvent(const DelphesFactory &factory) : fFactory(factory) {}
-  std::vector<Candidate *> *Get(std::string_view) const;
+  template <typename T>
+  const T &Get(std::string_view collName) const
+  {
+    return *fFactory.Attach<T>(collName);
+  }
 
 private:
   const DelphesFactory &fFactory;
