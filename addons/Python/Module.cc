@@ -32,7 +32,6 @@
 #include "classes/DelphesReader.h"
 
 #include "PyDelphes.h"
-#include "PyDelphesConfReader.h"
 #include "PyDelphesEvent.h"
 
 #include <dlfcn.h>

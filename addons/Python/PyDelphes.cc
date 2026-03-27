@@ -34,8 +34,8 @@
 #include "modules/Delphes.h"
 
 #include "PyDelphes.h"
-#include "PyDelphesConfReader.h"
 #include "PyDelphesEvent.h"
+#include "PyDelphesParameters.h"
 
 #include <ExRootAnalysis/ExRootProgressBar.h>
 
@@ -48,7 +48,7 @@ PyDelphes::~PyDelphes() { FinishTask(); }
 void PyDelphes::Init()
 {
   ClearModules();
-  const DelphesParameters fullConfig = PyDelphesConfReader{fConfig}.Parameters();
+  const DelphesParameters fullConfig = fConfig.cast<DelphesParameters>();
   DelphesFactory *factory = GetFactory();
   if(!factory)
     throw std::runtime_error("Delphes factory was not initialised for this PyDelphes module.");
@@ -97,7 +97,7 @@ void PyDelphes::SetReaderObj(DelphesReader *readerObj)
   //fEventReader = readerObj;
   //Delphes::SetReader(readerObj);
   fEventReader->SetFactory(GetFactory());
-  const DelphesParameters fullConfig = PyDelphesConfReader{fConfig}.Parameters();
+  const DelphesParameters fullConfig = fConfig.cast<DelphesParameters>();
   fEventReader->SetMaxEvents(fullConfig.Get<int>("MaxEvents", 0));
   fEventReader->SetSkipEvents(fullConfig.Get<int>("SkipEvents", 0));
 }
@@ -107,7 +107,7 @@ void PyDelphes::SetReaderObj(DelphesReader *readerObj)
 void PyDelphes::SetReaderConfig(const pybind11::dict &readerArgs)
 {
   fReaderConfig = readerArgs;
-  const DelphesParameters fullConfig = PyDelphesConfReader{fReaderConfig}.Parameters();
+  const DelphesParameters fullConfig = fReaderConfig.cast<DelphesParameters>();
   fEventReader = DelphesReaderFactory::Get().Build(fullConfig.Get<std::string>("ReaderType"), fullConfig);
   if(readerArgs.contains("inputFiles"))
   {
@@ -129,7 +129,7 @@ const PyDelphesEvent &PyDelphes::Next()
   if(!fIsInitialised || !fConfig.is(fLastProcessingConfig))
   {
     std::cout << "Configuration has changed!!" << std::endl;
-    std::cout << PyDelphesConfReader{fConfig}.Parameters() << std::endl;
+    std::cout << fConfig.cast<DelphesParameters>() << std::endl;
     InitTask();
     fLastProcessingConfig = fConfig;
     fIsInitialised = true;
