@@ -17,6 +17,7 @@ target_link_libraries(DelphesPython PUBLIC
   $<TARGET_OBJECTS:PUPPI>
   $<TARGET_OBJECTS:TrackCovariance>
   ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG
+  ROOT::ROOTNTuple
   ${YAML_CPP_LIBRARIES}
 )
 if(PYTHIA8_FOUND)
