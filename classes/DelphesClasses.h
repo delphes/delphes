@@ -98,8 +98,8 @@ public:
 class HepMCEvent: public Event
 {
 public:
-  Int_t ProcessID; // unique signal process id | signal_process_id()
-  Int_t MPI; // number of multi parton interactions | mpi()
+  Int_t ProcessID{0}; // unique signal process id | signal_process_id()
+  Int_t MPI{0}; // number of multi parton interactions | mpi()
 
   Float_t Weight{0.f}; // weight for the event
   Float_t CrossSection{0.f}; // cross-section in pb
@@ -131,18 +131,18 @@ public:
   GenParticle() = default;
   explicit GenParticle(const Candidate &);
 
-  Int_t PID; // particle HEP ID number | hepevt.idhep[number]
+  Int_t PID{0}; // particle HEP ID number | hepevt.idhep[number]
 
-  Int_t Status; // particle status | hepevt.isthep[number]
-  Int_t IsPU; // 0 or 1 for particles from pile-up interactions
+  Int_t Status{0}; // particle status | hepevt.isthep[number]
+  Int_t IsPU{0}; // 0 or 1 for particles from pile-up interactions
 
-  Int_t M1; // particle 1st mother | hepevt.jmohep[number][0] - 1
-  Int_t M2; // particle 2nd mother | hepevt.jmohep[number][1] - 1
+  Int_t M1{-1}; // particle 1st mother | hepevt.jmohep[number][0] - 1
+  Int_t M2{-1}; // particle 2nd mother | hepevt.jmohep[number][1] - 1
 
-  Int_t D1; // particle 1st daughter | hepevt.jdahep[number][0] - 1
-  Int_t D2; // particle last daughter | hepevt.jdahep[number][1] - 1
+  Int_t D1{-1}; // particle 1st daughter | hepevt.jdahep[number][0] - 1
+  Int_t D2{-1}; // particle last daughter | hepevt.jdahep[number][1] - 1
 
-  Int_t Charge; // particle charge
+  Int_t Charge{0}; // particle charge
 
   Float_t Mass{0.f}; // particle mass
 
@@ -348,7 +348,7 @@ public:
 
   Float_t T{0.f}; // particle arrival time of flight
 
-  Int_t Charge; // muon charge
+  Int_t Charge{0}; // muon charge
 
   TRef Particle; // reference to generated particle
 
@@ -391,24 +391,24 @@ public:
   Float_t DeltaEta{0.f}; // jet radius in pseudorapidity
   Float_t DeltaPhi{0.f}; // jet radius in azimuthal angle
 
-  UInt_t Flavor; // jet flavor
-  UInt_t FlavorAlgo; // jet flavor
-  UInt_t FlavorPhys; // jet flavor
-  UInt_t TauFlavor; // jet flavor according to Tau tagging module
+  UInt_t Flavor{0}; // jet flavor
+  UInt_t FlavorAlgo{0}; // jet flavor
+  UInt_t FlavorPhys{0}; // jet flavor
+  UInt_t TauFlavor{0}; // jet flavor according to Tau tagging module
 
-  UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
-  UInt_t BTagAlgo; // 0 or 1 for a jet that has been tagged as containing a heavy quark
-  UInt_t BTagPhys; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTag{0}; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagAlgo{0}; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagPhys{0}; // 0 or 1 for a jet that has been tagged as containing a heavy quark
 
-  UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
+  UInt_t TauTag{0}; // 0 or 1 for a jet that has been tagged as a tau
   Float_t TauWeight{0.f}; // probability for jet to be identified as tau
 
-  Int_t Charge; // tau charge
+  Int_t Charge{0}; // tau charge
 
   Float_t EhadOverEem{0.f}; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
-  Int_t NCharged; // number of charged constituents
-  Int_t NNeutrals; // number of neutral constituents
+  Int_t NCharged{0}; // number of charged constituents
+  Int_t NNeutrals{0}; // number of neutral constituents
 
   Float_t NeutralEnergyFraction{0.f}; // charged energy fraction
   Float_t ChargedEnergyFraction{0.f}; // neutral energy fraction
@@ -417,9 +417,9 @@ public:
   Float_t BetaStar{0.f}; // (sum pt of charged constituents coming from hard interaction)/(sum pt of charged constituents)
   Float_t MeanSqDeltaR{0.f}; // average distance (squared) between constituent and jet weighted by pt (squared) of constituent
   Float_t PTD{0.f}; // average pt between constituent and jet weighted by pt of constituent
-  Float_t FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents)
+  Float_t FracPt[5]{0.f}; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents)
 
-  Float_t Tau[5]; // N-subjettiness
+  Float_t Tau[5]{0.f}; // N-subjettiness
 
   TLorentzVector SoftDroppedJet;
   TLorentzVector SoftDroppedSubJet1;
@@ -433,11 +433,11 @@ public:
   Int_t NSubJetsPruned{0}; // number of subjets pruned
   Int_t NSubJetsSoftDropped{0}; // number of subjets soft-dropped
 
-  Double_t ExclYmerge12;
-  Double_t ExclYmerge23;
-  Double_t ExclYmerge34;
-  Double_t ExclYmerge45;
-  Double_t ExclYmerge56;
+  Double_t ExclYmerge12{0.};
+  Double_t ExclYmerge23{0.};
+  Double_t ExclYmerge34{0.};
+  Double_t ExclYmerge45{0.};
+  Double_t ExclYmerge56{0.};
 
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
@@ -463,8 +463,8 @@ public:
 
   Int_t Charge{0}; // track charge
 
-  Int_t IsPU; // 0 or 1 for particles from pile-up interactions
-  Int_t IsRecoPU; // 0 or 1 for reconstructed particles from pile-up
+  Int_t IsPU{0}; // 0 or 1 for particles from pile-up interactions
+  Int_t IsRecoPU{0}; // 0 or 1 for reconstructed particles from pile-up
   Float_t HardEnergyFraction{0.f}; // fraction of hard scattering vs PU energy in the particle flow candidate
 
   Float_t P{0.f}; // track momentum
@@ -564,8 +564,8 @@ public:
 
   Float_t Edges[4]{0.f}; // calorimeter tower edges
 
-  Int_t IsPU; // 0 or 1 for particles from pile-up interactions
-  Int_t IsRecoPU; // 0 or 1 for reconstructed particles from pile-up
+  Int_t IsPU{0}; // 0 or 1 for particles from pile-up interactions
+  Int_t IsRecoPU{0}; // 0 or 1 for reconstructed particles from pile-up
   Float_t HardEnergyFraction{0.f}; // fraction of hard scattering vs PU energy
 
   TRefArray Particles; // references to generated particles
@@ -587,12 +587,12 @@ public:
   ParticleFlowCandidate() = default;
   explicit ParticleFlowCandidate(const Candidate &);
 
-  Int_t PID; // HEP ID number
+  Int_t PID{0}; // HEP ID number
 
-  Int_t Charge; // track charge
+  Int_t Charge{0}; // track charge
 
-  Int_t IsPU; // 0 or 1 for particles from pile-up interactions
-  Int_t IsRecoPU; // 0 or 1 for reconstructed particles from pile-up
+  Int_t IsPU{0}; // 0 or 1 for particles from pile-up interactions
+  Int_t IsRecoPU{0}; // 0 or 1 for reconstructed particles from pile-up
   Float_t HardEnergyFraction{0.f}; // fraction of hard scattering vs PU energy in the particle flow candidate
 
   Float_t E{0.f}; // reconstructed energy [GeV]
@@ -717,7 +717,7 @@ public:
   Float_t E{0.f}; // E of LLP
   Float_t Ehad{0.f}; // had energy of LLP
   Float_t Eem{0.f}; // em energy of LLP
-  Float_t pid; // LLP pid
+  Float_t pid{0.f}; // LLP pid
   Float_t T{0.f}; // LLP decay time-photon travel time
   Float_t X{0.f}; // LLP decay x
   Float_t Y{0.f}; // LLP decay y
@@ -739,7 +739,7 @@ class Candidate: public SortableObject
   friend class DelphesFactory;
 
 public:
-  Candidate();
+  Candidate() = default;
 
   Int_t PID{0};
 
@@ -838,7 +838,7 @@ public:
 
   // ACTS compliant 6x6 track covariance (D0, phi, Curvature, dz, ctg(theta))
 
-  TMatrixDSym TrackCovariance;
+  TMatrixDSym TrackCovariance{5};
 
   // vertex variables
 

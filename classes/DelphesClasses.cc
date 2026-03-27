@@ -34,8 +34,6 @@ static constexpr Double_t c_light = 2.99792458E8;
 
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
 
-Candidate::Candidate() : TrackCovariance(5) {}
-
 //------------------------------------------------------------------------------
 
 void Candidate::AddCandidate(const Candidate *object)
