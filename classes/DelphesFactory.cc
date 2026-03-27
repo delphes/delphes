@@ -65,9 +65,11 @@ std::vector<std::string> DelphesFactory::GetCollections() const
 
 void DelphesFactory::ThrowAttachingFailure(std::string_view collectionName) const
 {
-  std::ostringstream os;
-  os << "Failed to attach memory segment to the collection name '" << collectionName << "'.";
-  throw std::runtime_error(os.str());
+  std::ostringstream message;
+  message << "Failed to attach memory segment to the collection name '" << collectionName << "'. List of collections registered:\n";
+  for(const std::string &collectionName : GetCollections())
+    message << " * " << collectionName << std::endl;
+  throw std::runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------
