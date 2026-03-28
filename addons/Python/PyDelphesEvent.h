@@ -30,17 +30,12 @@
 
 #include "classes/DelphesFactory.h"
 
-class DelphesFactory;
-
 class PyDelphesEvent
 {
 public:
   explicit PyDelphesEvent(const DelphesFactory &factory) : fFactory(factory) {}
   template <typename T>
-  std::shared_ptr<T> Get(std::string_view collName) const
-  {
-    return fFactory.Attach<T>(collName);
-  }
+  const T &Get(std::string_view collName) const { return *fFactory.Attach<T>(collName); }
 
 private:
   const DelphesFactory &fFactory;
