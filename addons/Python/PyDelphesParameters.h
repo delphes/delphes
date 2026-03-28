@@ -32,6 +32,13 @@
 
 #include <pybind11/pybind11.h>
 
+class PyDelphes;
+
+namespace pybind11
+{
+class dict;
+} // namespace pybind11
+
 namespace pybind11
 {
 namespace detail
@@ -150,5 +157,36 @@ struct type_caster<DelphesParameters>
 
 } // namespace detail
 } // namespace pybind11
+
+class PyDelphesParameters
+{
+public:
+  explicit PyDelphesParameters(PyDelphes &moduleObj);
+
+  void set_item(std::string_view key, pybind11::handle value);
+  pybind11::object get_item(std::string_view key);
+  pybind11::object del_item(std::string_view key);
+
+  size_t len();
+
+  pybind11::iterator iter();
+
+  bool contains(std::string_view key);
+
+  pybind11::list keys();
+  pybind11::list values();
+  pybind11::list items();
+
+  void update(const pybind11::dict &other);
+  void clear();
+
+  pybind11::object pop(std::string_view key, pybind11::object default_val = pybind11::none());
+
+private:
+  void sync();
+
+  PyDelphes &fModule;
+  pybind11::dict fParams;
+};
 
 #endif // DelphesPython_PyDelphesParameters_h

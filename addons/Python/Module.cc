@@ -27,12 +27,12 @@
 
 #include <pybind11/stl.h>
 
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
 #include "classes/DelphesReader.h"
 
 #include "PyDelphes.h"
 #include "PyDelphesEvent.h"
+#include "PyDelphesParameters.h"
 
 #include <dlfcn.h>
 
@@ -86,11 +86,25 @@ PYBIND11_MODULE(DelphesPython, m)
             for (const Candidate *candObj : *self.Get<std::vector<Candidate*> >(collName)) result.append(py::cast(candObj, py::return_value_policy::reference));
             return result; }, "Retrieve a collection from the event");
 
+  py::class_<PyDelphesParameters>(m, "PyDelphesParameters")
+    .def("__getitem__", &PyDelphesParameters::get_item)
+    .def("__setitem__", &PyDelphesParameters::set_item)
+    .def("__delitem__", &PyDelphesParameters::del_item)
+    .def("__len__", &PyDelphesParameters::len)
+    .def("__iter__", &PyDelphesParameters::iter)
+    .def("__contains__", &PyDelphesParameters::contains)
+    .def("keys", &PyDelphesParameters::keys)
+    .def("values", &PyDelphesParameters::values)
+    .def("items", &PyDelphesParameters::items)
+    .def("update", &PyDelphesParameters::update)
+    .def("clear", &PyDelphesParameters::clear)
+    .def("pop", &PyDelphesParameters::pop);
+
   // this is where all the magic is done
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
     .def(py::init<>())
     .def_property("reader", &PyDelphes::GetReaderConfig, &PyDelphes::SetReaderConfig, "Reader module used in event consumption")
-    .def_property("modules", &PyDelphes::GetModules, &PyDelphes::SetModules, "Processing modules chain definition")
+    .def_property_readonly("modules", [](PyDelphes &self) { return std::make_unique<PyDelphesParameters>(self); }, "Processing modules chain definition")
     .def("loadTCL", &PyDelphes::LoadTCL, "Load configuration from an external TCL file")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
 }

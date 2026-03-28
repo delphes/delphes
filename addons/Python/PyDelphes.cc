@@ -28,7 +28,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesReader.h"
 #include "classes/DelphesTCLConfReader.h"
 #include "classes/DelphesWriter.h"
