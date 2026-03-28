@@ -49,15 +49,15 @@ PyDelphes::~PyDelphes() { FinishTask(); }
 void PyDelphes::Init()
 {
   ClearModules();
-  const DelphesParameters fullConfig = fConfig.cast<DelphesParameters>();
+  const DelphesParameters modulesConfig = fConfig.cast<DelphesParameters>();
   DelphesFactory *factory = GetFactory();
   if(!factory)
     throw std::runtime_error("Delphes factory was not initialised for this PyDelphes module.");
   fDelphesEvent = std::make_unique<PyDelphesEvent>(*factory);
   const std::string outputFile = GetOutputFile();
-  for(const std::string &moduleName : fullConfig.Get<std::vector<std::string> >("ExecutionPath"))
+  for(const std::string &moduleName : modulesConfig.Get<std::vector<std::string> >("ExecutionPath"))
   {
-    if(!fullConfig.Has<DelphesParameters>(moduleName))
+    if(!modulesConfig.Has<DelphesParameters>(moduleName))
     {
       std::ostringstream message;
       message << "module '" << moduleName << "' is specified in ExecutionPath but not configured.";
@@ -65,7 +65,7 @@ void PyDelphes::Init()
     }
     try
     {
-      const DelphesParameters moduleParams = fullConfig.Get<DelphesParameters>(moduleName);
+      const DelphesParameters moduleParams = modulesConfig.Get<DelphesParameters>(moduleName);
       const std::string moduleTypeFromParams = moduleParams.Get<std::string>("ModuleType", moduleName);
       std::unique_ptr<DelphesModule> moduleObject = DelphesProcessingModuleFactory::Get().Build(moduleTypeFromParams, moduleParams);
       moduleObject->SetName(moduleName);
@@ -83,9 +83,9 @@ void PyDelphes::Init()
     {
       std::ostringstream message;
       message << "Failed to build '" << moduleName << "' module. Error: " << error.what();
-      if(fullConfig.Has<DelphesParameters>(moduleName))
+      if(modulesConfig.Has<DelphesParameters>(moduleName))
         message << "\nParameters:\n"
-                << fullConfig.Get<DelphesParameters>(moduleName);
+                << modulesConfig.Get<DelphesParameters>(moduleName);
       throw std::runtime_error(message.str());
     }
   }
@@ -96,8 +96,8 @@ void PyDelphes::Init()
 void PyDelphes::SetReaderConfig(const pybind11::dict &readerArgs)
 {
   fReaderConfig = readerArgs;
-  const DelphesParameters fullConfig = fReaderConfig.cast<DelphesParameters>();
-  fEventReader = DelphesReaderFactory::Get().Build(fullConfig.Get<std::string>("ReaderType"), fullConfig);
+  const DelphesParameters readerConfig = fReaderConfig.cast<DelphesParameters>();
+  fEventReader = DelphesReaderFactory::Get().Build(readerConfig.Get<std::string>("ReaderType"), readerConfig);
   if(readerArgs.contains("inputFiles"))
   {
     if(const std::vector<std::string> inputFiles = readerArgs["inputFiles"].cast<std::vector<std::string> >(); !inputFiles.empty())
@@ -105,8 +105,8 @@ void PyDelphes::SetReaderConfig(const pybind11::dict &readerArgs)
     //TODO: manage multi-files inputs
   }
   fEventReader->SetFactory(GetFactory());
-  fEventReader->SetMaxEvents(fullConfig.Get<int>("MaxEvents", 0));
-  fEventReader->SetSkipEvents(fullConfig.Get<int>("SkipEvents", 0));
+  fEventReader->SetMaxEvents(readerConfig.Get<int>("MaxEvents", 0));
+  fEventReader->SetSkipEvents(readerConfig.Get<int>("SkipEvents", 0));
 }
 
 //------------------------------------------------------------------------------
