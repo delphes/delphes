@@ -86,6 +86,14 @@ void DelphesLHEFReader::SetFactory(DelphesFactory *factory)
 
 //---------------------------------------------------------------------------
 
+void DelphesLHEFReader::Reset()
+{
+  fseek(fInputFile, 0L, SEEK_SET);
+  fEventCounter = 0;
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesLHEFReader::Clear()
 {
   fEventReady = false;

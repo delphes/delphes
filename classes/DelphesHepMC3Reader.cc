@@ -75,6 +75,14 @@ void DelphesHepMC3Reader::SetFactory(DelphesFactory *factory)
 
 //---------------------------------------------------------------------------
 
+void DelphesHepMC3Reader::Reset()
+{
+  fseek(fInputFile, 0L, SEEK_SET);
+  fEventCounter = 0;
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesHepMC3Reader::Clear()
 {
   fWeights.clear();

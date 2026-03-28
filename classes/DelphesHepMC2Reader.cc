@@ -92,6 +92,14 @@ void DelphesHepMC2Reader::Clear()
 
 //---------------------------------------------------------------------------
 
+void DelphesHepMC2Reader::Reset()
+{
+  fseek(fInputFile, 0L, SEEK_SET);
+  fEventCounter = 0;
+}
+
+//---------------------------------------------------------------------------
+
 bool DelphesHepMC2Reader::EventReady()
 {
   return (fVertexCounter == 0) && (fInCounter == 0) && (fOutCounter == 0);
