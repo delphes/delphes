@@ -28,7 +28,7 @@
 #ifndef Python_PyDelphesEvent_h
 #define Python_PyDelphesEvent_h
 
-#include <vector>
+#include "classes/DelphesFactory.h"
 
 class DelphesFactory;
 
@@ -37,9 +37,9 @@ class PyDelphesEvent
 public:
   explicit PyDelphesEvent(const DelphesFactory &factory) : fFactory(factory) {}
   template <typename T>
-  const T &Get(std::string_view collName) const
+  std::shared_ptr<T> Get(std::string_view collName) const
   {
-    return *fFactory.Attach<T>(collName);
+    return fFactory.Attach<T>(collName);
   }
 
 private:

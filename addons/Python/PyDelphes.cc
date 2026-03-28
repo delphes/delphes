@@ -129,17 +129,16 @@ const PyDelphesEvent &PyDelphes::Next()
 {
   if(!fEventReader)
     throw std::runtime_error("Event reader object is not yet initialised.");
-  if(!fIsInitialised || !fConfig.is(fLastProcessingConfig))
+  if(!fIsInitialised)
   {
     InitTask();
     fLastModulesConfig = fModulesConfig;
     fIsInitialised = true;
   }
   Clear();
+  fEventReader->Clear();
   fEventReader->ReadEvent();
   ProcessTask();
-  Clear();
-  fEventReader->Clear();
   return *fDelphesEvent;
 }
 
