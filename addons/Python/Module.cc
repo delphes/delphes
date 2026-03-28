@@ -87,6 +87,20 @@ PYBIND11_MODULE(DelphesPython, m)
     .def("clear", &PyDelphesParameters::clear)
     .def("pop", &PyDelphesParameters::pop);
 
+  py::class_<PyDelphesParameters>(m, "PyDelphesParameters")
+    .def("__getitem__", &PyDelphesParameters::get_item)
+    .def("__setitem__", &PyDelphesParameters::set_item)
+    .def("__delitem__", &PyDelphesParameters::del_item)
+    .def("__len__", &PyDelphesParameters::len)
+    .def("__iter__", &PyDelphesParameters::iter)
+    .def("__contains__", &PyDelphesParameters::contains)
+    .def("keys", &PyDelphesParameters::keys)
+    .def("values", &PyDelphesParameters::values)
+    .def("items", &PyDelphesParameters::items)
+    .def("update", &PyDelphesParameters::update)
+    .def("clear", &PyDelphesParameters::clear)
+    .def("pop", &PyDelphesParameters::pop);
+
   // this is where all the magic is done
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
     .def(py::init<>())
