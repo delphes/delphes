@@ -81,10 +81,7 @@ PYBIND11_MODULE(DelphesPython, m)
     .def_property_readonly("phi", [](const Candidate &self) { return self.Momentum.Phi(); }, "Candidate azimuthal angle (in rad)");
 
   py::class_<PyDelphesEvent>(m, "_DelphesEvent", py::dynamic_attr(), "Event collections content")
-    .def("__getitem__", [](const PyDelphesEvent &self, std::string_view collName) {
-            py::list result;
-            for (const Candidate *candObj : *self.Get<std::vector<Candidate*> >(collName)) result.append(py::cast(candObj, py::return_value_policy::reference));
-            return result; }, "Retrieve a collection from the event");
+    .def("__getitem__", &PyDelphesEvent::Get<std::vector<Candidate *> >, py::return_value_policy::reference, "Retrieve a collection from the event");
 
   py::class_<PyDelphesParameters>(m, "PyDelphesParameters")
     .def("__getitem__", &PyDelphesParameters::get_item)
