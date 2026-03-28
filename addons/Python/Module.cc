@@ -85,13 +85,11 @@ PYBIND11_MODULE(DelphesPython, m)
     .def("loadTCL", &PyDelphes::LoadTCL, "Load configuration from an external TCL file")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
 
-  py::class_<Candidate, std::unique_ptr<Candidate, py::nodelete> >(m, "Candidate")
+  py::class_<Candidate>(m, "Candidate")
     .def(py::init<>())
-    .def_property_readonly("pt", [](Candidate *self) {
-      std::cout << "--> " << self << std::endl;
-      if (!self) return -1.f;
-      return self->PT; });
-  //.def_readwrite("pt", &Candidate::PT);
+    .def_readwrite("pt", &Candidate::PT, "Candidate transverse momentum (in GeV/c)")
+    .def_property_readonly("eta", [](const Candidate &self) { return self.Momentum.Eta(); }, "Candidate pseudo-rapidity")
+    .def_property_readonly("phi", [](const Candidate &self) { return self.Momentum.Phi(); }, "Candidate azimuthal angle (in rad)");
 }
 
 //------------------------------------------------------------------------------
