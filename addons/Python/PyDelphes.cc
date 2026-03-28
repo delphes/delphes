@@ -49,12 +49,19 @@ PyDelphes::~PyDelphes() { FinishTask(); }
 void PyDelphes::Init()
 {
   ClearModules();
-  const DelphesParameters modulesConfig = fConfig.cast<DelphesParameters>();
+  const DelphesParameters modulesConfig = fModulesConfig.cast<DelphesParameters>();
   DelphesFactory *factory = GetFactory();
   if(!factory)
     throw std::runtime_error("Delphes factory was not initialised for this PyDelphes module.");
   fDelphesEvent = std::make_unique<PyDelphesEvent>(*factory);
   const std::string outputFile = GetOutputFile();
+
+  if(!fEventReader)
+    throw std::runtime_error("Event reader module was not yet initialised at PyDelphes module initialisation.");
+  fEventReader->SetMaxEvents(modulesConfig.Get<int>("MaxEvents", 0));
+  fEventReader->SetSkipEvents(modulesConfig.Get<int>("SkipEvents", 0));
+  fEventReader->Reset();
+
   for(const std::string &moduleName : modulesConfig.Get<std::vector<std::string> >("ExecutionPath"))
   {
     if(!modulesConfig.Has<DelphesParameters>(moduleName))
@@ -105,8 +112,6 @@ void PyDelphes::SetReaderConfig(const pybind11::dict &readerArgs)
     //TODO: manage multi-files inputs
   }
   fEventReader->SetFactory(GetFactory());
-  fEventReader->SetMaxEvents(readerConfig.Get<int>("MaxEvents", 0));
-  fEventReader->SetSkipEvents(readerConfig.Get<int>("SkipEvents", 0));
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +120,7 @@ void PyDelphes::LoadTCL(std::string_view tclFilePath)
 {
   DelphesTCLConfReader confReader;
   confReader.ReadFile(tclFilePath);
-  fConfig = py::cast(confReader.Parameters());
+  fModulesConfig = py::cast(confReader.Parameters());
 }
 
 //------------------------------------------------------------------------------
@@ -126,10 +131,8 @@ const PyDelphesEvent &PyDelphes::Next()
     throw std::runtime_error("Event reader object is not yet initialised.");
   if(!fIsInitialised || !fConfig.is(fLastProcessingConfig))
   {
-    std::cout << "Configuration has changed!!" << std::endl;
-    std::cout << fConfig.cast<DelphesParameters>() << std::endl;
     InitTask();
-    fLastProcessingConfig = fConfig;
+    fLastModulesConfig = fModulesConfig;
     fIsInitialised = true;
   }
   Clear();
@@ -142,7 +145,7 @@ const PyDelphesEvent &PyDelphes::Next()
 
 //------------------------------------------------------------------------------
 
-void PyDelphes::SetModules(const py::dict &modulesObj)
+void PyDelphes::SetModulesConfig(const py::dict &modulesObj)
 {
   py::list execPath;
   for(const std::pair<py::handle, py::handle> &moduleObj : modulesObj)
@@ -150,11 +153,12 @@ void PyDelphes::SetModules(const py::dict &modulesObj)
     const std::string moduleName = moduleObj.first.cast<std::string>();
     if(py::isinstance<py::dict>(moduleObj.second))
     {
-      fConfig[py::str(moduleName)] = moduleObj.second.cast<py::dict>();
+      fModulesConfig[py::str(moduleName)] = moduleObj.second.cast<py::dict>();
       execPath.append(py::str(moduleName));
     }
   }
-  fConfig[py::str("ExecutionPath")] = execPath;
+  fModulesConfig[py::str("ExecutionPath")] = execPath;
+  fIsInitialised = false;
 }
 
 //------------------------------------------------------------------------------
