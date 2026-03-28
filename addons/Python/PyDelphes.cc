@@ -30,6 +30,7 @@
 
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesReader.h"
+#include "classes/DelphesTCLConfReader.h"
 #include "classes/DelphesWriter.h"
 #include "modules/Delphes.h"
 
@@ -53,13 +54,13 @@ void PyDelphes::Init()
   if(!factory)
     throw std::runtime_error("Delphes factory was not initialised for this PyDelphes module.");
   fDelphesEvent = std::make_unique<PyDelphesEvent>(*factory);
+  const std::string outputFile = GetOutputFile();
   for(const std::string &moduleName : fullConfig.Get<std::vector<std::string> >("ExecutionPath"))
   {
     if(!fullConfig.Has<DelphesParameters>(moduleName))
     {
       std::ostringstream message;
-      message << "module '" << moduleName;
-      message << "' is specified in ExecutionPath but not configured.";
+      message << "module '" << moduleName << "' is specified in ExecutionPath but not configured.";
       throw std::runtime_error(message.str());
     }
     try
@@ -71,9 +72,10 @@ void PyDelphes::Init()
       moduleObject->SetFactory(factory);
       if(moduleObject->IsWriter())
       {
-        std::cout << "output file: " << GetOutputFile() << std::endl;
+        if(outputFile.empty()) continue; // skip writers if not output is defined
+        std::cout << "output file: " << outputFile << std::endl;
         DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
-        writerModule->SetOutputFile(GetOutputFile());
+        writerModule->SetOutputFile(outputFile);
       }
       AddModule(moduleName, moduleObject);
     }
@@ -87,19 +89,6 @@ void PyDelphes::Init()
       throw std::runtime_error(message.str());
     }
   }
-}
-
-//------------------------------------------------------------------------------
-
-void PyDelphes::SetReaderObj(DelphesReader *readerObj)
-{
-  fEventReader.reset(readerObj);
-  //fEventReader = readerObj;
-  //Delphes::SetReader(readerObj);
-  fEventReader->SetFactory(GetFactory());
-  const DelphesParameters fullConfig = fConfig.cast<DelphesParameters>();
-  fEventReader->SetMaxEvents(fullConfig.Get<int>("MaxEvents", 0));
-  fEventReader->SetSkipEvents(fullConfig.Get<int>("SkipEvents", 0));
 }
 
 //------------------------------------------------------------------------------
@@ -122,6 +111,15 @@ void PyDelphes::SetReaderConfig(const pybind11::dict &readerArgs)
 
 //------------------------------------------------------------------------------
 
+void PyDelphes::LoadTCL(std::string_view tclFilePath)
+{
+  DelphesTCLConfReader confReader;
+  confReader.ReadFile(tclFilePath);
+  fConfig = py::cast(confReader.Parameters());
+}
+
+//------------------------------------------------------------------------------
+
 const PyDelphesEvent &PyDelphes::Next()
 {
   if(!fEventReader)
@@ -140,13 +138,6 @@ const PyDelphesEvent &PyDelphes::Next()
   Clear();
   fEventReader->Clear();
   return *fDelphesEvent;
-}
-
-//------------------------------------------------------------------------------
-
-const py::dict &PyDelphes::GetModules() const
-{
-  return fConfig;
 }
 
 //------------------------------------------------------------------------------

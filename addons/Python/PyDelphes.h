@@ -44,14 +44,15 @@ public:
   PyDelphes() {}
   ~PyDelphes();
 
-  void SetReaderObj(DelphesReader *);
   const pybind11::dict &GetReaderConfig() const { return fReaderConfig; }
   void SetReaderConfig(const pybind11::dict &);
 
-  void Init() override;
-  const PyDelphesEvent &Next();
-  const pybind11::dict &GetModules() const;
+  const pybind11::dict &GetModules() const { return fConfig; }
   void SetModules(const pybind11::dict &);
+
+  void Init() override;
+  void LoadTCL(std::string_view tclFilePath);
+  const PyDelphesEvent &Next();
 
 private:
   std::unique_ptr<DelphesReader> fEventReader;
