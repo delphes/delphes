@@ -70,6 +70,14 @@ void DelphesSTDHEPReader::SetFactory(DelphesFactory *factory)
 
 //---------------------------------------------------------------------------
 
+void DelphesSTDHEPReader::Reset()
+{
+  fseek(fInputFile, 0L, SEEK_SET);
+  fEventCounter = 0;
+}
+
+//---------------------------------------------------------------------------
+
 void DelphesSTDHEPReader::Clear() { fBlockType = -1; }
 
 //---------------------------------------------------------------------------

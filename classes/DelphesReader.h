@@ -48,6 +48,7 @@ public:
   DelphesFactory *GetFactory() const;
 
   virtual void LoadInputFile(std::string_view inputFile) {}
+  virtual void Reset() {};
   virtual void Clear() = 0;
   virtual bool EventReady() = 0;
 
