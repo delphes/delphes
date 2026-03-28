@@ -74,8 +74,17 @@ PYBIND11_MODULE(DelphesPython, m)
     paramsObj[py::str("ReaderType")] = py::str(moduleType);
     return paramsObj; }, "Define an external event reader configuration");
 
+  py::class_<Candidate>(m, "Candidate")
+    .def(py::init<>())
+    .def_readwrite("pt", &Candidate::PT, "Candidate transverse momentum (in GeV/c)")
+    .def_property_readonly("eta", [](const Candidate &self) { return self.Momentum.Eta(); }, "Candidate pseudo-rapidity")
+    .def_property_readonly("phi", [](const Candidate &self) { return self.Momentum.Phi(); }, "Candidate azimuthal angle (in rad)");
+
   py::class_<PyDelphesEvent>(m, "_DelphesEvent", py::dynamic_attr(), "Event collections content")
-    .def("__getitem__", &PyDelphesEvent::Get<std::vector<Candidate *> >, "Retrieve a collection from the event");
+    .def("__getitem__", [](const PyDelphesEvent &self, std::string_view collName) {
+            py::list result;
+            for (const Candidate *candObj : *self.Get<std::vector<Candidate*> >(collName)) result.append(py::cast(candObj, py::return_value_policy::reference));
+            return result; }, "Retrieve a collection from the event");
 
   // this is where all the magic is done
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
@@ -84,12 +93,6 @@ PYBIND11_MODULE(DelphesPython, m)
     .def_property("modules", &PyDelphes::GetModules, &PyDelphes::SetModules, "Processing modules chain definition")
     .def("loadTCL", &PyDelphes::LoadTCL, "Load configuration from an external TCL file")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
-
-  py::class_<Candidate>(m, "Candidate")
-    .def(py::init<>())
-    .def_readwrite("pt", &Candidate::PT, "Candidate transverse momentum (in GeV/c)")
-    .def_property_readonly("eta", [](const Candidate &self) { return self.Momentum.Eta(); }, "Candidate pseudo-rapidity")
-    .def_property_readonly("phi", [](const Candidate &self) { return self.Momentum.Phi(); }, "Candidate azimuthal angle (in rad)");
 }
 
 //------------------------------------------------------------------------------

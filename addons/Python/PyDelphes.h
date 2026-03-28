@@ -47,8 +47,8 @@ public:
   const pybind11::dict &GetReaderConfig() const { return fReaderConfig; }
   void SetReaderConfig(const pybind11::dict &);
 
-  const pybind11::dict &GetModules() const { return fConfig; }
-  void SetModules(const pybind11::dict &);
+  const pybind11::dict &GetModulesConfig() const { return fModulesConfig; }
+  void SetModulesConfig(const pybind11::dict &);
 
   void Init() override;
   void LoadTCL(std::string_view tclFilePath);
@@ -57,9 +57,11 @@ public:
 private:
   std::unique_ptr<DelphesReader> fEventReader;
   std::unique_ptr<PyDelphesEvent> fDelphesEvent;
+
   pybind11::dict fReaderConfig;
-  pybind11::dict fConfig;
-  pybind11::dict fLastProcessingConfig;
+  pybind11::dict fModulesConfig;
+  pybind11::dict fLastModulesConfig;
+
   bool fIsInitialised{false};
 };
 
