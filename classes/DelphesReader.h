@@ -29,6 +29,7 @@
  */
 
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
 #include <TStopwatch.h>
@@ -36,33 +37,31 @@
 class DelphesFactory;
 
 class ExRootProgressBar;
-class ExRootTreeBranch;
 
-class DelphesReader
+class DelphesReader: public DelphesModule
 {
 public:
-  explicit DelphesReader(const DelphesParameters & = DelphesParameters{}) {}
+  explicit DelphesReader(const DelphesParameters &readerParams = DelphesParameters{}) : DelphesModule(readerParams) {}
   virtual ~DelphesReader();
-
-  virtual void SetFactory(DelphesFactory *factory);
-  DelphesFactory *GetFactory() const;
 
   virtual void LoadInputFile(std::string_view inputFile) {}
   virtual void Reset() {};
   virtual void Clear() = 0;
-  virtual bool EventReady() = 0;
+
+  void SetFactory(DelphesFactory *) override;
 
   void SetSkipEvents(long long);
   void SetMaxEvents(long long);
   unsigned long long EventCounter() const { return fEventCounter; }
 
   virtual bool ReadEvent();
-  virtual void AnalyzeEvent(TStopwatch *procStopWatch) = 0;
+  virtual void AnalyzeEvent(TStopwatch * /*procStopWatch*/) {}
+
+  bool IsReader() const override { return true; }
 
 protected:
+  virtual bool EventReady() { return false; }
   virtual bool ReadBlock() { return false; }
-
-  DelphesFactory *fFactory{nullptr};
 
   CandidatesCollection fAllParticleOutputArray;
   CandidatesCollection fStableParticleOutputArray;
@@ -87,6 +86,6 @@ protected:
   static_assert(true, "")
 
 /// A documentation generator factory
-DEFINE_FACTORY(DelphesReaderFactory, DelphesReader, "Event readers factory");
+DEFINE_FACTORY(DelphesReaderFactory, DelphesReader, "event readers");
 
 #endif // DelphesReader_h
