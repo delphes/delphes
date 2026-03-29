@@ -61,6 +61,7 @@ public:
     fAllParticleOutputArray->clear();
     fStableParticleOutputArray->clear();
     fPartonOutputArray->clear();
+    fWeightInfo->clear();
   }
 
 private:
@@ -114,7 +115,6 @@ bool DelphesPythia8Reader::ReadEvent()
   DelphesFactory *factory = GetFactory();
 
   fEventInfo->Number += 1;
-  fWeightInfo->clear();
 #if PYTHIA_VERSION_INTEGER > 8300
   for(const double &weight : fPythia->info.weightValueVector())
     fWeightInfo->emplace_back().Weight = weight;
