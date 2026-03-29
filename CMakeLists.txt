@@ -58,7 +58,6 @@ endfunction()
 # Define location of all other external dependencies
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
 
-add_subdirectory(addons)
 add_subdirectory(classes)
 add_subdirectory(converters)
 add_subdirectory(display)
@@ -80,11 +79,13 @@ add_library(Delphes SHARED
 )
 
 target_link_libraries(Delphes PUBLIC ${YAML_CPP_LIBRARIES} ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
-target_link_libraries(Delphes PUBLIC ROOT::ROOTNTuple)
+target_link_libraries(Delphes PRIVATE ROOT::ROOTNTuple)
 
 if(PYTHIA8_FOUND)
   target_link_libraries(Delphes PUBLIC ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
+
+add_subdirectory(addons)
 
 add_library(DelphesDisplay SHARED
   $<TARGET_OBJECTS:display>

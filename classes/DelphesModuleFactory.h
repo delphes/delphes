@@ -35,19 +35,19 @@
 /// Name of the object Builder
 #define BUILDER_NAME(obj) obj##Builder
 /// Define a new factory instance for the definition of modules
-#define DEFINE_FACTORY(name, obj_type, type)        \
-  class name: public DelphesModuleFactory<obj_type> \
-  {                                                 \
-  public:                                           \
-    inline static name &Get()                       \
-    {                                               \
-      static name instance;                         \
-      return instance;                              \
-    }                                               \
-                                                    \
-  private:                                          \
-    explicit name() : DelphesModuleFactory(type) {} \
-  };                                                \
+#define DEFINE_FACTORY(name, obj_type, type)                         \
+  class name: public DelphesModuleFactory<obj_type>                  \
+  {                                                                  \
+  public:                                                            \
+    inline static __attribute__((visibility("default"))) name &Get() \
+    {                                                                \
+      static name instance;                                          \
+      return instance;                                               \
+    }                                                                \
+                                                                     \
+  private:                                                           \
+    explicit name() : DelphesModuleFactory(type) {}                  \
+  };                                                                 \
   static_assert(true, "")
 
 template <typename T>
@@ -112,10 +112,7 @@ private:
 
   /// Build a module with its parameters set
   template <typename U>
-  static std::unique_ptr<T> BuildModule(const DelphesParameters &moduleParams)
-  {
-    return std::make_unique<U>(moduleParams);
-  }
+  static std::unique_ptr<T> BuildModule(const DelphesParameters &moduleParams) { return std::make_unique<U>(moduleParams); }
   std::unordered_map<std::string, Builder> fBuildersMap; ///< database of modules handled by this instance
   const std::string fType; ///< modules created by this factory
 };

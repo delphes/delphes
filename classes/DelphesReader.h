@@ -82,7 +82,7 @@ protected:
   {                                                                                \
     BUILDER_NAME(obj)() { DelphesReaderFactory::Get().RegisterModule<obj>(name); } \
   };                                                                               \
-  static const BUILDER_NAME(obj) gDelphesReader##obj;                              \
+  static __attribute__((used)) const BUILDER_NAME(obj) gDelphesReader##obj;        \
   static_assert(true, "")
 
 /// A documentation generator factory
