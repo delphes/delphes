@@ -105,10 +105,6 @@ bool DelphesPythia8Reader::ReadEvent()
     fEventInfo->AlphaQED = fPythia->info.alphaEM();
     fEventInfo->AlphaQCD = fPythia->info.alphaS();
 
-    /*Weight &weightInfo = fWeightInfo->emplace_back();
-    weightInfo.ID = id;
-    weightInfo.Weight = weight;*/
-
     fInitialised = true;
   }
   if(!fPythia->next()) return false;
@@ -122,22 +118,23 @@ bool DelphesPythia8Reader::ReadEvent()
     fWeightInfo->emplace_back().Weight = weight;
 #endif
 
-  for(const Pythia8::Particle &pyPart : *fPythia->event.particles())
+  for(int i = 1 /*skip the two-beam system*/; i < fPythia->event.size(); ++i)
   {
+    Pythia8::Particle &pyPart = fPythia->event[i];
     Candidate *candidate = factory->NewCandidate();
     candidate->PID = pyPart.id();
-    candidate->Status = pyPart.status();
+    candidate->Status = pyPart.statusHepMC();
     candidate->Charge = pyPart.charge();
     candidate->Mass = pyPart.mCalc();
 
     candidate->Momentum.SetPxPyPzE(pyPart.px(), pyPart.py(), pyPart.pz(), pyPart.e());
     candidate->Position.SetXYZT(pyPart.xProd(), pyPart.yProd(), pyPart.zProd(), pyPart.tProd());
 
-    candidate->M1 = pyPart.mother1();
-    candidate->M2 = pyPart.mother2();
+    candidate->M1 = pyPart.mother1() - 1;
+    candidate->M2 = pyPart.mother2() - 1;
 
-    candidate->D1 = pyPart.daughter1();
-    candidate->D2 = pyPart.daughter2();
+    candidate->D1 = pyPart.daughter1() - 1;
+    candidate->D2 = pyPart.daughter2() - 1;
 
     fAllParticleOutputArray->emplace_back(candidate);
 

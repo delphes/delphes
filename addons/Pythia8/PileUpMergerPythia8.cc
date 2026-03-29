@@ -36,13 +36,6 @@
 
 #include <Pythia8/Pythia.h>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
 class PileUpMergerPythia8: public DelphesModule
 {
 public:
