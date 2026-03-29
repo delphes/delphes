@@ -70,6 +70,13 @@ void Delphes::SetReader(DelphesReader *reader)
 
 //------------------------------------------------------------------------------
 
+void Delphes::Reset()
+{
+  if(fReader) fReader->Reset();
+}
+
+//------------------------------------------------------------------------------
+
 DelphesFactory *Delphes::GetFactory() const { return fDelphesFactory.get(); }
 
 //------------------------------------------------------------------------------

@@ -286,13 +286,9 @@ void DelphesLHEFReader::AnalyzeParticle()
   if(!pdgParticle) return;
 
   if(fStatus == 1)
-  {
     fStableParticleOutputArray->emplace_back(candidate);
-  }
   else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-  {
     fPartonOutputArray->emplace_back(candidate);
-  }
 }
 
 //---------------------------------------------------------------------------

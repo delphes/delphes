@@ -41,7 +41,7 @@ class PyDelphesEvent;
 class PyDelphes: public Delphes
 {
 public:
-  PyDelphes() {}
+  PyDelphes();
   ~PyDelphes();
 
   const pybind11::dict &GetReaderConfig() const { return fReaderConfig; }
@@ -55,8 +55,8 @@ public:
   const PyDelphesEvent &Next();
 
 private:
+  const std::unique_ptr<PyDelphesEvent> fDelphesEvent;
   std::unique_ptr<DelphesReader> fEventReader;
-  std::unique_ptr<PyDelphesEvent> fDelphesEvent;
 
   pybind11::dict fReaderConfig;
   pybind11::dict fModulesConfig;
