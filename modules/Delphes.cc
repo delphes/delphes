@@ -38,6 +38,8 @@
 
 #include <TRandom3.h>
 
+#include <chrono>
+
 #ifdef _WIN32
 #include <libloaderapi.h>
 #else
@@ -144,8 +146,13 @@ void Delphes::InitTask()
 
 void Delphes::ProcessTask()
 {
+  std::chrono::time_point<std::chrono::high_resolution_clock> procTimer =
+    std::chrono::high_resolution_clock::now();
   for(const auto &[moduleName, moduleObject] : fModules)
     moduleObject->Process();
+  fReader->SetProcessingTime(std::chrono::duration<double>(
+    std::chrono::high_resolution_clock::now() - procTimer)
+      .count());
 }
 
 //------------------------------------------------------------------------------
