@@ -34,7 +34,7 @@
 #include <TLorentzVector.h>
 #include <TRandom3.h>
 
-#include <Pythia.h>
+#include <Pythia8/Pythia.h>
 
 #include <algorithm>
 #include <iostream>

@@ -37,12 +37,6 @@ find_package(yaml-cpp REQUIRED)
 find_package(ROOT REQUIRED COMPONENTS EG Eve Gui GuiHtml)
 set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
 
-# Declare Pythia8 dependancy
-find_package(Pythia8)
-if(PYTHIA8_FOUND)
-  include_directories(${PYTHIA8_INCLUDE_DIRS})
-endif()
-
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR "lib")
 endif()
@@ -81,9 +75,6 @@ add_library(Delphes SHARED
 target_link_libraries(Delphes PUBLIC ${YAML_CPP_LIBRARIES} ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
 target_link_libraries(Delphes PRIVATE ROOT::ROOTNTuple)
 
-if(PYTHIA8_FOUND)
-  target_link_libraries(Delphes PUBLIC ${PYTHIA8_LIBRARIES} ${CMAKE_DL_LIBS})
-endif()
 
 add_subdirectory(addons)
 
