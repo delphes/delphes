@@ -16,20 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-
 #include <signal.h>
 
 #include <Pythia8/Pythia.h>
 #include <Pythia8Plugins/CombineMatchingInput.h>
 
-#include <TApplication.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
-#include <TROOT.h>
 #include <TStopwatch.h>
 
 #include "classes/DelphesClasses.h"
@@ -39,10 +32,6 @@
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-
-using namespace std;
 
 //---------------------------------------------------------------------------
 
@@ -230,22 +219,16 @@ int main(int argc, char *argv[])
 
   if(argc != 4)
   {
-    cout << " Usage: " << appName << " config_file"
-         << " pythia_card"
-         << " output_file" << endl;
-    cout << " config_file - configuration file in Tcl format," << endl;
-    cout << " pythia_card - Pythia8 configuration file," << endl;
-    cout << " output_file - output file in ROOT format." << endl;
+    std::cout << " Usage: " << appName << " config_file"
+              << " pythia_card"
+              << " output_file" << std::endl
+              << " config_file - configuration file in Tcl format," << std::endl
+              << " pythia_card - Pythia8 configuration file," << std::endl
+              << " output_file - output file in ROOT format." << std::endl;
     return 1;
   }
 
   signal(SIGINT, SignalHandler);
-
-  gROOT->SetBatch();
-
-  int appargc = 1;
-  char *appargv[] = {appName};
-  TApplication app(appName, &appargc, appargv);
 
   try
   {
@@ -267,12 +250,9 @@ int main(int argc, char *argv[])
     CandidatesCollection stableParticleOutputArrayLHEF, allParticleOutputArrayLHEF, partonOutputArrayLHEF;
 
     // Initialize Pythia
-    const auto pythia = std::make_unique<Pythia8::Pythia>();
-
-    if(pythia == NULL)
-    {
-      throw runtime_error("can't create Pythia instance");
-    }
+    const std::unique_ptr<Pythia8::Pythia> pythia = std::make_unique<Pythia8::Pythia>();
+    if(!pythia)
+      throw std::runtime_error("can't create Pythia instance");
 
     // jet matching
 #if PYTHIA_VERSION_INTEGER < 8300
@@ -348,13 +328,9 @@ int main(int argc, char *argv[])
       if(spareFlag1)
       {
         if((spareMode1 >= 1 && spareMode1 <= 5) || spareMode1 == 21)
-        {
           fillPartons(spareMode1, spareParm1, spareParm2, pythia->event, pythia->particleData, pythia->rndm);
-        }
         else
-        {
           fillParticle(spareMode1, spareParm1, spareParm2, pythia->event, pythia->particleData, pythia->rndm);
-        }
       }
 
       if(!pythia->next())
@@ -362,14 +338,14 @@ int main(int argc, char *argv[])
         // If failure because reached end of file then exit event loop
         if(pythia->info.atEndOfFile())
         {
-          cerr << "Aborted since reached end of Les Houches Event File" << endl;
+          std::cerr << "Aborted since reached end of Les Houches Event File" << std::endl;
           break;
         }
 
         // First few failures write off as "acceptable" errors, then quit
         if(++errorCounter > timesAllowErrors)
         {
-          cerr << "Event generation aborted prematurely, owing to error!" << endl;
+          std::cerr << "Event generation aborted prematurely, owing to error!" << std::endl;
           break;
         }
 
@@ -414,13 +390,13 @@ int main(int argc, char *argv[])
 
     modularDelphes->FinishTask();
 
-    cout << "** Exiting..." << endl;
+    std::cout << "** Exiting..." << std::endl;
 
     return 0;
   }
-  catch(runtime_error &e)
+  catch(const std::runtime_error &e)
   {
-    cerr << "** ERROR: " << e.what() << endl;
+    std::cerr << "** ERROR: " << e.what() << std::endl;
     return 1;
   }
 }
