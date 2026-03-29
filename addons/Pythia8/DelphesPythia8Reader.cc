@@ -52,6 +52,8 @@ public:
   }
 
   bool ReadEvent() override;
+  void SetReadoutTime(double readoutTime) override { fEventInfo->ReadTime = readoutTime; }
+  void SetProcessingTime(double procTime) override { fEventInfo->ProcTime = procTime; }
 
   void LoadInputFile(std::string_view inputFile) override { fPythia->readFile(std::string{inputFile}); }
   void Clear() override
@@ -63,7 +65,6 @@ public:
 
 private:
   const std::unique_ptr<Pythia8::Pythia> fPythia;
-
   bool fInitialised{false};
 
   std::shared_ptr<HepMCEvent> fEventInfo;
@@ -107,6 +108,7 @@ bool DelphesPythia8Reader::ReadEvent()
 
     fInitialised = true;
   }
+  ResetTimer();
   if(!fPythia->next()) return false;
 
   DelphesFactory *factory = GetFactory();
@@ -141,16 +143,9 @@ bool DelphesPythia8Reader::ReadEvent()
     if(candidate->Status == 1) fStableParticleOutputArray->emplace_back(candidate);
     if(pyPart.isParton()) fPartonOutputArray->emplace_back(candidate);
   }
+  SetReadoutTime(ElapsedTime());
   return true;
 }
-
-//---------------------------------------------------------------------------
-
-/*void DelphesPythia8Reader::AnalyzeEvent(TStopwatch *procStopWatch)
-{
-  fEventInfo->ReadTime = fReadStopWatch.RealTime();
-  fEventInfo->ProcTime = procStopWatch->RealTime();
-}*/
 
 //---------------------------------------------------------------------------
 
