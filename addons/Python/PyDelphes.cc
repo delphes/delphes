@@ -78,9 +78,8 @@ void PyDelphes::Init()
       moduleObject->SetFactory(factory);
       if(moduleObject->IsWriter())
       {
-        if(outputFile.empty()) continue; // skip writers if not output is defined
-        std::cout << "output file: " << outputFile << std::endl;
-        DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get());
+        if(outputFile.empty()) continue; // skip writers if no output is defined
+        DelphesWriter *writerModule = static_cast<DelphesWriter *>(moduleObject.get()); // cast to the end type
         writerModule->SetOutputFile(outputFile);
       }
       AddModule(moduleName, moduleObject);
@@ -106,9 +105,9 @@ void PyDelphes::SetReaderConfig(const pybind11::dict &readerArgs)
   fEventReader = DelphesReaderFactory::Get().Build(readerConfig.Get<std::string>("ReaderType"), readerConfig);
   if(readerArgs.contains("inputFiles"))
   {
-    if(const std::vector<std::string> inputFiles = readerArgs["inputFiles"].cast<std::vector<std::string> >(); !inputFiles.empty())
-      fEventReader->LoadInputFile(inputFiles.at(0));
-    //TODO: manage multi-files inputs
+    if(const std::vector<std::string> inputFiles = readerArgs["inputFiles"].cast<std::vector<std::string> >();
+      !inputFiles.empty())
+      fEventReader->LoadInputFile(inputFiles.at(0)); //TODO: manage multi-files inputs
   }
   fEventReader->SetFactory(GetFactory());
 }
