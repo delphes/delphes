@@ -101,6 +101,7 @@ void DelphesLHEFReader::Clear()
   fEventInfo->CrossSection = 0.; //TODO: read this?
   fParticleCounter = -1;
   fWeightInfo->clear();
+  ResetTimer();
 }
 
 //---------------------------------------------------------------------------
@@ -246,11 +247,11 @@ bool DelphesLHEFReader::ReadBlock()
 
 //---------------------------------------------------------------------------
 
-void DelphesLHEFReader::AnalyzeEvent(TStopwatch *procStopWatch)
-{
-  fEventInfo->ReadTime = fReadStopWatch.RealTime();
-  fEventInfo->ProcTime = procStopWatch->RealTime();
-}
+void DelphesLHEFReader::SetReadoutTime(double readoutTime) { fEventInfo->ReadTime = readoutTime; }
+
+//---------------------------------------------------------------------------
+
+void DelphesLHEFReader::SetProcessingTime(double procTime) { fEventInfo->ProcTime = procTime; }
 
 //---------------------------------------------------------------------------
 

@@ -32,7 +32,7 @@
 #include "classes/DelphesModule.h"
 #include "classes/DelphesModuleFactory.h"
 
-#include <TStopwatch.h>
+#include <chrono>
 
 class DelphesFactory;
 
@@ -55,7 +55,11 @@ public:
   unsigned long long EventCounter() const { return fEventCounter; }
 
   virtual bool ReadEvent();
-  virtual void AnalyzeEvent(TStopwatch * /*procStopWatch*/) {}
+  virtual void SetReadoutTime(double readoutTime) {} ///< Set the readout time for one event, in s
+  virtual void SetProcessingTime(double procTime) {} ///< Set the processing time for one event, in s
+
+  void ResetTimer();
+  double ElapsedTime() const;
 
   bool IsReader() const override { return true; }
 
@@ -67,9 +71,10 @@ protected:
   CandidatesCollection fStableParticleOutputArray;
   CandidatesCollection fPartonOutputArray;
 
+  std::chrono::time_point<std::chrono::high_resolution_clock> fTimer;
+
   FILE *fInputFile{nullptr};
   std::unique_ptr<ExRootProgressBar> fProgressBar;
-  TStopwatch fReadStopWatch;
 
   unsigned long long fEventCounter{0ll};
   long long fMaxEvents{-1ll};
