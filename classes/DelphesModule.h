@@ -50,9 +50,10 @@ public:
   void SetName(std::string_view moduleName) { fName = moduleName; }
   const std::string &GetName() const { return fName; }
 
-  void SetFactory(DelphesFactory *factory) { fFactory = factory; }
+  virtual void SetFactory(DelphesFactory *factory) { fFactory = factory; }
   virtual DelphesFactory *GetFactory() const;
 
+  virtual bool IsReader() const { return false; }
   virtual bool IsWriter() const { return false; }
 
 protected:

@@ -46,19 +46,10 @@ DelphesReader::~DelphesReader()
 
 void DelphesReader::SetFactory(DelphesFactory *factory)
 {
-  fFactory = factory;
+  DelphesModule::SetFactory(factory);
   fAllParticleOutputArray = GetFactory()->Book<std::vector<Candidate *> >("Delphes/allParticles", false);
   fStableParticleOutputArray = GetFactory()->Book<std::vector<Candidate *> >("Delphes/stableParticles", false);
   fPartonOutputArray = GetFactory()->Book<std::vector<Candidate *> >("Delphes/partons", false);
-}
-
-//---------------------------------------------------------------------------
-
-DelphesFactory *DelphesReader::GetFactory() const
-{
-  if(!fFactory)
-    throw std::runtime_error("Failed to retrieve the objects factory for the reader module.");
-  return fFactory;
 }
 
 //---------------------------------------------------------------------------
