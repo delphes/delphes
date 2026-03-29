@@ -34,8 +34,6 @@
 #include "PyDelphesEvent.h"
 #include "PyDelphesParameters.h"
 
-#include <dlfcn.h>
-
 #include <ExRootAnalysis/ExRootProgressBar.h>
 #include <TStopwatch.h>
 
@@ -52,15 +50,7 @@ PYBIND11_MODULE(DelphesPython, m)
     A Python wrapper for the processing of events through the Delphes framework.
   )pbdoc";
 
-  m.def("load", [](std::string_view libraryName) {
-    if(::dlopen(libraryName.data(), RTLD_LAZY | RTLD_GLOBAL) == nullptr)
-    {
-      std::ostringstream message;
-      message << "Failed to load library '" << libraryName << "'.";
-      if(const char *err = dlerror(); err != nullptr) message << " " << err;
-      throw py::import_error(message.str());
-    }
-    py::print("Successfully loaded the library", libraryName, "into the runtime environment."); }, "Load an external library into the runtime environment");
+  m.def("load", &LoadLibrary, "Load an external library into the runtime environment");
 
   // mimic Module as an actual Python object, while it is only a translator for a Python dictionary
   m.def("Module", [](std::string_view moduleType, const py::kwargs &moduleArgs) -> py::dict {
