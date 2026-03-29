@@ -78,7 +78,11 @@ void DelphesSTDHEPReader::Reset()
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::Clear() { fBlockType = -1; }
+void DelphesSTDHEPReader::Clear()
+{
+  fBlockType = -1;
+  ResetTimer();
+}
 
 //---------------------------------------------------------------------------
 
@@ -311,6 +315,7 @@ void DelphesSTDHEPReader::ReadSTDHEP()
 
   // Extracting the event number
   fReader[0].ReadValue(&fEventNumber, 4);
+  fEventInfo->Number = fEventNumber;
 
   // Extracting the number of particles
   fReader[0].ReadValue(&fEventSize, 4);
@@ -371,21 +376,18 @@ void DelphesSTDHEPReader::ReadSTDHEP4()
   SkipArray(4);
 
   SkipBytes(4);
+
+  fEventInfo->ProcessID = 0;
+  fEventInfo->ScalePDF = fScale.at(0);
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeEvent(TStopwatch *procStopWatch)
-{
-  fEventInfo->Number = fEventNumber;
+void DelphesSTDHEPReader::SetReadoutTime(double readoutTime) { fEventInfo->ReadTime = readoutTime; }
 
-  fEventInfo->ProcessID = 0;
+//---------------------------------------------------------------------------
 
-  fEventInfo->ScalePDF = fScale.at(0);
-
-  fEventInfo->ReadTime = fReadStopWatch.RealTime();
-  fEventInfo->ProcTime = procStopWatch->RealTime();
-}
+void DelphesSTDHEPReader::SetProcessingTime(double procTime) { fEventInfo->ProcTime = procTime; }
 
 //---------------------------------------------------------------------------
 

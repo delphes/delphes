@@ -380,6 +380,7 @@ int main(int argc, char *argv[])
 
       readStopWatch.Stop();
 
+      const std::chrono::time_point<std::chrono::high_resolution_clock> timerObj = std::chrono::high_resolution_clock::now();
       procStopWatch.Start();
       ConvertInput(eventCounter, pythia.get(), *eventInfo, modularDelphes->GetFactory(),
         allParticleOutputArray, stableParticleOutputArray, partonOutputArray,
@@ -388,7 +389,7 @@ int main(int argc, char *argv[])
       procStopWatch.Stop();
 
       if(reader)
-        reader->AnalyzeEvent(&procStopWatch); //FIXME ensure we use LHEF
+        reader->SetProcessingTime(std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - timerObj).count());
 
 #if PYTHIA_VERSION_INTEGER > 8300
       // fill Pythia8 Weights - see https://pythia.org/latest-manual/CrossSectionsAndWeights.html

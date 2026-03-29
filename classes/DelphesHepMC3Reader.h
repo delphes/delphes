@@ -51,7 +51,8 @@ public:
   void Clear() override;
   bool EventReady() override;
 
-  void AnalyzeEvent(TStopwatch *procStopWatch) override;
+  void SetReadoutTime(double readoutTime) override;
+  void SetProcessingTime(double procTime) override;
 
 private:
   bool ReadBlock() override;
@@ -74,7 +75,6 @@ private:
   double fMomentumCoefficient{1.}, fPositionCoefficient{1.};
 
   int fVertexCounter{0}, fParticleCounter{0};
-  std::vector<double> fWeights;
 
   double fX{0.}, fY{0.}, fZ{0.}, fT{0.};
 

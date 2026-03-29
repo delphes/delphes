@@ -51,7 +51,8 @@ public:
   void Clear() override;
   bool EventReady() override;
 
-  void AnalyzeEvent(TStopwatch *procStopWatch) override;
+  void SetReadoutTime(double readoutTime) override;
+  void SetProcessingTime(double procTime) override;
 
 private:
   bool ReadBlock() override;

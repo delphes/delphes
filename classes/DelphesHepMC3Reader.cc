@@ -85,7 +85,6 @@ void DelphesHepMC3Reader::Reset()
 
 void DelphesHepMC3Reader::Clear()
 {
-  fWeights.clear();
   fMomentumCoefficient = 1.0;
   fPositionCoefficient = 1.0;
   fVertexCounter = -2;
@@ -97,6 +96,7 @@ void DelphesHepMC3Reader::Clear()
   fMotherMap.clear();
   fDaughterMap.clear();
   fWeightsObject->clear();
+  ResetTimer();
 }
 
 //---------------------------------------------------------------------------
@@ -161,10 +161,12 @@ bool DelphesHepMC3Reader::ReadBlock()
   }
   else if(key == 'W')
   {
+    std::vector<double> weights;
     while(bufferStream.ReadDbl(weight))
-    {
-      fWeights.push_back(weight);
-    }
+      weights.push_back(weight);
+    fEventObject->Weight = weights.size() > 0 ? weights.at(0) : 1.;
+    for(const double &weight : weights)
+      fWeightsObject->emplace_back().Weight = weight;
   }
   else if(key == 'A' && bufferStream.FindStr("mpi"))
   {
@@ -345,21 +347,11 @@ bool DelphesHepMC3Reader::ReadBlock()
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeEvent(TStopwatch *procStopWatch)
-{
-  HepMCEvent &element = *fEventObject;
+void DelphesHepMC3Reader::SetReadoutTime(double readoutTime) { fEventObject->ReadTime = readoutTime; }
 
-  element.Weight = fWeights.size() > 0 ? fWeights[0] : 1.0;
+//---------------------------------------------------------------------------
 
-  element.ReadTime = fReadStopWatch.RealTime();
-  element.ProcTime = procStopWatch->RealTime();
-
-  for(std::vector<double>::const_iterator itWeights = fWeights.begin(); itWeights != fWeights.end(); ++itWeights)
-  {
-    Weight &weight = fWeightsObject->emplace_back();
-    weight.Weight = *itWeights;
-  }
-}
+void DelphesHepMC3Reader::SetProcessingTime(double procTime) { fEventObject->ProcTime = procTime; }
 
 //---------------------------------------------------------------------------
 

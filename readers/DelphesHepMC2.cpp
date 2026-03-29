@@ -16,14 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
 #include <signal.h>
-
-#include <TROOT.h>
-#include <TStopwatch.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -32,8 +25,6 @@
 #include "modules/Delphes.h"
 
 #include <ExRootAnalysis/ExRootProgressBar.h>
-#include <ExRootAnalysis/ExRootTreeBranch.h>
-#include <ExRootAnalysis/ExRootTreeWriter.h>
 
 using namespace std;
 
@@ -52,7 +43,6 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesHepMC2";
   stringstream message;
-  TStopwatch procStopWatch;
   Int_t i;
 
   if(argc < 3)
@@ -68,8 +58,6 @@ int main(int argc, char *argv[])
   }
 
   signal(SIGINT, SignalHandler);
-
-  gROOT->SetBatch();
 
   try
   {
@@ -109,11 +97,9 @@ int main(int argc, char *argv[])
       reader->Clear();
       while(reader->ReadEvent() && !interrupted)
       {
-        procStopWatch.Start();
+        const std::chrono::time_point<std::chrono::high_resolution_clock> timerObj = std::chrono::high_resolution_clock::now();
         modularDelphes->ProcessTask();
-        procStopWatch.Stop();
-
-        reader->AnalyzeEvent(&procStopWatch);
+        reader->SetProcessingTime(std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - timerObj).count());
 
         modularDelphes->Clear();
         reader->Clear();

@@ -80,11 +80,11 @@ bool DelphesReader::ReadEvent()
     return false;
   // initialise the collections if not already done
 
-  fReadStopWatch.Start();
   Clear();
   fAllParticleOutputArray->clear();
   fStableParticleOutputArray->clear();
   fPartonOutputArray->clear();
+  ResetTimer();
   while(ReadBlock())
   {
     if(EventReady())
@@ -94,7 +94,7 @@ bool DelphesReader::ReadEvent()
       {
         if(fInputFile)
           fProgressBar->Update(ftello(fInputFile), fEventCounter);
-        fReadStopWatch.Stop();
+        SetReadoutTime(ElapsedTime());
         return true;
       }
       else if(fSkipEvents > 0)
@@ -107,6 +107,17 @@ bool DelphesReader::ReadEvent()
     }
   }
   return false;
+}
+
+//---------------------------------------------------------------------------
+
+void DelphesReader::ResetTimer() { fTimer = std::chrono::high_resolution_clock::now(); }
+
+//---------------------------------------------------------------------------
+
+double DelphesReader::ElapsedTime() const
+{
+  return std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - fTimer).count();
 }
 
 //---------------------------------------------------------------------------

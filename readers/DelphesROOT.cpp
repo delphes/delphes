@@ -16,23 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <stdexcept>
-
-#include <map>
-#include <vector>
-
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <TClonesArray.h>
 #include <TFile.h>
 #include <TROOT.h>
-#include <TStopwatch.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -61,7 +49,6 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesROOT";
   stringstream message;
-  TStopwatch eventStopWatch;
   GenParticle *gen;
   Candidate *candidate;
   Int_t pdgCode;
@@ -162,7 +149,6 @@ int main(int argc, char *argv[])
 
         for(Int_t j = 0; j < branchParticle->GetEntriesFast(); j++)
         {
-
           gen = (GenParticle *)branchParticle->At(j);
           candidate = factory->NewCandidate();
 
@@ -186,13 +172,9 @@ int main(int argc, char *argv[])
           pdgCode = TMath::Abs(gen->PID);
 
           if(gen->Status == 1)
-          {
             stableParticleOutputArray->emplace_back(candidate);
-          }
           else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-          {
             partonOutputArray->emplace_back(candidate);
-          }
         }
 
         modularDelphes->ProcessTask();

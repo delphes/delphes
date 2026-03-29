@@ -88,6 +88,7 @@ void DelphesHepMC2Reader::Clear()
   fDaughterMap.clear();
   fParticleCounter = 0;
   fWeights->clear();
+  ResetTimer();
 }
 
 //---------------------------------------------------------------------------
@@ -173,9 +174,9 @@ bool DelphesHepMC2Reader::ReadBlock()
     for(i = 0; i < weightSize; ++i)
     {
       rc = rc && bufferStream.ReadDbl(weight);
-      Weight &weightInfo = fWeights->emplace_back();
-      weightInfo.Weight = weight;
+      fWeights->emplace_back().Weight = weight;
     }
+    fEventObject->Weight = fWeights->size() > 0 ? fWeights->at(0).Weight : 1.0;
 
     if(!rc)
     {
@@ -335,12 +336,11 @@ bool DelphesHepMC2Reader::ReadBlock()
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC2Reader::AnalyzeEvent(TStopwatch *procStopWatch)
-{
-  fEventObject->Weight = fWeights->size() > 0 ? fWeights->at(0).Weight : 1.0;
-  fEventObject->ReadTime = fReadStopWatch.RealTime();
-  fEventObject->ProcTime = procStopWatch->RealTime();
-}
+void DelphesHepMC2Reader::SetReadoutTime(double readoutTime) { fEventObject->ReadTime = readoutTime; }
+
+//---------------------------------------------------------------------------
+
+void DelphesHepMC2Reader::SetProcessingTime(double procTime) { fEventObject->ProcTime = procTime; }
 
 //---------------------------------------------------------------------------
 
