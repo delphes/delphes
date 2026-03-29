@@ -90,7 +90,7 @@ void Delphes::AddModule(std::string_view moduleName, std::unique_ptr<DelphesModu
 
 void Delphes::Init()
 {
-  if(!fReader)
+  if(!GetReader())
     throw std::runtime_error("Failed to initialise the main Delphes module with no reader declared.");
   if(!fConfReader)
     throw std::runtime_error("Failed to initialise the main Delphes module with no user configuration reader declared.");
@@ -157,9 +157,10 @@ void Delphes::ProcessTask()
     std::chrono::high_resolution_clock::now();
   for(const auto &[moduleName, moduleObject] : fModules)
     moduleObject->Process();
-  fReader->SetProcessingTime(std::chrono::duration<double>(
-    std::chrono::high_resolution_clock::now() - procTimer)
-      .count());
+  if(DelphesReader *reader = GetReader(); reader)
+    reader->SetProcessingTime(std::chrono::duration<double>(
+      std::chrono::high_resolution_clock::now() - procTimer)
+        .count());
 }
 
 //------------------------------------------------------------------------------

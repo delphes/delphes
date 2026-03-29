@@ -197,7 +197,7 @@ void TreeWriter::Init()
       continue;
     }
     TClass *branchClass = TClass::GetClass(*typeInfo);
-    fMemorySlots[branchInfo.first] = GetFactory()->Attach(branchInfo.first);
+    fMemorySlots[branchInfo.first] = GetFactory()->AttachRaw(branchInfo.first);
     fExtraBranchMap.insert(std::make_pair(
       fTreeWriter->NewBranch(branchInfo.first.data(), branchClass), // ExRootAnalysis tree branch
       std::make_pair(fExtraClassMap.at(typeInfo), fMemorySlots.at(branchInfo.first))));

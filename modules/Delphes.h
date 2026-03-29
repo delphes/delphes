@@ -46,7 +46,7 @@ public:
   void SetConfReader(DelphesConfReader *conf) { fConfReader = conf; }
 
   virtual void SetReader(DelphesReader *reader);
-  DelphesReader *GetReader() const { return fReader; }
+  virtual DelphesReader *GetReader() const { return fReader; }
 
   void InitTask();
   void ProcessTask();
