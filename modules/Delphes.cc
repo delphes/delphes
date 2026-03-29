@@ -38,6 +38,12 @@
 
 #include <TRandom3.h>
 
+#ifdef _WIN32
+#include <libloaderapi.h>
+#else
+#include <dlfcn.h>
+#endif
+
 Delphes::Delphes(const char *name) :
   DelphesModule(DelphesParameters{}),
   fDelphesFactory(std::make_unique<DelphesFactory>())
@@ -148,6 +154,29 @@ void Delphes::FinishTask()
 {
   for(const auto &[moduleName, moduleObject] : fModules)
     moduleObject->Finish();
+}
+
+//------------------------------------------------------------------------------
+
+void LoadLibrary(std::string_view libraryName)
+{
+#ifdef _WIN32
+  if(HMODULE handle = LoadLibraryA(file_path.data()); handle == nullptr)
+  {
+    std::ostringstream message;
+    message << "Failed to load library '" << file_path << "'. Error code #" << GetLastError() << ".";
+    throw std::runtime_error(message.str());
+  }
+#else
+  if(::dlopen(libraryName.data(), RTLD_LAZY | RTLD_GLOBAL) == nullptr)
+  {
+    std::ostringstream message;
+    message << "Failed to load library '" << libraryName << "'.";
+    if(const char *err = ::dlerror(); err != nullptr) message << " " << err;
+    throw std::runtime_error(message.str());
+  }
+#endif
+  std::cout << "Successfully loaded the library '" << libraryName << "' into the runtime environment." << std::endl;
 }
 
 //------------------------------------------------------------------------------

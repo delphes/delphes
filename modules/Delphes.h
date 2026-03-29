@@ -33,6 +33,8 @@
 class DelphesConfReader;
 class DelphesReader;
 
+void LoadLibrary(std::string_view); ///< Load an external library into the runtime environment
+
 class Delphes: public DelphesModule
 {
 public:
