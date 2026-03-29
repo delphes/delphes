@@ -23,7 +23,7 @@
 
 #include <csignal>
 
-#include <Pythia.h>
+#include <Pythia8/Pythia.h>
 #include <Pythia8Plugins/CombineMatchingInput.h>
 
 #include <TApplication.h>
