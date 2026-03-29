@@ -38,8 +38,11 @@ class DelphesPythia8Reader: public DelphesReader
 public:
   explicit DelphesPythia8Reader(const DelphesParameters &readerParams) :
     DelphesReader(readerParams),
-    fPythiaConfig(Steer<std::vector<std::string> >("pythiaConfig")),
-    fPythia(std::make_unique<Pythia8::Pythia>()) { std::cout << __PRETTY_FUNCTION__ << std::endl; }
+    fPythia(std::make_unique<Pythia8::Pythia>())
+  {
+    for(const std::string &configCmd : Steer<std::vector<std::string> >("pythiaConfig"))
+      fPythia->readString(configCmd);
+  }
 
   void SetFactory(DelphesFactory *factory) override
   {
@@ -59,7 +62,6 @@ public:
   }
 
 private:
-  const std::vector<std::string> fPythiaConfig;
   const std::unique_ptr<Pythia8::Pythia> fPythia;
 
   bool fInitialised{false};
