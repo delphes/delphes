@@ -26,7 +26,7 @@ void DelphesFilter::Reset(ExRootClassifier *classifier)
     {
       itMap->second.first = true;
       for(TCategoryMap::iterator itSubMap = itMap->second.second.begin(); itSubMap != itMap->second.second.end(); ++itSubMap)
-        itSubMap->second->clear();
+        itSubMap->second.clear();
     }
   }
   else
@@ -35,14 +35,14 @@ void DelphesFilter::Reset(ExRootClassifier *classifier)
     {
       itMap->second.first = true;
       for(TCategoryMap::iterator itSubMap = itMap->second.second.begin(); itSubMap != itMap->second.second.end(); ++itSubMap)
-        itSubMap->second->clear();
+        itSubMap->second.clear();
     }
   }
 }
 
 //------------------------------------------------------------------------------
 
-CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, Int_t category)
+std::vector<Candidate *> DelphesFilter::GetSubArray(ExRootClassifier *classifier, Int_t category)
 {
   TClassifierMap::iterator itMap = fMap.find(classifier);
   if(itMap == fMap.end())
@@ -50,9 +50,7 @@ CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, In
     std::pair<TClassifierMap::iterator, bool> pairMap = fMap.insert(
       std::make_pair(classifier, std::make_pair(true, TCategoryMap())));
     if(!pairMap.second)
-    {
       throw std::runtime_error("can't insert category map");
-    }
     itMap = pairMap.first;
   }
 
@@ -67,19 +65,17 @@ CandidatesCollection DelphesFilter::GetSubArray(ExRootClassifier *classifier, In
       if(itSubMap == itMap->second.second.end())
       {
         std::pair<TCategoryMap::iterator, bool> pairSubMap = itMap->second.second.insert(
-          std::make_pair(result, std::make_shared<std::vector<Candidate *> >()));
+          std::make_pair(result, std::vector<Candidate *>()));
         if(!pairSubMap.second)
-        {
           throw std::runtime_error("can't insert category");
-        }
 
         itSubMap = pairSubMap.first;
       }
-      itSubMap->second->emplace_back(element);
+      itSubMap->second.emplace_back(element);
     }
   }
   TCategoryMap::iterator itSubMap = itMap->second.second.find(category);
-  return (itSubMap != itMap->second.second.end()) ? itSubMap->second : 0;
+  return (itSubMap != itMap->second.second.end()) ? itSubMap->second : std::vector<Candidate *>{};
 }
 
 //------------------------------------------------------------------------------

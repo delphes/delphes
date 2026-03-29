@@ -80,12 +80,12 @@ void TaggingParticlesSkimmer::Process()
 
   // first select hadronic taus and replace them by visible part
   fFilter->Reset();
-  const CandidatesCollection tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
+  const std::vector<Candidate *> tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
-  if(tauArray->empty()) return;
+  if(tauArray.empty()) return;
 
   // loop over all input taus
-  for(Candidate *const &tau : *tauArray)
+  for(Candidate *const &tau : tauArray)
   {
     if(tau->D1 < 0) continue;
 
