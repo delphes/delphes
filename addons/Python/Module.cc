@@ -64,11 +64,12 @@ PYBIND11_MODULE(DelphesPython, m)
     paramsObj[py::str("ReaderType")] = py::str(moduleType);
     return paramsObj; }, "Define an external event reader configuration");
 
-  py::class_<Candidate>(m, "Candidate")
+  py::class_<Candidate, std::unique_ptr<Candidate, py::nodelete> >(m, "Candidate")
     .def(py::init<>())
-    .def_readwrite("pt", &Candidate::PT, "Candidate transverse momentum (in GeV/c)")
+    .def_property_readonly("pt", [](const Candidate &self) { return self.Momentum.Pt(); }, "Candidate transverse momentum (in GeV/c)")
     .def_property_readonly("eta", [](const Candidate &self) { return self.Momentum.Eta(); }, "Candidate pseudo-rapidity")
-    .def_property_readonly("phi", [](const Candidate &self) { return self.Momentum.Phi(); }, "Candidate azimuthal angle (in rad)");
+    .def_property_readonly("phi", [](const Candidate &self) { return self.Momentum.Phi(); }, "Candidate azimuthal angle (in rad)")
+    .def_property_readonly("vertex", [](const Candidate &self) { return std::array{self.Position.X(), self.Position.Y(), self.Position.Z()}; }, "Candidate vertex position (in m)");
 
   py::class_<PyDelphesEvent>(m, "_DelphesEvent", py::dynamic_attr(), "Event collections content")
     .def("__getitem__", &PyDelphesEvent::Get<std::vector<Candidate *> >, py::return_value_policy::reference, "Retrieve a collection from the event");
@@ -93,6 +94,7 @@ PYBIND11_MODULE(DelphesPython, m)
     .def_property("reader", &PyDelphes::GetReaderConfig, &PyDelphes::SetReaderConfig, "Reader module used in event consumption")
     .def_property_readonly("modules", [](PyDelphes &self) { return std::make_unique<PyDelphesParameters>(self); }, "Processing modules chain definition")
     .def("loadTCL", &PyDelphes::LoadTCL, "Load configuration from an external TCL file")
+    .def("reset", &PyDelphes::Reset, "Reset the reader to its first event")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
 }
 

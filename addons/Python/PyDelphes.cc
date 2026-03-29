@@ -41,6 +41,10 @@
 
 namespace py = pybind11;
 
+PyDelphes::PyDelphes() : fDelphesEvent(std::make_unique<PyDelphesEvent>(*GetFactory())) {}
+
+//------------------------------------------------------------------------------
+
 PyDelphes::~PyDelphes() { FinishTask(); }
 
 //------------------------------------------------------------------------------
@@ -52,7 +56,6 @@ void PyDelphes::Init()
   DelphesFactory *factory = GetFactory();
   if(!factory)
     throw std::runtime_error("Delphes factory was not initialised for this PyDelphes module.");
-  fDelphesEvent = std::make_unique<PyDelphesEvent>(*factory);
   const std::string outputFile = GetOutputFile();
 
   if(!fEventReader)

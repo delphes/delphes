@@ -55,6 +55,7 @@ public:
   void SetOutputFile(std::string_view outputFile) { fOutputFile = outputFile; }
   const std::string &GetOutputFile() const { return fOutputFile; }
 
+  void Reset(); ///< Reset the event reader to the beginning of its readout
   void Clear();
 
 protected:
