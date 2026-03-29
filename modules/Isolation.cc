@@ -111,7 +111,6 @@ void Isolation::Process()
 {
   fOutputArray->clear();
 
-  CandidatesCollection isolationArray;
   double sumChargedNoPU, sumChargedPU, sumNeutral, sumAllParticles;
   double sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr, sum, ratio;
   bool pass = false;
@@ -120,7 +119,7 @@ void Isolation::Process()
 
   // select isolation objects
   fFilter->Reset();
-  isolationArray = fFilter->GetSubArray(fClassifier.get(), 0);
+  std::vector<Candidate *> isolationArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
   for(Candidate *const &candidate : *fCandidateInputArray)
@@ -144,7 +143,7 @@ void Isolation::Process()
     sumChargedPU = 0.0;
     sumAllParticles = 0.0;
 
-    for(Candidate *const &isolation : *isolationArray)
+    for(Candidate *const &isolation : isolationArray)
     {
       const TLorentzVector &isolationMomentum = isolation->Momentum;
 

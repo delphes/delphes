@@ -126,8 +126,8 @@ public:
   }
   void Process() override;
 
-  void GetAlgoFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray);
-  void GetPhysicsFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray);
+  void GetAlgoFlavor(Candidate *jet, const std::vector<Candidate *> &partonArray, const std::vector<Candidate *> &partonLHEFArray);
+  void GetPhysicsFlavor(Candidate *jet, const std::vector<Candidate *> &partonArray, const std::vector<Candidate *> &partonLHEFArray);
 
 private:
   const double fDeltaR;
@@ -148,13 +148,13 @@ private:
 
 void JetFlavorAssociation::Process()
 {
-  CandidatesCollection partonArray, partonLHEFArray;
 
   // select quark and gluons
   fPartonFilter->Reset();
-  partonArray = fPartonFilter->GetSubArray(fPartonClassifier.get(), 0); // get the filtered parton array
-  if(!partonArray || partonArray->empty()) return;
+  const std::vector<Candidate *> partonArray = fPartonFilter->GetSubArray(fPartonClassifier.get(), 0); // get the filtered parton array
+  if(partonArray.empty()) return;
 
+  std::vector<Candidate *> partonLHEFArray;
   if(fParticleLHEFInputArray)
   {
     fParticleLHEFFilter->Reset();
@@ -173,14 +173,14 @@ void JetFlavorAssociation::Process()
 // Standard definition of jet flavor in
 // https://cmssdt.cern.ch/SDT/lxr/source/PhysicsTools/JetMCAlgos/plugins/JetPartonMatcher.cc?v=CMSSW_7_3_0_pre1
 
-void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray)
+void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, const std::vector<Candidate *> &partonArray, const std::vector<Candidate *> &partonLHEFArray)
 {
   float maxPt = 0;
   int daughterCounter = 0;
   Candidate *tempParton = 0, *tempPartonHighestPt = 0;
   int pdgCode, pdgCodeMax = -1;
 
-  for(Candidate *const &parton : *partonArray)
+  for(Candidate *const &parton : partonArray)
   {
     // default delphes method
     pdgCode = std::abs(parton->PID);
@@ -190,39 +190,38 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, const CandidatesCollect
       if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
     }
 
-    if(partonLHEFArray)
-      for(Candidate *const &partonLHEF : *partonLHEFArray)
+    for(Candidate *const &partonLHEF : partonLHEFArray)
+    {
+      if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
       {
-        if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.001 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
-        {
-          break;
-        }
+        break;
+      }
 
-        // check the daughter
-        daughterCounter = 0;
-        if(parton->D1 != -1 || parton->D2 != -1)
+      // check the daughter
+      daughterCounter = 0;
+      if(parton->D1 != -1 || parton->D2 != -1)
+      {
+        // partons are only quarks || gluons
+        int daughterFlavor1 = -1;
+        int daughterFlavor2 = -1;
+        if(parton->D1 != -1) daughterFlavor1 = std::abs(static_cast<Candidate *>(fParticleInputArray->at(parton->D1))->PID);
+        if(parton->D2 != -1) daughterFlavor2 = std::abs(static_cast<Candidate *>(fParticleInputArray->at(parton->D2))->PID);
+        if((daughterFlavor1 == 1 || daughterFlavor1 == 2 || daughterFlavor1 == 3 || daughterFlavor1 == 4 || daughterFlavor1 == 5 || daughterFlavor1 == 21)) daughterCounter++;
+        if((daughterFlavor2 == 1 || daughterFlavor2 == 2 || daughterFlavor2 == 3 || daughterFlavor2 == 4 || daughterFlavor2 == 5 || daughterFlavor2 == 21)) daughterCounter++;
+      }
+      if(daughterCounter > 0) continue;
+      if(jet->Momentum.DeltaR(parton->Momentum) <= fDeltaR)
+      {
+        // if not yet found && pdgId is a c, take as c
+        if(std::abs(parton->PID) == 4) tempParton = parton;
+        if(std::abs(parton->PID) == 5) tempParton = parton;
+        if(parton->Momentum.Pt() > maxPt)
         {
-          // partons are only quarks || gluons
-          int daughterFlavor1 = -1;
-          int daughterFlavor2 = -1;
-          if(parton->D1 != -1) daughterFlavor1 = std::abs(static_cast<Candidate *>(fParticleInputArray->at(parton->D1))->PID);
-          if(parton->D2 != -1) daughterFlavor2 = std::abs(static_cast<Candidate *>(fParticleInputArray->at(parton->D2))->PID);
-          if((daughterFlavor1 == 1 || daughterFlavor1 == 2 || daughterFlavor1 == 3 || daughterFlavor1 == 4 || daughterFlavor1 == 5 || daughterFlavor1 == 21)) daughterCounter++;
-          if((daughterFlavor2 == 1 || daughterFlavor2 == 2 || daughterFlavor2 == 3 || daughterFlavor2 == 4 || daughterFlavor2 == 5 || daughterFlavor2 == 21)) daughterCounter++;
-        }
-        if(daughterCounter > 0) continue;
-        if(jet->Momentum.DeltaR(parton->Momentum) <= fDeltaR)
-        {
-          // if not yet found && pdgId is a c, take as c
-          if(std::abs(parton->PID) == 4) tempParton = parton;
-          if(std::abs(parton->PID) == 5) tempParton = parton;
-          if(parton->Momentum.Pt() > maxPt)
-          {
-            maxPt = parton->Momentum.Pt();
-            tempPartonHighestPt = parton;
-          }
+          maxPt = parton->Momentum.Pt();
+          tempPartonHighestPt = parton;
         }
       }
+    }
   }
 
   if(!tempParton) tempParton = tempPartonHighestPt;
@@ -236,7 +235,7 @@ void JetFlavorAssociation::GetAlgoFlavor(Candidate *jet, const CandidatesCollect
 
 //------------------------------------------------------------------------------
 
-void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, const CandidatesCollection &partonArray, const CandidatesCollection &partonLHEFArray)
+void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, const std::vector<Candidate *> &partonArray, const std::vector<Candidate *> &partonLHEFArray)
 {
   int partonCounter = 0;
   float biggerConeSize = 0.7;
@@ -249,7 +248,7 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, const CandidatesColl
 
   contaminations.clear();
 
-  for(Candidate *const &partonLHEF : *partonLHEFArray)
+  for(Candidate *const &partonLHEF : partonLHEFArray)
   {
     dist = jet->Momentum.DeltaR(partonLHEF->Momentum); // take the DR
 
@@ -260,11 +259,11 @@ void JetFlavorAssociation::GetPhysicsFlavor(Candidate *jet, const CandidatesColl
     }
   }
 
-  for(Candidate *const &parton : *partonArray)
+  for(Candidate *const &parton : partonArray)
   {
     dist = jet->Momentum.DeltaR(parton->Momentum); // take the DR
     isGoodCandidate = true;
-    for(Candidate *const &partonLHEF : *partonLHEFArray)
+    for(Candidate *const &partonLHEF : partonLHEFArray)
     {
       if(parton->Momentum.DeltaR(partonLHEF->Momentum) < 0.01 && parton->PID == partonLHEF->PID && partonLHEF->Charge == parton->Charge)
       {

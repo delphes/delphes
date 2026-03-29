@@ -100,7 +100,7 @@ void TauTagging::Process()
 {
   // select taus
   fFilter->Reset();
-  CandidatesCollection tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
+  const std::vector<Candidate *> tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
   for(Candidate *const &jet : *fJetInputArray)
@@ -114,30 +114,27 @@ void TauTagging::Process()
     const double e = jetMomentum.E();
 
     // loop over all input taus
-    if(tauArray)
+    for(Candidate *const &tau : tauArray)
     {
-      for(Candidate *const &tau : *tauArray)
+      if(tau->D1 < 0) continue;
+
+      if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
       {
-        if(tau->D1 < 0) continue;
+        throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
+      }
 
-        if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
-        {
-          throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
-        }
+      TLorentzVector tauMomentum;
+      for(int i = tau->D1; i <= tau->D2; ++i)
+      {
+        Candidate *const &daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
+        if(std::abs(daughter->PID) == 16) continue;
+        tauMomentum += daughter->Momentum;
+      }
 
-        TLorentzVector tauMomentum;
-        for(int i = tau->D1; i <= tau->D2; ++i)
-        {
-          Candidate *const &daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
-          if(std::abs(daughter->PID) == 16) continue;
-          tauMomentum += daughter->Momentum;
-        }
-
-        if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
-        {
-          pdgCode = 15;
-          charge = tau->Charge;
-        }
+      if(jetMomentum.DeltaR(tauMomentum) <= fDeltaR)
+      {
+        pdgCode = 15;
+        charge = tau->Charge;
       }
     }
 

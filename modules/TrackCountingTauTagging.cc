@@ -155,7 +155,7 @@ void TrackCountingTauTagging::Process()
 
   // select taus
   fFilter->Reset();
-  CandidatesCollection tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
+  const std::vector<Candidate *> tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
   // loop over all input jets
   for(Candidate *const &jet : *fJetInputArray)
@@ -181,7 +181,7 @@ void TrackCountingTauTagging::Process()
 
     // loop over all input taus
     bool matchedTau = false;
-    for(Candidate *const &tau : *tauArray)
+    for(Candidate *const &tau : tauArray)
     {
       if(tau->D1 < 0) continue;
 
