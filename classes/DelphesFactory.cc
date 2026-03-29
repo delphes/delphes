@@ -48,7 +48,8 @@ Candidate *DelphesFactory::NewCandidate()
 
 bool DelphesFactory::Has(std::string_view collectionName) const
 {
-  return fMemorySlots.count(std::string{collectionName}) > 0;
+  return fMemorySlots.count(std::string{collectionName}) > 0
+    && fMemorySlots.at(std::string{collectionName}) != nullptr;
 }
 
 //------------------------------------------------------------------------------

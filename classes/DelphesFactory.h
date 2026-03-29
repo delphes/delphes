@@ -61,7 +61,7 @@ public:
     if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
     return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots.at(std::string{collectionName})), [](T *) {});
   }
-  void *Attach(std::string_view collectionName) const
+  void *AttachRaw(std::string_view collectionName) const
   {
     if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
     return fMemorySlots.at(std::string{collectionName});
