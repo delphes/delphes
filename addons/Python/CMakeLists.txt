@@ -5,6 +5,7 @@ endif()
 
 file(GLOB sources *.cc)
 file(GLOB headers *.h)
+file(GLOB examples examples/*.py)
 
 pybind11_add_module(DelphesPython ${sources})
 target_link_libraries(DelphesPython PRIVATE Delphes pybind11::module)
@@ -18,3 +19,5 @@ set_target_properties(DelphesPython PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_
 install(FILES ${headers} DESTINATION include/DelphesPython COMPONENT python)
 # install library
 install(TARGETS DelphesPython DESTINATION lib COMPONENT python)
+# install examples
+install(FILES ${examples} DESTINATION examples COMPONENT python)
