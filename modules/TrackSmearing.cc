@@ -171,13 +171,8 @@ void TrackSmearing::Process()
              *ctgThetaErrorHist = NULL,
              *phiErrorHist = NULL;
 
-  if(fBeamSpotInputArray->empty())
-    beamSpotPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  else
-  {
-    Candidate &beamSpotCandidate = *((Candidate *)fBeamSpotInputArray->at(0));
-    beamSpotPosition = beamSpotCandidate.Position;
-  }
+  if(fBeamSpotInputArray && !fBeamSpotInputArray->empty())
+    beamSpotPosition = fBeamSpotInputArray->at(0)->Position;
 
   if(!fUseD0Formula)
   {

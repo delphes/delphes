@@ -82,7 +82,7 @@ void VertexSorter::Process()
 
   if(fMethod == "BTV")
   {
-    if(fJetInputArray->empty())
+    if(!fJetInputArray)
     {
       std::cout << "BTV PV sorting selected, but no jet collection given!" << std::endl;
       throw 0;
@@ -120,7 +120,7 @@ void VertexSorter::Process()
   }
   else if(fMethod == "GenClosest")
   {
-    if(fBeamSpotInputArray->empty())
+    if(!fBeamSpotInputArray)
     {
       std::cout << "Beamspot collection is empty!" << std::endl;
       throw 0;
