@@ -26,7 +26,7 @@
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesReader.h"
+#include "classes/DelphesLHEFReader.h"
 
 #include <ExRootAnalysis/ExRootProgressBar.h>
 
@@ -40,6 +40,8 @@ public:
     DelphesReader(readerParams),
     fPythia(std::make_unique<Pythia8::Pythia>())
   {
+    if(const std::string configFile = Steer<std::string>("pythiaConfigFile"); !configFile.empty())
+      fPythia->readFile(configFile);
     for(const std::string &configCmd : Steer<std::vector<std::string> >("pythiaConfig"))
       fPythia->readString(configCmd);
   }
@@ -52,8 +54,16 @@ public:
   }
 
   bool ReadEvent() override;
-  void SetReadoutTime(double readoutTime) override { fEventInfo->ReadTime = readoutTime; }
-  void SetProcessingTime(double procTime) override { fEventInfo->ProcTime = procTime; }
+  void SetReadoutTime(double readoutTime) override
+  {
+    fEventInfo->ReadTime = readoutTime;
+    if(fLHEReader) fLHEReader->SetReadoutTime(readoutTime);
+  }
+  void SetProcessingTime(double procTime) override
+  {
+    fEventInfo->ProcTime = procTime;
+    if(fLHEReader) fLHEReader->SetProcessingTime(procTime);
+  }
 
   void LoadInputFile(std::string_view inputFile) override { fPythia->readFile(std::string{inputFile}); }
   void Clear() override
@@ -61,15 +71,78 @@ public:
     fAllParticleOutputArray->clear();
     fStableParticleOutputArray->clear();
     fPartonOutputArray->clear();
+    if(fAllParticleOutputArray) fAllParticleOutputArray->clear();
+    if(fStableParticleOutputArray) fStableParticleOutputArray->clear();
+    if(fPartonOutputArray) fPartonOutputArray->clear();
     fWeightInfo->clear();
   }
 
 private:
+  /** Single-particle gun. The particle must be a colour singlet.
+   * \param[in] id particle flavour
+   * \param[in] pMax maximum particle momentum
+   * \itarm[in] etaMax maximum particle pseudo-rapidity
+   * \note If theta < 0 then random choice over solid angle. From pythia8 example 21
+   */
+  void fillParticle(int id, double pMax, double etaMax, Pythia8::Event &event, Pythia8::ParticleData &pdt, Pythia8::Rndm &rndm)
+  {
+    event.reset(); // Reset event record to allow for new event.
+
+    // Generate uniform pt and eta.
+    // pMin = 0.1 GeV for single particles
+    const double pp = std::pow(10, -1. + (std::log10(pMax) + 1.) * rndm.flat());
+    const double eta = (2. * rndm.flat() - 1.) * etaMax;
+    const double phi = 2. * M_PI * rndm.flat();
+    const double mm = pdt.mSel(id);
+    const double ee = Pythia8::sqrtpos(pp * pp + mm * mm);
+    const double pt = pp / std::cosh(eta);
+
+    // Store the particle in the event record.
+    event.append(id, 1, 0, 0, pt * cos(phi), pt * sin(phi), pt * sinh(eta), ee, mm);
+  }
+  void fillPartons(int id, double pMax, double etaMax, Pythia8::Event &event, Pythia8::ParticleData &pdt, Pythia8::Rndm &rndm)
+  {
+    event.reset(); // Reset event record to allow for new event.
+
+    // Generate uniform pt and eta.
+    // pMin = 1 GeV for jets
+    const double pp = std::pow(10, std::log10(pMax) * rndm.flat());
+    const double eta = (2. * rndm.flat() - 1.) * etaMax;
+    const double phi = 2. * M_PI * rndm.flat();
+    const double mm = pdt.mSel(id);
+    const double ee = Pythia8::sqrtpos(pp * pp + mm * mm);
+    const double pt = pp / std::cosh(eta);
+
+    if((id == 4 || id == 5) && pt < 10.) return;
+    if(id == 21) // particular case for gluons
+    {
+      event.append(21, 23, 101, 102, +pt * std::cos(phi), +pt * std::sin(phi), +pt * std::sinh(eta), ee);
+      event.append(21, 23, 102, 101, -pt * std::cos(phi), -pt * std::sin(phi), -pt * std::sinh(eta), ee);
+      return;
+    }
+    event.append(+id, 23, 101, 0, +pt * std::cos(phi), +pt * std::sin(phi), +pt * std::sinh(eta), ee, mm);
+    event.append(-id, 23, 0, 101, -pt * std::cos(phi), -pt * std::sin(phi), -pt * std::sinh(eta), ee, mm);
+  }
+
   const std::unique_ptr<Pythia8::Pythia> fPythia;
   bool fInitialised{false};
 
   std::shared_ptr<HepMCEvent> fEventInfo;
   std::shared_ptr<std::vector<Weight> > fWeightInfo;
+
+  // external LHEF input mode objects
+  std::unique_ptr<DelphesLHEFReader> fLHEReader;
+  std::shared_ptr<HepMCEvent> fEventInfoLHEF;
+  std::shared_ptr<std::vector<Weight> > fWeightsInfoLHEF;
+  CandidatesCollection fAllParticleOutputArrayLHEF;
+  CandidatesCollection fStableParticleOutputArrayLHEF;
+  CandidatesCollection fPartonOutputArrayLHEF;
+
+  // particle gun mode flags
+  bool fSpareFlag1{false};
+  int fSpareMode1{-1};
+  double fSpareParm1{0.};
+  double fSpareParm2{0.};
 };
 
 //---------------------------------------------------------------------------
@@ -107,9 +180,41 @@ bool DelphesPythia8Reader::ReadEvent()
     fEventInfo->AlphaQED = fPythia->info.alphaEM();
     fEventInfo->AlphaQCD = fPythia->info.alphaS();
 
+    fSpareFlag1 = fPythia->flag("Main:spareFlag1");
+    fSpareMode1 = fPythia->mode("Main:spareMode1");
+    fSpareParm1 = fPythia->parm("Main:spareParm1");
+    fSpareParm2 = fPythia->parm("Main:spareParm2");
+    if(!fSpareFlag1)
+      if(const auto inputFile = fPythia->word("Beams:LHEF"); !inputFile.empty())
+      {
+        fLHEReader = std::make_unique<DelphesLHEFReader>(DelphesParameters{});
+        fLHEReader->LoadInputFile(inputFile);
+
+        fEventInfoLHEF = GetFactory()->Book<HepMCEvent>("EventLHEF", true);
+        fWeightsInfoLHEF = GetFactory()->Book<std::vector<Weight> >("WeightLHEF", true);
+
+        fAllParticleOutputArrayLHEF = ImportArray("Delphes/allParticlesLHEF");
+        fStableParticleOutputArrayLHEF = ImportArray("Delphes/stableParticlesLHEF");
+        fPartonOutputArrayLHEF = ImportArray("Delphes/partonsLHEF");
+      }
+
     fInitialised = true;
   }
   ResetTimer();
+
+  if(fSpareFlag1)
+  {
+    if((fSpareMode1 >= 1 && fSpareMode1 <= 5) || fSpareMode1 == 21)
+      fillPartons(fSpareMode1, fSpareParm1, fSpareParm2, fPythia->event, fPythia->particleData, fPythia->rndm);
+    else
+      fillParticle(fSpareMode1, fSpareParm1, fSpareParm2, fPythia->event, fPythia->particleData, fPythia->rndm);
+  }
+  else if(fLHEReader)
+  {
+    fLHEReader->Clear();
+    if(!fLHEReader->ReadEvent()) return false; // failed to read the next event in parallel to Pythia
+  }
+
   if(!fPythia->next()) return false;
 
   DelphesFactory *factory = GetFactory();
