@@ -92,7 +92,7 @@ PYBIND11_MODULE(DelphesPython, m)
   py::class_<PyDelphes>(m, "Delphes", "Main Delphes processing module")
     .def(py::init<>())
     .def_property("reader", &PyDelphes::GetReaderConfig, &PyDelphes::SetReaderConfig, "Reader module used in event consumption")
-    .def_property_readonly("modules", [](PyDelphes &self) { return std::make_unique<PyDelphesParameters>(self); }, "Processing modules chain definition")
+    .def_property("modules", [](PyDelphes &self) { return std::make_unique<PyDelphesParameters>(self); }, &PyDelphes::SetModulesConfig, "Processing modules chain definition")
     .def("loadTCL", &PyDelphes::LoadTCL, "Load configuration from an external TCL file")
     .def("reset", &PyDelphes::Reset, "Reset the reader to its first event")
     .def("next", &PyDelphes::Next, "Perform a new event readout and processing");
