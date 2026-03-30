@@ -66,5 +66,7 @@
 #pragma link C++ class DelphesRNTuple::Jet+;
 #pragma link C++ class DelphesRNTuple::Muon+;
 #pragma link C++ class DelphesRNTuple::Photon+;
+#pragma link C++ class DelphesRNTuple::Tower+;
+#pragma link C++ class DelphesRNTuple::Track+;
 
 #endif

@@ -82,9 +82,9 @@ public:
         eventModel->MakeField<ScalarHT>(branchName);
       //else if(branchClassName == "TauJet") eventModel->MakeField<std::vector<TauJet> >(branchName);
       else if(branchClassName == "Tower")
-        eventModel->MakeField<std::vector<Tower> >(branchName);
+        eventModel->MakeField<std::vector<DelphesRNTuple::Tower> >(branchName);
       else if(branchClassName == "Track")
-        eventModel->MakeField<std::vector<Track> >(branchName);
+        eventModel->MakeField<std::vector<DelphesRNTuple::Track> >(branchName);
       else
       {
         std::cout << "** WARNING: branch class name '" << branchName << "' is not supported for output." << std::endl;
@@ -223,12 +223,12 @@ private:
        // empty, for now
      }},
     {"Tower", [](ROOT::REntry &entry, std::string_view collName, const CandidatesCollection &array) {
-       std::shared_ptr<std::vector<Tower> > towers = entry.GetPtr<std::vector<Tower> >(collName);
+       std::shared_ptr<std::vector<DelphesRNTuple::Tower> > towers = entry.GetPtr<std::vector<DelphesRNTuple::Tower> >(collName);
        for(Candidate *const &candidate : *array)
          towers->emplace_back(*candidate);
      }},
     {"Track", [](ROOT::REntry &entry, std::string_view collName, const CandidatesCollection &array) {
-       std::shared_ptr<std::vector<Track> > tracks = entry.GetPtr<std::vector<Track> >(collName);
+       std::shared_ptr<std::vector<DelphesRNTuple::Track> > tracks = entry.GetPtr<std::vector<DelphesRNTuple::Track> >(collName);
        for(Candidate *const &candidate : *array)
          tracks->emplace_back(*candidate);
      }},
