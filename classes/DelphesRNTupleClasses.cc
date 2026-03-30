@@ -171,4 +171,114 @@ TLorentzVector Photon::P4() const
   return vec;
 }
 
+//------------------------------------------------------------------------------
+
+CompBase *Tower::fgCompare = CompE<Tower>::Instance();
+
+Tower::Tower(const Candidate &cand) :
+  ET(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? ((cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9) : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  E(cand.Momentum.E()),
+  T(cand.Position.T() * 1.e-3 / c_light),
+  X(cand.Position.X()), Y(cand.Position.Y()), Z(cand.Position.Z()),
+  NTimeHits(cand.NTimeHits),
+  Eem(cand.Eem), Ehad(cand.Ehad), Etrk(cand.Etrk),
+  IsPU(cand.IsPU), IsRecoPU(cand.IsRecoPU),
+  HardEnergyFraction(cand.BetaStar)
+{
+  //SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
+  for(size_t i = 0; i < 4; ++i)
+    Edges[i] = cand.Edges[i];
+}
+
+TLorentzVector Tower::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiE(ET, Eta, Phi, E);
+  return vec;
+}
+
+//------------------------------------------------------------------------------
+
+CompBase *Track::fgCompare = CompPT<Track>::Instance();
+
+Track::Track(const Candidate &cand) :
+  PID(cand.PID), Charge(cand.Charge),
+  IsPU(cand.IsPU), IsRecoPU(cand.IsRecoPU), HardEnergyFraction(cand.IsPU ? 0. : 1.),
+  P(cand.Momentum.P()), PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  CtgTheta((std::tan(cand.Momentum.Theta()) != 0) ? 1 / std::tan(cand.Momentum.Theta()) : 1e10),
+  C(cand.C), Mass(cand.Momentum.M()),
+  EtaOuter(Eta), PhiOuter(cand.Position.Phi()),
+  T(cand.InitialPosition.T() * 1.e-3 / c_light),
+  X(cand.InitialPosition.X()), Y(cand.InitialPosition.Y()), Z(cand.InitialPosition.Z()),
+  TOuter(cand.Position.T() * 1.0E-3 / c_light),
+  XOuter(cand.Position.X()), YOuter(cand.Position.Y()), ZOuter(cand.Position.Z()),
+  Xd(cand.Xd), Yd(cand.Yd), Zd(cand.Zd),
+  XFirstHit(cand.XFirstHit), YFirstHit(cand.YFirstHit), ZFirstHit(cand.ZFirstHit),
+  L(cand.L), D0(cand.D0), DZ(cand.DZ),
+  Nclusters(cand.Nclusters), dNdx(cand.dNdx),
+  // diagonal covariance matrix terms
+  ErrorP(cand.ErrorP), ErrorPT(cand.ErrorPT), ErrorPhi(cand.ErrorPhi), ErrorCtgTheta(cand.ErrorCtgTheta),
+  ErrorT(cand.ErrorT * 1.0E-3 / c_light), ErrorD0(cand.ErrorD0), ErrorDZ(cand.ErrorDZ), ErrorC(cand.ErrorC),
+  // add some offdiagonal covariance matrix elements
+  ErrorD0Phi(cand.TrackCovariance(0, 1) * 1.e3), ErrorD0C(cand.TrackCovariance(0, 2)), ErrorD0DZ(cand.TrackCovariance(0, 3) * 1.e6), ErrorD0CtgTheta(cand.TrackCovariance(0, 4) * 1.e3),
+  ErrorPhiC(cand.TrackCovariance(1, 2) * 1.e-3), ErrorPhiDZ(cand.TrackCovariance(1, 3) * 1.e3), ErrorPhiCtgTheta(cand.TrackCovariance(1, 4)),
+  ErrorCDZ(cand.TrackCovariance(2, 3)), ErrorCCtgTheta(cand.TrackCovariance(2, 4) * 1.e-3),
+  ErrorDZCtgTheta(cand.TrackCovariance(3, 4) * 1.e3),
+  //Particle(cand.GetCandidates().at(0)),
+  VertexIndex(cand.ClusterIndex)
+{
+  //SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
+}
+
+TMatrixDSym Track::CovarianceMatrix() const
+{
+  TMatrixDSym Cv;
+  Cv.ResizeTo(5, 5);
+
+  // convert diagonal term to original units
+  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
+  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2) = TMath::Power(ErrorC, 2.);
+  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
+
+  // off diagonal terms
+  Cv(0, 1) = ErrorD0Phi;
+  Cv(0, 2) = ErrorD0C;
+  Cv(0, 3) = ErrorD0DZ;
+  Cv(0, 4) = ErrorD0CtgTheta;
+  Cv(1, 2) = ErrorPhiC;
+  Cv(1, 3) = ErrorPhiDZ;
+  Cv(1, 4) = ErrorPhiCtgTheta;
+  Cv(2, 3) = ErrorCDZ;
+  Cv(2, 4) = ErrorCCtgTheta;
+  Cv(3, 4) = ErrorDZCtgTheta;
+
+  Cv(1, 0) = Cv(0, 1);
+  Cv(2, 0) = Cv(0, 2);
+  Cv(3, 0) = Cv(0, 3);
+  Cv(4, 0) = Cv(0, 4);
+  Cv(2, 1) = Cv(1, 2);
+  Cv(3, 1) = Cv(1, 3);
+  Cv(4, 1) = Cv(1, 4);
+  Cv(3, 2) = Cv(2, 3);
+  Cv(4, 2) = Cv(2, 4);
+  Cv(4, 3) = Cv(3, 4);
+
+  return Cv;
+}
+
+TLorentzVector Track::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
+  return vec;
+}
+
 } // namespace DelphesRNTuple

@@ -239,6 +239,129 @@ public:
 
   ClassDef(Jet, 5)
 };
+
+class Tower: public SortableObject
+{
+public:
+  Tower() = default;
+  explicit Tower(const Candidate &);
+
+  Float_t ET{0.f}; // calorimeter tower transverse energy
+  Float_t Eta{0.f}; // calorimeter tower pseudorapidity
+  Float_t Phi{0.f}; // calorimeter tower azimuthal angle
+
+  Float_t E{0.f}; // calorimeter tower energy
+
+  Float_t T{0.f}; // calo deposit time, averaged by sqrt(EM energy) over all particles
+  Float_t X{0.f}; // calo tower position
+  Float_t Y{0.f}; // calo tower position
+  Float_t Z{0.f}; // calo tower position
+
+  Int_t NTimeHits{0}; // number of hits contributing to time measurement
+
+  Float_t Eem{0.f}; // calorimeter tower electromagnetic energy
+  Float_t Ehad{0.f}; // calorimeter tower hadronic energy
+  Float_t Etrk{0.f}; // total charged energy hitting tower
+
+  Float_t Edges[4]{0.f}; // calorimeter tower edges
+
+  Int_t IsPU{0}; // 0 or 1 for particles from pile-up interactions
+  Int_t IsRecoPU{0}; // 0 or 1 for reconstructed particles from pile-up
+  Float_t HardEnergyFraction{0.f}; // fraction of hard scattering vs PU energy
+
+  //TRefArray Particles; // references to generated particles
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  TLorentzVector P4() const;
+
+  ClassDef(Tower, 5)
+};
+
+class Track: public SortableObject
+{
+public:
+  Track() = default;
+  explicit Track(const Candidate &);
+
+  Int_t PID{0}; // HEP ID number
+
+  Int_t Charge{0}; // track charge
+
+  Int_t IsPU{0}; // 0 or 1 for particles from pile-up interactions
+  Int_t IsRecoPU{0}; // 0 or 1 for reconstructed particles from pile-up
+  Float_t HardEnergyFraction{0.f}; // fraction of hard scattering vs PU energy in the particle flow candidate
+
+  Float_t P{0.f}; // track momentum
+  Float_t PT{0.f}; // track transverse momentum
+  Float_t Eta{0.f}; // track pseudorapidity
+  Float_t Phi{0.f}; // track azimuthal angle
+  Float_t CtgTheta{0.f}; // track cotangent of theta
+  Float_t C{0.f}; // track curvature inverse
+  Float_t Mass{0.f}; // particle mass
+
+  Float_t EtaOuter{0.f}; // track pseudorapidity at the tracker edge
+  Float_t PhiOuter{0.f}; // track azimuthal angle at the tracker edge
+
+  Float_t T{0.f}; // track vertex position (t component)
+  Float_t X{0.f}; // track vertex position (x component)
+  Float_t Y{0.f}; // track vertex position (y component)
+  Float_t Z{0.f}; // track vertex position (z component)
+
+  Float_t TOuter{0.f}; // track position (t component) at the tracker edge
+  Float_t XOuter{0.f}; // track position (x component) at the tracker edge
+  Float_t YOuter{0.f}; // track position (y component) at the tracker edge
+  Float_t ZOuter{0.f}; // track position (z component) at the tracker edge
+
+  Float_t Xd{0.f}; // X coordinate of point of closest approach to vertex
+  Float_t Yd{0.f}; // Y coordinate of point of closest approach to vertex
+  Float_t Zd{0.f}; // Z coordinate of point of closest approach to vertex
+
+  Float_t XFirstHit{0.f}; // X coordinate of point of closest approach to vertex
+  Float_t YFirstHit{0.f}; // Y coordinate of point of closest approach to vertex
+  Float_t ZFirstHit{0.f}; // Z coordinate of point of closest approach to vertex
+
+  Float_t L{0.f}; // track path length
+  Float_t D0{0.f}; // track transverse impact parameter
+  Float_t DZ{0.f}; // track longitudinal impact parameter
+  Float_t Nclusters{0.f}; // Number of ionization clusters
+  Float_t dNdx{0.f}; // Number of ionization clusters
+
+  Float_t ErrorP{0.f}; // track momentum error
+  Float_t ErrorPT{0.f}; // track transverse momentum error
+  Float_t ErrorPhi{0.f}; // track azimuthal angle error
+  Float_t ErrorCtgTheta{0.f}; // track cotangent of theta error
+
+  Float_t ErrorT{0.f}; // time measurement error
+  Float_t ErrorD0{0.f}; // track transverse impact parameter error
+  Float_t ErrorDZ{0.f}; // track longitudinal impact parameter error
+  Float_t ErrorC{0.f}; // track curvature error
+
+  // track covariance off-diagonal terms
+  Float_t ErrorD0Phi{0.f};
+  Float_t ErrorD0C{0.f};
+  Float_t ErrorD0DZ{0.f};
+  Float_t ErrorD0CtgTheta{0.f};
+  Float_t ErrorPhiC{0.f};
+  Float_t ErrorPhiDZ{0.f};
+  Float_t ErrorPhiCtgTheta{0.f};
+  Float_t ErrorCDZ{0.f};
+  Float_t ErrorCCtgTheta{0.f};
+  Float_t ErrorDZCtgTheta{0.f};
+
+  //TRef Particle; // reference to generated particle
+
+  Int_t VertexIndex{-1}; // reference to vertex
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  TLorentzVector P4() const;
+  TMatrixDSym CovarianceMatrix() const;
+
+  ClassDef(Track, 4)
+};
 } // namespace DelphesRNTuple
 
 #endif // DelphesRNTupleClasses_h
