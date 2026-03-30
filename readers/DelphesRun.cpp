@@ -95,10 +95,7 @@ int main(int argc, char *argv[])
       reader->Clear();
       while(reader->ReadEvent() && !interrupted)
       {
-        const std::chrono::time_point<std::chrono::high_resolution_clock> timerObj = std::chrono::high_resolution_clock::now();
         modularDelphes->ProcessTask();
-        reader->SetProcessingTime(std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - timerObj).count());
-
         modularDelphes->Clear();
         reader->Clear();
       }
