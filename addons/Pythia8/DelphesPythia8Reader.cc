@@ -45,6 +45,10 @@ public:
     for(const std::string &configCmd : Steer<std::vector<std::string> >("pythiaConfig"))
       fPythia->readString(configCmd);
   }
+  ~DelphesPythia8Reader()
+  {
+    if(fPythia) fPythia->stat();
+  }
 
   void SetFactory(DelphesFactory *factory) override
   {
@@ -236,6 +240,7 @@ bool DelphesPythia8Reader::ReadEvent()
 
     candidate->Momentum.SetPxPyPzE(pyPart.px(), pyPart.py(), pyPart.pz(), pyPart.e());
     candidate->Position.SetXYZT(pyPart.xProd(), pyPart.yProd(), pyPart.zProd(), pyPart.tProd());
+    candidate->DecayPosition.SetXYZT(pyPart.xDec(), pyPart.yDec(), pyPart.zDec(), pyPart.tDec());
 
     candidate->M1 = pyPart.mother1() - 1;
     candidate->M2 = pyPart.mother2() - 1;
