@@ -189,7 +189,7 @@ bool DelphesPythia8Reader::ReadEvent()
     fSpareParm1 = fPythia->parm("Main:spareParm1");
     fSpareParm2 = fPythia->parm("Main:spareParm2");
     if(!fSpareFlag1)
-      if(const auto inputFile = fPythia->word("Beams:LHEF"); !inputFile.empty())
+      if(const auto inputFile = fPythia->word("Beams:LHEF"); !inputFile.empty() && inputFile != "void")
       {
         fLHEReader = std::make_unique<DelphesLHEFReader>(DelphesParameters{});
         fLHEReader->LoadInputFile(inputFile);
