@@ -73,9 +73,9 @@ DelphesPileUpReader::DelphesPileUpReader(const char *fileName) :
   fseeko(fPileUpFile, -8, SEEK_END);
   fInputReader->ReadValue(&fEntries, 8);
 
-  if(fEntries >= kIndexSize)
+  if(fEntries < 0 || fEntries >= kIndexSize)
   {
-    message << "too many events in pile-up file " << fileName;
+    message << "invalid number of events in pile-up file " << fileName;
     throw runtime_error(message.str());
   }
 
@@ -135,9 +135,9 @@ bool DelphesPileUpReader::ReadEntry(int64_t entry)
   fseeko(fPileUpFile, offset, SEEK_SET);
   fInputReader->ReadValue(&fEntrySize, 4);
 
-  if(fEntrySize >= kBufferSize)
+  if(fEntrySize < 0 || fEntrySize >= kBufferSize)
   {
-    throw runtime_error("too many particles in pile-up event");
+    throw runtime_error("invalid number of particles in pile-up event");
   }
 
   fInputReader->ReadRaw(fBuffer, fEntrySize * kRecordSize * 4);
