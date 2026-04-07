@@ -106,7 +106,7 @@ void DelphesXDRReader::ReadString(void *value, int maxSize)
 
   ReadValue(&size, 4);
 
-  if(size > maxSize) size = maxSize;
+  if(size < 0 || size > maxSize) size = maxSize;
 
   if(fBuffer)
   {
