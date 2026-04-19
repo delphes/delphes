@@ -104,11 +104,15 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     pz = particle.pz();
     e = particle.e();
     mass = particle.m();
-    x = particle.xProd();
-    y = particle.yProd();
-    z = particle.zProd();
-    t = particle.tProd();
-
+    x_initial = particle.xProd();
+    y_initial = particle.yProd();
+    z_initial = particle.zProd();
+    t_initial = particle.tProd();                                                                                                                                                                         
+    x_decay = particle.xDec();
+    y_decay = particle.yDec();
+    z_decay = particle.zDec();
+    t_decay = particle.tDec();
+    
     candidate = factory->NewCandidate();
 
     candidate->PID = pid;
