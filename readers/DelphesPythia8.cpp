@@ -66,7 +66,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   Double_t px, py, pz, e, mass;
   Double_t x_initial, y_initial, z_initial, t_initial;
   Double_t x_decay, y_decay, z_decay, t_decay;
-
+  
   // event information
   element = static_cast<HepMCEvent *>(branch->NewEntry());
 
@@ -104,17 +104,11 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     pz = particle.pz();
     e = particle.e();
     mass = particle.m();
-    //production information
-    x_initial = particle.xProd();
-    y_initial = particle.yProd();
-    z_initial = particle.zProd();
-    t_initial = particle.tProd();
-    //decay information
-    x_decay = particle.xDec();
-    y_decay = particle.yDec();
-    z_decay = particle.zDec();
-    t_decay = particle.tDec();
-    
+    x = particle.xProd();
+    y = particle.yProd();
+    z = particle.zProd();
+    t = particle.tProd();
+
     candidate = factory->NewCandidate();
 
     candidate->PID = pid;
@@ -137,7 +131,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     candidate->Position.SetXYZT(x_initial, y_initial, z_initial, t_initial);
     candidate->InitialPosition.SetXYZT(x_initial, y_initial, z_initial, t_initial);
     candidate->DecayPosition.SetXYZT(x_decay, y_decay, z_decay, t_decay);
-
+    
     allParticleOutputArray->Add(candidate);
 
     if(!pdgParticle) continue;
@@ -152,7 +146,6 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     }
   }
 }
-
 
 //---------------------------------------------------------------------------
 
@@ -338,7 +331,7 @@ int main(int argc, char *argv[])
     spareMode1 = pythia->mode("Main:spareMode1");
     spareParm1 = pythia->parm("Main:spareParm1");
     spareParm2 = pythia->parm("Main:spareParm2");
-        
+
     // Check if particle gun
     if(!spareFlag1)
     {
@@ -371,8 +364,7 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady())
-        ;
+      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
 
       if(spareFlag1)
       {
@@ -431,7 +423,7 @@ int main(int argc, char *argv[])
         weight->Weight = pythia->info.weightValueVector()[iWeight];
       }
 #endif
-      
+
       treeWriter->Fill();
 
       treeWriter->Clear();
