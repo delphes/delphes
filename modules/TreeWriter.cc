@@ -44,9 +44,9 @@
 #include "TRandom3.h"
 #include "TString.h"
 
+#include <set>
 #include <algorithm>
 #include <iostream>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 
@@ -252,6 +252,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Y = position.Y();
     entry->Z = position.Z();
     entry->T = position.T() * 1.0E-3 / c_light;
+
   }
 }
 
@@ -382,16 +383,16 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->ErrorCtgTheta = candidate->ErrorCtgTheta;
 
     // add some offdiagonal covariance matrix elements
-    entry->ErrorD0Phi = candidate->TrackCovariance(0, 1) * 1.e3;
-    entry->ErrorD0C = candidate->TrackCovariance(0, 2);
-    entry->ErrorD0DZ = candidate->TrackCovariance(0, 3) * 1.e6;
-    entry->ErrorD0CtgTheta = candidate->TrackCovariance(0, 4) * 1.e3;
-    entry->ErrorPhiC = candidate->TrackCovariance(1, 2) * 1.e-3;
-    entry->ErrorPhiDZ = candidate->TrackCovariance(1, 3) * 1.e3;
-    entry->ErrorPhiCtgTheta = candidate->TrackCovariance(1, 4);
-    entry->ErrorCDZ = candidate->TrackCovariance(2, 3);
-    entry->ErrorCCtgTheta = candidate->TrackCovariance(2, 4) * 1.e-3;
-    entry->ErrorDZCtgTheta = candidate->TrackCovariance(3, 4) * 1.e3;
+    entry->ErrorD0Phi          = candidate->TrackCovariance(0,1)*1.e3;
+    entry->ErrorD0C            = candidate->TrackCovariance(0,2);
+    entry->ErrorD0DZ           = candidate->TrackCovariance(0,3)*1.e6;
+    entry->ErrorD0CtgTheta     = candidate->TrackCovariance(0,4)*1.e3;
+    entry->ErrorPhiC           = candidate->TrackCovariance(1,2)*1.e-3;
+    entry->ErrorPhiDZ          = candidate->TrackCovariance(1,3)*1.e3;
+    entry->ErrorPhiCtgTheta    = candidate->TrackCovariance(1,4);
+    entry->ErrorCDZ            = candidate->TrackCovariance(2,3);
+    entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4)*1.e-3;
+    entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4)*1.e3;
 
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
@@ -429,7 +430,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Y = initialPosition.Y();
     entry->Z = initialPosition.Z();
     entry->T = initialPosition.T() * 1.0E-3 / c_light;
-    entry->ErrorT = candidate->ErrorT * 1.0E-3 / c_light;
+    entry->ErrorT =candidate-> ErrorT * 1.0E-3 / c_light;
 
     entry->Particle = particle;
 
@@ -439,6 +440,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->HardEnergyFraction = candidate->IsPU ? 0.0 : 1.0;
   }
+
 }
 
 //------------------------------------------------------------------------------
@@ -529,7 +531,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
 
     entry->Charge = candidate->Charge;
 
-    if(TMath::Abs(entry->Charge) > 0.)
+    if (TMath::Abs(entry->Charge) > 0.)
     {
       entry->HardEnergyFraction = entry->IsPU ? 0.0 : 1.0;
     }
@@ -566,16 +568,16 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->ErrorCtgTheta = candidate->ErrorCtgTheta;
 
     // add some offdiagonal covariance matrix elements
-    entry->ErrorD0Phi = candidate->TrackCovariance(0, 1);
-    entry->ErrorD0C = candidate->TrackCovariance(0, 2);
-    entry->ErrorD0DZ = candidate->TrackCovariance(0, 3);
-    entry->ErrorD0CtgTheta = candidate->TrackCovariance(0, 4);
-    entry->ErrorPhiC = candidate->TrackCovariance(1, 2);
-    entry->ErrorPhiDZ = candidate->TrackCovariance(1, 3);
-    entry->ErrorPhiCtgTheta = candidate->TrackCovariance(1, 4);
-    entry->ErrorCDZ = candidate->TrackCovariance(2, 3);
-    entry->ErrorCCtgTheta = candidate->TrackCovariance(2, 4);
-    entry->ErrorDZCtgTheta = candidate->TrackCovariance(3, 4);
+    entry->ErrorD0Phi          = candidate->TrackCovariance(0,1);
+    entry->ErrorD0C            = candidate->TrackCovariance(0,2);
+    entry->ErrorD0DZ           = candidate->TrackCovariance(0,3);
+    entry->ErrorD0CtgTheta     = candidate->TrackCovariance(0,4);
+    entry->ErrorPhiC           = candidate->TrackCovariance(1,2);
+    entry->ErrorPhiDZ          = candidate->TrackCovariance(1,3);
+    entry->ErrorPhiCtgTheta    = candidate->TrackCovariance(1,4);
+    entry->ErrorCDZ            = candidate->TrackCovariance(2,3);
+    entry->ErrorCCtgTheta      = candidate->TrackCovariance(2,4);
+    entry->ErrorDZCtgTheta     = candidate->TrackCovariance(3,4);
 
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
@@ -613,7 +615,7 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->Y = initialPosition.Y();
     entry->Z = initialPosition.Z();
     entry->T = initialPosition.T() * 1.0E-3 / c_light;
-    entry->ErrorT = candidate->ErrorT * 1.0E-3 / c_light;
+    entry->ErrorT = candidate-> ErrorT * 1.0E-3 / c_light;
 
     entry->VertexIndex = candidate->ClusterIndex;
 
@@ -959,22 +961,23 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
 
     entry->PT = momentum.Pt(); // pt of LLP
-    entry->Px = momentum.Px(); // px of LLP
-    entry->Py = momentum.Py(); // py of LLP
-    entry->Pz = momentum.Pz(); // pz of LLP
+    entry->Px = momentum.Px();// px of LLP
+    entry->Py = momentum.Py();// py of LLP
+    entry->Pz = momentum.Pz();// pz of LLP
     entry->E = momentum.E(); // E of LLP
     entry->pid = candidate->PID; // LLP pid
     entry->Eem = candidate->Eem; // LLP Eem
     entry->Ehad = candidate->Ehad; // LLP Ehad
-    Double_t beta = momentum.P() / momentum.E();
-    Double_t gamma = 1.0 / sqrt(1 - beta * beta);
-    Double_t decayDistance = sqrt(pow(position.X(), 2) + pow(position.Y(), 2) + pow(position.Z(), 2)); // mm
+    Double_t beta = momentum.P()/momentum.E();
+    Double_t gamma = 1.0/sqrt(1-beta*beta);
+    Double_t decayDistance = sqrt(pow(position.X(),2)+pow(position.Y(),2)+pow(position.Z(),2)); // mm
     entry->beta = beta; // LLP pid
-    entry->ctau = decayDistance / (beta * gamma); // LLP travel time in its rest frame
-    entry->T = decayDistance * (1. / beta - 1) * 1.0E-3 / c_light * 1e9; // ns
+    entry->ctau = decayDistance/(beta * gamma); // LLP travel time in its rest frame
+    entry->T = decayDistance*(1./beta-1)* 1.0E-3/c_light*1e9; // ns
     entry->X = position.X(); // LLP decay x
     entry->Y = position.Y(); //  LLP decay y
     entry->Z = position.Z(); //  LLP decay z
+    entry->R = sqrt(pow(position.X(),2)+pow(position.Y(),2)); // LLP distance in transverse plane
   }
 }
 
