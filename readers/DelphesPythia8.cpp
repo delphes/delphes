@@ -64,7 +64,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
   Int_t pid, status;
   Double_t px, py, pz, e, mass;
-  Double_t x_initial, y_initial, z_initial, t_initial;
+  Double_t x, y, z, t;
   Double_t x_decay, y_decay, z_decay, t_decay;
   
   // event information
@@ -104,10 +104,11 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     pz = particle.pz();
     e = particle.e();
     mass = particle.m();
-    x_initial = particle.xProd();
-    y_initial = particle.yProd();
-    z_initial = particle.zProd();
-    t_initial = particle.tProd();                                                                                                                                                                         
+    x = particle.xProd();
+    y = particle.yProd();
+    z = particle.zProd();
+    t = particle.tProd();
+    
     x_decay = particle.xDec();
     y_decay = particle.yDec();
     z_decay = particle.zDec();
@@ -132,8 +133,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
 
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 
-    candidate->Position.SetXYZT(x_initial, y_initial, z_initial, t_initial);
-    candidate->InitialPosition.SetXYZT(x_initial, y_initial, z_initial, t_initial);
+    candidate->Position.SetXYZT(x, y, z, t);
     candidate->DecayPosition.SetXYZT(x_decay, y_decay, z_decay, t_decay);
     
     allParticleOutputArray->Add(candidate);
