@@ -65,7 +65,8 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
   Int_t pid, status;
   Double_t px, py, pz, e, mass;
   Double_t x, y, z, t;
-
+  Double_t x_decay, y_decay, z_decay, t_decay;
+  
   // event information
   element = static_cast<HepMCEvent *>(branch->NewEntry());
 
@@ -107,7 +108,12 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     y = particle.yProd();
     z = particle.zProd();
     t = particle.tProd();
-
+    
+    x_decay = particle.xDec();
+    y_decay = particle.yDec();
+    z_decay = particle.zDec();
+    t_decay = particle.tDec();
+    
     candidate = factory->NewCandidate();
 
     candidate->PID = pid;
@@ -128,7 +134,8 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia *pythia,
     candidate->Momentum.SetPxPyPzE(px, py, pz, e);
 
     candidate->Position.SetXYZT(x, y, z, t);
-
+    candidate->DecayPosition.SetXYZT(x_decay, y_decay, z_decay, t_decay);
+    
     allParticleOutputArray->Add(candidate);
 
     if(!pdgParticle) continue;

@@ -975,6 +975,7 @@ void TreeWriter::ProcessCscCluster(ExRootTreeBranch *branch, TObjArray *array)
     entry->X = position.X(); // LLP decay x
     entry->Y = position.Y(); //  LLP decay y
     entry->Z = position.Z(); //  LLP decay z
+    entry->R = sqrt(pow(position.X(),2)+pow(position.Y(),2)); // LLP distance in transverse plane
   }
 }
 
