@@ -24,99 +24,54 @@
  *
  */
 
-#include "modules/JetPileUpSubtractor.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-JetPileUpSubtractor::JetPileUpSubtractor()
+class JetPileUpSubtractor: public DelphesModule
 {
-}
+public:
+  explicit JetPileUpSubtractor(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetPTMin(Steer<double>("JetPTMin", 20.0)) {}
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+    fRhoInputArray = ImportArray(Steer<std::string>("RhoInputArray", "Rho/rho"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets"));
+  }
+  void Process() override;
 
-JetPileUpSubtractor::~JetPileUpSubtractor()
-{
-}
+private:
+  const double fJetPTMin;
 
-//------------------------------------------------------------------------------
+  CandidatesCollection fJetInputArray; //!
+  CandidatesCollection fRhoInputArray; //!
 
-void JetPileUpSubtractor::Init()
-{
-  fJetPTMin = GetDouble("JetPTMin", 20.0);
-
-  // import input array(s)
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
-
-  fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
-  fItRhoInputArray = fRhoInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void JetPileUpSubtractor::Finish()
-{
-  delete fItRhoInputArray;
-  delete fItJetInputArray;
-}
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void JetPileUpSubtractor::Process()
 {
-  Candidate *candidate, *object;
-  TLorentzVector momentum, area;
-  Double_t eta = 0.0;
-  Double_t rho = 0.0;
+  fOutputArray->clear();
 
   // loop over all input candidates
-  fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(Candidate *const &candidate : *fJetInputArray)
   {
-    momentum = candidate->Momentum;
-    area = candidate->Area;
-    eta = momentum.Eta();
+    TLorentzVector momentum = candidate->Momentum;
+    const TLorentzVector area = candidate->Area;
+    const double eta = momentum.Eta();
 
     // find rho
-    rho = 0.0;
-    if(fRhoInputArray)
+    double rho = 0.;
+    for(Candidate *const &object : *fRhoInputArray)
     {
-      fItRhoInputArray->Reset();
-      while((object = static_cast<Candidate *>(fItRhoInputArray->Next())))
-      {
-        if(eta >= object->Edges[0] && eta < object->Edges[1])
-        {
-          rho = object->Momentum.Pt();
-        }
-      }
+      if(eta >= object->Edges[0] && eta < object->Edges[1])
+        rho = object->Momentum.Pt();
     }
 
     // apply pile-up correction
@@ -126,11 +81,13 @@ void JetPileUpSubtractor::Process()
 
     if(momentum.Pt() <= fJetPTMin) continue;
 
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Momentum = momentum;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("JetPileUpSubtractor", JetPileUpSubtractor);

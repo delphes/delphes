@@ -17,113 +17,80 @@
  */
 
 /** \class CscClusterId
-  *
-  *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
-  *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
-  *  to reproduce the cut-based ID efficiency of the CMS paper.
-  *
-  *  \author Christina Wang
-  *
-  */
-
-#include "modules/CscClusterId.h"
+ *
+ *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
+ *  It is implemented based on the cut_based_id.py function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
+ *
+ *  \author Christina Wang
+ *
+ */
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCscClusterFormula.h"
-#include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include "assert.h"
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-CscClusterId::CscClusterId()
+class CscClusterId: public DelphesModule
 {
-  fFormula = new DelphesCscClusterFormula;
-  fEtaFormula = new DelphesCscClusterFormula;
-}
+public:
+  explicit CscClusterId(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fEtaCutMax(Steer<double>("EtaCutMax", 999.0)),
+    fFormula(std::make_unique<DelphesCscClusterFormula>()),
+    fEtaFormula(std::make_unique<DelphesCscClusterFormula>())
+  {
+    // read efficiency formula
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0"));
+    fEtaFormula->Compile(Steer<std::string>("EtaCutFormula", "1.0"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles")); // create output array
+  }
+  void Process() override;
 
-CscClusterId::~CscClusterId()
-{
-  delete fFormula;
-  delete fEtaFormula;
-}
+private:
+  const double fEtaCutMax;
 
-//------------------------------------------------------------------------------
+  const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
+  const std::unique_ptr<DelphesCscClusterFormula> fEtaFormula; //!
 
-void CscClusterId::Init()
-{
-  // read efficiency formula
-
-  fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
-  fEtaFormula->Compile(GetString("EtaCutFormula", "1.0"));
-  fEtaCutMax = GetDouble("EtaCutMax", 999.0);
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void CscClusterId::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void CscClusterId::Process()
 {
-  Candidate *candidate;
-  Double_t Ehad, decayR, decayZ, NStationEff, eta;
-  Double_t signPz, cosTheta;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
-    decayZ = abs(candidateDecayPosition.Z());
-    decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
-    Ehad = candidate->Ehad;
+    const double decayZ = std::fabs(candidateDecayPosition.Z());
+    const double decayR = std::hypot(candidateDecayPosition.X(), candidateDecayPosition.Y());
+    const double Ehad = candidate->Ehad;
 
-    cosTheta = TMath::Abs(momentum.CosTheta());
-    signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
-    eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
+    const double cosTheta = std::fabs(momentum.CosTheta());
+    const double signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
+    const double eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
 
     // calculate the NStation > 1 efficiency, implemented according to Additional Figure 8 in HEPData
-    NStationEff = fFormula->Eval(decayR, decayZ, Ehad);
+    const double NStationEff = fFormula->Eval(decayR, decayZ, Ehad);
 
     // depending on the decay region (station Number), different eta cut is applied, implemented based on cut_based_id.py in HEPData
-    float eta_cut = fEtaFormula->Eval(decayR, decayZ);
-    if(gRandom->Uniform() > NStationEff * (abs(eta) < fEtaCutMax) + (1.0 - NStationEff) * (abs(eta) < eta_cut)) continue;
+    const float eta_cut = fEtaFormula->Eval(decayR, decayZ);
+    if(gRandom->Uniform() > NStationEff * (std::fabs(eta) < fEtaCutMax) + (1.0 - NStationEff) * (std::fabs(eta) < eta_cut)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("CscClusterId", CscClusterId);

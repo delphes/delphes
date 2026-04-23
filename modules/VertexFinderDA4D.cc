@@ -6,39 +6,73 @@
  *
  */
 
-#include "modules/VertexFinderDA4D.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
-#include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TMatrixT.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-#include "TVector3.h"
-
-#include <algorithm>
-#include <iostream>
-#include <stdexcept>
-#include <utility>
-#include <vector>
+#include <TLorentzVector.h>
+#include <TMatrixT.h>
 
 using namespace std;
 
-static const Double_t mm = 1.;
-static const Double_t m = 1000. * mm;
-static const Double_t ns = 1.;
-static const Double_t s = 1.e+9 * ns;
-static const Double_t c_light = 2.99792458e+8 * m / s;
+class VertexFinderDA4D: public DelphesModule
+{
+public:
+  explicit VertexFinderDA4D(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fVerbose(Steer<bool>("Verbose", 1)),
+    fMinPT(Steer<double>("MinPT", 0.1)),
+    //
+    fVertexSpaceSize(Steer<double>("VertexSpaceSize", 0.5) / 10.), //in mm -> converted to cm
+    fVertexTimeSize(Steer<double>("VertexTimeSize", 10E-12) * 1.e9), //in s -> converted to ns
+    fUseTc(Steer<bool>("UseTc", 1)),
+    fBetaMax(Steer<double>("BetaMax ", 0.1)),
+    fBetaStop(Steer<double>("BetaStop", 1.0)),
+    fCoolingFactor(Steer<double>("CoolingFactor", 0.8)),
+    fMaxIterations(Steer<int>("MaxIterations", 100)),
+    fDzCutOff(Steer<double>("DzCutOff", 40) / 10.), // Adaptive Fitter uses 30 mm but that appears to be a bit tight here sometimes -> converted to cm
+    fD0CutOff(Steer<double>("D0CutOff", 30) / 10.), // in mm -> converted to cm
+    fDtCutOff(Steer<double>("DtCutOff", 100E-12)) // dummy
+  {
+  }
+
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "TrackSmearing/tracks"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks"));
+    fVertexOutputArray = ExportArray(Steer<std::string>("VertexOutputArray", "vertices"));
+  }
+  void Process() override;
+
+  void clusterize(const CandidatesCollection &tracks, CandidatesCollection &clusters);
+  std::vector<Candidate *> vertices();
+
+private:
+  const bool fVerbose;
+  const double fMinPT;
+
+  const float fVertexSpaceSize;
+  const float fVertexTimeSize;
+  const bool fUseTc;
+  const float fBetaMax;
+  const float fBetaStop;
+  const double fCoolingFactor;
+  const int fMaxIterations;
+  const double fDzCutOff;
+  const double fD0CutOff;
+  const double fDtCutOff; // for when the beamspot has time
+
+  CandidatesCollection fInputArray;
+
+  CandidatesCollection fOutputArray;
+  CandidatesCollection fVertexOutputArray;
+};
+
+static const double mm = 1.;
+static const double m = 1000. * mm;
+static const double ns = 1.;
+static const double s = 1.e+9 * ns;
+static const double c_light = 2.99792458e+8 * m / s;
 
 struct track_t
 {
@@ -87,81 +121,25 @@ static bool recTrackLessZ1(const track_t &tk1, const track_t &tk2)
   return tk1.z < tk2.z;
 }
 
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-VertexFinderDA4D::VertexFinderDA4D() :
-  fVerbose(0), fMinPT(0), fVertexSpaceSize(0), fVertexTimeSize(0),
-  fUseTc(0), fBetaMax(0), fBetaStop(0), fCoolingFactor(0),
-  fMaxIterations(0), fDzCutOff(0), fD0CutOff(0), fDtCutOff(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-VertexFinderDA4D::~VertexFinderDA4D()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void VertexFinderDA4D::Init()
-{
-
-  fVerbose = GetBool("Verbose", 1);
-  fMinPT = GetDouble("MinPT", 0.1);
-  fVertexSpaceSize = GetDouble("VertexSpaceSize", 0.5); //in mm
-  fVertexTimeSize = GetDouble("VertexTimeSize", 10E-12); //in s
-  fUseTc = GetBool("UseTc", 1);
-  fBetaMax = GetDouble("BetaMax ", 0.1);
-  fBetaStop = GetDouble("BetaStop", 1.0);
-  fCoolingFactor = GetDouble("CoolingFactor", 0.8);
-  fMaxIterations = GetInt("MaxIterations", 100);
-  fDzCutOff = GetDouble("DzCutOff", 40); // Adaptive Fitter uses 30 mm but that appears to be a bit tight here sometimes
-  fD0CutOff = GetDouble("D0CutOff", 30);
-  fDtCutOff = GetDouble("DtCutOff", 100E-12); // dummy
-
-  // convert stuff in cm, ns
-  fVertexSpaceSize /= 10.0;
-  fVertexTimeSize *= 1E9;
-  fDzCutOff /= 10.0; // Adaptive Fitter uses 3.0 but that appears to be a bit tight here sometimes
-  fD0CutOff /= 10.0;
-
-  fInputArray = ImportArray(GetString("InputArray", "TrackSmearing/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-}
-
-//------------------------------------------------------------------------------
-
-void VertexFinderDA4D::Finish()
-{
-  delete fItInputArray;
-}
-
 //------------------------------------------------------------------------------
 
 void VertexFinderDA4D::Process()
 {
-  Candidate *candidate, *track;
-  TObjArray *ClusterArray;
-  ClusterArray = new TObjArray;
-  TIterator *ItClusterArray;
-  Int_t ivtx = 0;
+  fOutputArray->clear();
+  fVertexOutputArray->clear();
 
-  fInputArray->Sort();
+  int ivtx = 0;
+  CandidatesCollection ClusterArray;
+
+  //fInputArray->Sort(); //TODO: sort wrt what?
 
   TLorentzVector pos, mom;
   if(fVerbose)
   {
     cout << " start processing vertices ..." << endl;
-    cout << " Found " << fInputArray->GetEntriesFast() << " input tracks" << endl;
+    cout << " Found " << fInputArray->size() << " input tracks" << endl;
     //loop over input tracks
-    fItInputArray->Reset();
-    while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+    for(Candidate *const &candidate : *fInputArray)
     {
       pos = candidate->InitialPosition;
       mom = candidate->Momentum;
@@ -171,19 +149,16 @@ void VertexFinderDA4D::Process()
   }
 
   // clusterize tracks in Z
-  clusterize(*fInputArray, *ClusterArray);
+  clusterize(fInputArray, ClusterArray);
 
   if(fVerbose)
   {
-    std::cout << " clustering returned  " << ClusterArray->GetEntriesFast() << " clusters  from " << fInputArray->GetEntriesFast() << " selected tracks" << std::endl;
+    std::cout << " clustering returned  " << ClusterArray->size() << " clusters  from " << fInputArray->size() << " selected tracks" << std::endl;
   }
 
   //loop over vertex candidates
-  ItClusterArray = ClusterArray->MakeIterator();
-  ItClusterArray->Reset();
-  while((candidate = static_cast<Candidate *>(ItClusterArray->Next())))
+  for(Candidate *const &candidate : *ClusterArray)
   {
-
     double meantime = 0.;
     double expv_x2 = 0.;
     double normw = 0.;
@@ -198,15 +173,11 @@ void VertexFinderDA4D::Process()
 
     int itr = 0;
 
-    if(fVerbose) cout << "this vertex has: " << candidate->GetCandidates()->GetEntriesFast() << " tracks" << endl;
+    if(fVerbose) cout << "this vertex has: " << candidate->GetCandidates().size() << " tracks" << endl;
 
     // loop over tracks belonging to this vertex
-    TIter it1(candidate->GetCandidates());
-    it1.Reset();
-
-    while((track = static_cast<Candidate *>(it1.Next())))
+    for(Candidate *const &track : candidate->GetCandidates())
     {
-
       itr++;
       // TBC: the time is in ns for now TBC
       double t = track->InitialPosition.T() / c_light;
@@ -236,10 +207,10 @@ void VertexFinderDA4D::Process()
 
     meantime = meantime / normw;
     expv_x2 = expv_x2 / normw;
-    errtime = TMath::Sqrt((expv_x2 - meantime * meantime) / itr);
+    errtime = std::sqrt((expv_x2 - meantime * meantime) / itr);
     meanpos = meanpos / normpos;
     meanerr2 = meanerr2 / normpos;
-    errpos = TMath::Sqrt(meanerr2 / itr);
+    errpos = std::sqrt(meanerr2 / itr);
 
     candidate->Position.SetXYZT(0.0, 0.0, meanpos * 10.0, meantime * c_light);
     candidate->PositionError.SetXYZT(0.0, 0.0, errpos * 10.0, errtime * c_light);
@@ -247,7 +218,7 @@ void VertexFinderDA4D::Process()
     candidate->ClusterNDF = itr;
     candidate->ClusterIndex = ivtx;
 
-    fVertexOutputArray->Add(candidate);
+    fVertexOutputArray->emplace_back(candidate);
 
     ivtx++;
 
@@ -271,7 +242,7 @@ void VertexFinderDA4D::Process()
 
   if(fVerbose)
   {
-    std::cout << "PrimaryVertexProducerAlgorithm::vertices candidates =" << ClusterArray->GetEntriesFast() << std::endl;
+    std::cout << "PrimaryVertexProducerAlgorithm::vertices candidates =" << ClusterArray->size() << std::endl;
   }
 
   //TBC maybe this can be done later
@@ -280,18 +251,16 @@ void VertexFinderDA4D::Process()
       sort(pvs.begin(), pvs.end(), VertexHigherPtSquared());
     }
      */
-
-  delete ClusterArray;
 }
 
 //------------------------------------------------------------------------------
 
-void VertexFinderDA4D::clusterize(const TObjArray &tracks, TObjArray &clusters)
+void VertexFinderDA4D::clusterize(const CandidatesCollection &tracks, CandidatesCollection &clusters)
 {
   if(fVerbose)
   {
     cout << "###################################################" << endl;
-    cout << "# VertexFinderDA4D::clusterize   nt=" << tracks.GetEntriesFast() << endl;
+    cout << "# VertexFinderDA4D::clusterize   nt=" << tracks->size() << endl;
     cout << "###################################################" << endl;
   }
 
@@ -331,18 +300,18 @@ void VertexFinderDA4D::clusterize(const TObjArray &tracks, TObjArray &clusters)
     if(std::abs((*k)->Position.Z() - (*(k - 1))->Position.Z()) / 10.0 > (2 * fVertexSpaceSize) || std::abs((*k)->Position.T() - (*(k - 1))->Position.Z()) / c_light > 2 * 0.010)
     {
       // close a cluster
-      clusters.Add(aCluster);
+      clusters->emplace_back(aCluster);
       //aCluster.clear();
     }
     //for(unsigned int i=0; i<k->GetCandidates().GetEntriesFast(); i++){
     aCluster = *k;
     //}
   }
-  clusters.Add(aCluster);
+  clusters->emplace_back(aCluster);
 
   if(fVerbose)
   {
-    std::cout << "# VertexFinderDA4D::clusterize clusters.size=" << clusters.GetEntriesFast() << std::endl;
+    std::cout << "# VertexFinderDA4D::clusterize clusters.size=" << clusters->size() << std::endl;
   }
 }
 
@@ -350,17 +319,15 @@ void VertexFinderDA4D::clusterize(const TObjArray &tracks, TObjArray &clusters)
 
 vector<Candidate *> VertexFinderDA4D::vertices()
 {
-  Candidate *candidate;
-  UInt_t clusterIndex = 0;
+  unsigned int clusterIndex = 0;
   vector<Candidate *> clusters;
 
   vector<track_t> tks;
   track_t tr;
-  Double_t z, dz, t, dt, d0, d0error;
+  double z, dz, t, dt, d0, d0error;
 
   // loop over input tracks
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     //TBC everything in cm
     z = candidate->DZ / 10;
@@ -388,7 +355,7 @@ vector<Candidate *> VertexFinderDA4D::vertices()
     if(fD0CutOff > 0)
     {
 
-      d0 = TMath::Abs(candidate->D0) / 10.0;
+      d0 = std::fabs(candidate->D0) / 10.0;
       d0error = candidate->ErrorD0 / 10.0;
 
       tr.pi = 1. / (1. + exp((d0 * d0) / (d0error * d0error) - fD0CutOff * fD0CutOff)); // reduce weight for high ip tracks
@@ -578,9 +545,8 @@ vector<Candidate *> VertexFinderDA4D::vertices()
 
   for(vector<vertex_t>::iterator k = y.begin(); k != y.end(); k++)
   {
-
     DelphesFactory *factory = GetFactory();
-    candidate = factory->NewCandidate();
+    Candidate *candidate = factory->NewCandidate();
 
     //cout<<"new vertex"<<endl;
     //GlobalPoint pos(0, 0, k->z);
@@ -1214,3 +1180,7 @@ void splitAll(vector<vertex_t> &y)
 
   y = y1;
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("VertexFinderDA4D", VertexFinderDA4D);

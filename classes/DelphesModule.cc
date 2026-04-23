@@ -24,151 +24,54 @@
  *
  */
 
+#include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesModule.h"
 
-#include "classes/DelphesFactory.h"
-
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-
-#include "TClass.h"
-#include "TFolder.h"
-#include "TObjArray.h"
-#include "TROOT.h"
-
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
+DelphesModule::DelphesModule(const DelphesParameters &moduleParams) : fModuleParams(moduleParams) {}
 
-DelphesModule::DelphesModule() :
-  fTreeWriter(0), fFactory(0), fPlots(0),
-  fPlotFolder(0), fExportFolder(0)
+//------------------------------------------------------------------------------
+
+CandidatesCollection DelphesModule::ImportArray(std::string_view name)
 {
+  DelphesFactory *factory = GetFactory();
+  if(!factory)
+    throw std::runtime_error("Failed to retrieve the Delphes objects factory for module '" + std::string{GetName()} + "'.");
+  return factory->Attach<std::vector<Candidate *> >(name);
 }
 
 //------------------------------------------------------------------------------
 
-DelphesModule::~DelphesModule()
+CandidatesCollection DelphesModule::ExportArray(std::string_view name)
 {
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::Init()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::Process()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::Finish()
-{
-}
-
-//------------------------------------------------------------------------------
-
-TObjArray *DelphesModule::ImportArray(const char *name)
-{
-  stringstream message;
-  TObjArray *object;
-
-  object = static_cast<TObjArray *>(GetObject(Form("Export/%s", name), TObjArray::Class()));
-  if(!object)
+  DelphesFactory *factory = GetFactory();
+  if(!factory)
+    throw std::runtime_error("Failed to retrieve the Delphes objects factory for module '" + std::string{GetName()} + "'.");
+  std::ostringstream collectionLabel;
+  collectionLabel << GetName() << "/" << name;
+  if(factory->Has(name))
   {
-    message << "can't access input list '" << name;
-    message << "' in module '" << GetName() << "'";
-    throw runtime_error(message.str());
+    std::ostringstream message;
+    message << "Collection with name '" << name << "' and label '" << collectionLabel.str() << "'  was already booked in the memory slot.";
+    throw std::runtime_error(message.str());
   }
-
-  return object;
+  return factory->Book<std::vector<Candidate *> >(collectionLabel.str(), false);
 }
 
 //------------------------------------------------------------------------------
 
-TObjArray *DelphesModule::ExportArray(const char *name)
+DelphesFactory *DelphesModule::GetFactory() const
 {
-  TObjArray *array;
-  if(!fExportFolder)
-  {
-    fExportFolder = NewFolder("Export");
-  }
-
-  array = GetFactory()->NewPermanentArray();
-
-  array->SetName(name);
-  fExportFolder->Add(array);
-
-  return array;
-}
-
-//------------------------------------------------------------------------------
-
-ExRootTreeBranch *DelphesModule::NewBranch(const char *name, TClass *cl)
-{
-  stringstream message;
-  if(!fTreeWriter)
-  {
-    fTreeWriter = static_cast<ExRootTreeWriter *>(GetObject("TreeWriter", ExRootTreeWriter::Class()));
-    if(!fTreeWriter)
-    {
-      message << "can't access access tree writer";
-      throw runtime_error(message.str());
-    }
-  }
-  return fTreeWriter->NewBranch(name, cl);
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesModule::AddInfo(const char *name, Double_t value)
-{
-  stringstream message;
-  if(!fTreeWriter)
-  {
-    fTreeWriter = static_cast<ExRootTreeWriter *>(GetObject("TreeWriter", ExRootTreeWriter::Class()));
-    if(!fTreeWriter)
-    {
-      message << "can't access access tree writer";
-      throw runtime_error(message.str());
-    }
-  }
-  fTreeWriter->AddInfo(name, value);
-}
-
-//------------------------------------------------------------------------------
-
-ExRootResult *DelphesModule::GetPlots()
-{
-  if(!fPlots)
-  {
-    fPlots = new ExRootResult();
-    fPlots->SetFolder(GetFolder());
-  }
-  return fPlots;
-}
-
-//------------------------------------------------------------------------------
-
-DelphesFactory *DelphesModule::GetFactory()
-{
-  stringstream message;
   if(!fFactory)
   {
-    fFactory = static_cast<DelphesFactory *>(GetObject("ObjectFactory", DelphesFactory::Class()));
-    if(!fFactory)
-    {
-      message << "can't access access object factory";
-      throw runtime_error(message.str());
-    }
+    std::ostringstream message;
+    message << "can't access access object factory for module '" << GetName() << "'.";
+    throw std::runtime_error(message.str());
   }
   return fFactory;
 }
+
+//------------------------------------------------------------------------------

@@ -1,80 +1,41 @@
 /** \class BeamSpotFilter
  *
- *  Extracts beam spot 
+ *  Extracts beam spot
  *
  *  \author Michele Selvaggi
  *
  */
 
-#include "modules/BeamSpotFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-BeamSpotFilter::BeamSpotFilter()
+class BeamSpotFilter: public DelphesModule
 {
-}
+public:
+  using DelphesModule::DelphesModule;
 
-//------------------------------------------------------------------------------
-
-BeamSpotFilter::~BeamSpotFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void BeamSpotFilter::Init()
-{
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void BeamSpotFilter::Finish()
-{
-  delete fItInputArray;
-}
-
-//------------------------------------------------------------------------------
-
-void BeamSpotFilter::Process()
-{
-  Candidate *candidate;
-  Bool_t passed = false;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())) && !passed)
+  void Init() override
   {
-    if(candidate->IsPU == 0) passed = true;
-    fOutputArray->Add(candidate);
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "filteredParticles"));
   }
-}
+  void Process() override
+  {
+    fOutputArray->clear();
+    Bool_t passed = false;
+    for(Candidate *const &candidate : *fInputArray)
+    {
+      if(passed) break;
+      if(candidate->IsPU == 0) passed = true;
+      fOutputArray->emplace_back(candidate);
+    }
+  }
+
+private:
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("BeamSpotFilter", BeamSpotFilter);

@@ -20,131 +20,114 @@
  *
  *  Smears track parameters according to appropriate covariance matrix.
  *
- *  \authors F. Bedeschi - INFN Pisa
-*            P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors P. Demin - UCLouvain, Louvain-la-Neuve
  *           M. Selvaggi - CERN
  *
- *
  */
-
 //FIXME add reference to Bedeschi-code
 //FIXME make sure about units of P, X
 //FIXME fix pt > 200 GeV issue and angle > 6.41
 
-#include "modules/TrackCovariance.h"
-
 #include "classes/DelphesClasses.h"
-
-#include "TrackCovariance/ObsTrk.h"
-#include "TrackCovariance/SolGeom.h"
-#include "TrackCovariance/SolGridCov.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
+#include <TrackCovariance/ObsTrk.h>
+#include <TrackCovariance/SolGeom.h>
+#include <TrackCovariance/SolGridCov.h>
 
-#include <iostream>
-#include <sstream>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-TrackCovariance::TrackCovariance()
+class TrackCovariance: public DelphesModule
 {
-  fGeometry = new SolGeom();
-  fCovariance = new SolGridCov();
-  fElectronScaleFactor = new DelphesFormula;
-  fMuonScaleFactor = new DelphesFormula;
-  fChargedHadronScaleFactor = new DelphesFormula;
-}
+public:
+  explicit TrackCovariance(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    //
+    fBz(Steer<double>("Bz", 0.0)),
+    fNMinHits(Steer<int>("NMinHits", 6)),
+    //
+    fElectronScaleFactor(std::make_unique<DelphesFormula>()),
+    fMuonScaleFactor(std::make_unique<DelphesFormula>()),
+    fChargedHadronScaleFactor(std::make_unique<DelphesFormula>()),
+    fGeometry(std::make_unique<SolGeom>()),
+    fCovariance(std::make_unique<SolGridCov>())
+  {
+    // scale factors to apply to resolutions
+    fElectronScaleFactor->Compile(Steer<std::string>("ElectronScaleFactor", "1.0"));
+    fMuonScaleFactor->Compile(Steer<std::string>("MuonScaleFactor", "1.0"));
+    fChargedHadronScaleFactor->Compile(Steer<std::string>("ChargedHadronScaleFactor", "1.0"));
 
-//------------------------------------------------------------------------------
+    // load geometry
+    fGeometry->Read(Steer<std::string>("DetectorGeometry", "").data());
+    fGeometry->SetBz(fBz);
+    fCovariance->Calc(fGeometry.get());
+    fCovariance->SetMinHits(fNMinHits);
+    // load geometry
+    fAcx = fCovariance->AccPnt();
+  }
 
-TrackCovariance::~TrackCovariance()
-{
-  delete fGeometry;
-  delete fCovariance;
-  delete fElectronScaleFactor;
-  delete fMuonScaleFactor;
-  delete fChargedHadronScaleFactor;
-}
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "TrackMerger/tracks"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks"));
+  }
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const double fBz;
+  const int fNMinHits;
 
-void TrackCovariance::Init()
-{
-  fBz = GetDouble("Bz", 0.0);
-  fGeometry->Read(GetString("DetectorGeometry", ""));
-  fGeometry->SetBz(fBz);
-  fNMinHits = GetInt("NMinHits", 6);
+  const std::unique_ptr<DelphesFormula> fElectronScaleFactor;
+  const std::unique_ptr<DelphesFormula> fMuonScaleFactor;
+  const std::unique_ptr<DelphesFormula> fChargedHadronScaleFactor;
 
-  // scale factors to apply to resolutions
-  fElectronScaleFactor->Compile(GetString("ElectronScaleFactor", "1.0"));
-  fMuonScaleFactor->Compile(GetString("MuonScaleFactor", "1.0"));
-  fChargedHadronScaleFactor->Compile(GetString("ChargedHadronScaleFactor", "1.0"));
+  const std::unique_ptr<SolGeom> fGeometry;
+  const std::unique_ptr<SolGridCov> fCovariance;
 
-  // load geometry
-  fCovariance->Calc(fGeometry);
-  fCovariance->SetMinHits(fNMinHits);
-  // load geometry
-  fAcx = fCovariance->AccPnt();
+  AcceptanceClx *fAcx{nullptr};
 
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
-void TrackCovariance::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TrackCovariance::Process()
 {
-  Candidate *candidate, *mother, *particle;
-  Double_t mass, p, pt, q, ct;
-  Double_t dd0, ddz, dphi, dct, dp, dpt, dC;
+  fOutputArray->clear();
+
   //
   // Get cylindrical box for fast track simulation
   //
-  Double_t Rin = fGeometry->GetRmin();
-  Double_t ZinPos = fGeometry->GetZminPos();
-  Double_t ZinNeg = fGeometry->GetZminNeg();
+  double Rin = fGeometry->GetRmin();
+  double ZinPos = fGeometry->GetZminPos();
+  double ZinNeg = fGeometry->GetZminNeg();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
-
     // converting to meters
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     // converting to meters
     const TLorentzVector &candidatePosition = particle->Position * 1e-03;
     const TLorentzVector &candidateMomentum = particle->Momentum;
 
-    Bool_t inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
-    Bool_t Accept = kTRUE;
+    bool inside = TrkUtil::IsInside(candidatePosition.Vect(), Rin, ZinNeg, ZinPos); // Check if in inner box
+    bool Accept = true;
     if(inside)
       Accept = fCovariance->IsAccepted(candidateMomentum.Vect());
     else
-      Accept = fCovariance->IsAccepted(candidatePosition.Vect(), candidateMomentum.Vect(), fGeometry);
+      Accept = fCovariance->IsAccepted(candidatePosition.Vect(), candidateMomentum.Vect(), fGeometry.get());
     if(!Accept) continue;
 
-    mass = candidateMomentum.M();
+    const double mass = candidateMomentum.M();
 
     // ********************************
     // Standard implementation with grid
-    //ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance, fGeometry);
+    //ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance.get(), fGeometry.get());
     // ********************************
     //
     // *******************************
@@ -153,17 +136,18 @@ void TrackCovariance::Process()
     // Comment lines below within ******** and
     // uncomment above to return to standard implementation
     //
-    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, mass, fGeometry);
-    Int_t MinMeasure = 6; // minimum number of measurements required
+    ObsTrk track(candidatePosition.Vect(), candidateMomentum.Vect(), candidate->Charge, fCovariance.get(), fGeometry.get());
+    int MinMeasure = 6; // minimum number of measurements required
     if(track.GetUmeas() < MinMeasure) continue;
     //
     // *******************************
+
     // apply rescaling factors to resolution
-    if(TMath::Abs(candidate->PID) == 11)
+    if(std::abs(candidate->PID) == 11)
     {
       track.SetScale(fElectronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
-    else if(TMath::Abs(candidate->PID) == 13)
+    else if(std::abs(candidate->PID) == 13)
     {
       track.SetScale(fMuonScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
@@ -172,63 +156,64 @@ void TrackCovariance::Process()
       track.SetScale(fChargedHadronScaleFactor->Eval(candidateMomentum.Pt(), candidateMomentum.Eta(), candidateMomentum.Phi(), candidateMomentum.E(), candidate));
     }
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
-    candidate->Momentum.SetVectM(track.GetObsP(), mass);
+    new_candidate->Momentum.SetVectM(track.GetObsP(), mass);
 
     // converting back to mm
-    candidate->InitialPosition.SetXYZT(track.GetObsX().X() * 1e03, track.GetObsX().Y() * 1e03, track.GetObsX().Z() * 1e03, candidatePosition.T() * 1e03);
+    new_candidate->InitialPosition.SetXYZT(track.GetObsX().X() * 1e03, track.GetObsX().Y() * 1e03, track.GetObsX().Z() * 1e03, candidatePosition.T() * 1e03);
 
     // save full covariance 5x5 matrix internally (D0, phi, Curvature, dz, ctg(theta))
-    candidate->TrackCovariance = track.GetCov();
+    new_candidate->TrackCovariance = track.GetCov();
 
-    pt = candidate->Momentum.Pt();
-    p = candidate->Momentum.P();
-    q = track.GetObsQ();
-    ct = track.GetObsPar()[4];
+    const double pt = new_candidate->Momentum.Pt();
+    const double p = new_candidate->Momentum.P();
+    const double q = track.GetObsQ();
+    const double ct = track.GetObsPar()[4];
 
-    candidate->Xd = track.GetObsX().X() * 1e03;
-    candidate->Yd = track.GetObsX().Y() * 1e03;
-    candidate->Zd = track.GetObsX().Z() * 1e03;
+    new_candidate->Xd = track.GetObsX().X() * 1e03;
+    new_candidate->Yd = track.GetObsX().Y() * 1e03;
+    new_candidate->Zd = track.GetObsX().Z() * 1e03;
 
-    candidate->XFirstHit = track.GetFirstHit().X() * 1e03;
-    candidate->YFirstHit = track.GetFirstHit().Y() * 1e03;
-    candidate->ZFirstHit = track.GetFirstHit().Z() * 1e03;
+    new_candidate->XFirstHit = track.GetFirstHit().X() * 1e03;
+    new_candidate->YFirstHit = track.GetFirstHit().Y() * 1e03;
+    new_candidate->ZFirstHit = track.GetFirstHit().Z() * 1e03;
 
-    candidate->D0 = track.GetObsPar()[0] * 1e03;
-    candidate->Phi = track.GetObsPar()[1];
+    new_candidate->D0 = track.GetObsPar()[0] * 1e03;
+    new_candidate->Phi = track.GetObsPar()[1];
 
     // inverse of curvature
-    candidate->C = track.GetObsPar()[2] * 1e-03;
-    candidate->DZ = track.GetObsPar()[3] * 1e03;
-    candidate->CtgTheta = track.GetObsPar()[4];
-    candidate->P = track.GetObsP().Mag();
-    candidate->PT = pt;
-    candidate->Charge = q;
+    new_candidate->C = track.GetObsPar()[2] * 1e-03;
+    new_candidate->DZ = track.GetObsPar()[3] * 1e03;
+    new_candidate->CtgTheta = track.GetObsPar()[4];
+    new_candidate->P = track.GetObsP().Mag();
+    new_candidate->PT = pt;
+    new_candidate->Charge = q;
 
-    dd0 = TMath::Sqrt(track.GetCov()(0, 0)) * 1e03;
-    ddz = TMath::Sqrt(track.GetCov()(3, 3)) * 1e03;
-    dphi = TMath::Sqrt(track.GetCov()(1, 1));
-    dct = TMath::Sqrt(track.GetCov()(4, 4));
-    dpt = 2 * TMath::Sqrt(track.GetCov()(2, 2)) * pt * pt / (0.2998 * fBz);
-    dp = TMath::Sqrt((1. + ct * ct) * dpt * dpt + 4 * pt * pt * ct * ct * dct * dct / (1. + ct * ct) / (1. + ct * ct));
-    dC = TMath::Sqrt(track.GetCov()(2, 2)) * 1e-03;
+    const double dd0 = std::sqrt(track.GetCov()(0, 0)) * 1e03;
+    const double ddz = std::sqrt(track.GetCov()(3, 3)) * 1e03;
+    const double dphi = std::sqrt(track.GetCov()(1, 1));
+    const double dct = std::sqrt(track.GetCov()(4, 4));
+    const double dpt = 2 * std::sqrt(track.GetCov()(2, 2)) * pt * pt / (0.2998 * fBz);
+    const double dp = std::sqrt((1. + ct * ct) * dpt * dpt + 4 * pt * pt * ct * ct * dct * dct / (1. + ct * ct) / (1. + ct * ct));
+    const double dC = std::sqrt(track.GetCov()(2, 2)) * 1e-03;
 
-    candidate->ErrorD0 = dd0;
-    candidate->ErrorDZ = ddz;
-    candidate->ErrorP = dp;
-    candidate->ErrorC = dC;
-    candidate->ErrorCtgTheta = dct;
-    candidate->ErrorPhi = dphi;
-    candidate->ErrorPT = dpt;
-    //candidate->TrackResolution = dpt / pt;
-    candidate->TrackResolution = dp / p;
+    new_candidate->ErrorD0 = dd0;
+    new_candidate->ErrorDZ = ddz;
+    new_candidate->ErrorP = dp;
+    new_candidate->ErrorC = dC;
+    new_candidate->ErrorCtgTheta = dct;
+    new_candidate->ErrorPhi = dphi;
+    new_candidate->ErrorPT = dpt;
+    //new_candidate->TrackResolution = dpt / pt;
+    new_candidate->TrackResolution = dp / p;
 
-    candidate->AddCandidate(mother);
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackCovariance", TrackCovariance);

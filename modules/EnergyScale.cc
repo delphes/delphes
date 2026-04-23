@@ -24,92 +24,55 @@
  *
  */
 
-#include "modules/EnergyScale.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-EnergyScale::EnergyScale()
+class EnergyScale: public DelphesModule
 {
-  fFormula = new DelphesFormula;
-}
-
-//------------------------------------------------------------------------------
-
-EnergyScale::~EnergyScale()
-{
-  delete fFormula;
-}
-
-//------------------------------------------------------------------------------
-
-void EnergyScale::Init()
-{
-  // read resolution formula
-
-  fFormula->Compile(GetString("ScaleFormula", "0.0"));
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void EnergyScale::Finish()
-{
-  delete fItInputArray;
-}
-
-//------------------------------------------------------------------------------
-
-void EnergyScale::Process()
-{
-  Candidate *candidate;
-  TLorentzVector momentum;
-  Double_t scale;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+public:
+  explicit EnergyScale(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormula(std::make_unique<DelphesFormula>())
   {
-    momentum = candidate->Momentum;
-
-    scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
-
-    if(scale > 0.0) momentum *= scale;
-
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum = momentum;
-
-    fOutputArray->Add(candidate);
+    // read resolution formula
+    fFormula->Compile(Steer<std::string>("ScaleFormula", "0.0"));
   }
-}
+
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input arrays
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets")); // create output array
+  }
+  void Process() override
+  {
+    fOutputArray->clear();
+    for(Candidate *const &candidate : *fInputArray)
+    {
+      TLorentzVector momentum = candidate->Momentum;
+
+      const double scale = fFormula->Eval(momentum.Pt(), momentum.Eta(), momentum.Phi(), momentum.E());
+      if(scale > 0.0) momentum *= scale;
+
+      Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
+      new_candidate->Momentum = momentum;
+
+      fOutputArray->emplace_back(new_candidate);
+    }
+  }
+
+private:
+  const std::unique_ptr<DelphesFormula> fFormula; //!
+
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("EnergyScale", EnergyScale);

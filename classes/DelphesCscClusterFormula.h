@@ -21,20 +21,16 @@
 
 #include "TFormula.h"
 
-class Candidate;
-
 class DelphesCscClusterFormula: public TFormula
 {
 public:
   DelphesCscClusterFormula();
+  explicit DelphesCscClusterFormula(std::string_view name, std::string_view expression);
+  ~DelphesCscClusterFormula() = default;
 
-  DelphesCscClusterFormula(const char *name, const char *expression);
+  int Compile(std::string_view expression);
 
-  ~DelphesCscClusterFormula();
-
-  Int_t Compile(const char *expression);
-
-  Double_t Eval(Double_t deltaR, Double_t deltaZ = 0, Double_t Ehad = 0, Double_t Eem = 0);
+  double Eval(double deltaR, double deltaZ = 0., double Ehad = 0., double Eem = 0.) const;
 };
 
 #endif /* DelphesCscClusterFormula_h */

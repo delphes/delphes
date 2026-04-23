@@ -24,126 +24,96 @@
  *
  */
 
-#include "modules/TrackCountingBTagging.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-TrackCountingBTagging::TrackCountingBTagging()
+class TrackCountingBTagging: public DelphesModule
 {
-}
+public:
+  explicit TrackCountingBTagging(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fBitNumber(Steer<int>("BitNumber", 0)),
+    //
+    fPtMin(Steer<double>("TrackPtMin", 1.0)),
+    fDeltaR(Steer<double>("DeltaR", 0.3)),
+    fIPmax(Steer<double>("TrackIPMax", 2.0)),
+    //
+    fSigMin(Steer<double>("SigMin", 6.5)),
+    fNtracks(Steer<int>("Ntracks", 3)),
+    //
+    fUse3D(Steer<bool>("Use3D", false))
+  {
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "Calorimeter/eflowTracks"));
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+  }
+  void Process() override;
 
-TrackCountingBTagging::~TrackCountingBTagging()
-{
-}
+private:
+  const int fBitNumber;
 
-//------------------------------------------------------------------------------
+  const double fPtMin;
+  const double fDeltaR;
+  const double fIPmax;
+  const double fSigMin;
+  const int fNtracks;
+  const bool fUse3D;
 
-void TrackCountingBTagging::Init()
-{
-  fBitNumber = GetInt("BitNumber", 0);
-
-  fPtMin = GetDouble("TrackPtMin", 1.0);
-  fDeltaR = GetDouble("DeltaR", 0.3);
-  fIPmax = GetDouble("TrackIPMax", 2.0);
-
-  fSigMin = GetDouble("SigMin", 6.5);
-  fNtracks = GetInt("Ntracks", 3);
-
-  fUse3D = GetBool("Use3D", false);
-
-  // import input array(s)
-
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "Calorimeter/eflowTracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
-
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
-}
-
-//------------------------------------------------------------------------------
-
-void TrackCountingBTagging::Finish()
-{
-  delete fItTrackInputArray;
-  delete fItJetInputArray;
-}
+  CandidatesCollection fTrackInputArray; //!
+  CandidatesCollection fJetInputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TrackCountingBTagging::Process()
 {
-  Candidate *jet, *track;
-
-  Double_t jpx, jpy, jpz;
-  Double_t dr, tpt;
-  Double_t xd, yd, zd, d0, dd0, dz, ddz, sip;
-
-  Int_t sign;
-
-  Int_t count;
-
   // loop over all input jets
-  fItJetInputArray->Reset();
-  while((jet = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(Candidate *const &jet : *fJetInputArray)
   {
     const TLorentzVector &jetMomentum = jet->Momentum;
-    jpx = jetMomentum.Px();
-    jpy = jetMomentum.Py();
-    jpz = jetMomentum.Pz();
+    const double jpx = jetMomentum.Px(), jpy = jetMomentum.Py(), jpz = jetMomentum.Pz();
 
     // loop over all input tracks
-    fItTrackInputArray->Reset();
-    count = 0;
-    // stop once we have enough tracks
-    while((track = static_cast<Candidate *>(fItTrackInputArray->Next())) and count < fNtracks)
+    int count = 0;
+    for(Candidate *const &track : *fTrackInputArray)
     {
+      if(count >= fNtracks) break; // stop once we have enough tracks
       const TLorentzVector &trkMomentum = track->Momentum;
-      tpt = trkMomentum.Pt();
+      const double tpt = trkMomentum.Pt();
       if(tpt < fPtMin) continue;
 
-      d0 = TMath::Abs(track->D0);
+      const double d0 = std::fabs(track->D0);
       if(d0 > fIPmax) continue;
 
-      dr = jetMomentum.DeltaR(trkMomentum);
+      const double dr = jetMomentum.DeltaR(trkMomentum);
       if(dr > fDeltaR) continue;
 
-      xd = track->Xd;
-      yd = track->Yd;
-      zd = track->Zd;
-      dd0 = TMath::Abs(track->ErrorD0);
-      dz = TMath::Abs(track->DZ);
-      ddz = TMath::Abs(track->ErrorDZ);
+      const double xd = track->Xd,
+                   yd = track->Yd,
+                   zd = track->Zd;
+      const double dd0 = std::fabs(track->ErrorD0);
+      const double dz = std::fabs(track->DZ);
+      const double ddz = std::fabs(track->ErrorDZ);
 
+      double sip = 0.;
+      int sign = -1;
       if(fUse3D)
       {
         sign = (jpx * xd + jpy * yd + jpz * zd > 0.0) ? 1 : -1;
         //add transverse and longitudinal significances in quadrature
-        sip = sign * TMath::Sqrt(TMath::Power(d0 / dd0, 2) + TMath::Power(dz / ddz, 2));
+        sip = sign * std::sqrt(std::pow(d0 / dd0, 2) + std::pow(dz / ddz, 2));
       }
       else
       {
         sign = (jpx * xd + jpy * yd > 0.0) ? 1 : -1;
-        sip = sign * d0 / TMath::Abs(dd0);
+        sip = sign * d0 / std::fabs(dd0);
       }
 
       if(sip > fSigMin) count++;
@@ -155,3 +125,5 @@ void TrackCountingBTagging::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackCountingBTagging", TrackCountingBTagging);

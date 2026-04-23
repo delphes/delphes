@@ -21,52 +21,63 @@
 
 /** \class DelphesFactory
  *
- *  Class handling creation of Candidate,
- *  TObjArray and all other objects.
+ *  Class handling creation of Candidate, and all other objects.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author L. Forthomme - AGH, Krakow
  *
  */
 
-#include "TNamed.h"
-
 #include <map>
-#include <set>
+#include <memory>
+#include <string>
+#include <vector>
 
-class TObjArray;
 class Candidate;
 
-class ExRootTreeBranch;
-
-class DelphesFactory: public TNamed
+class DelphesFactory
 {
 public:
-  DelphesFactory(const char *name = "ObjectFactory");
-  ~DelphesFactory();
+  DelphesFactory() = default;
 
-  virtual void Clear(Option_t *option = "");
+  virtual void Clear(); ///< Clear all collections booked in this factory
 
-  TObjArray *NewPermanentArray();
-
-  TObjArray *NewArray() { return New<TObjArray>(); }
-
-  Candidate *NewCandidate();
-
-  TObject *New(TClass *cl);
-
+  bool Has(std::string_view collectionName) const; ///< Is the collection already booked?
+  /// Book the memory segment for a new collection
   template <typename T>
-  T *New() { return static_cast<T *>(New(T::Class())); }
+  std::shared_ptr<T> Book(std::string_view collectionName, bool forExport)
+  {
+    const std::string name{collectionName};
+    if(fMemorySlots.count(name) == 0)
+      fMemorySlots[name] = reinterpret_cast<void *>(new T);
+    if(forExport)
+      fExportCollections.emplace_back(std::make_pair(name, &typeid(T)));
+    return Attach<T>(collectionName);
+  }
+  /// Attach a pointer to a collection handled by this factory
+  template <typename T>
+  std::shared_ptr<T> Attach(std::string_view collectionName) const
+  {
+    if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
+    return std::shared_ptr<T>(reinterpret_cast<T *>(fMemorySlots.at(std::string{collectionName})), [](T *) {});
+  }
+  void *AttachRaw(std::string_view collectionName) const
+  {
+    if(!Has(collectionName)) ThrowAttachingFailure(collectionName);
+    return fMemorySlots.at(std::string{collectionName});
+  }
+  std::vector<std::string> GetCollections() const; ///< Retrieve the name of all collections booked
+  /// Retrieve the list of collections to be exported automatically
+  const std::vector<std::pair<std::string, const std::type_info *> > &GetExportCollections() const { return fExportCollections; }
+
+  Candidate *NewCandidate(); ///< Construct a new candidate to fill a collection
 
 private:
-  ExRootTreeBranch *fObjArrays; //!
+  void ThrowAttachingFailure(std::string_view collectionName) const;
 
-#if !defined(__CINT__) && !defined(__CLING__)
-  std::map<const TClass *, ExRootTreeBranch *> fBranches; //!
-#endif
-
-  std::set<TObject *> fPool; //!
-
-  ClassDef(DelphesFactory, 1)
+  std::map<std::string, void *> fMemorySlots;
+  std::vector<std::pair<std::string, const std::type_info *> > fExportCollections;
+  std::vector<std::unique_ptr<Candidate> > fCandidates;
 };
 
 #endif /* DelphesFactory */

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*  \class RecoPuFilter
+/** \class RecoPuFilter
  *
  *  Removes particles with RecoPU flag = true.
  *  Input collection needs to pass by TrackPileUpSubtractor first)
@@ -25,75 +25,34 @@
  *
  */
 
-#include "modules/RecoPuFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-RecoPuFilter::RecoPuFilter()
+class RecoPuFilter: public DelphesModule
 {
-}
+public:
+  using DelphesModule::DelphesModule;
 
-//------------------------------------------------------------------------------
-
-RecoPuFilter::~RecoPuFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void RecoPuFilter::Init()
-{
-
-  ExRootConfParam param;
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void RecoPuFilter::Finish()
-{
-  delete fItInputArray;
-}
-
-//------------------------------------------------------------------------------
-
-void RecoPuFilter::Process()
-{
-  Candidate *candidate;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  void Init() override
   {
-    if(candidate->IsRecoPU) continue;
-    fOutputArray->Add(candidate);
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "filteredParticles"));
   }
-}
+  void Process() override
+  {
+    fOutputArray->clear();
+    for(Candidate *const &candidate : *fInputArray)
+    {
+      if(candidate->IsRecoPU) continue;
+      fOutputArray->emplace_back(candidate);
+    }
+  }
+
+private:
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("RecoPuFilter", RecoPuFilter);

@@ -24,87 +24,54 @@
  *
  */
 
-#include "modules/Efficiency.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-Efficiency::Efficiency()
+class Efficiency: public DelphesModule
 {
-  fFormula = new DelphesFormula;
-}
+public:
+  explicit Efficiency(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fUseMomentumVector(Steer<bool>("UseMomentumVector", false)), // switch to compute efficiency based on momentum vector eta, phi
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read efficiency formula
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles")); // create output array
+  }
+  void Process() override;
 
-Efficiency::~Efficiency()
-{
-  delete fFormula;
-}
+private:
+  const Double_t fUseMomentumVector; //!
 
-//------------------------------------------------------------------------------
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-void Efficiency::Init()
-{
-  // read efficiency formula
-
-  fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // switch to compute efficiency based on momentum vector eta, phi
-  fUseMomentumVector = GetBool("UseMomentumVector", false);
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void Efficiency::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void Efficiency::Process()
 {
-  Candidate *candidate;
-  Double_t pt, eta, phi, e;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
+    double eta = candidatePosition.Eta();
+    double phi = candidatePosition.Phi();
 
     if(fUseMomentumVector)
     {
@@ -112,14 +79,16 @@ void Efficiency::Process()
       phi = candidateMomentum.Phi();
     }
 
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
+    const double pt = candidateMomentum.Pt();
+    const double e = candidateMomentum.E();
 
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e, candidate)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Efficiency", Efficiency);

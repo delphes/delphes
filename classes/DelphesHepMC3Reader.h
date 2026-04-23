@@ -32,69 +32,56 @@
 
 #include <stdio.h>
 
-class TObjArray;
-class TStopwatch;
+#include "classes/DelphesReader.h"
+
 class TDatabasePDG;
 class TLorentzVector;
-class ExRootTreeBranch;
-class DelphesFactory;
+
 class Candidate;
 
-class DelphesHepMC3Reader
+class DelphesHepMC3Reader: public DelphesReader
 {
 public:
-  DelphesHepMC3Reader();
-  ~DelphesHepMC3Reader();
+  explicit DelphesHepMC3Reader(const DelphesParameters &);
 
-  void SetInputFile(FILE *inputFile);
+  void SetFactory(DelphesFactory *factory) override;
 
-  void Clear();
-  bool EventReady();
+  void LoadInputFile(std::string_view) override;
+  void Reset() override;
+  void Clear() override;
+  bool EventReady() override;
 
-  bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
-
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch);
-
-  void AnalyzeWeight(ExRootTreeBranch *branch);
+  void SetReadoutTime(double readoutTime) override;
+  void SetProcessingTime(double procTime) override;
 
 private:
-  void AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate = 0);
+  bool ReadBlock() override;
 
-  void AnalyzeParticle(DelphesFactory *factory);
+  void AnalyzeVertex(int code, Candidate *candidate = 0);
 
-  void FinalizeParticles(TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  void AnalyzeParticle();
 
-  FILE *fInputFile;
+  void FinalizeParticles();
 
-  char *fBuffer;
+  std::shared_ptr<HepMCEvent> fEventObject;
+  std::shared_ptr<std::vector<Weight> > fWeightsObject;
 
-  TDatabasePDG *fPDG;
+  FILE *fInputFile{nullptr};
 
-  int fEventNumber, fMPI, fProcessID, fVertexCounter, fParticleCounter;
-  double fScale, fAlphaQCD, fAlphaQED;
+  std::array<char, 16384> fBuffer;
 
-  double fMomentumCoefficient, fPositionCoefficient;
+  TDatabasePDG *fPDG{nullptr};
 
-  std::vector<double> fWeights;
+  double fMomentumCoefficient{1.}, fPositionCoefficient{1.};
 
-  double fCrossSection, fCrossSectionError;
+  int fVertexCounter{0}, fParticleCounter{0};
 
-  int fID1, fID2;
-  double fX1, fX2, fScalePDF, fPDF1, fPDF2;
+  double fX{0.}, fY{0.}, fZ{0.}, fT{0.};
 
-  int fVertexCode, fVertexStatus;
-  double fX, fY, fZ, fT;
+  int fParticleCode{0}, fPID{0}, fParticleStatus{0}, fOutVertexCode{0};
+  double fPx{0.}, fPy{0.}, fPz{0.}, fE{0.}, fMass{0.};
 
-  int fParticleCode, fPID, fParticleStatus, fOutVertexCode;
-  double fPx, fPy, fPz, fE, fMass;
-
-  std::vector<std::pair<TLorentzVector *, TObjArray *> > fVertices;
+  std::vector<std::pair<std::shared_ptr<TLorentzVector>, CandidatesCollection> > fVertices;
   std::vector<int> fParticles;
 
   std::map<int, int> fInVertexMap;

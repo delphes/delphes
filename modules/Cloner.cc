@@ -24,69 +24,31 @@
  *
  */
 
-#include "modules/Cloner.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-Cloner::Cloner()
+class Cloner: public DelphesModule
 {
-}
+public:
+  using DelphesModule::DelphesModule;
 
-//------------------------------------------------------------------------------
-
-Cloner::~Cloner()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void Cloner::Init()
-{
-  // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void Cloner::Finish()
-{
-  delete fItInputArray;
-}
-
-//------------------------------------------------------------------------------
-
-void Cloner::Process()
-{
-  Candidate *candidate;
-
-  // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  void Init() override
   {
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    fOutputArray->Add(candidate);
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets")); // create output array
   }
-}
+  void Process() override
+  {
+    fOutputArray->clear();
+    for(Candidate *const &candidate : *fInputArray) // loop over all input candidates
+      fOutputArray->emplace_back(static_cast<Candidate *>(candidate->Clone()));
+  }
+
+private:
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Cloner", Cloner);

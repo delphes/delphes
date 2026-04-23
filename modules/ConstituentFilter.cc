@@ -24,123 +24,53 @@
  *
  */
 
-#include "modules/ConstituentFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
-
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include "classes/DelphesModule.h"
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-ConstituentFilter::ConstituentFilter()
+class ConstituentFilter: public DelphesModule
 {
-}
+public:
+  explicit ConstituentFilter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetPTMin(Steer<double>("JetPTMin", 0.0)) {}
 
-//------------------------------------------------------------------------------
-
-ConstituentFilter::~ConstituentFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void ConstituentFilter::Init()
-{
-  ExRootConfParam param;
-  Long_t i, size;
-  const TObjArray *array;
-  TIterator *iterator;
-
-  fJetPTMin = GetDouble("JetPTMin", 0.0);
-
-  // import input array(s)
-
-  param = GetParam("JetInputArray");
-  size = param.GetSize();
-  for(i = 0; i < size; ++i)
+  void Init() override
   {
-    array = ImportArray(param[i].GetString());
-    iterator = array->MakeIterator();
-
-    fInputList.push_back(iterator);
+    // import input arrays
+    for(const std::string &inputArray : Steer<std::vector<std::string> >("JetInputArray"))
+      fInputList.emplace_back(ImportArray(inputArray));
+    for(const std::pair<std::string, std::string> &constituents :
+      Steer<std::vector<std::pair<std::string, std::string> > >("ConstituentInputArray"))
+      fInputMap.emplace_back(std::make_pair(ImportArray(constituents.first), ExportArray(constituents.second)));
   }
+  void Process() override;
 
-  param = GetParam("ConstituentInputArray");
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
-  {
-    array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
+private:
+  const double fJetPTMin;
 
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
-  }
-}
-
-//------------------------------------------------------------------------------
-
-void ConstituentFilter::Finish()
-{
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
-
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
-  {
-    iterator = *itInputList;
-    if(iterator) delete iterator;
-  }
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-    if(iterator) delete iterator;
-  }
-}
+  std::vector<CandidatesCollection> fInputList; //!
+  std::vector<std::pair<CandidatesCollection, CandidatesCollection> > fInputMap; //!
+};
 
 //------------------------------------------------------------------------------
 
 void ConstituentFilter::Process()
 {
-  Candidate *jet, *constituent;
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  vector<TIterator *>::iterator itInputList;
-  TIterator *iterator;
-  TObjArray *array;
+  for(auto &[input_collection, output_collection] : fInputMap) output_collection->clear();
 
   // loop over all jet input arrays
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
+  for(const CandidatesCollection &input_collection : fInputList)
   {
-    iterator = *itInputList;
-
     // loop over all jets
-    iterator->Reset();
-    while((jet = static_cast<Candidate *>(iterator->Next())))
+    for(Candidate *const &jet : *input_collection)
     {
-      TIter itConstituents(jet->GetCandidates());
-
       if(jet->Momentum.Pt() <= fJetPTMin) continue;
 
       // loop over all constituents
-      while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+      for(Candidate *const &constituent : jet->GetCandidates())
       {
         // set the IsConstituent flag
         constituent->IsConstituent = 1;
@@ -149,22 +79,18 @@ void ConstituentFilter::Process()
   }
 
   // loop over all constituent input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
+  for(const auto &[input_collection, output_collection] : fInputMap)
   {
-    iterator = itInputMap->first;
-    array = itInputMap->second;
-
     // loop over all constituents
-    iterator->Reset();
-    while((constituent = static_cast<Candidate *>(iterator->Next())))
+    for(Candidate *const &constituent : *input_collection)
     {
       // check the IsConstituent flag
       if(constituent->IsConstituent)
-      {
-        array->Add(constituent);
-      }
+        output_collection->emplace_back(constituent);
     }
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ConstituentFilter", ConstituentFilter);

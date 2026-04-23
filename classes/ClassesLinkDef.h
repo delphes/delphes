@@ -25,20 +25,15 @@
  *
  */
 
-#include "classes/DelphesModule.h"
-#include "classes/DelphesFactory.h"
-
 #include "classes/SortableObject.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesRNTupleClasses.h"
 
 #ifdef __CINT__
 
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-
-#pragma link C++ class DelphesModule+;
-#pragma link C++ class DelphesFactory+;
 
 #pragma link C++ class SortableObject+;
 
@@ -65,5 +60,13 @@
 #pragma link C++ class HectorHit+;
 
 #pragma link C++ class Candidate+;
+
+#pragma link C++ class DelphesRNTuple::Electron+;
+#pragma link C++ class DelphesRNTuple::GenParticle+;
+#pragma link C++ class DelphesRNTuple::Jet+;
+#pragma link C++ class DelphesRNTuple::Muon+;
+#pragma link C++ class DelphesRNTuple::Photon+;
+#pragma link C++ class DelphesRNTuple::Tower+;
+#pragma link C++ class DelphesRNTuple::Track+;
 
 #endif

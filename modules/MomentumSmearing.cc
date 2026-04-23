@@ -24,137 +24,105 @@
  *
  */
 
-#include "modules/MomentumSmearing.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-MomentumSmearing::MomentumSmearing()
+class MomentumSmearing: public DelphesModule
 {
-  fFormula = new DelphesFormula;
-}
+public:
+  explicit MomentumSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    // switch to compute momentum smearing based on momentum vector eta, phi
+    fUseMomentumVector(Steer<bool>("UseMomentumVector", false)),
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormula->Compile(Steer<std::string>("ResolutionFormula", "0.0"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+  }
+  void Process() override;
 
-MomentumSmearing::~MomentumSmearing()
-{
-  delete fFormula;
-}
+private:
+  Double_t LogNormal(Double_t mean, Double_t sigma);
 
-//------------------------------------------------------------------------------
+  const double fUseMomentumVector; //!
 
-void MomentumSmearing::Init()
-{
-  // read resolution formula
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  fFormula->Compile(GetString("ResolutionFormula", "0.0"));
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // switch to compute momentum smearing based on momentum vector eta, phi
-  fUseMomentumVector = GetBool("UseMomentumVector", false);
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void MomentumSmearing::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void MomentumSmearing::Process()
 {
-  Candidate *candidate, *mother;
-  Double_t pt, eta, phi, e, m, res;
+  fOutputArray->clear();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
 
+    double eta = candidatePosition.Eta();
+    double phi = candidatePosition.Phi();
     if(fUseMomentumVector)
     {
       eta = candidateMomentum.Eta();
       phi = candidateMomentum.Phi();
     }
 
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
-    m = candidateMomentum.M();
-    res = fFormula->Eval(pt, eta, phi, e, candidate);
+    const double e = candidateMomentum.E();
+    const double m = candidateMomentum.M();
+    double res = fFormula->Eval(candidateMomentum.Pt(), eta, phi, e, candidate);
 
     // apply smearing formula
     //pt = gRandom->Gaus(pt, fFormula->Eval(pt, eta, phi, e) * pt);
 
     res = (res > 1.0) ? 1.0 : res;
 
-    pt = LogNormal(pt, res * pt);
+    const double candidatePt = candidateMomentum.Pt();
+    const double pt = LogNormal(candidatePt, res * candidatePt);
 
     //if(pt <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
     eta = candidateMomentum.Eta();
     phi = candidateMomentum.Phi();
-    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-    //candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
-    candidate->TrackResolution = res;
-    candidate->AddCandidate(mother);
+    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    //new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, e);
+    new_candidate->TrackResolution = res;
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 //----------------------------------------------------------------
 
 Double_t MomentumSmearing::LogNormal(Double_t mean, Double_t sigma)
 {
-  Double_t a, b;
-
   if(mean > 0.0)
   {
-    b = TMath::Sqrt(TMath::Log((1.0 + (sigma * sigma) / (mean * mean))));
-    a = TMath::Log(mean) - 0.5 * b * b;
-
-    return TMath::Exp(a + b * gRandom->Gaus(0.0, 1.0));
+    const double b = std::sqrt(std::log((1.0 + (sigma * sigma) / (mean * mean)))),
+                 a = std::log(mean) - 0.5 * b * b;
+    return std::exp(a + b * gRandom->Gaus(0.0, 1.0));
   }
   else
-  {
     return 0.0;
-  }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("MomentumSmearing", MomentumSmearing);

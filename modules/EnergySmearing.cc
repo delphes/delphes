@@ -24,105 +24,73 @@
  *
  */
 
-#include "modules/EnergySmearing.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-EnergySmearing::EnergySmearing()
+class EnergySmearing: public DelphesModule
 {
-  fFormula = new DelphesFormula;
-}
+public:
+  explicit EnergySmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormula(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormula->Compile(Steer<std::string>("ResolutionFormula", "0.0"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles")); // import input arrays
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles")); // create output array
+  }
+  void Process() override;
 
-EnergySmearing::~EnergySmearing()
-{
-  delete fFormula;
-}
+private:
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-//------------------------------------------------------------------------------
-
-void EnergySmearing::Init()
-{
-  // read resolution formula
-
-  fFormula->Compile(GetString("ResolutionFormula", "0.0"));
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void EnergySmearing::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void EnergySmearing::Process()
 {
-  Candidate *candidate, *mother;
-  Double_t pt, energy, eta, phi, m;
+  fOutputArray->clear();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-    pt = candidatePosition.Pt();
-    eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
-    energy = candidateMomentum.E();
-    m = candidateMomentum.M();
+    double energy = candidateMomentum.E();
 
     // apply smearing formula
-    energy = gRandom->Gaus(energy, fFormula->Eval(pt, eta, phi, energy));
+    energy = gRandom->Gaus(energy,
+      fFormula->Eval(candidatePosition.Pt(), candidatePosition.Eta(), candidatePosition.Phi(), energy));
 
     if(energy <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    eta = candidateMomentum.Eta();
-    phi = candidateMomentum.Phi();
-    pt = (energy > m) ? TMath::Sqrt(energy * energy - m * m) / TMath::CosH(eta) : 0;
-    candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
-    candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
-    candidate->AddCandidate(mother);
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    const double eta = candidateMomentum.Eta();
+    const double phi = candidateMomentum.Phi();
+    const double m = candidateMomentum.M();
+    const double pt = (energy > m) ? std::sqrt(energy * energy - m * m) / std::cosh(eta) : 0;
+    new_candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
+    new_candidate->TrackResolution = fFormula->Eval(pt, eta, phi, energy) / candidateMomentum.E();
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("EnergySmearing", EnergySmearing);

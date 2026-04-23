@@ -20,95 +20,80 @@
  *
  *  Counts ionisation clusters of energy loss in drift chambers
  *
- *  \authors F. Bedeschi - INFN Pisa
-*            P. Demin - UCLouvain, Louvain-la-Neuve
+ *  \authors F. Bedeschi - INFN
  *           M. Selvaggi - CERN
- *
  *
  */
 
-#include "modules/ClusterCounting.h"
-#include "TrackCovariance/TrkUtil.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesModule.h"
 
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TVectorD.h"
+#include <TrackCovariance/TrkUtil.h>
 
-#include <iostream>
-#include <sstream>
+#include <TLorentzVector.h>
+#include <TVectorD.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-ClusterCounting::ClusterCounting()
+class ClusterCounting: public DelphesModule
 {
-  fTrackUtil = new TrkUtil();
-}
+public:
+  ClusterCounting(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    // geometric acceptance
+    fRmin(Steer<double>("Rmin", 0.)),
+    fRmax(Steer<double>("Rmax", 0.)),
+    fZmin(Steer<double>("Zmin", 0.)),
+    fZmax(Steer<double>("Zmax", 0.)),
+    fBz(Steer<double>("Bz", 0.)), // magnetic field
+    fGasOption(Steer<int>("GasOption", 0)),
+    fTrackUtil(std::make_unique<TrkUtil>())
+  {
+    // initialize drift chamber geometry and gas mix
+    fTrackUtil->SetBfield(fBz);
+    fTrackUtil->SetDchBoundaries(fRmin, fRmax, fZmin, fZmax);
+    fTrackUtil->SetGasMix(fGasOption);
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "TrackMerger/tracks")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks")); // create output array
+  }
+  void Process() override;
 
-ClusterCounting::~ClusterCounting()
-{
-  delete fTrackUtil;
-}
-
-//------------------------------------------------------------------------------
-
-void ClusterCounting::Init()
-{
-
-  // geometric acceptance
-  fRmin = GetDouble("Rmin", 0.);
-  fRmax = GetDouble("Rmax", 0.);
-  fZmin = GetDouble("Zmin", 0.);
-  fZmax = GetDouble("Zmax", 0.);
-
-  // magnetic field
-  fBz = GetDouble("Bz", 0.);
+private:
+  const double fRmin;
+  const double fRmax;
+  const double fZmin;
+  const double fZmax;
+  const double fBz;
 
   // gas mix option: 0
   // 0:  Helium 90 - Isobutane 10
   // 1:  Helium 100
   // 2:  Argon 50 - Ethane 50
   // 3:  Argon 100
-  fGasOption = GetInt("GasOption", 0);
+  const int fGasOption;
 
-  // initialize drift chamber geometry and gas mix
-  fTrackUtil->SetBfield(fBz);
-  fTrackUtil->SetDchBoundaries(fRmin, fRmax, fZmin, fZmax);
-  fTrackUtil->SetGasMix(fGasOption);
+  const std::unique_ptr<TrkUtil> fTrackUtil;
 
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "TrackMerger/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
-void ClusterCounting::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void ClusterCounting::Process()
 {
-  Candidate *candidate, *mother, *particle;
-  Double_t mass, trackLength, Ncl;
+  fOutputArray->clear();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  double mass, trackLength, Ncl;
+
+  for(Candidate *const &candidate : *fInputArray)
   {
-
     // converting to meters
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     // converting to meters
     const TLorentzVector &candidatePosition = particle->Position * 1e-03;
@@ -119,20 +104,21 @@ void ClusterCounting::Process()
 
     trackLength = fTrackUtil->TrkLen(Par);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     Ncl = 0.;
     if(fTrackUtil->IonClusters(Ncl, mass, Par))
     {
-      candidate->Nclusters = Ncl;
-      candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
+      new_candidate->Nclusters = Ncl;
+      new_candidate->dNdx = (trackLength > 0.) ? Ncl / trackLength : -1;
     }
 
-    candidate->AddCandidate(mother);
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ClusterCounting", ClusterCounting);

@@ -32,70 +32,55 @@
 
 #include <stdio.h>
 
-class TObjArray;
-class TStopwatch;
-class TDatabasePDG;
-class ExRootTreeBranch;
-class DelphesFactory;
+#include "classes/DelphesReader.h"
 
-class DelphesHepMC2Reader
+class TDatabasePDG;
+
+class HepMCEvent;
+class Weight;
+
+class DelphesHepMC2Reader: public DelphesReader
 {
 public:
-  DelphesHepMC2Reader();
-  ~DelphesHepMC2Reader();
+  explicit DelphesHepMC2Reader(const DelphesParameters &);
 
-  void SetInputFile(FILE *inputFile);
+  void SetFactory(DelphesFactory *factory) override;
 
-  void Clear();
-  bool EventReady();
+  void LoadInputFile(std::string_view) override;
+  void Reset() override;
+  void Clear() override;
+  bool EventReady() override;
 
-  bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
-
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch);
-
-  void AnalyzeWeight(ExRootTreeBranch *branch);
+  void SetReadoutTime(double readoutTime) override;
+  void SetProcessingTime(double procTime) override;
 
 private:
-  void AnalyzeParticle(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  bool ReadBlock() override;
 
-  void FinalizeParticles(TObjArray *allParticleOutputArray);
+  void AnalyzeParticle();
 
-  FILE *fInputFile;
+  void FinalizeParticles();
 
-  char *fBuffer;
+  std::shared_ptr<HepMCEvent> fEventObject;
+  std::shared_ptr<std::vector<Weight> > fWeights;
 
-  TDatabasePDG *fPDG;
+  FILE *fInputFile{nullptr};
+  std::array<char, 16384> fBuffer;
 
-  int fEventNumber, fMPI, fProcessID, fSignalCode, fVertexCounter, fBeamCode[2];
-  double fScale, fAlphaQCD, fAlphaQED;
+  TDatabasePDG *fPDG{nullptr};
 
-  double fMomentumCoefficient, fPositionCoefficient;
+  int fVertexCounter{-1};
+  double fMomentumCoefficient{1.}, fPositionCoefficient{1.};
 
-  int fStateSize;
   std::vector<int> fState;
 
-  int fWeightSize;
-  std::vector<double> fWeight;
+  int fOutVertexCode{-1}, fVertexID{-1}, fInCounter{-1}, fOutCounter{-1};
+  double fX{0.}, fY{0.}, fZ{0.}, fT{0.};
 
-  double fCrossSection, fCrossSectionError;
+  int fParticleCode{0}, fPID{0}, fStatus{0}, fInVertexCode{-1};
+  double fPx{0.}, fPy{0.}, fPz{0.}, fE{0.}, fMass{0.}, fTheta{0.}, fPhi{0.};
 
-  int fID1, fID2;
-  double fX1, fX2, fScalePDF, fPDF1, fPDF2;
-
-  int fOutVertexCode, fVertexID, fInCounter, fOutCounter;
-  double fX, fY, fZ, fT;
-
-  int fParticleCode, fPID, fStatus, fInVertexCode;
-  double fPx, fPy, fPz, fE, fMass, fTheta, fPhi;
-
-  int fParticleCounter;
+  int fParticleCounter{0};
 
   std::map<int, std::pair<int, int> > fMotherMap;
   std::map<int, std::pair<int, int> > fDaughterMap;

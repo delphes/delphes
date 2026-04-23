@@ -25,142 +25,90 @@
  *
  */
 
-#include "modules/JetFakeParticle.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-JetFakeParticle::JetFakeParticle()
+class JetFakeParticle: public DelphesModule
 {
-}
-
-//------------------------------------------------------------------------------
-
-JetFakeParticle::~JetFakeParticle()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void JetFakeParticle::Init()
-{
-  TFakeMap::iterator itEfficiencyMap;
-  ExRootConfParam param;
-  DelphesFormula *formula;
-  Int_t i, size, pdgCode;
-
-  // read efficiency formulas
-  param = GetParam("EfficiencyFormula");
-  size = param.GetSize();
-
-  fEfficiencyMap.clear();
-
-  for(i = 0; i < size / 2; ++i)
+public:
+  explicit JetFakeParticle(const DelphesParameters &moduleParams) : DelphesModule(moduleParams)
   {
-    formula = new DelphesFormula;
-    formula->Compile(param[i * 2 + 1].GetString());
-    pdgCode = param[i * 2].GetInt();
-
-    if(TMath::Abs(pdgCode) != 11 && TMath::Abs(pdgCode) != 13 && TMath::Abs(pdgCode) != 22)
+    for(const std::pair<int, std::string> &efficiencyFormula : Steer<std::vector<std::pair<int, std::string> > >("EfficiencyFormula"))
     {
-      throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
+      if(const int pdgCode = efficiencyFormula.first; std::abs(pdgCode) != 11 && std::abs(pdgCode) != 13 && std::abs(pdgCode) != 22)
+        throw runtime_error("Jets can only fake into electrons, muons or photons. Other particles are not authorized.");
+      else
+      {
+        std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+        formula->Compile(efficiencyFormula.second);
+        fEfficiencyMap[pdgCode] = std::move(formula);
+      }
     }
-
-    fEfficiencyMap[param[i * 2].GetInt()] = formula;
+    // set default efficiency formula
+    if(fEfficiencyMap.count(0) == 0)
+    {
+      std::unique_ptr<DelphesFormula> formula = std::make_unique<DelphesFormula>();
+      formula->Compile("0.0");
+      fEfficiencyMap[0] = std::move(formula);
+    }
   }
 
-  // set default efficiency formula
-  itEfficiencyMap = fEfficiencyMap.find(0);
-  if(itEfficiencyMap == fEfficiencyMap.end())
+  void Init() override
   {
-    formula = new DelphesFormula;
-    formula->Compile("0.0");
-
-    fEfficiencyMap[0] = formula;
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets"));
+    fElectronOutputArray = ExportArray(Steer<std::string>("ElectronOutputArray", "fakeElectrons"));
+    fMuonOutputArray = ExportArray(Steer<std::string>("MuonOutputArray", "fakeMuons"));
+    fPhotonOutputArray = ExportArray(Steer<std::string>("PhotonOutputArray", "fakePhotons"));
+    fJetOutputArray = ExportArray(Steer<std::string>("JetOutputArray", "jets"));
   }
+  void Process() override;
 
-  // import input array
+private:
+#if !defined(__CINT__) && !defined(__CLING__)
+  typedef std::map<int, std::unique_ptr<DelphesFormula> > TFakeMap; //!
+  TFakeMap fEfficiencyMap;
+#endif
 
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
+  CandidatesCollection fInputArray; //!
 
-  // create output array
-
-  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "fakeElectrons"));
-  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "fakeMuons"));
-  fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "fakePhotons"));
-  fJetOutputArray = ExportArray(GetString("JetOutputArray", "jets"));
-}
-
-//------------------------------------------------------------------------------
-
-void JetFakeParticle::Finish()
-{
-  delete fItInputArray;
-
-  TFakeMap::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-  for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
-  {
-    formula = itEfficiencyMap->second;
-    if(formula) delete formula;
-  }
-}
+  CandidatesCollection fElectronOutputArray; //!
+  CandidatesCollection fMuonOutputArray; //!
+  CandidatesCollection fPhotonOutputArray; //!
+  CandidatesCollection fJetOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void JetFakeParticle::Process()
 {
-  Candidate *candidate, *fake = 0;
-  Double_t pt, eta, phi, e;
-  TFakeMap::iterator itEfficiencyMap;
-  DelphesFormula *formula;
-  Int_t pdgCodeOut;
+  fElectronOutputArray->clear();
+  fMuonOutputArray->clear();
+  fPhotonOutputArray->clear();
+  fJetOutputArray->clear();
 
-  Double_t p, r, rs, total;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = candidateMomentum.Eta();
-    phi = candidateMomentum.Phi();
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
+    const double eta = candidateMomentum.Eta();
+    const double phi = candidateMomentum.Phi();
+    const double pt = candidateMomentum.Pt();
+    const double e = candidateMomentum.E();
 
-    r = gRandom->Uniform();
-    total = 0.0;
-    fake = 0;
+    const double r = gRandom->Uniform();
+    double total = 0.;
+    Candidate *fake = nullptr;
 
     // loop over map for this jet
-    for(itEfficiencyMap = fEfficiencyMap.begin(); itEfficiencyMap != fEfficiencyMap.end(); ++itEfficiencyMap)
+    for(const std::pair<const int, std::unique_ptr<DelphesFormula> > &efficiencyMap : fEfficiencyMap)
     {
-      formula = itEfficiencyMap->second;
-      pdgCodeOut = itEfficiencyMap->first;
-
-      p = formula->Eval(pt, eta, phi, e);
+      const int pdgCodeOut = efficiencyMap.first;
+      const double p = efficiencyMap.second->Eval(pt, eta, phi, e);
 
       if(total <= r && r < total + p)
       {
@@ -168,33 +116,32 @@ void JetFakeParticle::Process()
 
         // convert jet
 
-        if(TMath::Abs(pdgCodeOut) == 11 || TMath::Abs(pdgCodeOut) == 13)
+        if(std::abs(pdgCodeOut) == 11 || std::abs(pdgCodeOut) == 13)
         {
           if(candidate->Charge != 0)
-          {
-            fake->Charge = candidate->Charge / TMath::Abs(candidate->Charge);
-          }
+            fake->Charge = candidate->Charge / std::abs(candidate->Charge);
           else
           {
-            rs = gRandom->Uniform();
+            const double rs = gRandom->Uniform();
             fake->Charge = (rs < 0.5) ? -1 : 1;
           }
         }
 
-        if(TMath::Abs(pdgCodeOut) == 22) fake->PID = 22;
+        if(std::abs(pdgCodeOut) == 22) fake->PID = 22;
 
-        if(TMath::Abs(pdgCodeOut) == 11) fElectronOutputArray->Add(fake);
-        if(TMath::Abs(pdgCodeOut) == 13) fMuonOutputArray->Add(fake);
-        if(TMath::Abs(pdgCodeOut) == 22) fPhotonOutputArray->Add(fake);
+        if(std::abs(pdgCodeOut) == 11) fElectronOutputArray->emplace_back(fake);
+        if(std::abs(pdgCodeOut) == 13) fMuonOutputArray->emplace_back(fake);
+        if(std::abs(pdgCodeOut) == 22) fPhotonOutputArray->emplace_back(fake);
 
         break;
       }
-
       total += p;
     }
 
-    if(!fake) fJetOutputArray->Add(candidate);
+    if(!fake) fJetOutputArray->emplace_back(candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("JetFakeParticle", JetFakeParticle);

@@ -30,33 +30,46 @@
 
 #include "classes/DelphesModule.h"
 
-class TFolder;
-class TObjArray;
+class DelphesConfReader;
+class DelphesReader;
 
-class ExRootTreeWriter;
-
-class DelphesFactory;
+void LoadLibrary(std::string_view); ///< Load an external library into the runtime environment
 
 class Delphes: public DelphesModule
 {
 public:
-  Delphes(const char *name = "Delphes");
-  ~Delphes();
+  explicit Delphes(const char *name = "Delphes");
 
-  void SetTreeWriter(ExRootTreeWriter *treeWriter);
+  void Init() override;
+  DelphesFactory *GetFactory() const override;
 
-  DelphesFactory *GetFactory() const { return fFactory; }
+  void SetConfReader(DelphesConfReader *conf) { fConfReader = conf; }
 
-  void Clear(Option_t *option = "");
+  virtual void SetReader(DelphesReader *reader);
+  virtual DelphesReader *GetReader() const { return fReader; }
 
-  virtual void Init();
-  virtual void Process();
-  virtual void Finish();
+  void InitTask();
+  void ProcessTask();
+  void FinishTask();
+
+  void SetOutputFile(std::string_view outputFile) { fOutputFile = outputFile; }
+  const std::string &GetOutputFile() const { return fOutputFile; }
+
+  void Reset(); ///< Reset the event reader to the beginning of its readout
+  void Clear();
+
+protected:
+  void ClearModules() { fModules.clear(); }
+  void AddModule(std::string_view moduleName, std::unique_ptr<DelphesModule> &moduleObject);
 
 private:
-  DelphesFactory *fFactory = nullptr;
+  std::unique_ptr<DelphesFactory> fDelphesFactory;
+  DelphesConfReader *fConfReader{nullptr};
+  DelphesReader *fReader{nullptr};
 
-  ClassDef(Delphes, 1)
+  std::vector<std::pair<std::string, std::unique_ptr<DelphesModule> > > fModules;
+
+  std::string fOutputFile;
 };
 
 #endif /* Delphes_h */

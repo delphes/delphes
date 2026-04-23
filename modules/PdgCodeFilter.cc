@@ -24,116 +24,74 @@
  *
  */
 
-#include "modules/PdgCodeFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-PdgCodeFilter::PdgCodeFilter()
+class PdgCodeFilter: public DelphesModule
 {
-}
-
-//------------------------------------------------------------------------------
-
-PdgCodeFilter::~PdgCodeFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void PdgCodeFilter::Init()
-{
-
-  ExRootConfParam param;
-  Size_t i, size;
-
-  // PT threshold
-  fPTMin = GetDouble("PTMin", 0.0);
-
-  fInvert = GetBool("Invert", false);
-
-  // no pileup
-  fRequireNotPileup = GetBool("RequireNotPileup", false);
-
-  fRequireStatus = GetBool("RequireStatus", false);
-  fStatus = GetInt("Status", 1);
-
-  fRequireCharge = GetBool("RequireCharge", false);
-  fCharge = GetInt("Charge", 1);
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  param = GetParam("PdgCode");
-  size = param.GetSize();
-
-  // read PdgCodes to be filtered out from the data card
-
-  fPdgCodes.clear();
-  for(i = 0; i < size; ++i)
+public:
+  explicit PdgCodeFilter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPTMin(Steer<double>("PTMin", 0.0)), // PT threshold
+    fInvert(Steer<bool>("Invert", false)),
+    fRequireNotPileup(Steer<bool>("RequireNotPileup", false)), // no pileup
+    fRequireStatus(Steer<bool>("RequireStatus", false)),
+    fStatus(Steer<int>("Status", 1)),
+    fRequireCharge(Steer<bool>("RequireCharge", false)),
+    fCharge(Steer<int>("Charge", 1)),
+    fPdgCodes(Steer<std::vector<int> >("PdgCode")) // PdgCodes to be filtered out from the data card
   {
-    fPdgCodes.push_back(param[i].GetInt());
   }
 
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "filteredParticles"));
-}
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "filteredParticles"));
+  }
+  void Process() override;
 
-//------------------------------------------------------------------------------
+private:
+  const double fPTMin; //!
+  const bool fInvert; //!
+  const bool fRequireNotPileup; //!
+  const bool fRequireStatus; //!
+  const int fStatus; //!
+  const bool fRequireCharge; //!
+  const int fCharge; //!
 
-void PdgCodeFilter::Finish()
-{
-  delete fItInputArray;
-}
+  const std::vector<int> fPdgCodes;
+
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void PdgCodeFilter::Process()
 {
-  Candidate *candidate;
-  Int_t pdgCode;
-  Bool_t pass;
-  Double_t pt;
+  fOutputArray->clear();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
-    pdgCode = candidate->PID;
+    const int pdgCode = candidate->PID;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    pt = candidateMomentum.Pt();
+    const double pt = candidateMomentum.Pt();
 
     if(pt < fPTMin) continue;
     if(fRequireStatus && (candidate->Status != fStatus)) continue;
     if(fRequireCharge && (candidate->Charge != fCharge)) continue;
     if(fRequireNotPileup && (candidate->IsPU > 0)) continue;
 
-    pass = kTRUE;
-    if(find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) != fPdgCodes.end()) pass = kFALSE;
-
+    bool pass = std::find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end();
     if(fInvert) pass = !pass;
-    if(pass) fOutputArray->Add(candidate);
+    if(pass) fOutputArray->emplace_back(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("PdgCodeFilter", PdgCodeFilter);

@@ -24,153 +24,73 @@
  *
  */
 
-#include "modules/FastJetGridMedianEstimator.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
+#include <fastjet/tools/GridMedianBackgroundEstimator.hh>
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-#include <utility>
-#include <vector>
-
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/JetDefinition.hh"
-#include "fastjet/PseudoJet.hh"
-#include "fastjet/RectangularGrid.hh"
-#include "fastjet/Selector.hh"
-#include "fastjet/tools/JetMedianBackgroundEstimator.hh"
-
-#include "fastjet/tools/GridMedianBackgroundEstimator.hh"
-
-#include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
-#include "fastjet/plugins/SISCone/fastjet/SISConePlugin.hh"
-
-#include "fastjet/contribs/Nsubjettiness/ExtraRecombiners.hh"
-#include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
-#include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
-#include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
-
-using namespace std;
-using namespace fastjet;
-using namespace fastjet::contrib;
-
-//------------------------------------------------------------------------------
-
-FastJetGridMedianEstimator::FastJetGridMedianEstimator()
+class FastJetGridMedianEstimator: public DelphesModule
 {
-}
-
-//------------------------------------------------------------------------------
-
-FastJetGridMedianEstimator::~FastJetGridMedianEstimator()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void FastJetGridMedianEstimator::Init()
-{
-  ExRootConfParam param;
-  Long_t i, size;
-  Double_t drap, dphi, rapMin, rapMax;
-
-  // read rapidity ranges
-
-  param = GetParam("GridRange");
-  size = param.GetSize();
-
-  fEstimators.clear();
-  for(i = 0; i < size / 4; ++i)
+public:
+  explicit FastJetGridMedianEstimator(const DelphesParameters &moduleParams) : DelphesModule(moduleParams)
   {
-    rapMin = param[i * 4].GetDouble();
-    rapMax = param[i * 4 + 1].GetDouble();
-    drap = param[i * 4 + 2].GetDouble();
-    dphi = param[i * 4 + 3].GetDouble();
-    fEstimators.push_back(new GridMedianBackgroundEstimator(rapMin, rapMax, drap, dphi));
+    for(const std::array<double, 4> &gridRange : Steer<std::vector<std::array<double, 4> > >("GridRange"))
+    {
+      const double rapMin = gridRange.at(0), rapMax = gridRange.at(1), drap = gridRange.at(2), dphi = gridRange.at(3);
+      fEstimators.push_back(std::make_unique<fastjet::GridMedianBackgroundEstimator>(rapMin, rapMax, drap, dphi));
+    }
   }
 
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
-}
-
-//------------------------------------------------------------------------------
-
-void FastJetGridMedianEstimator::Finish()
-{
-  vector<GridMedianBackgroundEstimator *>::iterator itEstimators;
-
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
+  void Init() override
   {
-    if(*itEstimators) delete *itEstimators;
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Calorimeter/towers"));
+    fRhoOutputArray = ExportArray(Steer<std::string>("RhoOutputArray", "rho"));
   }
+  void Process() override;
 
-  delete fItInputArray;
-}
+private:
+  std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> > fEstimators; //!
+
+  CandidatesCollection fInputArray;
+  CandidatesCollection fRhoOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void FastJetGridMedianEstimator::Process()
 {
-  Candidate *candidate;
-  TLorentzVector momentum;
-  Int_t number;
-  Double_t rho = 0;
-  PseudoJet jet;
-  vector<PseudoJet> inputList, outputList;
-
-  vector<GridMedianBackgroundEstimator *>::iterator itEstimators;
-  ;
+  fRhoOutputArray->clear();
 
   DelphesFactory *factory = GetFactory();
 
-  inputList.clear();
-
-  // loop over input objects
-  fItInputArray->Reset();
-  number = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  std::vector<fastjet::PseudoJet> inputList;
+  size_t number = 0;
+  for(Candidate *const &candidate : *fInputArray) // loop over input objects
   {
-    momentum = candidate->Momentum;
-    jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
-    jet.set_user_index(number);
-    inputList.push_back(jet);
-    ++number;
+    TLorentzVector &momentum = candidate->Momentum;
+    fastjet::PseudoJet &jet = inputList.emplace_back(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
+    jet.set_user_index(number++);
   }
 
   // compute rho and store it
-
-  for(itEstimators = fEstimators.begin(); itEstimators != fEstimators.end(); ++itEstimators)
+  for(std::vector<std::unique_ptr<fastjet::GridMedianBackgroundEstimator> >::iterator itEstimators = fEstimators.begin();
+    itEstimators != fEstimators.end(); ++itEstimators)
   {
     (*itEstimators)->set_particles(inputList);
 
-    rho = (*itEstimators)->rho();
+    double rho = (*itEstimators)->rho();
 
-    candidate = factory->NewCandidate();
+    Candidate *candidate = factory->NewCandidate();
     candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
     candidate->Edges[0] = (*itEstimators)->rapmin();
     candidate->Edges[1] = (*itEstimators)->rapmax();
-    fRhoOutputArray->Add(candidate);
+    fRhoOutputArray->emplace_back(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("FastJetGridMedianEstimator", FastJetGridMedianEstimator);

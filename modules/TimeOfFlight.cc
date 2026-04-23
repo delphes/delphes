@@ -17,105 +17,71 @@
  */
 
 /** \class TimeOfFlight
-  *
-  *  Calculates Time-Of-Flight
-  *
-  *  \author Michele Selvaggi - CERN
-  *
- */
-
-#include "modules/TimeOfFlight.h"
+ *
+ *  Calculates Time-Of-Flight
+ *
+ *  \author Michele Selvaggi - CERN
+ *
+*/
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-//------------------------------------------------------------------------------
-
-TimeOfFlight::TimeOfFlight()
+class TimeOfFlight: public DelphesModule
 {
-}
+public:
+  explicit TimeOfFlight(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fVertexTimeMode(Steer<int>("VertexTimeMode", 0)) // method to compute vertex time
+  {
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "MuonMomentumSmearing/muons")); // import track input array
+    fVertexInputArray = ImportArray(Steer<std::string>("VertexInputArray", "TruthVertexFinder/vertices")); // import vertex input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks")); // create output array
+  }
+  void Process() override;
 
-TimeOfFlight::~TimeOfFlight()
-{
-}
+  void ComputeVertexMomenta();
 
-//------------------------------------------------------------------------------
+private:
+  const int fVertexTimeMode;
 
-void TimeOfFlight::Init()
-{
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fVertexInputArray; //!
 
-  // method to compute vertex time
-  fVertexTimeMode = GetInt("VertexTimeMode", 0);
-
-  // import track input array
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // import vertex input array
-  fVertexInputArray = ImportArray(GetString("VertexInputArray", "TruthVertexFinder/vertices"));
-  fItVertexInputArray = fVertexInputArray->MakeIterator();
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
-void TimeOfFlight::Finish()
-{
-  delete fItInputArray;
-  delete fItVertexInputArray;
-}
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TimeOfFlight::Process()
 {
-  Candidate *candidate, *particle, *vertex, *constituent, *mother;
-  Double_t ti, t_truth, tf;
-  Double_t l, tof, beta;
+  fOutputArray->clear();
 
-  const Double_t c_light = 2.99792458E8;
+  const double c_light = 2.99792458E8;
 
   // first compute momenta of vertices based on reconstructed tracks
   ComputeVertexMomenta();
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
-
-    particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+    Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
 
     const TLorentzVector &candidateInitialPosition = particle->Position;
     const TLorentzVector &candidateInitialPositionSmeared = candidate->InitialPosition;
-    const TLorentzVector &candidateFinalPosition = candidate->Position;
+    //const TLorentzVector &candidateFinalPosition = candidate->Position;
 
     // time at vertex from MC truth
-    t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
+    const double t_truth = candidateInitialPosition.T() * 1.0E-3 / c_light;
 
     // various options on how to calculate the vertex time
-    ti = 0;
+    double ti = 0;
     switch(fVertexTimeMode)
     {
     case 0:
@@ -136,14 +102,10 @@ void TimeOfFlight::Process()
     case 2:
     {
       // same as 2 but attempt at estimate beta from vertex mass and momentum
-      beta = 1.;
-      fItVertexInputArray->Reset();
-      while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
+      double beta = 1.;
+      for(Candidate *const &vertex : *fVertexInputArray)
       {
-        TIter itGenParts(vertex->GetCandidates());
-        itGenParts.Reset();
-
-        while((constituent = static_cast<Candidate *>(itGenParts.Next())))
+        for(Candidate *const &constituent : vertex->GetCandidates())
         {
           if(particle == constituent)
           {
@@ -160,28 +122,27 @@ void TimeOfFlight::Process()
     }
 
     // this quantity has already been smeared by another module
-    tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
+    //const double tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
     // calculate time-of-flight
-    tof = tf - ti;
+    //const double tof = tf - ti;
     // path length of the full helix
-    l = candidate->L * 1.0E-3;
+    //const double l = candidate->L * 1.0E-3;
 
     // particle velocity
-    beta = l / (c_light * tof);
+    //const double beta = l / (c_light * tof);
 
     // calculate particle mass (i.e particle ID)
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
     // update time at vertex based on option
-    candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
+    new_candidate->InitialPosition.SetT(ti * 1.0E3 * c_light);
 
     // update particle mass based on TOF-based PID (commented for now, assume this calculation is done offline)
-    //candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
+    //new_candidate->Momentum.SetVectM(candidateMomentum.Vect(), mass);
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
@@ -189,28 +150,21 @@ void TimeOfFlight::Process()
 
 void TimeOfFlight::ComputeVertexMomenta()
 {
-  Candidate *track, *constituent, *particle, *vertex;
-
-  fItVertexInputArray->Reset();
-  while((vertex = static_cast<Candidate *>(fItVertexInputArray->Next())))
+  for(Candidate *const &vertex : *fVertexInputArray)
   {
-
-    TIter itGenParts(vertex->GetCandidates());
-    itGenParts.Reset();
-
-    while((constituent = static_cast<Candidate *>(itGenParts.Next())))
+    for(Candidate *const &constituent : vertex->GetCandidates())
     {
-      fItInputArray->Reset();
-      while((track = static_cast<Candidate *>(fItInputArray->Next())))
+      for(Candidate *const &track : *fInputArray)
       {
         // get gen part that generated track
-        particle = static_cast<Candidate *>(track->GetCandidates()->At(0));
-        if(particle == constituent)
-        {
+        if(Candidate *particle = static_cast<Candidate *>(track->GetCandidates().at(0)); particle == constituent)
           vertex->Momentum += track->Momentum;
-        }
 
       } // end track loop
     } // end vertex consitutent loop
   } // end vertex  loop
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TimeOfFlight", TimeOfFlight);

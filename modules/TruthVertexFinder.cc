@@ -18,111 +18,68 @@
 
 /** \class TruthVertexFinder
  *
- *  Merges particles from pile-up sample into event
+ *  Produces list of MC truth vertices
  *
- *  \author M. Selvaggi - UCL, Louvain-la-Neuve
+ *  \author M. Selvaggi - CERN
  *
  */
 
-#include "modules/TruthVertexFinder.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesPileUpReader.h"
-#include "classes/DelphesTF2.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-TruthVertexFinder::TruthVertexFinder()
+class TruthVertexFinder: public DelphesModule
 {
-}
+public:
+  explicit TruthVertexFinder(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fResolution(Steer<double>("Resolution", 1E-06)) // resolution in meters
+  {
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/stableParticles"));
+    fVertexOutputArray = ExportArray(Steer<std::string>("VertexOutputArray", "vertices"));
+  }
+  void Process() override;
 
-TruthVertexFinder::~TruthVertexFinder()
-{
-}
+private:
+  const double fResolution; //!
 
-//------------------------------------------------------------------------------
-
-void TruthVertexFinder::Init()
-{
-
-  fResolution = GetDouble("Resolution", 1E-06); // resolution in meters
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output arrays
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-  //fItOutputArray = fVertexOutputArray->MakeIterator();
-}
-
-//------------------------------------------------------------------------------
-
-void TruthVertexFinder::Finish()
-{
-  delete fItInputArray;
-  delete fItOutputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fVertexOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TruthVertexFinder::Process()
 {
-  Int_t nvtx = -1;
-  Float_t pt;
-  Candidate *candidate, *vertex;
-  DelphesFactory *factory;
+  fVertexOutputArray->clear();
 
-  fItInputArray->Reset();
+  DelphesFactory *factory = GetFactory();
 
-  factory = GetFactory();
-  vertex = factory->NewCandidate();
-
-  TLorentzVector vertexPosition(0., 0., 0., 0.);
-
-  nvtx = 0;
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  int nvtx = 0;
+  for(Candidate *const &candidate : *fInputArray)
   {
-
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-    pt = candidateMomentum.Pt();
+    const double pt = candidateMomentum.Pt();
 
     // check whether vertex already included, if so add particle
-    Bool_t old_vertex = false;
-    fItOutputArray = fVertexOutputArray->MakeIterator();
-    fItOutputArray->Reset();
-    while((vertex = static_cast<Candidate *>(fItOutputArray->Next())))
+    bool old_vertex = false;
+    for(Candidate *const &vertex : *fVertexOutputArray)
     {
       const TLorentzVector &vertexPosition = vertex->Position;
       // check whether spatial difference is < 1 um, in that case assume it is the same vertex
-      if(TMath::Abs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
+      if(std::fabs((candidatePosition.P() - vertexPosition.P())) < fResolution * 1.E3)
       {
         old_vertex = true;
         vertex->AddCandidate(candidate);
-        if(TMath::Abs(candidate->Charge) > 0)
+        if(std::fabs(candidate->Charge) > 0)
         {
           vertex->ClusterNDF += 1;
           vertex->GenSumPT2 += pt * pt;
@@ -133,11 +90,11 @@ void TruthVertexFinder::Process()
     // else fill new vertex
     if(!old_vertex)
     {
-      vertex = factory->NewCandidate();
+      Candidate *vertex = factory->NewCandidate();
       vertex->Position = candidatePosition;
       vertex->ClusterIndex = nvtx;
 
-      if(TMath::Abs(candidate->Charge) > 0)
+      if(std::fabs(candidate->Charge) > 0)
       {
         vertex->ClusterNDF = 1;
         vertex->GenSumPT2 = pt * pt;
@@ -147,10 +104,12 @@ void TruthVertexFinder::Process()
         vertex->ClusterNDF = 0;
         vertex->GenSumPT2 = 0.;
       }
-      fVertexOutputArray->Add(vertex);
+      fVertexOutputArray->emplace_back(vertex);
       nvtx++;
     }
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("TruthVertexFinder", TruthVertexFinder);

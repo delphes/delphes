@@ -24,177 +24,118 @@
  *
  */
 
-#include "modules/DenseTrackFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <set>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-DenseTrackFilter::DenseTrackFilter()
+class DenseTrackFilter: public DelphesModule
 {
-}
-
-//------------------------------------------------------------------------------
-
-DenseTrackFilter::~DenseTrackFilter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void DenseTrackFilter::Init()
-{
-  ExRootConfParam param, paramEtaBins, paramPhiBins, paramFractions;
-  Long_t i, j, k, size, sizeEtaBins, sizePhiBins;
-  TBinMap::iterator itEtaBin;
-  set<Double_t>::iterator itPhiBin;
-  vector<Double_t> *phiBins;
-
-  // read eta and phi bins
-  param = GetParam("EtaPhiBins");
-  size = param.GetSize();
-  fBinMap.clear();
-  fEtaBins.clear();
-  fPhiBins.clear();
-  for(i = 0; i < size / 2; ++i)
+public:
+  explicit DenseTrackFilter(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fEtaPhiRes(Steer<double>("EtaPhiRes", 0.003)), // Eta x Phi smearing to be applied
+    fPhiBins(Steer<std::unordered_map<double, std::vector<double> > >("EtaPhiBins"))
   {
-    paramEtaBins = param[i * 2];
-    sizeEtaBins = paramEtaBins.GetSize();
-    paramPhiBins = param[i * 2 + 1];
-    sizePhiBins = paramPhiBins.GetSize();
-
-    for(j = 0; j < sizeEtaBins; ++j)
-    {
-      for(k = 0; k < sizePhiBins; ++k)
-      {
-        fBinMap[paramEtaBins[j].GetDouble()].insert(paramPhiBins[k].GetDouble());
-      }
-    }
+    for(const std::pair<double, std::vector<double> > etaPhiBins : fPhiBins)
+      fEtaBins.insert(etaPhiBins.first);
   }
 
-  // for better performance we transform map of sets to parallel vectors:
-  // vector< double > and vector< vector< double >* >
-  for(itEtaBin = fBinMap.begin(); itEtaBin != fBinMap.end(); ++itEtaBin)
+  void Init() override
   {
-    fEtaBins.push_back(itEtaBin->first);
-    phiBins = new vector<double>(itEtaBin->second.size());
-    fPhiBins.push_back(phiBins);
-    phiBins->clear();
-    for(itPhiBin = itEtaBin->second.begin(); itPhiBin != itEtaBin->second.end(); ++itPhiBin)
-    {
-      phiBins->push_back(*itPhiBin);
-    }
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "TrackMergerProp/tracks"));
+    fTrackOutputArray = ExportArray(Steer<std::string>("TrackOutputArray", "tracks"));
+    fChargedHadronOutputArray = ExportArray(Steer<std::string>("ChargedHadronOutputArray", "chargedHadrons"));
+    fElectronOutputArray = ExportArray(Steer<std::string>("ElectronOutputArray", "electrons"));
+    fMuonOutputArray = ExportArray(Steer<std::string>("MuonOutputArray", "muons"));
   }
+  void Process() override;
 
-  // Eta x Phi smearing to be applied
-  fEtaPhiRes = GetDouble("EtaPhiRes", 0.003);
+private:
+  void FillTrack();
 
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "TrackMergerProp/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+  const double fEtaPhiRes;
 
-  fTrackOutputArray = ExportArray(GetString("TrackOutputArray", "tracks"));
-  fChargedHadronOutputArray = ExportArray(GetString("ChargedHadronOutputArray", "chargedHadrons"));
-  fElectronOutputArray = ExportArray(GetString("ElectronOutputArray", "electrons"));
-  fMuonOutputArray = ExportArray(GetString("MuonOutputArray", "muons"));
-}
+  typedef std::map<double, std::set<double> > TBinMap; //!
 
-//------------------------------------------------------------------------------
+  Candidate *fBestTrack{nullptr};
 
-void DenseTrackFilter::Finish()
-{
-  vector<vector<Double_t> *>::iterator itPhiBin;
-  delete fItTrackInputArray;
-  for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin)
-  {
-    delete *itPhiBin;
-  }
-}
+  int fTowerTrackHits;
+
+  TBinMap fBinMap; //!
+
+  const std::unordered_map<double, std::vector<double> > fPhiBins;
+  std::set<double> fEtaBins;
+
+  std::vector<long long> fTowerHits;
+
+  CandidatesCollection fTrackInputArray; //!
+
+  CandidatesCollection fTrackOutputArray; //!
+  CandidatesCollection fChargedHadronOutputArray; //!
+  CandidatesCollection fElectronOutputArray; //!
+  CandidatesCollection fMuonOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void DenseTrackFilter::Process()
 {
-  Candidate *track;
-  TLorentzVector position, momentum;
-  Short_t etaBin, phiBin, flags;
-  Int_t number;
-  Long64_t towerHit, towerEtaPhi, hitEtaPhi;
-  Double_t ptmax;
-
-  vector<Double_t>::iterator itEtaBin;
-  vector<Double_t>::iterator itPhiBin;
-  vector<Double_t> *phiBins;
-
-  vector<Long64_t>::iterator itTowerHits;
+  fTrackOutputArray->clear();
+  fChargedHadronOutputArray->clear();
+  fElectronOutputArray->clear();
+  fMuonOutputArray->clear();
 
   fTowerHits.clear();
 
   // loop over all tracks
-  fItTrackInputArray->Reset();
-  number = -1;
-  while((track = static_cast<Candidate *>(fItTrackInputArray->Next())))
+  size_t number = 0;
+  for(Candidate *const &track : *fTrackInputArray)
   {
     const TLorentzVector &trackPosition = track->Position;
-    ++number;
 
     // find eta bin [1, fEtaBins.size - 1]
-    itEtaBin = lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
+    std::set<double>::iterator itEtaBin = std::lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
     if(itEtaBin == fEtaBins.begin() || itEtaBin == fEtaBins.end()) continue;
-    etaBin = distance(fEtaBins.begin(), itEtaBin);
+    const short etaBin = std::distance(fEtaBins.begin(), itEtaBin);
 
     // phi bins for given eta bin
-    phiBins = fPhiBins[etaBin];
+    const std::vector<double> &phiBins = fPhiBins.at(*itEtaBin);
 
     // find phi bin [1, phiBins.size - 1]
-    itPhiBin = lower_bound(phiBins->begin(), phiBins->end(), trackPosition.Phi());
-    if(itPhiBin == phiBins->begin() || itPhiBin == phiBins->end()) continue;
-    phiBin = distance(phiBins->begin(), itPhiBin);
+    std::vector<double>::const_iterator itPhiBin = std::lower_bound(phiBins.begin(), phiBins.end(), trackPosition.Phi());
+    if(itPhiBin == phiBins.begin() || itPhiBin == phiBins.end()) continue; // outside range
+    const short phiBin = std::distance(phiBins.begin(), itPhiBin);
 
-    flags = 1;
+    const short flags = 1;
 
     // make tower hit {16-bits for eta bin number, 16-bits for phi bin number, 8-bits for flags, 24-bits for track number}
-    towerHit = (Long64_t(etaBin) << 48) | (Long64_t(phiBin) << 32) | (Long64_t(flags) << 24) | Long64_t(number);
+    const unsigned long long towerHit = (Long64_t(etaBin) << 48) | (Long64_t(phiBin) << 32) | (Long64_t(flags) << 24) | Long64_t(number);
 
     fTowerHits.push_back(towerHit);
+    ++number;
   }
 
   // all hits are sorted first by eta bin number, then by phi bin number,
   // then by flags and then by particle or track number
-  sort(fTowerHits.begin(), fTowerHits.end());
+  std::sort(fTowerHits.begin(), fTowerHits.end());
 
   // loop over all hits
-  towerEtaPhi = 0;
+  unsigned long long towerEtaPhi = 0;
   fBestTrack = 0;
-  ptmax = 0.0;
+  double ptmax = 0.;
   fTowerTrackHits = 0;
 
-  for(itTowerHits = fTowerHits.begin(); itTowerHits != fTowerHits.end(); ++itTowerHits)
+  for(const long long &towerHit : fTowerHits)
   {
-    towerHit = (*itTowerHits);
-    flags = (towerHit >> 24) & 0x00000000000000FFLL;
-    number = (towerHit) & 0x0000000000FFFFFFLL;
-    hitEtaPhi = towerHit >> 32;
+    const short flags = (towerHit >> 24) & 0x00000000000000FFLL;
+    const size_t number = (towerHit) & 0x0000000000FFFFFFLL;
+    const unsigned long long hitEtaPhi = towerHit >> 32;
 
     if(towerEtaPhi != hitEtaPhi)
     {
@@ -204,7 +145,7 @@ void DenseTrackFilter::Process()
       // saving track with highest pT that hit the tower
       FillTrack();
 
-      ptmax = 0.0;
+      ptmax = 0.;
       fTowerTrackHits = 0;
       fBestTrack = 0;
     }
@@ -213,8 +154,8 @@ void DenseTrackFilter::Process()
     if(flags & 1)
     {
       ++fTowerTrackHits;
-      track = static_cast<Candidate *>(fTrackInputArray->At(number));
-      momentum = track->Momentum;
+      Candidate *track = static_cast<Candidate *>(fTrackInputArray->at(number));
+      const TLorentzVector &momentum = track->Momentum;
 
       if(momentum.Pt() > ptmax)
       {
@@ -233,39 +174,36 @@ void DenseTrackFilter::Process()
 
 void DenseTrackFilter::FillTrack()
 {
-
-  Candidate *candidate, *track;
-  Double_t pt, eta, phi, m;
-  Int_t numberOfCandidates;
-
   // saving track with highest pT that hit the tower
   if(fTowerTrackHits < 1) return;
 
-  numberOfCandidates = fBestTrack->GetCandidates()->GetEntriesFast();
+  const size_t numberOfCandidates = fBestTrack->GetCandidates().size();
   if(numberOfCandidates < 1) return;
 
-  track = static_cast<Candidate *>(fBestTrack->GetCandidates()->At(numberOfCandidates - 1));
-  candidate = static_cast<Candidate *>(track->Clone());
-  pt = candidate->Momentum.Pt();
-  eta = candidate->Momentum.Eta();
-  phi = candidate->Momentum.Phi();
-  m = candidate->Momentum.M();
+  Candidate *track = static_cast<Candidate *>(fBestTrack->GetCandidates().at(numberOfCandidates - 1));
+  Candidate *new_candidate = static_cast<Candidate *>(track->Clone());
 
-  eta = gRandom->Gaus(eta, fEtaPhiRes);
-  phi = gRandom->Gaus(phi, fEtaPhiRes);
-  candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-  candidate->AddCandidate(track);
+  const double pt = new_candidate->Momentum.Pt();
+  const double eta = gRandom->Gaus(new_candidate->Momentum.Eta(), fEtaPhiRes);
+  const double phi = gRandom->Gaus(new_candidate->Momentum.Phi(), fEtaPhiRes);
+  const double m = new_candidate->Momentum.M();
+  new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+  new_candidate->AddCandidate(track);
 
-  fTrackOutputArray->Add(candidate);
-  switch(TMath::Abs(candidate->PID))
+  fTrackOutputArray->emplace_back(new_candidate);
+  switch(std::abs(new_candidate->PID))
   {
   case 11:
-    fElectronOutputArray->Add(candidate);
+    fElectronOutputArray->emplace_back(new_candidate);
     break;
   case 13:
-    fMuonOutputArray->Add(candidate);
+    fMuonOutputArray->emplace_back(new_candidate);
     break;
   default:
-    fChargedHadronOutputArray->Add(candidate);
+    fChargedHadronOutputArray->emplace_back(new_candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("DenseTrackFilter", DenseTrackFilter);

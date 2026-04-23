@@ -24,63 +24,67 @@
  *
  */
 
+#include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 #include "classes/DelphesHepMC3Reader.h"
+#include "classes/DelphesStream.h"
 
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TDatabasePDG.h>
+#include <TLorentzVector.h>
+#include <TParticlePDG.h>
+#include <TStopwatch.h>
 
-#include <map>
-#include <vector>
+#include <ExRootAnalysis/ExRootProgressBar.h>
 
 #include <stdio.h>
 
-#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
-
-#include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesStream.h"
-
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-
-using namespace std;
-
-static const int kBufferSize = 16384;
+DelphesHepMC3Reader::DelphesHepMC3Reader(const DelphesParameters &readerParams) :
+  DelphesReader(readerParams),
+  fPDG(TDatabasePDG::Instance()), fVertexCounter(-2), fParticleCounter(-1) {}
 
 //---------------------------------------------------------------------------
 
-DelphesHepMC3Reader::DelphesHepMC3Reader() :
-  fInputFile(0), fBuffer(0), fPDG(0),
-  fVertexCounter(-2), fParticleCounter(-1)
+void DelphesHepMC3Reader::LoadInputFile(std::string_view inputFile)
 {
-  fBuffer = new char[kBufferSize];
+  if(fInputFile) fclose(fInputFile); // unload previous streams
+  Clear(); // clear all buffers
+  if(fInputFile = fopen(std::string{inputFile}.data(), "r"); fInputFile == nullptr)
+  {
+    std::ostringstream message;
+    message << "can't open " << std::string{inputFile};
+    throw std::runtime_error(message.str());
+  }
+  fseek(fInputFile, 0L, SEEK_END);
+  int length = ftello(fInputFile);
+  fProgressBar = std::make_unique<ExRootProgressBar>(length);
+  fseek(fInputFile, 0L, SEEK_SET);
 
-  fPDG = TDatabasePDG::Instance();
+  if(length <= 0)
+    fclose(fInputFile);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
 
-DelphesHepMC3Reader::~DelphesHepMC3Reader()
+void DelphesHepMC3Reader::SetFactory(DelphesFactory *factory)
 {
-  if(fBuffer) delete[] fBuffer;
+  DelphesReader::SetFactory(factory);
+  fEventObject = GetFactory()->Book<HepMCEvent>("Event", true);
+  fWeightsObject = GetFactory()->Book<std::vector<Weight> >("Weight", true);
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::SetInputFile(FILE *inputFile)
+void DelphesHepMC3Reader::Reset()
 {
-  fInputFile = inputFile;
+  fseek(fInputFile, 0L, SEEK_SET);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
 
 void DelphesHepMC3Reader::Clear()
 {
-  fWeights.clear();
   fMomentumCoefficient = 1.0;
   fPositionCoefficient = 1.0;
   fVertexCounter = -2;
@@ -91,6 +95,8 @@ void DelphesHepMC3Reader::Clear()
   fOutVertexMap.clear();
   fMotherMap.clear();
   fDaughterMap.clear();
+  fWeightsObject->clear();
+  ResetTimer();
 }
 
 //---------------------------------------------------------------------------
@@ -102,159 +108,166 @@ bool DelphesHepMC3Reader::EventReady()
 
 //---------------------------------------------------------------------------
 
-bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+bool DelphesHepMC3Reader::ReadBlock()
 {
-  map<int, pair<int, int> >::iterator itDaughterMap;
+  std::map<int, std::pair<int, int> >::iterator itDaughterMap;
   char key, momentumUnit[4], positionUnit[3];
   int rc, code;
   double weight;
 
-  if(!fgets(fBuffer, kBufferSize, fInputFile)) return kFALSE;
+  if(!fgets(fBuffer.data(), fBuffer.size(), fInputFile)) return false;
 
-  DelphesStream bufferStream(fBuffer + 1);
+  DelphesStream bufferStream(fBuffer.data() + 1);
 
-  key = fBuffer[0];
+  key = fBuffer.at(0);
 
   if(key == 'E')
   {
     Clear();
 
-    rc = bufferStream.ReadInt(fEventNumber)
+    int eventNumber;
+
+    rc = bufferStream.ReadInt(eventNumber)
       && bufferStream.ReadInt(fVertexCounter)
       && bufferStream.ReadInt(fParticleCounter);
 
+    fEventObject->Number = eventNumber; // int -> long
+
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid event format" << std::endl;
+      return false;
     }
   }
   else if(key == 'U')
   {
-    rc = sscanf(fBuffer + 1, "%3s %2s", momentumUnit, positionUnit);
+    rc = sscanf(fBuffer.data() + 1, "%3s %2s", momentumUnit, positionUnit);
 
     if(rc != 2)
     {
-      cerr << "** ERROR: "
-           << "invalid units format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid units format" << std::endl;
+      return false;
     }
 
     if(strncmp(momentumUnit, "GEV", 3) == 0)
-    {
       fMomentumCoefficient = 1.0;
-    }
     else if(strncmp(momentumUnit, "MEV", 3) == 0)
-    {
       fMomentumCoefficient = 0.001;
-    }
 
     if(strncmp(positionUnit, "MM", 3) == 0)
-    {
       fPositionCoefficient = 1.0;
-    }
     else if(strncmp(positionUnit, "CM", 3) == 0)
-    {
       fPositionCoefficient = 10.0;
-    }
   }
   else if(key == 'W')
   {
+    std::vector<double> weights;
     while(bufferStream.ReadDbl(weight))
-    {
-      fWeights.push_back(weight);
-    }
+      weights.push_back(weight);
+    fEventObject->Weight = weights.size() > 0 ? weights.at(0) : 1.;
+    for(const double &weight : weights)
+      fWeightsObject->emplace_back().Weight = weight;
   }
   else if(key == 'A' && bufferStream.FindStr("mpi"))
   {
-    rc = bufferStream.ReadInt(fMPI);
+    rc = bufferStream.ReadInt(fEventObject->MPI);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid MPI format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid MPI format" << std::endl;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("signal_process_id"))
   {
-    rc = bufferStream.ReadInt(fProcessID);
+    rc = bufferStream.ReadInt(fEventObject->ProcessID);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid process ID format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid process ID format" << std::endl;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("event_scale"))
   {
-    rc = bufferStream.ReadDbl(fScale);
+    double scale;
+    rc = bufferStream.ReadDbl(scale);
+    fEventObject->Scale = scale; // double -> float
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid event scale format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid event scale format" << std::endl;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("alphaQCD"))
   {
-    rc = bufferStream.ReadDbl(fAlphaQCD);
+    double alphaQCD;
+    rc = bufferStream.ReadDbl(alphaQCD);
+    fEventObject->AlphaQCD = alphaQCD; // double -> float
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid alphaQCD format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid alphaQCD format" << std::endl;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("alphaQED"))
   {
-    rc = bufferStream.ReadDbl(fAlphaQED);
+    double alphaQED;
+    rc = bufferStream.ReadDbl(alphaQED);
+    fEventObject->AlphaQED = alphaQED; // double -> float
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid alphaQED format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid alphaQED format" << std::endl;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("GenCrossSection"))
   {
-    rc = bufferStream.ReadDbl(fCrossSection)
-      && bufferStream.ReadDbl(fCrossSectionError);
+    double crossSection, crossSectionError;
+    rc = bufferStream.ReadDbl(crossSection)
+      && bufferStream.ReadDbl(crossSectionError);
+
+    // double -> float
+    fEventObject->CrossSection = crossSection;
+    fEventObject->CrossSectionError = crossSectionError;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid cross section format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid cross section format" << std::endl;
+      return false;
     }
   }
   else if(key == 'A' && bufferStream.FindStr("GenPdfInfo"))
   {
-    rc = bufferStream.ReadInt(fID1)
-      && bufferStream.ReadInt(fID2)
-      && bufferStream.ReadDbl(fX1)
-      && bufferStream.ReadDbl(fX2)
-      && bufferStream.ReadDbl(fScalePDF)
-      && bufferStream.ReadDbl(fPDF1)
-      && bufferStream.ReadDbl(fPDF2);
+    double scalePDF, x1, x2, pdf1, pdf2;
+
+    rc = bufferStream.ReadInt(fEventObject->ID1)
+      && bufferStream.ReadInt(fEventObject->ID2)
+      && bufferStream.ReadDbl(x1)
+      && bufferStream.ReadDbl(x2)
+      && bufferStream.ReadDbl(scalePDF)
+      && bufferStream.ReadDbl(pdf1)
+      && bufferStream.ReadDbl(pdf2);
+
+    // double -> float
+    fEventObject->X1 = x1;
+    fEventObject->X2 = x2;
+    fEventObject->ScalePDF = scalePDF;
+    fEventObject->PDF1 = pdf1;
+    fEventObject->PDF2 = pdf2;
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid PDF format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid PDF format" << std::endl;
+      return false;
     }
   }
   else if(key == 'V')
   {
+    int vertexCode, vertexStatus;
     fParticles.clear();
 
     fX = 0.0;
@@ -262,23 +275,21 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
     fZ = 0.0;
     fT = 0.0;
 
-    rc = bufferStream.ReadInt(fVertexCode)
-      && bufferStream.ReadInt(fVertexStatus);
+    rc = bufferStream.ReadInt(vertexCode)
+      && bufferStream.ReadInt(vertexStatus);
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid vertex format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid vertex format" << std::endl;
+      return false;
     }
 
     rc = bufferStream.FindChr('[');
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid vertex format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid vertex format" << std::endl;
+      return false;
     }
 
     while(bufferStream.ReadInt(code))
@@ -296,13 +307,12 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
 
       if(!rc)
       {
-        cerr << "** ERROR: "
-             << "invalid vertex format" << endl;
-        return kFALSE;
+        std::cerr << "** ERROR: invalid vertex format" << std::endl;
+        return false;
       }
     }
 
-    AnalyzeVertex(factory, fVertexCode);
+    AnalyzeVertex(vertexCode);
   }
   else if(key == 'P' && fParticleCounter > 0)
   {
@@ -320,77 +330,38 @@ bool DelphesHepMC3Reader::ReadBlock(DelphesFactory *factory,
 
     if(!rc)
     {
-      cerr << "** ERROR: "
-           << "invalid particle format" << endl;
-      return kFALSE;
+      std::cerr << "** ERROR: invalid particle format" << std::endl;
+      return false;
     }
 
-    AnalyzeParticle(factory);
+    AnalyzeParticle();
   }
 
   if(EventReady())
   {
-    FinalizeParticles(allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+    FinalizeParticles();
   }
 
-  return kTRUE;
+  return true;
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eventNumber*/,
-  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
-{
-  HepMCEvent *element;
-
-  element = static_cast<HepMCEvent *>(branch->NewEntry());
-  element->Number = fEventNumber;
-
-  element->ProcessID = fProcessID;
-  element->MPI = fMPI;
-  element->Weight = fWeights.size() > 0 ? fWeights[0] : 1.0;
-  element->CrossSection = fCrossSection;
-  element->CrossSectionError = fCrossSectionError;
-  element->Scale = fScale;
-  element->AlphaQED = fAlphaQED;
-  element->AlphaQCD = fAlphaQCD;
-
-  element->ID1 = fID1;
-  element->ID2 = fID2;
-  element->X1 = fX1;
-  element->X2 = fX2;
-  element->ScalePDF = fScalePDF;
-  element->PDF1 = fPDF1;
-  element->PDF2 = fPDF2;
-
-  element->ReadTime = readStopWatch->RealTime();
-  element->ProcTime = procStopWatch->RealTime();
-}
+void DelphesHepMC3Reader::SetReadoutTime(double readoutTime) { fEventObject->ReadTime = readoutTime; }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeWeight(ExRootTreeBranch *branch)
-{
-  Weight *element;
-  vector<double>::const_iterator itWeights;
-
-  for(itWeights = fWeights.begin(); itWeights != fWeights.end(); ++itWeights)
-  {
-    element = static_cast<Weight *>(branch->NewEntry());
-
-    element->Weight = *itWeights;
-  }
-}
+void DelphesHepMC3Reader::SetProcessingTime(double procTime) { fEventObject->ProcTime = procTime; }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candidate *candidate)
+void DelphesHepMC3Reader::AnalyzeVertex(int code, Candidate *candidate)
 {
   int index;
-  TLorentzVector *position;
-  TObjArray *array;
-  vector<int>::iterator itParticle;
-  map<int, int>::iterator itVertexMap;
+  std::shared_ptr<TLorentzVector> position;
+  CandidatesCollection array;
+  std::vector<int>::iterator itParticle;
+  std::map<int, int>::iterator itVertexMap;
 
   itVertexMap = fOutVertexMap.find(code);
   if(itVertexMap == fOutVertexMap.end())
@@ -401,10 +372,10 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
     fOutVertexMap[code] = index;
     if(candidate && code > 0) fInVertexMap[code] = index;
 
-    position = factory->New<TLorentzVector>();
-    array = factory->NewArray();
+    position = std::make_shared<TLorentzVector>();
+    array = std::make_shared<std::vector<Candidate *> >();
     position->SetXYZT(0.0, 0.0, 0.0, 0.0);
-    fVertices.push_back(make_pair(position, array));
+    fVertices.push_back(std::make_pair(position, array));
   }
   else
   {
@@ -415,7 +386,7 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
 
   if(candidate)
   {
-    array->Add(candidate);
+    array->emplace_back(candidate);
   }
   else
   {
@@ -429,52 +400,43 @@ void DelphesHepMC3Reader::AnalyzeVertex(DelphesFactory *factory, int code, Candi
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::AnalyzeParticle(DelphesFactory *factory)
+void DelphesHepMC3Reader::AnalyzeParticle()
 {
-  Candidate *candidate;
-
-  candidate = factory->NewCandidate();
+  Candidate *candidate = GetFactory()->NewCandidate();
 
   candidate->PID = fPID;
-
   candidate->Status = fParticleStatus;
-
   candidate->Mass = fMass;
-
   candidate->Momentum.SetPxPyPzE(fPx, fPy, fPz, fE);
-
   candidate->D1 = fParticleCode;
 
-  AnalyzeVertex(factory, fOutVertexCode, candidate);
+  AnalyzeVertex(fOutVertexCode, candidate);
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+void DelphesHepMC3Reader::FinalizeParticles()
 {
   TLorentzVector *position;
-  TObjArray *array;
+  CandidatesCollection array;
   Candidate *candidate;
   Candidate *candidateDaughter;
   TParticlePDG *pdgParticle;
   int pdgCode;
-  map<int, int>::iterator itVertexMap;
-  map<int, pair<int, int> >::iterator itMotherMap;
-  map<int, pair<int, int> >::iterator itDaughterMap;
-  size_t i;
-  int j, code, counter;
+  std::map<int, int>::iterator itVertexMap;
+  std::map<int, std::pair<int, int> >::iterator itMotherMap;
+  std::map<int, std::pair<int, int> >::iterator itDaughterMap;
+  int code, counter;
 
   counter = 0;
-  for(i = 0; i < fVertices.size(); ++i)
+  for(size_t i = 0; i < fVertices.size(); ++i)
   {
-    position = fVertices[i].first;
+    position = fVertices[i].first.get();
     array = fVertices[i].second;
 
-    for(j = 0; j < array->GetEntriesFast(); ++j)
+    for(size_t j = 0; j < array->size(); ++j)
     {
-      candidate = static_cast<Candidate *>(array->At(j));
+      candidate = static_cast<Candidate *>(array->at(j));
 
       candidate->Position = *position;
       if(fPositionCoefficient != 1.0)
@@ -492,7 +454,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
       itDaughterMap = fDaughterMap.find(i);
       if(itDaughterMap == fDaughterMap.end())
       {
-        fDaughterMap[i] = make_pair(counter, counter);
+        fDaughterMap[i] = std::make_pair(counter, counter);
       }
       else
       {
@@ -515,7 +477,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
         itMotherMap = fMotherMap.find(code);
         if(itMotherMap == fMotherMap.end())
         {
-          fMotherMap[code] = make_pair(counter, -1);
+          fMotherMap[code] = std::make_pair(counter, -1);
         }
         else
         {
@@ -523,7 +485,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
         }
       }
 
-      allParticleOutputArray->Add(candidate);
+      fAllParticleOutputArray->emplace_back(candidate);
 
       ++counter;
 
@@ -537,18 +499,18 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
 
       if(candidate->Status == 1)
       {
-        stableParticleOutputArray->Add(candidate);
+        fStableParticleOutputArray->emplace_back(candidate);
       }
       else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
       {
-        partonOutputArray->Add(candidate);
+        fPartonOutputArray->emplace_back(candidate);
       }
     }
   }
 
-  for(j = 0; j < allParticleOutputArray->GetEntriesFast(); ++j)
+  for(size_t j = 0; j < fAllParticleOutputArray->size(); ++j)
   {
-    candidate = static_cast<Candidate *>(allParticleOutputArray->At(j));
+    candidate = static_cast<Candidate *>(fAllParticleOutputArray->at(j));
 
     itMotherMap = fMotherMap.find(candidate->M1);
     if(itMotherMap == fMotherMap.end())
@@ -581,7 +543,7 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
       {
         candidate->D1 = itDaughterMap->second.first;
         candidate->D2 = itDaughterMap->second.second;
-        candidateDaughter = static_cast<Candidate *>(allParticleOutputArray->At(candidate->D1));
+        candidateDaughter = static_cast<Candidate *>(fAllParticleOutputArray->at(candidate->D1));
         const TLorentzVector &decayPosition = candidateDaughter->Position;
         candidate->DecayPosition.SetXYZT(decayPosition.X(), decayPosition.Y(), decayPosition.Z(), decayPosition.T()); // decay position
       }
@@ -590,3 +552,5 @@ void DelphesHepMC3Reader::FinalizeParticles(TObjArray *allParticleOutputArray,
 }
 
 //---------------------------------------------------------------------------
+
+REGISTER_READER("HepMC3", DelphesHepMC3Reader);

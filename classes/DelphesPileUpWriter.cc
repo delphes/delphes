@@ -37,36 +37,22 @@
 
 using namespace std;
 
-static const int kIndexSize = 10000000;
-static const int kBufferSize = 1000000;
-static const int kRecordSize = 9;
-
 //------------------------------------------------------------------------------
 
-DelphesPileUpWriter::DelphesPileUpWriter(const char *fileName) :
-  fEntries(0), fEntrySize(0), fOffset(0),
-  fPileUpFile(0), fIndex(0), fBuffer(0),
-  fOutputWriter(0), fIndexWriter(0), fBufferWriter(0)
+DelphesPileUpWriter::DelphesPileUpWriter(std::string_view fileName) :
+  fOutputWriter(std::make_unique<DelphesXDRWriter>()),
+  fIndexWriter(std::make_unique<DelphesXDRWriter>()),
+  fBufferWriter(std::make_unique<DelphesXDRWriter>())
 {
-  stringstream message;
+  fIndexWriter->SetBuffer(fIndex.data());
+  fBufferWriter->SetBuffer(fBuffer.data());
 
-  fIndex = new uint8_t[kIndexSize * 8];
-  fBuffer = new uint8_t[kBufferSize * kRecordSize * 4];
-  fOutputWriter = new DelphesXDRWriter;
-  fIndexWriter = new DelphesXDRWriter;
-  fBufferWriter = new DelphesXDRWriter;
-
-  fIndexWriter->SetBuffer(fIndex);
-  fBufferWriter->SetBuffer(fBuffer);
-
-  fPileUpFile = fopen(fileName, "wb");
-
-  if(fPileUpFile == NULL)
+  if(fPileUpFile = fopen(fileName.data(), "wb"); fPileUpFile == nullptr)
   {
+    std::ostringstream message;
     message << "can't open pile-up file " << fileName;
-    throw runtime_error(message.str());
+    throw std::runtime_error(message.str());
   }
-
   fOutputWriter->SetFile(fPileUpFile);
 }
 
@@ -75,11 +61,6 @@ DelphesPileUpWriter::DelphesPileUpWriter(const char *fileName) :
 DelphesPileUpWriter::~DelphesPileUpWriter()
 {
   if(fPileUpFile) fclose(fPileUpFile);
-  if(fBufferWriter) delete fBufferWriter;
-  if(fIndexWriter) delete fIndexWriter;
-  if(fOutputWriter) delete fOutputWriter;
-  if(fBuffer) delete[] fBuffer;
-  if(fIndex) delete[] fIndex;
 }
 
 //------------------------------------------------------------------------------
@@ -88,10 +69,8 @@ void DelphesPileUpWriter::WriteParticle(int32_t pid,
   float x, float y, float z, float t,
   float px, float py, float pz, float e)
 {
-  if(fEntrySize >= kBufferSize)
-  {
-    throw runtime_error("too many particles in pile-up event");
-  }
+  if(static_cast<size_t>(fEntrySize) >= kBufferSize)
+    throw std::runtime_error("too many particles in pile-up event");
 
   fBufferWriter->WriteValue(&pid, 4);
   fBufferWriter->WriteValue(&x, 4);
@@ -110,13 +89,11 @@ void DelphesPileUpWriter::WriteParticle(int32_t pid,
 
 void DelphesPileUpWriter::WriteEntry()
 {
-  if(fEntries >= kIndexSize)
-  {
-    throw runtime_error("too many pile-up events");
-  }
+  if(static_cast<size_t>(fEntries) >= kIndexSize)
+    throw std::runtime_error("too many pile-up events");
 
   fOutputWriter->WriteValue(&fEntrySize, 4);
-  fOutputWriter->WriteRaw(fBuffer, fEntrySize * kRecordSize * 4);
+  fOutputWriter->WriteRaw(fBuffer.data(), fEntrySize * kRecordSize * 4);
 
   fIndexWriter->WriteValue(&fOffset, 8);
   fOffset += fEntrySize * kRecordSize * 4 + 4;
@@ -131,7 +108,7 @@ void DelphesPileUpWriter::WriteEntry()
 
 void DelphesPileUpWriter::WriteIndex()
 {
-  fOutputWriter->WriteRaw(fIndex, fEntries * 8);
+  fOutputWriter->WriteRaw(fIndex.data(), fEntries * 8);
   fOutputWriter->WriteValue(&fEntries, 8);
 }
 

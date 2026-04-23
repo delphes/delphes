@@ -27,6 +27,10 @@
  *
  */
 
+#include <array>
+#include <memory>
+#include <string_view>
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -35,30 +39,31 @@ class DelphesXDRWriter;
 class DelphesPileUpWriter
 {
 public:
-  DelphesPileUpWriter(const char *fileName);
-
+  explicit DelphesPileUpWriter(std::string_view fileName);
   ~DelphesPileUpWriter();
 
   void WriteParticle(int32_t pid,
     float x, float y, float z, float t,
     float px, float py, float pz, float e);
-
   void WriteEntry();
-
   void WriteIndex();
 
 private:
-  int64_t fEntries;
-  int32_t fEntrySize;
-  int64_t fOffset;
+  static constexpr size_t kIndexSize = 10000000;
+  static constexpr size_t kBufferSize = 1000000;
+  static constexpr size_t kRecordSize = 9;
 
-  FILE *fPileUpFile;
-  uint8_t *fIndex;
-  uint8_t *fBuffer;
+  int64_t fEntries{0};
+  int32_t fEntrySize{0};
+  int64_t fOffset{0};
 
-  DelphesXDRWriter *fOutputWriter;
-  DelphesXDRWriter *fIndexWriter;
-  DelphesXDRWriter *fBufferWriter;
+  FILE *fPileUpFile{nullptr};
+  std::array<uint8_t, kIndexSize * 8> fIndex;
+  std::array<uint8_t, kBufferSize * kRecordSize * 4> fBuffer;
+
+  const std::unique_ptr<DelphesXDRWriter> fOutputWriter;
+  const std::unique_ptr<DelphesXDRWriter> fIndexWriter;
+  const std::unique_ptr<DelphesXDRWriter> fBufferWriter;
 };
 
 #endif // DelphesPileUpWriter_h

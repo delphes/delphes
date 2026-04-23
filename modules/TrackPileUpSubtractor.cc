@@ -24,108 +24,56 @@
  *
  */
 
-#include "modules/TrackPileUpSubtractor.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-TrackPileUpSubtractor::TrackPileUpSubtractor()
+class TrackPileUpSubtractor: public DelphesModule
 {
-  fFormula = new DelphesFormula;
-}
-
-//------------------------------------------------------------------------------
-
-TrackPileUpSubtractor::~TrackPileUpSubtractor()
-{
-  delete fFormula;
-}
-
-//------------------------------------------------------------------------------
-
-void TrackPileUpSubtractor::Init()
-{
-  // import input array
-
-  fVertexInputArray = ImportArray(GetString("VertexInputArray", "PileUpMerger/vertices"));
-  fItVertexInputArray = fVertexInputArray->MakeIterator();
-
-  // read resolution formula in m
-  fFormula->Compile(GetString("ZVertexResolution", "0.001"));
-
-  fPTMin = GetDouble("PTMin", 0.);
-
-  // import arrays with output from other modules
-
-  ExRootConfParam param = GetParam("InputArray");
-  Long_t i, size;
-  const TObjArray *array;
-  TIterator *iterator;
-
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
+public:
+  explicit TrackPileUpSubtractor(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPTMin(Steer<double>("PTMin", 0.)),
+    fFormula(std::make_unique<DelphesFormula>())
   {
-    array = ImportArray(param[i * 2].GetString());
-    iterator = array->MakeIterator();
-
-    fInputMap[iterator] = ExportArray(param[i * 2 + 1].GetString());
-  }
-}
-
-//------------------------------------------------------------------------------
-
-void TrackPileUpSubtractor::Finish()
-{
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  TIterator *iterator;
-
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
-    iterator = itInputMap->first;
-
-    if(iterator) delete iterator;
+    // read resolution formula in m
+    fFormula->Compile(Steer<std::string>("ZVertexResolution", "0.001"));
   }
 
-  delete fItVertexInputArray;
-}
+  void Init() override
+  {
+    fVertexInputArray = ImportArray(Steer<std::string>("VertexInputArray", "PileUpMerger/vertices"));
+    // import arrays with output from other modules
+    for(const std::pair<std::string, std::string> &inputArray :
+      Steer<std::vector<std::pair<std::string, std::string> > >("InputArray"))
+      fInputMap.emplace_back(std::make_pair(
+        ImportArray(inputArray.first),
+        ExportArray(inputArray.second)));
+  }
+  void Process() override;
+
+private:
+  const double fPTMin;
+  const std::unique_ptr<DelphesFormula> fFormula; //!
+
+  CandidatesCollection fVertexInputArray; //!
+  std::vector<std::pair<CandidatesCollection, CandidatesCollection> > fInputMap; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TrackPileUpSubtractor::Process()
 {
-  Candidate *candidate, *particle;
-  map<TIterator *, TObjArray *>::iterator itInputMap;
-  TIterator *iterator;
-  TObjArray *array;
-  Double_t z, zvtx = 0;
-  Double_t pt, eta, phi, e;
+  for(const auto &[input_collection, output_collection] : fInputMap)
+    output_collection->clear();
 
+  double zvtx = 0.;
   // find z position of primary vertex
-
-  fItVertexInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItVertexInputArray->Next())))
+  for(Candidate *const &candidate : *fVertexInputArray)
   {
     if(!candidate->IsPU)
     {
@@ -135,37 +83,37 @@ void TrackPileUpSubtractor::Process()
   }
 
   // loop over all input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
+  for(const auto &[input_collection, output_collection] : fInputMap)
   {
-    iterator = itInputMap->first;
-    array = itInputMap->second;
-
     // loop over all candidates
-    iterator->Reset();
-    while((candidate = static_cast<Candidate *>(iterator->Next())))
+    for(Candidate *const &candidate : *input_collection)
     {
-      particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0));
+      Candidate *particle = static_cast<Candidate *>(candidate->GetCandidates().at(0));
       const TLorentzVector &candidateMomentum = particle->Momentum;
 
-      eta = candidateMomentum.Eta();
-      pt = candidateMomentum.Pt();
-      phi = candidateMomentum.Phi();
-      e = candidateMomentum.E();
+      const double eta = candidateMomentum.Eta();
+      const double pt = candidateMomentum.Pt();
+      const double phi = candidateMomentum.Phi();
+      const double e = candidateMomentum.E();
 
-      z = particle->Position.Z();
+      const double z = particle->Position.Z();
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
 
-      if(candidate->Charge != 0 && candidate->IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
+      if(candidate->Charge != 0 && candidate->IsPU && std::fabs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
       {
         candidate->IsRecoPU = 1;
       }
       else
       {
         candidate->IsRecoPU = 0;
-        if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
+        if(candidate->Momentum.Pt() > fPTMin) output_collection->emplace_back(candidate);
       }
     }
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TrackPileUpSubtractor", TrackPileUpSubtractor);

@@ -16,146 +16,115 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//------------------------------------------------------------------------------
-
 /** \class TaggingParticlesSkimmer
  *
  *  Filters particle collection by only keeping gen particles useful for b and tau tagging.
- *  tau particles are replaced by their "visible decay".
+    tau particles are replaced by their "visible decay".
  *
  *  \author M. Selvaggi
  *
  */
 
-#include "modules/TaggingParticlesSkimmer.h"
-#include "modules/TauTagging.h"
+#include "modules/TauTaggingPartonClassifier.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesFilter.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-TaggingParticlesSkimmer::TaggingParticlesSkimmer()
+class TaggingParticlesSkimmer: public DelphesModule
 {
-}
+public:
+  explicit TaggingParticlesSkimmer(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPTMin(Steer<double>("PTMin", 15.0)),
+    fEtaMax(Steer<double>("EtaMax", 2.5)) {}
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fPartonInputArray = ImportArray(Steer<std::string>("PartonInputArray", "Delphes/partons"));
+    fParticleInputArray = ImportArray(Steer<std::string>("ParticleInputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "taggingParticles"));
 
-TaggingParticlesSkimmer::~TaggingParticlesSkimmer()
-{
-}
+    fClassifier = std::make_unique<TauTaggingPartonClassifier>(fParticleInputArray);
+    fClassifier->fPTMin = Steer<double>("PTMin", 15.0);
+    fClassifier->fEtaMax = Steer<double>("EtaMax", 2.5);
 
-//------------------------------------------------------------------------------
+    fFilter = std::make_unique<DelphesFilter>(fPartonInputArray);
+  }
+  void Process() override;
 
-void TaggingParticlesSkimmer::Init()
-{
+private:
+  const double fPTMin; //!
+  const double fEtaMax; //!
 
-  fPTMin = GetDouble("PTMin", 15.0);
-  fEtaMax = GetDouble("EtaMax", 2.5);
+  CandidatesCollection fPartonInputArray; //!
+  CandidatesCollection fParticleInputArray; //!
 
-  // import input array
-  fPartonInputArray = ImportArray(GetString("PartonInputArray", "Delphes/partons"));
-  fItPartonInputArray = fPartonInputArray->MakeIterator();
+  CandidatesCollection fOutputArray; //!
 
-  fParticleInputArray = ImportArray(GetString("ParticleInputArray", "Delphes/allParticles"));
-
-  fClassifier = new TauTaggingPartonClassifier(fParticleInputArray);
-  fClassifier->fPTMin = GetDouble("PTMin", 15.0);
-  fClassifier->fEtaMax = GetDouble("EtaMax", 2.5);
-
-  fFilter = new ExRootFilter(fPartonInputArray);
-
-  // output array
-  fOutputArray = ExportArray(GetString("OutputArray", "taggingParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void TaggingParticlesSkimmer::Finish()
-{
-  delete fItPartonInputArray;
-  delete fFilter;
-  delete fClassifier;
-}
+  std::unique_ptr<TauTaggingPartonClassifier> fClassifier; //!
+  std::unique_ptr<DelphesFilter> fFilter;
+};
 
 //------------------------------------------------------------------------------
 
 void TaggingParticlesSkimmer::Process()
 {
-  Candidate *candidate, *tau, *daughter;
-  TLorentzVector tauMomentum;
-  Double_t pt, eta;
-  TObjArray *tauArray;
-  Int_t pdgCode, i;
+  fOutputArray->clear();
 
   // first select hadronic taus and replace them by visible part
   fFilter->Reset();
-  tauArray = fFilter->GetSubArray(fClassifier, 0);
+  const std::vector<Candidate *> tauArray = fFilter->GetSubArray(fClassifier.get(), 0);
 
-  if(tauArray == 0) return;
-
-  TIter itTauArray(tauArray);
+  if(tauArray.empty()) return;
 
   // loop over all input taus
-  itTauArray.Reset();
-  while((tau = static_cast<Candidate *>(itTauArray.Next())))
+  for(Candidate *const &tau : tauArray)
   {
     if(tau->D1 < 0) continue;
 
-    if(tau->D1 >= fParticleInputArray->GetEntriesFast() || tau->D2 >= fParticleInputArray->GetEntriesFast())
+    if(tau->D1 >= static_cast<int>(fParticleInputArray->size()) || tau->D2 >= static_cast<int>(fParticleInputArray->size()))
     {
       throw runtime_error("tau's daughter index is greater than the ParticleInputArray size");
     }
 
-    tauMomentum.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
-
-    for(i = tau->D1; i <= tau->D2; ++i)
+    TLorentzVector tauMomentum;
+    for(int i = tau->D1; i <= tau->D2; ++i)
     {
-      daughter = static_cast<Candidate *>(fParticleInputArray->At(i));
-      if(TMath::Abs(daughter->PID) == 16) continue;
+      Candidate *daughter = static_cast<Candidate *>(fParticleInputArray->at(i));
+      if(std::abs(daughter->PID) == 16) continue;
       tauMomentum += daughter->Momentum;
     }
 
-    candidate = static_cast<Candidate *>(tau->Clone());
+    Candidate *candidate = static_cast<Candidate *>(tau->Clone());
     candidate->Momentum = tauMomentum;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 
   // then add all other partons (except tau's to avoid double counting)
 
-  fItPartonInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItPartonInputArray->Next())))
+  for(Candidate *const &candidate : *fPartonInputArray)
   {
-    pdgCode = TMath::Abs(candidate->PID);
+    const int pdgCode = std::abs(candidate->PID);
     if(pdgCode == 15) continue;
 
-    pt = candidate->Momentum.Pt();
+    const double pt = candidate->Momentum.Pt();
     if(pt < fPTMin) continue;
 
-    eta = TMath::Abs(candidate->Momentum.Eta());
+    const double eta = std::fabs(candidate->Momentum.Eta());
     if(eta > fEtaMax) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TaggingParticlesSkimmer", TaggingParticlesSkimmer);

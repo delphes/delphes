@@ -1,4 +1,3 @@
-
 /** \class PileUpJetID
  *
  *  CMS PileUp Jet ID Variables
@@ -7,103 +6,124 @@
  *
  */
 
-#include "modules/PileUpJetID.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TFormula.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-//#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-PileUpJetID::PileUpJetID()
+class PileUpJetID: public DelphesModule
 {
-}
+public:
+  explicit PileUpJetID(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fJetPTMin(Steer<double>("JetPTMin", 20.0)),
+    fParameterR(Steer<double>("ParameterR", 0.5)),
+    //
+    fUseConstituents(Steer<int>("UseConstituents", 0)),
+    fMeanSqDeltaRMaxBarrel(Steer<double>("MeanSqDeltaRMaxBarrel", 0.1)),
+    fBetaMinBarrel(Steer<double>("BetaMinBarrel", 0.1)),
+    fMeanSqDeltaRMaxEndcap(Steer<double>("MeanSqDeltaRMaxEndcap", 0.1)),
+    fBetaMinEndcap(Steer<double>("BetaMinEndcap", 0.1)),
+    fMeanSqDeltaRMaxForward(Steer<double>("MeanSqDeltaRMaxForward", 0.1)),
+    //
+    fJetPTMinForNeutrals(Steer<double>("JetPTMinForNeutrals", 20.0)),
+    fNeutralPTMin(Steer<double>("NeutralPTMin", 2.0))
+  {
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fJetInputArray = ImportArray(Steer<std::string>("JetInputArray", "FastJetFinder/jets"));
+    fTrackInputArray = ImportArray(Steer<std::string>("TrackInputArray", "ParticlePropagator/tracks"));
+    fNeutralInputArray = ImportArray(Steer<std::string>("NeutralInputArray", "ParticlePropagator/tracks"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets"));
+    fNeutralsInPassingJets = ExportArray(Steer<std::string>("NeutralsInPassingJets", "eflowtowers"));
+  }
+  void Process() override;
 
-PileUpJetID::~PileUpJetID()
-{
-}
+private:
+  const double fJetPTMin;
+  const double fParameterR;
 
-//------------------------------------------------------------------------------
+  // If set to true, may have weird results for PFCHS
+  // If set to false, uses everything within dR < fParameterR even if in other jets &c.
+  // Results should be very similar for PF
+  const int fUseConstituents;
 
-void PileUpJetID::Init()
-{
+  const double fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
+  const double fBetaMinBarrel; // |eta| < 2.5
+  const double fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
+  const double fBetaMinEndcap; // 1.5 < |eta| < 4.0
+  const double fMeanSqDeltaRMaxForward; // |eta| > 4.0
 
-  fJetPTMin = GetDouble("JetPTMin", 20.0);
-  fParameterR = GetDouble("ParameterR", 0.5);
-  fUseConstituents = GetInt("UseConstituents", 0);
+  const double fJetPTMinForNeutrals;
+  const double fNeutralPTMin;
 
-  fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel", 0.1);
-  fBetaMinBarrel = GetDouble("BetaMinBarrel", 0.1);
-  fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap", 0.1);
-  fBetaMinEndcap = GetDouble("BetaMinEndcap", 0.1);
-  fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward", 0.1);
-  fJetPTMinForNeutrals = GetDouble("JetPTMinForNeutrals", 20.0);
-  fNeutralPTMin = GetDouble("NeutralPTMin", 2.0);
+  CandidatesCollection fJetInputArray; //!
+  CandidatesCollection fTrackInputArray; // SCZ
+  CandidatesCollection fNeutralInputArray;
 
-  fAverageEachTower = false; // for timing
+  CandidatesCollection fOutputArray; //!
+  CandidatesCollection fNeutralsInPassingJets; // SCZ
 
-  // import input array(s)
+  /*
+JAY
+---
 
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
-  fItJetInputArray = fJetInputArray->MakeIterator();
+|Eta|<1.5
 
-  fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
-  fItTrackInputArray = fTrackInputArray->MakeIterator();
+meanSqDeltaR betaStar SigEff BgdEff
+0.13 0.92 96% 8%
+0.13 0.95 97% 16%
+0.13 0.97 98% 27%
 
-  fNeutralInputArray = ImportArray(GetString("NeutralInputArray", "ParticlePropagator/tracks"));
-  fItNeutralInputArray = fNeutralInputArray->MakeIterator();
+|Eta|>1.5
 
-  // create output array(s)
+meanSqDeltaR betaStar SigEff BgdEff
+0.14 0.91 95% 15%
+0.14 0.94 97% 19%
+0.14 0.97 98% 29%
 
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+BRYAN
+-----
 
-  fNeutralsInPassingJets = ExportArray(GetString("NeutralsInPassingJets", "eflowtowers"));
-}
+Barrel (MeanSqDR, Beta, sig eff, bg eff):
+0.10, 0.08, 90%, 8%
+0.11, 0.12, 90%, 6%
+0.13, 0.16, 89%, 5%
 
-//------------------------------------------------------------------------------
+Endcap (MeanSqDR, Beta, sig eff, bg eff):
+0.07, 0.06, 89%, 4%
+0.08, 0.08, 92%, 6%
+0.09, 0.08, 95%, 10%
+0.10, 0.08, 97%, 13%
 
-void PileUpJetID::Finish()
-{
-  //  cout << "In finish" << endl;
+SETH GUESSES FOR |eta| > 4.0
+----------------------------
 
-  delete fItJetInputArray;
-  delete fItTrackInputArray;
-  delete fItNeutralInputArray;
-}
+MeanSqDeltaR
+0.07
+0.10
+0.14
+0.2
+  */
+
+  const bool fAverageEachTower{false}; // for timing
+};
 
 //------------------------------------------------------------------------------
 
 void PileUpJetID::Process()
 {
-  Candidate *candidate, *constituent;
+  fOutputArray->clear();
+  fNeutralsInPassingJets->clear();
+
   TLorentzVector momentum, area;
 
-  Candidate *trk;
-
   // loop over all input candidates
-  fItJetInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItJetInputArray->Next())))
+  for(Candidate *const &candidate : *fJetInputArray)
   {
     momentum = candidate->Momentum;
     area = candidate->Area;
@@ -127,8 +147,7 @@ void PileUpJetID::Process()
 
     if(fUseConstituents)
     {
-      TIter itConstituents(candidate->GetCandidates());
-      while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+      for(Candidate *const &constituent : candidate->GetCandidates())
       {
         float pt = constituent->Momentum.Pt();
         float dr = candidate->Momentum.DeltaR(constituent->Momentum);
@@ -163,7 +182,7 @@ void PileUpJetID::Process()
         float tow_sumW = 0;
         for(size_t i = 0; i < constituent->ECalEnergyTimePairs.size(); i++)
         {
-          float w = TMath::Sqrt(constituent->ECalEnergyTimePairs[i].first);
+          float w = std::sqrt(constituent->ECalEnergyTimePairs[i].first);
           if(fAverageEachTower)
           {
             tow_sumW += w;
@@ -182,8 +201,7 @@ void PileUpJetID::Process()
     else
     {
       // Not using constituents, using dr
-      fItTrackInputArray->Reset();
-      while((trk = static_cast<Candidate *>(fItTrackInputArray->Next())))
+      for(Candidate *const &trk : *fTrackInputArray)
       {
         if(trk->Momentum.DeltaR(candidate->Momentum) < fParameterR)
         {
@@ -211,8 +229,7 @@ void PileUpJetID::Process()
           }
         }
       }
-      fItNeutralInputArray->Reset();
-      while((constituent = static_cast<Candidate *>(fItNeutralInputArray->Next())))
+      for(Candidate *const &constituent : *fNeutralInputArray)
       {
         if(constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR)
         {
@@ -255,7 +272,7 @@ void PileUpJetID::Process()
     candidate->NNeutrals = nn;
     if(sumpt > 0.)
     {
-      candidate->PTD = TMath::Sqrt(sumptsq) / sumpt;
+      candidate->PTD = std::sqrt(sumptsq) / sumpt;
       for(int i = 0; i < 5; i++)
       {
         candidate->FracPt[i] = pt_ann[i] / sumpt;
@@ -270,15 +287,15 @@ void PileUpJetID::Process()
       }
     }
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
 
     // New stuff
     /*
-    fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel",0.1);
-    fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
-    fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap",0.1);
-    fBetaMinEndcap = GetDouble("BetaMinEndcap",0.1);
-    fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward",0.1);
+    fMeanSqDeltaRMaxBarrel = Steer<double>("MeanSqDeltaRMaxBarrel",0.1);
+    fBetaMinBarrel = Steer<double>("BetaMinBarrel",0.1);
+    fMeanSqDeltaRMaxEndcap = Steer<double>("MeanSqDeltaRMaxEndcap",0.1);
+    fBetaMinEndcap = Steer<double>("BetaMinEndcap",0.1);
+    fMeanSqDeltaRMaxForward = Steer<double>("MeanSqDeltaRMaxForward",0.1);
     */
 
     bool passId = false;
@@ -305,24 +322,22 @@ void PileUpJetID::Process()
     {
       if(fUseConstituents)
       {
-        TIter itConstituents(candidate->GetCandidates());
-        while((constituent = static_cast<Candidate *>(itConstituents.Next())))
+        for(Candidate *const &constituent : candidate->GetCandidates())
         {
           if(constituent->Charge == 0 && constituent->Momentum.Pt() > fNeutralPTMin)
           {
-            fNeutralsInPassingJets->Add(constituent);
+            fNeutralsInPassingJets->emplace_back(constituent);
             //	    cout << "    Constitutent added Pt Eta Charge " << constituent->Momentum.Pt() << " " << constituent->Momentum.Eta() << " " << constituent->Charge << endl;
           }
         }
       }
       else
       { // use DeltaR
-        fItNeutralInputArray->Reset();
-        while((constituent = static_cast<Candidate *>(fItNeutralInputArray->Next())))
+        for(Candidate *const &constituent : *fNeutralInputArray)
         {
           if(constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR && constituent->Momentum.Pt() > fNeutralPTMin)
           {
-            fNeutralsInPassingJets->Add(constituent);
+            fNeutralsInPassingJets->emplace_back(constituent);
             //            cout << "    Constitutent added Pt Eta Charge " << constituent->Momentum.Pt() << " " << constituent->Momentum.Eta() << " " << constituent->Charge << endl;
           }
         }
@@ -332,3 +347,5 @@ void PileUpJetID::Process()
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("PileUpJetID", PileUpJetID);

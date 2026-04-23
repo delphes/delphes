@@ -24,20 +24,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
-
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
+#include <TApplication.h>
+#include <TDatabasePDG.h>
+#include <TFile.h>
+#include <TLorentzVector.h>
+#include <TParticlePDG.h>
+#include <TROOT.h>
 
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesPileUpReader.h"
-#include "classes/DelphesStream.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
 #include "ExRootAnalysis/ExRootTreeBranch.h"
@@ -115,11 +110,6 @@ void SignalHandler(int sig)
 int main(int argc, char *argv[])
 {
   char appName[] = "pileup2root";
-  stringstream message;
-  TFile *outputFile = 0;
-  ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchParticle = 0;
-  DelphesPileUpReader *reader = 0;
   Long64_t entry, allEntries;
 
   if(argc != 3)
@@ -141,25 +131,25 @@ int main(int argc, char *argv[])
 
   try
   {
-    outputFile = TFile::Open(argv[1], "CREATE");
-
-    if(outputFile == NULL)
+    const auto outputFile = std::make_unique<TFile>(argv[1], "CREATE");
+    if(!outputFile)
     {
+      std::ostringstream message;
       message << "can't open " << argv[1];
       throw runtime_error(message.str());
     }
 
     cout << "** Reading " << argv[2] << endl;
 
-    reader = new DelphesPileUpReader(argv[2]);
+    const auto reader = std::make_unique<DelphesPileUpReader>(argv[2]);
     allEntries = reader->GetEntries();
 
     cout << "** Input file contains " << allEntries << " events" << endl;
 
     if(allEntries > 0)
     {
-      treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
-      branchParticle = treeWriter->NewBranch("Particle", GenParticle::Class());
+      const auto treeWriter = std::make_unique<ExRootTreeWriter>(outputFile.get(), "Delphes");
+      ExRootTreeBranch *branchParticle = treeWriter->NewBranch("Particle", GenParticle::Class());
 
       ExRootProgressBar progressBar(allEntries - 1);
       // Loop over all events
@@ -172,7 +162,7 @@ int main(int argc, char *argv[])
         }
 
         treeWriter->Clear();
-        ProcessEvent(reader, branchParticle);
+        ProcessEvent(reader.get(), branchParticle);
         treeWriter->Fill();
 
         progressBar.Update(entry);
@@ -180,10 +170,7 @@ int main(int argc, char *argv[])
       treeWriter->Write();
 
       progressBar.Finish();
-
-      delete treeWriter;
     }
-    delete reader;
 
     cout << "** Exiting..." << endl;
 
@@ -191,9 +178,6 @@ int main(int argc, char *argv[])
   }
   catch(runtime_error &e)
   {
-    if(treeWriter) delete treeWriter;
-    if(reader) delete reader;
-    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }

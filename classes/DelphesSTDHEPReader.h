@@ -30,16 +30,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "classes/DelphesReader.h"
 #include "classes/DelphesXDRReader.h"
 
-class TObjArray;
-class TStopwatch;
 class TDatabasePDG;
-class ExRootTreeBranch;
-class DelphesFactory;
-class DelphesXDRReader;
 
-class DelphesSTDHEPReader
+class DelphesSTDHEPReader: public DelphesReader
 {
 public:
   enum STDHEPBlock
@@ -54,27 +50,22 @@ public:
     MCFIO_STDHEP4 = 201
   };
 
-  DelphesSTDHEPReader();
-  ~DelphesSTDHEPReader();
+  explicit DelphesSTDHEPReader(const DelphesParameters &);
 
-  void SetInputFile(FILE *inputFile);
+  void SetFactory(DelphesFactory *factory) override;
 
-  void Clear();
-  bool EventReady();
+  void LoadInputFile(std::string_view) override;
+  void Reset() override;
+  void Clear() override;
+  bool EventReady() override;
 
-  bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
-
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch);
+  void SetReadoutTime(double readoutTime) override;
+  void SetProcessingTime(double procTime) override;
 
 private:
-  void AnalyzeParticles(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  bool ReadBlock() override;
+
+  void AnalyzeParticles();
 
   void SkipBytes(int size);
   void SkipArray(int elsize);
@@ -86,20 +77,18 @@ private:
   void ReadSTDHEP();
   void ReadSTDHEP4();
 
-  FILE *fInputFile;
+  FILE *fInputFile{nullptr};
+
+  std::shared_ptr<LHEFEvent> fEventInfo;
 
   DelphesXDRReader fReader[7];
 
-  uint8_t *fBuffer;
+  std::array<uint8_t, 1000000 * 96 + 24> fBuffer;
 
-  TDatabasePDG *fPDG;
+  TDatabasePDG *fPDG{nullptr};
 
-  uint32_t fEntries;
-  int32_t fBlockType, fEventNumber, fEventSize;
-  double fWeight, fAlphaQCD, fAlphaQED;
-
-  uint32_t fScaleSize;
-  double fScale[10];
+  int32_t fBlockType{-1}, fEventNumber, fEventSize;
+  std::vector<double> fScale;
 };
 
 #endif // DelphesSTDHEPReader_h

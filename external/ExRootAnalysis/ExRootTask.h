@@ -36,6 +36,7 @@ public:
 
   void Add(TTask *task);
 
+  ExRootTask *NewTask(ExRootTask *task, const char *taskName);
   ExRootTask *NewTask(TClass *cl, const char *name);
   ExRootTask *NewTask(const char *className, const char *taskName);
 

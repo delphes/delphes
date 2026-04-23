@@ -18,7 +18,7 @@
 
 /** \class DecayFilter
  *
- *  This module randomly generates decays along the particle trajectory length 
+ *  This module randomly generates decays along the particle trajectory length
  *  according to actual particle decay length, taking into account for the boost
  *  and using ROOT TDatabasePDG as a source for the particle lifetime.
  *
@@ -31,108 +31,77 @@
  *
  */
 
-#include "modules/DecayFilter.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TDatabasePDG.h>
+#include <TMath.h>
+#include <TParticlePDG.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-DecayFilter::DecayFilter()
+class DecayFilter: public DelphesModule
 {
-}
+public:
+  using DelphesModule::DelphesModule;
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks")); // create output array
+  }
 
-DecayFilter::~DecayFilter()
-{
-}
+  void Process() override;
 
-//------------------------------------------------------------------------------
-
-void DecayFilter::Init()
-{
-
-  // import input array(s)
-
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array(s)
-
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
-void DecayFilter::Finish()
-{
-  delete fItInputArray;
-}
+private:
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void DecayFilter::Process()
 {
-  Candidate *candidate;
+  fOutputArray->clear();
+
   TDatabasePDG *pdgdb = TDatabasePDG::Instance();
-  const Double_t c = TMath::C(); // [m/s]
-  Double_t m, t, p, bgct, L, l;
+  const double c = TMath::C(); // [m/s]
 
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     // get particle information from PDG
     TParticlePDG *pdg = pdgdb->GetParticle(candidate->PID);
     if(!pdg)
     { // don't know this particle
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
       continue;
     }
-    m = pdg->Mass();
-    t = pdg->Lifetime(); // [s]
+    const double m = pdg->Mass();
+    const double t = pdg->Lifetime(); // [s]
     if(t == 0.)
     { // does not decay
-      fOutputArray->Add(candidate);
+      fOutputArray->emplace_back(candidate);
       continue;
     }
 
     // compute boosted decay length (beta gamma c tau)
-    p = candidate->P;
-    bgct = p / m * c * t; // [m]
+    const double p = candidate->P;
+    const double bgct = p / m * c * t; // [m]
 
     // get full trajectory length and generate random decay length
-    L = candidate->L * 1.0E-3; // [m]
-    l = gRandom->Exp(bgct);
+    const double L = candidate->L * 1.0E-3; // [m]
+    const double l = gRandom->Exp(bgct);
 
     // if random decay happens before end of trajectory, reject track
     if(l < L) continue;
 
     // else particle did not decay within the trajectory
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("DecayFilter", DecayFilter);

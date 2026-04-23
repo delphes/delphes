@@ -16,42 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "classes/DelphesFormula.h"
 #include "classes/DelphesClasses.h"
-
-#include "TString.h"
+#include "classes/DelphesFormula.h"
 
 #include <stdexcept>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-DelphesFormula::DelphesFormula() :
-  TFormula()
-{
-}
+DelphesFormula::DelphesFormula() : TFormula() {}
 
 //------------------------------------------------------------------------------
 
-DelphesFormula::DelphesFormula(const char * /*name*/, const char * /*expression*/) :
-  TFormula()
-{
-}
+DelphesFormula::DelphesFormula(const char * /*name*/, const char * /*expression*/) : TFormula() {}
 
 //------------------------------------------------------------------------------
 
-DelphesFormula::~DelphesFormula()
-{
-}
-
-//------------------------------------------------------------------------------
-
-Int_t DelphesFormula::Compile(const char *expression)
+Int_t DelphesFormula::Compile(std::string_view expression)
 {
   TString buffer;
-  const char *it;
-  for(it = expression; *it; ++it)
+  for(const char *it = expression.data(); *it; ++it)
   {
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
@@ -79,9 +62,8 @@ Int_t DelphesFormula::Compile(const char *expression)
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi, Double_t energy, Candidate *candidate)
+Double_t DelphesFormula::Eval(Double_t pt, Double_t eta, Double_t phi, Double_t energy, const Candidate *candidate) const
 {
-
   Double_t d0 = 0., dz = 0., ctgTheta = 0., radius = 0., density = 0.;
   if(candidate)
   {

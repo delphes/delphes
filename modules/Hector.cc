@@ -24,28 +24,11 @@
  *
  */
 
-#include "modules/Hector.h"
-
 #include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 #include "Hector/H_BeamLine.h"
 #include "Hector/H_BeamParticle.h"
@@ -53,91 +36,78 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-Hector::Hector()
+class Hector: public DelphesModule
 {
-}
+public:
+  explicit Hector(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    //
+    fDirection(Steer<int>("Direction", 1)),
+    fBeamLineLength(Steer<double>("BeamLineLength", 430.0)),
+    fDistance(Steer<double>("Distance", 420.0)),
+    fOffsetX(Steer<double>("OffsetX", 0.0)),
+    fOffsetS(Steer<double>("OffsetS", 120.0)),
+    fSigmaE(Steer<double>("SigmaE", 0.0)),
+    fSigmaX(Steer<double>("SigmaX", 0.0)),
+    fSigmaY(Steer<double>("SigmaY", 0.0)),
+    fSigmaT(Steer<double>("SigmaT", 0.0)),
+    fEtaMin(Steer<double>("EtaMin", 5.0)),
+    fBeamLine(std::make_unique<H_BeamLine>(fDirection, fBeamLineLength + 0.1))
+  {
+    fBeamLine->fill(Steer<std::string>("BeamLineFile", "cards/LHCB1IR5_5TeV.tfs"), fDirection, moduleParams.Get<std::string>("IPName", "IP5"));
+    fBeamLine->offsetElements(fOffsetS, fOffsetX);
+    fBeamLine->calcMatrix();
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "hits"));
+  }
+  void Process() override;
 
-Hector::~Hector()
-{
-}
+private:
+  const int fDirection;
 
-//------------------------------------------------------------------------------
+  const double fBeamLineLength, fDistance;
+  const double fOffsetX, fOffsetS;
+  const double fSigmaE, fSigmaX, fSigmaY, fSigmaT;
+  const double fEtaMin;
 
-void Hector::Init()
-{
-  // read Hector parameters
+  const std::unique_ptr<H_BeamLine> fBeamLine;
 
-  fDirection = GetInt("Direction", 1);
-  fBeamLineLength = GetDouble("BeamLineLength", 430.0);
-  fDistance = GetDouble("Distance", 420.0);
-  fOffsetX = GetDouble("OffsetX", 0.0);
-  fOffsetS = GetDouble("OffsetS", 120.0);
-  fSigmaE = GetDouble("SigmaE", 0.0);
-  fSigmaX = GetDouble("SigmaX", 0.0);
-  fSigmaY = GetDouble("SigmaY", 0.0);
-  fSigmaT = GetDouble("SigmaT", 0.0);
-  fEtaMin = GetDouble("EtaMin", 5.0);
-
-  fBeamLine = new H_BeamLine(fDirection, fBeamLineLength + 0.1);
-  fBeamLine->fill(GetString("BeamLineFile", "cards/LHCB1IR5_5TeV.tfs"), fDirection, GetString("IPName", "IP5"));
-  fBeamLine->offsetElements(fOffsetS, fOffsetX);
-  fBeamLine->calcMatrix();
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "hits"));
-}
-
-//------------------------------------------------------------------------------
-
-void Hector::Finish()
-{
-  delete fItInputArray;
-  delete fBeamLine;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void Hector::Process()
 {
-  Candidate *candidate, *mother;
-  Double_t pz;
-  Double_t x, y, z, tx, ty, theta;
-  Double_t distance, time;
+  fOutputArray->clear();
 
-  const Double_t c_light = 2.99792458E8;
+  const double c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    pz = candidateMomentum.Pz();
+    const double pz = candidateMomentum.Pz();
 
-    if(TMath::Abs(candidateMomentum.Eta()) <= fEtaMin || TMath::Sign(pz, Double_t(fDirection)) != pz) continue;
+    if(std::fabs(candidateMomentum.Eta()) <= fEtaMin || pz * fDirection / std::abs(fDirection) != pz) continue;
 
-    x = 1.0E3 * candidatePosition.X();
-    y = 1.0E3 * candidatePosition.Y();
-    z = 1.0E-3 * candidatePosition.Z();
+    const double x = 1.0E3 * candidatePosition.X(),
+                 y = 1.0E3 * candidatePosition.Y(),
+                 z = 1.0E-3 * candidatePosition.Z();
 
-    //    tx = 1.0E6 * TMath::ATan(candidateMomentum.Px()/pz);
-    //    ty = 1.0E6 * TMath::ATan(candidateMomentum.Py()/pz);
+    //const double tx = 1.0E6 * std::atan(candidateMomentum.Px() / pz),
+    //             ty = 1.0E6 * std::atan(candidateMomentum.Py() / pz);
 
-    tx = 0.0;
-    ty = 0.0;
+    const double tx = 0.0, ty = 0.0;
 
-    theta = TMath::Hypot(TMath::ATan(candidateMomentum.Px() / pz), TMath::ATan(candidateMomentum.Py() / pz));
-    distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / TMath::Cos(theta);
-    time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
+    const double theta = std::hypot(std::atan(candidateMomentum.Px() / pz), std::atan(candidateMomentum.Py() / pz));
+    const double distance = (fDistance - 1.0E-3 * candidatePosition.Z()) / std::cos(theta);
+    const double time = gRandom->Gaus((distance + 1.0E-3 * candidatePosition.T()) / c_light, fSigmaT);
 
     H_BeamParticle particle(candidate->Mass, candidate->Charge);
     //    particle.set4Momentum(candidateMomentum);
@@ -148,20 +118,21 @@ void Hector::Process()
     particle.smearAng(fSigmaX, fSigmaY, gRandom);
     particle.smearE(fSigmaE, gRandom);
 
-    particle.computePath(fBeamLine);
+    particle.computePath(fBeamLine.get());
 
-    if(particle.stopped(fBeamLine)) continue;
+    if(particle.stopped(fBeamLine.get())) continue;
 
     particle.propagate(fDistance);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
-    candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
-    candidate->AddCandidate(mother);
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Position.SetXYZT(particle.getX(), particle.getY(), particle.getS(), time);
+    new_candidate->Momentum.SetPxPyPzE(particle.getTX(), particle.getTY(), 0.0, particle.getE());
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Hector", Hector);

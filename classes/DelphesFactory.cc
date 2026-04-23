@@ -18,77 +18,27 @@
 
 /** \class DelphesFactory
  *
- *  Class handling creation of Candidate,
- *  TObjArray and all other objects.
+ *  Class handling creation of Candidate, and all other objects.
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author L. Forthomme - AGH, Krakow
  *
  */
 
-#include "classes/DelphesFactory.h"
 #include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
 
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-
-#include "TClass.h"
-#include "TObjArray.h"
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-DelphesFactory::DelphesFactory(const char *name) :
-  TNamed(name, ""), fObjArrays(0)
+void DelphesFactory::Clear()
 {
-  fObjArrays = new ExRootTreeBranch("PermanentObjArrays", TObjArray::Class(), 0);
-}
-
-//------------------------------------------------------------------------------
-
-DelphesFactory::~DelphesFactory()
-{
-  if(fObjArrays) delete fObjArrays;
-
-  map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
-  for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
-  {
-    delete(itBranches->second);
-  }
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesFactory::Clear(Option_t * /*option*/)
-{
-  set<TObject *>::iterator itPool;
-  for(itPool = fPool.begin(); itPool != fPool.end(); ++itPool)
-  {
-    (*itPool)->Clear();
-  }
-
   TProcessID::SetObjectCount(0);
-
-  map<const TClass *, ExRootTreeBranch *>::iterator itBranches;
-  for(itBranches = fBranches.begin(); itBranches != fBranches.end(); ++itBranches)
-  {
-    itBranches->second->Clear();
-  }
-}
-
-//------------------------------------------------------------------------------
-
-TObjArray *DelphesFactory::NewPermanentArray()
-{
-  TObjArray *array = static_cast<TObjArray *>(fObjArrays->NewEntry());
-  fPool.insert(array);
-  return array;
+  fCandidates.clear();
 }
 
 //------------------------------------------------------------------------------
 
 Candidate *DelphesFactory::NewCandidate()
 {
-  Candidate *object = New<Candidate>();
+  Candidate *object = static_cast<Candidate *>(fCandidates.emplace_back(std::make_unique<Candidate>()).get());
   object->SetFactory(this);
   TProcessID::AssignID(object);
   return object;
@@ -96,25 +46,31 @@ Candidate *DelphesFactory::NewCandidate()
 
 //------------------------------------------------------------------------------
 
-TObject *DelphesFactory::New(TClass *cl)
+bool DelphesFactory::Has(std::string_view collectionName) const
 {
-  TObject *object = 0;
-  ExRootTreeBranch *branch = 0;
-  map<const TClass *, ExRootTreeBranch *>::iterator it = fBranches.find(cl);
+  return fMemorySlots.count(std::string{collectionName}) > 0
+    && fMemorySlots.at(std::string{collectionName}) != nullptr;
+}
 
-  if(it != fBranches.end())
-  {
-    branch = it->second;
-  }
-  else
-  {
-    branch = new ExRootTreeBranch(cl->GetName(), cl, 0);
-    fBranches.insert(make_pair(cl, branch));
-  }
+//------------------------------------------------------------------------------
 
-  object = branch->NewEntry();
-  object->Clear();
-  return object;
+std::vector<std::string> DelphesFactory::GetCollections() const
+{
+  std::vector<std::string> collections;
+  for(const auto &[collectionName, collectionPtr] : fMemorySlots)
+    collections.emplace_back(collectionName);
+  return collections;
+}
+
+//------------------------------------------------------------------------------
+
+void DelphesFactory::ThrowAttachingFailure(std::string_view collectionName) const
+{
+  std::ostringstream message;
+  message << "Failed to attach memory segment to the collection name '" << collectionName << "'. List of collections registered:\n";
+  for(const std::string &collectionName : GetCollections())
+    message << " * " << collectionName << std::endl;
+  throw std::runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------

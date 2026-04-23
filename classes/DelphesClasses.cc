@@ -30,48 +30,120 @@
 #include "classes/DelphesFactory.h"
 #include "classes/SortableObject.h"
 
-CompBase *GenParticle::fgCompare = 0;
-CompBase *Photon::fgCompare = CompPT<Photon>::Instance();
-CompBase *Electron::fgCompare = CompPT<Electron>::Instance();
-CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
+static constexpr Double_t c_light = 2.99792458E8;
 
-CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
-CompBase *Track::fgCompare = CompPT<Track>::Instance();
-CompBase *Tower::fgCompare = CompE<Tower>::Instance();
-CompBase *ParticleFlowCandidate::fgCompare = CompE<ParticleFlowCandidate>::Instance();
-CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
-CompBase *Vertex::fgCompare = CompSumPT2<Vertex>::Instance();
 CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
+
+//------------------------------------------------------------------------------
+
+void Candidate::AddCandidate(const Candidate *object)
+{
+  fArray.push_back(const_cast<Candidate *>(object));
+}
+
+//------------------------------------------------------------------------------
+
+const std::vector<Candidate *> &Candidate::GetCandidates() const
+{
+  return fArray;
+}
+
+//------------------------------------------------------------------------------
+
+Bool_t Candidate::Overlaps(const Candidate *object) const
+{
+  if(object->GetUniqueID() == GetUniqueID()) return true;
+
+  for(const Candidate *candidate : fArray)
+  {
+    if(candidate->Overlaps(object)) return true;
+  }
+
+  for(const Candidate *candidate : object->fArray)
+  {
+    if(candidate->Overlaps(this)) return true;
+  }
+
+  return false;
+}
+
+//------------------------------------------------------------------------------
+
+TObject *Candidate::Clone(const char * /*newname*/) const
+{
+  Candidate *object = fFactory->NewCandidate();
+  Copy(*object);
+  return object;
+}
+
+//------------------------------------------------------------------------------
+
+void Candidate::Copy(TObject &obj) const
+{
+  Candidate &object = static_cast<Candidate &>(obj);
+  object = *this;
+  object.fFactory = fFactory;
+  object.fArray.clear();
+
+  // copy cluster timing info
+  std::copy(ECalEnergyTimePairs.begin(), ECalEnergyTimePairs.end(), std::back_inserter(object.ECalEnergyTimePairs));
+
+  for(const Candidate *candidate : fArray)
+    object.AddCandidate(candidate);
+}
+
+//------------------------------------------------------------------------------
+
+void Candidate::Clear(Option_t * /*option*/)
+{
+  *this = Candidate();
+  SetUniqueID(0);
+  ResetBit(kIsReferenced);
+  TrackCovariance.Zero();
+  ECalEnergyTimePairs.clear();
+  fArray.clear();
+}
+
+//------------------------------------------------------------------------------
+
 CompBase *CscCluster::fgCompare = CompE<CscCluster>::Instance();
 
-//------------------------------------------------------------------------------
-
-TLorentzVector GenParticle::P4() const
+CscCluster::CscCluster(const Candidate &cand) :
+  Eta(std::fabs(cand.Momentum.CosTheta()) == 1.0 ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta()),
+  Phi(cand.Momentum.Phi()), PT(cand.Momentum.Pt()),
+  Px(cand.Momentum.Px()), Py(cand.Momentum.Py()), Pz(cand.Momentum.Pz()), E(cand.Momentum.E()),
+  Ehad(cand.Ehad), Eem(cand.Eem),
+  pid(cand.PID),
+  X(cand.DecayPosition.X()), Y(cand.DecayPosition.Y()), Z(cand.DecayPosition.Z()),
+  R(std::hypot(X, Y)), // LLP distance in transverse plane
+  beta(cand.Momentum.P() / cand.Momentum.E())
 {
-  TLorentzVector vec;
-  vec.SetPxPyPzE(Px, Py, Pz, E);
-  return vec;
+  SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
+
+  const double gamma = 1.0 / std::sqrt(1 - beta * beta);
+  const double decayDistance = std::hypot(cand.DecayPosition.X(), cand.DecayPosition.Y(), cand.DecayPosition.Z()); // mm
+  ctau = decayDistance / (beta * gamma); // LLP travel time in its rest frame
+  T = decayDistance * (1. / beta - 1) * 1.0E-3 / c_light * 1e9; // ns
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector MissingET::P4() const
+CompBase *Electron::fgCompare = CompPT<Electron>::Instance();
+
+Electron::Electron(const Candidate &cand) :
+  PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  T(cand.Position.T() * 1.e-3 / c_light),
+  Charge(cand.Charge),
+  Particle(cand.GetCandidates().at(0)),
+  // Isolation variables
+  IsolationVar(cand.IsolationVar), IsolationVarRhoCorr(cand.IsolationVarRhoCorr),
+  SumPtCharged(cand.SumPtCharged), SumPtNeutral(cand.SumPtNeutral), SumPtChargedPU(cand.SumPtChargedPU), SumPt(cand.SumPt),
+  D0(cand.D0), DZ(cand.DZ), ErrorD0(cand.ErrorD0), ErrorDZ(cand.ErrorDZ) // displacement
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(MET, Eta, Phi, 0.0);
-  return vec;
 }
-
-//------------------------------------------------------------------------------
-
-TLorentzVector Photon::P4() const
-{
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
-  return vec;
-}
-
-//------------------------------------------------------------------------------
 
 TLorentzVector Electron::P4() const
 {
@@ -82,14 +154,79 @@ TLorentzVector Electron::P4() const
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Muon::P4() const
+CompBase *GenParticle::fgCompare = 0;
+
+GenParticle::GenParticle(const Candidate &cand) :
+  PID(cand.PID), Status(cand.Status), IsPU(cand.IsPU),
+  M1(cand.M1), M2(cand.M2), D1(cand.D1), D2(cand.D2),
+  Charge(cand.Charge), Mass(cand.Mass),
+  E(cand.Momentum.E()), Px(cand.Momentum.Px()), Py(cand.Momentum.Py()), Pz(cand.Momentum.Pz()),
+  P(cand.Momentum.P()), PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  Rapidity((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Rapidity())),
+  T(cand.Position.T() * 1.e-3 / c_light), X(cand.Position.X()), Y(cand.Position.Y()), Z(cand.Position.Z())
 {
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
-  return vec;
+  SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
 }
 
+TLorentzVector GenParticle::P4() const { return {Px, Py, Pz, E}; }
+
 //------------------------------------------------------------------------------
+
+CompBase *HectorHit::fgCompare = CompE<HectorHit>::Instance();
+
+HectorHit::HectorHit(const Candidate &cand) :
+  E(cand.Momentum.E()),
+  Tx(cand.Momentum.Px()), Ty(cand.Momentum.Py()),
+  T(cand.Position.T()), X(cand.Position.X()), Y(cand.Position.Y()), S(cand.Position.Z()),
+  Particle(cand.GetCandidates().at(0)) {}
+
+//------------------------------------------------------------------------------
+
+CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
+
+Jet::Jet(const Candidate &cand) :
+  PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  T(cand.Position.T() * 1.e-3 / c_light),
+  Mass(cand.Momentum.M()),
+  DeltaEta(cand.DeltaEta), DeltaPhi(cand.DeltaPhi),
+  Flavor(cand.Flavor), FlavorAlgo(cand.FlavorAlgo), FlavorPhys(cand.FlavorPhys), TauFlavor(cand.TauFlavor),
+  BTag(cand.BTag), BTagAlgo(cand.BTagAlgo), BTagPhys(cand.BTagPhys),
+  TauTag(cand.TauTag), TauWeight(cand.TauWeight),
+  Charge(cand.Charge),
+  // Pile-Up Jet ID variables
+  NCharged(cand.NCharged), NNeutrals(cand.NNeutrals),
+  NeutralEnergyFraction(cand.NeutralEnergyFraction), ChargedEnergyFraction(cand.ChargedEnergyFraction),
+  Beta(cand.Beta), BetaStar(cand.BetaStar), MeanSqDeltaR(cand.MeanSqDeltaR), PTD(cand.PTD),
+  SoftDroppedJet(cand.SoftDroppedJet), SoftDroppedSubJet1(cand.SoftDroppedSubJet1), SoftDroppedSubJet2(cand.SoftDroppedSubJet2),
+  // Sub-structure variables
+  NSubJetsTrimmed(cand.NSubJetsTrimmed), NSubJetsPruned(cand.NSubJetsPruned), NSubJetsSoftDropped(cand.NSubJetsSoftDropped),
+  // exclusive clustering variables
+  ExclYmerge12(cand.ExclYmerge12), ExclYmerge23(cand.ExclYmerge23), ExclYmerge34(cand.ExclYmerge34), ExclYmerge45(cand.ExclYmerge45), ExclYmerge56(cand.ExclYmerge56),
+  Area(cand.Area)
+{
+  double ecalEnergy = 0., hcalEnergy = 0.;
+  for(Candidate *const &constituent : cand.GetCandidates())
+  {
+    Constituents.Add(constituent);
+    ecalEnergy += constituent->Eem;
+    hcalEnergy += constituent->Ehad;
+  }
+  EhadOverEem = ecalEnergy > 0.0 ? hcalEnergy / ecalEnergy : 999.9;
+
+  for(size_t i = 0; i < 5; ++i)
+  {
+    FracPt[i] = cand.FracPt[i];
+    Tau[i] = cand.Tau[i];
+    TrimmedP4[i] = cand.TrimmedP4[i];
+    PrunedP4[i] = cand.PrunedP4[i];
+    SoftDroppedP4[i] = cand.SoftDroppedP4[i];
+  }
+}
 
 TLorentzVector Jet::P4() const
 {
@@ -100,72 +237,79 @@ TLorentzVector Jet::P4() const
 
 //------------------------------------------------------------------------------
 
-TLorentzVector Track::P4() const
+MissingET::MissingET(const Candidate &cand) : MET(cand.Momentum.Pt()), Eta((-cand.Momentum).Eta()), Phi((-cand.Momentum).Phi()) {}
+
+TLorentzVector MissingET::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
+  vec.SetPtEtaPhiM(MET, Eta, Phi, 0.0);
   return vec;
 }
 
 //------------------------------------------------------------------------------
 
-TMatrixDSym Track::CovarianceMatrix() const
+CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
+
+Muon::Muon(const Candidate &cand) :
+  PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  T(cand.Position.T() * 1.e-3 / c_light),
+  Charge(cand.Charge), Particle(cand.GetCandidates().at(0)),
+  // Isolation variables
+  IsolationVar(cand.IsolationVar), IsolationVarRhoCorr(cand.IsolationVarRhoCorr),
+  SumPtCharged(cand.SumPtCharged), SumPtNeutral(cand.SumPtNeutral), SumPtChargedPU(cand.SumPtChargedPU), SumPt(cand.SumPt),
+  // Displacement variables
+  D0(cand.D0), DZ(cand.DZ), ErrorD0(cand.ErrorD0), ErrorDZ(cand.ErrorDZ)
 {
-  TMatrixDSym Cv;
-  Cv.ResizeTo(5, 5);
-
-  // convert diagonal term to original units
-  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
-  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
-  Cv(2, 2) = TMath::Power(ErrorC, 2.);
-  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
-  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
-
-  // off diagonal terms
-  Cv(0, 1) = ErrorD0Phi;
-  Cv(0, 2) = ErrorD0C;
-  Cv(0, 3) = ErrorD0DZ;
-  Cv(0, 4) = ErrorD0CtgTheta;
-  Cv(1, 2) = ErrorPhiC;
-  Cv(1, 3) = ErrorPhiDZ;
-  Cv(1, 4) = ErrorPhiCtgTheta;
-  Cv(2, 3) = ErrorCDZ;
-  Cv(2, 4) = ErrorCCtgTheta;
-  Cv(3, 4) = ErrorDZCtgTheta;
-
-  Cv(1, 0) = Cv(0, 1);
-  Cv(2, 0) = Cv(0, 2);
-  Cv(3, 0) = Cv(0, 3);
-  Cv(4, 0) = Cv(0, 4);
-  Cv(2, 1) = Cv(1, 2);
-  Cv(3, 1) = Cv(1, 3);
-  Cv(4, 1) = Cv(1, 4);
-  Cv(3, 2) = Cv(2, 3);
-  Cv(4, 2) = Cv(2, 4);
-  Cv(4, 3) = Cv(3, 4);
-
-  return Cv;
+  SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
 }
 
-//------------------------------------------------------------------------------
-
-TLorentzVector Tower::P4() const
+TLorentzVector Muon::P4() const
 {
   TLorentzVector vec;
-  vec.SetPtEtaPhiE(ET, Eta, Phi, E);
+  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
   return vec;
 }
 
 //------------------------------------------------------------------------------
 
-TLorentzVector ParticleFlowCandidate::P4() const
-{
-  TLorentzVector vec;
-  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
-  return vec;
-}
+CompBase *ParticleFlowCandidate::fgCompare = CompE<ParticleFlowCandidate>::Instance();
 
-//------------------------------------------------------------------------------
+ParticleFlowCandidate::ParticleFlowCandidate(const Candidate &cand) :
+  PID(cand.PID), Charge(cand.Charge),
+  IsPU(cand.IsPU), IsRecoPU(cand.IsRecoPU),
+  HardEnergyFraction(std::fabs(cand.Charge) > 0. ? (cand.IsPU ? 0. : 1.) : cand.BetaStar),
+  E(cand.Momentum.E()), P(cand.Momentum.P()), PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  CtgTheta((std::tan(cand.Momentum.Theta()) != 0) ? 1 / std::tan(cand.Momentum.Theta()) : 1e10),
+  C(cand.C),
+  Mass(cand.Momentum.M()),
+  EtaOuter(Eta), PhiOuter(cand.Position.Phi()),
+  T(cand.InitialPosition.T() * 1.e-3 / c_light), X(cand.InitialPosition.X()), Y(cand.InitialPosition.Y()), Z(cand.InitialPosition.Z()),
+  TOuter(cand.Position.T() * 1.e-3 / c_light), XOuter(cand.Position.X()), YOuter(cand.Position.Y()), ZOuter(cand.Position.Z()),
+  Xd(cand.Xd), Yd(cand.Yd), Zd(cand.Zd),
+  XFirstHit(cand.XFirstHit), YFirstHit(cand.YFirstHit), ZFirstHit(cand.ZFirstHit),
+  L(cand.L), D0(cand.D0), DZ(cand.DZ), Nclusters(cand.Nclusters), dNdx(cand.dNdx),
+  ErrorP(cand.ErrorP), ErrorPT(cand.ErrorPT), ErrorPhi(cand.ErrorPhi), ErrorCtgTheta(cand.ErrorCtgTheta),
+  // diagonal covariance matrix terms
+  ErrorT(cand.ErrorT * 1.e-3 / c_light), ErrorD0(cand.ErrorD0), ErrorDZ(cand.ErrorDZ), ErrorC(cand.ErrorC),
+  // add some offdiagonal covariance matrix elements
+  ErrorD0Phi(cand.TrackCovariance(0, 1)), ErrorD0C(cand.TrackCovariance(0, 2)), ErrorD0DZ(cand.TrackCovariance(0, 3)), ErrorD0CtgTheta(cand.TrackCovariance(0, 4)),
+  ErrorPhiC(cand.TrackCovariance(1, 2)), ErrorPhiDZ(cand.TrackCovariance(1, 3)), ErrorPhiCtgTheta(cand.TrackCovariance(1, 4)),
+  ErrorCDZ(cand.TrackCovariance(2, 3)), ErrorCCtgTheta(cand.TrackCovariance(2, 4)),
+  ErrorDZCtgTheta(cand.TrackCovariance(3, 4)),
+  VertexIndex(cand.ClusterIndex),
+  NTimeHits(cand.NTimeHits),
+  Eem(cand.Eem), Ehad(cand.Ehad), Etrk(cand.Etrk)
+{
+  SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
+  for(size_t i = 0; i < 4; ++i)
+    Edges[i] = cand.Edges[i];
+}
 
 TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
 {
@@ -205,423 +349,164 @@ TMatrixDSym ParticleFlowCandidate::CovarianceMatrix() const
   return Cv;
 }
 
-//------------------------------------------------------------------------------
-
-Candidate::Candidate() :
-  PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
-  Charge(0), Mass(0.0),
-  IsPU(0), IsRecoPU(0), IsConstituent(0), IsFromConversion(0),
-  Flavor(0), FlavorAlgo(0), FlavorPhys(0), TauFlavor(0),
-  BTag(0), BTagAlgo(0), BTagPhys(0),
-  TauTag(0), TauWeight(0.0), Eem(0.0), Ehad(0.0), Etrk(0.0),
-  DeltaEta(0.0), DeltaPhi(0.0),
-  Momentum(0.0, 0.0, 0.0, 0.0),
-  Position(0.0, 0.0, 0.0, 0.0),
-  InitialPosition(0.0, 0.0, 0.0, 0.0),
-  PositionError(0.0, 0.0, 0.0, 0.0),
-  DecayPosition(0.0, 0.0, 0.0, 0.0),
-  Area(0.0, 0.0, 0.0, 0.0),
-  L(0),
-  DZ(0), ErrorDZ(0),
-  D0(0), ErrorD0(0),
-  C(0), ErrorC(0),
-  P(0), ErrorP(0),
-  PT(0), ErrorPT(0),
-  CtgTheta(0), ErrorCtgTheta(0),
-  Phi(0), ErrorPhi(0),
-  Nclusters(0.0),
-  dNdx(0.0),
-  Xd(0), Yd(0), Zd(0),
-  XFirstHit(0), YFirstHit(0), ZFirstHit(0),
-  TrackResolution(0),
-  NCharged(0),
-  NNeutrals(0),
-  Beta(0),
-  BetaStar(0),
-  MeanSqDeltaR(0),
-  PTD(0),
-  NeutralEnergyFraction(0), // neutral energy fraction
-  ChargedEnergyFraction(0), // charged energy fraction
-  NTimeHits(-1),
-  IsolationVar(-999),
-  IsolationVarRhoCorr(-999),
-  SumPtCharged(-999),
-  SumPtNeutral(-999),
-  SumPtChargedPU(-999),
-  SumPt(-999),
-  TrackCovariance(5),
-  ClusterIndex(-1), ClusterNDF(0), ClusterSigma(0), SumPT2(0), BTVSumPT2(0), GenDeltaZ(0), GenSumPT2(0),
-  NSubJetsTrimmed(0),
-  NSubJetsPruned(0),
-  NSubJetsSoftDropped(0),
-  ExclYmerge12(0),
-  ExclYmerge23(0),
-  ExclYmerge34(0),
-  ExclYmerge45(0),
-  ExclYmerge56(0),
-  ParticleDensity(0),
-  fFactory(0),
-  fArray(0)
+TLorentzVector ParticleFlowCandidate::P4() const
 {
-  int i;
-  Edges[0] = 0.0;
-  Edges[1] = 0.0;
-  Edges[2] = 0.0;
-  Edges[3] = 0.0;
-  FracPt[0] = 0.0;
-  FracPt[1] = 0.0;
-  FracPt[2] = 0.0;
-  FracPt[3] = 0.0;
-  FracPt[4] = 0.0;
-  Tau[0] = 0.0;
-  Tau[1] = 0.0;
-  Tau[2] = 0.0;
-  Tau[3] = 0.0;
-  Tau[4] = 0.0;
-
-  SoftDroppedJet.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  SoftDroppedSubJet1.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  SoftDroppedSubJet2.SetXYZT(0.0, 0.0, 0.0, 0.0);
-
-  for(i = 0; i < 5; ++i)
-  {
-    TrimmedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-    PrunedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-    SoftDroppedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-  }
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
+  return vec;
 }
 
 //------------------------------------------------------------------------------
 
-void Candidate::AddCandidate(Candidate *object)
+CompBase *Photon::fgCompare = CompPT<Photon>::Instance();
+
+Photon::Photon(const Candidate &cand) :
+  PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  E(cand.Momentum.E()), T(cand.Position.T() * 1.e-3 / c_light),
+  EhadOverEem(cand.Eem > 0. ? cand.Ehad / cand.Eem : 999.9),
+  // Isolation variables
+  IsolationVar(cand.IsolationVar), IsolationVarRhoCorr(cand.IsolationVarRhoCorr),
+  SumPtCharged(cand.SumPtCharged), SumPtNeutral(cand.SumPtNeutral), SumPtChargedPU(cand.SumPtChargedPU), SumPt(cand.SumPt),
+  Status(cand.Status)
 {
-  if(!fArray) fArray = fFactory->NewArray();
-  fArray->Add(object);
+}
+
+TLorentzVector Photon::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
+  return vec;
 }
 
 //------------------------------------------------------------------------------
 
-TObjArray *Candidate::GetCandidates()
+ScalarHT::ScalarHT(const Candidate &cand) : HT(cand.Momentum.Pt()) {}
+
+//------------------------------------------------------------------------------
+
+CompBase *Tower::fgCompare = CompE<Tower>::Instance();
+
+Tower::Tower(const Candidate &cand) :
+  ET(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? ((cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9) : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  E(cand.Momentum.E()),
+  T(cand.Position.T() * 1.e-3 / c_light),
+  X(cand.Position.X()), Y(cand.Position.Y()), Z(cand.Position.Z()),
+  NTimeHits(cand.NTimeHits),
+  Eem(cand.Eem), Ehad(cand.Ehad), Etrk(cand.Etrk),
+  IsPU(cand.IsPU), IsRecoPU(cand.IsRecoPU),
+  HardEnergyFraction(cand.BetaStar)
 {
-  if(!fArray) fArray = fFactory->NewArray();
-  return fArray;
+  SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
+  for(size_t i = 0; i < 4; ++i)
+    Edges[i] = cand.Edges[i];
+}
+
+TLorentzVector Tower::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiE(ET, Eta, Phi, E);
+  return vec;
 }
 
 //------------------------------------------------------------------------------
 
-Bool_t Candidate::Overlaps(const Candidate *object) const
+CompBase *Track::fgCompare = CompPT<Track>::Instance();
+
+Track::Track(const Candidate &cand) :
+  PID(cand.PID), Charge(cand.Charge),
+  IsPU(cand.IsPU), IsRecoPU(cand.IsRecoPU), HardEnergyFraction(cand.IsPU ? 0. : 1.),
+  P(cand.Momentum.P()), PT(cand.Momentum.Pt()),
+  Eta((std::fabs(cand.Momentum.CosTheta()) == 1. ? (cand.Momentum.Pz() >= 0. ? 1. : -1.) * 999.9 : cand.Momentum.Eta())),
+  Phi(cand.Momentum.Phi()),
+  CtgTheta((std::tan(cand.Momentum.Theta()) != 0) ? 1 / std::tan(cand.Momentum.Theta()) : 1e10),
+  C(cand.C), Mass(cand.Momentum.M()),
+  EtaOuter(Eta), PhiOuter(cand.Position.Phi()),
+  T(cand.InitialPosition.T() * 1.e-3 / c_light),
+  X(cand.InitialPosition.X()), Y(cand.InitialPosition.Y()), Z(cand.InitialPosition.Z()),
+  TOuter(cand.Position.T() * 1.0E-3 / c_light),
+  XOuter(cand.Position.X()), YOuter(cand.Position.Y()), ZOuter(cand.Position.Z()),
+  Xd(cand.Xd), Yd(cand.Yd), Zd(cand.Zd),
+  XFirstHit(cand.XFirstHit), YFirstHit(cand.YFirstHit), ZFirstHit(cand.ZFirstHit),
+  L(cand.L), D0(cand.D0), DZ(cand.DZ),
+  Nclusters(cand.Nclusters), dNdx(cand.dNdx),
+  // diagonal covariance matrix terms
+  ErrorP(cand.ErrorP), ErrorPT(cand.ErrorPT), ErrorPhi(cand.ErrorPhi), ErrorCtgTheta(cand.ErrorCtgTheta),
+  ErrorT(cand.ErrorT * 1.0E-3 / c_light), ErrorD0(cand.ErrorD0), ErrorDZ(cand.ErrorDZ), ErrorC(cand.ErrorC),
+  // add some offdiagonal covariance matrix elements
+  ErrorD0Phi(cand.TrackCovariance(0, 1) * 1.e3), ErrorD0C(cand.TrackCovariance(0, 2)), ErrorD0DZ(cand.TrackCovariance(0, 3) * 1.e6), ErrorD0CtgTheta(cand.TrackCovariance(0, 4) * 1.e3),
+  ErrorPhiC(cand.TrackCovariance(1, 2) * 1.e-3), ErrorPhiDZ(cand.TrackCovariance(1, 3) * 1.e3), ErrorPhiCtgTheta(cand.TrackCovariance(1, 4)),
+  ErrorCDZ(cand.TrackCovariance(2, 3)), ErrorCCtgTheta(cand.TrackCovariance(2, 4) * 1.e-3),
+  ErrorDZCtgTheta(cand.TrackCovariance(3, 4) * 1.e3),
+  Particle(cand.GetCandidates().at(0)),
+  VertexIndex(cand.ClusterIndex)
 {
-  const Candidate *candidate;
+  SetBit(kIsReferenced);
+  SetUniqueID(cand.GetUniqueID());
+}
 
-  if(object->GetUniqueID() == GetUniqueID()) return kTRUE;
+TMatrixDSym Track::CovarianceMatrix() const
+{
+  TMatrixDSym Cv;
+  Cv.ResizeTo(5, 5);
 
-  if(fArray)
-  {
-    TIter it(fArray);
-    while((candidate = static_cast<Candidate *>(it.Next())))
-    {
-      if(candidate->Overlaps(object)) return kTRUE;
-    }
-  }
+  // convert diagonal term to original units
+  Cv(0, 0) = TMath::Power(ErrorD0, 2.);
+  Cv(1, 1) = TMath::Power(ErrorPhi, 2.);
+  Cv(2, 2) = TMath::Power(ErrorC, 2.);
+  Cv(3, 3) = TMath::Power(ErrorDZ, 2.);
+  Cv(4, 4) = TMath::Power(ErrorCtgTheta, 2.);
 
-  if(object->fArray)
-  {
-    TIter it(object->fArray);
-    while((candidate = static_cast<Candidate *>(it.Next())))
-    {
-      if(candidate->Overlaps(this)) return kTRUE;
-    }
-  }
+  // off diagonal terms
+  Cv(0, 1) = ErrorD0Phi;
+  Cv(0, 2) = ErrorD0C;
+  Cv(0, 3) = ErrorD0DZ;
+  Cv(0, 4) = ErrorD0CtgTheta;
+  Cv(1, 2) = ErrorPhiC;
+  Cv(1, 3) = ErrorPhiDZ;
+  Cv(1, 4) = ErrorPhiCtgTheta;
+  Cv(2, 3) = ErrorCDZ;
+  Cv(2, 4) = ErrorCCtgTheta;
+  Cv(3, 4) = ErrorDZCtgTheta;
 
-  return kFALSE;
+  Cv(1, 0) = Cv(0, 1);
+  Cv(2, 0) = Cv(0, 2);
+  Cv(3, 0) = Cv(0, 3);
+  Cv(4, 0) = Cv(0, 4);
+  Cv(2, 1) = Cv(1, 2);
+  Cv(3, 1) = Cv(1, 3);
+  Cv(4, 1) = Cv(1, 4);
+  Cv(3, 2) = Cv(2, 3);
+  Cv(4, 2) = Cv(2, 4);
+  Cv(4, 3) = Cv(3, 4);
+
+  return Cv;
+}
+
+TLorentzVector Track::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
+  return vec;
 }
 
 //------------------------------------------------------------------------------
 
-TObject *Candidate::Clone(const char * /*newname*/) const
+CompBase *Vertex::fgCompare = CompSumPT2<Vertex>::Instance();
+
+Vertex::Vertex(const Candidate &cand) :
+  T(cand.Position.T() * 1.e-3 / c_light), X(cand.Position.X()), Y(cand.Position.Y()), Z(cand.Position.Z()),
+  ErrorT(cand.PositionError.T() * 1.e-3 / c_light), ErrorX(cand.PositionError.X()), ErrorY(cand.PositionError.Y()), ErrorZ(cand.PositionError.Z()),
+  Index(cand.ClusterIndex), NDF(cand.ClusterNDF),
+  Sigma(cand.ClusterSigma), SumPT2(cand.SumPT2), GenSumPT2(cand.GenSumPT2),
+  GenDeltaZ(cand.GenDeltaZ), BTVSumPT2(cand.BTVSumPT2)
 {
-  Candidate *object = fFactory->NewCandidate();
-  Copy(*object);
-  return object;
+  for(Candidate *const &constituent : cand.GetCandidates())
+    Constituents.Add(const_cast<Candidate *>(constituent));
 }
 
 //------------------------------------------------------------------------------
-
-void Candidate::Copy(TObject &obj) const
-{
-  Candidate &object = static_cast<Candidate &>(obj);
-  Candidate *candidate;
-
-  object.PID = PID;
-  object.Status = Status;
-  object.M1 = M1;
-  object.M2 = M2;
-  object.D1 = D1;
-  object.D2 = D2;
-  object.Charge = Charge;
-  object.Mass = Mass;
-  object.IsPU = IsPU;
-  object.IsRecoPU = IsRecoPU;
-  object.IsConstituent = IsConstituent;
-  object.IsFromConversion = IsFromConversion;
-  object.ClusterIndex = ClusterIndex;
-  object.ClusterNDF = ClusterNDF;
-  object.ClusterSigma = ClusterSigma;
-  object.SumPT2 = SumPT2;
-  object.BTVSumPT2 = BTVSumPT2;
-  object.GenDeltaZ = GenDeltaZ;
-  object.GenSumPT2 = GenSumPT2;
-  object.Flavor = Flavor;
-  object.FlavorAlgo = FlavorAlgo;
-  object.FlavorPhys = FlavorPhys;
-  object.TauFlavor = TauFlavor;
-  object.BTag = BTag;
-  object.BTagAlgo = BTagAlgo;
-  object.BTagPhys = BTagPhys;
-  object.TauTag = TauTag;
-  object.TauWeight = TauWeight;
-  object.Eem = Eem;
-  object.Ehad = Ehad;
-  object.Etrk = Etrk;
-  object.Edges[0] = Edges[0];
-  object.Edges[1] = Edges[1];
-  object.Edges[2] = Edges[2];
-  object.Edges[3] = Edges[3];
-  object.DeltaEta = DeltaEta;
-  object.DeltaPhi = DeltaPhi;
-  object.Momentum = Momentum;
-  object.Position = Position;
-  object.InitialPosition = InitialPosition;
-  object.DecayPosition = DecayPosition;
-  object.PositionError = PositionError;
-  object.Area = Area;
-  object.L = L;
-  object.ErrorT = ErrorT;
-  object.D0 = D0;
-  object.ErrorD0 = ErrorD0;
-  object.DZ = DZ;
-  object.ErrorDZ = ErrorDZ;
-  object.P = P;
-  object.ErrorP = ErrorP;
-  object.C = C;
-  object.ErrorC = ErrorC;
-  object.PT = PT;
-  object.ErrorPT = ErrorPT;
-  object.CtgTheta = CtgTheta;
-  object.ErrorCtgTheta = ErrorCtgTheta;
-  object.Phi = Phi;
-  object.ErrorPhi = ErrorPhi;
-  object.Xd = Xd;
-  object.Yd = Yd;
-  object.Zd = Zd;
-  object.XFirstHit = XFirstHit;
-  object.YFirstHit = YFirstHit;
-  object.ZFirstHit = ZFirstHit;
-  object.Nclusters = Nclusters;
-  object.dNdx = dNdx;
-  object.TrackResolution = TrackResolution;
-  object.NCharged = NCharged;
-  object.NNeutrals = NNeutrals;
-  object.NeutralEnergyFraction = NeutralEnergyFraction;
-  object.ChargedEnergyFraction = ChargedEnergyFraction;
-  object.Beta = Beta;
-  object.BetaStar = BetaStar;
-  object.MeanSqDeltaR = MeanSqDeltaR;
-  object.PTD = PTD;
-  object.NTimeHits = NTimeHits;
-  object.IsolationVar = IsolationVar;
-  object.IsolationVarRhoCorr = IsolationVarRhoCorr;
-  object.SumPtCharged = SumPtCharged;
-  object.SumPtNeutral = SumPtNeutral;
-  object.SumPtChargedPU = SumPtChargedPU;
-  object.SumPt = SumPt;
-  object.ClusterIndex = ClusterIndex;
-  object.ClusterNDF = ClusterNDF;
-  object.ClusterSigma = ClusterSigma;
-  object.SumPT2 = SumPT2;
-
-  object.FracPt[0] = FracPt[0];
-  object.FracPt[1] = FracPt[1];
-  object.FracPt[2] = FracPt[2];
-  object.FracPt[3] = FracPt[3];
-  object.FracPt[4] = FracPt[4];
-  object.Tau[0] = Tau[0];
-  object.Tau[1] = Tau[1];
-  object.Tau[2] = Tau[2];
-  object.Tau[3] = Tau[3];
-  object.Tau[4] = Tau[4];
-
-  object.TrimmedP4[0] = TrimmedP4[0];
-  object.TrimmedP4[1] = TrimmedP4[1];
-  object.TrimmedP4[2] = TrimmedP4[2];
-  object.TrimmedP4[3] = TrimmedP4[3];
-  object.TrimmedP4[4] = TrimmedP4[4];
-  object.PrunedP4[0] = PrunedP4[0];
-  object.PrunedP4[1] = PrunedP4[1];
-  object.PrunedP4[2] = PrunedP4[2];
-  object.PrunedP4[3] = PrunedP4[3];
-  object.PrunedP4[4] = PrunedP4[4];
-  object.SoftDroppedP4[0] = SoftDroppedP4[0];
-  object.SoftDroppedP4[1] = SoftDroppedP4[1];
-  object.SoftDroppedP4[2] = SoftDroppedP4[2];
-  object.SoftDroppedP4[3] = SoftDroppedP4[3];
-  object.SoftDroppedP4[4] = SoftDroppedP4[4];
-
-  object.NSubJetsTrimmed = NSubJetsTrimmed;
-  object.NSubJetsPruned = NSubJetsPruned;
-  object.NSubJetsSoftDropped = NSubJetsSoftDropped;
-  object.ExclYmerge12 = ExclYmerge12;
-  object.ExclYmerge23 = ExclYmerge23;
-  object.ExclYmerge34 = ExclYmerge34;
-  object.ExclYmerge45 = ExclYmerge45;
-  object.ExclYmerge56 = ExclYmerge56;
-
-  object.SoftDroppedJet = SoftDroppedJet;
-  object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
-  object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
-  object.TrackCovariance = TrackCovariance;
-  object.fFactory = fFactory;
-  object.fArray = 0;
-
-  // copy cluster timing info
-  copy(ECalEnergyTimePairs.begin(), ECalEnergyTimePairs.end(), back_inserter(object.ECalEnergyTimePairs));
-
-  if(fArray && fArray->GetEntriesFast() > 0)
-  {
-    TIter itArray(fArray);
-    TObjArray *array = object.GetCandidates();
-    while((candidate = static_cast<Candidate *>(itArray.Next())))
-    {
-      array->Add(candidate);
-    }
-  }
-}
-
-//------------------------------------------------------------------------------
-
-void Candidate::Clear(Option_t * /*option*/)
-{
-  int i;
-  SetUniqueID(0);
-  ResetBit(kIsReferenced);
-  PID = 0;
-  Status = 0;
-  M1 = -1;
-  M2 = -1;
-  D1 = -1;
-  D2 = -1;
-  Charge = 0;
-  Mass = 0.0;
-  IsPU = 0;
-  IsRecoPU = 0;
-  IsConstituent = 0;
-  IsFromConversion = 0;
-  Flavor = 0;
-  FlavorAlgo = 0;
-  FlavorPhys = 0;
-  TauFlavor = 0;
-  BTag = 0;
-  BTagAlgo = 0;
-  BTagPhys = 0;
-  TauTag = 0;
-  TauWeight = 0.0;
-  Eem = 0.0;
-  Ehad = 0.0;
-  Etrk = 0.0;
-  Edges[0] = 0.0;
-  Edges[1] = 0.0;
-  Edges[2] = 0.0;
-  Edges[3] = 0.0;
-  DeltaEta = 0.0;
-  DeltaPhi = 0.0;
-  Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  DecayPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  TrackCovariance.Zero();
-  L = 0.0;
-  ErrorT = 0.0;
-  D0 = 0.0;
-  ErrorD0 = 0.0;
-  DZ = 0.0;
-  ErrorDZ = 0.0;
-  P = 0.0;
-  ErrorP = 0.0;
-  C = 0.0;
-  ErrorC = 0.0;
-  PT = 0.0;
-  ErrorPT = 0.0;
-  CtgTheta = 0.0;
-  ErrorCtgTheta = 0.0;
-  Phi = 0.0;
-  ErrorPhi = 0.0;
-  Xd = 0.0;
-  Yd = 0.0;
-  Zd = 0.0;
-  XFirstHit = 0.0;
-  YFirstHit = 0.0;
-  ZFirstHit = 0.0;
-  Nclusters = 0.0;
-  dNdx = 0.0;
-  TrackResolution = 0.0;
-  NCharged = 0;
-  NNeutrals = 0;
-  Beta = 0.0;
-  BetaStar = 0.0;
-  MeanSqDeltaR = 0.0;
-  PTD = 0.0;
-
-  NTimeHits = 0;
-  ECalEnergyTimePairs.clear();
-
-  IsolationVar = -999;
-  IsolationVarRhoCorr = -999;
-  SumPtCharged = -999;
-  SumPtNeutral = -999;
-  SumPtChargedPU = -999;
-  SumPt = -999;
-
-  ClusterIndex = -1;
-  ClusterNDF = -99;
-  ClusterSigma = 0.0;
-  SumPT2 = 0.0;
-  BTVSumPT2 = 0.0;
-  GenDeltaZ = 0.0;
-  GenSumPT2 = 0.0;
-
-  FracPt[0] = 0.0;
-  FracPt[1] = 0.0;
-  FracPt[2] = 0.0;
-  FracPt[3] = 0.0;
-  FracPt[4] = 0.0;
-  Tau[0] = 0.0;
-  Tau[1] = 0.0;
-  Tau[2] = 0.0;
-  Tau[3] = 0.0;
-  Tau[4] = 0.0;
-
-  SoftDroppedJet.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  SoftDroppedSubJet1.SetXYZT(0.0, 0.0, 0.0, 0.0);
-  SoftDroppedSubJet2.SetXYZT(0.0, 0.0, 0.0, 0.0);
-
-  ExclYmerge12 = 0.0;
-  ExclYmerge23 = 0.0;
-  ExclYmerge34 = 0.0;
-  ExclYmerge45 = 0.0;
-  ExclYmerge56 = 0.0;
-  ParticleDensity = 0.0;
-
-  for(i = 0; i < 5; ++i)
-  {
-    TrimmedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-    PrunedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-    SoftDroppedP4[i].SetXYZT(0.0, 0.0, 0.0, 0.0);
-  }
-
-  NSubJetsTrimmed = 0;
-  NSubJetsPruned = 0;
-  NSubJetsSoftDropped = 0;
-
-  fArray = 0;
-}

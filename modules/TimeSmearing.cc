@@ -20,106 +20,77 @@
  *
  *  Performs time smearing.
  *
- *  \author M. Selvaggi - CERN
+ *  \author Michele Selvaggi - CERN
  *
  */
-
-#include "modules/TimeSmearing.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
-//------------------------------------------------------------------------------
 
-TimeSmearing::TimeSmearing()
+class TimeSmearing: public DelphesModule
 {
-  fResolutionFormula = new DelphesFormula;
-}
+public:
+  explicit TimeSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fResolutionFormula(std::make_unique<DelphesFormula>())
+  {
+    // read time resolution formula in seconds
+    fResolutionFormula->Compile(Steer<std::string>("TimeResolution", "30e-12"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "MuonMomentumSmearing/muons"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "tracks"));
+  }
+  void Process() override;
 
-TimeSmearing::~TimeSmearing()
-{
-  delete fResolutionFormula;
-}
+private:
+  const std::unique_ptr<DelphesFormula> fResolutionFormula;
 
-//------------------------------------------------------------------------------
-
-void TimeSmearing::Init()
-{
-  // read resolution formula
-
-  // read time resolution formula in seconds
-  fResolutionFormula->Compile(GetString("TimeResolution", "30e-12"));
-
-  // import track input array
-  fInputArray = ImportArray(GetString("InputArray", "MuonMomentumSmearing/muons"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "tracks"));
-}
-
-//------------------------------------------------------------------------------
-
-void TimeSmearing::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void TimeSmearing::Process()
 {
-  Candidate *candidate, *mother;
-  Double_t tf_smeared, tf;
-  Double_t eta, energy;
-  Double_t timeResolution;
+  fOutputArray->clear();
 
-  const Double_t c_light = 2.99792458E8;
+  const double c_light = 2.99792458E8;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
-
     const TLorentzVector &candidateFinalPosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
 
-    tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
+    const double tf = candidateFinalPosition.T() * 1.0E-3 / c_light;
 
-    eta = candidateMomentum.Eta();
-    energy = candidateMomentum.E();
+    const double eta = candidateMomentum.Eta();
+    const double energy = candidateMomentum.E();
 
     // apply smearing formula
-    timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
-    tf_smeared = gRandom->Gaus(tf, timeResolution);
+    const double timeResolution = fResolutionFormula->Eval(0.0, eta, 0.0, energy);
+    const double tf_smeared = gRandom->Gaus(tf, timeResolution);
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
 
-    candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
-    candidate->ErrorT = timeResolution * 1.0E3 * c_light;
+    new_candidate->Position.SetT(tf_smeared * 1.0E3 * c_light);
+    new_candidate->ErrorT = timeResolution * 1.0E3 * c_light;
 
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
+    new_candidate->AddCandidate(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
+
+//------------------------------------------------------------------------------
+
+REGISTER_MODULE("TimeSmearing", TimeSmearing);

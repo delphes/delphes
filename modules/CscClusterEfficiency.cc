@@ -17,97 +17,67 @@
  */
 
 /** \class CscClusterEfficiency
-  *
-  *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
-  *  It is implemented based on the ClusterEfficiency parameterization function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
-  *
-  *  \author Christina Wang
-  *
-  */
-
-#include "modules/CscClusterEfficiency.h"
+ *
+ *  This module is specific to the CMS paper searching for neutral LLPs in the CMS endcap muon detectors: https://arxiv.org/abs/2107.04838
+ *  It is implemented based on the ClusterEfficiency parameterization function provided in the HEPData entry of the paper: https://www.hepdata.net/record/104408
+ *
+ *  \author Christina Wang
+ *
+ */
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesCscClusterFormula.h"
-#include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-CscClusterEfficiency::CscClusterEfficiency()
+class CscClusterEfficiency: public DelphesModule
 {
-  fFormula = new DelphesCscClusterFormula;
-}
+public:
+  explicit CscClusterEfficiency(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormula(std::make_unique<DelphesCscClusterFormula>())
+  {
+    // read CscClusterEfficiency formula
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "1.0"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles")); // import input array
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles")); // create output array
+  }
+  void Process() override;
 
-CscClusterEfficiency::~CscClusterEfficiency()
-{
-  delete fFormula;
-}
+private:
+  const std::unique_ptr<DelphesCscClusterFormula> fFormula; //!
 
-//------------------------------------------------------------------------------
-
-void CscClusterEfficiency::Init()
-{
-  // read CscClusterEfficiency formula
-  fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void CscClusterEfficiency::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void CscClusterEfficiency::Process()
 {
-  Candidate *candidate;
-  Double_t Ehad, Eem, decayR, decayZ;
-
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  fOutputArray->clear();
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateDecayPosition = candidate->DecayPosition;
-    decayZ = abs(candidateDecayPosition.Z());
-    decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
-    Ehad = candidate->Ehad;
-    Eem = candidate->Eem;
+    double decayZ = abs(candidateDecayPosition.Z());
+    double decayR = sqrt(pow(candidateDecayPosition.X(), 2) + pow(candidateDecayPosition.Y(), 2));
+    double Ehad = candidate->Ehad;
+    double Eem = candidate->Eem;
     // apply an efficency formula
     if(gRandom->Uniform() > fFormula->Eval(decayR, decayZ, Ehad, Eem)) continue;
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("CscClusterEfficiency", CscClusterEfficiency);

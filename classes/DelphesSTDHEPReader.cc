@@ -24,56 +24,56 @@
  *
  */
 
-#include "classes/DelphesSTDHEPReader.h"
-
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-#include <errno.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "TDatabasePDG.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesSTDHEPReader.h"
 #include "classes/DelphesXDRReader.h"
 
-#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include <ExRootAnalysis/ExRootProgressBar.h>
 
-using namespace std;
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
+#include <TStopwatch.h>
 
 static const int kBufferSize = 1000000;
 
 //---------------------------------------------------------------------------
 
-DelphesSTDHEPReader::DelphesSTDHEPReader() :
-  fInputFile(0), fBuffer(0), fPDG(0), fBlockType(-1)
-{
-  fBuffer = new uint8_t[kBufferSize * 96 + 24];
+DelphesSTDHEPReader::DelphesSTDHEPReader(const DelphesParameters &readerParams) :
+  DelphesReader(readerParams), fPDG(TDatabasePDG::Instance()) {}
 
-  fPDG = TDatabasePDG::Instance();
+//---------------------------------------------------------------------------
+
+void DelphesSTDHEPReader::LoadInputFile(std::string_view inputFile)
+{
+  if(fInputFile) fclose(fInputFile); // unload previous streams
+  Clear(); // clear all buffers
+  if(fInputFile = fopen(std::string{inputFile}.data(), "r"); fInputFile == nullptr)
+  {
+    std::ostringstream message;
+    message << "can't open " << std::string{inputFile};
+    throw std::runtime_error(message.str());
+  }
+  fReader[0].SetFile(fInputFile);
+  int length = ftello(fInputFile);
+  fProgressBar = std::make_unique<ExRootProgressBar>(length);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
 
-DelphesSTDHEPReader::~DelphesSTDHEPReader()
+void DelphesSTDHEPReader::SetFactory(DelphesFactory *factory)
 {
-  if(fBuffer) delete fBuffer;
+  DelphesReader::SetFactory(factory);
+  fEventInfo = GetFactory()->Book<LHEFEvent>("Event", true);
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
+void DelphesSTDHEPReader::Reset()
 {
-  fInputFile = inputFile;
-  fReader[0].SetFile(inputFile);
+  fseek(fInputFile, 0L, SEEK_SET);
+  fEventCounter = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -81,84 +81,57 @@ void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
 void DelphesSTDHEPReader::Clear()
 {
   fBlockType = -1;
+  ResetTimer();
 }
 
 //---------------------------------------------------------------------------
 
-bool DelphesSTDHEPReader::EventReady()
-{
-  return (fBlockType == MCFIO_STDHEP) || (fBlockType == MCFIO_STDHEP4);
-}
+bool DelphesSTDHEPReader::EventReady() { return (fBlockType == MCFIO_STDHEP) || (fBlockType == MCFIO_STDHEP4); }
 
 //---------------------------------------------------------------------------
 
-bool DelphesSTDHEPReader::ReadBlock(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+bool DelphesSTDHEPReader::ReadBlock()
 {
   fReader[0].ReadValue(&fBlockType, 4);
 
-  if(feof(fInputFile)) return kFALSE;
+  if(feof(fInputFile)) return false;
 
   SkipBytes(4);
 
   if(fBlockType == FILEHEADER)
-  {
     ReadFileHeader();
-  }
   else if(fBlockType == EVENTTABLE)
-  {
     ReadEventTable();
-  }
   else if(fBlockType == EVENTHEADER)
-  {
     ReadEventHeader();
-  }
   else if(fBlockType == MCFIO_STDHEPBEG || fBlockType == MCFIO_STDHEPEND)
-  {
     ReadSTDCM1();
-  }
   else if(fBlockType == MCFIO_STDHEP)
   {
     ReadSTDHEP();
-    AnalyzeParticles(factory, allParticleOutputArray,
-      stableParticleOutputArray, partonOutputArray);
+    AnalyzeParticles();
   }
   else if(fBlockType == MCFIO_STDHEP4)
   {
     ReadSTDHEP();
-    AnalyzeParticles(factory, allParticleOutputArray,
-      stableParticleOutputArray, partonOutputArray);
+    AnalyzeParticles();
     ReadSTDHEP4();
   }
   else
-  {
-    throw runtime_error("Unsupported block type.");
-  }
+    throw std::runtime_error("Unsupported block type.");
 
-  return kTRUE;
+  return true;
 }
 
 //---------------------------------------------------------------------------
 
 void DelphesSTDHEPReader::SkipBytes(int size)
 {
-  int rc;
-  int rndup;
-
-  rndup = size % 4;
+  int rndup = size % 4;
   if(rndup > 0)
-  {
     rndup = 4 - rndup;
-  }
-
-  rc = fseek(fInputFile, size + rndup, SEEK_CUR);
-
-  if(rc != 0 && errno == ESPIPE)
-  {
-    fReader[0].ReadRaw(fBuffer, size);
-  }
+  if(int rc = fseek(fInputFile, size + rndup, SEEK_CUR); rc != 0 && errno == ESPIPE)
+    fReader[0].ReadRaw(fBuffer.data(), size);
 }
 
 //---------------------------------------------------------------------------
@@ -184,37 +157,33 @@ void DelphesSTDHEPReader::ReadFileHeader()
   } version;
 
   // version
-  fReader[0].ReadString(fBuffer, 100);
-  if(fBuffer[0] == '\0' || fBuffer[1] == '\0')
+  fReader[0].ReadString(fBuffer.data(), 100);
+  if(fBuffer.at(0) == '\0' || fBuffer.at(1) == '\0')
     version = UNKNOWN;
-  else if(fBuffer[0] == '1')
+  else if(fBuffer.at(0) == '1')
     version = V1;
-  else if(strncmp((char *)fBuffer, "2.01", 4) == 0)
+  else if(strncmp((char *)fBuffer.data(), "2.01", 4) == 0)
     version = V21;
-  else if(fBuffer[0] == '2')
+  else if(fBuffer.at(0) == '2')
     version = V2;
   else
     version = UNKNOWN;
 
   if(version == UNKNOWN)
-  {
-    throw runtime_error("Unknown file format version.");
-  }
+    throw std::runtime_error("Unknown file format version.");
 
   SkipArray(1);
   SkipArray(1);
   SkipArray(1);
 
-  if(version == V21)
-  {
-    SkipArray(1);
-  }
+  if(version == V21) SkipArray(1);
 
   // Expected number of events
   SkipBytes(4);
 
   // Number of events
-  fReader[0].ReadValue(&fEntries, 4);
+  uint32_t entries;
+  fReader[0].ReadValue(&entries, 4);
 
   SkipBytes(8);
 
@@ -224,25 +193,16 @@ void DelphesSTDHEPReader::ReadFileHeader()
 
   // Number of NTuples
   uint32_t nNTuples = 0;
-  if(version != V1)
-  {
-    fReader[0].ReadValue(&nNTuples, 4);
-  }
+  if(version != V1) fReader[0].ReadValue(&nNTuples, 4);
 
   if(nNTuples != 0)
-  {
-    throw runtime_error("Files containing n-tuples are not supported.");
-  }
+    throw std::runtime_error("Files containing n-tuples are not supported.");
 
   // Processing blocks extraction
   if(nBlocks != 0)
   {
     SkipArray(4);
-
-    for(i = 0; i < nBlocks; i++)
-    {
-      SkipArray(1);
-    }
+    for(i = 0; i < nBlocks; i++) SkipArray(1);
   }
 }
 
@@ -251,8 +211,8 @@ void DelphesSTDHEPReader::ReadFileHeader()
 void DelphesSTDHEPReader::ReadEventTable()
 {
   // version
-  fReader[0].ReadString(fBuffer, 100);
-  if(strncmp((char *)fBuffer, "1.00", 4) == 0)
+  fReader[0].ReadString(fBuffer.data(), 100);
+  if(strncmp((char *)fBuffer.data(), "1.00", 4) == 0)
   {
     SkipBytes(8);
 
@@ -262,7 +222,7 @@ void DelphesSTDHEPReader::ReadEventTable()
     SkipArray(4);
     SkipArray(4);
   }
-  else if(strncmp((char *)fBuffer, "2.00", 4) == 0)
+  else if(strncmp((char *)fBuffer.data(), "2.00", 4) == 0)
   {
     SkipBytes(12);
 
@@ -282,12 +242,10 @@ void DelphesSTDHEPReader::ReadEventHeader()
   int skipSize = 4;
 
   // version
-  fReader[0].ReadString(fBuffer, 100);
-  if(strncmp((char *)fBuffer, "2.00", 4) == 0)
-  {
+  fReader[0].ReadString(fBuffer.data(), 100);
+  if(strncmp((char *)fBuffer.data(), "2.00", 4) == 0)
     skipNTuples = true;
-  }
-  else if(strncmp((char *)fBuffer, "3.00", 4) == 0)
+  else if(strncmp((char *)fBuffer.data(), "3.00", 4) == 0)
   {
     skipNTuples = true;
     skipSize = 8;
@@ -325,25 +283,23 @@ void DelphesSTDHEPReader::ReadEventHeader()
 void DelphesSTDHEPReader::ReadSTDCM1()
 {
   // version
-  fReader[0].ReadString(fBuffer, 100);
+  fReader[0].ReadString(fBuffer.data(), 100);
 
   // skip 5*4 + 2*8 = 36 bytes
   SkipBytes(36);
 
-  if((strncmp((char *)fBuffer, "1.", 2) == 0) || (strncmp((char *)fBuffer, "2.", 2) == 0) ||
-     (strncmp((char *)fBuffer, "3.", 2) == 0) || (strncmp((char *)fBuffer, "4.", 2) == 0) ||
-     (strncmp((char *)fBuffer, "5.00", 4) == 0))
-  {
+  if((strncmp((char *)fBuffer.data(), "1.", 2) == 0)
+    || (strncmp((char *)fBuffer.data(), "2.", 2) == 0)
+    || (strncmp((char *)fBuffer.data(), "3.", 2) == 0)
+    || (strncmp((char *)fBuffer.data(), "4.", 2) == 0)
+    || (strncmp((char *)fBuffer.data(), "5.00", 4) == 0))
     return;
-  }
 
   SkipArray(1);
   SkipArray(1);
 
-  if(strncmp((char *)fBuffer, "5.01", 4) == 0)
-  {
+  if(strncmp((char *)fBuffer.data(), "5.01", 4) == 0)
     return;
-  }
 
   SkipBytes(4);
 }
@@ -355,30 +311,29 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   uint32_t idhepSize, isthepSize, jmohepSize, jdahepSize, phepSize, vhepSize;
 
   // version
-  fReader[0].ReadString(fBuffer, 100);
+  fReader[0].ReadString(fBuffer.data(), 100);
 
   // Extracting the event number
   fReader[0].ReadValue(&fEventNumber, 4);
+  fEventInfo->Number = fEventNumber;
 
   // Extracting the number of particles
   fReader[0].ReadValue(&fEventSize, 4);
 
   if(fEventSize >= kBufferSize)
-  {
-    throw runtime_error("too many particles in event");
-  }
+    throw std::runtime_error("too many particles in event");
 
   // 4*n + 4*n + 8*n + 8*n + 40*n + 32*n +
   // 4 + 4 + 4 + 4 + 4 + 4 = 96*n + 24
 
-  fReader[0].ReadRaw(fBuffer, 96 * fEventSize + 24);
+  fReader[0].ReadRaw(fBuffer.data(), 96 * fEventSize + 24);
 
-  fReader[1].SetBuffer(fBuffer);
-  fReader[2].SetBuffer(fBuffer + 4 * 1 + 4 * 1 * fEventSize);
-  fReader[3].SetBuffer(fBuffer + 4 * 2 + 4 * 2 * fEventSize);
-  fReader[4].SetBuffer(fBuffer + 4 * 3 + 4 * 4 * fEventSize);
-  fReader[5].SetBuffer(fBuffer + 4 * 4 + 4 * 6 * fEventSize);
-  fReader[6].SetBuffer(fBuffer + 4 * 5 + 4 * 16 * fEventSize);
+  fReader[1].SetBuffer(fBuffer.data());
+  fReader[2].SetBuffer(fBuffer.data() + 4 * 1 + 4 * 1 * fEventSize);
+  fReader[3].SetBuffer(fBuffer.data() + 4 * 2 + 4 * 2 * fEventSize);
+  fReader[4].SetBuffer(fBuffer.data() + 4 * 3 + 4 * 4 * fEventSize);
+  fReader[5].SetBuffer(fBuffer.data() + 4 * 4 + 4 * 6 * fEventSize);
+  fReader[6].SetBuffer(fBuffer.data() + 4 * 5 + 4 * 16 * fEventSize);
 
   fReader[1].ReadValue(&idhepSize, 4);
   fReader[2].ReadValue(&isthepSize, 4);
@@ -387,89 +342,60 @@ void DelphesSTDHEPReader::ReadSTDHEP()
   fReader[5].ReadValue(&phepSize, 4);
   fReader[6].ReadValue(&vhepSize, 4);
 
-  if(fEventSize < 0 ||
-     fEventSize != (int)idhepSize      || fEventSize != (int)isthepSize     ||
-     (2*fEventSize) != (int)jmohepSize || (2*fEventSize) != (int)jdahepSize ||
-     (5*fEventSize) != (int)phepSize   || (4*fEventSize) != (int)vhepSize)
-  {
-    throw runtime_error("Inconsistent size of arrays. File is probably corrupted.");
-  }
-
-  fWeight = 1.0;
-  fAlphaQED = 0.0;
-  fAlphaQCD = 0.0;
-  fScaleSize = 0;
-  memset(fScale, 0, 10 * sizeof(double));
+  if(fEventSize < 0
+    || fEventSize != (int)idhepSize
+    || fEventSize != (int)isthepSize
+    || (2 * fEventSize) != (int)jmohepSize
+    || (2 * fEventSize) != (int)jdahepSize
+    || (5 * fEventSize) != (int)phepSize
+    || (4 * fEventSize) != (int)vhepSize)
+    throw std::runtime_error("Inconsistent size of arrays. File is probably corrupted.");
 }
 
 //---------------------------------------------------------------------------
 
 void DelphesSTDHEPReader::ReadSTDHEP4()
 {
-  uint32_t number;
-
   // Extracting the event weight
-  fReader[0].ReadValue(&fWeight, 8);
+  fReader[0].ReadValue(&fEventInfo->Weight, 8);
 
   // Extracting alpha QED
-  fReader[0].ReadValue(&fAlphaQED, 8);
+  fReader[0].ReadValue(&fEventInfo->AlphaQED, 8);
 
   // Extracting alpha QCD
-  fReader[0].ReadValue(&fAlphaQCD, 8);
+  fReader[0].ReadValue(&fEventInfo->AlphaQCD, 8);
 
   // Extracting the event scale
-  fReader[0].ReadValue(&fScaleSize, 4);
-  for(number = 0; number < fScaleSize; ++number)
-  {
+  uint32_t scaleSize;
+  fReader[0].ReadValue(&scaleSize, 4);
+  fScale.resize(scaleSize);
+  for(uint32_t number = 0; number < scaleSize; ++number)
     fReader[0].ReadValue(&fScale[number], 8);
-  }
 
   SkipArray(8);
   SkipArray(4);
 
   SkipBytes(4);
+
+  fEventInfo->ProcessID = 0;
+  fEventInfo->ScalePDF = fScale.at(0);
 }
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeEvent(ExRootTreeBranch *branch, long long /*eventNumber*/,
-  TStopwatch *readStopWatch, TStopwatch *procStopWatch)
-{
-  LHEFEvent *element;
-
-  element = static_cast<LHEFEvent *>(branch->NewEntry());
-
-  element->Number = fEventNumber;
-
-  element->ProcessID = 0;
-
-  element->Weight = fWeight;
-  element->ScalePDF = fScale[0];
-  element->AlphaQED = fAlphaQED;
-  element->AlphaQCD = fAlphaQCD;
-
-  element->ReadTime = readStopWatch->RealTime();
-  element->ProcTime = procStopWatch->RealTime();
-}
+void DelphesSTDHEPReader::SetReadoutTime(double readoutTime) { fEventInfo->ReadTime = readoutTime; }
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
-  TObjArray *allParticleOutputArray,
-  TObjArray *stableParticleOutputArray,
-  TObjArray *partonOutputArray)
+void DelphesSTDHEPReader::SetProcessingTime(double procTime) { fEventInfo->ProcTime = procTime; }
+
+//---------------------------------------------------------------------------
+
+void DelphesSTDHEPReader::AnalyzeParticles()
 {
-  Candidate *candidate;
-  TParticlePDG *pdgParticle;
-  int pdgCode;
-
-  int number;
-  int32_t pid, status, m1, m2, d1, d2;
-  double px, py, pz, e, mass;
-  double x, y, z, t;
-
-  for(number = 0; number < fEventSize; ++number)
+  for(int number = 0; number < fEventSize; ++number)
   {
+    int32_t pid, status, m1, m2, d1, d2;
     fReader[1].ReadValue(&status, 4);
     fReader[2].ReadValue(&pid, 4);
     fReader[3].ReadValue(&m1, 4);
@@ -477,21 +403,23 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
     fReader[4].ReadValue(&d1, 4);
     fReader[4].ReadValue(&d2, 4);
 
+    double px, py, pz, e, mass;
     fReader[5].ReadValue(&px, 8);
     fReader[5].ReadValue(&py, 8);
     fReader[5].ReadValue(&pz, 8);
     fReader[5].ReadValue(&e, 8);
     fReader[5].ReadValue(&mass, 8);
 
+    double x, y, z, t;
     fReader[6].ReadValue(&x, 8);
     fReader[6].ReadValue(&y, 8);
     fReader[6].ReadValue(&z, 8);
     fReader[6].ReadValue(&t, 8);
 
-    candidate = factory->NewCandidate();
+    Candidate *candidate = GetFactory()->NewCandidate();
 
     candidate->PID = pid;
-    pdgCode = TMath::Abs(candidate->PID);
+    const int pdgCode = std::abs(candidate->PID);
 
     candidate->Status = status;
 
@@ -501,7 +429,7 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
     candidate->D1 = d1 - 1;
     candidate->D2 = d2 - 1;
 
-    pdgParticle = fPDG->GetParticle(pid);
+    TParticlePDG *pdgParticle = fPDG->GetParticle(pid);
     candidate->Charge = pdgParticle ? int(pdgParticle->Charge() / 3.0) : -999;
     candidate->Mass = mass;
 
@@ -509,19 +437,17 @@ void DelphesSTDHEPReader::AnalyzeParticles(DelphesFactory *factory,
 
     candidate->Position.SetXYZT(x, y, z, t);
 
-    allParticleOutputArray->Add(candidate);
+    fAllParticleOutputArray->emplace_back(candidate);
 
     if(!pdgParticle) continue;
 
     if(status == 1)
-    {
-      stableParticleOutputArray->Add(candidate);
-    }
+      fStableParticleOutputArray->emplace_back(candidate);
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-    {
-      partonOutputArray->Add(candidate);
-    }
+      fPartonOutputArray->emplace_back(candidate);
   }
 }
 
 //---------------------------------------------------------------------------
+
+REGISTER_READER("STDHEP", DelphesSTDHEPReader);

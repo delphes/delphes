@@ -17,42 +17,29 @@
  */
 
 #include "classes/DelphesCscClusterFormula.h"
-#include "classes/DelphesClasses.h"
 
-#include "TString.h"
+#include <TString.h>
 
-#include <iostream>
 #include <stdexcept>
 
-using namespace std;
+//------------------------------------------------------------------------------
+
+DelphesCscClusterFormula::DelphesCscClusterFormula() : TFormula() {}
 
 //------------------------------------------------------------------------------
 
-DelphesCscClusterFormula::DelphesCscClusterFormula() :
+DelphesCscClusterFormula::DelphesCscClusterFormula(std::string_view /*name*/, std::string_view /*expression*/) :
   TFormula()
 {
 }
 
 //------------------------------------------------------------------------------
 
-DelphesCscClusterFormula::DelphesCscClusterFormula(const char * /*name*/, const char * /*expression*/) :
-  TFormula()
-{
-}
-
-//------------------------------------------------------------------------------
-
-DelphesCscClusterFormula::~DelphesCscClusterFormula()
-{
-}
-
-//------------------------------------------------------------------------------
-
-Int_t DelphesCscClusterFormula::Compile(const char *expression)
+int DelphesCscClusterFormula::Compile(std::string_view expression)
 {
   TString buffer;
   const char *it;
-  for(it = expression; *it; ++it)
+  for(it = expression.data(); *it; ++it)
   {
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
@@ -66,17 +53,15 @@ Int_t DelphesCscClusterFormula::Compile(const char *expression)
   TFormula::SetMaxima(100000, 1000, 1000000);
 #endif
   if(TFormula::Compile(buffer) != 0)
-  {
-    throw runtime_error("Invalid formula.");
-  }
+    throw std::runtime_error("Invalid formula.");
   return 0;
 }
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesCscClusterFormula::Eval(Double_t decayR, Double_t decayZ, Double_t Ehad, Double_t Eem)
+double DelphesCscClusterFormula::Eval(double decayR, double decayZ, double Ehad, double Eem) const
 {
-  Double_t x[4] = {decayR, decayZ, Ehad, Eem};
+  double x[4] = {decayR, decayZ, Ehad, Eem};
   return EvalPar(x);
 }
 

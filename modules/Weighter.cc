@@ -24,170 +24,106 @@
  *
  */
 
-#include "modules/Weighter.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
-#include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <set>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-bool Weighter::TIndexStruct::operator<(const Weighter::TIndexStruct &value) const
+class Weighter: public DelphesModule
 {
-  Int_t i;
-
-  for(i = 0; i < 4; ++i)
+public:
+  explicit Weighter(const DelphesParameters &moduleParams) : DelphesModule(moduleParams)
   {
-    if(codes[i] != value.codes[i]) return codes[i] < value.codes[i];
-  }
-
-  return false;
-}
-
-//------------------------------------------------------------------------------
-
-Weighter::Weighter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-Weighter::~Weighter()
-{
-}
-
-//------------------------------------------------------------------------------
-
-void Weighter::Init()
-{
-  ExRootConfParam param, paramCodes;
-  Int_t i, j, size, sizeCodes;
-  Int_t code;
-  TIndexStruct index;
-  Double_t weight;
-
-  fWeightSet.clear();
-
-  // set default weight value
-  fWeightMap.clear();
-  memset(index.codes, 0, 4 * sizeof(Int_t));
-  fWeightMap[index] = 1.0;
-
-  // read weights
-  param = GetParam("Weight");
-  size = param.GetSize();
-  for(i = 0; i < size / 2; ++i)
-  {
-    paramCodes = param[i * 2];
-    sizeCodes = paramCodes.GetSize();
-    weight = param[i * 2 + 1].GetDouble();
-
-    if(sizeCodes < 1 || sizeCodes > 4)
+    for(const std::pair<std::vector<int>, double> &weightValue :
+      Steer<std::vector<std::pair<std::vector<int>, double> > >("Weight"))
     {
-      throw runtime_error("only 1, 2, 3 or 4 PDG codes can be specified per weight");
+      if(const size_t sizeCodes = weightValue.first.size(); sizeCodes < 1 || sizeCodes > 4)
+        throw std::runtime_error("only 1, 2, 3 or 4 PDG codes can be specified per weight");
+      TIndexStruct index;
+      std::memset(index.codes, 0, 4 * sizeof(int));
+      size_t j = 0;
+      for(const int &code : weightValue.first)
+      {
+        index.codes[j++] = code;
+        fWeightSet.insert(code);
+      }
+      std::sort(index.codes, index.codes + 4);
+      fWeightMap[index] = weightValue.second;
     }
 
-    memset(index.codes, 0, 4 * sizeof(Int_t));
-
-    for(j = 0; j < sizeCodes; ++j)
-    {
-      code = paramCodes[j].GetInt();
-      index.codes[j] = code;
-      fWeightSet.insert(code);
-    }
-
-    sort(index.codes, index.codes + 4);
-
-    fWeightMap[index] = weight;
+    TIndexStruct index;
+    std::memset(index.codes, 0, 4 * sizeof(int));
+    fWeightMap[index] = 1.0;
   }
 
-  // import input array(s)
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/allParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "weight"));
+  }
+  void Process() override;
 
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
-  fItInputArray = fInputArray->MakeIterator();
+private:
+#if !defined(__CINT__) && !defined(__CLING__)
+  struct TIndexStruct
+  {
+    int codes[4];
+    bool operator<(const TIndexStruct &value) const
+    {
+      for(size_t i = 0; i < 4; ++i)
+        if(codes[i] != value.codes[i]) return codes[i] < value.codes[i];
+      return false;
+    }
+  };
 
-  // create output array(s)
+  std::set<int> fWeightSet, fCodeSet;
+  std::map<TIndexStruct, double> fWeightMap;
+#endif
 
-  fOutputArray = ExportArray(GetString("OutputArray", "weight"));
-}
-
-//------------------------------------------------------------------------------
-
-void Weighter::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void Weighter::Process()
 {
-  Candidate *candidate;
-  Int_t i;
-  TIndexStruct index;
-  Double_t weight;
-  set<Int_t>::iterator itCodeSet;
-  map<TIndexStruct, Double_t>::iterator itWeightMap;
+  fOutputArray->clear();
 
   DelphesFactory *factory = GetFactory();
 
   // loop over all particles
   fCodeSet.clear();
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     if(candidate->Status != 3) continue;
-
     if(fWeightSet.find(candidate->PID) == fWeightSet.end()) continue;
 
     fCodeSet.insert(candidate->PID);
   }
 
   // find default weight value
-  memset(index.codes, 0, 4 * sizeof(Int_t));
-  itWeightMap = fWeightMap.find(index);
-  weight = itWeightMap->second;
+  TIndexStruct index;
+  std::memset(index.codes, 0, 4 * sizeof(int));
+  double weight = fWeightMap.at(index);
 
   if(fCodeSet.size() <= 4)
   {
-    i = 0;
-    for(itCodeSet = fCodeSet.begin(); itCodeSet != fCodeSet.end(); ++itCodeSet)
-    {
-      index.codes[i] = *itCodeSet;
-      ++i;
-    }
+    size_t i = 0;
+    for(const int &codeSet : fCodeSet)
+      index.codes[i++] = codeSet;
 
-    sort(index.codes, index.codes + 4);
-
-    itWeightMap = fWeightMap.find(index);
-    if(itWeightMap != fWeightMap.end())
-    {
-      weight = itWeightMap->second;
-    }
+    std::sort(index.codes, index.codes + 4);
+    if(fWeightMap.count(index) > 0)
+      weight = fWeightMap.at(index);
   }
 
-  candidate = factory->NewCandidate();
+  Candidate *candidate = factory->NewCandidate();
   candidate->Momentum.SetPtEtaPhiE(weight, 0.0, 0.0, weight);
-  fOutputArray->Add(candidate);
+  fOutputArray->emplace_back(candidate);
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("Weighter", Weighter);

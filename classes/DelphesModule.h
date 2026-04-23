@@ -27,48 +27,63 @@
  *
  */
 
-#include "ExRootAnalysis/ExRootTask.h"
+#include "classes/DelphesModuleFactory.h"
+#include "classes/DelphesParameters.h"
 
-class TClass;
-class TObject;
-class TFolder;
-class TClonesArray;
-
-class ExRootResult;
-class ExRootTreeBranch;
-class ExRootTreeWriter;
+class Candidate;
 
 class DelphesFactory;
 
-class DelphesModule: public ExRootTask
+class DelphesModule
 {
 public:
-  DelphesModule();
-  ~DelphesModule();
+  explicit DelphesModule(const DelphesParameters &);
+  virtual ~DelphesModule() = default;
 
-  virtual void Init();
-  virtual void Process();
-  virtual void Finish();
+  virtual void Init() {}
+  virtual void Process() {}
+  virtual void Finish() {}
 
-  TObjArray *ImportArray(const char *name);
-  TObjArray *ExportArray(const char *name);
+  std::shared_ptr<std::vector<Candidate *> > ImportArray(std::string_view name);
+  std::shared_ptr<std::vector<Candidate *> > ExportArray(std::string_view name);
 
-  ExRootTreeBranch *NewBranch(const char *name, TClass *cl);
-  void AddInfo(const char *name, Double_t value);
+  void SetName(std::string_view moduleName) { fName = moduleName; }
+  const std::string &GetName() const { return fName; }
 
-  ExRootResult *GetPlots();
-  DelphesFactory *GetFactory();
+  virtual void SetFactory(DelphesFactory *factory) { fFactory = factory; }
+  virtual DelphesFactory *GetFactory() const;
+
+  virtual bool IsReader() const { return false; }
+  virtual bool IsWriter() const { return false; }
 
 protected:
-  ExRootTreeWriter *fTreeWriter;
-  DelphesFactory *fFactory;
+  template <typename T>
+  T Steer(std::string_view keyName, T defaultValue = T{}) const
+  {
+    return fModuleParams.Get<T>(std::string{keyName}, defaultValue);
+  }
+  std::string Steer(std::string_view keyName, std::string_view defaultValue = {}) const
+  {
+    return fModuleParams.Get<std::string>(std::string{keyName}, std::string{defaultValue});
+  }
 
 private:
-  ExRootResult *fPlots;
+  std::string fName;
+  DelphesFactory *fFactory{nullptr};
 
-  TFolder *fPlotFolder, *fExportFolder;
-
-  ClassDef(DelphesModule, 1)
+  const DelphesParameters fModuleParams;
 };
+
+/// Add a processing module to the list of handled modules
+#define REGISTER_MODULE(name, obj)                                                           \
+  struct BUILDER_NAME(obj)                                                                   \
+  {                                                                                          \
+    BUILDER_NAME(obj)() { DelphesProcessingModuleFactory::Get().RegisterModule<obj>(name); } \
+  };                                                                                         \
+  static const BUILDER_NAME(obj) gDelphesModule##obj;                                        \
+  static_assert(true, "")
+
+/// A documentation generator factory
+DEFINE_FACTORY(DelphesProcessingModuleFactory, DelphesModule, "Processing modules factory");
 
 #endif /* DelphesModule_h */

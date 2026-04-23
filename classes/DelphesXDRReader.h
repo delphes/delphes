@@ -33,21 +33,21 @@
 class DelphesXDRReader
 {
 public:
-  DelphesXDRReader();
+  DelphesXDRReader() = default;
 
-  void SetFile(FILE *file);
+  void SetFile(FILE *file) { fFile = file; }
   void SetBuffer(void *buffer);
-  void SetOffset(int offset);
+  void SetOffset(int offset) { fOffset = offset; }
 
   void ReadRaw(void *value, int size);
   void ReadValue(void *value, int size);
   void ReadString(void *value, int maxSize);
 
 private:
-  FILE *fFile;
-  uint8_t *fBuffer;
+  FILE *fFile{nullptr};
+  uint8_t *fBuffer{nullptr};
 
-  int fOffset;
+  int fOffset{0};
 };
 
 #endif // DelphesXDRReader_h

@@ -22,24 +22,16 @@
 
 #include <signal.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
+#include <ExRootAnalysis/ExRootProgressBar.h>
 
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
+#include <TApplication.h>
+#include <TLorentzVector.h>
+#include <TROOT.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesHepMC2Reader.h"
 #include "classes/DelphesPileUpWriter.h"
-
-#include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
 
@@ -58,15 +50,7 @@ int main(int argc, char *argv[])
 {
   char appName[] = "hepmc2pileup";
   stringstream message;
-  FILE *inputFile = 0;
-  DelphesFactory *factory = 0;
-  TObjArray *stableParticleOutputArray = 0, *allParticleOutputArray = 0, *partonOutputArray = 0;
-  TIterator *itParticle = 0;
-  Candidate *candidate = 0;
-  DelphesPileUpWriter *writer = 0;
-  DelphesHepMC2Reader *reader = 0;
   Int_t i;
-  Long64_t length, eventCounter;
 
   if(argc < 2)
   {
@@ -88,16 +72,12 @@ int main(int argc, char *argv[])
 
   try
   {
-    writer = new DelphesPileUpWriter(argv[1]);
+    const auto writer = std::make_unique<DelphesPileUpWriter>(argv[1]);
 
-    factory = new DelphesFactory("ObjectFactory");
-    allParticleOutputArray = factory->NewPermanentArray();
-    stableParticleOutputArray = factory->NewPermanentArray();
-    partonOutputArray = factory->NewPermanentArray();
+    const auto factory = std::make_unique<DelphesFactory>();
 
-    itParticle = stableParticleOutputArray->MakeIterator();
-
-    reader = new DelphesHepMC2Reader;
+    const auto reader = std::make_unique<DelphesHepMC2Reader>(DelphesParameters{});
+    reader->SetFactory(factory.get());
 
     i = 2;
     do
@@ -107,72 +87,36 @@ int main(int argc, char *argv[])
       if(i == argc || strncmp(argv[i], "-", 2) == 0)
       {
         cout << "** Reading standard input" << endl;
-        inputFile = stdin;
-        length = -1;
+        //inputFile = stdin;
+        //length = -1;
+        throw;
       }
       else
       {
         cout << "** Reading " << argv[i] << endl;
-        inputFile = fopen(argv[i], "r");
-
-        if(inputFile == NULL)
-        {
-          message << "can't open " << argv[i];
-          throw runtime_error(message.str());
-        }
-
-        fseek(inputFile, 0L, SEEK_END);
-        length = ftello(inputFile);
-        fseek(inputFile, 0L, SEEK_SET);
-
-        if(length <= 0)
-        {
-          fclose(inputFile);
-          ++i;
-          continue;
-        }
+        reader->LoadInputFile(argv[i]);
       }
-
-      reader->SetInputFile(inputFile);
-
-      ExRootProgressBar progressBar(length);
 
       // Loop over all objects
-      eventCounter = 0;
       factory->Clear();
       reader->Clear();
-      while(reader->ReadBlock(factory, allParticleOutputArray,
-              stableParticleOutputArray, partonOutputArray)
-        && !interrupted)
+      CandidatesCollection stableParticleOutputArray = factory->Attach<std::vector<Candidate *> >("stableParticles");
+      while(reader->ReadEvent() && !interrupted)
       {
-        if(reader->EventReady())
+        for(const auto &candidate : *stableParticleOutputArray)
         {
-          ++eventCounter;
-
-          itParticle->Reset();
-          while((candidate = static_cast<Candidate *>(itParticle->Next())))
-          {
-            const TLorentzVector &position = candidate->Position;
-            const TLorentzVector &momentum = candidate->Momentum;
-            writer->WriteParticle(candidate->PID,
-              position.X(), position.Y(), position.Z(), position.T(),
-              momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
-          }
-
-          writer->WriteEntry();
-
-          factory->Clear();
-          reader->Clear();
+          const TLorentzVector &position = candidate->Position;
+          const TLorentzVector &momentum = candidate->Momentum;
+          writer->WriteParticle(candidate->PID,
+            position.X(), position.Y(), position.Z(), position.T(),
+            momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
         }
-        progressBar.Update(ftello(inputFile), eventCounter);
+
+        writer->WriteEntry();
+
+        factory->Clear();
+        reader->Clear();
       }
-
-      fseek(inputFile, 0L, SEEK_END);
-      progressBar.Update(ftello(inputFile), eventCounter, kTRUE);
-      progressBar.Finish();
-
-      if(inputFile != stdin) fclose(inputFile);
-
       ++i;
     } while(i < argc);
 
@@ -180,15 +124,10 @@ int main(int argc, char *argv[])
 
     cout << "** Exiting..." << endl;
 
-    delete reader;
-    delete factory;
-    delete writer;
-
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(writer) delete writer;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }

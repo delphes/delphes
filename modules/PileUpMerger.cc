@@ -24,106 +24,90 @@
  *
  */
 
-#include "modules/PileUpMerger.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
+#include "classes/DelphesModule.h"
 #include "classes/DelphesPileUpReader.h"
 #include "classes/DelphesTF2.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
-
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <TDatabasePDG.h>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-PileUpMerger::PileUpMerger()
+class PileUpMerger: public DelphesModule
 {
-  fFunction = new DelphesTF2;
-}
+public:
+  explicit PileUpMerger(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fPileUpDistribution(Steer<int>("PileUpDistribution", 0)),
+    fMeanPileUp(Steer<double>("MeanPileUp", 10)),
+    //
+    fZVertexSpread(Steer<double>("ZVertexSpread", 0.15)),
+    fTVertexSpread(Steer<double>("TVertexSpread", 1.5E-09)),
+    //
+    fInputBeamSpotX(Steer<double>("InputBeamSpotX", 0.0)),
+    fInputBeamSpotY(Steer<double>("InputBeamSpotY", 0.0)),
+    fOutputBeamSpotX(Steer<double>("OutputBeamSpotX", 0.0)),
+    fOutputBeamSpotY(Steer<double>("OutputBeamSpotY", 0.0)),
+    //
+    fReader(std::make_unique<DelphesPileUpReader>(Steer<std::string>("PileUpFile", "MinBias.pileup"))),
+    fFunction(std::unique_ptr<DelphesTF2>())
+  {
+    // read vertex smearing formula
+    fFunction->Compile(Steer<std::string>("VertexDistributionFormula", "0.0"));
+    fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "Delphes/stableParticles"));
+    fParticleOutputArray = ExportArray(Steer<std::string>("ParticleOutputArray", "stableParticles"));
+    fVertexOutputArray = ExportArray(Steer<std::string>("VertexOutputArray", "vertices"));
+  }
+  void Process() override;
 
-PileUpMerger::~PileUpMerger()
-{
-  delete fFunction;
-}
+private:
+  const int fPileUpDistribution;
+  const double fMeanPileUp;
 
-//------------------------------------------------------------------------------
+  const double fZVertexSpread;
+  const double fTVertexSpread;
 
-void PileUpMerger::Init()
-{
-  const char *fileName;
+  const double fInputBeamSpotX;
+  const double fInputBeamSpotY;
+  const double fOutputBeamSpotX;
+  const double fOutputBeamSpotY;
 
-  fPileUpDistribution = GetInt("PileUpDistribution", 0);
+  const std::unique_ptr<DelphesPileUpReader> fReader; //!
+  const std::unique_ptr<DelphesTF2> fFunction; //!
 
-  fMeanPileUp = GetDouble("MeanPileUp", 10);
+  CandidatesCollection fInputArray; //!
 
-  fZVertexSpread = GetDouble("ZVertexSpread", 0.15);
-  fTVertexSpread = GetDouble("TVertexSpread", 1.5E-09);
-
-  fInputBeamSpotX = GetDouble("InputBeamSpotX", 0.0);
-  fInputBeamSpotY = GetDouble("InputBeamSpotY", 0.0);
-  fOutputBeamSpotX = GetDouble("OutputBeamSpotX", 0.0);
-  fOutputBeamSpotY = GetDouble("OutputBeamSpotY", 0.0);
-
-  // read vertex smearing formula
-
-  fFunction->Compile(GetString("VertexDistributionFormula", "0.0"));
-  fFunction->SetRange(-fZVertexSpread, -fTVertexSpread, fZVertexSpread, fTVertexSpread);
-
-  fileName = GetString("PileUpFile", "MinBias.pileup");
-  fReader = new DelphesPileUpReader(fileName);
-
-  // import input array
-  fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output arrays
-  fParticleOutputArray = ExportArray(GetString("ParticleOutputArray", "stableParticles"));
-  fVertexOutputArray = ExportArray(GetString("VertexOutputArray", "vertices"));
-}
-
-//------------------------------------------------------------------------------
-
-void PileUpMerger::Finish()
-{
-  delete fReader;
-}
+  CandidatesCollection fParticleOutputArray; //!
+  CandidatesCollection fVertexOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void PileUpMerger::Process()
 {
+  fParticleOutputArray->clear();
+  fVertexOutputArray->clear();
+
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   TParticlePDG *pdgParticle;
-  Int_t pid, nch, nvtx = -1;
-  Float_t x, y, z, t, vx, vy;
-  Float_t px, py, pz, e, pt;
-  Double_t dz, dphi, dt, sumpt2, dz0, dt0;
-  Int_t numberOfEvents, event, numberOfParticles;
+  int pid, nch, nvtx = -1;
+  float x, y, z, t, vx, vy;
+  float px, py, pz, e, pt;
+  double dz, dphi, dt, sumpt2, dz0, dt0;
+  int numberOfEvents, event, numberOfParticles;
   Long64_t allEntries, entry;
   Candidate *candidate, *vertex;
   DelphesFactory *factory;
 
-  const Double_t c_light = 2.99792458E8;
-
-  fItInputArray->Reset();
+  const double c_light = 2.99792458E8;
 
   // --- Deal with primary vertex first  ------
 
@@ -140,14 +124,14 @@ void PileUpMerger::Process()
   vx = 0.0;
   vy = 0.0;
 
-  numberOfParticles = fInputArray->GetEntriesFast();
+  numberOfParticles = fInputArray->size();
   nch = 0;
   sumpt2 = 0.0;
 
   factory = GetFactory();
   vertex = factory->NewCandidate();
 
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     vx += candidate->Position.X();
     vy += candidate->Position.Y();
@@ -167,9 +151,9 @@ void PileUpMerger::Process()
 
     candidate->IsPU = 0;
 
-    fParticleOutputArray->Add(candidate);
+    fParticleOutputArray->emplace_back(candidate);
 
-    if(TMath::Abs(candidate->Charge) > 1.0E-9)
+    if(std::fabs(candidate->Charge) > 1.0E-9)
     {
       nch++;
       sumpt2 += pt * pt;
@@ -189,7 +173,7 @@ void PileUpMerger::Process()
   vertex->ClusterNDF = nch;
   vertex->SumPT2 = sumpt2;
   vertex->GenSumPT2 = sumpt2;
-  fVertexOutputArray->Add(vertex);
+  fVertexOutputArray->emplace_back(vertex);
 
   // --- Then with pile-up vertices  ------
 
@@ -215,7 +199,7 @@ void PileUpMerger::Process()
   {
     do
     {
-      entry = TMath::Nint(gRandom->Rndm() * allEntries);
+      entry = std::ceil(gRandom->Rndm() * allEntries);
     } while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
@@ -227,7 +211,7 @@ void PileUpMerger::Process()
     dt *= c_light * 1.0E3; // necessary in order to make t in mm/c
     dz *= 1.0E3; // necessary in order to make z in mm
 
-    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
+    dphi = gRandom->Uniform(-M_PI, M_PI);
 
     vx = 0.0;
     vy = 0.0;
@@ -247,7 +231,7 @@ void PileUpMerger::Process()
       candidate->Status = 1;
 
       pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge() / 3.0) : -999;
+      candidate->Charge = pdgParticle ? int(pdgParticle->Charge() / 3.0) : -999;
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
 
       candidate->IsPU = 1;
@@ -266,14 +250,14 @@ void PileUpMerger::Process()
       vy += candidate->Position.Y();
 
       ++numberOfParticles;
-      if(TMath::Abs(candidate->Charge) > 1.0E-9)
+      if(std::fabs(candidate->Charge) > 1.0E-9)
       {
         nch++;
         sumpt2 += pt * pt;
         vertex->AddCandidate(candidate);
       }
 
-      fParticleOutputArray->Add(candidate);
+      fParticleOutputArray->emplace_back(candidate);
     }
 
     if(numberOfParticles > 0)
@@ -293,8 +277,10 @@ void PileUpMerger::Process()
 
     vertex->IsPU = 1;
 
-    fVertexOutputArray->Add(vertex);
+    fVertexOutputArray->emplace_back(vertex);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("PileUpMerger", PileUpMerger);

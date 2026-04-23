@@ -16,43 +16,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <stdexcept>
-
-#include <map>
-#include <vector>
-
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "TApplication.h"
-#include "TROOT.h"
-
-#include "TClonesArray.h"
-#include "TDatabasePDG.h"
-#include "TFile.h"
-#include "TLorentzVector.h"
-#include "TObjArray.h"
-#include "TParticlePDG.h"
-#include "TStopwatch.h"
+#include <TClonesArray.h>
+#include <TFile.h>
+#include <TROOT.h>
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesStream.h"
+#include "classes/DelphesTCLConfReader.h"
+
 #include "modules/Delphes.h"
 
 #include "ExRootAnalysis/ExRootProgressBar.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
 
 using namespace std;
-
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 
@@ -69,22 +49,12 @@ int main(int argc, char *argv[])
 {
   char appName[] = "DelphesROOT";
   stringstream message;
-  TFile *inputFile = 0;
-  TFile *outputFile = 0;
-  TStopwatch eventStopWatch;
-  ExRootTreeWriter *treeWriter = 0;
-  ExRootTreeBranch *branchEvent = 0;
-  ExRootConfReader *confReader = 0;
-  Delphes *modularDelphes = 0;
-  DelphesFactory *factory = 0;
   GenParticle *gen;
-  HepMCEvent *element, *eve;
   Candidate *candidate;
   Int_t pdgCode;
 
   const Double_t c_light = 2.99792458E8;
 
-  TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i;
   Long64_t eventCounter, numberOfEvents;
 
@@ -103,37 +73,22 @@ int main(int argc, char *argv[])
 
   gROOT->SetBatch();
 
-  int appargc = 1;
-  char *appargv[] = {appName};
-  TApplication app(appName, &appargc, appargv);
-
   try
   {
-    outputFile = TFile::Open(argv[2], "CREATE");
-
-    if(outputFile == NULL)
-    {
-      message << "can't open " << argv[2] << endl;
-      throw runtime_error(message.str());
-    }
-
-    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
-
-    branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
-
-    confReader = new ExRootConfReader;
+    const auto confReader = std::make_unique<DelphesTCLConfReader>();
     confReader->ReadFile(argv[1]);
 
-    modularDelphes = new Delphes("Delphes");
-    modularDelphes->SetConfReader(confReader);
-    modularDelphes->SetTreeWriter(treeWriter);
+    const auto modularDelphes = std::make_unique<Delphes>("Delphes");
+    modularDelphes->SetConfReader(confReader.get());
+    modularDelphes->SetOutputFile(argv[2]);
 
-    TChain *chain = new TChain("Delphes");
+    const auto chain = std::make_unique<TChain>("Delphes");
 
-    factory = modularDelphes->GetFactory();
-    allParticleOutputArray = modularDelphes->ExportArray("allParticles");
-    stableParticleOutputArray = modularDelphes->ExportArray("stableParticles");
-    partonOutputArray = modularDelphes->ExportArray("partons");
+    DelphesFactory *factory = modularDelphes->GetFactory();
+    CandidatesCollection allParticleOutputArray = modularDelphes->ExportArray("allParticles"),
+                         stableParticleOutputArray = modularDelphes->ExportArray("stableParticles"),
+                         partonOutputArray = modularDelphes->ExportArray("partons");
+    std::shared_ptr<HepMCEvent> eventInfo = modularDelphes->GetFactory()->Book<HepMCEvent>("Event", true);
 
     modularDelphes->InitTask();
 
@@ -142,11 +97,10 @@ int main(int argc, char *argv[])
       cout << "** Reading " << argv[i] << endl;
 
       chain->Add(argv[i]);
-      ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
+      const auto treeReader = std::make_unique<ExRootTreeReader>(chain.get());
 
-      inputFile = TFile::Open(argv[i]);
-
-      if(inputFile == NULL)
+      const auto inputFile = std::make_unique<TFile>(argv[i]);
+      if(!inputFile)
       {
         message << "can't open " << argv[i] << endl;
         throw runtime_error(message.str());
@@ -164,40 +118,37 @@ int main(int argc, char *argv[])
       // Loop over all objects
       eventCounter = 0;
       modularDelphes->Clear();
-      treeWriter->Clear();
       for(Int_t entry = 0; entry < numberOfEvents && !interrupted; ++entry)
       {
-
         treeReader->ReadEntry(entry);
 
         // -- TBC need also to include event weights --
 
-        eve = (HepMCEvent *)branchHepMCEvent->At(0);
-        element = static_cast<HepMCEvent *>(branchEvent->NewEntry());
+        HepMCEvent *eve = (HepMCEvent *)branchHepMCEvent->At(0);
+        HepMCEvent &element = *eventInfo;
 
-        element->Number = eventCounter;
+        element.Number = eventCounter;
 
-        element->ProcessID = eve->ProcessID;
-        element->MPI = eve->MPI;
-        element->Weight = eve->Weight;
-        element->Scale = eve->Scale;
-        element->AlphaQED = eve->AlphaQED;
-        element->AlphaQCD = eve->AlphaQCD;
+        element.ProcessID = eve->ProcessID;
+        element.MPI = eve->MPI;
+        element.Weight = eve->Weight;
+        element.Scale = eve->Scale;
+        element.AlphaQED = eve->AlphaQED;
+        element.AlphaQCD = eve->AlphaQCD;
 
-        element->ID1 = eve->ID1;
-        element->ID2 = eve->ID2;
-        element->X1 = eve->X1;
-        element->X2 = eve->X2;
-        element->ScalePDF = eve->ScalePDF;
-        element->PDF1 = eve->PDF1;
-        element->PDF2 = eve->PDF2;
+        element.ID1 = eve->ID1;
+        element.ID2 = eve->ID2;
+        element.X1 = eve->X1;
+        element.X2 = eve->X2;
+        element.ScalePDF = eve->ScalePDF;
+        element.PDF1 = eve->PDF1;
+        element.PDF2 = eve->PDF2;
 
-        element->ReadTime = eve->ReadTime;
-        element->ProcTime = eve->ProcTime;
+        element.ReadTime = eve->ReadTime;
+        element.ProcTime = eve->ProcTime;
 
         for(Int_t j = 0; j < branchParticle->GetEntriesFast(); j++)
         {
-
           gen = (GenParticle *)branchParticle->At(j);
           candidate = factory->NewCandidate();
 
@@ -216,26 +167,19 @@ int main(int argc, char *argv[])
           candidate->Charge = gen->Charge;
           candidate->Mass = gen->Mass;
 
-          allParticleOutputArray->Add(candidate);
+          allParticleOutputArray->emplace_back(candidate);
 
           pdgCode = TMath::Abs(gen->PID);
 
           if(gen->Status == 1)
-          {
-            stableParticleOutputArray->Add(candidate);
-          }
+            stableParticleOutputArray->emplace_back(candidate);
           else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
-          {
-            partonOutputArray->Add(candidate);
-          }
+            partonOutputArray->emplace_back(candidate);
         }
 
         modularDelphes->ProcessTask();
 
-        treeWriter->Fill();
-
         modularDelphes->Clear();
-        treeWriter->Clear();
 
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
@@ -245,27 +189,16 @@ int main(int argc, char *argv[])
       progressBar.Finish();
 
       inputFile->Close();
-
-      delete treeReader;
     }
 
     modularDelphes->FinishTask();
-    treeWriter->Write();
 
     cout << "** Exiting..." << endl;
-
-    delete modularDelphes;
-    delete confReader;
-    delete treeWriter;
-    delete outputFile;
-    delete chain;
 
     return 0;
   }
   catch(runtime_error &e)
   {
-    if(treeWriter) delete treeWriter;
-    if(outputFile) delete outputFile;
     cerr << "** ERROR: " << e.what() << endl;
     return 1;
   }

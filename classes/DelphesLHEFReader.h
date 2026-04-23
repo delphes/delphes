@@ -27,61 +27,50 @@
  *
  */
 
-#include <stdio.h>
+#include "classes/DelphesClasses.h"
 
+#include <stdio.h>
 #include <utility>
 #include <vector>
 
-class TObjArray;
-class TStopwatch;
-class TDatabasePDG;
-class ExRootTreeBranch;
-class DelphesFactory;
+#include "classes/DelphesReader.h"
 
-class DelphesLHEFReader
+class TDatabasePDG;
+
+class DelphesWriter;
+
+class DelphesLHEFReader: public DelphesReader
 {
 public:
-  DelphesLHEFReader();
-  ~DelphesLHEFReader();
+  explicit DelphesLHEFReader(const DelphesParameters &);
 
-  void SetInputFile(FILE *inputFile);
+  void SetFactory(DelphesFactory *factory) override;
 
-  void Clear();
-  bool EventReady();
+  void LoadInputFile(std::string_view) override;
+  void Reset() override;
+  void Clear() override;
+  bool EventReady() override { return fEventReady; }
 
-  bool ReadBlock(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
-
-  void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
-    TStopwatch *readStopWatch, TStopwatch *procStopWatch);
-
-  void AnalyzeWeight(ExRootTreeBranch *branch);
+  void SetReadoutTime(double readoutTime) override;
+  void SetProcessingTime(double procTime) override;
 
 private:
-  void AnalyzeParticle(DelphesFactory *factory,
-    TObjArray *allParticleOutputArray,
-    TObjArray *stableParticleOutputArray,
-    TObjArray *partonOutputArray);
+  bool ReadBlock() override;
+  void AnalyzeParticle();
 
-  FILE *fInputFile;
+  std::shared_ptr<LHEFEvent> fEventInfo;
+  std::shared_ptr<std::vector<LHEFWeight> > fWeightInfo;
 
-  char *fBuffer;
+  std::array<char, 16384> fBuffer;
 
-  TDatabasePDG *fPDG;
+  TDatabasePDG *fPDG{nullptr};
 
-  bool fEventReady;
+  bool fEventReady{false};
 
-  int fEventCounter;
+  int fParticleCounter{-1};
 
-  int fParticleCounter, fProcessID;
-  double fCrossSection, fWeight, fScalePDF, fAlphaQCD, fAlphaQED;
-
-  int fPID, fStatus, fM1, fM2, fC1, fC2;
-  double fPx, fPy, fPz, fE, fMass;
-
-  std::vector<std::pair<int, double> > fWeightList;
+  int fPID{0}, fStatus{0}, fM1{-1}, fM2{-1}, fC1{-1}, fC2{-1};
+  double fPx{0.}, fPy{0.}, fPz{0.}, fE{0.}, fMass{0.};
 };
 
 #endif // DelphesLHEFReader_h

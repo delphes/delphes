@@ -26,75 +26,44 @@
 
 #include "classes/DelphesXDRReader.h"
 
-#include <stdint.h>
-#include <stdio.h>
+#include <array>
+
 #include <string.h>
-
-//------------------------------------------------------------------------------
-
-DelphesXDRReader::DelphesXDRReader() :
-  fFile(0), fBuffer(0), fOffset(0)
-{
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesXDRReader::SetFile(FILE *file)
-{
-  fFile = file;
-}
 
 //------------------------------------------------------------------------------
 
 void DelphesXDRReader::SetBuffer(void *buffer)
 {
-  fBuffer = (uint8_t *)buffer;
+  fBuffer = reinterpret_cast<uint8_t *>(buffer);
   fOffset = 0;
-}
-
-//------------------------------------------------------------------------------
-
-void DelphesXDRReader::SetOffset(int offset)
-{
-  fOffset = offset;
 }
 
 //------------------------------------------------------------------------------
 
 void DelphesXDRReader::ReadRaw(void *value, int size)
 {
-  int rndup;
-
-  rndup = size % 4;
+  int rndup = size % 4;
   if(rndup > 0)
-  {
     rndup = 4 - rndup;
-  }
-
   if(fFile)
-  {
     fread(value, 1, size + rndup, fFile);
-  }
 }
 
 //------------------------------------------------------------------------------
 
 void DelphesXDRReader::ReadValue(void *value, int size)
 {
-  int i;
-  uint8_t *dst, buffer[8];
-
-  dst = (uint8_t *)value;
-
+  uint8_t *dst = reinterpret_cast<uint8_t *>(value);
   if(fBuffer)
   {
     fOffset += size;
-    for(i = 0; i < size; ++i) dst[i] = fBuffer[fOffset - 1 - i];
+    for(int i = 0; i < size; ++i) dst[i] = fBuffer[fOffset - 1 - i];
   }
   else if(fFile)
   {
-    ReadRaw(buffer, size);
-    for(i = 0; i < size; ++i) dst[i] = buffer[size - 1 - i];
+    std::array<uint8_t, 8> buffer;
+    ReadRaw(buffer.data(), size);
+    for(int i = 0; i < size; ++i) dst[i] = buffer.at(size - 1 - i);
   }
 }
 
@@ -103,10 +72,7 @@ void DelphesXDRReader::ReadValue(void *value, int size)
 void DelphesXDRReader::ReadString(void *value, int maxSize)
 {
   int32_t size;
-
-  ReadValue(&size, 4);
-
-  if(size < 0 || size > maxSize) size = maxSize;
+  if(ReadValue(&size, 4); size < 0 || size > maxSize) size = maxSize;
 
   if(fBuffer)
   {
@@ -114,9 +80,7 @@ void DelphesXDRReader::ReadString(void *value, int maxSize)
     fOffset += size;
   }
   else if(fFile)
-  {
     ReadRaw(value, size);
-  }
 }
 
 //------------------------------------------------------------------------------

@@ -24,104 +24,67 @@
  *
  */
 
-#include "modules/ExampleModule.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
+#include <deque>
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-ExampleModule::ExampleModule()
+class ExampleModule: public DelphesModule
 {
-  fFormula = new DelphesFormula;
-}
-
-//------------------------------------------------------------------------------
-
-ExampleModule::~ExampleModule()
-{
-  delete fFormula;
-}
-
-//------------------------------------------------------------------------------
-
-void ExampleModule::Init()
-{
-  // read parameters
-
-  fIntParam = GetInt("IntParam", 10);
-
-  fDoubleParam = GetDouble("DoubleParam", 1.0);
-
-  fFormula->Compile(GetString("EfficiencyFormula", "0.4"));
-
-  ExRootConfParam param = GetParam("ArrayParam");
-  Long_t i, size;
-  fArrayParam.clear();
-
-  size = param.GetSize();
-  for(i = 0; i < size; ++i)
+public:
+  explicit ExampleModule(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fIntParam(Steer<int>("IntParam", 10)),
+    fDoubleParam(Steer<double>("DoubleParam", 1.0)),
+    fFormula(std::make_unique<DelphesFormula>())
   {
-    fArrayParam.push_back(param[i].GetDouble());
+    fFormula->Compile(Steer<std::string>("EfficiencyFormula", "0.4"));
+    for(const double &param : Steer<std::vector<double> >("ArrayParam"))
+      fArrayParam.push_back(param);
   }
 
-  // import input array(s)
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "FastJetFinder/jets")); // import input array(s)
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "jets")); // create output array(s)
+  }
+  void Process() override;
+  void Finish() override {}
 
-  fInputArray = ImportArray(GetString("InputArray", "FastJetFinder/jets"));
-  fItInputArray = fInputArray->MakeIterator();
+private:
+  const int fIntParam;
+  const double fDoubleParam;
 
-  // create output array(s)
+  const std::unique_ptr<DelphesFormula> fFormula; //!
 
-  fOutputArray = ExportArray(GetString("OutputArray", "jets"));
-}
+  std::deque<double> fArrayParam;
 
-//------------------------------------------------------------------------------
-
-void ExampleModule::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray; //!
+  CandidatesCollection fOutputArray; //!
+};
 
 //------------------------------------------------------------------------------
 
 void ExampleModule::Process()
 {
-  Candidate *candidate;
-  TLorentzVector candidatePosition, candidateMomentum;
+  fOutputArray->clear();
 
   // loop over all input candidates
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
-    candidatePosition = candidate->Position;
-    candidateMomentum = candidate->Momentum;
-
     // apply an efficency formula
-    if(gRandom->Uniform() <= fFormula->Eval(candidateMomentum.Pt(), candidatePosition.Eta()))
-    {
-      fOutputArray->Add(candidate);
-    }
+    if(gRandom->Uniform() <= fFormula->Eval(candidate->Momentum.Pt(), candidate->Position.Eta()))
+      fOutputArray->emplace_back(candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("ExampleModule", ExampleModule);

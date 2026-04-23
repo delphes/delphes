@@ -24,82 +24,51 @@
  *
  */
 
-#include "modules/AngularSmearing.h"
-
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesFormula.h"
+#include "classes/DelphesModule.h"
+#include "classes/DelphesParameters.h"
 
-#include "ExRootAnalysis/ExRootClassifier.h"
-#include "ExRootAnalysis/ExRootFilter.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
-#include "TDatabasePDG.h"
-#include "TFormula.h"
-#include "TLorentzVector.h"
-#include "TMath.h"
-#include "TObjArray.h"
-#include "TRandom3.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
-
-using namespace std;
-
-//------------------------------------------------------------------------------
-
-AngularSmearing::AngularSmearing()
+class AngularSmearing: public DelphesModule
 {
-  fFormulaEta = new DelphesFormula;
-  fFormulaPhi = new DelphesFormula;
-}
+public:
+  AngularSmearing(const DelphesParameters &moduleParams) :
+    DelphesModule(moduleParams),
+    fFormulaEta(std::make_unique<DelphesFormula>()),
+    fFormulaPhi(std::make_unique<DelphesFormula>())
+  {
+    // read resolution formula
+    fFormulaEta->Compile(Steer<std::string>("EtaResolutionFormula", "0.0"));
+    fFormulaPhi->Compile(Steer<std::string>("PhiResolutionFormula", "0.0"));
+  }
 
-//------------------------------------------------------------------------------
+  void Init() override
+  {
+    fInputArray = ImportArray(Steer<std::string>("InputArray", "ParticlePropagator/stableParticles"));
+    fOutputArray = ExportArray(Steer<std::string>("OutputArray", "stableParticles"));
+  }
+  void Process() override;
 
-AngularSmearing::~AngularSmearing()
-{
-  delete fFormulaEta;
-  delete fFormulaPhi;
-}
+private:
+  const std::unique_ptr<DelphesFormula> fFormulaEta; //!
+  const std::unique_ptr<DelphesFormula> fFormulaPhi; //!
 
-//------------------------------------------------------------------------------
-
-void AngularSmearing::Init()
-{
-  // read resolution formula
-
-  fFormulaEta->Compile(GetString("EtaResolutionFormula", "0.0"));
-  fFormulaPhi->Compile(GetString("PhiResolutionFormula", "0.0"));
-
-  // import input array
-
-  fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
-  fItInputArray = fInputArray->MakeIterator();
-
-  // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-}
-
-//------------------------------------------------------------------------------
-
-void AngularSmearing::Finish()
-{
-  delete fItInputArray;
-}
+  CandidatesCollection fInputArray;
+  CandidatesCollection fOutputArray;
+};
 
 //------------------------------------------------------------------------------
 
 void AngularSmearing::Process()
 {
-  Candidate *candidate, *mother;
+  fOutputArray->clear();
   Double_t pt, eta, phi, e, m;
 
-  fItInputArray->Reset();
-  while((candidate = static_cast<Candidate *>(fItInputArray->Next())))
+  for(Candidate *const &candidate : *fInputArray)
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidateMomentum.Eta();
@@ -114,13 +83,14 @@ void AngularSmearing::Process()
 
     if(pt <= 0.0) continue;
 
-    mother = candidate;
-    candidate = static_cast<Candidate *>(candidate->Clone());
-    candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
-    candidate->AddCandidate(mother);
+    Candidate *new_candidate = static_cast<Candidate *>(candidate->Clone());
+    new_candidate->Momentum.SetPtEtaPhiM(pt, eta, phi, m);
+    new_candidate->AddCandidate(candidate);
 
-    fOutputArray->Add(candidate);
+    fOutputArray->emplace_back(new_candidate);
   }
 }
 
 //------------------------------------------------------------------------------
+
+REGISTER_MODULE("AngularSmearing", AngularSmearing);
