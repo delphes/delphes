@@ -368,7 +368,6 @@ int main(int argc, char *argv[])
     readStopWatch.Start();
     for(eventCounter = 0; eventCounter < numberOfEvents && !interrupted; ++eventCounter)
     {
-      while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
 
       if(spareFlag1)
       {
@@ -402,6 +401,16 @@ int main(int argc, char *argv[])
         reader->Clear();
         continue;
       }
+
+      // Advance the LHE reader for events that were tried but failed by Pythia8.
+      // Without this synchronization, the LHEF information and reconstructed
+      // Delphes branches correspond to different events after a failed generation.
+      int nTriedPythia = pythia->info.nTried();
+      while(nTriedPythia > eventCounter){
+        while(reader && reader->ReadBlock(factory, allParticleOutputArrayLHEF, stableParticleOutputArrayLHEF, partonOutputArrayLHEF) && !reader->EventReady());
+        eventCounter++;
+      }
+      eventCounter--;
 
       readStopWatch.Stop();
 
