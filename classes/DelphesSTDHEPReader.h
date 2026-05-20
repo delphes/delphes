@@ -67,6 +67,15 @@ public:
     TObjArray *stableParticleOutputArray,
     TObjArray *partonOutputArray);
 
+  [[deprecated("ReadBlock has been renamed to ReadEvent")]]
+  bool ReadBlock(DelphesFactory *factory,
+    TObjArray *allParticleOutputArray,
+    TObjArray *stableParticleOutputArray,
+    TObjArray *partonOutputArray)
+  {
+    return ReadEvent(factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
+  }
+
   void AnalyzeEvent(ExRootTreeBranch *branch, long long eventNumber,
     TStopwatch *readStopWatch, TStopwatch *procStopWatch);
 
