@@ -222,17 +222,13 @@ module SimpleCalorimeter ECal {
 
   set SmearTowerCenter true
 
-  set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
 
   # 1.0 degree towers (3 cm x 3 cm)
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
+  set PhiBins 360
 
   # 0.02 unit in eta up to eta = 3.0
   for {set i -200} {$i <= 200} {incr i} {
@@ -286,7 +282,6 @@ module SimpleCalorimeter HCal {
 
   set SmearTowerCenter true
 
-  set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
@@ -294,10 +289,7 @@ module SimpleCalorimeter HCal {
 
 
   # 2.0 degree towers (6 cm x 6 cm)
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
+  set PhiBins 360
 
   # 0.04 unit in eta up to eta = 3.0
   for {set i -100} {$i <= 100} {incr i} {

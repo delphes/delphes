@@ -641,7 +641,6 @@ module SimpleCalorimeter ECal {
 
     set SmearTowerCenter true
 
-    set pi [expr {acos(-1)}]
 
     # lists of the edges of each tower in eta and phi
     # each list starts with the lower edge of the first tower
@@ -654,10 +653,7 @@ module SimpleCalorimeter ECal {
 
     #barrel:
     #dphi = 0.2 degree towers up to eta <=1.2
-    set PhiBins {}
-    for {set i -900} {$i <= 900} {incr i} {
-	add PhiBins [expr {$i * $pi/900.0 }]
-    }
+    set PhiBins 1800
     # 0.003 unit (5x5 mm^2) in eta up to eta <=1.2
     for {set i -400} {$i <=400} {incr i} {
 	set eta [expr {$i * 0.003}]
@@ -666,10 +662,7 @@ module SimpleCalorimeter ECal {
 
     #endcaps:
     #dphi = 0.8 degree towers for 1.2 < eta <=2.5
-    set PhiBins {}
-    for {set i -225} {$i <= 225} {incr i} {
-	add PhiBins [expr {$i * $pi/225.}]
-    }
+    set PhiBins 450
     #deta=0.02 units for 1.2 < |eta| <=2.5
     #first, from -2.5 to -1.2, there will be (1.3/0.02=)65 segments
     for {set i 1} {$i <=66} {incr i} {
@@ -684,10 +677,7 @@ module SimpleCalorimeter ECal {
     
     #plug: 
     #dphi = 1 degree for 2.5 < eta <=3
-    set PhiBins {}
-    for {set i -180} {$i <= 180} {incr i} {
-	add PhiBins [expr {$i * $pi/180.}]
-    }
+    set PhiBins 360
     # deta = 0.02 for 2.5 < |eta| <=3
     # from -3 to -2.5, there will be 25 segments
     for {set i 1} {$i <= 26} {incr i} {
@@ -749,7 +739,6 @@ module SimpleCalorimeter HCal {
 
     set SmearTowerCenter true
 
-    set pi [expr {acos(-1)}]
 
     # lists of the edges of each tower in eta and phi
     # each list starts with the lower edge of the first tower
@@ -763,10 +752,7 @@ module SimpleCalorimeter HCal {
 
     #barrel and ring:
     #dphi = 1 degree up to |eta| <=0.9
-    set PhiBins {}
-    for {set i -180} {$i <=180} {incr i} {
-	add PhiBins [expr {$i * $pi/180.0}]
-    }
+    set PhiBins 360
     #deta= 0.02 towers up to |eta| <=0.9
     for {set i -45} {$i <=45} {incr i} {
 	set eta [expr {$i * 0.02}]
@@ -775,10 +761,7 @@ module SimpleCalorimeter HCal {
 
     #endcaps:
     # dphi = 6 degree
-    set PhiBins {}
-    for {set i -30} {$i <=30} {incr i} {
-	add PhiBins [expr {$i * $pi/30.0}]
-    }
+    set PhiBins 60
     # deta =0.1 for 0.9 < |eta| <=3.0
     #for -3.0 to -0.9, 21 segments
     for {set i 1} {$i <=22} {incr i} {

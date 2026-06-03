@@ -11,10 +11,7 @@ set pi [expr {acos(-1)} ]
 # 360/0.0973/cosh(4.4) = ~90 => 90 bins
 # Front part
 
-  set PhiBins {}
-  for {set i -45} {$i <= 45} {incr i} {
-    add PhiBins [expr {$i * $pi/45.0} ]
-  }
+  set PhiBins 90
   for {set i 0} {$i <= 10} {incr i} {
     set eta [expr {4.0 + $i * 0.4999/10.0} ]
     add EtaPhiBins $eta $PhiBins

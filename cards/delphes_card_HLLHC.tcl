@@ -172,13 +172,7 @@ module DenseTrackFilter DenseTrackFilter {
 
   set pi [expr {acos(-1)}]
 
-  set nbins_phi [expr {$pi/$EtaPhiRes} ]
-  set nbins_phi [expr {int($nbins_phi)} ]
-
-  set PhiBins {}
-  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-    add PhiBins [expr {$i * $pi/$nbins_phi}]
-  }
+  set PhiBins [expr {int($pi/$EtaPhiRes) * 2}]
 
   set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
   set nbins_eta [expr {int($nbins_eta)} ]
@@ -584,10 +578,7 @@ module SimpleCalorimeter ECal {
 
   # assume 0.02 x 0.02 resolution in eta,phi in the barrel |eta| < 1.5
 
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
+  set PhiBins 360
 
   # 0.02 unit in eta up to eta = 1.5 (barrel)
   for {set i -85} {$i <= 86} {incr i} {
@@ -597,10 +588,7 @@ module SimpleCalorimeter ECal {
 
   # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- ECAL)
 
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
+  set PhiBins 360
 
   # 0.02 unit in eta up to eta = 3
   for {set i 1} {$i <= 84} {incr i} {
@@ -616,10 +604,7 @@ module SimpleCalorimeter ECal {
   # take present CMS granularity for HF
 
   # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
+  set PhiBins 36
 
   foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
@@ -684,19 +669,13 @@ module SimpleCalorimeter HCal {
   # the list ends with the higher edged of the last tower
 
   # 10 degrees towers
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
+  set PhiBins 36
   foreach eta {-3.2 -2.5 -2.4 -2.3 -2.2 -2.1 -2 -1.9 -1.8 -1.7 -1.6 -1.5 -1.4 -1.3 -1.2 -1.1 -1 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2 2.1 2.2 2.3 2.4 2.5 2.6 3.3} {
     add EtaPhiBins $eta $PhiBins
   }
 
   # 20 degrees towers
-  set PhiBins {}
-  for {set i -9} {$i <= 9} {incr i} {
-    add PhiBins [expr {$i * $pi/9.0}]
-  }
+  set PhiBins 18
   foreach eta {-4.9 -4.7 -4.5 -4.3 -4.1 -3.9 -3.7 -3.5 -3.3 -3 -2.8 -2.6 2.8 3 3.2 3.5 3.7 3.9 4.1 4.3 4.5 4.7 4.9} {
     add EtaPhiBins $eta $PhiBins
   }

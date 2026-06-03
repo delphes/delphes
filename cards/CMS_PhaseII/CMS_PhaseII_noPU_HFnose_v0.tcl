@@ -344,1559 +344,782 @@ module SimpleCalorimeter ECal {
   # the list ends with the higher edged of the last tower
 
   # assume 0.02 x 0.02 resolution in eta,phi in the barrel |eta| < 1.5
-  set PhiBins {}
-          for {set i -139} {$i <= 139} {incr i} {
-              add PhiBins [expr {$i * $pi/139}]
-          }
+  set PhiBins 278
   add EtaPhiBins -4.18 $PhiBins
   add EtaPhiBins 4.21 $PhiBins
-  set PhiBins {}
-          for {set i -142} {$i <= 142} {incr i} {
-              add PhiBins [expr {$i * $pi/142}]
-          }
+  set PhiBins 284
   add EtaPhiBins -4.16 $PhiBins
   add EtaPhiBins 4.18 $PhiBins
-  set PhiBins {}
-          for {set i -145} {$i <= 145} {incr i} {
-              add PhiBins [expr {$i * $pi/145}]
-          }
+  set PhiBins 290
   add EtaPhiBins -4.14 $PhiBins
   add EtaPhiBins 4.16 $PhiBins
-  set PhiBins {}
-          for {set i -148} {$i <= 148} {incr i} {
-              add PhiBins [expr {$i * $pi/148}]
-          }
+  set PhiBins 296
   add EtaPhiBins -4.12 $PhiBins
   add EtaPhiBins 4.14 $PhiBins
-  set PhiBins {}
-          for {set i -151} {$i <= 151} {incr i} {
-              add PhiBins [expr {$i * $pi/151}]
-          }
+  set PhiBins 302
   add EtaPhiBins -4.10 $PhiBins
   add EtaPhiBins 4.12 $PhiBins
-  set PhiBins {}
-          for {set i -155} {$i <= 155} {incr i} {
-              add PhiBins [expr {$i * $pi/155}]
-          }
+  set PhiBins 310
   add EtaPhiBins -4.08 $PhiBins
   add EtaPhiBins 4.10 $PhiBins
-  set PhiBins {}
-          for {set i -158} {$i <= 158} {incr i} {
-              add PhiBins [expr {$i * $pi/158}]
-          }
+  set PhiBins 316
   add EtaPhiBins -4.06 $PhiBins
   add EtaPhiBins 4.08 $PhiBins
-  set PhiBins {}
-          for {set i -161} {$i <= 161} {incr i} {
-              add PhiBins [expr {$i * $pi/161}]
-          }
+  set PhiBins 322
   add EtaPhiBins -4.04 $PhiBins
   add EtaPhiBins 4.06 $PhiBins
-  set PhiBins {}
-          for {set i -164} {$i <= 164} {incr i} {
-              add PhiBins [expr {$i * $pi/164}]
-          }
+  set PhiBins 328
   add EtaPhiBins -4.02 $PhiBins
   add EtaPhiBins 4.04 $PhiBins
-  set PhiBins {}
-          for {set i -167} {$i <= 167} {incr i} {
-              add PhiBins [expr {$i * $pi/167}]
-          }
+  set PhiBins 334
   add EtaPhiBins -4.00 $PhiBins
   add EtaPhiBins 4.02 $PhiBins
-  set PhiBins {}
-          for {set i -170} {$i <= 170} {incr i} {
-              add PhiBins [expr {$i * $pi/170}]
-          }
+  set PhiBins 340
   add EtaPhiBins -3.98 $PhiBins
   add EtaPhiBins 4.00 $PhiBins
-  set PhiBins {}
-          for {set i -173} {$i <= 173} {incr i} {
-              add PhiBins [expr {$i * $pi/173}]
-          }
+  set PhiBins 346
   add EtaPhiBins -3.96 $PhiBins
   add EtaPhiBins 3.98 $PhiBins
-  set PhiBins {}
-          for {set i -176} {$i <= 176} {incr i} {
-              add PhiBins [expr {$i * $pi/176}]
-          }
+  set PhiBins 352
   add EtaPhiBins -3.95 $PhiBins
   add EtaPhiBins 3.96 $PhiBins
-  set PhiBins {}
-          for {set i -180} {$i <= 180} {incr i} {
-              add PhiBins [expr {$i * $pi/180}]
-          }
+  set PhiBins 360
   add EtaPhiBins -3.93 $PhiBins
   add EtaPhiBins 3.95 $PhiBins
-  set PhiBins {}
-          for {set i -183} {$i <= 183} {incr i} {
-              add PhiBins [expr {$i * $pi/183}]
-          }
+  set PhiBins 366
   add EtaPhiBins -3.91 $PhiBins
   add EtaPhiBins 3.93 $PhiBins
-  set PhiBins {}
-          for {set i -186} {$i <= 186} {incr i} {
-              add PhiBins [expr {$i * $pi/186}]
-          }
+  set PhiBins 372
   add EtaPhiBins -3.90 $PhiBins
   add EtaPhiBins 3.91 $PhiBins
-  set PhiBins {}
-          for {set i -189} {$i <= 189} {incr i} {
-              add PhiBins [expr {$i * $pi/189}]
-          }
+  set PhiBins 378
   add EtaPhiBins -3.88 $PhiBins
   add EtaPhiBins 3.90 $PhiBins
-  set PhiBins {}
-          for {set i -192} {$i <= 192} {incr i} {
-              add PhiBins [expr {$i * $pi/192}]
-          }
+  set PhiBins 384
   add EtaPhiBins -3.86 $PhiBins
   add EtaPhiBins 3.88 $PhiBins
-  set PhiBins {}
-          for {set i -195} {$i <= 195} {incr i} {
-              add PhiBins [expr {$i * $pi/195}]
-          }
+  set PhiBins 390
   add EtaPhiBins -3.85 $PhiBins
   add EtaPhiBins 3.86 $PhiBins
-  set PhiBins {}
-          for {set i -198} {$i <= 198} {incr i} {
-              add PhiBins [expr {$i * $pi/198}]
-          }
+  set PhiBins 396
   add EtaPhiBins -3.83 $PhiBins
   add EtaPhiBins 3.85 $PhiBins
-  set PhiBins {}
-          for {set i -202} {$i <= 202} {incr i} {
-              add PhiBins [expr {$i * $pi/202}]
-          }
+  set PhiBins 404
   add EtaPhiBins -3.82 $PhiBins
   add EtaPhiBins 3.83 $PhiBins
-  set PhiBins {}
-          for {set i -205} {$i <= 205} {incr i} {
-              add PhiBins [expr {$i * $pi/205}]
-          }
+  set PhiBins 410
   add EtaPhiBins -3.80 $PhiBins
   add EtaPhiBins 3.82 $PhiBins
-  set PhiBins {}
-          for {set i -208} {$i <= 208} {incr i} {
-              add PhiBins [expr {$i * $pi/208}]
-          }
+  set PhiBins 416
   add EtaPhiBins -3.78 $PhiBins
   add EtaPhiBins 3.80 $PhiBins
-  set PhiBins {}
-          for {set i -211} {$i <= 211} {incr i} {
-              add PhiBins [expr {$i * $pi/211}]
-          }
+  set PhiBins 422
   add EtaPhiBins -3.77 $PhiBins
   add EtaPhiBins 3.78 $PhiBins
-  set PhiBins {}
-          for {set i -214} {$i <= 214} {incr i} {
-              add PhiBins [expr {$i * $pi/214}]
-          }
+  set PhiBins 428
   add EtaPhiBins -3.76 $PhiBins
   add EtaPhiBins 3.77 $PhiBins
-  set PhiBins {}
-          for {set i -217} {$i <= 217} {incr i} {
-              add PhiBins [expr {$i * $pi/217}]
-          }
+  set PhiBins 434
   add EtaPhiBins -3.74 $PhiBins
   add EtaPhiBins 3.76 $PhiBins
-  set PhiBins {}
-          for {set i -220} {$i <= 220} {incr i} {
-              add PhiBins [expr {$i * $pi/220}]
-          }
+  set PhiBins 440
   add EtaPhiBins -3.73 $PhiBins
   add EtaPhiBins 3.74 $PhiBins
-  set PhiBins {}
-          for {set i -224} {$i <= 224} {incr i} {
-              add PhiBins [expr {$i * $pi/224}]
-          }
+  set PhiBins 448
   add EtaPhiBins -3.71 $PhiBins
   add EtaPhiBins 3.73 $PhiBins
-  set PhiBins {}
-          for {set i -227} {$i <= 227} {incr i} {
-              add PhiBins [expr {$i * $pi/227}]
-          }
+  set PhiBins 454
   add EtaPhiBins -3.70 $PhiBins
   add EtaPhiBins 3.71 $PhiBins
-  set PhiBins {}
-          for {set i -230} {$i <= 230} {incr i} {
-              add PhiBins [expr {$i * $pi/230}]
-          }
+  set PhiBins 460
   add EtaPhiBins -3.69 $PhiBins
   add EtaPhiBins 3.70 $PhiBins
-  set PhiBins {}
-          for {set i -233} {$i <= 233} {incr i} {
-              add PhiBins [expr {$i * $pi/233}]
-          }
+  set PhiBins 466
   add EtaPhiBins -3.67 $PhiBins
   add EtaPhiBins 3.69 $PhiBins
-  set PhiBins {}
-          for {set i -236} {$i <= 236} {incr i} {
-              add PhiBins [expr {$i * $pi/236}]
-          }
+  set PhiBins 472
   add EtaPhiBins -3.66 $PhiBins
   add EtaPhiBins 3.67 $PhiBins
-  set PhiBins {}
-          for {set i -239} {$i <= 239} {incr i} {
-              add PhiBins [expr {$i * $pi/239}]
-          }
+  set PhiBins 478
   add EtaPhiBins -3.65 $PhiBins
   add EtaPhiBins 3.66 $PhiBins
-  set PhiBins {}
-          for {set i -242} {$i <= 242} {incr i} {
-              add PhiBins [expr {$i * $pi/242}]
-          }
+  set PhiBins 484
   add EtaPhiBins -3.63 $PhiBins
   add EtaPhiBins 3.65 $PhiBins
-  set PhiBins {}
-          for {set i -246} {$i <= 246} {incr i} {
-              add PhiBins [expr {$i * $pi/246}]
-          }
+  set PhiBins 492
   add EtaPhiBins -3.62 $PhiBins
   add EtaPhiBins 3.63 $PhiBins
-  set PhiBins {}
-          for {set i -249} {$i <= 249} {incr i} {
-              add PhiBins [expr {$i * $pi/249}]
-          }
+  set PhiBins 498
   add EtaPhiBins -3.61 $PhiBins
   add EtaPhiBins 3.62 $PhiBins
-  set PhiBins {}
-          for {set i -252} {$i <= 252} {incr i} {
-              add PhiBins [expr {$i * $pi/252}]
-          }
+  set PhiBins 504
   add EtaPhiBins -3.59 $PhiBins
   add EtaPhiBins 3.61 $PhiBins
-  set PhiBins {}
-          for {set i -255} {$i <= 255} {incr i} {
-              add PhiBins [expr {$i * $pi/255}]
-          }
+  set PhiBins 510
   add EtaPhiBins -3.58 $PhiBins
   add EtaPhiBins 3.59 $PhiBins
-  set PhiBins {}
-          for {set i -258} {$i <= 258} {incr i} {
-              add PhiBins [expr {$i * $pi/258}]
-          }
+  set PhiBins 516
   add EtaPhiBins -3.57 $PhiBins
   add EtaPhiBins 3.58 $PhiBins
-  set PhiBins {}
-          for {set i -261} {$i <= 261} {incr i} {
-              add PhiBins [expr {$i * $pi/261}]
-          }
+  set PhiBins 522
   add EtaPhiBins -3.56 $PhiBins
   add EtaPhiBins 3.57 $PhiBins
-  set PhiBins {}
-          for {set i -264} {$i <= 264} {incr i} {
-              add PhiBins [expr {$i * $pi/264}]
-          }
+  set PhiBins 528
   add EtaPhiBins -3.55 $PhiBins
   add EtaPhiBins 3.56 $PhiBins
-  set PhiBins {}
-          for {set i -268} {$i <= 268} {incr i} {
-              add PhiBins [expr {$i * $pi/268}]
-          }
+  set PhiBins 536
   add EtaPhiBins -3.54 $PhiBins
   add EtaPhiBins 3.55 $PhiBins
-  set PhiBins {}
-          for {set i -271} {$i <= 271} {incr i} {
-              add PhiBins [expr {$i * $pi/271}]
-          }
+  set PhiBins 542
   add EtaPhiBins -3.52 $PhiBins
   add EtaPhiBins 3.54 $PhiBins
-  set PhiBins {}
-          for {set i -274} {$i <= 274} {incr i} {
-              add PhiBins [expr {$i * $pi/274}]
-          }
+  set PhiBins 548
   add EtaPhiBins -3.51 $PhiBins
   add EtaPhiBins 3.52 $PhiBins
-  set PhiBins {}
-          for {set i -277} {$i <= 277} {incr i} {
-              add PhiBins [expr {$i * $pi/277}]
-          }
+  set PhiBins 554
   add EtaPhiBins -3.50 $PhiBins
   add EtaPhiBins 3.51 $PhiBins
-  set PhiBins {}
-          for {set i -280} {$i <= 280} {incr i} {
-              add PhiBins [expr {$i * $pi/280}]
-          }
+  set PhiBins 560
   add EtaPhiBins -3.49 $PhiBins
   add EtaPhiBins 3.50 $PhiBins
-  set PhiBins {}
-          for {set i -283} {$i <= 283} {incr i} {
-              add PhiBins [expr {$i * $pi/283}]
-          }
+  set PhiBins 566
   add EtaPhiBins -3.48 $PhiBins
   add EtaPhiBins 3.49 $PhiBins
-  set PhiBins {}
-          for {set i -286} {$i <= 286} {incr i} {
-              add PhiBins [expr {$i * $pi/286}]
-          }
+  set PhiBins 572
   add EtaPhiBins -3.47 $PhiBins
   add EtaPhiBins 3.48 $PhiBins
-  set PhiBins {}
-          for {set i -290} {$i <= 290} {incr i} {
-              add PhiBins [expr {$i * $pi/290}]
-          }
+  set PhiBins 580
   add EtaPhiBins -3.46 $PhiBins
   add EtaPhiBins 3.47 $PhiBins
-  set PhiBins {}
-          for {set i -293} {$i <= 293} {incr i} {
-              add PhiBins [expr {$i * $pi/293}]
-          }
+  set PhiBins 586
   add EtaPhiBins -3.45 $PhiBins
   add EtaPhiBins 3.46 $PhiBins
-  set PhiBins {}
-          for {set i -296} {$i <= 296} {incr i} {
-              add PhiBins [expr {$i * $pi/296}]
-          }
+  set PhiBins 592
   add EtaPhiBins -3.44 $PhiBins
   add EtaPhiBins 3.45 $PhiBins
-  set PhiBins {}
-          for {set i -299} {$i <= 299} {incr i} {
-              add PhiBins [expr {$i * $pi/299}]
-          }
+  set PhiBins 598
   add EtaPhiBins -3.43 $PhiBins
   add EtaPhiBins 3.44 $PhiBins
-  set PhiBins {}
-          for {set i -302} {$i <= 302} {incr i} {
-              add PhiBins [expr {$i * $pi/302}]
-          }
+  set PhiBins 604
   add EtaPhiBins -3.41 $PhiBins
   add EtaPhiBins 3.43 $PhiBins
-  set PhiBins {}
-          for {set i -305} {$i <= 305} {incr i} {
-              add PhiBins [expr {$i * $pi/305}]
-          }
+  set PhiBins 610
   add EtaPhiBins -3.40 $PhiBins
   add EtaPhiBins 3.41 $PhiBins
-  set PhiBins {}
-          for {set i -308} {$i <= 308} {incr i} {
-              add PhiBins [expr {$i * $pi/308}]
-          }
+  set PhiBins 616
   add EtaPhiBins -3.39 $PhiBins
   add EtaPhiBins 3.40 $PhiBins
-  set PhiBins {}
-          for {set i -312} {$i <= 312} {incr i} {
-              add PhiBins [expr {$i * $pi/312}]
-          }
+  set PhiBins 624
   add EtaPhiBins -3.38 $PhiBins
   add EtaPhiBins 3.39 $PhiBins
-  set PhiBins {}
-          for {set i -315} {$i <= 315} {incr i} {
-              add PhiBins [expr {$i * $pi/315}]
-          }
+  set PhiBins 630
   add EtaPhiBins -3.37 $PhiBins
   add EtaPhiBins 3.38 $PhiBins
-  set PhiBins {}
-          for {set i -318} {$i <= 318} {incr i} {
-              add PhiBins [expr {$i * $pi/318}]
-          }
+  set PhiBins 636
   add EtaPhiBins -3.36 $PhiBins
   add EtaPhiBins 3.37 $PhiBins
-  set PhiBins {}
-          for {set i -321} {$i <= 321} {incr i} {
-              add PhiBins [expr {$i * $pi/321}]
-          }
+  set PhiBins 642
   add EtaPhiBins -3.35 $PhiBins
   add EtaPhiBins 3.36 $PhiBins
-  set PhiBins {}
-          for {set i -324} {$i <= 324} {incr i} {
-              add PhiBins [expr {$i * $pi/324}]
-          }
+  set PhiBins 648
   add EtaPhiBins -3.35 $PhiBins
   add EtaPhiBins 3.35 $PhiBins
-  set PhiBins {}
-          for {set i -327} {$i <= 327} {incr i} {
-              add PhiBins [expr {$i * $pi/327}]
-          }
+  set PhiBins 654
   add EtaPhiBins -3.34 $PhiBins
   add EtaPhiBins 3.35 $PhiBins
-  set PhiBins {}
-          for {set i -330} {$i <= 330} {incr i} {
-              add PhiBins [expr {$i * $pi/330}]
-          }
+  set PhiBins 660
   add EtaPhiBins -3.33 $PhiBins
   add EtaPhiBins 3.34 $PhiBins
-  set PhiBins {}
-          for {set i -334} {$i <= 334} {incr i} {
-              add PhiBins [expr {$i * $pi/334}]
-          }
+  set PhiBins 668
   add EtaPhiBins -3.32 $PhiBins
   add EtaPhiBins 3.33 $PhiBins
-  set PhiBins {}
-          for {set i -337} {$i <= 337} {incr i} {
-              add PhiBins [expr {$i * $pi/337}]
-          }
+  set PhiBins 674
   add EtaPhiBins -3.31 $PhiBins
   add EtaPhiBins 3.32 $PhiBins
-  set PhiBins {}
-          for {set i -340} {$i <= 340} {incr i} {
-              add PhiBins [expr {$i * $pi/340}]
-          }
+  set PhiBins 680
   add EtaPhiBins -3.30 $PhiBins
   add EtaPhiBins 3.31 $PhiBins
-  set PhiBins {}
-          for {set i -343} {$i <= 343} {incr i} {
-              add PhiBins [expr {$i * $pi/343}]
-          }
+  set PhiBins 686
   add EtaPhiBins -3.29 $PhiBins
   add EtaPhiBins 3.30 $PhiBins
-  set PhiBins {}
-          for {set i -346} {$i <= 346} {incr i} {
-              add PhiBins [expr {$i * $pi/346}]
-          }
+  set PhiBins 692
   add EtaPhiBins -3.28 $PhiBins
   add EtaPhiBins 3.29 $PhiBins
-  set PhiBins {}
-          for {set i -349} {$i <= 349} {incr i} {
-              add PhiBins [expr {$i * $pi/349}]
-          }
+  set PhiBins 698
   add EtaPhiBins -3.27 $PhiBins
   add EtaPhiBins 3.28 $PhiBins
-  set PhiBins {}
-          for {set i -352} {$i <= 352} {incr i} {
-              add PhiBins [expr {$i * $pi/352}]
-          }
+  set PhiBins 704
   add EtaPhiBins -3.26 $PhiBins
   add EtaPhiBins 3.27 $PhiBins
-  set PhiBins {}
-          for {set i -356} {$i <= 356} {incr i} {
-              add PhiBins [expr {$i * $pi/356}]
-          }
+  set PhiBins 712
   add EtaPhiBins -3.25 $PhiBins
   add EtaPhiBins 3.26 $PhiBins
-  set PhiBins {}
-          for {set i -359} {$i <= 359} {incr i} {
-              add PhiBins [expr {$i * $pi/359}]
-          }
+  set PhiBins 718
   add EtaPhiBins -3.24 $PhiBins
   add EtaPhiBins 3.25 $PhiBins
-  set PhiBins {}
-          for {set i -362} {$i <= 362} {incr i} {
-              add PhiBins [expr {$i * $pi/362}]
-          }
+  set PhiBins 724
   add EtaPhiBins -3.24 $PhiBins
   add EtaPhiBins 3.24 $PhiBins
-  set PhiBins {}
-          for {set i -365} {$i <= 365} {incr i} {
-              add PhiBins [expr {$i * $pi/365}]
-          }
+  set PhiBins 730
   add EtaPhiBins -3.23 $PhiBins
   add EtaPhiBins 3.24 $PhiBins
-  set PhiBins {}
-          for {set i -368} {$i <= 368} {incr i} {
-              add PhiBins [expr {$i * $pi/368}]
-          }
+  set PhiBins 736
   add EtaPhiBins -3.22 $PhiBins
   add EtaPhiBins 3.23 $PhiBins
-  set PhiBins {}
-          for {set i -371} {$i <= 371} {incr i} {
-              add PhiBins [expr {$i * $pi/371}]
-          }
+  set PhiBins 742
   add EtaPhiBins -3.21 $PhiBins
   add EtaPhiBins 3.22 $PhiBins
-  set PhiBins {}
-          for {set i -374} {$i <= 374} {incr i} {
-              add PhiBins [expr {$i * $pi/374}]
-          }
+  set PhiBins 748
   add EtaPhiBins -3.20 $PhiBins
   add EtaPhiBins 3.21 $PhiBins
-  set PhiBins {}
-          for {set i -378} {$i <= 378} {incr i} {
-              add PhiBins [expr {$i * $pi/378}]
-          }
+  set PhiBins 756
   add EtaPhiBins -3.19 $PhiBins
   add EtaPhiBins 3.20 $PhiBins
-  set PhiBins {}
-          for {set i -381} {$i <= 381} {incr i} {
-              add PhiBins [expr {$i * $pi/381}]
-          }
+  set PhiBins 762
   add EtaPhiBins -3.19 $PhiBins
   add EtaPhiBins 3.19 $PhiBins
-  set PhiBins {}
-          for {set i -384} {$i <= 384} {incr i} {
-              add PhiBins [expr {$i * $pi/384}]
-          }
+  set PhiBins 768
   add EtaPhiBins -3.18 $PhiBins
   add EtaPhiBins 3.19 $PhiBins
-  set PhiBins {}
-          for {set i -387} {$i <= 387} {incr i} {
-              add PhiBins [expr {$i * $pi/387}]
-          }
+  set PhiBins 774
   add EtaPhiBins -3.17 $PhiBins
   add EtaPhiBins 3.18 $PhiBins
-  set PhiBins {}
-          for {set i -390} {$i <= 390} {incr i} {
-              add PhiBins [expr {$i * $pi/390}]
-          }
+  set PhiBins 780
   add EtaPhiBins -3.16 $PhiBins
   add EtaPhiBins 3.17 $PhiBins
-  set PhiBins {}
-          for {set i -393} {$i <= 393} {incr i} {
-              add PhiBins [expr {$i * $pi/393}]
-          }
+  set PhiBins 786
   add EtaPhiBins -3.15 $PhiBins
   add EtaPhiBins 3.16 $PhiBins
-  set PhiBins {}
-          for {set i -396} {$i <= 396} {incr i} {
-              add PhiBins [expr {$i * $pi/396}]
-          }
+  set PhiBins 792
   add EtaPhiBins -3.15 $PhiBins
   add EtaPhiBins 3.15 $PhiBins
-  set PhiBins {}
-          for {set i -400} {$i <= 400} {incr i} {
-              add PhiBins [expr {$i * $pi/400}]
-          }
+  set PhiBins 800
   add EtaPhiBins -3.14 $PhiBins
   add EtaPhiBins 3.15 $PhiBins
-  set PhiBins {}
-          for {set i -403} {$i <= 403} {incr i} {
-              add PhiBins [expr {$i * $pi/403}]
-          }
+  set PhiBins 806
   add EtaPhiBins -3.13 $PhiBins
   add EtaPhiBins 3.14 $PhiBins
-  set PhiBins {}
-          for {set i -406} {$i <= 406} {incr i} {
-              add PhiBins [expr {$i * $pi/406}]
-          }
+  set PhiBins 812
   add EtaPhiBins -3.12 $PhiBins
   add EtaPhiBins 3.13 $PhiBins
-  set PhiBins {}
-          for {set i -409} {$i <= 409} {incr i} {
-              add PhiBins [expr {$i * $pi/409}]
-          }
+  set PhiBins 818
   add EtaPhiBins -3.11 $PhiBins
   add EtaPhiBins 3.12 $PhiBins
-  set PhiBins {}
-          for {set i -412} {$i <= 412} {incr i} {
-              add PhiBins [expr {$i * $pi/412}]
-          }
+  set PhiBins 824
   add EtaPhiBins -3.11 $PhiBins
   add EtaPhiBins 3.11 $PhiBins
-  set PhiBins {}
-          for {set i -415} {$i <= 415} {incr i} {
-              add PhiBins [expr {$i * $pi/415}]
-          }
+  set PhiBins 830
   add EtaPhiBins -3.10 $PhiBins
   add EtaPhiBins 3.11 $PhiBins
-  set PhiBins {}
-          for {set i -418} {$i <= 418} {incr i} {
-              add PhiBins [expr {$i * $pi/418}]
-          }
+  set PhiBins 836
   add EtaPhiBins -3.09 $PhiBins
   add EtaPhiBins 3.10 $PhiBins
-  set PhiBins {}
-          for {set i -422} {$i <= 422} {incr i} {
-              add PhiBins [expr {$i * $pi/422}]
-          }
+  set PhiBins 844
   add EtaPhiBins -3.08 $PhiBins
   add EtaPhiBins 3.09 $PhiBins
-  set PhiBins {}
-          for {set i -425} {$i <= 425} {incr i} {
-              add PhiBins [expr {$i * $pi/425}]
-          }
+  set PhiBins 850
   add EtaPhiBins -3.08 $PhiBins
   add EtaPhiBins 3.08 $PhiBins
-  set PhiBins {}
-          for {set i -428} {$i <= 428} {incr i} {
-              add PhiBins [expr {$i * $pi/428}]
-          }
+  set PhiBins 856
   add EtaPhiBins -3.07 $PhiBins
   add EtaPhiBins 3.08 $PhiBins
-  set PhiBins {}
-          for {set i -431} {$i <= 431} {incr i} {
-              add PhiBins [expr {$i * $pi/431}]
-          }
+  set PhiBins 862
   add EtaPhiBins -3.06 $PhiBins
   add EtaPhiBins 3.07 $PhiBins
-  set PhiBins {}
-          for {set i -434} {$i <= 434} {incr i} {
-              add PhiBins [expr {$i * $pi/434}]
-          }
+  set PhiBins 868
   add EtaPhiBins -3.06 $PhiBins
   add EtaPhiBins 3.06 $PhiBins
-  set PhiBins {}
-          for {set i -437} {$i <= 437} {incr i} {
-              add PhiBins [expr {$i * $pi/437}]
-          }
+  set PhiBins 874
   add EtaPhiBins -3.05 $PhiBins
   add EtaPhiBins 3.06 $PhiBins
-  set PhiBins {}
-          for {set i -440} {$i <= 440} {incr i} {
-              add PhiBins [expr {$i * $pi/440}]
-          }
+  set PhiBins 880
   add EtaPhiBins -3.04 $PhiBins
   add EtaPhiBins 3.05 $PhiBins
-  set PhiBins {}
-          for {set i -444} {$i <= 444} {incr i} {
-              add PhiBins [expr {$i * $pi/444}]
-          }
+  set PhiBins 888
   add EtaPhiBins -3.03 $PhiBins
   add EtaPhiBins 3.04 $PhiBins
-  set PhiBins {}
-          for {set i -447} {$i <= 447} {incr i} {
-              add PhiBins [expr {$i * $pi/447}]
-          }
+  set PhiBins 894
   add EtaPhiBins -3.03 $PhiBins
   add EtaPhiBins 3.03 $PhiBins
-  set PhiBins {}
-          for {set i -450} {$i <= 450} {incr i} {
-              add PhiBins [expr {$i * $pi/450}]
-          }
+  set PhiBins 900
   add EtaPhiBins -3.02 $PhiBins
   add EtaPhiBins 3.03 $PhiBins
-  set PhiBins {}
-          for {set i -453} {$i <= 453} {incr i} {
-              add PhiBins [expr {$i * $pi/453}]
-          }
+  set PhiBins 906
   add EtaPhiBins -3.01 $PhiBins
   add EtaPhiBins 3.02 $PhiBins
-  set PhiBins {}
-          for {set i -456} {$i <= 456} {incr i} {
-              add PhiBins [expr {$i * $pi/456}]
-          }
+  set PhiBins 912
   add EtaPhiBins -3.01 $PhiBins
   add EtaPhiBins 3.01 $PhiBins
-  set PhiBins {}
-          for {set i -459} {$i <= 459} {incr i} {
-              add PhiBins [expr {$i * $pi/459}]
-          }
+  set PhiBins 918
   add EtaPhiBins -3.00 $PhiBins
   add EtaPhiBins 3.01 $PhiBins
-  set PhiBins {}
-          for {set i -462} {$i <= 462} {incr i} {
-              add PhiBins [expr {$i * $pi/462}]
-          }
+  set PhiBins 924
   add EtaPhiBins -2.99 $PhiBins
   add EtaPhiBins 3.00 $PhiBins
-  set PhiBins {}
-          for {set i -466} {$i <= 466} {incr i} {
-              add PhiBins [expr {$i * $pi/466}]
-          }
+  set PhiBins 932
   add EtaPhiBins -2.99 $PhiBins
   add EtaPhiBins 2.99 $PhiBins
-  set PhiBins {}
-          for {set i -161} {$i <= 161} {incr i} {
-              add PhiBins [expr {$i * $pi/161}]
-          }
+  set PhiBins 322
   add EtaPhiBins -2.97 $PhiBins
   add EtaPhiBins 2.99 $PhiBins
-  set PhiBins {}
-          for {set i -164} {$i <= 164} {incr i} {
-              add PhiBins [expr {$i * $pi/164}]
-          }
+  set PhiBins 328
   add EtaPhiBins -2.95 $PhiBins
   add EtaPhiBins 2.97 $PhiBins
-  set PhiBins {}
-          for {set i -167} {$i <= 167} {incr i} {
-              add PhiBins [expr {$i * $pi/167}]
-          }
+  set PhiBins 334
   add EtaPhiBins -2.93 $PhiBins
   add EtaPhiBins 2.95 $PhiBins
-  set PhiBins {}
-          for {set i -170} {$i <= 170} {incr i} {
-              add PhiBins [expr {$i * $pi/170}]
-          }
+  set PhiBins 340
   add EtaPhiBins -2.91 $PhiBins
   add EtaPhiBins 2.93 $PhiBins
-  set PhiBins {}
-          for {set i -174} {$i <= 174} {incr i} {
-              add PhiBins [expr {$i * $pi/174}]
-          }
+  set PhiBins 348
   add EtaPhiBins -2.90 $PhiBins
   add EtaPhiBins 2.91 $PhiBins
-  set PhiBins {}
-          for {set i -177} {$i <= 177} {incr i} {
-              add PhiBins [expr {$i * $pi/177}]
-          }
+  set PhiBins 354
   add EtaPhiBins -2.88 $PhiBins
   add EtaPhiBins 2.90 $PhiBins
-  set PhiBins {}
-          for {set i -180} {$i <= 180} {incr i} {
-              add PhiBins [expr {$i * $pi/180}]
-          }
+  set PhiBins 360
   add EtaPhiBins -2.86 $PhiBins
   add EtaPhiBins 2.88 $PhiBins
-  set PhiBins {}
-          for {set i -183} {$i <= 183} {incr i} {
-              add PhiBins [expr {$i * $pi/183}]
-          }
+  set PhiBins 366
   add EtaPhiBins -2.84 $PhiBins
   add EtaPhiBins 2.86 $PhiBins
-  set PhiBins {}
-          for {set i -186} {$i <= 186} {incr i} {
-              add PhiBins [expr {$i * $pi/186}]
-          }
+  set PhiBins 372
   add EtaPhiBins -2.83 $PhiBins
   add EtaPhiBins 2.84 $PhiBins
-  set PhiBins {}
-          for {set i -189} {$i <= 189} {incr i} {
-              add PhiBins [expr {$i * $pi/189}]
-          }
+  set PhiBins 378
   add EtaPhiBins -2.81 $PhiBins
   add EtaPhiBins 2.83 $PhiBins
-  set PhiBins {}
-          for {set i -192} {$i <= 192} {incr i} {
-              add PhiBins [expr {$i * $pi/192}]
-          }
+  set PhiBins 384
   add EtaPhiBins -2.80 $PhiBins
   add EtaPhiBins 2.81 $PhiBins
-  set PhiBins {}
-          for {set i -196} {$i <= 196} {incr i} {
-              add PhiBins [expr {$i * $pi/196}]
-          }
+  set PhiBins 392
   add EtaPhiBins -2.78 $PhiBins
   add EtaPhiBins 2.80 $PhiBins
-  set PhiBins {}
-          for {set i -199} {$i <= 199} {incr i} {
-              add PhiBins [expr {$i * $pi/199}]
-          }
+  set PhiBins 398
   add EtaPhiBins -2.76 $PhiBins
   add EtaPhiBins 2.78 $PhiBins
-  set PhiBins {}
-          for {set i -202} {$i <= 202} {incr i} {
-              add PhiBins [expr {$i * $pi/202}]
-          }
+  set PhiBins 404
   add EtaPhiBins -2.75 $PhiBins
   add EtaPhiBins 2.76 $PhiBins
-  set PhiBins {}
-          for {set i -205} {$i <= 205} {incr i} {
-              add PhiBins [expr {$i * $pi/205}]
-          }
+  set PhiBins 410
   add EtaPhiBins -2.73 $PhiBins
   add EtaPhiBins 2.75 $PhiBins
-  set PhiBins {}
-          for {set i -208} {$i <= 208} {incr i} {
-              add PhiBins [expr {$i * $pi/208}]
-          }
+  set PhiBins 416
   add EtaPhiBins -2.72 $PhiBins
   add EtaPhiBins 2.73 $PhiBins
-  set PhiBins {}
-          for {set i -211} {$i <= 211} {incr i} {
-              add PhiBins [expr {$i * $pi/211}]
-          }
+  set PhiBins 422
   add EtaPhiBins -2.70 $PhiBins
   add EtaPhiBins 2.72 $PhiBins
-  set PhiBins {}
-          for {set i -214} {$i <= 214} {incr i} {
-              add PhiBins [expr {$i * $pi/214}]
-          }
+  set PhiBins 428
   add EtaPhiBins -2.69 $PhiBins
   add EtaPhiBins 2.70 $PhiBins
-  set PhiBins {}
-          for {set i -218} {$i <= 218} {incr i} {
-              add PhiBins [expr {$i * $pi/218}]
-          }
+  set PhiBins 436
   add EtaPhiBins -2.67 $PhiBins
   add EtaPhiBins 2.69 $PhiBins
-  set PhiBins {}
-          for {set i -221} {$i <= 221} {incr i} {
-              add PhiBins [expr {$i * $pi/221}]
-          }
+  set PhiBins 442
   add EtaPhiBins -2.66 $PhiBins
   add EtaPhiBins 2.67 $PhiBins
-  set PhiBins {}
-          for {set i -224} {$i <= 224} {incr i} {
-              add PhiBins [expr {$i * $pi/224}]
-          }
+  set PhiBins 448
   add EtaPhiBins -2.65 $PhiBins
   add EtaPhiBins 2.66 $PhiBins
-  set PhiBins {}
-          for {set i -227} {$i <= 227} {incr i} {
-              add PhiBins [expr {$i * $pi/227}]
-          }
+  set PhiBins 454
   add EtaPhiBins -2.63 $PhiBins
   add EtaPhiBins 2.65 $PhiBins
-  set PhiBins {}
-          for {set i -230} {$i <= 230} {incr i} {
-              add PhiBins [expr {$i * $pi/230}]
-          }
+  set PhiBins 460
   add EtaPhiBins -2.62 $PhiBins
   add EtaPhiBins 2.63 $PhiBins
-  set PhiBins {}
-          for {set i -233} {$i <= 233} {incr i} {
-              add PhiBins [expr {$i * $pi/233}]
-          }
+  set PhiBins 466
   add EtaPhiBins -2.61 $PhiBins
   add EtaPhiBins 2.62 $PhiBins
-  set PhiBins {}
-          for {set i -236} {$i <= 236} {incr i} {
-              add PhiBins [expr {$i * $pi/236}]
-          }
+  set PhiBins 472
   add EtaPhiBins -2.59 $PhiBins
   add EtaPhiBins 2.61 $PhiBins
-  set PhiBins {}
-          for {set i -240} {$i <= 240} {incr i} {
-              add PhiBins [expr {$i * $pi/240}]
-          }
+  set PhiBins 480
   add EtaPhiBins -2.58 $PhiBins
   add EtaPhiBins 2.59 $PhiBins
-  set PhiBins {}
-          for {set i -243} {$i <= 243} {incr i} {
-              add PhiBins [expr {$i * $pi/243}]
-          }
+  set PhiBins 486
   add EtaPhiBins -2.57 $PhiBins
   add EtaPhiBins 2.58 $PhiBins
-  set PhiBins {}
-          for {set i -246} {$i <= 246} {incr i} {
-              add PhiBins [expr {$i * $pi/246}]
-          }
+  set PhiBins 492
   add EtaPhiBins -2.56 $PhiBins
   add EtaPhiBins 2.57 $PhiBins
-  set PhiBins {}
-          for {set i -249} {$i <= 249} {incr i} {
-              add PhiBins [expr {$i * $pi/249}]
-          }
+  set PhiBins 498
   add EtaPhiBins -2.54 $PhiBins
   add EtaPhiBins 2.56 $PhiBins
-  set PhiBins {}
-          for {set i -252} {$i <= 252} {incr i} {
-              add PhiBins [expr {$i * $pi/252}]
-          }
+  set PhiBins 504
   add EtaPhiBins -2.53 $PhiBins
   add EtaPhiBins 2.54 $PhiBins
-  set PhiBins {}
-          for {set i -255} {$i <= 255} {incr i} {
-              add PhiBins [expr {$i * $pi/255}]
-          }
+  set PhiBins 510
   add EtaPhiBins -2.52 $PhiBins
   add EtaPhiBins 2.53 $PhiBins
-  set PhiBins {}
-          for {set i -258} {$i <= 258} {incr i} {
-              add PhiBins [expr {$i * $pi/258}]
-          }
+  set PhiBins 516
   add EtaPhiBins -2.51 $PhiBins
   add EtaPhiBins 2.52 $PhiBins
-  set PhiBins {}
-          for {set i -262} {$i <= 262} {incr i} {
-              add PhiBins [expr {$i * $pi/262}]
-          }
+  set PhiBins 524
   add EtaPhiBins -2.49 $PhiBins
   add EtaPhiBins 2.51 $PhiBins
-  set PhiBins {}
-          for {set i -265} {$i <= 265} {incr i} {
-              add PhiBins [expr {$i * $pi/265}]
-          }
+  set PhiBins 530
   add EtaPhiBins -2.48 $PhiBins
   add EtaPhiBins 2.49 $PhiBins
-  set PhiBins {}
-          for {set i -268} {$i <= 268} {incr i} {
-              add PhiBins [expr {$i * $pi/268}]
-          }
+  set PhiBins 536
   add EtaPhiBins -2.47 $PhiBins
   add EtaPhiBins 2.48 $PhiBins
-  set PhiBins {}
-          for {set i -271} {$i <= 271} {incr i} {
-              add PhiBins [expr {$i * $pi/271}]
-          }
+  set PhiBins 542
   add EtaPhiBins -2.46 $PhiBins
   add EtaPhiBins 2.47 $PhiBins
-  set PhiBins {}
-          for {set i -274} {$i <= 274} {incr i} {
-              add PhiBins [expr {$i * $pi/274}]
-          }
+  set PhiBins 548
   add EtaPhiBins -2.45 $PhiBins
   add EtaPhiBins 2.46 $PhiBins
-  set PhiBins {}
-          for {set i -277} {$i <= 277} {incr i} {
-              add PhiBins [expr {$i * $pi/277}]
-          }
+  set PhiBins 554
   add EtaPhiBins -2.44 $PhiBins
   add EtaPhiBins 2.45 $PhiBins
-  set PhiBins {}
-          for {set i -280} {$i <= 280} {incr i} {
-              add PhiBins [expr {$i * $pi/280}]
-          }
+  set PhiBins 560
   add EtaPhiBins -2.43 $PhiBins
   add EtaPhiBins 2.44 $PhiBins
-  set PhiBins {}
-          for {set i -284} {$i <= 284} {incr i} {
-              add PhiBins [expr {$i * $pi/284}]
-          }
+  set PhiBins 568
   add EtaPhiBins -2.42 $PhiBins
   add EtaPhiBins 2.43 $PhiBins
-  set PhiBins {}
-          for {set i -287} {$i <= 287} {incr i} {
-              add PhiBins [expr {$i * $pi/287}]
-          }
+  set PhiBins 574
   add EtaPhiBins -2.40 $PhiBins
   add EtaPhiBins 2.42 $PhiBins
-  set PhiBins {}
-          for {set i -290} {$i <= 290} {incr i} {
-              add PhiBins [expr {$i * $pi/290}]
-          }
+  set PhiBins 580
   add EtaPhiBins -2.39 $PhiBins
   add EtaPhiBins 2.40 $PhiBins
-  set PhiBins {}
-          for {set i -293} {$i <= 293} {incr i} {
-              add PhiBins [expr {$i * $pi/293}]
-          }
+  set PhiBins 586
   add EtaPhiBins -2.38 $PhiBins
   add EtaPhiBins 2.39 $PhiBins
-  set PhiBins {}
-          for {set i -296} {$i <= 296} {incr i} {
-              add PhiBins [expr {$i * $pi/296}]
-          }
+  set PhiBins 592
   add EtaPhiBins -2.37 $PhiBins
   add EtaPhiBins 2.38 $PhiBins
-  set PhiBins {}
-          for {set i -299} {$i <= 299} {incr i} {
-              add PhiBins [expr {$i * $pi/299}]
-          }
+  set PhiBins 598
   add EtaPhiBins -2.36 $PhiBins
   add EtaPhiBins 2.37 $PhiBins
-  set PhiBins {}
-          for {set i -302} {$i <= 302} {incr i} {
-              add PhiBins [expr {$i * $pi/302}]
-          }
+  set PhiBins 604
   add EtaPhiBins -2.35 $PhiBins
   add EtaPhiBins 2.36 $PhiBins
-  set PhiBins {}
-          for {set i -306} {$i <= 306} {incr i} {
-              add PhiBins [expr {$i * $pi/306}]
-          }
+  set PhiBins 612
   add EtaPhiBins -2.34 $PhiBins
   add EtaPhiBins 2.35 $PhiBins
-  set PhiBins {}
-          for {set i -309} {$i <= 309} {incr i} {
-              add PhiBins [expr {$i * $pi/309}]
-          }
+  set PhiBins 618
   add EtaPhiBins -2.33 $PhiBins
   add EtaPhiBins 2.34 $PhiBins
-  set PhiBins {}
-          for {set i -312} {$i <= 312} {incr i} {
-              add PhiBins [expr {$i * $pi/312}]
-          }
+  set PhiBins 624
   add EtaPhiBins -2.32 $PhiBins
   add EtaPhiBins 2.33 $PhiBins
-  set PhiBins {}
-          for {set i -315} {$i <= 315} {incr i} {
-              add PhiBins [expr {$i * $pi/315}]
-          }
+  set PhiBins 630
   add EtaPhiBins -2.31 $PhiBins
   add EtaPhiBins 2.32 $PhiBins
-  set PhiBins {}
-          for {set i -318} {$i <= 318} {incr i} {
-              add PhiBins [expr {$i * $pi/318}]
-          }
+  set PhiBins 636
   add EtaPhiBins -2.30 $PhiBins
   add EtaPhiBins 2.31 $PhiBins
-  set PhiBins {}
-          for {set i -321} {$i <= 321} {incr i} {
-              add PhiBins [expr {$i * $pi/321}]
-          }
+  set PhiBins 642
   add EtaPhiBins -2.29 $PhiBins
   add EtaPhiBins 2.30 $PhiBins
-  set PhiBins {}
-          for {set i -324} {$i <= 324} {incr i} {
-              add PhiBins [expr {$i * $pi/324}]
-          }
+  set PhiBins 648
   add EtaPhiBins -2.28 $PhiBins
   add EtaPhiBins 2.29 $PhiBins
-  set PhiBins {}
-          for {set i -328} {$i <= 328} {incr i} {
-              add PhiBins [expr {$i * $pi/328}]
-          }
+  set PhiBins 656
   add EtaPhiBins -2.27 $PhiBins
   add EtaPhiBins 2.28 $PhiBins
-  set PhiBins {}
-          for {set i -331} {$i <= 331} {incr i} {
-              add PhiBins [expr {$i * $pi/331}]
-          }
+  set PhiBins 662
   add EtaPhiBins -2.27 $PhiBins
   add EtaPhiBins 2.27 $PhiBins
-  set PhiBins {}
-          for {set i -334} {$i <= 334} {incr i} {
-              add PhiBins [expr {$i * $pi/334}]
-          }
+  set PhiBins 668
   add EtaPhiBins -2.26 $PhiBins
   add EtaPhiBins 2.27 $PhiBins
-  set PhiBins {}
-          for {set i -337} {$i <= 337} {incr i} {
-              add PhiBins [expr {$i * $pi/337}]
-          }
+  set PhiBins 674
   add EtaPhiBins -2.25 $PhiBins
   add EtaPhiBins 2.26 $PhiBins
-  set PhiBins {}
-          for {set i -340} {$i <= 340} {incr i} {
-              add PhiBins [expr {$i * $pi/340}]
-          }
+  set PhiBins 680
   add EtaPhiBins -2.24 $PhiBins
   add EtaPhiBins 2.25 $PhiBins
-  set PhiBins {}
-          for {set i -343} {$i <= 343} {incr i} {
-              add PhiBins [expr {$i * $pi/343}]
-          }
+  set PhiBins 686
   add EtaPhiBins -2.23 $PhiBins
   add EtaPhiBins 2.24 $PhiBins
-  set PhiBins {}
-          for {set i -346} {$i <= 346} {incr i} {
-              add PhiBins [expr {$i * $pi/346}]
-          }
+  set PhiBins 692
   add EtaPhiBins -2.22 $PhiBins
   add EtaPhiBins 2.23 $PhiBins
-  set PhiBins {}
-          for {set i -350} {$i <= 350} {incr i} {
-              add PhiBins [expr {$i * $pi/350}]
-          }
+  set PhiBins 700
   add EtaPhiBins -2.21 $PhiBins
   add EtaPhiBins 2.22 $PhiBins
-  set PhiBins {}
-          for {set i -353} {$i <= 353} {incr i} {
-              add PhiBins [expr {$i * $pi/353}]
-          }
+  set PhiBins 706
   add EtaPhiBins -2.20 $PhiBins
   add EtaPhiBins 2.21 $PhiBins
-  set PhiBins {}
-          for {set i -356} {$i <= 356} {incr i} {
-              add PhiBins [expr {$i * $pi/356}]
-          }
+  set PhiBins 712
   add EtaPhiBins -2.20 $PhiBins
   add EtaPhiBins 2.20 $PhiBins
-  set PhiBins {}
-          for {set i -252} {$i <= 252} {incr i} {
-              add PhiBins [expr {$i * $pi/252}]
-          }
+  set PhiBins 504
   add EtaPhiBins -2.19 $PhiBins
   add EtaPhiBins 2.20 $PhiBins
-  set PhiBins {}
-          for {set i -256} {$i <= 256} {incr i} {
-              add PhiBins [expr {$i * $pi/256}]
-          }
+  set PhiBins 512
   add EtaPhiBins -2.18 $PhiBins
   add EtaPhiBins 2.19 $PhiBins
-  set PhiBins {}
-          for {set i -259} {$i <= 259} {incr i} {
-              add PhiBins [expr {$i * $pi/259}]
-          }
+  set PhiBins 518
   add EtaPhiBins -2.17 $PhiBins
   add EtaPhiBins 2.18 $PhiBins
-  set PhiBins {}
-          for {set i -262} {$i <= 262} {incr i} {
-              add PhiBins [expr {$i * $pi/262}]
-          }
+  set PhiBins 524
   add EtaPhiBins -2.15 $PhiBins
   add EtaPhiBins 2.17 $PhiBins
-  set PhiBins {}
-          for {set i -265} {$i <= 265} {incr i} {
-              add PhiBins [expr {$i * $pi/265}]
-          }
+  set PhiBins 530
   add EtaPhiBins -2.14 $PhiBins
   add EtaPhiBins 2.15 $PhiBins
-  set PhiBins {}
-          for {set i -268} {$i <= 268} {incr i} {
-              add PhiBins [expr {$i * $pi/268}]
-          }
+  set PhiBins 536
   add EtaPhiBins -2.13 $PhiBins
   add EtaPhiBins 2.14 $PhiBins
-  set PhiBins {}
-          for {set i -271} {$i <= 271} {incr i} {
-              add PhiBins [expr {$i * $pi/271}]
-          }
+  set PhiBins 542
   add EtaPhiBins -2.12 $PhiBins
   add EtaPhiBins 2.13 $PhiBins
-  set PhiBins {}
-          for {set i -274} {$i <= 274} {incr i} {
-              add PhiBins [expr {$i * $pi/274}]
-          }
+  set PhiBins 548
   add EtaPhiBins -2.11 $PhiBins
   add EtaPhiBins 2.12 $PhiBins
-  set PhiBins {}
-          for {set i -278} {$i <= 278} {incr i} {
-              add PhiBins [expr {$i * $pi/278}]
-          }
+  set PhiBins 556
   add EtaPhiBins -2.10 $PhiBins
   add EtaPhiBins 2.11 $PhiBins
-  set PhiBins {}
-          for {set i -281} {$i <= 281} {incr i} {
-              add PhiBins [expr {$i * $pi/281}]
-          }
+  set PhiBins 562
   add EtaPhiBins -2.09 $PhiBins
   add EtaPhiBins 2.10 $PhiBins
-  set PhiBins {}
-          for {set i -284} {$i <= 284} {incr i} {
-              add PhiBins [expr {$i * $pi/284}]
-          }
+  set PhiBins 568
   add EtaPhiBins -2.08 $PhiBins
   add EtaPhiBins 2.09 $PhiBins
-  set PhiBins {}
-          for {set i -287} {$i <= 287} {incr i} {
-              add PhiBins [expr {$i * $pi/287}]
-          }
+  set PhiBins 574
   add EtaPhiBins -2.07 $PhiBins
   add EtaPhiBins 2.08 $PhiBins
-  set PhiBins {}
-          for {set i -290} {$i <= 290} {incr i} {
-              add PhiBins [expr {$i * $pi/290}]
-          }
+  set PhiBins 580
   add EtaPhiBins -2.05 $PhiBins
   add EtaPhiBins 2.07 $PhiBins
-  set PhiBins {}
-          for {set i -293} {$i <= 293} {incr i} {
-              add PhiBins [expr {$i * $pi/293}]
-          }
+  set PhiBins 586
   add EtaPhiBins -2.04 $PhiBins
   add EtaPhiBins 2.05 $PhiBins
-  set PhiBins {}
-          for {set i -296} {$i <= 296} {incr i} {
-              add PhiBins [expr {$i * $pi/296}]
-          }
+  set PhiBins 592
   add EtaPhiBins -2.03 $PhiBins
   add EtaPhiBins 2.04 $PhiBins
-  set PhiBins {}
-          for {set i -300} {$i <= 300} {incr i} {
-              add PhiBins [expr {$i * $pi/300}]
-          }
+  set PhiBins 600
   add EtaPhiBins -2.02 $PhiBins
   add EtaPhiBins 2.03 $PhiBins
-  set PhiBins {}
-          for {set i -303} {$i <= 303} {incr i} {
-              add PhiBins [expr {$i * $pi/303}]
-          }
+  set PhiBins 606
   add EtaPhiBins -2.01 $PhiBins
   add EtaPhiBins 2.02 $PhiBins
-  set PhiBins {}
-          for {set i -306} {$i <= 306} {incr i} {
-              add PhiBins [expr {$i * $pi/306}]
-          }
+  set PhiBins 612
   add EtaPhiBins -2.00 $PhiBins
   add EtaPhiBins 2.01 $PhiBins
-  set PhiBins {}
-          for {set i -309} {$i <= 309} {incr i} {
-              add PhiBins [expr {$i * $pi/309}]
-          }
+  set PhiBins 618
   add EtaPhiBins -1.99 $PhiBins
   add EtaPhiBins 2.00 $PhiBins
-  set PhiBins {}
-          for {set i -312} {$i <= 312} {incr i} {
-              add PhiBins [expr {$i * $pi/312}]
-          }
+  set PhiBins 624
   add EtaPhiBins -1.98 $PhiBins
   add EtaPhiBins 1.99 $PhiBins
-  set PhiBins {}
-          for {set i -315} {$i <= 315} {incr i} {
-              add PhiBins [expr {$i * $pi/315}]
-          }
+  set PhiBins 630
   add EtaPhiBins -1.98 $PhiBins
   add EtaPhiBins 1.98 $PhiBins
-  set PhiBins {}
-          for {set i -318} {$i <= 318} {incr i} {
-              add PhiBins [expr {$i * $pi/318}]
-          }
+  set PhiBins 636
   add EtaPhiBins -1.97 $PhiBins
   add EtaPhiBins 1.98 $PhiBins
-  set PhiBins {}
-          for {set i -322} {$i <= 322} {incr i} {
-              add PhiBins [expr {$i * $pi/322}]
-          }
+  set PhiBins 644
   add EtaPhiBins -1.96 $PhiBins
   add EtaPhiBins 1.97 $PhiBins
-  set PhiBins {}
-          for {set i -325} {$i <= 325} {incr i} {
-              add PhiBins [expr {$i * $pi/325}]
-          }
+  set PhiBins 650
   add EtaPhiBins -1.95 $PhiBins
   add EtaPhiBins 1.96 $PhiBins
-  set PhiBins {}
-          for {set i -328} {$i <= 328} {incr i} {
-              add PhiBins [expr {$i * $pi/328}]
-          }
+  set PhiBins 656
   add EtaPhiBins -1.94 $PhiBins
   add EtaPhiBins 1.95 $PhiBins
-  set PhiBins {}
-          for {set i -331} {$i <= 331} {incr i} {
-              add PhiBins [expr {$i * $pi/331}]
-          }
+  set PhiBins 662
   add EtaPhiBins -1.93 $PhiBins
   add EtaPhiBins 1.94 $PhiBins
-  set PhiBins {}
-          for {set i -334} {$i <= 334} {incr i} {
-              add PhiBins [expr {$i * $pi/334}]
-          }
+  set PhiBins 668
   add EtaPhiBins -1.92 $PhiBins
   add EtaPhiBins 1.93 $PhiBins
-  set PhiBins {}
-          for {set i -337} {$i <= 337} {incr i} {
-              add PhiBins [expr {$i * $pi/337}]
-          }
+  set PhiBins 674
   add EtaPhiBins -1.91 $PhiBins
   add EtaPhiBins 1.92 $PhiBins
-  set PhiBins {}
-          for {set i -340} {$i <= 340} {incr i} {
-              add PhiBins [expr {$i * $pi/340}]
-          }
+  set PhiBins 680
   add EtaPhiBins -1.90 $PhiBins
   add EtaPhiBins 1.91 $PhiBins
-  set PhiBins {}
-          for {set i -344} {$i <= 344} {incr i} {
-              add PhiBins [expr {$i * $pi/344}]
-          }
+  set PhiBins 688
   add EtaPhiBins -1.89 $PhiBins
   add EtaPhiBins 1.90 $PhiBins
-  set PhiBins {}
-          for {set i -347} {$i <= 347} {incr i} {
-              add PhiBins [expr {$i * $pi/347}]
-          }
+  set PhiBins 694
   add EtaPhiBins -1.88 $PhiBins
   add EtaPhiBins 1.89 $PhiBins
-  set PhiBins {}
-          for {set i -350} {$i <= 350} {incr i} {
-              add PhiBins [expr {$i * $pi/350}]
-          }
+  set PhiBins 700
   add EtaPhiBins -1.88 $PhiBins
   add EtaPhiBins 1.88 $PhiBins
-  set PhiBins {}
-          for {set i -353} {$i <= 353} {incr i} {
-              add PhiBins [expr {$i * $pi/353}]
-          }
+  set PhiBins 706
   add EtaPhiBins -1.87 $PhiBins
   add EtaPhiBins 1.88 $PhiBins
-  set PhiBins {}
-          for {set i -356} {$i <= 356} {incr i} {
-              add PhiBins [expr {$i * $pi/356}]
-          }
+  set PhiBins 712
   add EtaPhiBins -1.86 $PhiBins
   add EtaPhiBins 1.87 $PhiBins
-  set PhiBins {}
-          for {set i -359} {$i <= 359} {incr i} {
-              add PhiBins [expr {$i * $pi/359}]
-          }
+  set PhiBins 718
   add EtaPhiBins -1.85 $PhiBins
   add EtaPhiBins 1.86 $PhiBins
-  set PhiBins {}
-          for {set i -362} {$i <= 362} {incr i} {
-              add PhiBins [expr {$i * $pi/362}]
-          }
+  set PhiBins 724
   add EtaPhiBins -1.84 $PhiBins
   add EtaPhiBins 1.85 $PhiBins
-  set PhiBins {}
-          for {set i -365} {$i <= 365} {incr i} {
-              add PhiBins [expr {$i * $pi/365}]
-          }
+  set PhiBins 730
   add EtaPhiBins -1.83 $PhiBins
   add EtaPhiBins 1.84 $PhiBins
-  set PhiBins {}
-          for {set i -369} {$i <= 369} {incr i} {
-              add PhiBins [expr {$i * $pi/369}]
-          }
+  set PhiBins 738
   add EtaPhiBins -1.83 $PhiBins
   add EtaPhiBins 1.83 $PhiBins
-  set PhiBins {}
-          for {set i -372} {$i <= 372} {incr i} {
-              add PhiBins [expr {$i * $pi/372}]
-          }
+  set PhiBins 744
   add EtaPhiBins -1.82 $PhiBins
   add EtaPhiBins 1.83 $PhiBins
-  set PhiBins {}
-          for {set i -375} {$i <= 375} {incr i} {
-              add PhiBins [expr {$i * $pi/375}]
-          }
+  set PhiBins 750
   add EtaPhiBins -1.81 $PhiBins
   add EtaPhiBins 1.82 $PhiBins
-  set PhiBins {}
-          for {set i -378} {$i <= 378} {incr i} {
-              add PhiBins [expr {$i * $pi/378}]
-          }
+  set PhiBins 756
   add EtaPhiBins -1.80 $PhiBins
   add EtaPhiBins 1.81 $PhiBins
-  set PhiBins {}
-          for {set i -381} {$i <= 381} {incr i} {
-              add PhiBins [expr {$i * $pi/381}]
-          }
+  set PhiBins 762
   add EtaPhiBins -1.79 $PhiBins
   add EtaPhiBins 1.80 $PhiBins
-  set PhiBins {}
-          for {set i -384} {$i <= 384} {incr i} {
-              add PhiBins [expr {$i * $pi/384}]
-          }
+  set PhiBins 768
   add EtaPhiBins -1.79 $PhiBins
   add EtaPhiBins 1.79 $PhiBins
-  set PhiBins {}
-          for {set i -387} {$i <= 387} {incr i} {
-              add PhiBins [expr {$i * $pi/387}]
-          }
+  set PhiBins 774
   add EtaPhiBins -1.78 $PhiBins
   add EtaPhiBins 1.79 $PhiBins
-  set PhiBins {}
-          for {set i -391} {$i <= 391} {incr i} {
-              add PhiBins [expr {$i * $pi/391}]
-          }
+  set PhiBins 782
   add EtaPhiBins -1.77 $PhiBins
   add EtaPhiBins 1.78 $PhiBins
-  set PhiBins {}
-          for {set i -394} {$i <= 394} {incr i} {
-              add PhiBins [expr {$i * $pi/394}]
-          }
+  set PhiBins 788
   add EtaPhiBins -1.76 $PhiBins
   add EtaPhiBins 1.77 $PhiBins
-  set PhiBins {}
-          for {set i -397} {$i <= 397} {incr i} {
-              add PhiBins [expr {$i * $pi/397}]
-          }
+  set PhiBins 794
   add EtaPhiBins -1.76 $PhiBins
   add EtaPhiBins 1.76 $PhiBins
-  set PhiBins {}
-          for {set i -400} {$i <= 400} {incr i} {
-              add PhiBins [expr {$i * $pi/400}]
-          }
+  set PhiBins 800
   add EtaPhiBins -1.75 $PhiBins
   add EtaPhiBins 1.76 $PhiBins
-  set PhiBins {}
-          for {set i -403} {$i <= 403} {incr i} {
-              add PhiBins [expr {$i * $pi/403}]
-          }
+  set PhiBins 806
   add EtaPhiBins -1.74 $PhiBins
   add EtaPhiBins 1.75 $PhiBins
-  set PhiBins {}
-          for {set i -406} {$i <= 406} {incr i} {
-              add PhiBins [expr {$i * $pi/406}]
-          }
+  set PhiBins 812
   add EtaPhiBins -1.73 $PhiBins
   add EtaPhiBins 1.74 $PhiBins
-  set PhiBins {}
-          for {set i -409} {$i <= 409} {incr i} {
-              add PhiBins [expr {$i * $pi/409}]
-          }
+  set PhiBins 818
   add EtaPhiBins -1.73 $PhiBins
   add EtaPhiBins 1.73 $PhiBins
-  set PhiBins {}
-          for {set i -413} {$i <= 413} {incr i} {
-              add PhiBins [expr {$i * $pi/413}]
-          }
+  set PhiBins 826
   add EtaPhiBins -1.72 $PhiBins
   add EtaPhiBins 1.73 $PhiBins
-  set PhiBins {}
-          for {set i -416} {$i <= 416} {incr i} {
-              add PhiBins [expr {$i * $pi/416}]
-          }
+  set PhiBins 832
   add EtaPhiBins -1.71 $PhiBins
   add EtaPhiBins 1.72 $PhiBins
-  set PhiBins {}
-          for {set i -419} {$i <= 419} {incr i} {
-              add PhiBins [expr {$i * $pi/419}]
-          }
+  set PhiBins 838
   add EtaPhiBins -1.71 $PhiBins
   add EtaPhiBins 1.71 $PhiBins
-  set PhiBins {}
-          for {set i -422} {$i <= 422} {incr i} {
-              add PhiBins [expr {$i * $pi/422}]
-          }
+  set PhiBins 844
   add EtaPhiBins -1.70 $PhiBins
   add EtaPhiBins 1.71 $PhiBins
-  set PhiBins {}
-          for {set i -425} {$i <= 425} {incr i} {
-              add PhiBins [expr {$i * $pi/425}]
-          }
+  set PhiBins 850
   add EtaPhiBins -1.69 $PhiBins
   add EtaPhiBins 1.70 $PhiBins
-  set PhiBins {}
-          for {set i -428} {$i <= 428} {incr i} {
-              add PhiBins [expr {$i * $pi/428}]
-          }
+  set PhiBins 856
   add EtaPhiBins -1.69 $PhiBins
   add EtaPhiBins 1.69 $PhiBins
-  set PhiBins {}
-          for {set i -431} {$i <= 431} {incr i} {
-              add PhiBins [expr {$i * $pi/431}]
-          }
+  set PhiBins 862
   add EtaPhiBins -1.68 $PhiBins
   add EtaPhiBins 1.69 $PhiBins
-  set PhiBins {}
-          for {set i -435} {$i <= 435} {incr i} {
-              add PhiBins [expr {$i * $pi/435}]
-          }
+  set PhiBins 870
   add EtaPhiBins -1.67 $PhiBins
   add EtaPhiBins 1.68 $PhiBins
-  set PhiBins {}
-          for {set i -438} {$i <= 438} {incr i} {
-              add PhiBins [expr {$i * $pi/438}]
-          }
+  set PhiBins 876
   add EtaPhiBins -1.67 $PhiBins
   add EtaPhiBins 1.67 $PhiBins
-  set PhiBins {}
-          for {set i -441} {$i <= 441} {incr i} {
-              add PhiBins [expr {$i * $pi/441}]
-          }
+  set PhiBins 882
   add EtaPhiBins -1.66 $PhiBins
   add EtaPhiBins 1.67 $PhiBins
-  set PhiBins {}
-          for {set i -444} {$i <= 444} {incr i} {
-              add PhiBins [expr {$i * $pi/444}]
-          }
+  set PhiBins 888
   add EtaPhiBins -1.65 $PhiBins
   add EtaPhiBins 1.66 $PhiBins
-  set PhiBins {}
-          for {set i -447} {$i <= 447} {incr i} {
-              add PhiBins [expr {$i * $pi/447}]
-          }
+  set PhiBins 894
   add EtaPhiBins -1.65 $PhiBins
   add EtaPhiBins 1.65 $PhiBins
-  set PhiBins {}
-          for {set i -450} {$i <= 450} {incr i} {
-              add PhiBins [expr {$i * $pi/450}]
-          }
+  set PhiBins 900
   add EtaPhiBins -1.64 $PhiBins
   add EtaPhiBins 1.65 $PhiBins
-  set PhiBins {}
-          for {set i -453} {$i <= 453} {incr i} {
-              add PhiBins [expr {$i * $pi/453}]
-          }
+  set PhiBins 906
   add EtaPhiBins -1.63 $PhiBins
   add EtaPhiBins 1.64 $PhiBins
-  set PhiBins {}
-          for {set i -457} {$i <= 457} {incr i} {
-              add PhiBins [expr {$i * $pi/457}]
-          }
+  set PhiBins 914
   add EtaPhiBins -1.63 $PhiBins
   add EtaPhiBins 1.63 $PhiBins
-  set PhiBins {}
-          for {set i -460} {$i <= 460} {incr i} {
-              add PhiBins [expr {$i * $pi/460}]
-          }
+  set PhiBins 920
   add EtaPhiBins -1.62 $PhiBins
   add EtaPhiBins 1.63 $PhiBins
-  set PhiBins {}
-          for {set i -463} {$i <= 463} {incr i} {
-              add PhiBins [expr {$i * $pi/463}]
-          }
+  set PhiBins 926
   add EtaPhiBins -1.61 $PhiBins
   add EtaPhiBins 1.62 $PhiBins
-  set PhiBins {}
-          for {set i -466} {$i <= 466} {incr i} {
-              add PhiBins [expr {$i * $pi/466}]
-          }
+  set PhiBins 932
   add EtaPhiBins -1.61 $PhiBins
   add EtaPhiBins 1.61 $PhiBins
-  set PhiBins {}
-          for {set i -469} {$i <= 469} {incr i} {
-              add PhiBins [expr {$i * $pi/469}]
-          }
+  set PhiBins 938
   add EtaPhiBins -1.60 $PhiBins
   add EtaPhiBins 1.61 $PhiBins
-  set PhiBins {}
-          for {set i -472} {$i <= 472} {incr i} {
-              add PhiBins [expr {$i * $pi/472}]
-          }
+  set PhiBins 944
   add EtaPhiBins -1.60 $PhiBins
   add EtaPhiBins 1.60 $PhiBins
-  set PhiBins {}
-          for {set i -475} {$i <= 475} {incr i} {
-              add PhiBins [expr {$i * $pi/475}]
-          }
+  set PhiBins 950
   add EtaPhiBins -1.59 $PhiBins
   add EtaPhiBins 1.60 $PhiBins
-  set PhiBins {}
-          for {set i -479} {$i <= 479} {incr i} {
-              add PhiBins [expr {$i * $pi/479}]
-          }
+  set PhiBins 958
   add EtaPhiBins -1.58 $PhiBins
   add EtaPhiBins 1.59 $PhiBins
-  set PhiBins {}
-          for {set i -482} {$i <= 482} {incr i} {
-              add PhiBins [expr {$i * $pi/482}]
-          }
+  set PhiBins 964
   add EtaPhiBins -1.58 $PhiBins
   add EtaPhiBins 1.58 $PhiBins
-  set PhiBins {}
-          for {set i -485} {$i <= 485} {incr i} {
-              add PhiBins [expr {$i * $pi/485}]
-          }
+  set PhiBins 970
   add EtaPhiBins -1.57 $PhiBins
   add EtaPhiBins 1.58 $PhiBins
-  set PhiBins {}
-          for {set i -488} {$i <= 488} {incr i} {
-              add PhiBins [expr {$i * $pi/488}]
-          }
+  set PhiBins 976
   add EtaPhiBins -1.57 $PhiBins
   add EtaPhiBins 1.57 $PhiBins
-  set PhiBins {}
-          for {set i -491} {$i <= 491} {incr i} {
-              add PhiBins [expr {$i * $pi/491}]
-          }
+  set PhiBins 982
   add EtaPhiBins -1.56 $PhiBins
   add EtaPhiBins 1.57 $PhiBins
-  set PhiBins {}
-          for {set i -494} {$i <= 494} {incr i} {
-              add PhiBins [expr {$i * $pi/494}]
-          }
+  set PhiBins 988
   add EtaPhiBins -1.55 $PhiBins
   add EtaPhiBins 1.56 $PhiBins
-  set PhiBins {}
-          for {set i -497} {$i <= 497} {incr i} {
-              add PhiBins [expr {$i * $pi/497}]
-          }
+  set PhiBins 994
   add EtaPhiBins -1.55 $PhiBins
   add EtaPhiBins 1.55 $PhiBins
-  set PhiBins {}
-          for {set i -501} {$i <= 501} {incr i} {
-              add PhiBins [expr {$i * $pi/501}]
-          }
+  set PhiBins 1002
   add EtaPhiBins -1.54 $PhiBins
   add EtaPhiBins 1.55 $PhiBins
-  set PhiBins {}
-          for {set i -504} {$i <= 504} {incr i} {
-              add PhiBins [expr {$i * $pi/504}]
-          }
+  set PhiBins 1008
   add EtaPhiBins -1.54 $PhiBins
   add EtaPhiBins 1.54 $PhiBins
-  set PhiBins {}
-          for {set i -507} {$i <= 507} {incr i} {
-              add PhiBins [expr {$i * $pi/507}]
-          }
+  set PhiBins 1014
   add EtaPhiBins -1.53 $PhiBins
   add EtaPhiBins 1.54 $PhiBins
-  set PhiBins {}
-          for {set i -510} {$i <= 510} {incr i} {
-              add PhiBins [expr {$i * $pi/510}]
-          }
+  set PhiBins 1020
   add EtaPhiBins -1.53 $PhiBins
   add EtaPhiBins 1.53 $PhiBins
-  set PhiBins {}
-          for {set i -513} {$i <= 513} {incr i} {
-              add PhiBins [expr {$i * $pi/513}]
-          }
+  set PhiBins 1026
   add EtaPhiBins -1.52 $PhiBins
   add EtaPhiBins 1.53 $PhiBins
-  set PhiBins {}
-          for {set i -516} {$i <= 516} {incr i} {
-              add PhiBins [expr {$i * $pi/516}]
-          }
+  set PhiBins 1032
   add EtaPhiBins -1.51 $PhiBins
   add EtaPhiBins 1.52 $PhiBins
-  set PhiBins {}
-          for {set i -519} {$i <= 519} {incr i} {
-              add PhiBins [expr {$i * $pi/519}]
-          }
+  set PhiBins 1038
   add EtaPhiBins -1.51 $PhiBins
   add EtaPhiBins 1.51 $PhiBins
-  set PhiBins {}
-          for {set i -523} {$i <= 523} {incr i} {
-              add PhiBins [expr {$i * $pi/523}]
-          }
+  set PhiBins 1046
   add EtaPhiBins -1.50 $PhiBins
   add EtaPhiBins 1.51 $PhiBins
-  set PhiBins {}
-          for {set i -526} {$i <= 526} {incr i} {
-              add PhiBins [expr {$i * $pi/526}]
-          }
+  set PhiBins 1052
   add EtaPhiBins -1.50 $PhiBins
   add EtaPhiBins 1.50 $PhiBins
-  set PhiBins {}
-          for {set i -529} {$i <= 529} {incr i} {
-              add PhiBins [expr {$i * $pi/529}]
-          }
+  set PhiBins 1058
   add EtaPhiBins -1.50 $PhiBins
   add EtaPhiBins 1.50 $PhiBins
 
   set EtaPhiRes 0.02
   set EtaMax 1.5
 
-  set nbins_phi [expr {$pi/$EtaPhiRes} ]
-  set nbins_phi [expr {int($nbins_phi)} ]
-
-  set PhiBins {}
-  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-    add PhiBins [expr {$i * $pi/$nbins_phi}]
-  }
+  set PhiBins [expr {int($pi/$EtaPhiRes) * 2}]
 
   set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
   set nbins_eta [expr {int($nbins_eta)} ]
@@ -1911,10 +1134,7 @@ module SimpleCalorimeter ECal {
   # take present CMS granularity for HF
 
   # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
+  set PhiBins 36
 
   foreach eta {-5 -4.7 -4.525 -4.35 -4.21 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
@@ -1974,1559 +1194,782 @@ module SimpleCalorimeter HCal {
 
   set pi [expr {acos(-1)}]
 
-  set PhiBins {}
-          for {set i -139} {$i <= 139} {incr i} {
-              add PhiBins [expr {$i * $pi/139}]
-          }
+  set PhiBins 278
   add EtaPhiBins -4.18 $PhiBins
   add EtaPhiBins 4.21 $PhiBins
-  set PhiBins {}
-          for {set i -142} {$i <= 142} {incr i} {
-              add PhiBins [expr {$i * $pi/142}]
-          }
+  set PhiBins 284
   add EtaPhiBins -4.16 $PhiBins
   add EtaPhiBins 4.18 $PhiBins
-  set PhiBins {}
-          for {set i -145} {$i <= 145} {incr i} {
-              add PhiBins [expr {$i * $pi/145}]
-          }
+  set PhiBins 290
   add EtaPhiBins -4.14 $PhiBins
   add EtaPhiBins 4.16 $PhiBins
-  set PhiBins {}
-          for {set i -148} {$i <= 148} {incr i} {
-              add PhiBins [expr {$i * $pi/148}]
-          }
+  set PhiBins 296
   add EtaPhiBins -4.12 $PhiBins
   add EtaPhiBins 4.14 $PhiBins
-  set PhiBins {}
-          for {set i -151} {$i <= 151} {incr i} {
-              add PhiBins [expr {$i * $pi/151}]
-          }
+  set PhiBins 302
   add EtaPhiBins -4.10 $PhiBins
   add EtaPhiBins 4.12 $PhiBins
-  set PhiBins {}
-          for {set i -155} {$i <= 155} {incr i} {
-              add PhiBins [expr {$i * $pi/155}]
-          }
+  set PhiBins 310
   add EtaPhiBins -4.08 $PhiBins
   add EtaPhiBins 4.10 $PhiBins
-  set PhiBins {}
-          for {set i -158} {$i <= 158} {incr i} {
-              add PhiBins [expr {$i * $pi/158}]
-          }
+  set PhiBins 316
   add EtaPhiBins -4.06 $PhiBins
   add EtaPhiBins 4.08 $PhiBins
-  set PhiBins {}
-          for {set i -161} {$i <= 161} {incr i} {
-              add PhiBins [expr {$i * $pi/161}]
-          }
+  set PhiBins 322
   add EtaPhiBins -4.04 $PhiBins
   add EtaPhiBins 4.06 $PhiBins
-  set PhiBins {}
-          for {set i -164} {$i <= 164} {incr i} {
-              add PhiBins [expr {$i * $pi/164}]
-          }
+  set PhiBins 328
   add EtaPhiBins -4.02 $PhiBins
   add EtaPhiBins 4.04 $PhiBins
-  set PhiBins {}
-          for {set i -167} {$i <= 167} {incr i} {
-              add PhiBins [expr {$i * $pi/167}]
-          }
+  set PhiBins 334
   add EtaPhiBins -4.00 $PhiBins
   add EtaPhiBins 4.02 $PhiBins
-  set PhiBins {}
-          for {set i -170} {$i <= 170} {incr i} {
-              add PhiBins [expr {$i * $pi/170}]
-          }
+  set PhiBins 340
   add EtaPhiBins -3.98 $PhiBins
   add EtaPhiBins 4.00 $PhiBins
-  set PhiBins {}
-          for {set i -173} {$i <= 173} {incr i} {
-              add PhiBins [expr {$i * $pi/173}]
-          }
+  set PhiBins 346
   add EtaPhiBins -3.96 $PhiBins
   add EtaPhiBins 3.98 $PhiBins
-  set PhiBins {}
-          for {set i -176} {$i <= 176} {incr i} {
-              add PhiBins [expr {$i * $pi/176}]
-          }
+  set PhiBins 352
   add EtaPhiBins -3.95 $PhiBins
   add EtaPhiBins 3.96 $PhiBins
-  set PhiBins {}
-          for {set i -180} {$i <= 180} {incr i} {
-              add PhiBins [expr {$i * $pi/180}]
-          }
+  set PhiBins 360
   add EtaPhiBins -3.93 $PhiBins
   add EtaPhiBins 3.95 $PhiBins
-  set PhiBins {}
-          for {set i -183} {$i <= 183} {incr i} {
-              add PhiBins [expr {$i * $pi/183}]
-          }
+  set PhiBins 366
   add EtaPhiBins -3.91 $PhiBins
   add EtaPhiBins 3.93 $PhiBins
-  set PhiBins {}
-          for {set i -186} {$i <= 186} {incr i} {
-              add PhiBins [expr {$i * $pi/186}]
-          }
+  set PhiBins 372
   add EtaPhiBins -3.90 $PhiBins
   add EtaPhiBins 3.91 $PhiBins
-  set PhiBins {}
-          for {set i -189} {$i <= 189} {incr i} {
-              add PhiBins [expr {$i * $pi/189}]
-          }
+  set PhiBins 378
   add EtaPhiBins -3.88 $PhiBins
   add EtaPhiBins 3.90 $PhiBins
-  set PhiBins {}
-          for {set i -192} {$i <= 192} {incr i} {
-              add PhiBins [expr {$i * $pi/192}]
-          }
+  set PhiBins 384
   add EtaPhiBins -3.86 $PhiBins
   add EtaPhiBins 3.88 $PhiBins
-  set PhiBins {}
-          for {set i -195} {$i <= 195} {incr i} {
-              add PhiBins [expr {$i * $pi/195}]
-          }
+  set PhiBins 390
   add EtaPhiBins -3.85 $PhiBins
   add EtaPhiBins 3.86 $PhiBins
-  set PhiBins {}
-          for {set i -198} {$i <= 198} {incr i} {
-              add PhiBins [expr {$i * $pi/198}]
-          }
+  set PhiBins 396
   add EtaPhiBins -3.83 $PhiBins
   add EtaPhiBins 3.85 $PhiBins
-  set PhiBins {}
-          for {set i -202} {$i <= 202} {incr i} {
-              add PhiBins [expr {$i * $pi/202}]
-          }
+  set PhiBins 404
   add EtaPhiBins -3.82 $PhiBins
   add EtaPhiBins 3.83 $PhiBins
-  set PhiBins {}
-          for {set i -205} {$i <= 205} {incr i} {
-              add PhiBins [expr {$i * $pi/205}]
-          }
+  set PhiBins 410
   add EtaPhiBins -3.80 $PhiBins
   add EtaPhiBins 3.82 $PhiBins
-  set PhiBins {}
-          for {set i -208} {$i <= 208} {incr i} {
-              add PhiBins [expr {$i * $pi/208}]
-          }
+  set PhiBins 416
   add EtaPhiBins -3.78 $PhiBins
   add EtaPhiBins 3.80 $PhiBins
-  set PhiBins {}
-          for {set i -211} {$i <= 211} {incr i} {
-              add PhiBins [expr {$i * $pi/211}]
-          }
+  set PhiBins 422
   add EtaPhiBins -3.77 $PhiBins
   add EtaPhiBins 3.78 $PhiBins
-  set PhiBins {}
-          for {set i -214} {$i <= 214} {incr i} {
-              add PhiBins [expr {$i * $pi/214}]
-          }
+  set PhiBins 428
   add EtaPhiBins -3.76 $PhiBins
   add EtaPhiBins 3.77 $PhiBins
-  set PhiBins {}
-          for {set i -217} {$i <= 217} {incr i} {
-              add PhiBins [expr {$i * $pi/217}]
-          }
+  set PhiBins 434
   add EtaPhiBins -3.74 $PhiBins
   add EtaPhiBins 3.76 $PhiBins
-  set PhiBins {}
-          for {set i -220} {$i <= 220} {incr i} {
-              add PhiBins [expr {$i * $pi/220}]
-          }
+  set PhiBins 440
   add EtaPhiBins -3.73 $PhiBins
   add EtaPhiBins 3.74 $PhiBins
-  set PhiBins {}
-          for {set i -224} {$i <= 224} {incr i} {
-              add PhiBins [expr {$i * $pi/224}]
-          }
+  set PhiBins 448
   add EtaPhiBins -3.71 $PhiBins
   add EtaPhiBins 3.73 $PhiBins
-  set PhiBins {}
-          for {set i -227} {$i <= 227} {incr i} {
-              add PhiBins [expr {$i * $pi/227}]
-          }
+  set PhiBins 454
   add EtaPhiBins -3.70 $PhiBins
   add EtaPhiBins 3.71 $PhiBins
-  set PhiBins {}
-          for {set i -230} {$i <= 230} {incr i} {
-              add PhiBins [expr {$i * $pi/230}]
-          }
+  set PhiBins 460
   add EtaPhiBins -3.69 $PhiBins
   add EtaPhiBins 3.70 $PhiBins
-  set PhiBins {}
-          for {set i -233} {$i <= 233} {incr i} {
-              add PhiBins [expr {$i * $pi/233}]
-          }
+  set PhiBins 466
   add EtaPhiBins -3.67 $PhiBins
   add EtaPhiBins 3.69 $PhiBins
-  set PhiBins {}
-          for {set i -236} {$i <= 236} {incr i} {
-              add PhiBins [expr {$i * $pi/236}]
-          }
+  set PhiBins 472
   add EtaPhiBins -3.66 $PhiBins
   add EtaPhiBins 3.67 $PhiBins
-  set PhiBins {}
-          for {set i -239} {$i <= 239} {incr i} {
-              add PhiBins [expr {$i * $pi/239}]
-          }
+  set PhiBins 478
   add EtaPhiBins -3.65 $PhiBins
   add EtaPhiBins 3.66 $PhiBins
-  set PhiBins {}
-          for {set i -242} {$i <= 242} {incr i} {
-              add PhiBins [expr {$i * $pi/242}]
-          }
+  set PhiBins 484
   add EtaPhiBins -3.63 $PhiBins
   add EtaPhiBins 3.65 $PhiBins
-  set PhiBins {}
-          for {set i -246} {$i <= 246} {incr i} {
-              add PhiBins [expr {$i * $pi/246}]
-          }
+  set PhiBins 492
   add EtaPhiBins -3.62 $PhiBins
   add EtaPhiBins 3.63 $PhiBins
-  set PhiBins {}
-          for {set i -249} {$i <= 249} {incr i} {
-              add PhiBins [expr {$i * $pi/249}]
-          }
+  set PhiBins 498
   add EtaPhiBins -3.61 $PhiBins
   add EtaPhiBins 3.62 $PhiBins
-  set PhiBins {}
-          for {set i -252} {$i <= 252} {incr i} {
-              add PhiBins [expr {$i * $pi/252}]
-          }
+  set PhiBins 504
   add EtaPhiBins -3.59 $PhiBins
   add EtaPhiBins 3.61 $PhiBins
-  set PhiBins {}
-          for {set i -255} {$i <= 255} {incr i} {
-              add PhiBins [expr {$i * $pi/255}]
-          }
+  set PhiBins 510
   add EtaPhiBins -3.58 $PhiBins
   add EtaPhiBins 3.59 $PhiBins
-  set PhiBins {}
-          for {set i -258} {$i <= 258} {incr i} {
-              add PhiBins [expr {$i * $pi/258}]
-          }
+  set PhiBins 516
   add EtaPhiBins -3.57 $PhiBins
   add EtaPhiBins 3.58 $PhiBins
-  set PhiBins {}
-          for {set i -261} {$i <= 261} {incr i} {
-              add PhiBins [expr {$i * $pi/261}]
-          }
+  set PhiBins 522
   add EtaPhiBins -3.56 $PhiBins
   add EtaPhiBins 3.57 $PhiBins
-  set PhiBins {}
-          for {set i -264} {$i <= 264} {incr i} {
-              add PhiBins [expr {$i * $pi/264}]
-          }
+  set PhiBins 528
   add EtaPhiBins -3.55 $PhiBins
   add EtaPhiBins 3.56 $PhiBins
-  set PhiBins {}
-          for {set i -268} {$i <= 268} {incr i} {
-              add PhiBins [expr {$i * $pi/268}]
-          }
+  set PhiBins 536
   add EtaPhiBins -3.54 $PhiBins
   add EtaPhiBins 3.55 $PhiBins
-  set PhiBins {}
-          for {set i -271} {$i <= 271} {incr i} {
-              add PhiBins [expr {$i * $pi/271}]
-          }
+  set PhiBins 542
   add EtaPhiBins -3.52 $PhiBins
   add EtaPhiBins 3.54 $PhiBins
-  set PhiBins {}
-          for {set i -274} {$i <= 274} {incr i} {
-              add PhiBins [expr {$i * $pi/274}]
-          }
+  set PhiBins 548
   add EtaPhiBins -3.51 $PhiBins
   add EtaPhiBins 3.52 $PhiBins
-  set PhiBins {}
-          for {set i -277} {$i <= 277} {incr i} {
-              add PhiBins [expr {$i * $pi/277}]
-          }
+  set PhiBins 554
   add EtaPhiBins -3.50 $PhiBins
   add EtaPhiBins 3.51 $PhiBins
-  set PhiBins {}
-          for {set i -280} {$i <= 280} {incr i} {
-              add PhiBins [expr {$i * $pi/280}]
-          }
+  set PhiBins 560
   add EtaPhiBins -3.49 $PhiBins
   add EtaPhiBins 3.50 $PhiBins
-  set PhiBins {}
-          for {set i -283} {$i <= 283} {incr i} {
-              add PhiBins [expr {$i * $pi/283}]
-          }
+  set PhiBins 566
   add EtaPhiBins -3.48 $PhiBins
   add EtaPhiBins 3.49 $PhiBins
-  set PhiBins {}
-          for {set i -286} {$i <= 286} {incr i} {
-              add PhiBins [expr {$i * $pi/286}]
-          }
+  set PhiBins 572
   add EtaPhiBins -3.47 $PhiBins
   add EtaPhiBins 3.48 $PhiBins
-  set PhiBins {}
-          for {set i -290} {$i <= 290} {incr i} {
-              add PhiBins [expr {$i * $pi/290}]
-          }
+  set PhiBins 580
   add EtaPhiBins -3.46 $PhiBins
   add EtaPhiBins 3.47 $PhiBins
-  set PhiBins {}
-          for {set i -293} {$i <= 293} {incr i} {
-              add PhiBins [expr {$i * $pi/293}]
-          }
+  set PhiBins 586
   add EtaPhiBins -3.45 $PhiBins
   add EtaPhiBins 3.46 $PhiBins
-  set PhiBins {}
-          for {set i -296} {$i <= 296} {incr i} {
-              add PhiBins [expr {$i * $pi/296}]
-          }
+  set PhiBins 592
   add EtaPhiBins -3.44 $PhiBins
   add EtaPhiBins 3.45 $PhiBins
-  set PhiBins {}
-          for {set i -299} {$i <= 299} {incr i} {
-              add PhiBins [expr {$i * $pi/299}]
-          }
+  set PhiBins 598
   add EtaPhiBins -3.43 $PhiBins
   add EtaPhiBins 3.44 $PhiBins
-  set PhiBins {}
-          for {set i -302} {$i <= 302} {incr i} {
-              add PhiBins [expr {$i * $pi/302}]
-          }
+  set PhiBins 604
   add EtaPhiBins -3.41 $PhiBins
   add EtaPhiBins 3.43 $PhiBins
-  set PhiBins {}
-          for {set i -305} {$i <= 305} {incr i} {
-              add PhiBins [expr {$i * $pi/305}]
-          }
+  set PhiBins 610
   add EtaPhiBins -3.40 $PhiBins
   add EtaPhiBins 3.41 $PhiBins
-  set PhiBins {}
-          for {set i -308} {$i <= 308} {incr i} {
-              add PhiBins [expr {$i * $pi/308}]
-          }
+  set PhiBins 616
   add EtaPhiBins -3.39 $PhiBins
   add EtaPhiBins 3.40 $PhiBins
-  set PhiBins {}
-          for {set i -312} {$i <= 312} {incr i} {
-              add PhiBins [expr {$i * $pi/312}]
-          }
+  set PhiBins 624
   add EtaPhiBins -3.38 $PhiBins
   add EtaPhiBins 3.39 $PhiBins
-  set PhiBins {}
-          for {set i -315} {$i <= 315} {incr i} {
-              add PhiBins [expr {$i * $pi/315}]
-          }
+  set PhiBins 630
   add EtaPhiBins -3.37 $PhiBins
   add EtaPhiBins 3.38 $PhiBins
-  set PhiBins {}
-          for {set i -318} {$i <= 318} {incr i} {
-              add PhiBins [expr {$i * $pi/318}]
-          }
+  set PhiBins 636
   add EtaPhiBins -3.36 $PhiBins
   add EtaPhiBins 3.37 $PhiBins
-  set PhiBins {}
-          for {set i -321} {$i <= 321} {incr i} {
-              add PhiBins [expr {$i * $pi/321}]
-          }
+  set PhiBins 642
   add EtaPhiBins -3.35 $PhiBins
   add EtaPhiBins 3.36 $PhiBins
-  set PhiBins {}
-          for {set i -324} {$i <= 324} {incr i} {
-              add PhiBins [expr {$i * $pi/324}]
-          }
+  set PhiBins 648
   add EtaPhiBins -3.35 $PhiBins
   add EtaPhiBins 3.35 $PhiBins
-  set PhiBins {}
-          for {set i -327} {$i <= 327} {incr i} {
-              add PhiBins [expr {$i * $pi/327}]
-          }
+  set PhiBins 654
   add EtaPhiBins -3.34 $PhiBins
   add EtaPhiBins 3.35 $PhiBins
-  set PhiBins {}
-          for {set i -330} {$i <= 330} {incr i} {
-              add PhiBins [expr {$i * $pi/330}]
-          }
+  set PhiBins 660
   add EtaPhiBins -3.33 $PhiBins
   add EtaPhiBins 3.34 $PhiBins
-  set PhiBins {}
-          for {set i -334} {$i <= 334} {incr i} {
-              add PhiBins [expr {$i * $pi/334}]
-          }
+  set PhiBins 668
   add EtaPhiBins -3.32 $PhiBins
   add EtaPhiBins 3.33 $PhiBins
-  set PhiBins {}
-          for {set i -337} {$i <= 337} {incr i} {
-              add PhiBins [expr {$i * $pi/337}]
-          }
+  set PhiBins 674
   add EtaPhiBins -3.31 $PhiBins
   add EtaPhiBins 3.32 $PhiBins
-  set PhiBins {}
-          for {set i -340} {$i <= 340} {incr i} {
-              add PhiBins [expr {$i * $pi/340}]
-          }
+  set PhiBins 680
   add EtaPhiBins -3.30 $PhiBins
   add EtaPhiBins 3.31 $PhiBins
-  set PhiBins {}
-          for {set i -343} {$i <= 343} {incr i} {
-              add PhiBins [expr {$i * $pi/343}]
-          }
+  set PhiBins 686
   add EtaPhiBins -3.29 $PhiBins
   add EtaPhiBins 3.30 $PhiBins
-  set PhiBins {}
-          for {set i -346} {$i <= 346} {incr i} {
-              add PhiBins [expr {$i * $pi/346}]
-          }
+  set PhiBins 692
   add EtaPhiBins -3.28 $PhiBins
   add EtaPhiBins 3.29 $PhiBins
-  set PhiBins {}
-          for {set i -349} {$i <= 349} {incr i} {
-              add PhiBins [expr {$i * $pi/349}]
-          }
+  set PhiBins 698
   add EtaPhiBins -3.27 $PhiBins
   add EtaPhiBins 3.28 $PhiBins
-  set PhiBins {}
-          for {set i -352} {$i <= 352} {incr i} {
-              add PhiBins [expr {$i * $pi/352}]
-          }
+  set PhiBins 704
   add EtaPhiBins -3.26 $PhiBins
   add EtaPhiBins 3.27 $PhiBins
-  set PhiBins {}
-          for {set i -356} {$i <= 356} {incr i} {
-              add PhiBins [expr {$i * $pi/356}]
-          }
+  set PhiBins 712
   add EtaPhiBins -3.25 $PhiBins
   add EtaPhiBins 3.26 $PhiBins
-  set PhiBins {}
-          for {set i -359} {$i <= 359} {incr i} {
-              add PhiBins [expr {$i * $pi/359}]
-          }
+  set PhiBins 718
   add EtaPhiBins -3.24 $PhiBins
   add EtaPhiBins 3.25 $PhiBins
-  set PhiBins {}
-          for {set i -362} {$i <= 362} {incr i} {
-              add PhiBins [expr {$i * $pi/362}]
-          }
+  set PhiBins 724
   add EtaPhiBins -3.24 $PhiBins
   add EtaPhiBins 3.24 $PhiBins
-  set PhiBins {}
-          for {set i -365} {$i <= 365} {incr i} {
-              add PhiBins [expr {$i * $pi/365}]
-          }
+  set PhiBins 730
   add EtaPhiBins -3.23 $PhiBins
   add EtaPhiBins 3.24 $PhiBins
-  set PhiBins {}
-          for {set i -368} {$i <= 368} {incr i} {
-              add PhiBins [expr {$i * $pi/368}]
-          }
+  set PhiBins 736
   add EtaPhiBins -3.22 $PhiBins
   add EtaPhiBins 3.23 $PhiBins
-  set PhiBins {}
-          for {set i -371} {$i <= 371} {incr i} {
-              add PhiBins [expr {$i * $pi/371}]
-          }
+  set PhiBins 742
   add EtaPhiBins -3.21 $PhiBins
   add EtaPhiBins 3.22 $PhiBins
-  set PhiBins {}
-          for {set i -374} {$i <= 374} {incr i} {
-              add PhiBins [expr {$i * $pi/374}]
-          }
+  set PhiBins 748
   add EtaPhiBins -3.20 $PhiBins
   add EtaPhiBins 3.21 $PhiBins
-  set PhiBins {}
-          for {set i -378} {$i <= 378} {incr i} {
-              add PhiBins [expr {$i * $pi/378}]
-          }
+  set PhiBins 756
   add EtaPhiBins -3.19 $PhiBins
   add EtaPhiBins 3.20 $PhiBins
-  set PhiBins {}
-          for {set i -381} {$i <= 381} {incr i} {
-              add PhiBins [expr {$i * $pi/381}]
-          }
+  set PhiBins 762
   add EtaPhiBins -3.19 $PhiBins
   add EtaPhiBins 3.19 $PhiBins
-  set PhiBins {}
-          for {set i -384} {$i <= 384} {incr i} {
-              add PhiBins [expr {$i * $pi/384}]
-          }
+  set PhiBins 768
   add EtaPhiBins -3.18 $PhiBins
   add EtaPhiBins 3.19 $PhiBins
-  set PhiBins {}
-          for {set i -387} {$i <= 387} {incr i} {
-              add PhiBins [expr {$i * $pi/387}]
-          }
+  set PhiBins 774
   add EtaPhiBins -3.17 $PhiBins
   add EtaPhiBins 3.18 $PhiBins
-  set PhiBins {}
-          for {set i -390} {$i <= 390} {incr i} {
-              add PhiBins [expr {$i * $pi/390}]
-          }
+  set PhiBins 780
   add EtaPhiBins -3.16 $PhiBins
   add EtaPhiBins 3.17 $PhiBins
-  set PhiBins {}
-          for {set i -393} {$i <= 393} {incr i} {
-              add PhiBins [expr {$i * $pi/393}]
-          }
+  set PhiBins 786
   add EtaPhiBins -3.15 $PhiBins
   add EtaPhiBins 3.16 $PhiBins
-  set PhiBins {}
-          for {set i -396} {$i <= 396} {incr i} {
-              add PhiBins [expr {$i * $pi/396}]
-          }
+  set PhiBins 792
   add EtaPhiBins -3.15 $PhiBins
   add EtaPhiBins 3.15 $PhiBins
-  set PhiBins {}
-          for {set i -400} {$i <= 400} {incr i} {
-              add PhiBins [expr {$i * $pi/400}]
-          }
+  set PhiBins 800
   add EtaPhiBins -3.14 $PhiBins
   add EtaPhiBins 3.15 $PhiBins
-  set PhiBins {}
-          for {set i -403} {$i <= 403} {incr i} {
-              add PhiBins [expr {$i * $pi/403}]
-          }
+  set PhiBins 806
   add EtaPhiBins -3.13 $PhiBins
   add EtaPhiBins 3.14 $PhiBins
-  set PhiBins {}
-          for {set i -406} {$i <= 406} {incr i} {
-              add PhiBins [expr {$i * $pi/406}]
-          }
+  set PhiBins 812
   add EtaPhiBins -3.12 $PhiBins
   add EtaPhiBins 3.13 $PhiBins
-  set PhiBins {}
-          for {set i -409} {$i <= 409} {incr i} {
-              add PhiBins [expr {$i * $pi/409}]
-          }
+  set PhiBins 818
   add EtaPhiBins -3.11 $PhiBins
   add EtaPhiBins 3.12 $PhiBins
-  set PhiBins {}
-          for {set i -412} {$i <= 412} {incr i} {
-              add PhiBins [expr {$i * $pi/412}]
-          }
+  set PhiBins 824
   add EtaPhiBins -3.11 $PhiBins
   add EtaPhiBins 3.11 $PhiBins
-  set PhiBins {}
-          for {set i -415} {$i <= 415} {incr i} {
-              add PhiBins [expr {$i * $pi/415}]
-          }
+  set PhiBins 830
   add EtaPhiBins -3.10 $PhiBins
   add EtaPhiBins 3.11 $PhiBins
-  set PhiBins {}
-          for {set i -418} {$i <= 418} {incr i} {
-              add PhiBins [expr {$i * $pi/418}]
-          }
+  set PhiBins 836
   add EtaPhiBins -3.09 $PhiBins
   add EtaPhiBins 3.10 $PhiBins
-  set PhiBins {}
-          for {set i -422} {$i <= 422} {incr i} {
-              add PhiBins [expr {$i * $pi/422}]
-          }
+  set PhiBins 844
   add EtaPhiBins -3.08 $PhiBins
   add EtaPhiBins 3.09 $PhiBins
-  set PhiBins {}
-          for {set i -425} {$i <= 425} {incr i} {
-              add PhiBins [expr {$i * $pi/425}]
-          }
+  set PhiBins 850
   add EtaPhiBins -3.08 $PhiBins
   add EtaPhiBins 3.08 $PhiBins
-  set PhiBins {}
-          for {set i -428} {$i <= 428} {incr i} {
-              add PhiBins [expr {$i * $pi/428}]
-          }
+  set PhiBins 856
   add EtaPhiBins -3.07 $PhiBins
   add EtaPhiBins 3.08 $PhiBins
-  set PhiBins {}
-          for {set i -431} {$i <= 431} {incr i} {
-              add PhiBins [expr {$i * $pi/431}]
-          }
+  set PhiBins 862
   add EtaPhiBins -3.06 $PhiBins
   add EtaPhiBins 3.07 $PhiBins
-  set PhiBins {}
-          for {set i -434} {$i <= 434} {incr i} {
-              add PhiBins [expr {$i * $pi/434}]
-          }
+  set PhiBins 868
   add EtaPhiBins -3.06 $PhiBins
   add EtaPhiBins 3.06 $PhiBins
-  set PhiBins {}
-          for {set i -437} {$i <= 437} {incr i} {
-              add PhiBins [expr {$i * $pi/437}]
-          }
+  set PhiBins 874
   add EtaPhiBins -3.05 $PhiBins
   add EtaPhiBins 3.06 $PhiBins
-  set PhiBins {}
-          for {set i -440} {$i <= 440} {incr i} {
-              add PhiBins [expr {$i * $pi/440}]
-          }
+  set PhiBins 880
   add EtaPhiBins -3.04 $PhiBins
   add EtaPhiBins 3.05 $PhiBins
-  set PhiBins {}
-          for {set i -444} {$i <= 444} {incr i} {
-              add PhiBins [expr {$i * $pi/444}]
-          }
+  set PhiBins 888
   add EtaPhiBins -3.03 $PhiBins
   add EtaPhiBins 3.04 $PhiBins
-  set PhiBins {}
-          for {set i -447} {$i <= 447} {incr i} {
-              add PhiBins [expr {$i * $pi/447}]
-          }
+  set PhiBins 894
   add EtaPhiBins -3.03 $PhiBins
   add EtaPhiBins 3.03 $PhiBins
-  set PhiBins {}
-          for {set i -450} {$i <= 450} {incr i} {
-              add PhiBins [expr {$i * $pi/450}]
-          }
+  set PhiBins 900
   add EtaPhiBins -3.02 $PhiBins
   add EtaPhiBins 3.03 $PhiBins
-  set PhiBins {}
-          for {set i -453} {$i <= 453} {incr i} {
-              add PhiBins [expr {$i * $pi/453}]
-          }
+  set PhiBins 906
   add EtaPhiBins -3.01 $PhiBins
   add EtaPhiBins 3.02 $PhiBins
-  set PhiBins {}
-          for {set i -456} {$i <= 456} {incr i} {
-              add PhiBins [expr {$i * $pi/456}]
-          }
+  set PhiBins 912
   add EtaPhiBins -3.01 $PhiBins
   add EtaPhiBins 3.01 $PhiBins
-  set PhiBins {}
-          for {set i -459} {$i <= 459} {incr i} {
-              add PhiBins [expr {$i * $pi/459}]
-          }
+  set PhiBins 918
   add EtaPhiBins -3.00 $PhiBins
   add EtaPhiBins 3.01 $PhiBins
-  set PhiBins {}
-          for {set i -462} {$i <= 462} {incr i} {
-              add PhiBins [expr {$i * $pi/462}]
-          }
+  set PhiBins 924
   add EtaPhiBins -2.99 $PhiBins
   add EtaPhiBins 3.00 $PhiBins
-  set PhiBins {}
-          for {set i -466} {$i <= 466} {incr i} {
-              add PhiBins [expr {$i * $pi/466}]
-          }
+  set PhiBins 932
   add EtaPhiBins -2.99 $PhiBins
   add EtaPhiBins 2.99 $PhiBins
-  set PhiBins {}
-          for {set i -161} {$i <= 161} {incr i} {
-              add PhiBins [expr {$i * $pi/161}]
-          }
+  set PhiBins 322
   add EtaPhiBins -2.97 $PhiBins
   add EtaPhiBins 2.99 $PhiBins
-  set PhiBins {}
-          for {set i -164} {$i <= 164} {incr i} {
-              add PhiBins [expr {$i * $pi/164}]
-          }
+  set PhiBins 328
   add EtaPhiBins -2.95 $PhiBins
   add EtaPhiBins 2.97 $PhiBins
-  set PhiBins {}
-          for {set i -167} {$i <= 167} {incr i} {
-              add PhiBins [expr {$i * $pi/167}]
-          }
+  set PhiBins 334
   add EtaPhiBins -2.93 $PhiBins
   add EtaPhiBins 2.95 $PhiBins
-  set PhiBins {}
-          for {set i -170} {$i <= 170} {incr i} {
-              add PhiBins [expr {$i * $pi/170}]
-          }
+  set PhiBins 340
   add EtaPhiBins -2.91 $PhiBins
   add EtaPhiBins 2.93 $PhiBins
-  set PhiBins {}
-          for {set i -174} {$i <= 174} {incr i} {
-              add PhiBins [expr {$i * $pi/174}]
-          }
+  set PhiBins 348
   add EtaPhiBins -2.90 $PhiBins
   add EtaPhiBins 2.91 $PhiBins
-  set PhiBins {}
-          for {set i -177} {$i <= 177} {incr i} {
-              add PhiBins [expr {$i * $pi/177}]
-          }
+  set PhiBins 354
   add EtaPhiBins -2.88 $PhiBins
   add EtaPhiBins 2.90 $PhiBins
-  set PhiBins {}
-          for {set i -180} {$i <= 180} {incr i} {
-              add PhiBins [expr {$i * $pi/180}]
-          }
+  set PhiBins 360
   add EtaPhiBins -2.86 $PhiBins
   add EtaPhiBins 2.88 $PhiBins
-  set PhiBins {}
-          for {set i -183} {$i <= 183} {incr i} {
-              add PhiBins [expr {$i * $pi/183}]
-          }
+  set PhiBins 366
   add EtaPhiBins -2.84 $PhiBins
   add EtaPhiBins 2.86 $PhiBins
-  set PhiBins {}
-          for {set i -186} {$i <= 186} {incr i} {
-              add PhiBins [expr {$i * $pi/186}]
-          }
+  set PhiBins 372
   add EtaPhiBins -2.83 $PhiBins
   add EtaPhiBins 2.84 $PhiBins
-  set PhiBins {}
-          for {set i -189} {$i <= 189} {incr i} {
-              add PhiBins [expr {$i * $pi/189}]
-          }
+  set PhiBins 378
   add EtaPhiBins -2.81 $PhiBins
   add EtaPhiBins 2.83 $PhiBins
-  set PhiBins {}
-          for {set i -192} {$i <= 192} {incr i} {
-              add PhiBins [expr {$i * $pi/192}]
-          }
+  set PhiBins 384
   add EtaPhiBins -2.80 $PhiBins
   add EtaPhiBins 2.81 $PhiBins
-  set PhiBins {}
-          for {set i -196} {$i <= 196} {incr i} {
-              add PhiBins [expr {$i * $pi/196}]
-          }
+  set PhiBins 392
   add EtaPhiBins -2.78 $PhiBins
   add EtaPhiBins 2.80 $PhiBins
-  set PhiBins {}
-          for {set i -199} {$i <= 199} {incr i} {
-              add PhiBins [expr {$i * $pi/199}]
-          }
+  set PhiBins 398
   add EtaPhiBins -2.76 $PhiBins
   add EtaPhiBins 2.78 $PhiBins
-  set PhiBins {}
-          for {set i -202} {$i <= 202} {incr i} {
-              add PhiBins [expr {$i * $pi/202}]
-          }
+  set PhiBins 404
   add EtaPhiBins -2.75 $PhiBins
   add EtaPhiBins 2.76 $PhiBins
-  set PhiBins {}
-          for {set i -205} {$i <= 205} {incr i} {
-              add PhiBins [expr {$i * $pi/205}]
-          }
+  set PhiBins 410
   add EtaPhiBins -2.73 $PhiBins
   add EtaPhiBins 2.75 $PhiBins
-  set PhiBins {}
-          for {set i -208} {$i <= 208} {incr i} {
-              add PhiBins [expr {$i * $pi/208}]
-          }
+  set PhiBins 416
   add EtaPhiBins -2.72 $PhiBins
   add EtaPhiBins 2.73 $PhiBins
-  set PhiBins {}
-          for {set i -211} {$i <= 211} {incr i} {
-              add PhiBins [expr {$i * $pi/211}]
-          }
+  set PhiBins 422
   add EtaPhiBins -2.70 $PhiBins
   add EtaPhiBins 2.72 $PhiBins
-  set PhiBins {}
-          for {set i -214} {$i <= 214} {incr i} {
-              add PhiBins [expr {$i * $pi/214}]
-          }
+  set PhiBins 428
   add EtaPhiBins -2.69 $PhiBins
   add EtaPhiBins 2.70 $PhiBins
-  set PhiBins {}
-          for {set i -218} {$i <= 218} {incr i} {
-              add PhiBins [expr {$i * $pi/218}]
-          }
+  set PhiBins 436
   add EtaPhiBins -2.67 $PhiBins
   add EtaPhiBins 2.69 $PhiBins
-  set PhiBins {}
-          for {set i -221} {$i <= 221} {incr i} {
-              add PhiBins [expr {$i * $pi/221}]
-          }
+  set PhiBins 442
   add EtaPhiBins -2.66 $PhiBins
   add EtaPhiBins 2.67 $PhiBins
-  set PhiBins {}
-          for {set i -224} {$i <= 224} {incr i} {
-              add PhiBins [expr {$i * $pi/224}]
-          }
+  set PhiBins 448
   add EtaPhiBins -2.65 $PhiBins
   add EtaPhiBins 2.66 $PhiBins
-  set PhiBins {}
-          for {set i -227} {$i <= 227} {incr i} {
-              add PhiBins [expr {$i * $pi/227}]
-          }
+  set PhiBins 454
   add EtaPhiBins -2.63 $PhiBins
   add EtaPhiBins 2.65 $PhiBins
-  set PhiBins {}
-          for {set i -230} {$i <= 230} {incr i} {
-              add PhiBins [expr {$i * $pi/230}]
-          }
+  set PhiBins 460
   add EtaPhiBins -2.62 $PhiBins
   add EtaPhiBins 2.63 $PhiBins
-  set PhiBins {}
-          for {set i -233} {$i <= 233} {incr i} {
-              add PhiBins [expr {$i * $pi/233}]
-          }
+  set PhiBins 466
   add EtaPhiBins -2.61 $PhiBins
   add EtaPhiBins 2.62 $PhiBins
-  set PhiBins {}
-          for {set i -236} {$i <= 236} {incr i} {
-              add PhiBins [expr {$i * $pi/236}]
-          }
+  set PhiBins 472
   add EtaPhiBins -2.59 $PhiBins
   add EtaPhiBins 2.61 $PhiBins
-  set PhiBins {}
-          for {set i -240} {$i <= 240} {incr i} {
-              add PhiBins [expr {$i * $pi/240}]
-          }
+  set PhiBins 480
   add EtaPhiBins -2.58 $PhiBins
   add EtaPhiBins 2.59 $PhiBins
-  set PhiBins {}
-          for {set i -243} {$i <= 243} {incr i} {
-              add PhiBins [expr {$i * $pi/243}]
-          }
+  set PhiBins 486
   add EtaPhiBins -2.57 $PhiBins
   add EtaPhiBins 2.58 $PhiBins
-  set PhiBins {}
-          for {set i -246} {$i <= 246} {incr i} {
-              add PhiBins [expr {$i * $pi/246}]
-          }
+  set PhiBins 492
   add EtaPhiBins -2.56 $PhiBins
   add EtaPhiBins 2.57 $PhiBins
-  set PhiBins {}
-          for {set i -249} {$i <= 249} {incr i} {
-              add PhiBins [expr {$i * $pi/249}]
-          }
+  set PhiBins 498
   add EtaPhiBins -2.54 $PhiBins
   add EtaPhiBins 2.56 $PhiBins
-  set PhiBins {}
-          for {set i -252} {$i <= 252} {incr i} {
-              add PhiBins [expr {$i * $pi/252}]
-          }
+  set PhiBins 504
   add EtaPhiBins -2.53 $PhiBins
   add EtaPhiBins 2.54 $PhiBins
-  set PhiBins {}
-          for {set i -255} {$i <= 255} {incr i} {
-              add PhiBins [expr {$i * $pi/255}]
-          }
+  set PhiBins 510
   add EtaPhiBins -2.52 $PhiBins
   add EtaPhiBins 2.53 $PhiBins
-  set PhiBins {}
-          for {set i -258} {$i <= 258} {incr i} {
-              add PhiBins [expr {$i * $pi/258}]
-          }
+  set PhiBins 516
   add EtaPhiBins -2.51 $PhiBins
   add EtaPhiBins 2.52 $PhiBins
-  set PhiBins {}
-          for {set i -262} {$i <= 262} {incr i} {
-              add PhiBins [expr {$i * $pi/262}]
-          }
+  set PhiBins 524
   add EtaPhiBins -2.49 $PhiBins
   add EtaPhiBins 2.51 $PhiBins
-  set PhiBins {}
-          for {set i -265} {$i <= 265} {incr i} {
-              add PhiBins [expr {$i * $pi/265}]
-          }
+  set PhiBins 530
   add EtaPhiBins -2.48 $PhiBins
   add EtaPhiBins 2.49 $PhiBins
-  set PhiBins {}
-          for {set i -268} {$i <= 268} {incr i} {
-              add PhiBins [expr {$i * $pi/268}]
-          }
+  set PhiBins 536
   add EtaPhiBins -2.47 $PhiBins
   add EtaPhiBins 2.48 $PhiBins
-  set PhiBins {}
-          for {set i -271} {$i <= 271} {incr i} {
-              add PhiBins [expr {$i * $pi/271}]
-          }
+  set PhiBins 542
   add EtaPhiBins -2.46 $PhiBins
   add EtaPhiBins 2.47 $PhiBins
-  set PhiBins {}
-          for {set i -274} {$i <= 274} {incr i} {
-              add PhiBins [expr {$i * $pi/274}]
-          }
+  set PhiBins 548
   add EtaPhiBins -2.45 $PhiBins
   add EtaPhiBins 2.46 $PhiBins
-  set PhiBins {}
-          for {set i -277} {$i <= 277} {incr i} {
-              add PhiBins [expr {$i * $pi/277}]
-          }
+  set PhiBins 554
   add EtaPhiBins -2.44 $PhiBins
   add EtaPhiBins 2.45 $PhiBins
-  set PhiBins {}
-          for {set i -280} {$i <= 280} {incr i} {
-              add PhiBins [expr {$i * $pi/280}]
-          }
+  set PhiBins 560
   add EtaPhiBins -2.43 $PhiBins
   add EtaPhiBins 2.44 $PhiBins
-  set PhiBins {}
-          for {set i -284} {$i <= 284} {incr i} {
-              add PhiBins [expr {$i * $pi/284}]
-          }
+  set PhiBins 568
   add EtaPhiBins -2.42 $PhiBins
   add EtaPhiBins 2.43 $PhiBins
-  set PhiBins {}
-          for {set i -287} {$i <= 287} {incr i} {
-              add PhiBins [expr {$i * $pi/287}]
-          }
+  set PhiBins 574
   add EtaPhiBins -2.40 $PhiBins
   add EtaPhiBins 2.42 $PhiBins
-  set PhiBins {}
-          for {set i -290} {$i <= 290} {incr i} {
-              add PhiBins [expr {$i * $pi/290}]
-          }
+  set PhiBins 580
   add EtaPhiBins -2.39 $PhiBins
   add EtaPhiBins 2.40 $PhiBins
-  set PhiBins {}
-          for {set i -293} {$i <= 293} {incr i} {
-              add PhiBins [expr {$i * $pi/293}]
-          }
+  set PhiBins 586
   add EtaPhiBins -2.38 $PhiBins
   add EtaPhiBins 2.39 $PhiBins
-  set PhiBins {}
-          for {set i -296} {$i <= 296} {incr i} {
-              add PhiBins [expr {$i * $pi/296}]
-          }
+  set PhiBins 592
   add EtaPhiBins -2.37 $PhiBins
   add EtaPhiBins 2.38 $PhiBins
-  set PhiBins {}
-          for {set i -299} {$i <= 299} {incr i} {
-              add PhiBins [expr {$i * $pi/299}]
-          }
+  set PhiBins 598
   add EtaPhiBins -2.36 $PhiBins
   add EtaPhiBins 2.37 $PhiBins
-  set PhiBins {}
-          for {set i -302} {$i <= 302} {incr i} {
-              add PhiBins [expr {$i * $pi/302}]
-          }
+  set PhiBins 604
   add EtaPhiBins -2.35 $PhiBins
   add EtaPhiBins 2.36 $PhiBins
-  set PhiBins {}
-          for {set i -306} {$i <= 306} {incr i} {
-              add PhiBins [expr {$i * $pi/306}]
-          }
+  set PhiBins 612
   add EtaPhiBins -2.34 $PhiBins
   add EtaPhiBins 2.35 $PhiBins
-  set PhiBins {}
-          for {set i -309} {$i <= 309} {incr i} {
-              add PhiBins [expr {$i * $pi/309}]
-          }
+  set PhiBins 618
   add EtaPhiBins -2.33 $PhiBins
   add EtaPhiBins 2.34 $PhiBins
-  set PhiBins {}
-          for {set i -312} {$i <= 312} {incr i} {
-              add PhiBins [expr {$i * $pi/312}]
-          }
+  set PhiBins 624
   add EtaPhiBins -2.32 $PhiBins
   add EtaPhiBins 2.33 $PhiBins
-  set PhiBins {}
-          for {set i -315} {$i <= 315} {incr i} {
-              add PhiBins [expr {$i * $pi/315}]
-          }
+  set PhiBins 630
   add EtaPhiBins -2.31 $PhiBins
   add EtaPhiBins 2.32 $PhiBins
-  set PhiBins {}
-          for {set i -318} {$i <= 318} {incr i} {
-              add PhiBins [expr {$i * $pi/318}]
-          }
+  set PhiBins 636
   add EtaPhiBins -2.30 $PhiBins
   add EtaPhiBins 2.31 $PhiBins
-  set PhiBins {}
-          for {set i -321} {$i <= 321} {incr i} {
-              add PhiBins [expr {$i * $pi/321}]
-          }
+  set PhiBins 642
   add EtaPhiBins -2.29 $PhiBins
   add EtaPhiBins 2.30 $PhiBins
-  set PhiBins {}
-          for {set i -324} {$i <= 324} {incr i} {
-              add PhiBins [expr {$i * $pi/324}]
-          }
+  set PhiBins 648
   add EtaPhiBins -2.28 $PhiBins
   add EtaPhiBins 2.29 $PhiBins
-  set PhiBins {}
-          for {set i -328} {$i <= 328} {incr i} {
-              add PhiBins [expr {$i * $pi/328}]
-          }
+  set PhiBins 656
   add EtaPhiBins -2.27 $PhiBins
   add EtaPhiBins 2.28 $PhiBins
-  set PhiBins {}
-          for {set i -331} {$i <= 331} {incr i} {
-              add PhiBins [expr {$i * $pi/331}]
-          }
+  set PhiBins 662
   add EtaPhiBins -2.27 $PhiBins
   add EtaPhiBins 2.27 $PhiBins
-  set PhiBins {}
-          for {set i -334} {$i <= 334} {incr i} {
-              add PhiBins [expr {$i * $pi/334}]
-          }
+  set PhiBins 668
   add EtaPhiBins -2.26 $PhiBins
   add EtaPhiBins 2.27 $PhiBins
-  set PhiBins {}
-          for {set i -337} {$i <= 337} {incr i} {
-              add PhiBins [expr {$i * $pi/337}]
-          }
+  set PhiBins 674
   add EtaPhiBins -2.25 $PhiBins
   add EtaPhiBins 2.26 $PhiBins
-  set PhiBins {}
-          for {set i -340} {$i <= 340} {incr i} {
-              add PhiBins [expr {$i * $pi/340}]
-          }
+  set PhiBins 680
   add EtaPhiBins -2.24 $PhiBins
   add EtaPhiBins 2.25 $PhiBins
-  set PhiBins {}
-          for {set i -343} {$i <= 343} {incr i} {
-              add PhiBins [expr {$i * $pi/343}]
-          }
+  set PhiBins 686
   add EtaPhiBins -2.23 $PhiBins
   add EtaPhiBins 2.24 $PhiBins
-  set PhiBins {}
-          for {set i -346} {$i <= 346} {incr i} {
-              add PhiBins [expr {$i * $pi/346}]
-          }
+  set PhiBins 692
   add EtaPhiBins -2.22 $PhiBins
   add EtaPhiBins 2.23 $PhiBins
-  set PhiBins {}
-          for {set i -350} {$i <= 350} {incr i} {
-              add PhiBins [expr {$i * $pi/350}]
-          }
+  set PhiBins 700
   add EtaPhiBins -2.21 $PhiBins
   add EtaPhiBins 2.22 $PhiBins
-  set PhiBins {}
-          for {set i -353} {$i <= 353} {incr i} {
-              add PhiBins [expr {$i * $pi/353}]
-          }
+  set PhiBins 706
   add EtaPhiBins -2.20 $PhiBins
   add EtaPhiBins 2.21 $PhiBins
-  set PhiBins {}
-          for {set i -356} {$i <= 356} {incr i} {
-              add PhiBins [expr {$i * $pi/356}]
-          }
+  set PhiBins 712
   add EtaPhiBins -2.20 $PhiBins
   add EtaPhiBins 2.20 $PhiBins
-  set PhiBins {}
-          for {set i -252} {$i <= 252} {incr i} {
-              add PhiBins [expr {$i * $pi/252}]
-          }
+  set PhiBins 504
   add EtaPhiBins -2.19 $PhiBins
   add EtaPhiBins 2.20 $PhiBins
-  set PhiBins {}
-          for {set i -256} {$i <= 256} {incr i} {
-              add PhiBins [expr {$i * $pi/256}]
-          }
+  set PhiBins 512
   add EtaPhiBins -2.18 $PhiBins
   add EtaPhiBins 2.19 $PhiBins
-  set PhiBins {}
-          for {set i -259} {$i <= 259} {incr i} {
-              add PhiBins [expr {$i * $pi/259}]
-          }
+  set PhiBins 518
   add EtaPhiBins -2.17 $PhiBins
   add EtaPhiBins 2.18 $PhiBins
-  set PhiBins {}
-          for {set i -262} {$i <= 262} {incr i} {
-              add PhiBins [expr {$i * $pi/262}]
-          }
+  set PhiBins 524
   add EtaPhiBins -2.15 $PhiBins
   add EtaPhiBins 2.17 $PhiBins
-  set PhiBins {}
-          for {set i -265} {$i <= 265} {incr i} {
-              add PhiBins [expr {$i * $pi/265}]
-          }
+  set PhiBins 530
   add EtaPhiBins -2.14 $PhiBins
   add EtaPhiBins 2.15 $PhiBins
-  set PhiBins {}
-          for {set i -268} {$i <= 268} {incr i} {
-              add PhiBins [expr {$i * $pi/268}]
-          }
+  set PhiBins 536
   add EtaPhiBins -2.13 $PhiBins
   add EtaPhiBins 2.14 $PhiBins
-  set PhiBins {}
-          for {set i -271} {$i <= 271} {incr i} {
-              add PhiBins [expr {$i * $pi/271}]
-          }
+  set PhiBins 542
   add EtaPhiBins -2.12 $PhiBins
   add EtaPhiBins 2.13 $PhiBins
-  set PhiBins {}
-          for {set i -274} {$i <= 274} {incr i} {
-              add PhiBins [expr {$i * $pi/274}]
-          }
+  set PhiBins 548
   add EtaPhiBins -2.11 $PhiBins
   add EtaPhiBins 2.12 $PhiBins
-  set PhiBins {}
-          for {set i -278} {$i <= 278} {incr i} {
-              add PhiBins [expr {$i * $pi/278}]
-          }
+  set PhiBins 556
   add EtaPhiBins -2.10 $PhiBins
   add EtaPhiBins 2.11 $PhiBins
-  set PhiBins {}
-          for {set i -281} {$i <= 281} {incr i} {
-              add PhiBins [expr {$i * $pi/281}]
-          }
+  set PhiBins 562
   add EtaPhiBins -2.09 $PhiBins
   add EtaPhiBins 2.10 $PhiBins
-  set PhiBins {}
-          for {set i -284} {$i <= 284} {incr i} {
-              add PhiBins [expr {$i * $pi/284}]
-          }
+  set PhiBins 568
   add EtaPhiBins -2.08 $PhiBins
   add EtaPhiBins 2.09 $PhiBins
-  set PhiBins {}
-          for {set i -287} {$i <= 287} {incr i} {
-              add PhiBins [expr {$i * $pi/287}]
-          }
+  set PhiBins 574
   add EtaPhiBins -2.07 $PhiBins
   add EtaPhiBins 2.08 $PhiBins
-  set PhiBins {}
-          for {set i -290} {$i <= 290} {incr i} {
-              add PhiBins [expr {$i * $pi/290}]
-          }
+  set PhiBins 580
   add EtaPhiBins -2.05 $PhiBins
   add EtaPhiBins 2.07 $PhiBins
-  set PhiBins {}
-          for {set i -293} {$i <= 293} {incr i} {
-              add PhiBins [expr {$i * $pi/293}]
-          }
+  set PhiBins 586
   add EtaPhiBins -2.04 $PhiBins
   add EtaPhiBins 2.05 $PhiBins
-  set PhiBins {}
-          for {set i -296} {$i <= 296} {incr i} {
-              add PhiBins [expr {$i * $pi/296}]
-          }
+  set PhiBins 592
   add EtaPhiBins -2.03 $PhiBins
   add EtaPhiBins 2.04 $PhiBins
-  set PhiBins {}
-          for {set i -300} {$i <= 300} {incr i} {
-              add PhiBins [expr {$i * $pi/300}]
-          }
+  set PhiBins 600
   add EtaPhiBins -2.02 $PhiBins
   add EtaPhiBins 2.03 $PhiBins
-  set PhiBins {}
-          for {set i -303} {$i <= 303} {incr i} {
-              add PhiBins [expr {$i * $pi/303}]
-          }
+  set PhiBins 606
   add EtaPhiBins -2.01 $PhiBins
   add EtaPhiBins 2.02 $PhiBins
-  set PhiBins {}
-          for {set i -306} {$i <= 306} {incr i} {
-              add PhiBins [expr {$i * $pi/306}]
-          }
+  set PhiBins 612
   add EtaPhiBins -2.00 $PhiBins
   add EtaPhiBins 2.01 $PhiBins
-  set PhiBins {}
-          for {set i -309} {$i <= 309} {incr i} {
-              add PhiBins [expr {$i * $pi/309}]
-          }
+  set PhiBins 618
   add EtaPhiBins -1.99 $PhiBins
   add EtaPhiBins 2.00 $PhiBins
-  set PhiBins {}
-          for {set i -312} {$i <= 312} {incr i} {
-              add PhiBins [expr {$i * $pi/312}]
-          }
+  set PhiBins 624
   add EtaPhiBins -1.98 $PhiBins
   add EtaPhiBins 1.99 $PhiBins
-  set PhiBins {}
-          for {set i -315} {$i <= 315} {incr i} {
-              add PhiBins [expr {$i * $pi/315}]
-          }
+  set PhiBins 630
   add EtaPhiBins -1.98 $PhiBins
   add EtaPhiBins 1.98 $PhiBins
-  set PhiBins {}
-          for {set i -318} {$i <= 318} {incr i} {
-              add PhiBins [expr {$i * $pi/318}]
-          }
+  set PhiBins 636
   add EtaPhiBins -1.97 $PhiBins
   add EtaPhiBins 1.98 $PhiBins
-  set PhiBins {}
-          for {set i -322} {$i <= 322} {incr i} {
-              add PhiBins [expr {$i * $pi/322}]
-          }
+  set PhiBins 644
   add EtaPhiBins -1.96 $PhiBins
   add EtaPhiBins 1.97 $PhiBins
-  set PhiBins {}
-          for {set i -325} {$i <= 325} {incr i} {
-              add PhiBins [expr {$i * $pi/325}]
-          }
+  set PhiBins 650
   add EtaPhiBins -1.95 $PhiBins
   add EtaPhiBins 1.96 $PhiBins
-  set PhiBins {}
-          for {set i -328} {$i <= 328} {incr i} {
-              add PhiBins [expr {$i * $pi/328}]
-          }
+  set PhiBins 656
   add EtaPhiBins -1.94 $PhiBins
   add EtaPhiBins 1.95 $PhiBins
-  set PhiBins {}
-          for {set i -331} {$i <= 331} {incr i} {
-              add PhiBins [expr {$i * $pi/331}]
-          }
+  set PhiBins 662
   add EtaPhiBins -1.93 $PhiBins
   add EtaPhiBins 1.94 $PhiBins
-  set PhiBins {}
-          for {set i -334} {$i <= 334} {incr i} {
-              add PhiBins [expr {$i * $pi/334}]
-          }
+  set PhiBins 668
   add EtaPhiBins -1.92 $PhiBins
   add EtaPhiBins 1.93 $PhiBins
-  set PhiBins {}
-          for {set i -337} {$i <= 337} {incr i} {
-              add PhiBins [expr {$i * $pi/337}]
-          }
+  set PhiBins 674
   add EtaPhiBins -1.91 $PhiBins
   add EtaPhiBins 1.92 $PhiBins
-  set PhiBins {}
-          for {set i -340} {$i <= 340} {incr i} {
-              add PhiBins [expr {$i * $pi/340}]
-          }
+  set PhiBins 680
   add EtaPhiBins -1.90 $PhiBins
   add EtaPhiBins 1.91 $PhiBins
-  set PhiBins {}
-          for {set i -344} {$i <= 344} {incr i} {
-              add PhiBins [expr {$i * $pi/344}]
-          }
+  set PhiBins 688
   add EtaPhiBins -1.89 $PhiBins
   add EtaPhiBins 1.90 $PhiBins
-  set PhiBins {}
-          for {set i -347} {$i <= 347} {incr i} {
-              add PhiBins [expr {$i * $pi/347}]
-          }
+  set PhiBins 694
   add EtaPhiBins -1.88 $PhiBins
   add EtaPhiBins 1.89 $PhiBins
-  set PhiBins {}
-          for {set i -350} {$i <= 350} {incr i} {
-              add PhiBins [expr {$i * $pi/350}]
-          }
+  set PhiBins 700
   add EtaPhiBins -1.88 $PhiBins
   add EtaPhiBins 1.88 $PhiBins
-  set PhiBins {}
-          for {set i -353} {$i <= 353} {incr i} {
-              add PhiBins [expr {$i * $pi/353}]
-          }
+  set PhiBins 706
   add EtaPhiBins -1.87 $PhiBins
   add EtaPhiBins 1.88 $PhiBins
-  set PhiBins {}
-          for {set i -356} {$i <= 356} {incr i} {
-              add PhiBins [expr {$i * $pi/356}]
-          }
+  set PhiBins 712
   add EtaPhiBins -1.86 $PhiBins
   add EtaPhiBins 1.87 $PhiBins
-  set PhiBins {}
-          for {set i -359} {$i <= 359} {incr i} {
-              add PhiBins [expr {$i * $pi/359}]
-          }
+  set PhiBins 718
   add EtaPhiBins -1.85 $PhiBins
   add EtaPhiBins 1.86 $PhiBins
-  set PhiBins {}
-          for {set i -362} {$i <= 362} {incr i} {
-              add PhiBins [expr {$i * $pi/362}]
-          }
+  set PhiBins 724
   add EtaPhiBins -1.84 $PhiBins
   add EtaPhiBins 1.85 $PhiBins
-  set PhiBins {}
-          for {set i -365} {$i <= 365} {incr i} {
-              add PhiBins [expr {$i * $pi/365}]
-          }
+  set PhiBins 730
   add EtaPhiBins -1.83 $PhiBins
   add EtaPhiBins 1.84 $PhiBins
-  set PhiBins {}
-          for {set i -369} {$i <= 369} {incr i} {
-              add PhiBins [expr {$i * $pi/369}]
-          }
+  set PhiBins 738
   add EtaPhiBins -1.83 $PhiBins
   add EtaPhiBins 1.83 $PhiBins
-  set PhiBins {}
-          for {set i -372} {$i <= 372} {incr i} {
-              add PhiBins [expr {$i * $pi/372}]
-          }
+  set PhiBins 744
   add EtaPhiBins -1.82 $PhiBins
   add EtaPhiBins 1.83 $PhiBins
-  set PhiBins {}
-          for {set i -375} {$i <= 375} {incr i} {
-              add PhiBins [expr {$i * $pi/375}]
-          }
+  set PhiBins 750
   add EtaPhiBins -1.81 $PhiBins
   add EtaPhiBins 1.82 $PhiBins
-  set PhiBins {}
-          for {set i -378} {$i <= 378} {incr i} {
-              add PhiBins [expr {$i * $pi/378}]
-          }
+  set PhiBins 756
   add EtaPhiBins -1.80 $PhiBins
   add EtaPhiBins 1.81 $PhiBins
-  set PhiBins {}
-          for {set i -381} {$i <= 381} {incr i} {
-              add PhiBins [expr {$i * $pi/381}]
-          }
+  set PhiBins 762
   add EtaPhiBins -1.79 $PhiBins
   add EtaPhiBins 1.80 $PhiBins
-  set PhiBins {}
-          for {set i -384} {$i <= 384} {incr i} {
-              add PhiBins [expr {$i * $pi/384}]
-          }
+  set PhiBins 768
   add EtaPhiBins -1.79 $PhiBins
   add EtaPhiBins 1.79 $PhiBins
-  set PhiBins {}
-          for {set i -387} {$i <= 387} {incr i} {
-              add PhiBins [expr {$i * $pi/387}]
-          }
+  set PhiBins 774
   add EtaPhiBins -1.78 $PhiBins
   add EtaPhiBins 1.79 $PhiBins
-  set PhiBins {}
-          for {set i -391} {$i <= 391} {incr i} {
-              add PhiBins [expr {$i * $pi/391}]
-          }
+  set PhiBins 782
   add EtaPhiBins -1.77 $PhiBins
   add EtaPhiBins 1.78 $PhiBins
-  set PhiBins {}
-          for {set i -394} {$i <= 394} {incr i} {
-              add PhiBins [expr {$i * $pi/394}]
-          }
+  set PhiBins 788
   add EtaPhiBins -1.76 $PhiBins
   add EtaPhiBins 1.77 $PhiBins
-  set PhiBins {}
-          for {set i -397} {$i <= 397} {incr i} {
-              add PhiBins [expr {$i * $pi/397}]
-          }
+  set PhiBins 794
   add EtaPhiBins -1.76 $PhiBins
   add EtaPhiBins 1.76 $PhiBins
-  set PhiBins {}
-          for {set i -400} {$i <= 400} {incr i} {
-              add PhiBins [expr {$i * $pi/400}]
-          }
+  set PhiBins 800
   add EtaPhiBins -1.75 $PhiBins
   add EtaPhiBins 1.76 $PhiBins
-  set PhiBins {}
-          for {set i -403} {$i <= 403} {incr i} {
-              add PhiBins [expr {$i * $pi/403}]
-          }
+  set PhiBins 806
   add EtaPhiBins -1.74 $PhiBins
   add EtaPhiBins 1.75 $PhiBins
-  set PhiBins {}
-          for {set i -406} {$i <= 406} {incr i} {
-              add PhiBins [expr {$i * $pi/406}]
-          }
+  set PhiBins 812
   add EtaPhiBins -1.73 $PhiBins
   add EtaPhiBins 1.74 $PhiBins
-  set PhiBins {}
-          for {set i -409} {$i <= 409} {incr i} {
-              add PhiBins [expr {$i * $pi/409}]
-          }
+  set PhiBins 818
   add EtaPhiBins -1.73 $PhiBins
   add EtaPhiBins 1.73 $PhiBins
-  set PhiBins {}
-          for {set i -413} {$i <= 413} {incr i} {
-              add PhiBins [expr {$i * $pi/413}]
-          }
+  set PhiBins 826
   add EtaPhiBins -1.72 $PhiBins
   add EtaPhiBins 1.73 $PhiBins
-  set PhiBins {}
-          for {set i -416} {$i <= 416} {incr i} {
-              add PhiBins [expr {$i * $pi/416}]
-          }
+  set PhiBins 832
   add EtaPhiBins -1.71 $PhiBins
   add EtaPhiBins 1.72 $PhiBins
-  set PhiBins {}
-          for {set i -419} {$i <= 419} {incr i} {
-              add PhiBins [expr {$i * $pi/419}]
-          }
+  set PhiBins 838
   add EtaPhiBins -1.71 $PhiBins
   add EtaPhiBins 1.71 $PhiBins
-  set PhiBins {}
-          for {set i -422} {$i <= 422} {incr i} {
-              add PhiBins [expr {$i * $pi/422}]
-          }
+  set PhiBins 844
   add EtaPhiBins -1.70 $PhiBins
   add EtaPhiBins 1.71 $PhiBins
-  set PhiBins {}
-          for {set i -425} {$i <= 425} {incr i} {
-              add PhiBins [expr {$i * $pi/425}]
-          }
+  set PhiBins 850
   add EtaPhiBins -1.69 $PhiBins
   add EtaPhiBins 1.70 $PhiBins
-  set PhiBins {}
-          for {set i -428} {$i <= 428} {incr i} {
-              add PhiBins [expr {$i * $pi/428}]
-          }
+  set PhiBins 856
   add EtaPhiBins -1.69 $PhiBins
   add EtaPhiBins 1.69 $PhiBins
-  set PhiBins {}
-          for {set i -431} {$i <= 431} {incr i} {
-              add PhiBins [expr {$i * $pi/431}]
-          }
+  set PhiBins 862
   add EtaPhiBins -1.68 $PhiBins
   add EtaPhiBins 1.69 $PhiBins
-  set PhiBins {}
-          for {set i -435} {$i <= 435} {incr i} {
-              add PhiBins [expr {$i * $pi/435}]
-          }
+  set PhiBins 870
   add EtaPhiBins -1.67 $PhiBins
   add EtaPhiBins 1.68 $PhiBins
-  set PhiBins {}
-          for {set i -438} {$i <= 438} {incr i} {
-              add PhiBins [expr {$i * $pi/438}]
-          }
+  set PhiBins 876
   add EtaPhiBins -1.67 $PhiBins
   add EtaPhiBins 1.67 $PhiBins
-  set PhiBins {}
-          for {set i -441} {$i <= 441} {incr i} {
-              add PhiBins [expr {$i * $pi/441}]
-          }
+  set PhiBins 882
   add EtaPhiBins -1.66 $PhiBins
   add EtaPhiBins 1.67 $PhiBins
-  set PhiBins {}
-          for {set i -444} {$i <= 444} {incr i} {
-              add PhiBins [expr {$i * $pi/444}]
-          }
+  set PhiBins 888
   add EtaPhiBins -1.65 $PhiBins
   add EtaPhiBins 1.66 $PhiBins
-  set PhiBins {}
-          for {set i -447} {$i <= 447} {incr i} {
-              add PhiBins [expr {$i * $pi/447}]
-          }
+  set PhiBins 894
   add EtaPhiBins -1.65 $PhiBins
   add EtaPhiBins 1.65 $PhiBins
-  set PhiBins {}
-          for {set i -450} {$i <= 450} {incr i} {
-              add PhiBins [expr {$i * $pi/450}]
-          }
+  set PhiBins 900
   add EtaPhiBins -1.64 $PhiBins
   add EtaPhiBins 1.65 $PhiBins
-  set PhiBins {}
-          for {set i -453} {$i <= 453} {incr i} {
-              add PhiBins [expr {$i * $pi/453}]
-          }
+  set PhiBins 906
   add EtaPhiBins -1.63 $PhiBins
   add EtaPhiBins 1.64 $PhiBins
-  set PhiBins {}
-          for {set i -457} {$i <= 457} {incr i} {
-              add PhiBins [expr {$i * $pi/457}]
-          }
+  set PhiBins 914
   add EtaPhiBins -1.63 $PhiBins
   add EtaPhiBins 1.63 $PhiBins
-  set PhiBins {}
-          for {set i -460} {$i <= 460} {incr i} {
-              add PhiBins [expr {$i * $pi/460}]
-          }
+  set PhiBins 920
   add EtaPhiBins -1.62 $PhiBins
   add EtaPhiBins 1.63 $PhiBins
-  set PhiBins {}
-          for {set i -463} {$i <= 463} {incr i} {
-              add PhiBins [expr {$i * $pi/463}]
-          }
+  set PhiBins 926
   add EtaPhiBins -1.61 $PhiBins
   add EtaPhiBins 1.62 $PhiBins
-  set PhiBins {}
-          for {set i -466} {$i <= 466} {incr i} {
-              add PhiBins [expr {$i * $pi/466}]
-          }
+  set PhiBins 932
   add EtaPhiBins -1.61 $PhiBins
   add EtaPhiBins 1.61 $PhiBins
-  set PhiBins {}
-          for {set i -469} {$i <= 469} {incr i} {
-              add PhiBins [expr {$i * $pi/469}]
-          }
+  set PhiBins 938
   add EtaPhiBins -1.60 $PhiBins
   add EtaPhiBins 1.61 $PhiBins
-  set PhiBins {}
-          for {set i -472} {$i <= 472} {incr i} {
-              add PhiBins [expr {$i * $pi/472}]
-          }
+  set PhiBins 944
   add EtaPhiBins -1.60 $PhiBins
   add EtaPhiBins 1.60 $PhiBins
-  set PhiBins {}
-          for {set i -475} {$i <= 475} {incr i} {
-              add PhiBins [expr {$i * $pi/475}]
-          }
+  set PhiBins 950
   add EtaPhiBins -1.59 $PhiBins
   add EtaPhiBins 1.60 $PhiBins
-  set PhiBins {}
-          for {set i -479} {$i <= 479} {incr i} {
-              add PhiBins [expr {$i * $pi/479}]
-          }
+  set PhiBins 958
   add EtaPhiBins -1.58 $PhiBins
   add EtaPhiBins 1.59 $PhiBins
-  set PhiBins {}
-          for {set i -482} {$i <= 482} {incr i} {
-              add PhiBins [expr {$i * $pi/482}]
-          }
+  set PhiBins 964
   add EtaPhiBins -1.58 $PhiBins
   add EtaPhiBins 1.58 $PhiBins
-  set PhiBins {}
-          for {set i -485} {$i <= 485} {incr i} {
-              add PhiBins [expr {$i * $pi/485}]
-          }
+  set PhiBins 970
   add EtaPhiBins -1.57 $PhiBins
   add EtaPhiBins 1.58 $PhiBins
-  set PhiBins {}
-          for {set i -488} {$i <= 488} {incr i} {
-              add PhiBins [expr {$i * $pi/488}]
-          }
+  set PhiBins 976
   add EtaPhiBins -1.57 $PhiBins
   add EtaPhiBins 1.57 $PhiBins
-  set PhiBins {}
-          for {set i -491} {$i <= 491} {incr i} {
-              add PhiBins [expr {$i * $pi/491}]
-          }
+  set PhiBins 982
   add EtaPhiBins -1.56 $PhiBins
   add EtaPhiBins 1.57 $PhiBins
-  set PhiBins {}
-          for {set i -494} {$i <= 494} {incr i} {
-              add PhiBins [expr {$i * $pi/494}]
-          }
+  set PhiBins 988
   add EtaPhiBins -1.55 $PhiBins
   add EtaPhiBins 1.56 $PhiBins
-  set PhiBins {}
-          for {set i -497} {$i <= 497} {incr i} {
-              add PhiBins [expr {$i * $pi/497}]
-          }
+  set PhiBins 994
   add EtaPhiBins -1.55 $PhiBins
   add EtaPhiBins 1.55 $PhiBins
-  set PhiBins {}
-          for {set i -501} {$i <= 501} {incr i} {
-              add PhiBins [expr {$i * $pi/501}]
-          }
+  set PhiBins 1002
   add EtaPhiBins -1.54 $PhiBins
   add EtaPhiBins 1.55 $PhiBins
-  set PhiBins {}
-          for {set i -504} {$i <= 504} {incr i} {
-              add PhiBins [expr {$i * $pi/504}]
-          }
+  set PhiBins 1008
   add EtaPhiBins -1.54 $PhiBins
   add EtaPhiBins 1.54 $PhiBins
-  set PhiBins {}
-          for {set i -507} {$i <= 507} {incr i} {
-              add PhiBins [expr {$i * $pi/507}]
-          }
+  set PhiBins 1014
   add EtaPhiBins -1.53 $PhiBins
   add EtaPhiBins 1.54 $PhiBins
-  set PhiBins {}
-          for {set i -510} {$i <= 510} {incr i} {
-              add PhiBins [expr {$i * $pi/510}]
-          }
+  set PhiBins 1020
   add EtaPhiBins -1.53 $PhiBins
   add EtaPhiBins 1.53 $PhiBins
-  set PhiBins {}
-          for {set i -513} {$i <= 513} {incr i} {
-              add PhiBins [expr {$i * $pi/513}]
-          }
+  set PhiBins 1026
   add EtaPhiBins -1.52 $PhiBins
   add EtaPhiBins 1.53 $PhiBins
-  set PhiBins {}
-          for {set i -516} {$i <= 516} {incr i} {
-              add PhiBins [expr {$i * $pi/516}]
-          }
+  set PhiBins 1032
   add EtaPhiBins -1.51 $PhiBins
   add EtaPhiBins 1.52 $PhiBins
-  set PhiBins {}
-          for {set i -519} {$i <= 519} {incr i} {
-              add PhiBins [expr {$i * $pi/519}]
-          }
+  set PhiBins 1038
   add EtaPhiBins -1.51 $PhiBins
   add EtaPhiBins 1.51 $PhiBins
-  set PhiBins {}
-          for {set i -523} {$i <= 523} {incr i} {
-              add PhiBins [expr {$i * $pi/523}]
-          }
+  set PhiBins 1046
   add EtaPhiBins -1.50 $PhiBins
   add EtaPhiBins 1.51 $PhiBins
-  set PhiBins {}
-          for {set i -526} {$i <= 526} {incr i} {
-              add PhiBins [expr {$i * $pi/526}]
-          }
+  set PhiBins 1052
   add EtaPhiBins -1.50 $PhiBins
   add EtaPhiBins 1.50 $PhiBins
-  set PhiBins {}
-          for {set i -529} {$i <= 529} {incr i} {
-              add PhiBins [expr {$i * $pi/529}]
-          }
+  set PhiBins 1058
   add EtaPhiBins -1.50 $PhiBins
   add EtaPhiBins 1.50 $PhiBins
 
   set EtaPhiRes 0.1
   set EtaMax 1.5
 
-  set nbins_phi [expr {$pi/$EtaPhiRes} ]
-  set nbins_phi [expr {int($nbins_phi)} ]
-
-  set PhiBins {}
-  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-    add PhiBins [expr {$i * $pi/$nbins_phi}]
-  }
+  set PhiBins [expr {int($pi/$EtaPhiRes) * 2}]
 
   set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
   set nbins_eta [expr {int($nbins_eta)} ]
@@ -3542,10 +1985,7 @@ module SimpleCalorimeter HCal {
   # take present CMS granularity for HF
 
   # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
+  set PhiBins 36
 
   foreach eta {-5 -4.7 -4.525 -4.35 -4.21 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins

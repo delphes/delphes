@@ -352,13 +352,7 @@ module DualReadoutCalorimeter Calorimeter {
 
     set pi [expr {acos(-1)}]
 
-    set nbins_phi [expr {$pi/$EtaPhiRes} ]
-    set nbins_phi [expr {int($nbins_phi)} ]
-
-    set PhiBins {}
-    for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-      add PhiBins [expr {$i * $pi/$nbins_phi}]
-    }
+    set PhiBins [expr {int($pi/$EtaPhiRes) * 2}]
 
     set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
     set nbins_eta [expr {int($nbins_eta)} ]

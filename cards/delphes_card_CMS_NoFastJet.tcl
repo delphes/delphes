@@ -189,7 +189,6 @@ module SimpleCalorimeter ECal {
 
   set SmearTowerCenter true
 
-  set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
@@ -197,10 +196,7 @@ module SimpleCalorimeter ECal {
 
   # assume 0.02 x 0.02 resolution in eta,phi in the barrel |eta| < 1.5
 
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
+  set PhiBins 360
 
   # 0.02 unit in eta up to eta = 1.5 (barrel)
   for {set i -85} {$i <= 86} {incr i} {
@@ -210,10 +206,7 @@ module SimpleCalorimeter ECal {
 
   # assume 0.02 x 0.02 resolution in eta,phi in the endcaps 1.5 < |eta| < 3.0 (HGCAL- ECAL)
 
-  set PhiBins {}
-  for {set i -180} {$i <= 180} {incr i} {
-    add PhiBins [expr {$i * $pi/180.0}]
-  }
+  set PhiBins 360
 
   # 0.02 unit in eta up to eta = 3
   for {set i 1} {$i <= 84} {incr i} {
@@ -229,10 +222,7 @@ module SimpleCalorimeter ECal {
   # take present CMS granularity for HF
 
   # 0.175 x (0.175 - 0.35) resolution in eta,phi in the HF 3.0 < |eta| < 5.0
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
+  set PhiBins 36
 
   foreach eta {-5 -4.7 -4.525 -4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.958 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
@@ -290,35 +280,25 @@ module SimpleCalorimeter HCal {
 
   set SmearTowerCenter true
 
-  set pi [expr {acos(-1)}]
 
   # lists of the edges of each tower in eta and phi
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
 
   # 5 degrees towers
-  set PhiBins {}
-  for {set i -36} {$i <= 36} {incr i} {
-    add PhiBins [expr {$i * $pi/36.0}]
-  }
+  set PhiBins 72
   foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.653} {
     add EtaPhiBins $eta $PhiBins
   }
 
   # 10 degrees towers
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
+  set PhiBins 36
   foreach eta {-4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.95 -2.868 -2.65 -2.5 -2.322 -2.172 -2.043 -1.93 -1.83 -1.74 -1.653 1.74 1.83 1.93 2.043 2.172 2.322 2.5 2.65 2.868 2.95 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525} {
     add EtaPhiBins $eta $PhiBins
   }
 
   # 20 degrees towers
-  set PhiBins {}
-  for {set i -9} {$i <= 9} {incr i} {
-    add PhiBins [expr {$i * $pi/9.0}]
-  }
+  set PhiBins 18
   foreach eta {-5 -4.7 -4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
   }

@@ -175,13 +175,7 @@ module DenseTrackFilter DenseTrackFilter {
 
   set pi [expr {acos(-1)}]
 
-  set nbins_phi [expr {$pi/$EtaPhiRes} ]
-  set nbins_phi [expr {int($nbins_phi)} ]
-
-  set PhiBins {}
-  for {set i -$nbins_phi} {$i <= $nbins_phi} {incr i} {
-    add PhiBins [expr {$i * $pi/$nbins_phi}]
-  }
+  set PhiBins [expr {int($pi/$EtaPhiRes) * 2}]
 
   set nbins_eta [expr {$EtaMax/$EtaPhiRes} ]
   set nbins_eta [expr {int($nbins_eta)} ]
@@ -333,10 +327,7 @@ module SimpleCalorimeter ECal {
   # the list ends with the higher edged of the last tower
 
   # 0.012 rad towers up to eta = 2.5 (barrel)
-   set PhiBins {}
-  for {set i -256} {$i <= 256} {incr i} {
-    add PhiBins [expr {$i * $pi/256.0}]
-  } 
+   set PhiBins 512 
 
   # 0.01 unit in eta up to eta = 2.5 (barrel)
   for {set i -249} {$i <= 250} {incr i} {
@@ -345,10 +336,7 @@ module SimpleCalorimeter ECal {
   }
 
   # 0.025 rad between 2.5 and 6.0
-  set PhiBins {}
-  for {set i -128} {$i <= 128} {incr i} {
-    add PhiBins [expr {$i * $pi/128.0}]
-  }
+  set PhiBins 256
 
   # 0.025 unit in eta between 2.5 and 6.0
   for {set i 0} {$i <= 140} {incr i} {
@@ -415,10 +403,7 @@ module SimpleCalorimeter HCal {
   # the list ends with the higher edged of the last tower
 
   # 0.025 rad towers up to eta = 2.5 (barrel)
-   set PhiBins {}
-  for {set i -128} {$i <= 128} {incr i} {
-    add PhiBins [expr {$i * $pi/128.0}]
-  } 
+   set PhiBins 256 
 
   # 0.025 unit in eta up to eta = 2.5 (barrel)
   for {set i -99} {$i <= 100} {incr i} {
@@ -427,10 +412,7 @@ module SimpleCalorimeter HCal {
   }
 
   # 0.05 rad between 2.5 and 6.0
-  set PhiBins {}
-  for {set i -64} {$i <= 64} {incr i} {
-    add PhiBins [expr {$i * $pi/64.0}]
-  }
+  set PhiBins 128
 
   # 0.05 unit in eta between 2.5 and 6.0
   for {set i 0} {$i <= 70} {incr i} {
