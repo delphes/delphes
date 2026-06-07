@@ -404,6 +404,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/UniqueObjectFinder.h \
 	modules/TrackCountingBTagging.h \
 	modules/BTagging.h \
+	modules/BoostedTagging.h \
 	modules/TauTagging.h \
 	modules/TrackCountingTauTagging.h \
 	modules/TreeWriter.h \
@@ -687,6 +688,12 @@ tmp/modules/BeamSpotFilter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/BoostedTagging.$(ObjSuf): \
+	modules/BoostedTagging.$(SrcSuf) \
+	modules/BoostedTagging.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesFormula.h
 tmp/modules/Calorimeter.$(ObjSuf): \
 	modules/Calorimeter.$(SrcSuf) \
 	modules/Calorimeter.h \
@@ -1239,6 +1246,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
+	tmp/modules/BoostedTagging.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
 	tmp/modules/ClusterCounting.$(ObjSuf) \
@@ -2328,6 +2336,12 @@ external/fastjet/CompositeJetStructure.hh: \
 external/fastjet/internal/BasicRandom.hh: \
 	external/fastjet/internal/base.hh \
 	external/fastjet/config.h
+	@touch $@
+modules/BoostedTagging.h: \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h \
+	classes/DelphesModule.h
 	@touch $@
 modules/ClusterCounting.h: \
 	classes/DelphesModule.h
