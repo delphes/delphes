@@ -849,6 +849,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->TauFlavor = candidate->TauFlavor;
     entry->TauTag = candidate->TauTag;
     entry->TauWeight = candidate->TauWeight;
+    entry->BoostedTag = candidate->BoostedTag;
 
     entry->Charge = candidate->Charge;
 

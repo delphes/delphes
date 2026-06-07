@@ -377,6 +377,8 @@ public:
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
   Float_t TauWeight; // probability for jet to be identified as tau
 
+  UInt_t BoostedTag; // bitmask of boosted-resonance fatjet tags (W/Z/H/top)
+
   Int_t Charge; // tau charge
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
@@ -422,7 +424,7 @@ public:
   TLorentzVector P4() const;
   TLorentzVector Area;
 
-  ClassDef(Jet, 5)
+  ClassDef(Jet, 6)
 };
 
 //---------------------------------------------------------------------------
@@ -727,6 +729,8 @@ public:
   UInt_t TauTag;
   Float_t TauWeight;
 
+  UInt_t BoostedTag;
+
   Float_t Eem;
   Float_t Ehad;
   Float_t Etrk;
@@ -855,7 +859,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 6)
+  ClassDef(Candidate, 7)
 };
 
 #endif // DelphesClasses_h
