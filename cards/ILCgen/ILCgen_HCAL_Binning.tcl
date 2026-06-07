@@ -21,7 +21,10 @@ for {set i 1} {$i <= 147} {incr i} {
 
 #360/1.72 deg/cosh(1.65) : ~77.6 -> 76 divisions
 #0.9/0.03: 30
-set PhiBins 76 ]
+set PhiBins 76
+
+for {set i 1} {$i <= 30} {incr i} {
+    set eta [expr {-2.0 + $i * 0.9/30.0} ]
     add EtaPhiBins $eta $PhiBins
   }
 
@@ -32,7 +35,10 @@ for {set i 1} {$i <= 30} {incr i} {
 
 #360/3.72 deg/cosh(2.25) : ~20  divisions
 #0.5/0.065: ~7.65 -> 8  
-set PhiBins 40 ]
+set PhiBins 40
+
+for {set i 1} {$i <= 8} {incr i} {
+    set eta [expr {-2.5 + $i * 0.5/8.0} ]
     add EtaPhiBins $eta $PhiBins
   }
 
@@ -43,7 +49,10 @@ for {set i 1} {$i <= 8} {incr i} {
 
 #360/4.58 deg/cosh(2.65) : ~11 -> 10 divisions
 #0.3/0.08: ~4
-set PhiBins 10 ]
+set PhiBins 10
+
+for {set i 0} {$i <= 4} {incr i} {
+    set eta [expr {-2.8 + $i * 0.3/4.0} ]
     add EtaPhiBins $eta $PhiBins
   }
 
