@@ -67,6 +67,7 @@
 #include "modules/StatusPidFilter.h"
 #include "modules/PdgCodeFilter.h"
 #include "modules/BeamSpotFilter.h"
+#include "modules/BeamSpotSmearing.h"
 #include "modules/RecoPuFilter.h"
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
@@ -132,6 +133,7 @@
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class PdgCodeFilter+;
 #pragma link C++ class BeamSpotFilter+;
+#pragma link C++ class BeamSpotSmearing+;
 #pragma link C++ class RecoPuFilter+;
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;

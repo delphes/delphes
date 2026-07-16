@@ -29,6 +29,8 @@ set DCHRMAX 2.02
 
 set ExecutionPath {
 
+  BeamSpotSmearing
+
   TruthVertexFinder
   ParticlePropagator
 
@@ -85,6 +87,23 @@ set ExecutionPath {
 
   TreeWriter
 }
+
+#################################
+# Beam spot smearing
+#################################
+
+module BeamSpotSmearing BeamSpotSmearing {
+
+  set InputArray Delphes/allParticles
+
+  # beam spot size in x, y, z [m] and bunch time spread [s]
+  # FCC-ee Z pole example: 5.96E-06, 23.8E-09, 0.397E-03, 36.3E-12
+  set SigmaX 0.0
+  set SigmaY 0.0
+  set SigmaZ 0.0
+  set SigmaT 0.0
+}
+
 
 #################################
 # Truth Vertex Finder
