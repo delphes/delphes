@@ -539,6 +539,7 @@ void Candidate::Clear(Option_t * /*option*/)
   Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   InitialPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  PositionError.SetXYZT(0.0, 0.0, 0.0, 0.0);
   DecayPosition.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
   TrackCovariance.Zero();
