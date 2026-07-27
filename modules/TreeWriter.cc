@@ -668,6 +668,21 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
     entry->E = momentum.E();
     entry->T = position.T() * 1.0E-3 / c_light;
 
+    entry->X = position.X();
+    entry->Y = position.Y();
+    entry->Z = position.Z();
+
+    entry->ErrorTheta = candidate->PositionError.X();
+    entry->ErrorPhi = candidate->PositionError.Y();
+
+    entry->ThetaP = candidate->DecayPosition.X();
+    entry->PhiP = candidate->DecayPosition.Y();
+
+    entry->ErrorThetaP = candidate->PositionError.Z();
+    entry->ErrorPhiP = candidate->PositionError.T();
+
+    entry->ErrorE = candidate->DecayPosition.Z();
+
     // Isolation variables
 
     entry->IsolationVar = candidate->IsolationVar;

@@ -47,6 +47,8 @@
 #include "TObjArray.h"
 #include "TRandom3.h"
 #include "TString.h"
+#include "TVector2.h"
+#include "TVector3.h"
 
 #include <algorithm>
 #include <iostream>
@@ -63,6 +65,11 @@ DualReadoutCalorimeter::DualReadoutCalorimeter()
 
   fECalResolutionFormula = make_unique<DelphesFormula>();
   fHCalResolutionFormula = make_unique<DelphesFormula>();
+
+  fPhotonThetaResolutionFormula = make_unique<DelphesFormula>();
+  fPhotonPhiResolutionFormula = make_unique<DelphesFormula>();
+  fPointingThetaResolutionFormula = make_unique<DelphesFormula>();
+  fPointingPhiResolutionFormula = make_unique<DelphesFormula>();
 
   fECalTowerTrackArray = make_unique<TObjArray>();
   fItECalTowerTrackArray.reset(fECalTowerTrackArray->MakeIterator());
@@ -179,6 +186,18 @@ void DualReadoutCalorimeter::Init()
   // read resolution formulas
   fECalResolutionFormula->Compile(GetString("ECalResolutionFormula", "0"));
   fHCalResolutionFormula->Compile(GetString("HCalResolutionFormula", "0"));
+
+  // opt-in photon angular smearing and pointing for trackless pure-EM photon
+  // towers (see the header). Both default to off and all formulas default to
+  // "0", which reproduces the legacy behaviour exactly through the sigma > 0
+  // guards in FinalizeTower(). Formulas return RADIANS as a function of the
+  // tower eta and of the reconstructed energy.
+  fPhotonAngularSmearing = GetBool("PhotonAngularSmearing", false);
+  fPhotonPointing = GetBool("PhotonPointing", false);
+  fPhotonThetaResolutionFormula->Compile(GetString("PhotonThetaResolutionFormula", "0"));
+  fPhotonPhiResolutionFormula->Compile(GetString("PhotonPhiResolutionFormula", "0"));
+  fPointingThetaResolutionFormula->Compile(GetString("PointingThetaResolutionFormula", "0"));
+  fPointingPhiResolutionFormula->Compile(GetString("PointingPhiResolutionFormula", "0"));
 
   // import array with output from other modules
   fParticleInputArray = ImportArray(GetString("ParticleInputArray", "ParticlePropagator/particles"));
@@ -470,7 +489,7 @@ void DualReadoutCalorimeter::Process()
 void DualReadoutCalorimeter::FinalizeTower()
 {
 
-  Candidate *track, *tower, *mother, *candidate;
+  Candidate *track, *tower, *mother, *candidate, *constituent;
   Double_t energy, pt, eta, phi, r, time;
   Double_t neutralEnergy;
 
@@ -548,15 +567,100 @@ void DualReadoutCalorimeter::FinalizeTower()
 
   time = (fTowerTimeWeight < 1.0E-09) ? 0.0 : fTowerTime / fTowerTimeWeight;
 
-  if(fSmearTowerCenter)
+  // photon angular smearing and pointing (segmented crystal ECAL),
+  // applied only to trackless pure EM photon towers for now
+
+  Bool_t isPurePhotonTower = isPureEM && fTowerPhotonHits > 0 && fTowerTrackHits == 0;
+  Bool_t photonSmeared = false;
+
+  if((fPhotonAngularSmearing || fPhotonPointing) && isPurePhotonTower && energy > 0.0)
   {
-    eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
-    phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
+    // energy-weighted sums over the EM constituents, the true impact point on the
+    // calorimeter (Position, set by ParticlePropagator) and the true flight
+    // direction (Momentum, vertex-agnostic by construction)
+    TVector3 impact(0.0, 0.0, 0.0);
+    TVector3 flight(0.0, 0.0, 0.0);
+    Double_t sumWeight = 0.0;
+
+    TIter itConstituent(fTower->GetCandidates());
+    itConstituent.Reset();
+    while((constituent = static_cast<Candidate *>(itConstituent.Next())))
+    {
+      if(TMath::Abs(constituent->PID) != 11 && TMath::Abs(constituent->PID) != 22) continue;
+      Double_t weight = constituent->Momentum.E();
+      if(weight <= 0.0) continue;
+      impact += weight * constituent->Position.Vect();
+      flight += weight * constituent->Momentum.Vect();
+      sumWeight += weight;
+    }
+
+    if(sumWeight > 0.0 && impact.Mag() > 0.0)
+    {
+      Double_t sigmaTheta = 0.0, sigmaPhi = 0.0;
+      Double_t thetaP = 0.0, phiP = 0.0, sigmaThetaP = 0.0, sigmaPhiP = 0.0;
+
+      // momentum direction from the smeared true impact point, replacing the
+      // tower-size dither with the shower-barycenter resolution
+      if(fPhotonAngularSmearing)
+      {
+        sigmaTheta = fPhotonThetaResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+        sigmaPhi = fPhotonPhiResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+
+        if(sigmaTheta > 0.0 && sigmaPhi > 0.0)
+        {
+          Double_t theta = gRandom->Gaus(impact.Theta(), sigmaTheta);
+          // keep theta strictly inside (0, pi) so that eta stays finite
+          theta = TMath::Min(TMath::Max(theta, 1.0e-06), TMath::Pi() - 1.0e-06);
+
+          eta = -TMath::Log(TMath::Tan(0.5 * theta));
+          phi = TVector2::Phi_mpi_pi(gRandom->Gaus(impact.Phi(), sigmaPhi));
+
+          photonSmeared = true;
+        }
+        else
+        {
+          sigmaTheta = 0.0;
+          sigmaPhi = 0.0;
+        }
+      }
+
+      // vertex-agnostic pointing direction
+      if(fPhotonPointing && flight.Mag() > 0.0)
+      {
+        sigmaThetaP = fPointingThetaResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+        sigmaPhiP = fPointingPhiResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+
+        if(sigmaThetaP > 0.0 && sigmaPhiP > 0.0)
+        {
+          thetaP = gRandom->Gaus(flight.Theta(), sigmaThetaP);
+          thetaP = TMath::Min(TMath::Max(thetaP, 1.0e-06), TMath::Pi() - 1.0e-06);
+          phiP = TVector2::Phi_mpi_pi(gRandom->Gaus(flight.Phi(), sigmaPhiP));
+        }
+        else
+        {
+          sigmaThetaP = 0.0;
+          sigmaPhiP = 0.0;
+        }
+      }
+
+      // store on the tower candidate
+      fTower->PositionError.SetXYZT(sigmaTheta, sigmaPhi, sigmaThetaP, sigmaPhiP);
+      fTower->DecayPosition.SetXYZT(thetaP, phiP, caloSigma, 0.0);
+    }
   }
-  else
+
+  if(!photonSmeared)
   {
-    eta = fTowerEta;
-    phi = fTowerPhi;
+    if(fSmearTowerCenter)
+    {
+      eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
+      phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
+    }
+    else
+    {
+      eta = fTowerEta;
+      phi = fTowerPhi;
+    }
   }
 
   // check whether barrel or endcap tower

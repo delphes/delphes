@@ -84,6 +84,9 @@ private:
   Bool_t fSmearTowerCenter;
   Bool_t fSmearLogNormal;
 
+  Bool_t fPhotonAngularSmearing;
+  Bool_t fPhotonPointing;
+
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
 
@@ -100,6 +103,11 @@ private:
 
   std::unique_ptr<DelphesFormula> fECalResolutionFormula; //!
   std::unique_ptr<DelphesFormula> fHCalResolutionFormula; //!
+
+  std::unique_ptr<DelphesFormula> fPhotonThetaResolutionFormula; //!
+  std::unique_ptr<DelphesFormula> fPhotonPhiResolutionFormula; //!
+  std::unique_ptr<DelphesFormula> fPointingThetaResolutionFormula; //!
+  std::unique_ptr<DelphesFormula> fPointingPhiResolutionFormula; //!
 
   std::unique_ptr<TIterator> fItParticleInputArray; //!
   std::unique_ptr<TIterator> fItTrackInputArray; //!

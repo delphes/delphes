@@ -258,6 +258,21 @@ public:
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
+  Float_t X; // reference point of the photon track on the calorimeter
+  Float_t Y; // reference point of the photon track on the calorimeter
+  Float_t Z; // reference point of the photon track on the calorimeter
+
+  Float_t ErrorTheta; // resolution on the polar angle of the momentum direction
+  Float_t ErrorPhi; // resolution on the azimuthal angle of the momentum direction
+
+  Float_t ThetaP; // polar angle of the vertex-agnostic pointing direction
+  Float_t PhiP; // azimuthal angle of the vertex-agnostic pointing direction
+
+  Float_t ErrorThetaP; // resolution on the polar angle of the pointing direction
+  Float_t ErrorPhiP; // resolution on the azimuthal angle of the pointing direction
+
+  Float_t ErrorE; // resolution on the reconstructed energy
+
   TRefArray Particles; // references to generated particles
 
   Float_t IsolationVar; // isolation variable
@@ -274,7 +289,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Photon, 4)
+  ClassDef(Photon, 5)
 };
 
 //---------------------------------------------------------------------------
