@@ -419,6 +419,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/StatusPidFilter.h \
 	modules/PdgCodeFilter.h \
 	modules/BeamSpotFilter.h \
+	modules/BeamSpotSmearing.h \
 	modules/RecoPuFilter.h \
 	modules/Cloner.h \
 	modules/Weighter.h \
@@ -681,6 +682,10 @@ tmp/modules/BeamSpotFilter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/BeamSpotSmearing.$(ObjSuf): \
+	modules/BeamSpotSmearing.$(SrcSuf) \
+	modules/BeamSpotSmearing.h \
+	classes/DelphesClasses.h
 tmp/modules/BoostedTagging.$(ObjSuf): \
 	modules/BoostedTagging.$(SrcSuf) \
 	modules/BoostedTagging.h \
@@ -1233,6 +1238,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
+	tmp/modules/BeamSpotSmearing.$(ObjSuf) \
 	tmp/modules/BoostedTagging.$(ObjSuf) \
 	tmp/modules/Calorimeter.$(ObjSuf) \
 	tmp/modules/Cloner.$(ObjSuf) \
@@ -2116,6 +2122,9 @@ external/fastjet/RectangularGrid.hh: \
 	external/fastjet/PseudoJet.hh \
 	external/fastjet/Selector.hh
 	@touch $@
+modules/BeamSpotSmearing.h: \
+	classes/DelphesModule.h
+	@touch $@
 modules/PileUpMerger.h: \
 	classes/DelphesModule.h
 	@touch $@
@@ -2417,7 +2426,8 @@ external/fastjet/ClusterSequencePassiveArea.hh: \
 	external/fastjet/ClusterSequence1GhostPassiveArea.hh
 	@touch $@
 modules/FastJetFinder.h: \
-	classes/DelphesModule.h
+	classes/DelphesModule.h \
+	external/fastjet/JetDefinition.hh
 	@touch $@
 modules/BeamSpotFilter.h: \
 	classes/DelphesModule.h
