@@ -488,6 +488,15 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Y = position.Y();
     entry->Z = position.Z();
 
+    // photon track information
+    entry->ErrorTheta = candidate->PositionError.X();
+    entry->ErrorPhi = candidate->PositionError.Y();
+    entry->ThetaP = candidate->DecayPosition.X();
+    entry->PhiP = candidate->DecayPosition.Y();
+    entry->ErrorThetaP = candidate->PositionError.Z();
+    entry->ErrorPhiP = candidate->PositionError.T();
+    entry->ErrorE = candidate->DecayPosition.Z();
+
     entry->NTimeHits = candidate->NTimeHits;
 
     entry->IsPU = candidate->IsPU;
@@ -579,6 +588,15 @@ void TreeWriter::ProcessParticleFlowCandidates(ExRootTreeBranch *branch, TObjArr
     entry->ErrorCDZ = candidate->TrackCovariance(2, 3);
     entry->ErrorCCtgTheta = candidate->TrackCovariance(2, 4);
     entry->ErrorDZCtgTheta = candidate->TrackCovariance(3, 4);
+
+    // photon track information,  the reference point is (XOuter, YOuter, ZOuter).
+    entry->ErrorTheta = candidate->PositionError.X();
+    if(candidate->PositionError.Y() > 0.0) entry->ErrorPhi = candidate->PositionError.Y();
+    entry->ThetaP = candidate->DecayPosition.X();
+    entry->PhiP = candidate->DecayPosition.Y();
+    entry->ErrorThetaP = candidate->PositionError.Z();
+    entry->ErrorPhiP = candidate->PositionError.T();
+    entry->ErrorE = candidate->DecayPosition.Z();
 
     entry->Xd = candidate->Xd;
     entry->Yd = candidate->Yd;
