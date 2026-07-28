@@ -541,6 +541,17 @@ public:
   Float_t Y; // calo tower position
   Float_t Z; // calo tower position
 
+  Float_t ErrorTheta; // resolution on the polar angle of the momentum direction
+  Float_t ErrorPhi; // resolution on the azimuthal angle of the momentum direction
+
+  Float_t ThetaP; // polar angle of the vertex-agnostic pointing direction
+  Float_t PhiP; // azimuthal angle of the vertex-agnostic pointing direction
+
+  Float_t ErrorThetaP; // resolution on the polar angle of the pointing direction
+  Float_t ErrorPhiP; // resolution on the azimuthal angle of the pointing direction
+
+  Float_t ErrorE; // resolution on the reconstructed energy
+
   Int_t NTimeHits; // number of hits contributing to time measurement
 
   Float_t Eem; // calorimeter tower electromagnetic energy
@@ -560,7 +571,7 @@ public:
 
   TLorentzVector P4() const;
 
-  ClassDef(Tower, 5)
+  ClassDef(Tower, 6)
 };
 
 //---------------------------------------------------------------------------
@@ -635,6 +646,13 @@ public:
   Float_t ErrorCCtgTheta;
   Float_t ErrorDZCtgTheta;
 
+  Float_t ErrorTheta; // resolution on the polar angle of the momentum direction (photons)
+  Float_t ThetaP; // polar angle of the vertex-agnostic pointing direction (photons)
+  Float_t PhiP; // azimuthal angle of the vertex-agnostic pointing direction (photons)
+  Float_t ErrorThetaP; // resolution on the polar angle of the pointing direction (photons)
+  Float_t ErrorPhiP; // resolution on the azimuthal angle of the pointing direction (photons)
+  Float_t ErrorE; // resolution on the reconstructed energy (photons)
+
   Int_t VertexIndex; // reference to vertex
 
   static CompBase *fgCompare; //!
@@ -653,7 +671,7 @@ public:
 
   TRefArray Particles; // references to generated particles
 
-  ClassDef(ParticleFlowCandidate, 4)
+  ClassDef(ParticleFlowCandidate, 5)
 };
 
 //---------------------------------------------------------------------------
