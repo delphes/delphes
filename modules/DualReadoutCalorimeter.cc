@@ -580,7 +580,6 @@ void DualReadoutCalorimeter::FinalizeTower()
     // direction (Momentum, vertex-agnostic by construction)
     TVector3 impact(0.0, 0.0, 0.0);
     TVector3 flight(0.0, 0.0, 0.0);
-    Double_t sumWeight = 0.0;
 
     TIter itConstituent(fTower->GetCandidates());
     itConstituent.Reset();
@@ -591,62 +590,9 @@ void DualReadoutCalorimeter::FinalizeTower()
       if(weight <= 0.0) continue;
       impact += weight * constituent->Position.Vect();
       flight += weight * constituent->Momentum.Vect();
-      sumWeight += weight;
     }
 
-    if(sumWeight > 0.0 && impact.Mag() > 0.0)
-    {
-      Double_t sigmaTheta = 0.0, sigmaPhi = 0.0;
-      Double_t thetaP = 0.0, phiP = 0.0, sigmaThetaP = 0.0, sigmaPhiP = 0.0;
-
-      // momentum direction from the smeared true impact point, replacing the
-      // tower-size dither with the shower-barycenter resolution
-      if(fPhotonAngularSmearing)
-      {
-        sigmaTheta = fPhotonThetaResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
-        sigmaPhi = fPhotonPhiResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
-
-        if(sigmaTheta > 0.0 && sigmaPhi > 0.0)
-        {
-          Double_t theta = gRandom->Gaus(impact.Theta(), sigmaTheta);
-          // keep theta strictly inside (0, pi) so that eta stays finite
-          theta = TMath::Min(TMath::Max(theta, 1.0e-06), TMath::Pi() - 1.0e-06);
-
-          eta = -TMath::Log(TMath::Tan(0.5 * theta));
-          phi = TVector2::Phi_mpi_pi(gRandom->Gaus(impact.Phi(), sigmaPhi));
-
-          photonSmeared = true;
-        }
-        else
-        {
-          sigmaTheta = 0.0;
-          sigmaPhi = 0.0;
-        }
-      }
-
-      // vertex-agnostic pointing direction
-      if(fPhotonPointing && flight.Mag() > 0.0)
-      {
-        sigmaThetaP = fPointingThetaResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
-        sigmaPhiP = fPointingPhiResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
-
-        if(sigmaThetaP > 0.0 && sigmaPhiP > 0.0)
-        {
-          thetaP = gRandom->Gaus(flight.Theta(), sigmaThetaP);
-          thetaP = TMath::Min(TMath::Max(thetaP, 1.0e-06), TMath::Pi() - 1.0e-06);
-          phiP = TVector2::Phi_mpi_pi(gRandom->Gaus(flight.Phi(), sigmaPhiP));
-        }
-        else
-        {
-          sigmaThetaP = 0.0;
-          sigmaPhiP = 0.0;
-        }
-      }
-
-      // store on the tower candidate
-      fTower->PositionError.SetXYZT(sigmaTheta, sigmaPhi, sigmaThetaP, sigmaPhiP);
-      fTower->DecayPosition.SetXYZT(thetaP, phiP, caloSigma, 0.0);
-    }
+    photonSmeared = SmearPhotonDirection(fTower, impact, flight, energy, caloSigma, eta, phi);
   }
 
   if(!photonSmeared)
@@ -765,8 +711,35 @@ void DualReadoutCalorimeter::FinalizeTower()
       tower->Eem = neutralEnergy;
       tower->Ehad = 0.0;
       tower->PID = 22;
-      pt = neutralEnergy / TMath::CosH(eta);
-      tower->Momentum.SetPtEtaPhiE(pt, eta, phi, neutralEnergy);
+
+      // neutral excess in a tower with tracks -->  smear around the barycenter of the
+      // photon constituents only. With no photon constituent (pure fake) the
+      // direction keeps the tower smearing and the granularity is quoted as error.
+      Double_t etaNeutral = eta, phiNeutral = phi;
+      if((fPhotonAngularSmearing || fPhotonPointing) && fTowerTrackHits > 0 && neutralEnergy > 0.0)
+      {
+        TVector3 impact(0.0, 0.0, 0.0);
+        TVector3 flight(0.0, 0.0, 0.0);
+
+        TIter itConstituent(fTower->GetCandidates());
+        itConstituent.Reset();
+        while((constituent = static_cast<Candidate *>(itConstituent.Next())))
+        {
+          if(constituent->PID != 22) continue;
+          Double_t weight = constituent->Momentum.E();
+          if(weight <= 0.0) continue;
+          impact += weight * constituent->Position.Vect();
+          flight += weight * constituent->Momentum.Vect();
+        }
+
+        if(SmearPhotonDirection(tower, impact, flight, neutralEnergy, trackCaloSigma, etaNeutral, phiNeutral))
+        {
+          tower->Position.SetPtEtaPhiE(fTower->Position.Pt(), etaNeutral, phiNeutral, fTower->Position.T());
+        }
+      }
+
+      pt = neutralEnergy / TMath::CosH(etaNeutral);
+      tower->Momentum.SetPtEtaPhiE(pt, etaNeutral, phiNeutral, neutralEnergy);
       fEFlowPhotonOutputArray->Add(tower);
     }
     else
@@ -827,6 +800,82 @@ void DualReadoutCalorimeter::FinalizeTower()
       fEFlowTrackOutputArray->Add(track);
     }
   }
+}
+
+//------------------------------------------------------------------------------
+
+// Applies the angular smearing and pointing to a photon candidate.
+// impact and flight are the energy-weighted true impact point and flight
+// direction of the photon constituents 
+// Returns true when the direction was smeared around the shower barycenter, in
+// which case etaOut/phiOut hold the new direction; otherwise they are left
+// untouched and the tower granularity is quoted as the direction error, so that
+// every photon candidate carries a calibrated (if coarse) uncertainty.
+// Pointing is filled only when a true flight direction exists.
+// A pure fake has no flight direction, and ErrorThetaP == 0 means "no pointing measurement".
+
+Bool_t DualReadoutCalorimeter::SmearPhotonDirection(Candidate *candidate, const TVector3 &impact, const TVector3 &flight, Double_t energy, Double_t sigmaE, Double_t &etaOut, Double_t &phiOut)
+{
+  Double_t sigmaTheta = 0.0, sigmaPhi = 0.0;
+  Double_t thetaP = 0.0, phiP = 0.0, sigmaThetaP = 0.0, sigmaPhiP = 0.0;
+  Bool_t smeared = false;
+
+  // momentum direction from the smeared true impact point, replacing the
+  // tower-size dither with the shower-barycenter resolution
+  if(fPhotonAngularSmearing && impact.Mag() > 0.0)
+  {
+    sigmaTheta = fPhotonThetaResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+    sigmaPhi = fPhotonPhiResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+
+    if(sigmaTheta > 0.0 && sigmaPhi > 0.0)
+    {
+      Double_t theta = gRandom->Gaus(impact.Theta(), sigmaTheta);
+      // keep theta strictly inside (0, pi) so that eta stays finite
+      theta = TMath::Min(TMath::Max(theta, 1.0e-06), TMath::Pi() - 1.0e-06);
+
+      etaOut = -TMath::Log(TMath::Tan(0.5 * theta));
+      phiOut = TVector2::Phi_mpi_pi(gRandom->Gaus(impact.Phi(), sigmaPhi));
+
+      smeared = true;
+    }
+    else
+    {
+      sigmaTheta = 0.0;
+      sigmaPhi = 0.0;
+    }
+  }
+
+  // direction not measured from the shower barycenter: the candidate keeps the
+  // uniform tower dither, whose exact covariance is the tower size
+  if(!smeared)
+  {
+    sigmaTheta = (fTowerEdges[1] - fTowerEdges[0]) / TMath::Sqrt(12.0) / TMath::CosH(fTowerEta);
+    sigmaPhi = (fTowerEdges[3] - fTowerEdges[2]) / TMath::Sqrt(12.0);
+  }
+
+  // vertex-agnostic pointing direction
+  if(fPhotonPointing && flight.Mag() > 0.0)
+  {
+    sigmaThetaP = fPointingThetaResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+    sigmaPhiP = fPointingPhiResolutionFormula->Eval(0.0, fTowerEta, 0.0, energy);
+
+    if(sigmaThetaP > 0.0 && sigmaPhiP > 0.0)
+    {
+      thetaP = gRandom->Gaus(flight.Theta(), sigmaThetaP);
+      thetaP = TMath::Min(TMath::Max(thetaP, 1.0e-06), TMath::Pi() - 1.0e-06);
+      phiP = TVector2::Phi_mpi_pi(gRandom->Gaus(flight.Phi(), sigmaPhiP));
+    }
+    else
+    {
+      sigmaThetaP = 0.0;
+      sigmaPhiP = 0.0;
+    }
+  }
+
+  candidate->PositionError.SetXYZT(sigmaTheta, sigmaPhi, sigmaThetaP, sigmaPhiP);
+  candidate->DecayPosition.SetXYZT(thetaP, phiP, sigmaE, 0.0);
+
+  return smeared;
 }
 
 //------------------------------------------------------------------------------

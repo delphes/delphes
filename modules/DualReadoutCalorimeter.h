@@ -36,6 +36,7 @@
 #include <vector>
 
 class TObjArray;
+class TVector3;
 class DelphesFormula;
 class Candidate;
 
@@ -132,6 +133,7 @@ private:
   std::unique_ptr<TIterator> fItTowerTrackArray; //!
 
   void FinalizeTower();
+  Bool_t SmearPhotonDirection(Candidate *candidate, const TVector3 &impact, const TVector3 &flight, Double_t energy, Double_t sigmaE, Double_t &etaOut, Double_t &phiOut);
   Double_t LogNormal(Double_t mean, Double_t sigma);
   Double_t TruncatedGaussian(Double_t mean, Double_t sigma);
 
