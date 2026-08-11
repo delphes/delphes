@@ -19,6 +19,11 @@ def run_tof_test(load_delphes, config, vertex_time=0.0):
     input_array = module.ExportArray("inputTracks")
     c = make_candidate(factory, 50.0, 0.5, pid=211, charge=1)
     c.Position.SetXYZT(1000.0, 0.0, 0.0, vertex_time * 299.792458)
+
+    mother = make_candidate(factory, 50.0, 0.5, pid=211, charge=1)
+    mother.Position.SetXYZT(1000.0, 0.0, 0.0, vertex_time * 299.792458)
+    c.AddCandidate(mother)
+
     input_array.Add(c)
 
     vertex_array = module.ExportArray("inputVertices")
