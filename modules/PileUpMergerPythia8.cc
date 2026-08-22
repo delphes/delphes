@@ -92,6 +92,7 @@ void PileUpMergerPythia8::Init()
   fileName = GetString("ConfigFile", "MinBias.cmnd");
   fPythia = make_unique<Pythia8::Pythia>();
   fPythia->readFile(fileName);
+  fPythia->init();
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
