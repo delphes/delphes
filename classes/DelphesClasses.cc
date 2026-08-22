@@ -480,7 +480,12 @@ void Candidate::Copy(TObject &obj) const
   object.SoftDroppedJet = SoftDroppedJet;
   object.SoftDroppedSubJet1 = SoftDroppedSubJet1;
   object.SoftDroppedSubJet2 = SoftDroppedSubJet2;
+  if(TrackCovariance.GetNrows() != object.TrackCovariance.GetNrows())
+  {
+    object.TrackCovariance.ResizeTo(TrackCovariance.GetNrows(), TrackCovariance.GetNrows());
+  }
   object.TrackCovariance = TrackCovariance;
+  object.ParticleDensity = ParticleDensity;
   object.fFactory = fFactory;
   object.fArray = 0;
 
