@@ -56,15 +56,17 @@ Int_t DelphesFormula::Compile(const char *expression)
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
   }
-  buffer.ReplaceAll("pt", "x");
-  buffer.ReplaceAll("eta", "y");
-  buffer.ReplaceAll("phi", "z");
-  buffer.ReplaceAll("energy", "t");
+
   buffer.ReplaceAll("d0", "[0]");
   buffer.ReplaceAll("dz", "[1]");
   buffer.ReplaceAll("ctgTheta", "[2]");
   buffer.ReplaceAll("radius", "[3]");
   buffer.ReplaceAll("density", "[4]");
+
+  buffer.ReplaceAll("pt", "x");
+  buffer.ReplaceAll("eta", "y");
+  buffer.ReplaceAll("phi", "z");
+  buffer.ReplaceAll("energy", "t");
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6, 3, 0)
   TFormula::SetMaxima(100000, 1000, 1000000);
