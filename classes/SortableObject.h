@@ -199,15 +199,15 @@ class CompDeltaR: public CompBase
   CompDeltaR(const T2 *obj = 0) :
     fObj(obj) {}
 
-  Double_t DeltaPhi(Double_t phi1, Double_t phi2)
+  Double_t DeltaPhi(Double_t phi1, Double_t phi2) const
   {
     Double_t phi = TMath::Abs(phi1 - phi2);
     return (phi <= TMath::Pi()) ? phi : (2.0 * TMath::Pi()) - phi;
   }
 
-  Double_t Sqr(Double_t x) { return x * x; }
+  Double_t Sqr(Double_t x) const { return x * x; }
 
-  Double_t SumSqr(Double_t a, Double_t b)
+  Double_t SumSqr(Double_t a, Double_t b) const
   {
     Double_t aAbs = TMath::Abs(a);
     Double_t bAbs = TMath::Abs(b);
