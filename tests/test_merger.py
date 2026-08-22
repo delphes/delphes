@@ -1,39 +1,37 @@
-from conftest import make_candidate, make_config
+from conftest import build_config, make_candidate
 
 
 def make_module_config(**extra):
-    params = {
-        "InputArray": ["Delphes/inputA", "Delphes/inputB"],
-        "OutputArray": "outputCandidates",
-        "MomentumOutputArray": "momentum",
-        "EnergyOutputArray": "energy",
-    }
-    params.update(extra)
-    return make_config("Merger", **params)
+    return build_config(
+        "Merger",
+        {
+            "InputArray": ["Delphes/inputA", "Delphes/inputB"],
+            "OutputArray": "outputCandidates",
+            "MomentumOutputArray": "momentum",
+            "EnergyOutputArray": "energy",
+        },
+        **extra,
+    )
 
 
-def run_merger_test(load_delphes, config, arrays_data):
-    module, factory = load_delphes(config)
+def run_merger_test(run_generic, config, arrays_data):
+    def setup(module, factory):
+        for array_name, candidates in arrays_data:
+            arr = module.ExportArray(array_name)
+            for pt, eta in candidates:
+                c = make_candidate(factory, pt, eta)
+                arr.Add(c)
 
-    for array_name, candidates in arrays_data:
-        arr = module.ExportArray(array_name)
-        for pt, eta in candidates:
-            c = make_candidate(factory, pt, eta)
-            arr.Add(c)
-
-    module.Init()
-    module.Process()
-
-    return module.ImportArray("TestModule/outputCandidates")
+    return run_generic(config, setup=setup, outputs=("TestModule/outputCandidates",))
 
 
-def test_merge_two_arrays(load_delphes):
+def test_merge_two_arrays(run_generic):
     arrays = [("inputA", [(50.0, 0.5)]), ("inputB", [(30.0, 1.0)])]
-    output = run_merger_test(load_delphes, make_module_config(), arrays)
+    output = run_merger_test(run_generic, make_module_config(), arrays)
     assert output.GetEntries() == 2
 
 
-def test_merge_single_array(load_delphes):
+def test_merge_single_array(run_generic):
     arrays = [("inputA", [(50.0, 0.5), (30.0, 1.0)])]
-    output = run_merger_test(load_delphes, make_module_config(InputArray=["Delphes/inputA"]), arrays)
+    output = run_merger_test(run_generic, make_module_config(InputArray=["Delphes/inputA"]), arrays)
     assert output.GetEntries() == 2

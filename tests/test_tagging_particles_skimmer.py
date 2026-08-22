@@ -1,40 +1,25 @@
-from conftest import make_config, make_particle, make_parton
+from conftest import add_generator_particles, add_input_partons, build_config
 
 
-def run_skimmer_test(load_delphes, config, partons, particles):
-    module, factory = load_delphes(config)
-
-    parton_array = module.ExportArray("inputPartons")
-    for pt, eta, pid, status, d1, d2 in partons:
-        c = make_parton(factory, pt, eta, pid, status)
-        c.D1 = d1
-        c.D2 = d2
-        parton_array.Add(c)
-
-    particle_array = module.ExportArray("inputParticles")
-    for pt, eta, pid, status in particles:
-        p = make_particle(factory, pt, eta, pid, status)
-        particle_array.Add(p)
-
-    module.Init()
-    module.Process()
-
-    return module.ImportArray("TestModule/taggingParticles")
-
-
-def test_skims_partons_with_tau(load_delphes):
-    config = make_config(
+def test_skims_partons_with_tau(run_generic):
+    config = build_config(
         "TaggingParticlesSkimmer",
-        PartonInputArray="Delphes/inputPartons",
-        ParticleInputArray="Delphes/inputParticles",
-        OutputArray="taggingParticles",
-        PTMin=0.0,
-        EtaMax=10.0,
+        {
+            "PartonInputArray": "Delphes/inputPartons",
+            "ParticleInputArray": "Delphes/inputParticles",
+            "OutputArray": "taggingParticles",
+            "PTMin": 0.0,
+            "EtaMax": 10.0,
+        },
     )
-    output = run_skimmer_test(
-        load_delphes,
-        config,
-        partons=[(50.0, 0.5, 15, 3, 0, 1)],
-        particles=[(20.0, 0.4, 211, 1), (15.0, 0.6, -211, 1)],
-    )
+
+    def setup(module, factory):
+        add_input_partons(module, factory, [{"pt": 50.0, "eta": 0.5, "pid": 15, "status": 3, "d1": 0, "d2": 1}])
+        add_generator_particles(
+            module,
+            factory,
+            [{"pt": 20.0, "eta": 0.4, "pid": 211, "status": 1}, {"pt": 15.0, "eta": 0.6, "pid": -211, "status": 1}],
+        )
+
+    output = run_generic(config, setup=setup, outputs=("TestModule/taggingParticles",))
     assert output.GetEntries() >= 1

@@ -1,45 +1,43 @@
 import pytest
-from conftest import make_candidate, make_config, make_vertex
+from conftest import build_config, make_candidate, make_vertex
 
 
 def make_module_config(**extra):
-    params = {
-        "InputArray": "Delphes/inputVertices",
-        "TrackInputArray": "Delphes/inputTracks",
-        "OutputArray": "clusters",
-        "Method": "GenBest",
-    }
-    params.update(extra)
-    return make_config("VertexSorter", **params)
+    return build_config(
+        "VertexSorter",
+        {
+            "InputArray": "Delphes/inputVertices",
+            "TrackInputArray": "Delphes/inputTracks",
+            "OutputArray": "clusters",
+            "Method": "GenBest",
+        },
+        **extra,
+    )
 
 
-def run_sorter_test(load_delphes, config, vertexs, tracks):
-    module, factory = load_delphes(config)
+def run_sorter_test(run_generic, config, vertexs, tracks):
+    def setup(module, factory):
+        vertex_array = module.ExportArray("inputVertices")
+        for z, ndf, sumpt2, cluster_index in vertexs:
+            v = make_vertex(factory, z=z * 1000.0)
+            v.ClusterNDF = ndf
+            v.SumPT2 = sumpt2
+            v.ClusterIndex = cluster_index
+            vertex_array.Add(v)
 
-    vertex_array = module.ExportArray("inputVertices")
-    for z, ndf, sumpt2, cluster_index in vertexs:
-        v = make_vertex(factory, z=z * 1000.0)
-        v.ClusterNDF = ndf
-        v.SumPT2 = sumpt2
-        v.ClusterIndex = cluster_index
-        vertex_array.Add(v)
+        track_array = module.ExportArray("inputTracks")
+        for pt, eta, cluster_index, is_pu in tracks:
+            t = make_candidate(factory, pt, eta, charge=1, pid=211)
+            t.ClusterIndex = cluster_index
+            t.IsPU = is_pu
+            track_array.Add(t)
 
-    track_array = module.ExportArray("inputTracks")
-    for pt, eta, cluster_index, is_pu in tracks:
-        t = make_candidate(factory, pt, eta, charge=1, pid=211)
-        t.ClusterIndex = cluster_index
-        t.IsPU = is_pu
-        track_array.Add(t)
-
-    module.Init()
-    module.Process()
-
-    return module.ImportArray("TestModule/clusters")
+    return run_generic(config, setup=setup, outputs=("TestModule/clusters",))
 
 
-def test_sorts_by_gen_best(load_delphes):
+def test_sorts_by_gen_best(run_generic):
     output = run_sorter_test(
-        load_delphes,
+        run_generic,
         make_module_config(),
         vertexs=[(0.0, 4, 100.0, 0), (1.0, 4, 200.0, 1)],
         tracks=[(10.0, 0.5, 0, 0), (20.0, 0.5, 1, 0)],
@@ -49,9 +47,9 @@ def test_sorts_by_gen_best(load_delphes):
     assert output.At(1).GenSumPT2 == pytest.approx(100.0, rel=1e-3)
 
 
-def test_single_vertex(load_delphes):
+def test_single_vertex(run_generic):
     output = run_sorter_test(
-        load_delphes,
+        run_generic,
         make_module_config(),
         vertexs=[(0.0, 4, 150.0, 0)],
         tracks=[(10.0, 0.5, 0, 0), (20.0, 0.5, 0, 0)],

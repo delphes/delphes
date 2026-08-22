@@ -1,41 +1,27 @@
-from conftest import make_candidate, make_config
+from conftest import build_config
 
 
-def run_filter_test(load_delphes, config, pid, pt=50.0, eta=0.5):
-    module, factory = load_delphes(config)
-
-    input_array = module.ExportArray("inputParticles")
-
-    c = make_candidate(factory, pt, eta, pid=pid, charge=1)
-    c.D1 = -1
-    c.D2 = -1
-    input_array.Add(c)
-
-    module.Init()
-    module.Process()
-
-    return module.ImportArray("TestModule/outputParticles")
+def make_module_config(**extra):
+    return build_config("LLPFilter", {"PdgCode": [1000022]}, **extra)
 
 
-def test_keeps_matching_llp(load_delphes):
-    config = make_config("LLPFilter", PdgCode=[1000022])
-    output = run_filter_test(load_delphes, config, pid=1000022)
+def test_keeps_matching_llp(run_module):
+    output = run_module(make_module_config(), [{"pid": 1000022, "charge": 1, "D1": -1, "D2": -1}])
     assert output.GetEntries() == 1
 
 
-def test_rejects_non_matching(load_delphes):
-    config = make_config("LLPFilter", PdgCode=[1000022])
-    output = run_filter_test(load_delphes, config, pid=13)
+def test_rejects_non_matching(run_module):
+    output = run_module(make_module_config(), [{"pid": 13, "charge": 1, "D1": -1, "D2": -1}])
     assert output.GetEntries() == 0
 
 
-def test_pt_min_filter(load_delphes):
-    config = make_config("LLPFilter", PdgCode=[1000022], PTMin=100.0)
-    output = run_filter_test(load_delphes, config, pid=1000022, pt=50.0)
+def test_pt_min_filter(run_module):
+    output = run_module(
+        make_module_config(PTMin=100.0), [{"pid": 1000022, "charge": 1, "D1": -1, "D2": -1, "pt": 50.0}]
+    )
     assert output.GetEntries() == 0
 
 
-def test_daughter_number_filter(load_delphes):
-    config = make_config("LLPFilter", PdgCode=[1000022], DaughterNumber=2)
-    output = run_filter_test(load_delphes, config, pid=1000022)
+def test_daughter_number_filter(run_module):
+    output = run_module(make_module_config(DaughterNumber=2), [{"pid": 1000022, "charge": 1, "D1": -1, "D2": -1}])
     assert output.GetEntries() == 0
