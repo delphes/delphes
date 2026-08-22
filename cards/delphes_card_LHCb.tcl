@@ -49,7 +49,7 @@ module PhotonConversions PhotonConversions {
   
   # material budget map: (uniform for now)
   # distribution of the detector mass ( density / X0), can be thought as 
-  # conversion rate per meter function of r,phi,z 
+  # conversion rate per meter function of rho,phi,z
  
  
   # unit: m-1

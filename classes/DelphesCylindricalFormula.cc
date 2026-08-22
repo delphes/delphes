@@ -55,9 +55,8 @@ Int_t DelphesCylindricalFormula::Compile(const char *expression)
     if(*it == ' ' || *it == '\t' || *it == '\r' || *it == '\n' || *it == '\\') continue;
     buffer.Append(*it);
   }
-  buffer.ReplaceAll("r", "x");
+  buffer.ReplaceAll("rho", "x");
   buffer.ReplaceAll("phi", "y");
-  buffer.ReplaceAll("z", "z");
   if(TFormula::Compile(buffer) != 0)
   {
     throw runtime_error("Invalid formula.");
@@ -67,9 +66,9 @@ Int_t DelphesCylindricalFormula::Compile(const char *expression)
 
 //------------------------------------------------------------------------------
 
-Double_t DelphesCylindricalFormula::Eval(Double_t r, Double_t phi, Double_t z)
+Double_t DelphesCylindricalFormula::Eval(Double_t rho, Double_t phi, Double_t z)
 {
-  Double_t x[3] = {r, phi, z};
+  Double_t x[3] = {rho, phi, z};
   return EvalPar(x);
 }
 
