@@ -9,7 +9,7 @@
 
 #include "ExRootAnalysis/ExRootConfReader.h"
 
-#include "tcl/tcl.h"
+#include "tcl/jim.h"
 
 #include "TSystem.h"
 
@@ -22,25 +22,25 @@
 
 using namespace std;
 
-static Tcl_ObjCmdProc ModuleObjCmdProc;
-static Tcl_ObjCmdProc SourceObjCmdProc;
+static Jim_CmdProc SourceCmdProc;
 
 //------------------------------------------------------------------------------
 
 ExRootConfReader::ExRootConfReader() :
   fTopDir(0), fTclInterp(0)
 {
-  fTclInterp = Tcl_CreateInterp();
+  fTclInterp = Jim_CreateInterp();
+  Jim_RegisterCoreCommands(fTclInterp);
+  Jim_InitStaticExtensions(fTclInterp);
 
-  Tcl_CreateObjCommand(fTclInterp, "module", ModuleObjCmdProc, this, 0);
-  Tcl_CreateObjCommand(fTclInterp, "source", SourceObjCmdProc, this, 0);
+  Jim_CreateCommand(fTclInterp, "source", SourceCmdProc, this, NULL);
 }
 
 //------------------------------------------------------------------------------
 
 ExRootConfReader::~ExRootConfReader()
 {
-  Tcl_DeleteInterp(fTclInterp);
+  Jim_FreeInterp(fTclInterp);
 }
 
 //------------------------------------------------------------------------------
@@ -48,26 +48,40 @@ ExRootConfReader::~ExRootConfReader()
 void ExRootConfReader::ReadData(const char *dirName, char *data, int length)
 {
   stringstream message;
+  Jim_Obj *object;
+  int rc;
 
   fTopDir = dirName;
 
-  Tcl_Obj *cmdObjPtr = Tcl_NewObj();
-  cmdObjPtr->bytes = data;
-  cmdObjPtr->length = length;
+  object = Jim_NewStringObj(fTclInterp, data, length);
+  object->bytes = data;
+  object->length = length;
+  object->typePtr = NULL;
 
-  Tcl_IncrRefCount(cmdObjPtr);
+  Jim_IncrRefCount(object);
+  rc = Jim_EvalObj(fTclInterp, object);
+  object->bytes = NULL;
+  object->length = 0;
+  Jim_DecrRefCount(fTclInterp, object);
 
-  if(Tcl_EvalObj(fTclInterp, cmdObjPtr) != TCL_OK)
+  if(rc != JIM_OK)
   {
     message << "can't read configuration data" << endl;
-    message << Tcl_GetStringResult(fTclInterp);
+    if(rc == JIM_BREAK)
+    {
+      message << "invoked \"break\" outside of a loop" << endl;
+    }
+    else if(rc == JIM_CONTINUE)
+    {
+      message << "invoked \"continue\" outside of a loop" << endl;
+    }
+    else
+    {
+      Jim_MakeErrorMessage(fTclInterp);
+      message << Jim_GetString(Jim_GetResult(fTclInterp), NULL);
+    }
     throw runtime_error(message.str());
   }
-
-  cmdObjPtr->bytes = 0;
-  cmdObjPtr->length = 0;
-
-  Tcl_DecrRefCount(cmdObjPtr);
 }
 
 //------------------------------------------------------------------------------
@@ -75,7 +89,8 @@ void ExRootConfReader::ReadData(const char *dirName, char *data, int length)
 void ExRootConfReader::ReadFile(const char *fileName, bool isTop)
 {
   stringstream message;
-  int length;
+  Jim_Obj *object;
+  int length, rc;
   char *buffer;
 
   ifstream inputFileStream(fileName, ios::in | ios::ate);
@@ -94,34 +109,46 @@ void ExRootConfReader::ReadFile(const char *fileName, bool isTop)
   buffer[length] = 0;
   inputFileStream.read(buffer, length);
 
-  Tcl_Obj *cmdObjPtr = Tcl_NewObj();
-  cmdObjPtr->bytes = buffer;
-  cmdObjPtr->length = length;
+  object = Jim_NewObj(fTclInterp);
+  object->bytes = buffer;
+  object->length = length;
+  object->typePtr = NULL;
 
-  Tcl_IncrRefCount(cmdObjPtr);
-
-  if(Tcl_EvalObj(fTclInterp, cmdObjPtr) != TCL_OK)
-  {
-    message << "can't read configuration file " << fileName << endl;
-    message << Tcl_GetStringResult(fTclInterp);
-    throw runtime_error(message.str());
-  }
-
-  cmdObjPtr->bytes = 0;
-  cmdObjPtr->length = 0;
-
-  Tcl_DecrRefCount(cmdObjPtr);
+  Jim_IncrRefCount(object);
+  rc = Jim_EvalObj(fTclInterp, object);
+  object->bytes = NULL;
+  object->length = 0;
+  Jim_DecrRefCount(fTclInterp, object);
 
   delete[] buffer;
+
+  if(rc != JIM_OK)
+  {
+    message << "can't read configuration file " << fileName << endl;
+    if(rc == JIM_BREAK)
+    {
+      message << "invoked \"break\" outside of a loop" << endl;
+    }
+    else if(rc == JIM_CONTINUE)
+    {
+      message << "invoked \"continue\" outside of a loop" << endl;
+    }
+    else
+    {
+      Jim_MakeErrorMessage(fTclInterp);
+      message << Jim_GetString(Jim_GetResult(fTclInterp), NULL);
+    }
+    throw runtime_error(message.str());
+  }
 }
 
 //------------------------------------------------------------------------------
 
 ExRootConfParam ExRootConfReader::GetParam(const char *name)
 {
-  Tcl_Obj *object;
-  Tcl_Obj *variableName = Tcl_NewStringObj(const_cast<char *>(name), -1);
-  object = Tcl_ObjGetVar2(fTclInterp, variableName, 0, TCL_GLOBAL_ONLY);
+  Jim_Obj *object;
+  Jim_Obj *variableName = Jim_NewStringObj(fTclInterp, const_cast<char *>(name), -1);
+  object = Jim_GetGlobalVariable(fTclInterp, variableName, 0);
   return ExRootConfParam(name, object, fTclInterp);
 }
 
@@ -192,62 +219,36 @@ const char *ExRootConfReader::GetString(const char *name, const char *defaultVal
 
 //------------------------------------------------------------------------------
 
-int ModuleObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+int SourceCmdProc(Jim_Interp *interp, int objc, Jim_Obj *const objv[])
 {
-  Tcl_Obj *object;
-  TString name;
-  int rc;
-
-  if(objc < 3)
-  {
-    Tcl_WrongNumArgs(interp, 1, objv, "className moduleName ?arg...?");
-    return TCL_ERROR;
-  }
-
-  // add module to a list of modules to be created
-
-  if(objc > 3)
-  {
-    object = Tcl_NewListObj(0, 0);
-    Tcl_ListObjAppendElement(interp, object, Tcl_NewStringObj("namespace", -1));
-    Tcl_ListObjAppendElement(interp, object, Tcl_NewStringObj("eval", -1));
-    Tcl_ListObjAppendList(interp, object, Tcl_NewListObj(objc - 2, objv + 2));
-
-    rc = Tcl_GlobalEvalObj(interp, object);
-
-    if(rc != TCL_OK) return rc;
-
-    name = Tcl_GetStringFromObj(objv[2], 0);
-    object = Tcl_NewStringObj(name + "::Class", -1);
-    Tcl_ObjSetVar2(interp, object, 0, objv[1], TCL_GLOBAL_ONLY);
-  }
-
-  return TCL_OK;
-}
-
-//------------------------------------------------------------------------------
-
-int SourceObjCmdProc(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-  ExRootConfReader *reader = static_cast<ExRootConfReader *>(clientData);
+  ExRootConfReader *reader = static_cast<ExRootConfReader *>(Jim_CmdPrivData(interp));
   stringstream fileName;
 
   if(objc != 2)
   {
-    Tcl_WrongNumArgs(interp, 1, objv, "fileName");
-    return TCL_ERROR;
+    Jim_WrongNumArgs(interp, 1, objv, "fileName");
+    return JIM_ERR;
   }
 
-  fileName << reader->GetTopDir() << "/" << Tcl_GetStringFromObj(objv[1], 0);
-  reader->ReadFile(fileName.str().c_str(), false);
+  fileName << reader->GetTopDir() << "/" << Jim_GetString(objv[1], NULL);
 
-  return TCL_OK;
+  try
+  {
+    reader->ReadFile(fileName.str().c_str(), false);
+  }
+  catch(runtime_error &e)
+  {
+    Jim_SetResultString(interp, e.what(), -1);
+    return JIM_ERR;
+  }
+
+  return JIM_OK;
 }
 
 //------------------------------------------------------------------------------
 
-ExRootConfParam::ExRootConfParam(const char *name, Tcl_Obj *object, Tcl_Interp *interp) :
-  fName(name), fObject(object), fTclInterp(interp)
+ExRootConfParam::ExRootConfParam(const char *name, Jim_Obj *object, Jim_Interp *interp) :
+  TNamed(name, ""), fObject(object), fTclInterp(interp)
 {
 }
 
@@ -256,14 +257,18 @@ ExRootConfParam::ExRootConfParam(const char *name, Tcl_Obj *object, Tcl_Interp *
 int ExRootConfParam::GetInt(int defaultValue)
 {
   stringstream message;
-  int result = defaultValue;
-  if(fObject && TCL_OK != Tcl_GetIntFromObj(fTclInterp, fObject, &result))
-  {
-    message << "parameter '" << fName << "' is not an integer." << endl;
-    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
-    throw runtime_error(message.str());
-  }
-  return result;
+  long result;
+  int rc;
+
+  if(!fObject) return defaultValue;
+
+  rc = Jim_GetLong(fTclInterp, fObject, &result);
+
+  if(rc == JIM_OK && static_cast<int>(result) == result) return result;
+
+  message << "parameter '" << GetName() << "' is not an integer." << endl;
+  message << GetName() << " = " << Jim_GetString(fObject, NULL);
+  throw runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------
@@ -271,14 +276,18 @@ int ExRootConfParam::GetInt(int defaultValue)
 long ExRootConfParam::GetLong(long defaultValue)
 {
   stringstream message;
-  long result = defaultValue;
-  if(fObject && TCL_OK != Tcl_GetLongFromObj(fTclInterp, fObject, &result))
-  {
-    message << "parameter '" << fName << "' is not an long integer." << endl;
-    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
-    throw runtime_error(message.str());
-  }
-  return result;
+  long result;
+  int rc;
+
+  if(!fObject) return defaultValue;
+
+  rc = Jim_GetLong(fTclInterp, fObject, &result);
+
+  if(rc == JIM_OK) return result;
+
+  message << "parameter '" << GetName() << "' is not an long integer." << endl;
+  message << GetName() << " = " << Jim_GetString(fObject, NULL);
+  throw runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------
@@ -286,14 +295,18 @@ long ExRootConfParam::GetLong(long defaultValue)
 double ExRootConfParam::GetDouble(double defaultValue)
 {
   stringstream message;
-  double result = defaultValue;
-  if(fObject && TCL_OK != Tcl_GetDoubleFromObj(fTclInterp, fObject, &result))
-  {
-    message << "parameter '" << fName << "' is not a number." << endl;
-    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
-    throw runtime_error(message.str());
-  }
-  return result;
+  double result;
+  int rc;
+
+  if(!fObject) return defaultValue;
+
+  rc = Jim_GetDouble(fTclInterp, fObject, &result);
+
+  if(rc == JIM_OK) return result;
+
+  message << "parameter '" << GetName() << "' is not a number." << endl;
+  message << GetName() << " = " << Jim_GetString(fObject, NULL);
+  throw runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------
@@ -301,38 +314,36 @@ double ExRootConfParam::GetDouble(double defaultValue)
 bool ExRootConfParam::GetBool(bool defaultValue)
 {
   stringstream message;
-  int result = defaultValue;
-  if(fObject && TCL_OK != Tcl_GetBooleanFromObj(fTclInterp, fObject, &result))
-  {
-    message << "parameter '" << fName << "' is not a boolean." << endl;
-    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
-    throw runtime_error(message.str());
-  }
-  return result;
+  int result;
+  int rc;
+
+  if(!fObject) return defaultValue;
+
+  rc = Jim_GetBoolean(fTclInterp, fObject, &result);
+
+  if(rc == JIM_OK) return result;
+
+  message << "parameter '" << GetName() << "' is not a boolean." << endl;
+  message << GetName() << " = " << Jim_GetString(fObject, NULL);
+  throw runtime_error(message.str());
 }
 
 //------------------------------------------------------------------------------
 
 const char *ExRootConfParam::GetString(const char *defaultValue)
 {
-  const char *result = defaultValue;
-  if(fObject) result = Tcl_GetStringFromObj(fObject, 0);
-  return result;
+  if(!fObject) return defaultValue;
+
+  return Jim_GetString(fObject, NULL);
 }
 
 //------------------------------------------------------------------------------
 
 int ExRootConfParam::GetSize()
 {
-  stringstream message;
-  int length = 0;
-  if(fObject && TCL_OK != Tcl_ListObjLength(fTclInterp, fObject, &length))
-  {
-    message << "parameter '" << fName << "' is not a list." << endl;
-    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
-    throw runtime_error(message.str());
-  }
-  return length;
+  if(!fObject) return 0;
+
+  return Jim_ListLength(fTclInterp, fObject);
 }
 
 //------------------------------------------------------------------------------
@@ -340,12 +351,16 @@ int ExRootConfParam::GetSize()
 ExRootConfParam ExRootConfParam::operator[](int index)
 {
   stringstream message;
-  Tcl_Obj *object = 0;
-  if(fObject && TCL_OK != Tcl_ListObjIndex(fTclInterp, fObject, index, &object))
-  {
-    message << "parameter '" << fName << "' is not a list." << endl;
-    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
-    throw runtime_error(message.str());
-  }
-  return ExRootConfParam(fName, object, fTclInterp);
+  Jim_Obj *object;
+  int rc;
+
+  if(!fObject) return ExRootConfParam(GetName(), 0, fTclInterp);
+
+  rc = Jim_ListIndex(fTclInterp, fObject, index, &object, 0);
+
+  if(rc == JIM_OK) return ExRootConfParam(GetName(), object, fTclInterp);
+
+  message << "list index for parameter '" << GetName() << "' is out of range." << endl;
+  message << GetName() << " = " << Jim_GetString(fObject, NULL);
+  throw runtime_error(message.str());
 }

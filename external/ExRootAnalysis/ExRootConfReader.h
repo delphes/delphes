@@ -11,13 +11,13 @@
 
 #include "TNamed.h"
 
-struct Tcl_Obj;
-struct Tcl_Interp;
+struct Jim_Obj;
+struct Jim_Interp;
 
-class ExRootConfParam
+class ExRootConfParam: public TNamed
 {
 public:
-  ExRootConfParam(const char *name = 0, Tcl_Obj *object = 0, Tcl_Interp *interp = 0);
+  ExRootConfParam(const char *name = 0, Jim_Obj *object = 0, Jim_Interp *interp = 0);
 
   int GetInt(int defaultValue = 0);
   long GetLong(long defaultValue = 0);
@@ -29,9 +29,10 @@ public:
   ExRootConfParam operator[](int index);
 
 private:
-  const char *fName; //!
-  Tcl_Obj *fObject; //!
-  Tcl_Interp *fTclInterp; //!
+  Jim_Obj *fObject; //!
+  Jim_Interp *fTclInterp; //!
+
+  ClassDef(ExRootConfParam, 1)
 };
 
 //------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ public:
 private:
   const char *fTopDir; //!
 
-  Tcl_Interp *fTclInterp; //!
+  Jim_Interp *fTclInterp; //!
 
   ClassDef(ExRootConfReader, 1)
 };

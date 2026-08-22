@@ -563,7 +563,7 @@ tmp/classes/DelphesXDRWriter.$(ObjSuf): \
 tmp/external/ExRootAnalysis/ExRootConfReader.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootConfReader.$(SrcSuf) \
 	external/ExRootAnalysis/ExRootConfReader.h \
-	external/tcl/tcl.h
+	external/tcl/jim.h
 tmp/external/ExRootAnalysis/ExRootFilter.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootFilter.$(SrcSuf) \
 	external/ExRootAnalysis/ExRootFilter.h \
@@ -1861,73 +1861,28 @@ ifeq ($(HAS_PYTHIA8),true)
 DISPLAY_OBJ +=  \
 	
 endif
-tmp/external/tcl/panic.$(ObjSuf): \
-	external/tcl/panic.c
-tmp/external/tcl/tclAlloc.$(ObjSuf): \
-	external/tcl/tclAlloc.c
-tmp/external/tcl/tclBasic.$(ObjSuf): \
-	external/tcl/tclBasic.c
-tmp/external/tcl/tclCkalloc.$(ObjSuf): \
-	external/tcl/tclCkalloc.c
-tmp/external/tcl/tclCmdAH.$(ObjSuf): \
-	external/tcl/tclCmdAH.c
-tmp/external/tcl/tclCmdIL.$(ObjSuf): \
-	external/tcl/tclCmdIL.c
-tmp/external/tcl/tclCmdMZ.$(ObjSuf): \
-	external/tcl/tclCmdMZ.c
-tmp/external/tcl/tclCompExpr.$(ObjSuf): \
-	external/tcl/tclCompExpr.c
-tmp/external/tcl/tclCompile.$(ObjSuf): \
-	external/tcl/tclCompile.c
-tmp/external/tcl/tclExecute.$(ObjSuf): \
-	external/tcl/tclExecute.c
-tmp/external/tcl/tclGet.$(ObjSuf): \
-	external/tcl/tclGet.c
-tmp/external/tcl/tclHash.$(ObjSuf): \
-	external/tcl/tclHash.c
-tmp/external/tcl/tclIndexObj.$(ObjSuf): \
-	external/tcl/tclIndexObj.c
-tmp/external/tcl/tclListObj.$(ObjSuf): \
-	external/tcl/tclListObj.c
-tmp/external/tcl/tclNamesp.$(ObjSuf): \
-	external/tcl/tclNamesp.c
-tmp/external/tcl/tclObj.$(ObjSuf): \
-	external/tcl/tclObj.c
-tmp/external/tcl/tclParse.$(ObjSuf): \
-	external/tcl/tclParse.c
-tmp/external/tcl/tclPreserve.$(ObjSuf): \
-	external/tcl/tclPreserve.c
-tmp/external/tcl/tclProc.$(ObjSuf): \
-	external/tcl/tclProc.c
-tmp/external/tcl/tclStringObj.$(ObjSuf): \
-	external/tcl/tclStringObj.c
-tmp/external/tcl/tclUtil.$(ObjSuf): \
-	external/tcl/tclUtil.c
-tmp/external/tcl/tclVar.$(ObjSuf): \
-	external/tcl/tclVar.c
+tmp/external/tcl/jim-format.$(ObjSuf): \
+	external/tcl/jim-format.c
+tmp/external/tcl/jim-subcmd.$(ObjSuf): \
+	external/tcl/jim-subcmd.c
+tmp/external/tcl/jim.$(ObjSuf): \
+	external/tcl/jim.c
+tmp/external/tcl/load-static-exts.$(ObjSuf): \
+	external/tcl/load-static-exts.c
+tmp/external/tcl/module.$(ObjSuf): \
+	external/tcl/module.c
+tmp/external/tcl/stdlib.$(ObjSuf): \
+	external/tcl/stdlib.c
+tmp/external/tcl/utf8.$(ObjSuf): \
+	external/tcl/utf8.c
 TCL_OBJ +=  \
-	tmp/external/tcl/panic.$(ObjSuf) \
-	tmp/external/tcl/tclAlloc.$(ObjSuf) \
-	tmp/external/tcl/tclBasic.$(ObjSuf) \
-	tmp/external/tcl/tclCkalloc.$(ObjSuf) \
-	tmp/external/tcl/tclCmdAH.$(ObjSuf) \
-	tmp/external/tcl/tclCmdIL.$(ObjSuf) \
-	tmp/external/tcl/tclCmdMZ.$(ObjSuf) \
-	tmp/external/tcl/tclCompExpr.$(ObjSuf) \
-	tmp/external/tcl/tclCompile.$(ObjSuf) \
-	tmp/external/tcl/tclExecute.$(ObjSuf) \
-	tmp/external/tcl/tclGet.$(ObjSuf) \
-	tmp/external/tcl/tclHash.$(ObjSuf) \
-	tmp/external/tcl/tclIndexObj.$(ObjSuf) \
-	tmp/external/tcl/tclListObj.$(ObjSuf) \
-	tmp/external/tcl/tclNamesp.$(ObjSuf) \
-	tmp/external/tcl/tclObj.$(ObjSuf) \
-	tmp/external/tcl/tclParse.$(ObjSuf) \
-	tmp/external/tcl/tclPreserve.$(ObjSuf) \
-	tmp/external/tcl/tclProc.$(ObjSuf) \
-	tmp/external/tcl/tclStringObj.$(ObjSuf) \
-	tmp/external/tcl/tclUtil.$(ObjSuf) \
-	tmp/external/tcl/tclVar.$(ObjSuf)
+	tmp/external/tcl/jim-format.$(ObjSuf) \
+	tmp/external/tcl/jim-subcmd.$(ObjSuf) \
+	tmp/external/tcl/jim.$(ObjSuf) \
+	tmp/external/tcl/load-static-exts.$(ObjSuf) \
+	tmp/external/tcl/module.$(ObjSuf) \
+	tmp/external/tcl/stdlib.$(ObjSuf) \
+	tmp/external/tcl/utf8.$(ObjSuf)
 modules/DenseTrackFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
