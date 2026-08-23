@@ -55,3 +55,8 @@ def test_light_quark_flavor(run_tagging):
         particles=[],
     )
     assert jets.At(0).Flavor == 1
+
+
+def test_empty_input(run_tagging):
+    jets = run_tagging(make_module_config(), jets=[], partons=[], particles=[])
+    assert jets.GetEntries() == 0

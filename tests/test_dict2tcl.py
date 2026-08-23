@@ -1,4 +1,5 @@
 import pytest
+
 from delphes.dict2tcl import dict2tcl
 
 cases = [
@@ -71,6 +72,41 @@ cases = [
         {"a": {"Class": "b", "c": [i for i in range(3)]}},
         "module b a {\n    set c [list 0 1 2]\n}",
         "module_list",
+    ),
+    (
+        {"a": [[0, 1], [2, 3]]},
+        "set a [list [list 0 1] [list 2 3]]",
+        "set_nested_list",
+    ),
+    (
+        {"a": []},
+        "set a [list ]",
+        "set_empty_list",
+    ),
+    (
+        {"a": {"Class": "b"}},
+        "module b a {\n    \n}",
+        "empty_module",
+    ),
+    (
+        {"a": 0.5},
+        "set a 0.5",
+        "set_float",
+    ),
+    (
+        {"a": 1e10},
+        "set a 10000000000.0",
+        "set_float_exp",
+    ),
+    (
+        {"a": "1 2 3"},
+        "set a 123",
+        "set_string_spaces_stripped",
+    ),
+    (
+        {"a": "true"},
+        "set a true",
+        "set_string_bool_like",
     ),
 ]
 

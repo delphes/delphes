@@ -56,3 +56,8 @@ def test_single_vertex(run_generic):
     )
     assert output.GetEntries() == 1
     assert output.At(0).GenSumPT2 == pytest.approx(500.0, rel=1e-3)
+
+
+def test_empty_input(run_generic):
+    output = run_sorter_test(run_generic, make_module_config(), vertexs=[], tracks=[])
+    assert output.GetEntries() == 0

@@ -355,6 +355,15 @@ tmp/classes/ClassesDict.$(SrcSuf): \
 	classes/DelphesHepMC3Reader.h \
 	classes/DelphesLHEFReader.h \
 	classes/DelphesSTDHEPReader.h \
+	classes/DelphesCscClusterFormula.h \
+	classes/DelphesCylindricalFormula.h \
+	classes/DelphesFormula.h \
+	classes/DelphesPileUpReader.h \
+	classes/DelphesPileUpWriter.h \
+	classes/DelphesStream.h \
+	classes/DelphesTF2.h \
+	classes/DelphesXDRReader.h \
+	classes/DelphesXDRWriter.h \
 	classes/SortableObject.h \
 	classes/DelphesClasses.h
 tmp/classes/ClassesDict$(PcmSuf): \

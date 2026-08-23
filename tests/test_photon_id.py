@@ -1,4 +1,4 @@
-from conftest import build_config, make_candidate
+from conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate
 
 
 def make_module_config(**extra):
@@ -51,3 +51,62 @@ def test_nonprompt_photon(run_generic):
     output = run_photonid_test(run_generic, make_module_config(), recos=[(50.0, 0.5, 0.5)], gens=[(50.0, 0.5)])
     assert output.GetEntries() == 1
     assert output.At(0).Status == 2
+
+
+def test_rel_iso_max_boundary(run_generic):
+    at_cut = run_photonid_test(run_generic, make_module_config(), recos=[(50.0, 0.5, 0.3)], gens=[(50.0, 0.5)])
+    assert at_cut.GetEntries() == 1
+    assert at_cut.At(0).Status == 2
+    below = run_photonid_test(run_generic, make_module_config(), recos=[(50.0, 0.5, 0.29)], gens=[(50.0, 0.5)])
+    assert below.At(0).Status == 1
+
+
+def test_pt_min_filter(run_generic):
+    output = run_photonid_test(
+        run_generic, make_module_config(PTMin=100.0), recos=[(50.0, 0.5, 0.1)], gens=[(50.0, 0.5)]
+    )
+    assert output.GetEntries() == 0
+
+
+def test_empty_input(run_generic):
+    output = run_photonid_test(run_generic, make_module_config(), recos=[], gens=[])
+    assert output.GetEntries() == 0
+
+
+def test_pt_at_min_passes(run_generic):
+    output = run_photonid_test(
+        run_generic, make_module_config(PTMin=50.0), recos=[(50.0, 0.5, 0.1)], gens=[(50.0, 0.5)]
+    )
+    assert output.GetEntries() == 1
+    assert output.At(0).Status == 1
+
+
+def test_fake_match_at_dpt_boundary(run_generic):
+    output = run_photonid_test(run_generic, make_module_config(), recos=[(100.0, 0.5, 0.1)], gens=[(150.0, 0.5)])
+    assert output.GetEntries() == 1
+    assert output.At(0).Status == 1
+
+
+def test_fake_match_above_dpt_boundary(run_generic):
+    output = run_photonid_test(run_generic, make_module_config(), recos=[(100.0, 0.5, 0.1)], gens=[(150.01, 0.5)])
+    assert output.GetEntries() == 1
+    assert output.At(0).Status == 3
+
+
+def test_fake_match_at_deltar_boundary(run_generic):
+    output = run_photonid_test(run_generic, make_module_config(), recos=[(50.0, 0.5, 0.1)], gens=[(50.0, 0.6)])
+    assert output.GetEntries() == 1
+    assert output.At(0).Status == 3
+    output = run_photonid_test(run_generic, make_module_config(), recos=[(50.0, 0.5, 0.1)], gens=[(50.0, 0.55)])
+    assert output.GetEntries() == 1
+    assert output.At(0).Status == 1
+
+
+def test_deterministic_with_fixed_seed(run_generic):
+    config = make_module_config(PromptFormula=0.5, NonPromptFormula=0.5, FakeFormula=0.5)
+    recos = [(50.0, 0.5, 0.1), (50.0, 0.6, 0.1), (50.0, 0.7, 0.1)]
+    gens = [(50.0, 0.5), (50.0, 0.6), (50.0, 0.7)]
+    assert_deterministic(
+        lambda: run_photonid_test(run_generic, config, recos, gens),
+        extract=lambda out: candidate_snapshots(out, ("Status", "Momentum")),
+    )

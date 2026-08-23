@@ -101,3 +101,9 @@ def test_multiple_particles(run_generic):
     assert results["neutral"].GetEntries() == 1
     assert results["charged"].GetEntries() == 1
     assert results["muons"].GetEntries() == 1
+
+
+def test_empty_input(run_generic):
+    results = run_propagator_test(run_generic, make_module_config(), [])
+    for name in ("stable", "neutral", "charged", "electrons", "muons"):
+        assert results[name].GetEntries() == 0

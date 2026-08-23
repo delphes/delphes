@@ -1,3 +1,6 @@
+import math
+
+import ROOT
 from conftest import build_config, make_candidate
 
 
@@ -45,7 +48,7 @@ def run_track_cov_test(run_generic, config, pt=50.0, eta=0.5, pid=211, charge=1)
 
 def test_initialization_with_geometry(load_delphes):
     config = make_module_config()
-    module, factory = load_delphes(config)
+    module, factory, _ = load_delphes(config)
     input_array = module.ExportArray("inputTracks")
     c = make_candidate(factory, 50.0, 0.5, pid=211, charge=1)
     input_array.Add(c)
@@ -115,3 +118,66 @@ def test_electron_with_scale_factor(run_generic):
     output = run_track_cov_test(run_generic, make_module_config(), pid=11, charge=-1)
     assert output.GetEntries() == 1
     assert output.At(0).PID == 11
+
+
+def test_empty_input(run_generic):
+    def setup(module, factory):
+        module.ExportArray("inputTracks")
+
+    output = run_generic(make_module_config(), setup=setup, outputs=("TestModule/tracks",))
+    assert output.GetEntries() == 0
+
+
+def cov_elements(track):
+    cov = track.TrackCovariance
+    n = cov.GetNrows()
+    return n, [[cov(i, j) for j in range(n)] for i in range(n)]
+
+
+def test_covariance_symmetric_positive_semidefinite(run_generic):
+    output = run_track_cov_test(run_generic, make_module_config())
+    n, rows = cov_elements(output.At(0))
+    assert n == 5
+    for i in range(n):
+        for j in range(n):
+            assert math.isfinite(rows[i][j])
+            assert rows[i][j] == rows[j][i]
+
+    m = ROOT.TMatrixDSym(n)
+    for i in range(n):
+        for j in range(i, n):
+            m[i][j] = rows[i][j]
+    eig = ROOT.TMatrixDSymEigen(m).GetEigenValues()
+    values = [eig(i) for i in range(n)]
+    assert min(values) >= -1e-18
+    assert max(values) > 0.0
+
+    assert all(rows[i][i] > 0.0 for i in range(n))
+
+
+def test_impact_parameter_errors_shrink_with_pt(run_generic):
+    low = run_track_cov_test(run_generic, make_module_config(), pt=5.0).At(0)
+    high = run_track_cov_test(run_generic, make_module_config(), pt=50.0).At(0)
+    assert low.ErrorD0 > high.ErrorD0 > 0.0
+    assert low.ErrorDZ > high.ErrorDZ > 0.0
+
+
+def test_error_pt_grows_with_pt(run_generic):
+    low = run_track_cov_test(run_generic, make_module_config(), pt=5.0).At(0)
+    high = run_track_cov_test(run_generic, make_module_config(), pt=50.0).At(0)
+    assert high.ErrorPT > low.ErrorPT > 0.0
+    ratio = high.ErrorPT / low.ErrorPT
+    assert 20.0 < ratio < 200.0
+
+    assert high.ErrorPT / high.Momentum.Pt() > low.ErrorPT / low.Momentum.Pt()
+
+
+def test_low_pt_track_gives_finite_matrix(run_generic):
+    out = run_track_cov_test(run_generic, make_module_config(), pt=5.0)
+    assert out.GetEntries() == 1
+    track = out.At(0)
+    _, rows = cov_elements(track)
+    assert all(math.isfinite(v) for row in rows for v in row)
+    assert all(math.isfinite(x) for x in (track.ErrorD0, track.ErrorDZ, track.ErrorPT, track.ErrorPhi))
+    assert track.TrackResolution > 0.0
+    assert math.isfinite(track.TrackResolution)

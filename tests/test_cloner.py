@@ -24,3 +24,8 @@ def test_preserves_eta_phi(run_module):
     smeared = output.At(0)
     assert smeared.Momentum.Eta() == pytest.approx(1.2, rel=1e-6)
     assert smeared.Momentum.Phi() == pytest.approx(0.7, rel=1e-6)
+
+
+def test_empty_input(run_module):
+    output = run_module(make_config("Cloner"), [])
+    assert output.GetEntries() == 0

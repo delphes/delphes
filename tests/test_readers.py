@@ -1,24 +1,29 @@
+from itertools import combinations
+
 import pytest
 import ROOT
-from itertools import combinations
-from pathlib import Path
+from conftest import DATA_DIR, pythia8_reader_available, reader_context
 
 data_info = [
     ("HepMC2", "test.hepmc2"),
     ("HepMC3", "test.hepmc3"),
     ("Pythia8", "test.cmnd"),
+    ("STDHEP", "test.stdhep"),
 ]
+
+if not pythia8_reader_available:
+    data_info = [d for d in data_info if d[0] != "Pythia8"]
+
+
+@pytest.mark.skipif(not pythia8_reader_available, reason="DelphesPythia8Reader not built (no Pythia8)")
+def test_pythia8_reader_present_anchor():
+    assert hasattr(ROOT, "DelphesPythia8Reader")
 
 
 def run_reader(info, load_delphes):
     data_format, data_file = info
-    data_dir = Path(__file__).parent / "data"
-    module, factory = load_delphes({})
-    arrays = [module.ExportArray(name) for name in ("allParticles", "stableParticles", "partons")]
-    reader = getattr(ROOT, f"Delphes{data_format}Reader")()
-    reader.OpenInputFile(str(data_dir / data_file))
-    reader.ReadEvent(factory, *arrays)
-    reader.CloseInputFile()
+    with reader_context(load_delphes, data_format, DATA_DIR / data_file) as (_, factory, _, arrays, reader):
+        reader.ReadEvent(factory, *arrays)
     return arrays
 
 

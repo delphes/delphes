@@ -31,6 +31,8 @@ public:
   ~DelphesTF2();
 
   Int_t Compile(const char *expression);
+
+  ClassDef(DelphesTF2, 1)
 };
 
 #endif /* DelphesTF2_h */

@@ -55,3 +55,28 @@ def test_multiple_pdg_codes(run_module):
         ],
     )
     assert output.GetEntries() == 1
+
+
+def test_empty_input(run_module):
+    output = run_module(make_module_config(), [])
+    assert output.GetEntries() == 0
+
+
+def test_pt_min_boundary_kept(run_module):
+    output = run_module(make_module_config(PTMin=50.0), [{"pid": 11, "charge": 1, "pt": 50.0}])
+    assert output.GetEntries() == 1
+
+
+def test_tiny_pt_dropped_before_pdg_match(run_module):
+    output = run_module(make_module_config(PTMin=10.0), [{"pid": 13, "charge": -1, "pt": 1e-6}])
+    assert output.GetEntries() == 0
+
+
+def test_extreme_kinematics_matching_pdg_removed(run_module):
+    output = run_module(make_module_config(), [{"pid": 13, "charge": -1, "pt": 1e4, "eta": 5.0}])
+    assert output.GetEntries() == 0
+
+
+def test_extreme_kinematics_nonmatching_kept(run_module):
+    output = run_module(make_module_config(), [{"pid": 11, "charge": -1, "pt": 1e4, "eta": -5.0}])
+    assert output.GetEntries() == 1

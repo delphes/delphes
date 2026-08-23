@@ -35,6 +35,8 @@ public:
   Int_t Compile(const char *expression);
 
   Double_t Eval(Double_t pt, Double_t eta = 0, Double_t phi = 0, Double_t energy = 0, Candidate *candidate = nullptr);
+
+  ClassDef(DelphesFormula, 1)
 };
 
 #endif /* DelphesFormula_h */

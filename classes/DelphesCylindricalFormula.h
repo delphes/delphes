@@ -33,6 +33,8 @@ public:
   Int_t Compile(const char *expression);
 
   Double_t Eval(Double_t r, Double_t phi = 0, Double_t z = 0);
+
+  ClassDef(DelphesCylindricalFormula, 1)
 };
 
 #endif /* DelphesCylindricalFormula_h */

@@ -1,4 +1,4 @@
-from conftest import build_config, make_candidate
+from conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate
 
 
 def make_module_config(**extra):
@@ -41,3 +41,19 @@ def test_forward_particle_propagates(run_generic):
 def test_low_eta_particle_rejected(run_generic):
     hits = run_hector_test(run_generic, make_module_config(), eta=0.5)
     assert hits.GetEntries() == 0
+
+
+def test_empty_input(run_generic):
+    def setup(module, factory):
+        module.ExportArray("inputParticles")
+
+    hits = run_generic(make_module_config(), setup=setup, outputs=("TestModule/hits",))
+    assert hits.GetEntries() == 0
+
+
+def test_deterministic_with_fixed_seed(run_generic):
+    config = make_module_config(SigmaT=0.01, SigmaX=0.001, SigmaY=0.001, SigmaE=0.1)
+    assert_deterministic(
+        lambda: run_hector_test(run_generic, config, eta=6.0),
+        extract=lambda hits: candidate_snapshots(hits, ("Position", "Momentum")),
+    )

@@ -33,6 +33,16 @@
 #include "classes/DelphesLHEFReader.h"
 #include "classes/DelphesSTDHEPReader.h"
 
+#include "classes/DelphesCscClusterFormula.h"
+#include "classes/DelphesCylindricalFormula.h"
+#include "classes/DelphesFormula.h"
+#include "classes/DelphesPileUpReader.h"
+#include "classes/DelphesPileUpWriter.h"
+#include "classes/DelphesStream.h"
+#include "classes/DelphesTF2.h"
+#include "classes/DelphesXDRReader.h"
+#include "classes/DelphesXDRWriter.h"
+
 #include "classes/SortableObject.h"
 #include "classes/DelphesClasses.h"
 
@@ -49,6 +59,16 @@
 #pragma link C++ class DelphesHepMC3Reader+;
 #pragma link C++ class DelphesLHEFReader+;
 #pragma link C++ class DelphesSTDHEPReader+;
+
+#pragma link C++ class DelphesCscClusterFormula+;
+#pragma link C++ class DelphesCylindricalFormula+;
+#pragma link C++ class DelphesFormula+;
+#pragma link C++ class DelphesPileUpReader+;
+#pragma link C++ class DelphesPileUpWriter+;
+#pragma link C++ class DelphesStream+;
+#pragma link C++ class DelphesTF2+;
+#pragma link C++ class DelphesXDRReader+;
+#pragma link C++ class DelphesXDRWriter+;
 
 #pragma link C++ class SortableObject+;
 

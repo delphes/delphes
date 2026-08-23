@@ -35,6 +35,8 @@ public:
   Int_t Compile(const char *expression);
 
   Double_t Eval(Double_t deltaR, Double_t deltaZ = 0, Double_t Ehad = 0, Double_t Eem = 0);
+
+  ClassDef(DelphesCscClusterFormula, 1)
 };
 
 #endif /* DelphesCscClusterFormula_h */

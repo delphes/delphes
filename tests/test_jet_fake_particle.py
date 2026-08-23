@@ -1,4 +1,4 @@
-from conftest import add_input_jets, build_config
+from conftest import add_input_jets, assert_deterministic, build_config, candidate_snapshots
 
 
 def make_module_config(**extra):
@@ -56,3 +56,45 @@ def test_fake_photons_generated(run_generic):
     results = run_fake_test(run_generic, make_module_config(EfficiencyFormula=[22, 1.0]))
     assert results["jets"].GetEntries() == 0
     assert results["photons"].GetEntries() == 1
+
+
+def test_empty_input(run_generic):
+    def setup(module, factory):
+        module.ExportArray("inputJets")
+
+    results = run_generic(
+        make_module_config(),
+        setup=setup,
+        outputs={
+            "jets": "TestModule/jets",
+            "electrons": "TestModule/fakeElectrons",
+            "muons": "TestModule/fakeMuons",
+            "photons": "TestModule/fakePhotons",
+        },
+    )
+    assert results["jets"].GetEntries() == 0
+    assert results["electrons"].GetEntries() == 0
+    assert results["muons"].GetEntries() == 0
+    assert results["photons"].GetEntries() == 0
+
+
+def test_deterministic_with_fixed_seed(run_generic):
+    config = make_module_config(EfficiencyFormula=[11, 0.4, 13, 0.3, 22, 0.2])
+
+    def setup(module, factory):
+        add_input_jets(module, factory, [{"pt": 50.0, "eta": 0.5}, {"pt": 60.0, "eta": 0.6}, {"pt": 70.0, "eta": 0.7}])
+
+    outputs = {
+        "jets": "TestModule/jets",
+        "electrons": "TestModule/fakeElectrons",
+        "muons": "TestModule/fakeMuons",
+        "photons": "TestModule/fakePhotons",
+    }
+
+    def snap(results):
+        out = []
+        for key in ("jets", "electrons", "muons", "photons"):
+            out.extend((key, *row) for row in candidate_snapshots(results[key], ("Momentum", "Charge")))
+        return tuple(out)
+
+    assert_deterministic(lambda: run_generic(config, setup=setup, outputs=outputs), extract=snap)

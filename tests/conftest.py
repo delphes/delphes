@@ -1,4 +1,9 @@
+import contextlib
 import math
+import subprocess
+import sys
+from pathlib import Path
+
 import pytest
 import ROOT
 
@@ -6,27 +11,39 @@ from delphes.dict2tcl import dict2tcl
 
 ROOT.gSystem.Load("libDelphes")
 
+C_LIGHT = 2.99792458e8
+C_LIGHT_MM_PER_NS = C_LIGHT * 1.0e-6
+
+REPO_ROOT = Path(__file__).parent.parent
+TESTS_DIR = Path(__file__).parent
+DATA_DIR = TESTS_DIR / "data"
+CARDS_DIR = REPO_ROOT / "cards"
+MINBIAS_FILE = str(REPO_ROOT / "MinBias.pileup")
+
+pythia8_reader_available = hasattr(ROOT, "DelphesPythia8Reader")
+pythia8_pileup_available = hasattr(ROOT, "PileUpMergerPythia8")
+
 
 @pytest.fixture(scope="function")
 def load_delphes():
     modules = []
     refs = []
 
-    def load(config):
+    def load(config, fout=0):
         conf_reader = ROOT.ExRootConfReader()
         if isinstance(config, dict):
             data = dict2tcl(config).encode()
             conf_reader.ReadData(".", data, len(data))
         else:
             conf_reader.ReadFile(config)
-        writer = ROOT.ExRootTreeWriter()
+        writer = ROOT.ExRootTreeWriter(fout, "Delphes")
         module = ROOT.Delphes("Delphes")
         module.SetConfReader(conf_reader)
         module.SetTreeWriter(writer)
         factory = module.GetFactory()
         modules.append(module)
-        refs.extend([conf_reader, writer])
-        return module, factory
+        refs.extend([conf_reader])
+        return module, factory, writer
 
     yield load
 
@@ -177,7 +194,7 @@ def run_vertex_finder_test(run_generic, config, tracks):
 @pytest.fixture(scope="function")
 def run_generic(load_delphes):
     def run(config, setup=None, outputs=("TestModule/outputParticles",)):
-        module, factory = load_delphes(config)
+        module, factory, _ = load_delphes(config)
         result = setup(module, factory) if setup else None
         module.Init()
         module.Process()
@@ -202,6 +219,28 @@ def run_module(run_generic):
         return run_generic(config, setup=setup)
 
     yield run
+
+
+def run_repeated(load_delphes, config, n, setup, output="TestModule/outputParticles"):
+    results = []
+    for i in range(n):
+        cfg = dict(config)
+        cfg["RandomSeed"] = 42 + i
+        module, factory, _ = load_delphes(cfg)
+        setup(module, factory)
+        module.Init()
+        module.Process()
+        results.append(module.ImportArray(output))
+    return results
+
+
+def mean(values):
+    return sum(values) / len(values)
+
+
+def stddev(values):
+    m = mean(values)
+    return (sum((v - m) ** 2 for v in values) / (len(values) - 1)) ** 0.5
 
 
 @pytest.fixture(scope="function")
@@ -245,3 +284,154 @@ def run_calorimeter(run_generic):
         return run_generic(config, setup=setup, outputs=("TestModule/towers",))
 
     yield run
+
+
+def candidate_snapshots(array, fields=("PID", "Momentum", "Position")):
+    snaps = []
+    for i in range(array.GetEntries()):
+        c = array.At(i)
+        values = []
+        for field in fields:
+            if field == "Momentum":
+                mom = c.Momentum
+                values.extend((mom.Px(), mom.Py(), mom.Pz(), mom.E()))
+            elif field == "Position":
+                pos = c.Position
+                values.extend((pos.X(), pos.Y(), pos.Z(), pos.T()))
+            else:
+                values.append(getattr(c, field))
+        snaps.append(tuple(values))
+    return tuple(snaps)
+
+
+def deterministic_snapshot(result, extract):
+    if extract is not None:
+        return extract(result)
+    if isinstance(result, (tuple, list)):
+        return tuple(candidate_snapshots(arr) for arr in result)
+    return candidate_snapshots(result)
+
+
+def flatten_snapshot(snap):
+    if not isinstance(snap, (tuple, list)):
+        return [snap]
+    flat = []
+    for value in snap:
+        flat.extend(flatten_snapshot(value))
+    return flat
+
+
+def assert_deterministic(runner, extract=None, abs_tol=None):
+    snap_a = deterministic_snapshot(runner(), extract)
+    snap_b = deterministic_snapshot(runner(), extract)
+    if abs_tol is None:
+        assert snap_a == snap_b
+    else:
+        assert flatten_snapshot(snap_a) == pytest.approx(flatten_snapshot(snap_b), abs=abs_tol)
+
+
+def run_seeds(load_delphes, config, seeds, setup, output="TestModule/outputParticles"):
+    results = []
+    for seed in seeds:
+        cfg = dict(config)
+        cfg["RandomSeed"] = seed
+        module, factory, _ = load_delphes(cfg)
+        setup(module, factory)
+        module.Init()
+        module.Process()
+        results.append(module.ImportArray(output))
+    return results
+
+
+def repeated_values(load_delphes, config, n, setup, extract, output="TestModule/outputParticles"):
+    results = run_repeated(load_delphes, config, n, setup, output=output)
+    return [extract(r) for r in results]
+
+
+def run_pileup(load_delphes, config, particles):
+    module, factory, _ = load_delphes(config)
+    input_array = module.ExportArray("inputParticles")
+    for pt, charge in particles:
+        c = make_candidate(factory, pt, 0.5, pid=211, charge=charge)
+        c.Position.SetXYZT(0.0, 0.0, 0.0, 0.0)
+        input_array.Add(c)
+    module.Init()
+    module.Process()
+    return module.ImportArray("TestModule/stableParticles"), module.ImportArray("TestModule/vertices")
+
+
+def read_tree_branch(load_delphes, tmp_path, build, config=None, index=1):
+    if config is None:
+        config = {}
+    path = tmp_path / f"output_{index}.root"
+    fout = ROOT.TFile(str(path), "RECREATE")
+    module, _, writer = load_delphes(config, fout)
+    build(module, writer)
+    writer.Fill()
+    writer.Write()
+    module.Finish()
+    fout.Close()
+    fin = ROOT.TFile(str(path))
+    reader = ROOT.ExRootTreeReader(fin.Get("Delphes"))
+    return reader, fin
+
+
+@contextlib.contextmanager
+def reader_context(load_delphes, format, data_file, config=None, fout=0):
+    if config is None:
+        config = {}
+    module, factory, writer = load_delphes(config, fout)
+    arrays = [module.ExportArray(name) for name in ("allParticles", "stableParticles", "partons")]
+    reader = getattr(ROOT, f"Delphes{format}Reader")()
+    reader.OpenInputFile(str(data_file))
+    try:
+        yield module, factory, writer, arrays, reader
+    finally:
+        reader.CloseInputFile()
+
+
+EVENT_FIELD_ATTRIBUTES = {
+    "number": "Number",
+    "process_id": "ProcessID",
+    "mpi": "MPI",
+    "weight": "Weight",
+    "scale": "Scale",
+    "alpha_qed": "AlphaQED",
+    "alpha_qcd": "AlphaQCD",
+    "id1": "ID1",
+    "id2": "ID2",
+    "x1": "X1",
+    "x2": "X2",
+    "scale_pdf": "ScalePDF",
+    "pdf1": "PDF1",
+    "pdf2": "PDF2",
+    "cross_section": "CrossSection",
+    "cross_section_error": "CrossSectionError",
+}
+
+EXACT_EVENT_FIELDS = ("number", "process_id", "mpi", "id1", "id2")
+ABS_TOLERANCE_EVENT_FIELDS = ("pdf1", "pdf2")
+
+
+def check_event_fields(event, expected):
+    for key, attribute in EVENT_FIELD_ATTRIBUTES.items():
+        if key not in expected:
+            continue
+        value = getattr(event, attribute)
+        if key in EXACT_EVENT_FIELDS:
+            assert value == expected[key], key
+        elif key in ABS_TOLERANCE_EVENT_FIELDS:
+            assert value == pytest.approx(expected[key], abs=1e-6), key
+        else:
+            assert value == pytest.approx(expected[key], rel=1e-5), key
+
+
+def run_cli(args, timeout=120):
+    return subprocess.run(
+        [sys.executable, "-m", "delphes.delphes", *args],
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+        timeout=timeout,
+        check=False,
+    )

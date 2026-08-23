@@ -1,3 +1,4 @@
+import pytest
 from conftest import build_config, make_candidate
 
 
@@ -26,7 +27,12 @@ def run_vertex_test(run_generic, config, particles):
 
 def test_creates_vertex(run_generic):
     output = run_vertex_test(run_generic, make_module_config(), [(0.0, 0.0, 0.0, 50.0, 211)])
-    assert output.GetEntries() >= 1
+    assert output.GetEntries() == 1
+    vertex = output.At(0)
+
+    assert vertex.Position.X() == pytest.approx(0.0, abs=1e-6)
+    assert vertex.Position.Y() == pytest.approx(0.0, abs=1e-6)
+    assert vertex.Position.Z() == pytest.approx(0.0, abs=1e-6)
 
 
 def test_same_vertex(run_generic):
@@ -34,3 +40,8 @@ def test_same_vertex(run_generic):
         run_generic, make_module_config(), [(0.0, 0.0, 0.0, 50.0, 211), (0.0005, 0.0005, 0.0005, 30.0, 211)]
     )
     assert output.GetEntries() == 1
+
+
+def test_empty_input(run_generic):
+    output = run_vertex_test(run_generic, make_module_config(), [])
+    assert output.GetEntries() == 0

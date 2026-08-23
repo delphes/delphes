@@ -1,4 +1,4 @@
-from conftest import build_config
+from conftest import assert_deterministic, build_config, candidate_snapshots
 
 
 def make_module_config(**extra):
@@ -14,6 +14,11 @@ def test_b_tags_b_jet(run_tagging):
     assert jets.GetEntries() == 1
     jet = jets.At(0)
     assert jet.BTag & 1 == 1
+
+
+def test_empty_input(run_tagging):
+    jets = run_tagging(make_module_config(), [])
+    assert jets.GetEntries() == 0
 
 
 def test_no_b_tag_light_jet(run_tagging):
@@ -38,3 +43,12 @@ def test_bit_number_1(run_tagging):
 def test_c_tagging(run_tagging):
     jets = run_tagging(make_module_config(EfficiencyFormula=[4, 1.0]), [{"flavor": 4}])
     assert jets.At(0).BTag & 1 == 1
+
+
+def test_deterministic_with_fixed_seed(run_tagging):
+    config = make_module_config(EfficiencyFormula=[5, 0.5, 0, 0.0])
+    jets_in = [{"flavor": 5} for _ in range(5)]
+    assert_deterministic(
+        lambda: run_tagging(config, jets_in),
+        extract=lambda jets: candidate_snapshots(jets, ("BTag", "Flavor")),
+    )
