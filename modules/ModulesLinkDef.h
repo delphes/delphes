@@ -65,6 +65,7 @@
 #include "modules/PhotonID.h"
 #include "modules/ConstituentFilter.h"
 #include "modules/StatusPidFilter.h"
+#include "modules/EventCounterFilter.h"
 #include "modules/PdgCodeFilter.h"
 #include "modules/BeamSpotFilter.h"
 #include "modules/BeamSpotSmearing.h"
@@ -131,6 +132,7 @@
 #pragma link C++ class PhotonID+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
+#pragma link C++ class EventCounterFilter+;
 #pragma link C++ class PdgCodeFilter+;
 #pragma link C++ class BeamSpotFilter+;
 #pragma link C++ class BeamSpotSmearing+;
