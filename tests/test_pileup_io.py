@@ -5,7 +5,7 @@ import struct
 
 import pytest
 import ROOT
-from conftest import MINBIAS_FILE
+from .conftest import MINBIAS_FILE
 
 EVENTS = [
     [(211, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0), (-13, -1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0, -8.0)],

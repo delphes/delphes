@@ -1,7 +1,7 @@
 import math
 
 import pytest
-from conftest import assert_deterministic, build_config, make_candidate
+from .conftest import assert_deterministic, build_config, make_candidate
 
 
 def make_module_config(**extra):

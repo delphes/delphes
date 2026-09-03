@@ -1,4 +1,4 @@
-from conftest import add_generator_particles, add_input_partons, build_config
+from .conftest import add_generator_particles, add_input_partons, build_config
 
 
 def test_skims_partons_with_tau(run_generic):

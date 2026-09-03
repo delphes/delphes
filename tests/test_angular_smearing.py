@@ -1,5 +1,5 @@
 import pytest
-from conftest import assert_deterministic, candidate_snapshots, make_candidate, make_config, mean, run_repeated, stddev
+from .conftest import assert_deterministic, candidate_snapshots, make_candidate, make_config, mean, run_repeated, stddev
 
 
 def test_zero_resolution(run_module):

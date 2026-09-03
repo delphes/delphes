@@ -1,4 +1,4 @@
-from conftest import assert_deterministic, candidate_snapshots, make_config
+from .conftest import assert_deterministic, candidate_snapshots, make_config
 
 
 def make_module_config(**extra):

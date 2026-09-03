@@ -1,5 +1,5 @@
 import pytest
-from conftest import assert_deterministic, make_config, run_repeated
+from .conftest import assert_deterministic, make_config, run_repeated
 
 
 def test_pass_all(run_module):

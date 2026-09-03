@@ -1,5 +1,5 @@
 import pytest
-from conftest import make_candidate, make_config
+from .conftest import make_candidate, make_config
 
 
 def run_rho_test(run_generic, config, particles):

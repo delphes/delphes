@@ -1,4 +1,4 @@
-from conftest import VERTEX_FINDER_TRACKS, build_config, run_vertex_finder_test
+from .conftest import VERTEX_FINDER_TRACKS, build_config, run_vertex_finder_test
 
 
 def make_module_config(**extra):

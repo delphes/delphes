@@ -1,5 +1,5 @@
 import pytest
-from conftest import assert_deterministic, candidate_snapshots, make_candidate, make_config, run_repeated
+from .conftest import assert_deterministic, candidate_snapshots, make_candidate, make_config, run_repeated
 
 
 def run_cluster_test(run_generic, config, eta=3.5, ehad=50.0, eem=0.0):

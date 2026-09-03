@@ -1,5 +1,5 @@
 import pytest
-from conftest import make_candidate, make_config
+from .conftest import make_candidate, make_config
 
 
 def run_framework(load_delphes, config, setup=None):

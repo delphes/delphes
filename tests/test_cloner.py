@@ -1,5 +1,5 @@
 import pytest
-from conftest import make_config
+from .conftest import make_config
 
 
 def test_clones_single_candidate(run_module):

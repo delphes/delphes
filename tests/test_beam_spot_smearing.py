@@ -1,5 +1,5 @@
 import pytest
-from conftest import C_LIGHT_MM_PER_NS, assert_deterministic, make_candidate, make_config
+from .conftest import C_LIGHT_MM_PER_NS, assert_deterministic, make_candidate, make_config
 
 
 def beam_spot_config(**extra):

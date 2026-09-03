@@ -2,7 +2,7 @@ import struct
 
 import pytest
 import ROOT
-from conftest import MINBIAS_FILE, make_config
+from .conftest import MINBIAS_FILE, make_config
 
 from delphes.dict2tcl import dict2tcl
 

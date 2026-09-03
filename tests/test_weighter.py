@@ -1,4 +1,4 @@
-from conftest import make_config, make_particle
+from .conftest import make_config, make_particle
 
 
 def run_weighter_test(run_generic, config, particles):

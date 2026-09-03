@@ -1,7 +1,7 @@
 import math
 
 import pytest
-from conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate, run_repeated
+from .conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate, run_repeated
 
 BASE_DEFAULTS = {
     "ParticleInputArray": "Delphes/inputParticles",

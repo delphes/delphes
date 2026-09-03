@@ -1,7 +1,7 @@
 import cppyy
 import pytest
 import ROOT
-from conftest import read_tree_branch
+from .conftest import read_tree_branch
 
 GET_CONFIGURED_CASES = [
     ("GetInt", "MyInt", 12345, -1),

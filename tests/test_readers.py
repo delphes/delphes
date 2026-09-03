@@ -2,7 +2,7 @@ from itertools import combinations
 
 import pytest
 import ROOT
-from conftest import DATA_DIR, pythia8_reader_available, reader_context
+from .conftest import DATA_DIR, pythia8_reader_available, reader_context
 
 data_info = [
     ("HepMC2", "test.hepmc2"),

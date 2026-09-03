@@ -1,6 +1,6 @@
 import math
 
-from conftest import make_candidate, make_config
+from .conftest import make_candidate, make_config
 
 
 def test_pass_all(run_module):

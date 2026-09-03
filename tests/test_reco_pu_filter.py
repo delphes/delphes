@@ -1,4 +1,4 @@
-from conftest import make_config
+from .conftest import make_config
 
 
 def make_module_config(**extra):

@@ -1,5 +1,5 @@
 import pytest
-from conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate, mean, run_repeated, stddev
+from .conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate, mean, run_repeated, stddev
 
 
 def make_module_config(**extra):

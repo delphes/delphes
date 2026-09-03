@@ -3,7 +3,7 @@ import math
 
 import pytest
 import ROOT
-from conftest import DATA_DIR, check_event_fields, read_tree_branch, reader_context
+from .conftest import DATA_DIR, check_event_fields, read_tree_branch, reader_context
 
 HEPMCE2_EVENT_1 = {
     "number": 0,

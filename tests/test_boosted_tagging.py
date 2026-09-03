@@ -1,6 +1,6 @@
 import math
 
-from conftest import assert_deterministic, make_candidate, make_config, make_particle
+from .conftest import assert_deterministic, make_candidate, make_config, make_particle
 
 
 def boosted_tagging_config(efficiency_formula, **extra):

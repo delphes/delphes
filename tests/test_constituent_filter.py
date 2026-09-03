@@ -1,4 +1,4 @@
-from conftest import build_config, make_candidate, make_jet
+from .conftest import build_config, make_candidate, make_jet
 
 
 def make_module_config(**extra):

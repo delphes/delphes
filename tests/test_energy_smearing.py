@@ -1,5 +1,5 @@
 import pytest
-from conftest import (
+from .conftest import (
     assert_deterministic,
     candidate_snapshots,
     make_candidate,

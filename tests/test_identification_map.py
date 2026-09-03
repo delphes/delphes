@@ -1,7 +1,7 @@
 from collections import Counter
 
 import pytest
-from conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate, run_repeated
+from .conftest import assert_deterministic, build_config, candidate_snapshots, make_candidate, run_repeated
 
 
 def make_module_config(**extra):

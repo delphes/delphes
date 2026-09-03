@@ -1,4 +1,4 @@
-from conftest import make_config
+from .conftest import make_config
 
 PU = {"pid": 211, "charge": 1, "IsPU": 1}
 NON_PU = {"pid": 211, "charge": 1, "IsPU": 0}

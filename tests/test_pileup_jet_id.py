@@ -1,7 +1,7 @@
 import math
 
 import pytest
-from conftest import build_config, make_candidate, make_jet
+from .conftest import build_config, make_candidate, make_jet
 
 PILEUP_JET_ID_DEFAULTS = {
     "JetInputArray": "Delphes/inputJets",

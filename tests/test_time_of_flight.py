@@ -1,7 +1,7 @@
 import math
 
 import pytest
-from conftest import build_config, make_candidate, make_vertex
+from .conftest import build_config, make_candidate, make_vertex
 
 
 def make_module_config(**extra):

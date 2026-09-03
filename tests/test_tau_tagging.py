@@ -1,4 +1,4 @@
-from conftest import (
+from .conftest import (
     add_generator_particles,
     add_input_jets,
     add_input_partons,

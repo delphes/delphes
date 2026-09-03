@@ -1,7 +1,7 @@
 import math
 
 import pytest
-from conftest import (
+from .conftest import (
     C_LIGHT,
     MINBIAS_FILE,
     assert_deterministic,

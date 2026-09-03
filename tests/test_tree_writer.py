@@ -2,7 +2,7 @@ import math
 
 import pytest
 import ROOT
-from conftest import C_LIGHT, make_candidate
+from .conftest import C_LIGHT, make_candidate
 
 from delphes.dict2tcl import dict2tcl
 

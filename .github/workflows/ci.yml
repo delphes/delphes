@@ -24,7 +24,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python3 -m pytest tests
+          pytest tests
 
       - name: Build Delphes using cmake
         run: |
