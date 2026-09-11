@@ -110,7 +110,7 @@ void DelphesSTDHEPReader::SetInputFile(FILE *inputFile)
 
 //---------------------------------------------------------------------------
 
-void DelphesSTDHEPReader::Clear()
+void DelphesSTDHEPReader::Clear(Option_t * /*option*/)
 {
   fBlockType = -1;
 }

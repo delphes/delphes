@@ -53,7 +53,7 @@ public:
 
   void SetInputFile(FILE *inputFile);
 
-  void Clear();
+  void Clear(Option_t *option = "") override;
   bool EventReady();
 
   bool ReadEvent(DelphesFactory *factory,

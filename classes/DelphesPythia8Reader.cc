@@ -124,7 +124,7 @@ string DelphesPythia8Reader::FileNameLHEF()
 
 //---------------------------------------------------------------------------
 
-void DelphesPythia8Reader::Clear()
+void DelphesPythia8Reader::Clear(Option_t * /*option*/)
 {
   fEventReady = kFALSE;
 }

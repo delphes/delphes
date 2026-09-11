@@ -110,7 +110,7 @@ void DelphesHepMC3Reader::SetInputFile(FILE *inputFile)
 
 //---------------------------------------------------------------------------
 
-void DelphesHepMC3Reader::Clear()
+void DelphesHepMC3Reader::Clear(Option_t * /*option*/)
 {
   fWeights.clear();
   fMomentumCoefficient = 1.0;
