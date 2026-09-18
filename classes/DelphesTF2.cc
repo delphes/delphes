@@ -18,7 +18,7 @@
 
 #include "classes/DelphesTF2.h"
 
-#include "RVersion.h"
+#include "ROOT/RVersion.hxx"
 #include "TString.h"
 
 #include <stdexcept>
