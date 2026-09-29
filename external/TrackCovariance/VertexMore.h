@@ -85,7 +85,8 @@ public:
 	TVectorD GetVpar(){ return fPar;};		// Get vertex track parameters
 	TMatrixDSym GetVcov(){ return fCov;};		// Get vertex track covariance
 	Double_t GetCharge(Int_t i) { return fQ[i]; };
-	TVector3 GetMomentum(Int_t i) { return *fpi[i]; };		// Momentum of track i at vertex
+	TVector3 GetMomentum(Int_t i) { 
+		return *fpi[i]; };		// Momentum of track i at vertex
 	TMatrixDSym GetMomentumC(Int_t i) { return *fCpi[i]; };		// Momentum errors of track i at vertex
 	TVector3 GetTotalP() { return fP; };				// Total vertex momentum
 	Double_t GetTotalQ() { return fQtot; };				// Total vertex charge

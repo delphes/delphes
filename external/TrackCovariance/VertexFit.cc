@@ -7,6 +7,8 @@ Vertex fitting code
 #include <TMatrixD.h>
 #include <TMatrixDSym.h>
 #include <TMatrixDSymEigen.h>
+#include <memory>
+#include <optional>
 #include "VertexFit.h"
 //
 // Constructors
@@ -127,6 +129,8 @@ void VertexFit::ResetWrkArrays()
 		fWi.clear();
 		fWinvi.clear();
 	}
+	fCachedDm1.reset();
+	resetCachedResults();
 }
 VertexFit::~VertexFit()
 {	
@@ -492,21 +496,20 @@ TVectorD VertexFit::GetVtxChi2List()
 //
 // Derivative of phases wrt initial track arameters
 //
-TVectorD VertexFit::DsiDa0k(Int_t i, Int_t k)
+const TVectorD & VertexFit::DsiDa0k(Int_t i, Int_t k)
 {
+	std::size_t index = flattenIndex(i,k);
+	if (fCachedDsiDa0k.at(index)){
+		return *fCachedDsiDa0k.at(index);
+	}
 	// Unit 3x3 matrix
-	TMatrixD M3(3, 3);
+	static const TMatrixD M3(3, 3);
 	TMatrixD Ui3(TMatrixD::kUnit, M3);
 	if(i != k) Ui3.Zero();	
 	//
-	// Initialize D^{-1}
-	TMatrixDSym D(3);	D.Zero();
-	TMatrixDSym Dm1(3);
-	for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
-	// 
-	// if vertex constraint
-	if(fVtxCst) D += fCovCstInv;
-	Dm1 = RegInv(D);
+
+	
+	const TMatrixDSym& Dm1 = getDm1();
 	// Other input variables
 	TVectorD ai   = *fai[i];
 	Double_t a2i  = fa2i[i];
@@ -518,23 +521,22 @@ TVectorD VertexFit::DsiDa0k(Int_t i, Int_t k)
 	TVectorD Sik = T*ai;
 	Sik *= 1./a2i;
 	//
-	return Sik;
+	fCachedDsiDa0k.at(index) = std::make_shared<TVectorD>(Sik); 
+	return *fCachedDsiDa0k.at(index);
 }
 //
 // Correlation matrix of new track parameters
-TMatrixD VertexFit::DaiDa0k(Int_t i, Int_t k)
+const TMatrixD & VertexFit::DaiDa0k(Int_t i, Int_t k)
 {
-	TMatrixD M3(3, 3);
-	TMatrixD M5(5, 5);
+	std::size_t index = flattenIndex(i,k);
+	if (fCachedDaiDa0k.at(index)){
+		return *fCachedDaiDa0k.at(index);
+	}
+	static const TMatrixD M3(3, 3);
+	static const TMatrixD M5(5, 5);
 	//
-	// Initialize D^{-1}
-	TMatrixDSym D(3);	D.Zero();
-	TMatrixDSym Dm1(3);
-	for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
-	// 
-	// if vertex constraint
-	if(fVtxCst) D += fCovCstInv;
-	Dm1 = RegInv(D);
+
+	const TMatrixDSym& Dm1 = getDm1();
 	// Other useful matrices
 	TMatrixD Ait = *fAti[i];
 	TMatrixD Ai(TMatrixD::kTransposed, Ait);
@@ -551,8 +553,8 @@ TMatrixD VertexFit::DaiDa0k(Int_t i, Int_t k)
 	TMatrixD Mi0 = (*fDi[i]) * (Ui3 - (Dm1 * (*fDi[k])));
 	TMatrixD Mik = Ait * (Mi0 * Ak);
 	TMatrixD Mi = Ui5 - (*fCov[i]) * Mik;
-	//
-	return Mi;
+	fCachedDaiDa0k.at(index) = std::make_shared<TMatrixD>(Mi); 
+	return *fCachedDaiDa0k.at(index);
 }
 TMatrixD VertexFit::GetNewCov(Int_t i, Int_t j)
 {
@@ -560,8 +562,8 @@ TMatrixD VertexFit::GetNewCov(Int_t i, Int_t j)
 	//
 	// Main computation
 	for(Int_t k=0; k<fNtr; k++){
-		TMatrixD Mi = DaiDa0k(i, k);
-		TMatrixD Mj = DaiDa0k(j, k);
+		const TMatrixD & Mi = DaiDa0k(i, k);
+		const TMatrixD & Mj = (i == j ? Mi : DaiDa0k(j, k));
 		TMatrixD Mjt(TMatrixD::kTransposed,Mj);
 		Cij += Mi*((*fCov[k])*Mjt);
 	}
@@ -569,12 +571,8 @@ TMatrixD VertexFit::GetNewCov(Int_t i, Int_t j)
 	// If vertex constraint
 	if(fVtxCst){
 		//
-		// Initialize D^{-1}
-		TMatrixDSym D(3);	D.Zero();
-		TMatrixDSym Dm1(3);
-		for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
-		D += fCovCstInv;
-		Dm1 = RegInv(D);
+
+		const TMatrixDSym& Dm1 = getDm1();
 		TMatrixD Fi = (*fCov[i])*((*fAti[i])*((*fDi[i])*Dm1));
 		TMatrixD Fj = (*fCov[j])*((*fAti[j])*((*fDi[j])*Dm1));
 		TMatrixD Fjt(TMatrixD::kTransposed,Fj);
@@ -603,12 +601,8 @@ TMatrixD VertexFit::GetNewCovXvPar(Int_t i)
 	TMatrixD M3(3,3); 
 	TMatrixD M5(5,5);
 	//
-	// Initialize D^{-1}
-	TMatrixDSym D(3);	D.Zero();
-	TMatrixDSym Dm1(3);
-	for(Int_t k=0; k<fNtr; k++) D += *fDi[k];
-	if(fVtxCst) D += fCovCstInv;
-	Dm1 = RegInv(D);
+
+	const TMatrixDSym& Dm1 = getDm1();
 	// Other useful matrices
 	//
 	// Main computation
@@ -629,7 +623,7 @@ TMatrixD VertexFit::GetNewCovXvPar(Int_t i)
 		TMatrixD Mit(TMatrixD::kTransposed,Mi);
 		Cxp += (*fDi[k])*(Ak*((*fCov[k])*Mit));
 */
-	TMatrixD Mik = DaiDa0k(i, k);
+	const TMatrixD & Mik = DaiDa0k(i, k);
 	TMatrixD Mikt(TMatrixD::kTransposed, Mik);
 	//std::cout<<"Mikt:"; Mikt.Print();
 	TMatrixD Akt = *fAti[i];
@@ -656,12 +650,8 @@ TMatrixD VertexFit::GetDxvDpar0(Int_t i)
 {
 	TMatrixD dXvDa0(3, 5); dXvDa0.Zero();	// Return matrix
 	//
-	// Initialize D^{-1}
-	TMatrixDSym D(3);	D.Zero();
-	TMatrixDSym Dm1(3);
-	for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
-	if(fVtxCst) D += fCovCstInv;
-	Dm1 = RegInv(D);
+
+	const TMatrixDSym& Dm1 = getDm1();
 	//
 	// Other useful matrix
 	TMatrixD Ait = *fAti[i];
@@ -682,6 +672,7 @@ void VertexFit::AddVtxConstraint(TVectorD xv, TMatrixDSym cov)	// Add gaussian v
 	fCovCst = cov;					// Constraint covariance
 	fCovCstInv = cov;
 	fCovCstInv.Invert();				// Its inverse
+	fCachedDm1.reset();
 	//
 	// Set starting vertex as external constraint
 	fXv = fxCst;
@@ -743,4 +734,16 @@ void VertexFit::RemoveTrk(Int_t iTrk)	// Remove iTrk track
 	ResetWrkArrays();
 	ffi.clear();
 	fVtxDone = kFALSE;			// Reset vertex done flag
+}
+
+const TMatrixDSym & VertexFit::getDm1(){
+	if (!fCachedDm1){
+		TMatrixDSym D(3);	
+		D.Zero();
+		for (Int_t k = 0; k < fNtr; k++) D += *fDi[k];
+		// if vertex constraint
+		if(fVtxCst) D += fCovCstInv;
+		fCachedDm1 = std::make_unique<TMatrixDSym>(RegInv(D));
+	}
+	return *fCachedDm1; 
 }

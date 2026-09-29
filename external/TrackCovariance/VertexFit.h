@@ -7,6 +7,7 @@
 #include <TMatrixDSym.h>
 #include "TrkUtil.h"
 #include "ObsTrk.h"
+#include <optional>
 #include <vector>
 #include <iostream>
 //
@@ -52,6 +53,20 @@ private:
 	std::vector<TMatrixDSym*> fDi;			// W-WBW
 	std::vector<TMatrixDSym*> fWi;			// (ACA')^-1
 	std::vector<TMatrixDSym*> fWinvi;		// ACA'
+	
+	// cached intermediate results
+	std::unique_ptr<TMatrixDSym> fCachedDm1 = nullptr; 
+	std::size_t flattenIndex(Int_t i, Int_t j){
+		return i * fNtr + j; 
+	}
+	std::vector<std::shared_ptr<TMatrixD>> fCachedDaiDa0k; 
+	std::vector<std::shared_ptr<TVectorD>> fCachedDsiDa0k; 
+	void resetCachedResults(){
+		fCachedDaiDa0k.clear(); 
+		fCachedDaiDa0k.resize(fNtr*fNtr, std::shared_ptr<TMatrixD>(nullptr));
+		fCachedDsiDa0k.clear(); 
+		fCachedDsiDa0k.resize(fNtr*fNtr, std::shared_ptr<TVectorD>(nullptr));
+	}
 	//
 	// Service routines
 	void ResetWrkArrays();				// Clear work arrays
@@ -86,8 +101,12 @@ public:
 	TMatrixDSym GetNewCov(Int_t i);		// Updated parameter covariance <par_i*par_i>
 	Double_t GetPhase(Int_t i) { return ffi[i]; };
 	TMatrixD GetDxvDpar0(Int_t i) ;		// X_i = dXv/dStartPar(i)
-	TMatrixD DaiDa0k(Int_t i, Int_t k);	// M^i_k: Derivative of final track parameters wrt initial
-	TVectorD DsiDa0k(Int_t i, Int_t k);	// S^i_k: Derivative of phase wrt initial track parameters
+	const TMatrixD & DaiDa0k(Int_t i, Int_t k);	// M^i_k: Derivative of final track parameters wrt initial
+	const TVectorD & DsiDa0k(Int_t i, Int_t k);	// S^i_k: Derivative of phase wrt initial track parameters
+	const TMatrixDSym & getDm1(); 
+	inline TMatrixDSym* getCache(){
+		return fCachedDm1.get(); 
+	}
 	//
 	// Handle tracks/constraints
 	void AddVtxConstraint(TVectorD xv, TMatrixDSym cov);	// Add gaussian vertex constraint
