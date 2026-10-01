@@ -182,6 +182,7 @@ void RunPUPPI::Process()
     curRecoObj.eta = momentum.Eta();
     curRecoObj.phi = momentum.Phi();
     curRecoObj.m = momentum.M();
+    curRecoObj.charge = candidate->Charge;
     particle = static_cast<Candidate *>(candidate->GetCandidates()->At(0)); //if(fApplyNoLep && TMath::Abs(candidate->PID) == 11) continue; //Dumb cut to minimize the nolepton on electron
     //if(fApplyNoLep && TMath::Abs(candidate->PID) == 13) continue;
     if(candidate->IsRecoPU and candidate->Charge != 0)

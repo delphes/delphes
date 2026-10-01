@@ -8,7 +8,7 @@ public:
 	pt(0), eta(0), phi(0), m(0),
 	pfType(-1),vtxId(-1),
 	trkChi2(0),vtxChi2(0),
-	id(0),time(0),depth(0)
+	id(0),time(0),depth(0),charge(0)
     {}
     ~RecoObj(){}
     
