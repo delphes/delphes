@@ -1,4 +1,4 @@
-// $Id: BottomUpSoftDrop.cc 1064 2017-09-08 09:19:57Z gsoyez $
+// $Id: BottomUpSoftDrop.cc 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2017-, Gavin P. Salam, Gregory Soyez, Jesse Thaler,
 // Kevin Zhou, Frederic Dreyer

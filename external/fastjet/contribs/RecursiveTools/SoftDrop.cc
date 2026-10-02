@@ -1,4 +1,4 @@
-// $Id: SoftDrop.cc 1059 2017-09-07 20:48:00Z gsoyez $
+// $Id: SoftDrop.cc 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2014-, Gregory Soyez, Jesse. Thaler
 // based on arXiv:1402.2657 by Andrew J. Larkoski, Simone Marzani,

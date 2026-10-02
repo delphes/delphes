@@ -1,4 +1,4 @@
-// $Id: IteratedSoftDrop.hh 1086 2017-10-11 08:07:26Z gsoyez $
+// $Id: IteratedSoftDrop.hh 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2017-, Jesse Thaler, Kevin Zhou, Gavin P. Salam,
 // Gregory Soyez

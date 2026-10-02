@@ -1,4 +1,4 @@
-// $Id: ModifiedMassDropTagger.cc 683 2014-06-13 14:38:38Z gsoyez $
+// $Id: ModifiedMassDropTagger.cc 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2014-, Gavin P. Salam
 //

@@ -1,3 +1,8 @@
+2026/09/30: release of version 2.0.5
+            Batch application of patch from Juan Mighel Carceller & Jesse 
+            Thaler(+Claude) to resolve compilation issues with MacOS27/C++23
+
+2024/12/11: release of version 2.0.4, moving to new-form contrib, with FJCONTRIB.cfg file and include files in include/fastjet/contrib, to allow for use as a dependency of other fjcontribs packages.
 2024/10/04: release of version 2.0.3, resolving use of wrong Recluster.hh in RecursiveSoftDrop.hh
 2024/02/22: release of version 2.0.2, addressing rounding issue in recursive soft drop example
 2021/08/21: release of version 2.0.1, addressing rare divide-by-zero in calculation of mu2

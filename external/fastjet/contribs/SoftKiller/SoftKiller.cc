@@ -1,4 +1,4 @@
-// $Id$
+// $Id: SoftKiller.cc 1586 2026-09-30 14:32:00Z salam $
 //
 // Copyright (c) 2014-, Matteo Cacciari, Gavin. P. Salam and Gregory Soyez
 //
@@ -20,6 +20,7 @@
 //----------------------------------------------------------------------
 
 #include "SoftKiller.hh"
+#include <algorithm>
 #include <sstream>
 
 using namespace std;

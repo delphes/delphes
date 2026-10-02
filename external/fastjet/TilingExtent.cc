@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id$
 //
-// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2026, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -72,6 +72,29 @@ void TilingExtent::_determine_rapidity_extent(const vector<PseudoJet> & particle
     if (ibin < 0) ibin = 0;
     if (ibin >= nbins) ibin = nbins - 1;
     counts[ibin]++;
+  }
+
+  if (_minrap > _maxrap) {
+    // Occurs if particles have E=|pz|; this will usually mean all
+    // rapidities are "infinite" (1e5+|pz|). Special use cases (e.g.
+    // PanScales log-accuracy tests) may have manually rapidities that
+    // are large, but physically correct, while still triggering E=|pz|
+    //
+    // In any case, leaving _minrap > _maxrap leads to a badly
+    // initialised tiling and segfaults, so we set things up, with a
+    // "pretend" range that effectively puts the particles into two
+    // bins, sufficiently distant that that they will usually not
+    // communicate with each other in tiled clutering, but not so
+    // distant that we have a huge number of empty tiles.
+    _minrap = -2.5;
+    _maxrap =  2.5;
+    for (unsigned i = 0; i < particles.size(); i++) {
+      double rap = particles[i].pz() > 0 ? _maxrap : _minrap;
+      ibin = int(rap+nrap); 
+      if (ibin < 0) ibin = 0;
+      if (ibin >= nbins) ibin = nbins - 1;
+      counts[ibin]++;
+    }
   }
 
   // now figure out the particle count in the busiest bin

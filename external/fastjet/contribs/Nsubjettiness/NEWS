@@ -1,3 +1,7 @@
+2026/09/30: release of version 2.3.3
+            Batch application of patch from Juan Mighel Carceller & Jesse 
+            Thaler(+Claude) to resolve compilation issues with MacOS27/C++23
+
 -------------------------
 Version 2
 -------------------------

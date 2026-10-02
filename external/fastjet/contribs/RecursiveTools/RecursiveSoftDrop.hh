@@ -1,4 +1,4 @@
-// $Id: RecursiveSoftDrop.hh 1431 2024-10-04 12:29:53Z salam $
+// $Id: RecursiveSoftDrop.hh 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2014-, Gavin P. Salam, Gregory Soyez, Jesse Thaler,
 // Kevin Zhou, Frederic Dreyer

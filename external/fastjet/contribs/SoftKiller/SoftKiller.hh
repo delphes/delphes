@@ -1,4 +1,4 @@
-// $Id$
+// $Id: SoftKiller.hh 769 2015-02-20 14:48:49Z gsalam $
 //
 // Copyright (c) 2014-, Matteo Cacciari, Gavin. P. Salam and Gregory Soyez
 //

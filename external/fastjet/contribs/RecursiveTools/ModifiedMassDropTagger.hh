@@ -1,4 +1,4 @@
-// $Id: ModifiedMassDropTagger.hh 1032 2017-07-31 14:20:03Z gsoyez $
+// $Id: ModifiedMassDropTagger.hh 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2014-, Gavin P. Salam
 // based on arXiv:1307.007 by Mrinal Dasgupta, Simone Marzani and Gavin P. Salam

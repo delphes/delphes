@@ -1,4 +1,4 @@
-// $Id: RecursiveSymmetryCutBase.hh 1074 2017-09-18 15:15:20Z gsoyez $
+// $Id: RecursiveSymmetryCutBase.hh 1444 2024-12-09 18:15:56Z salam $
 //
 // Copyright (c) 2014-, Gavin P. Salam, Gregory Soyez, Jesse Thaler
 //

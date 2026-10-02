@@ -1,7 +1,7 @@
 //FJSTARTHEADER
 // $Id$
 //
-// Copyright (c) 2005-2025, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
+// Copyright (c) 2005-2026, Matteo Cacciari, Gavin P. Salam and Gregory Soyez
 //
 //----------------------------------------------------------------------
 // This file is part of FastJet.
@@ -73,7 +73,7 @@ void ClusterSequence::_bj_remove_from_tiles(TiledJet * const jet) {
 ///
 /// The neighbourhood of a tile is set up as follows
 ///
-/// 	      LRR
+///           LRR
 ///           LXR
 ///           LLR
 ///
@@ -139,13 +139,13 @@ void ClusterSequence::_initialise_tiles() {
       // set up L's in column to the left of X
       tile->surrounding_tiles = pptile;
       if (ieta > _tiles_ieta_min) {
-	// with the itile subroutine, we can safely run tiles from
-	// idphi=-1 to idphi=+1, because it takes care of
-	// negative and positive boundaries
-	for (int idphi = -1; idphi <=+1; idphi++) {
-	  *pptile = & _tiles[_tile_index(ieta-1,iphi+idphi)];
-	  pptile++;
-	}	
+        // with the itile subroutine, we can safely run tiles from
+        // idphi=-1 to idphi=+1, because it takes care of
+        // negative and positive boundaries
+        for (int idphi = -1; idphi <=+1; idphi++) {
+          *pptile = & _tiles[_tile_index(ieta-1,iphi+idphi)];
+          pptile++;
+        }        
       }
       // now set up last L (below X)
       *pptile = & _tiles[_tile_index(ieta,iphi-1)];
@@ -156,10 +156,10 @@ void ClusterSequence::_initialise_tiles() {
       pptile++;
       // set up remaining R's, to the right of X
       if (ieta < _tiles_ieta_max) {
-	for (int idphi = -1; idphi <= +1; idphi++) {
-	  *pptile = & _tiles[_tile_index(ieta+1,iphi+idphi)];
-	  pptile++;
-	}	
+        for (int idphi = -1; idphi <= +1; idphi++) {
+          *pptile = & _tiles[_tile_index(ieta+1,iphi+idphi)];
+          pptile++;
+        }        
       }
       // now put semaphore for end tile
       tile->end_tiles = pptile;
@@ -197,7 +197,7 @@ int ClusterSequence::_tile_index(const double eta, const double phi) const {
 // overloaded version which additionally sets up information regarding the
 // tiling
 inline void ClusterSequence::_tj_set_jetinfo( TiledJet * const jet,
-					      const int _jets_index) {
+                                              const int _jets_index) {
   // first call the generic setup
   _bj_set_jetinfo<>(jet, _jets_index);
 
@@ -241,7 +241,7 @@ void ClusterSequence::_print_tiles(TiledJet * briefjets ) const {
 /// space, but fear is that it would have been slower, e.g. checking
 /// for end of vector at each stage to decide whether to resize it)
 void ClusterSequence::_add_neighbours_to_tile_union(const int tile_index, 
-	       vector<int> & tile_union, int & n_near_tiles) const {
+               vector<int> & tile_union, int & n_near_tiles) const {
   for (Tile * const * near_tile = _tiles[tile_index].begin_tiles; 
        near_tile != _tiles[tile_index].end_tiles; near_tile++){
     // get the tile number
@@ -274,7 +274,7 @@ void ClusterSequence::_add_neighbours_to_tile_union(const int tile_index,
 /// diagnostic ignored "-Wpragmas" at the top of this file
 inline void ClusterSequence::_add_untagged_neighbours_to_tile_union(
                const int tile_index, 
-	       vector<int> & tile_union, int & n_near_tiles)  {
+               vector<int> & tile_union, int & n_near_tiles)  {
   for (Tile ** near_tile = _tiles[tile_index].begin_tiles; 
        near_tile != _tiles[tile_index].end_tiles; near_tile++){
     if (! (*near_tile)->tagged) {
@@ -318,19 +318,19 @@ void ClusterSequence::_tiled_N2_cluster() {
     // first do it on this tile
     for (jetA = tile->head; jetA != NULL; jetA = jetA->next) {
       for (jetB = tile->head; jetB != jetA; jetB = jetB->next) {
-	double dist = _bj_dist(jetA,jetB);
-	if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
-	if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
+        double dist = _bj_dist(jetA,jetB);
+        if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
+        if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
       }
     }
     // then do it for RH tiles
     for (Tile ** RTile = tile->RH_tiles; RTile != tile->end_tiles; RTile++) {
       for (jetA = tile->head; jetA != NULL; jetA = jetA->next) {
-	for (jetB = (*RTile)->head; jetB != NULL; jetB = jetB->next) {
-	  double dist = _bj_dist(jetA,jetB);
-	  if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
-	  if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
-	}
+        for (jetB = (*RTile)->head; jetB != NULL; jetB = jetB->next) {
+          double dist = _bj_dist(jetA,jetB);
+          if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
+          if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
+        }
       }
     }
   }
@@ -383,7 +383,7 @@ void ClusterSequence::_tiled_N2_cluster() {
     } else {
       // jet-beam recombination
       _do_iB_recombination_step(jetA->_jets_index, diJ_min);
-	    
+            
       _bj_remove_from_tiles(jetA);
     }
 
@@ -394,27 +394,27 @@ void ClusterSequence::_tiled_N2_cluster() {
     if (jetB != NULL) {
       bool sort_it = false;
       if (jetB->tile_index != jetA->tile_index) {
-	sort_it = true;
-	_add_neighbours_to_tile_union(jetB->tile_index,tile_union,n_near_tiles);
+        sort_it = true;
+        _add_neighbours_to_tile_union(jetB->tile_index,tile_union,n_near_tiles);
       }
       if (oldB.tile_index != jetA->tile_index && 
-	  oldB.tile_index != jetB->tile_index) {
-	sort_it = true;
-	_add_neighbours_to_tile_union(oldB.tile_index,tile_union,n_near_tiles);
+          oldB.tile_index != jetB->tile_index) {
+        sort_it = true;
+        _add_neighbours_to_tile_union(oldB.tile_index,tile_union,n_near_tiles);
       }
 
       if (sort_it) {
-	// sort the tiles before then compressing the list
-	sort(tile_union.begin(), tile_union.begin()+n_near_tiles);
-	// and now condense the list
-	int nnn = 1;
-	for (int i = 1; i < n_near_tiles; i++) {
-	  if (tile_union[i] != tile_union[nnn-1]) {
-	    tile_union[nnn] = tile_union[i]; 
-	    nnn++;
-	  }
-	}
-	n_near_tiles = nnn;
+        // sort the tiles before then compressing the list
+        sort(tile_union.begin(), tile_union.begin()+n_near_tiles);
+        // and now condense the list
+        int nnn = 1;
+        for (int i = 1; i < n_near_tiles; i++) {
+          if (tile_union[i] != tile_union[nnn-1]) {
+            tile_union[nnn] = tile_union[i]; 
+            nnn++;
+          }
+        }
+        n_near_tiles = nnn;
       }
     }
 
@@ -431,9 +431,9 @@ void ClusterSequence::_tiled_N2_cluster() {
       // pointers to jetA (from predecessors, successors and the tile
       // head if need be)
       if (jetA->previous == NULL) {
-	_tiles[jetA->tile_index].head = jetA;
+        _tiles[jetA->tile_index].head = jetA;
       } else {
-	jetA->previous->next = jetA;
+        jetA->previous->next = jetA;
       }
       if (jetA->next != NULL) {jetA->next->previous = jetA;}
     }
@@ -443,41 +443,41 @@ void ClusterSequence::_tiled_N2_cluster() {
     for (int itile = 0; itile < n_near_tiles; itile++) {
       Tile * tile_ptr = &_tiles[tile_union[itile]];
       for (TiledJet * jetI = tile_ptr->head; jetI != NULL; jetI = jetI->next) {
-	// see if jetI had jetA or jetB as a NN -- if so recalculate the NN
-	if (jetI->NN == jetA || (jetI->NN == jetB && jetB != NULL)) {
-	  jetI->NN_dist = _R2;
-	  jetI->NN      = NULL;
-	  // now go over tiles that are neighbours of I (include own tile)
-	  for (Tile ** near_tile  = tile_ptr->begin_tiles; 
-	               near_tile != tile_ptr->end_tiles; near_tile++) {
-	    // and then over the contents of that tile
-	    for (TiledJet * jetJ  = (*near_tile)->head; 
+        // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
+        if (jetI->NN == jetA || (jetI->NN == jetB && jetB != NULL)) {
+          jetI->NN_dist = _R2;
+          jetI->NN      = NULL;
+          // now go over tiles that are neighbours of I (include own tile)
+          for (Tile ** near_tile  = tile_ptr->begin_tiles; 
+                       near_tile != tile_ptr->end_tiles; near_tile++) {
+            // and then over the contents of that tile
+            for (TiledJet * jetJ  = (*near_tile)->head; 
                             jetJ != NULL; jetJ = jetJ->next) {
-	      double dist = _bj_dist(jetI,jetJ);
-	      if (dist < jetI->NN_dist && jetJ != jetI) {
-		jetI->NN_dist = dist; jetI->NN = jetJ;
-	      }
-	    }
-	  }
-	  diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
-	}
-	// check whether new jetB is closer than jetI's current NN and
-	// if need to update things
-	if (jetB != NULL) {
-	  double dist = _bj_dist(jetI,jetB);
-	  if (dist < jetI->NN_dist) {
-	    if (jetI != jetB) {
-	      jetI->NN_dist = dist;
-	      jetI->NN = jetB;
-	      diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
-	    }
-	  }
-	  if (dist < jetB->NN_dist) {
-	    if (jetI != jetB) {
-	      jetB->NN_dist = dist;
-	      jetB->NN      = jetI;}
-	  }
-	}
+              double dist = _bj_dist(jetI,jetJ);
+              if (dist < jetI->NN_dist && jetJ != jetI) {
+                jetI->NN_dist = dist; jetI->NN = jetJ;
+              }
+            }
+          }
+          diJ[jetI-head] = _bj_diJ(jetI); // update diJ 
+        }
+        // check whether new jetB is closer than jetI's current NN and
+        // if need to update things
+        if (jetB != NULL) {
+          double dist = _bj_dist(jetI,jetB);
+          if (dist < jetI->NN_dist) {
+            if (jetI != jetB) {
+              jetI->NN_dist = dist;
+              jetI->NN = jetB;
+              diJ[jetI-head] = _bj_diJ(jetI); // update diJ...
+            }
+          }
+          if (dist < jetB->NN_dist) {
+            if (jetI != jetB) {
+              jetB->NN_dist = dist;
+              jetB->NN      = jetI;}
+          }
+        }
       }
     }
 
@@ -487,11 +487,11 @@ void ClusterSequence::_tiled_N2_cluster() {
 
     // remember to update pointers to tail
     for (Tile ** near_tile = _tiles[tail->tile_index].begin_tiles; 
-	         near_tile!= _tiles[tail->tile_index].end_tiles; near_tile++){
+                 near_tile!= _tiles[tail->tile_index].end_tiles; near_tile++){
       // and then the contents of that tile
       for (TiledJet * jetJ = (*near_tile)->head; 
-	             jetJ != NULL; jetJ = jetJ->next) {
-	if (jetJ->NN == tail) {jetJ->NN = jetA;}
+                     jetJ != NULL; jetJ = jetJ->next) {
+        if (jetJ->NN == tail) {jetJ->NN = jetA;}
       }
     }
 
@@ -541,19 +541,19 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
     // first do it on this tile
     for (jetA = tile->head; jetA != NULL; jetA = jetA->next) {
       for (jetB = tile->head; jetB != jetA; jetB = jetB->next) {
-	double dist = _bj_dist(jetA,jetB);
-	if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
-	if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
+        double dist = _bj_dist(jetA,jetB);
+        if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
+        if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
       }
     }
     // then do it for RH tiles
     for (Tile ** RTile = tile->RH_tiles; RTile != tile->end_tiles; RTile++) {
       for (jetA = tile->head; jetA != NULL; jetA = jetA->next) {
-	for (jetB = (*RTile)->head; jetB != NULL; jetB = jetB->next) {
-	  double dist = _bj_dist(jetA,jetB);
-	  if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
-	  if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
-	}
+        for (jetB = (*RTile)->head; jetB != NULL; jetB = jetB->next) {
+          double dist = _bj_dist(jetA,jetB);
+          if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
+          if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
+        }
       }
     }
     // no need to do it for LH tiles, since they are implicitly done
@@ -572,7 +572,7 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
   jetA = head;
   for (int i = 0; i < n; i++) {
     diJ[i].diJ = _bj_diJ(jetA); // kt distance * R^2
-    diJ[i].jet = jetA;  // our compact diJ table will not be in	     
+    diJ[i].jet = jetA;  // our compact diJ table will not be in             
     jetA->diJ_posn = i; // one-to-one corresp. with non-compact jets,
                         // so set up bi-directional correspondence here.
     jetA++; // have jetA follow i 
@@ -629,16 +629,16 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
     // and one new jet.
     int n_near_tiles = 0;
     _add_untagged_neighbours_to_tile_union(jetA->tile_index, 
-					   tile_union, n_near_tiles);
+                                           tile_union, n_near_tiles);
     if (jetB != NULL) {
       if (jetB->tile_index != jetA->tile_index) {
-	_add_untagged_neighbours_to_tile_union(jetB->tile_index,
-					       tile_union,n_near_tiles);
+        _add_untagged_neighbours_to_tile_union(jetB->tile_index,
+                                               tile_union,n_near_tiles);
       }
       if (oldB.tile_index != jetA->tile_index && 
-	  oldB.tile_index != jetB->tile_index) {
-	_add_untagged_neighbours_to_tile_union(oldB.tile_index,
-					       tile_union,n_near_tiles);
+          oldB.tile_index != jetB->tile_index) {
+        _add_untagged_neighbours_to_tile_union(oldB.tile_index,
+                                               tile_union,n_near_tiles);
       }
     }
 
@@ -658,42 +658,42 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
       tile_ptr->tagged = false; // reset tag, since we're done with unions
       // run over all jets in the current tile
       for (TiledJet * jetI = tile_ptr->head; jetI != NULL; jetI = jetI->next) {
-	// see if jetI had jetA or jetB as a NN -- if so recalculate the NN
-	if (jetI->NN == jetA || (jetI->NN == jetB && jetB != NULL)) {
-	  jetI->NN_dist = _R2;
-	  jetI->NN      = NULL;
-	  // now go over tiles that are neighbours of I (include own tile)
-	  for (Tile ** near_tile  = tile_ptr->begin_tiles; 
-	               near_tile != tile_ptr->end_tiles; near_tile++) {
-	    // and then over the contents of that tile
-	    for (TiledJet * jetJ  = (*near_tile)->head; 
+        // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
+        if (jetI->NN == jetA || (jetI->NN == jetB && jetB != NULL)) {
+          jetI->NN_dist = _R2;
+          jetI->NN      = NULL;
+          // now go over tiles that are neighbours of I (include own tile)
+          for (Tile ** near_tile  = tile_ptr->begin_tiles; 
+                       near_tile != tile_ptr->end_tiles; near_tile++) {
+            // and then over the contents of that tile
+            for (TiledJet * jetJ  = (*near_tile)->head; 
                             jetJ != NULL; jetJ = jetJ->next) {
-	      double dist = _bj_dist(jetI,jetJ);
-	      if (dist < jetI->NN_dist && jetJ != jetI) {
-		jetI->NN_dist = dist; jetI->NN = jetJ;
-	      }
-	    }
-	  }
-	  diJ[jetI->diJ_posn].diJ = _bj_diJ(jetI); // update diJ kt-dist
-	}
-	// check whether new jetB is closer than jetI's current NN and
-	// if jetI is closer than jetB's current (evolving) nearest
-	// neighbour. Where relevant update things
-	if (jetB != NULL) {
-	  double dist = _bj_dist(jetI,jetB);
-	  if (dist < jetI->NN_dist) {
-	    if (jetI != jetB) {
-	      jetI->NN_dist = dist;
-	      jetI->NN = jetB;
-	      diJ[jetI->diJ_posn].diJ = _bj_diJ(jetI); // update diJ...
-	    }
-	  }
-	  if (dist < jetB->NN_dist) {
-	    if (jetI != jetB) {
-	      jetB->NN_dist = dist;
-	      jetB->NN      = jetI;}
-	  }
-	}
+              double dist = _bj_dist(jetI,jetJ);
+              if (dist < jetI->NN_dist && jetJ != jetI) {
+                jetI->NN_dist = dist; jetI->NN = jetJ;
+              }
+            }
+          }
+          diJ[jetI->diJ_posn].diJ = _bj_diJ(jetI); // update diJ kt-dist
+        }
+        // check whether new jetB is closer than jetI's current NN and
+        // if jetI is closer than jetB's current (evolving) nearest
+        // neighbour. Where relevant update things
+        if (jetB != NULL) {
+          double dist = _bj_dist(jetI,jetB);
+          if (dist < jetI->NN_dist) {
+            if (jetI != jetB) {
+              jetI->NN_dist = dist;
+              jetI->NN = jetB;
+              diJ[jetI->diJ_posn].diJ = _bj_diJ(jetI); // update diJ...
+            }
+          }
+          if (dist < jetB->NN_dist) {
+            if (jetI != jetB) {
+              jetB->NN_dist = dist;
+              jetB->NN      = jetI;}
+          }
+        }
       }
     }
 
@@ -738,19 +738,19 @@ void ClusterSequence::_minheap_faster_tiled_N2_cluster() {
     // first do it on this tile
     for (jetA = tile->head; jetA != NULL; jetA = jetA->next) {
       for (jetB = tile->head; jetB != jetA; jetB = jetB->next) {
-	double dist = _bj_dist(jetA,jetB);
-	if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
-	if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
+        double dist = _bj_dist(jetA,jetB);
+        if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
+        if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
       }
     }
     // then do it for RH tiles
     for (Tile ** RTile = tile->RH_tiles; RTile != tile->end_tiles; RTile++) {
       for (jetA = tile->head; jetA != NULL; jetA = jetA->next) {
-	for (jetB = (*RTile)->head; jetB != NULL; jetB = jetB->next) {
-	  double dist = _bj_dist(jetA,jetB);
-	  if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
-	  if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
-	}
+        for (jetB = (*RTile)->head; jetB != NULL; jetB = jetB->next) {
+          double dist = _bj_dist(jetA,jetB);
+          if (dist < jetA->NN_dist) {jetA->NN_dist = dist; jetA->NN = jetB;}
+          if (dist < jetB->NN_dist) {jetB->NN_dist = dist; jetB->NN = jetA;}
+        }
       }
     }
     // no need to do it for LH tiles, since they are implicitly done
@@ -770,7 +770,7 @@ void ClusterSequence::_minheap_faster_tiled_N2_cluster() {
   //jetA = head;
   //for (int i = 0; i < n; i++) {
   //  diJ[i].diJ = _bj_diJ(jetA); // kt distance * R^2
-  //  diJ[i].jet = jetA;  // our compact diJ table will not be in	     
+  //  diJ[i].jet = jetA;  // our compact diJ table will not be in             
   //  jetA->diJ_posn = i; // one-to-one corresp. with non-compact jets,
   //                      // so set up bi-directional correspondence here.
   //  jetA++; // have jetA follow i 
@@ -828,23 +828,23 @@ void ClusterSequence::_minheap_faster_tiled_N2_cluster() {
     // and one new jet.
     int n_near_tiles = 0;
     _add_untagged_neighbours_to_tile_union(jetA->tile_index, 
-					   tile_union, n_near_tiles);
+                                           tile_union, n_near_tiles);
     if (jetB != NULL) {
       if (jetB->tile_index != jetA->tile_index) {
-	_add_untagged_neighbours_to_tile_union(jetB->tile_index,
-					       tile_union,n_near_tiles);
+        _add_untagged_neighbours_to_tile_union(jetB->tile_index,
+                                               tile_union,n_near_tiles);
       }
       if (oldB.tile_index != jetA->tile_index && 
-	  oldB.tile_index != jetB->tile_index) {
-	// GS: the line below generates a warning that oldB.tile_index
-	// may be used uninitialised. However, to reach this point, we
-	// ned jetB != NULL (see test a few lines above) and is jetB
-	// !=NULL, one would have gone through "oldB = *jetB before
-	// (see piece of code ~20 line above), so the index is
-	// initialised. We do not do anything to avoid the warning to
-	// avoid any potential speed impact.
-	_add_untagged_neighbours_to_tile_union(oldB.tile_index,
-					       tile_union,n_near_tiles);
+          oldB.tile_index != jetB->tile_index) {
+        // GS: the line below generates a warning that oldB.tile_index
+        // may be used uninitialised. However, to reach this point, we
+        // ned jetB != NULL (see test a few lines above) and is jetB
+        // !=NULL, one would have gone through "oldB = *jetB before
+        // (see piece of code ~20 line above), so the index is
+        // initialised. We do not do anything to avoid the warning to
+        // avoid any potential speed impact.
+        _add_untagged_neighbours_to_tile_union(oldB.tile_index,
+                                               tile_union,n_near_tiles);
       }
       // indicate that we'll have to update jetB in the minheap
       jetB->label_minheap_update_needed();
@@ -860,48 +860,48 @@ void ClusterSequence::_minheap_faster_tiled_N2_cluster() {
       tile_ptr->tagged = false; // reset tag, since we're done with unions
       // run over all jets in the current tile
       for (TiledJet * jetI = tile_ptr->head; jetI != NULL; jetI = jetI->next) {
-	// see if jetI had jetA or jetB as a NN -- if so recalculate the NN
-	if (jetI->NN == jetA || (jetI->NN == jetB && jetB != NULL)) {
-	  jetI->NN_dist = _R2;
-	  jetI->NN      = NULL;
-	  // label jetI as needing heap action...
-	  if (!jetI->minheap_update_needed()) {
-	    jetI->label_minheap_update_needed();
-	    jets_for_minheap.push_back(jetI);}
-	  // now go over tiles that are neighbours of I (include own tile)
-	  for (Tile ** near_tile  = tile_ptr->begin_tiles; 
-	               near_tile != tile_ptr->end_tiles; near_tile++) {
-	    // and then over the contents of that tile
-	    for (TiledJet * jetJ  = (*near_tile)->head; 
+        // see if jetI had jetA or jetB as a NN -- if so recalculate the NN
+        if (jetI->NN == jetA || (jetI->NN == jetB && jetB != NULL)) {
+          jetI->NN_dist = _R2;
+          jetI->NN      = NULL;
+          // label jetI as needing heap action...
+          if (!jetI->minheap_update_needed()) {
+            jetI->label_minheap_update_needed();
+            jets_for_minheap.push_back(jetI);}
+          // now go over tiles that are neighbours of I (include own tile)
+          for (Tile ** near_tile  = tile_ptr->begin_tiles; 
+                       near_tile != tile_ptr->end_tiles; near_tile++) {
+            // and then over the contents of that tile
+            for (TiledJet * jetJ  = (*near_tile)->head; 
                             jetJ != NULL; jetJ = jetJ->next) {
-	      double dist = _bj_dist(jetI,jetJ);
-	      if (dist < jetI->NN_dist && jetJ != jetI) {
-		jetI->NN_dist = dist; jetI->NN = jetJ;
-	      }
-	    }
-	  }
-	}
-	// check whether new jetB is closer than jetI's current NN and
-	// if jetI is closer than jetB's current (evolving) nearest
-	// neighbour. Where relevant update things
-	if (jetB != NULL) {
-	  double dist = _bj_dist(jetI,jetB);
-	  if (dist < jetI->NN_dist) {
-	    if (jetI != jetB) {
-	      jetI->NN_dist = dist;
-	      jetI->NN = jetB;
-	      // label jetI as needing heap action...
-	      if (!jetI->minheap_update_needed()) {
-		jetI->label_minheap_update_needed();
-		jets_for_minheap.push_back(jetI);}
-	    }
-	  }
-	  if (dist < jetB->NN_dist) {
-	    if (jetI != jetB) {
-	      jetB->NN_dist = dist;
-	      jetB->NN      = jetI;}
-	  }
-	}
+              double dist = _bj_dist(jetI,jetJ);
+              if (dist < jetI->NN_dist && jetJ != jetI) {
+                jetI->NN_dist = dist; jetI->NN = jetJ;
+              }
+            }
+          }
+        }
+        // check whether new jetB is closer than jetI's current NN and
+        // if jetI is closer than jetB's current (evolving) nearest
+        // neighbour. Where relevant update things
+        if (jetB != NULL) {
+          double dist = _bj_dist(jetI,jetB);
+          if (dist < jetI->NN_dist) {
+            if (jetI != jetB) {
+              jetI->NN_dist = dist;
+              jetI->NN = jetB;
+              // label jetI as needing heap action...
+              if (!jetI->minheap_update_needed()) {
+                jetI->label_minheap_update_needed();
+                jets_for_minheap.push_back(jetI);}
+            }
+          }
+          if (dist < jetB->NN_dist) {
+            if (jetI != jetB) {
+              jetB->NN_dist = dist;
+              jetB->NN      = jetI;}
+          }
+        }
       }
     }
 

@@ -1,3 +1,39 @@
+2026-09-30  Gavin Salam
+
+	* NEWS:
+	* FJCONTRIB.cfg (version):
+	release of version 2.0.5
+
+	* Recluster.cc:
+	Batch application of patch from Juan Mighel Carceller & Jesse 
+	Thaler(+Claude) to resolve compilation issues with MacOS27/C++23
+
+2024-12-11  Gavin Salam  <gavin.salam@physics.ox.ac.uk>
+
+	* FJCONTRIB.cfg (version):
+	* NEWS:
+	updated version to 2.0.4 and put in today's date as release date
+
+	* AUTHORS:
+	moved Kevin Zhou and Frederic Dreyer to former developers
+
+2024-12-10 Tue  <gavin.salam@physics.ox.ac.uk>
+
+	* FJCONTRIB.cfg:
+	* NEWS:
+	Preparing a 2.0.4-rc1 release
+
+2024-12-09 Mon  <gavin.salam@physics.ox.ac.uk> (with help from Matteo Cacciari)
+
+	* Makefile:
+	* *.cc/*.hh:
+	moved hh files into include/fastjet/contrib and adapted the
+	Makefile accordingly. This is to make it easier to use the contrib
+	as a dependency in other contribs.
+
+	* VERSION: -> FJCONTRIB.cfg
+	updated to new form of version & other configuration info file
+
 2024-10-04 Fri  <gavin.salam@physics.ox.ac.uk>
 
 	* VERSION:

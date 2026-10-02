@@ -4,7 +4,7 @@
 //  Copyright (c) 2011-14
 //  Jesse Thaler, Ken Van Tilburg, Christopher K. Vermilion, and TJ Wilkason
 //
-//  $Id: AxesDefinition.hh 1412 2024-02-29 00:15:59Z jthaler $
+//  $Id: AxesDefinition.hh 1583 2026-09-30 14:31:45Z salam $
 //----------------------------------------------------------------------
 // This file is part of FastJet contrib.
 //
@@ -27,6 +27,7 @@
 
 
 #include "MeasureDefinition.hh"
+#include <algorithm>
 #include "ExtraRecombiners.hh"
 
 #include "fastjet/PseudoJet.hh"
