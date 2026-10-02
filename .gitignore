@@ -4,13 +4,16 @@
 *bk
 CaloGrid
 ClassesDict_rdict.pcm
-DelphesHepMC
+DelphesCMSFWLite
+DelphesHepMC2
+DelphesHepMC3
 DelphesLHEF
 DelphesROOT
 DelphesSTDHEP
 DelphesValidation
 ExRootAnalysisDict_rdict.pcm
 Example1
+ModulesFastJetDict_rdict.pcm
 FastJetDict_rdict.pcm
 ModulesDict_rdict.pcm
 hepmc2pileup
