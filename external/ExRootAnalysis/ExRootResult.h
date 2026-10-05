@@ -1,7 +1,6 @@
 #ifndef ExRootResult_h
 #define ExRootResult_h
 
-#include "Gtypes.h"
 #include "Rtypes.h"
 #include "TMath.h"
 
