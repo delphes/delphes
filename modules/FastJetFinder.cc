@@ -65,6 +65,7 @@
 #include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
 #include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
+#include "fastjet/contribs/EnergyCorrelator/EnergyCorrelator.hh"
 
 #include "fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh"
 
@@ -121,6 +122,9 @@ void FastJetFinder::Init()
   fAxisMode = GetInt("AxisMode", 1);
   fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
   fN = GetInt("N", 2); // used only if Njettiness is used as jet clustering algo (case 8)
+
+  fComputeEnergyCorrelationFunctions = GetBool("ComputeEnergyCorrelationFunctions", false);
+  fECFBeta = GetDouble("ECFBeta", 1.0);
 
   //-- Exclusive clustering for e+e- collisions --
 
@@ -575,6 +579,21 @@ void FastJetFinder::Process()
       candidate->Tau[2] = nSub3(*itOutputList);
       candidate->Tau[3] = nSub4(*itOutputList);
       candidate->Tau[4] = nSub5(*itOutputList);
+    }
+
+    if(fComputeEnergyCorrelationFunctions)
+    {
+      contrib::EnergyCorrelator ecf1(1, fECFBeta);
+      contrib::EnergyCorrelator ecf2(2, fECFBeta);
+      contrib::EnergyCorrelator ecf3(3, fECFBeta);
+      contrib::EnergyCorrelator ecf4(4, fECFBeta);
+      contrib::EnergyCorrelator ecf5(5, fECFBeta);
+
+      candidate->ECF[0] = ecf1(*itOutputList);
+      candidate->ECF[1] = ecf2(*itOutputList);
+      candidate->ECF[2] = ecf3(*itOutputList);
+      candidate->ECF[3] = ecf4(*itOutputList);
+      candidate->ECF[4] = ecf5(*itOutputList);
     }
 
     fOutputArray->Add(candidate);
