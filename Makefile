@@ -1499,6 +1499,9 @@ tmp/external/fastjet/contribs/Nsubjettiness/TauComponents.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/TauComponents.$(SrcSuf)
 tmp/external/fastjet/contribs/Nsubjettiness/XConePlugin.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/XConePlugin.$(SrcSuf)
+tmp/external/fastjet/contribs/EnergyCorrelator/EnergyCorrelator.$(ObjSuf): \
+	external/fastjet/contribs/EnergyCorrelator/EnergyCorrelator.$(SrcSuf) \
+	external/fastjet/contribs/EnergyCorrelator/EnergyCorrelator.hh
 tmp/external/fastjet/contribs/RecursiveTools/BottomUpSoftDrop.$(ObjSuf): \
 	external/fastjet/contribs/RecursiveTools/BottomUpSoftDrop.$(SrcSuf) \
 	external/fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh \
@@ -1679,6 +1682,7 @@ tmp/modules/FastJetFinder.$(ObjSuf): \
 	external/fastjet/contribs/Nsubjettiness/Njettiness.hh \
 	external/fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh \
 	external/fastjet/contribs/Nsubjettiness/Nsubjettiness.hh \
+	external/fastjet/contribs/EnergyCorrelator/EnergyCorrelator.hh \
 	external/fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh \
 	external/fastjet/contribs/RecursiveTools/SoftDrop.hh \
 	external/fastjet/tools/Filter.hh \
@@ -1768,6 +1772,7 @@ FASTJET_OBJ +=  \
 	tmp/external/fastjet/contribs/Nsubjettiness/Nsubjettiness.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/TauComponents.$(ObjSuf) \
 	tmp/external/fastjet/contribs/Nsubjettiness/XConePlugin.$(ObjSuf) \
+	tmp/external/fastjet/contribs/EnergyCorrelator/EnergyCorrelator.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/BottomUpSoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/IteratedSoftDrop.$(ObjSuf) \
 	tmp/external/fastjet/contribs/RecursiveTools/ModifiedMassDropTagger.$(ObjSuf) \
@@ -2542,4 +2547,3 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(FASTJET_DICT_OBJ) $(DELPHES_OBJ
 	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
 
 ###
-
