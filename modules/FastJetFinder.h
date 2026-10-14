@@ -104,6 +104,7 @@ private:
 
   Bool_t fComputeEnergyCorrelationFunctions;
   Double_t fECFBeta;
+  Int_t fECFMeasure;
 
   //-- Trimming parameters --
 

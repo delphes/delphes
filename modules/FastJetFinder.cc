@@ -125,6 +125,12 @@ void FastJetFinder::Init()
 
   fComputeEnergyCorrelationFunctions = GetBool("ComputeEnergyCorrelationFunctions", false);
   fECFBeta = GetDouble("ECFBeta", 1.0);
+  // FastJet Contrib measures: 0 = pt_R (default), 1 = E_theta, 2 = E_inv.
+  fECFMeasure = GetInt("ECFMeasure", 0);
+  if(fECFMeasure < 0 || fECFMeasure > 2)
+  {
+    throw runtime_error("ECFMeasure must be 0 (pt_R), 1 (E_theta), or 2 (E_inv)");
+  }
 
   //-- Exclusive clustering for e+e- collisions --
 
@@ -402,6 +408,10 @@ void FastJetFinder::Process()
   }
 
   // loop over all jets and export them
+  contrib::EnergyCorrelator::Measure ecfMeasure = contrib::EnergyCorrelator::pt_R;
+  if(fECFMeasure == 1) ecfMeasure = contrib::EnergyCorrelator::E_theta;
+  else if(fECFMeasure == 2) ecfMeasure = contrib::EnergyCorrelator::E_inv;
+
   for(itOutputList = outputList.begin(); itOutputList != outputList.end(); ++itOutputList)
   {
     jet = *itOutputList;
@@ -583,11 +593,11 @@ void FastJetFinder::Process()
 
     if(fComputeEnergyCorrelationFunctions)
     {
-      contrib::EnergyCorrelator ecf1(1, fECFBeta, contrib::EnergyCorrelator::E_theta);
-      contrib::EnergyCorrelator ecf2(2, fECFBeta, contrib::EnergyCorrelator::E_theta);
-      contrib::EnergyCorrelator ecf3(3, fECFBeta, contrib::EnergyCorrelator::E_theta);
-      contrib::EnergyCorrelator ecf4(4, fECFBeta, contrib::EnergyCorrelator::E_theta);
-      contrib::EnergyCorrelator ecf5(5, fECFBeta, contrib::EnergyCorrelator::E_theta);
+      contrib::EnergyCorrelator ecf1(1, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf2(2, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf3(3, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf4(4, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf5(5, fECFBeta, ecfMeasure);
 
       candidate->ECF[0] = ecf1(*itOutputList);
       candidate->ECF[1] = ecf2(*itOutputList);
