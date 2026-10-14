@@ -583,11 +583,11 @@ void FastJetFinder::Process()
 
     if(fComputeEnergyCorrelationFunctions)
     {
-      contrib::EnergyCorrelator ecf1(1, fECFBeta);
-      contrib::EnergyCorrelator ecf2(2, fECFBeta);
-      contrib::EnergyCorrelator ecf3(3, fECFBeta);
-      contrib::EnergyCorrelator ecf4(4, fECFBeta);
-      contrib::EnergyCorrelator ecf5(5, fECFBeta);
+      contrib::EnergyCorrelator ecf1(1, fECFBeta, contrib::EnergyCorrelator::E_theta);
+      contrib::EnergyCorrelator ecf2(2, fECFBeta, contrib::EnergyCorrelator::E_theta);
+      contrib::EnergyCorrelator ecf3(3, fECFBeta, contrib::EnergyCorrelator::E_theta);
+      contrib::EnergyCorrelator ecf4(4, fECFBeta, contrib::EnergyCorrelator::E_theta);
+      contrib::EnergyCorrelator ecf5(5, fECFBeta, contrib::EnergyCorrelator::E_theta);
 
       candidate->ECF[0] = ecf1(*itOutputList);
       candidate->ECF[1] = ecf2(*itOutputList);
