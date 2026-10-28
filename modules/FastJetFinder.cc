@@ -65,6 +65,7 @@
 #include "fastjet/contribs/Nsubjettiness/Njettiness.hh"
 #include "fastjet/contribs/Nsubjettiness/NjettinessPlugin.hh"
 #include "fastjet/contribs/Nsubjettiness/Nsubjettiness.hh"
+#include "fastjet/contribs/EnergyCorrelator/EnergyCorrelator.hh"
 
 #include "fastjet/contribs/ValenciaPlugin/ValenciaPlugin.hh"
 
@@ -121,6 +122,15 @@ void FastJetFinder::Init()
   fAxisMode = GetInt("AxisMode", 1);
   fRcutOff = GetDouble("RcutOff", 0.8); // used only if Njettiness is used as jet clustering algo (case 8)
   fN = GetInt("N", 2); // used only if Njettiness is used as jet clustering algo (case 8)
+
+  fComputeEnergyCorrelationFunctions = GetBool("ComputeEnergyCorrelationFunctions", false);
+  fECFBeta = GetDouble("ECFBeta", 1.0);
+  // FastJet Contrib measures: 0 = pt_R (default), 1 = E_theta, 2 = E_inv.
+  fECFMeasure = GetInt("ECFMeasure", 0);
+  if(fECFMeasure < 0 || fECFMeasure > 2)
+  {
+    throw runtime_error("ECFMeasure must be 0 (pt_R), 1 (E_theta), or 2 (E_inv)");
+  }
 
   //-- Exclusive clustering for e+e- collisions --
 
@@ -398,6 +408,10 @@ void FastJetFinder::Process()
   }
 
   // loop over all jets and export them
+  contrib::EnergyCorrelator::Measure ecfMeasure = contrib::EnergyCorrelator::pt_R;
+  if(fECFMeasure == 1) ecfMeasure = contrib::EnergyCorrelator::E_theta;
+  else if(fECFMeasure == 2) ecfMeasure = contrib::EnergyCorrelator::E_inv;
+
   for(itOutputList = outputList.begin(); itOutputList != outputList.end(); ++itOutputList)
   {
     jet = *itOutputList;
@@ -575,6 +589,21 @@ void FastJetFinder::Process()
       candidate->Tau[2] = nSub3(*itOutputList);
       candidate->Tau[3] = nSub4(*itOutputList);
       candidate->Tau[4] = nSub5(*itOutputList);
+    }
+
+    if(fComputeEnergyCorrelationFunctions)
+    {
+      contrib::EnergyCorrelator ecf1(1, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf2(2, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf3(3, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf4(4, fECFBeta, ecfMeasure);
+      contrib::EnergyCorrelator ecf5(5, fECFBeta, ecfMeasure);
+
+      candidate->ECF[0] = ecf1(*itOutputList);
+      candidate->ECF[1] = ecf2(*itOutputList);
+      candidate->ECF[2] = ecf3(*itOutputList);
+      candidate->ECF[3] = ecf4(*itOutputList);
+      candidate->ECF[4] = ecf5(*itOutputList);
     }
 
     fOutputArray->Add(candidate);

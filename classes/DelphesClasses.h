@@ -411,6 +411,7 @@ public:
   Float_t FracPt[5]; // (sum pt of constituents within a ring 0.1*i < DeltaR < 0.1*(i+1))/(sum pt of constituents)
 
   Float_t Tau[5]; // N-subjettiness
+  Float_t ECF[5]; // energy correlation functions
 
   TLorentzVector SoftDroppedJet;
   TLorentzVector SoftDroppedSubJet1;
@@ -439,7 +440,7 @@ public:
   TLorentzVector P4() const;
   TLorentzVector Area;
 
-  ClassDef(Jet, 6)
+  ClassDef(Jet, 7)
 };
 
 //---------------------------------------------------------------------------
@@ -849,6 +850,7 @@ public:
   // N-subjettiness variables
 
   Float_t Tau[5];
+  Float_t ECF[5]; // energy correlation functions
 
   // Other Substructure variables
 
@@ -892,7 +894,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 7)
+  ClassDef(Candidate, 8)
 };
 
 #endif // DelphesClasses_h
