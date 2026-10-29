@@ -1190,8 +1190,8 @@ Double_t TrkUtil::Nclusters(Double_t begam, Int_t Opt) {
 	}
 	//
 	Double_t interp = 0.0;
-	TSpline3* sp3 = new TSpline3("sp3", bg, ncl, Npt);
-	if (begam > bg[0] && begam < bg[Npt - 1]) interp = sp3->Eval(begam);
+	TSpline3 sp3("sp3", bg, ncl, Npt);
+	if (begam > bg[0] && begam < bg[Npt - 1]) interp = sp3.Eval(begam);
 	return 100 * interp;
 }
 //
