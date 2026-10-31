@@ -1999,10 +1999,10 @@ modules/ExampleModule.h: \
 modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
-modules/EnergyScale.h: \
+modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
-modules/Isolation.h: \
+modules/EnergyScale.h: \
 	classes/DelphesModule.h
 	@touch $@
 external/fastjet/internal/Dnn2piCylinder.hh: \

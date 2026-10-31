@@ -17,13 +17,13 @@ three-sigma reaches within 5 %, two configurations predicted blind. Validated ra
 | `modules/ARCTracing.h`, `modules/ARCTracing.cc` | the module |
 | `classes/DelphesClasses.h/.cc`, `modules/TreeWriter.cc` | 16 ARC members on `Candidate` and `Track` (below) |
 | `modules/ModulesLinkDef.h`, `Makefile` | registration and build |
-| `cards/delphes_card_ALFA_Xe2bar.tcl` | the ALFA card: 3 T, all-MAPS tracker, ARC with xenon at 2 bar and aerogel n = 1.030, GRAiNITA ECAL |
-| `cards/delphes_card_ALFA_C4F10.tcl` | the same with C4F10 at 1 bar in the ARC |
-| `cards/arc/cells_ALFA_o1_v01.txt` | the 1203 ARC cells of `ALFA_o1_v01` (mirror, SiPM array, aerogel per cell; 80 x 80 mm arrays) |
-| `cards/arc/cells_ALFA_o1_v01_bigSiPM.txt` | the same cells with the largest arrays that fit (89.6 mm barrel, 108.8 mm endcap) |
-| `cards/arc/arc_optics_tables.txt` | n(E) of Xe, C4F10 and aerogel, aerogel Rayleigh length, SiPM PDE, mirror reflectivity (from the Geant4 materials) |
-| `examples/ALFA/dump_arc_cells.py` | writes a cell table from a k4geo compact file (`python3 dump_arc_cells.py <compact.xml> <out.txt>`) |
-| `examples/ALFA/gun_{pip,kp,p}.cmnd` | Pythia8 single-particle guns (pi+, K+, p), log-uniform p in 0.1-60 GeV, abs(eta) < 2.6 |
+| `cards/ARCTracing-ALFA/delphes_card_ALFA_Xe2bar.tcl` | the ALFA card: 3 T, all-MAPS tracker, ARC with xenon at 2 bar and aerogel n = 1.030, GRAiNITA ECAL |
+| `cards/ARCTracing-ALFA/delphes_card_ALFA_C4F10.tcl` | the same with C4F10 at 1 bar in the ARC |
+| `cards/ARCTracing-ALFA/cells_ALFA_o1_v01.txt` | the 1203 ARC cells of `ALFA_o1_v01` (mirror, SiPM array, aerogel per cell; 80 x 80 mm arrays) |
+| `cards/ARCTracing-ALFA/cells_ALFA_o1_v01_bigSiPM.txt` | the same cells with the largest arrays that fit (89.6 mm barrel, 108.8 mm endcap) |
+| `cards/ARCTracing-ALFA/arc_optics_tables.txt` | n(E) of Xe, C4F10 and aerogel, aerogel Rayleigh length, SiPM PDE, mirror reflectivity (from the Geant4 materials) |
+| `cards/ARCTracing-ALFA/dump_arc_cells.py` | writes a cell table from a k4geo compact file (`python3 dump_arc_cells.py <compact.xml> <out.txt>`) |
+| `cards/ARCTracing-ALFA/gun_{pip,kp,p}.cmnd` | Pythia8 single-particle guns (pi+, K+, p), log-uniform p in 0.1-60 GeV, abs(eta) < 2.6 |
 
 ## Which ARC configuration the cards describe
 
@@ -36,7 +36,7 @@ The validation and the design study use three labels; the cards in this reposito
 | C | n = 1.030, 10 mm | 89.6 mm barrel / 108.8 mm endcap, the largest that fit the cells | validated (blind); the optimised design |
 
 Both cards state this in their first lines. To run the optimised design, change one line in either card:
-`set CellFile cards/arc/cells_ALFA_o1_v01_bigSiPM.txt` (the table is included). Everything else -- gas, pixels,
+`set CellFile cards/ARCTracing-ALFA/cells_ALFA_o1_v01_bigSiPM.txt` (the table is included). Everything else -- gas, pixels,
 mirrors, reconstruction -- is identical. A dedicated `delphes_card_ALFA_optimised.tcl` will follow.
 
 ## Build and run
@@ -45,17 +45,17 @@ mirrors, reconstruction -- is identical. A dedicated `delphes_card_ALFA_optimise
 source /cvmfs/sw-nightlies.hsf.org/key4hep/setup.sh   # ROOT, Pythia8, HepMC
 ./configure                                           # regenerates the Makefile with the new module
 make -j8 HAS_PYTHIA8=true
-./DelphesPythia8 cards/delphes_card_ALFA_Xe2bar.tcl examples/ALFA/gun_kp.cmnd kp.root
+./DelphesPythia8 cards/ARCTracing-ALFA/delphes_card_ALFA_Xe2bar.tcl cards/ARCTracing-ALFA/gun_kp.cmnd kp.root
 ```
 
-The cards refer to `cards/arc/...` relative to the Delphes directory: run from there or make the two paths absolute.
+The cards refer to `cards/ARCTracing-ALFA/...` relative to the Delphes directory: run from there or make the two paths absolute.
 About 500 tracks per second per core.
 
 ## Module parameters (the values of the cards)
 
 | Parameter | Meaning | Card |
 |---|---|---|
-| `CellFile`, `OpticsFile` | cell table, optical tables | `cards/arc/...` |
+| `CellFile`, `OpticsFile` | cell table, optical tables | `cards/ARCTracing-ALFA/...` |
 | `Bz` | magnetic field [T] | `$::B` (3) |
 | `GasIndexTable`, `GasIndexScale` | n(E) of the gas; n - 1 scaled (pressure) | `RINDEX__Xenon_ARC`, 1.0 (Xe 2 bar); `RINDEX__C4F10_PFRICH` |
 | `AerogelIndexTable`, `AerogelIndexScale` | n(E) of the aerogel; n - 1 scaled | `RINDEX__Aerogel_PFRICH`, 1.0 (n = 1.030) |

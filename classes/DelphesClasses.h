@@ -540,7 +540,7 @@ public:
   TLorentzVector P4() const;
   TMatrixDSym CovarianceMatrix() const;
 
-  ClassDef(Track, 5)
+  ClassDef(Track, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -928,7 +928,7 @@ private:
 
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
-  ClassDef(Candidate, 8)
+  ClassDef(Candidate, 7)
 };
 
 #endif // DelphesClasses_h

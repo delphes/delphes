@@ -1,7 +1,7 @@
 # ALFA Delphes card, ARC gas variant: Xe2bar. ARC simulated by the ARCTracing module.
 # ARC GEOMETRY: as built in k4geo ALFA_o1_v01 -- 80 x 80 mm SiPM arrays, 0.8 mm pixels, 10 mm aerogel n = 1.030
 # ("configuration B" of the validation). The optimised design ("configuration C": the largest arrays that fit the
-# cells, 89.6 mm barrel / 108.8 mm endcap) is the same card with CellFile cards/arc/cells_ALFA_o1_v01_bigSiPM.txt.
+# cells, 89.6 mm barrel / 108.8 mm endcap) is the same card with CellFile cards/ARCTracing-ALFA/cells_ALFA_o1_v01_bigSiPM.txt.
 set RandomSeed 123
 
 #####################################################################
@@ -21,8 +21,8 @@ set RandomSeed 123
 #   B field : 3 T
 #
 # ARC response: the ray-tracing ARCTracing module (modules/ARCTracing), with the
-# cell table cards/arc/cells_ALFA_o1_v01.txt and the optical tables
-# cards/arc/arc_optics_tables.txt of the k4geo full simulation.
+# cell table cards/ARCTracing-ALFA/cells_ALFA_o1_v01.txt and the optical tables
+# cards/ARCTracing-ALFA/arc_optics_tables.txt of the k4geo full simulation.
 #####################################################################
 
 set B 3.0
@@ -314,8 +314,8 @@ module ARCTracing ARCTracing {
   set OutputArray tracks
   set Bz $::B
 
-  set CellFile cards/arc/cells_ALFA_o1_v01.txt      ;# as built: 80 mm arrays (B); cells_ALFA_o1_v01_bigSiPM.txt: optimised (C)
-  set OpticsFile cards/arc/arc_optics_tables.txt
+  set CellFile cards/ARCTracing-ALFA/cells_ALFA_o1_v01.txt      ;# as built: 80 mm arrays (B); cells_ALFA_o1_v01_bigSiPM.txt: optimised (C)
+  set OpticsFile cards/ARCTracing-ALFA/arc_optics_tables.txt
 
   ## radiators: index tables (n - 1 scaled by *IndexScale). Aerogel attenuation as in the Geant4 material of the full
   ## simulation (checked with a ddsim DEBUG dump): Rayleigh scattering with the BelleII table, no absorption (DD4hep keeps
