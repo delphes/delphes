@@ -49,7 +49,8 @@ make -j8 HAS_PYTHIA8=true
 ```
 
 The cards refer to `cards/ARCTracing-ALFA/...` relative to the Delphes directory: run from there or make the two paths absolute.
-About 500 tracks per second per core.
+Speed: the ray tracing adds about 1.9 ms per e+e- -> ZH event at 240 GeV (about 80 us per charged track, ~12 000 tracks/s
+per core): 5.5 ms per event with the ARC against 3.6 ms without, Pythia and ROOT output included (10k events, AMD EPYC 7302).
 
 ## Module parameters (the values of the cards)
 
