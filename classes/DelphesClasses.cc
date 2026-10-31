@@ -231,6 +231,22 @@ Candidate::Candidate() :
   Phi(0), ErrorPhi(0),
   Nclusters(0.0),
   dNdx(0.0),
+  CherenkovAngleGas(-1.0),
+  CherenkovAngleAerogel(-1.0),
+  CherenkovRecoAngleGas(-1.0),
+  CherenkovRecoAngleAerogel(-1.0),
+  SigmaThetaCGas(-1.0),
+  SigmaThetaCAerogel(-1.0),
+  NpeGas(0.0),
+  NpeAerogel(0.0),
+  ARCchi2Pi(-1.0),
+  ARCchi2K(-1.0),
+  ARCchi2P(-1.0),
+  ARCpid(0),
+  ARCprobPi(-1.0),
+  ARCprobK(-1.0),
+  ARCprobP(-1.0),
+  ARCmass(-1.0),
   Xd(0), Yd(0), Zd(0),
   XFirstHit(0), YFirstHit(0), ZFirstHit(0),
   TrackResolution(0),
@@ -420,6 +436,22 @@ void Candidate::Copy(TObject &obj) const
   object.ZFirstHit = ZFirstHit;
   object.Nclusters = Nclusters;
   object.dNdx = dNdx;
+  object.CherenkovAngleGas = CherenkovAngleGas;
+  object.CherenkovAngleAerogel = CherenkovAngleAerogel;
+  object.CherenkovRecoAngleGas = CherenkovRecoAngleGas;
+  object.CherenkovRecoAngleAerogel = CherenkovRecoAngleAerogel;
+  object.SigmaThetaCGas = SigmaThetaCGas;
+  object.SigmaThetaCAerogel = SigmaThetaCAerogel;
+  object.NpeGas = NpeGas;
+  object.NpeAerogel = NpeAerogel;
+  object.ARCchi2Pi = ARCchi2Pi;
+  object.ARCchi2K = ARCchi2K;
+  object.ARCchi2P = ARCchi2P;
+  object.ARCpid = ARCpid;
+  object.ARCprobPi = ARCprobPi;
+  object.ARCprobK = ARCprobK;
+  object.ARCprobP = ARCprobP;
+  object.ARCmass = ARCmass;
   object.TrackResolution = TrackResolution;
   object.NCharged = NCharged;
   object.NNeutrals = NNeutrals;
@@ -572,6 +604,22 @@ void Candidate::Clear(Option_t * /*option*/)
   ZFirstHit = 0.0;
   Nclusters = 0.0;
   dNdx = 0.0;
+  CherenkovAngleGas = -1.0;
+  CherenkovAngleAerogel = -1.0;
+  CherenkovRecoAngleGas = -1.0;
+  CherenkovRecoAngleAerogel = -1.0;
+  SigmaThetaCGas = -1.0;
+  SigmaThetaCAerogel = -1.0;
+  NpeGas = 0.0;
+  NpeAerogel = 0.0;
+  ARCchi2Pi = -1.0;
+  ARCchi2K = -1.0;
+  ARCchi2P = -1.0;
+  ARCpid = 0;
+  ARCprobPi = -1.0;
+  ARCprobK = -1.0;
+  ARCprobP = -1.0;
+  ARCmass = -1.0;
   TrackResolution = 0.0;
   NCharged = 0;
   NNeutrals = 0;

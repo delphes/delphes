@@ -399,6 +399,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/TrackSmearing.h \
 	modules/TrackCovariance.h \
 	modules/ClusterCounting.h \
+	modules/ARCTracing.h \
 	modules/ImpactParameterSmearing.h \
 	modules/TimeSmearing.h \
 	modules/TimeOfFlight.h \
@@ -667,6 +668,11 @@ tmp/external/TrackCovariance/VertexFit.$(ObjSuf): \
 	external/TrackCovariance/VertexFit.$(SrcSuf)
 tmp/external/TrackCovariance/VertexMore.$(ObjSuf): \
 	external/TrackCovariance/VertexMore.$(SrcSuf)
+tmp/modules/ARCTracing.$(ObjSuf): \
+	modules/ARCTracing.$(SrcSuf) \
+	modules/ARCTracing.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h
 tmp/modules/AngularSmearing.$(ObjSuf): \
 	modules/AngularSmearing.$(SrcSuf) \
 	modules/AngularSmearing.h \
@@ -1244,6 +1250,7 @@ DELPHES_OBJ +=  \
 	tmp/external/TrackCovariance/TrkUtil.$(ObjSuf) \
 	tmp/external/TrackCovariance/VertexFit.$(ObjSuf) \
 	tmp/external/TrackCovariance/VertexMore.$(ObjSuf) \
+	tmp/modules/ARCTracing.$(ObjSuf) \
 	tmp/modules/AngularSmearing.$(ObjSuf) \
 	tmp/modules/BTagging.$(ObjSuf) \
 	tmp/modules/BeamSpotFilter.$(ObjSuf) \
@@ -1924,6 +1931,9 @@ modules/FastJetGridMedianEstimator.h: \
 modules/LLPFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
+modules/ARCTracing.h: \
+	classes/DelphesModule.h
+	@touch $@
 external/fastjet/internal/MinHeap.hh: \
 	external/fastjet/internal/base.hh
 	@touch $@
@@ -1989,10 +1999,10 @@ modules/ExampleModule.h: \
 modules/Merger.h: \
 	classes/DelphesModule.h
 	@touch $@
-modules/Isolation.h: \
+modules/EnergyScale.h: \
 	classes/DelphesModule.h
 	@touch $@
-modules/EnergyScale.h: \
+modules/Isolation.h: \
 	classes/DelphesModule.h
 	@touch $@
 external/fastjet/internal/Dnn2piCylinder.hh: \
