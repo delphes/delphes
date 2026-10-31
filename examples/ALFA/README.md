@@ -25,6 +25,20 @@ three-sigma reaches within 5 %, two configurations predicted blind. Validated ra
 | `examples/ALFA/dump_arc_cells.py` | writes a cell table from a k4geo compact file (`python3 dump_arc_cells.py <compact.xml> <out.txt>`) |
 | `examples/ALFA/gun_{pip,kp,p}.cmnd` | Pythia8 single-particle guns (pi+, K+, p), log-uniform p in 0.1-60 GeV, abs(eta) < 2.6 |
 
+## Which ARC configuration the cards describe
+
+The validation and the design study use three labels; the cards in this repository are **B**:
+
+| label | aerogel | SiPM arrays | status |
+|---|---|---|---|
+| A | n = 1.019, 10 mm | 80 x 80 mm (as built) | validated (blind) |
+| **B** | **n = 1.030, 10 mm** | **80 x 80 mm (as built in k4geo ALFA_o1_v01)** | **validated; the two cards here** |
+| C | n = 1.030, 10 mm | 89.6 mm barrel / 108.8 mm endcap, the largest that fit the cells | validated (blind); the optimised design |
+
+Both cards state this in their first lines. To run the optimised design, change one line in either card:
+`set CellFile cards/arc/cells_ALFA_o1_v01_bigSiPM.txt` (the table is included). Everything else -- gas, pixels,
+mirrors, reconstruction -- is identical. A dedicated `delphes_card_ALFA_optimised.tcl` will follow.
+
 ## Build and run
 
 ```bash
