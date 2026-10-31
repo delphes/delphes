@@ -1,0 +1,14 @@
+! Single-particle gun for the ALFA ARC validation: PDG 211, log-uniform p in [0.1, 60] GeV, |eta| < 2.6
+ProcessLevel:all = off
+Main:numberOfEvents = 20000
+Main:timesAllowErrors = 3
+Main:spareFlag1 = on
+Main:spareMode1 = 211
+Main:spareParm1 = 60.0
+Main:spareParm2 = 2.6
+Init:showChangedSettings = off
+Init:showChangedParticleData = off
+Next:numberCount = 1000
+Next:numberShowInfo = 0
+Next:numberShowProcess = 0
+Next:numberShowEvent = 0
