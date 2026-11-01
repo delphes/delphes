@@ -124,7 +124,7 @@ private:
   double SolveSphere(const Helix &h, const Cell &c, double sT0, bool &ok) const;
   double SolveRadius(const Helix &h, double r, bool &ok) const;
 
-  bool TracePhoton(const Cell &c, int rad, double beta, double *P, double *T, double energy, double *D);
+  bool TracePhoton(const Cell &c, int rad, double beta, double *P, double *T, double energy, double *D, int *cellDet = 0);
   bool RefractZ(double *k, double n1, double n2) const;
   int SlabTransport(double *Q, double *k, double zBot, double zTop, double lAbs, double lRay) const;
   void RayleighScatter(double *k) const;
@@ -153,7 +153,11 @@ private:
 
   // statistics
   Long64_t fNtracks, fNcovered, fNgen[2], fNdet[2];
-  Long64_t fNrecoMoved; // gas emission points moved from the fixed radius (beyond the mirror) to mid-path
+  Long64_t fNcrossed; // photons reflected by the mirror of a neighbouring cell (MultiCell)
+  Long64_t fNsensorNeighbour; // photons detected on the array of a neighbouring cell (MultiCell)
+  Bool_t fRecoMidPathFallback;
+  Bool_t fMultiCell; // photons may reach the mirror and sensor of a neighbouring cell; tracks reconstructed in their main cell
+  std::vector<std::vector<int> > fNeighbours; //! cells around each cell
   Long64_t fLoss[2][20]; //! photons lost per radiator and reason (see Finish)
   Bool_t fCount; //! count the losses (off for the hypothesis test photons)
   std::string fDebugFile;

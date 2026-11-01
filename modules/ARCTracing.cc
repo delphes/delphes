@@ -298,6 +298,8 @@ void ARCTracing::Init()
   fUseTrueTrack = GetBool("UseTrueTrack", true);
   fUseTrueMomentumForPID = GetBool("UseTrueMomentumForPID", false);
   fTrueHypothesisAngle = GetBool("TrueHypothesisAngle", false);
+  fRecoMidPathFallback = GetBool("RecoMidPathFallback", false); // study option: gas emission point beyond the main mirror -> mid-path (default off: as the full-simulation analysis; better reach, fewer gas rings at 45-65 deg)
+  fMultiCell = GetBool("MultiCell", true); // as Geant4: a photon reflects off the mirror of the cell it reaches; reconstruction in the main cell (most hits), as the full-simulation analysis
   fSharedCells = GetBool("SharedCells", true); // reconstruct every track against all photons of its cell (overlapping rings in jets)
   // hypothesis test: expected angle of each hypothesis from test photons reconstructed like the data (includes the bias of the
   // reconstruction method, the bending and the cell geometry), and a missing ring weighted by P(N < MinPe | expected photons)
@@ -312,9 +314,25 @@ void ARCTracing::Init()
     fRecoIndex[i] = 1.0 + fRad[i].indexScale * (fRad[i].n.Eval(fRecoEnergy) - 1.0);
   }
   ReadCells(cellFile.c_str());
+  // neighbours: cells of the same region and side whose axis points at mid-depth are within 2.6 apothems (first ring: 2)
+  fNeighbours.assign(fCells.size(), vector<int>());
+  for(size_t i = 0; i < fCells.size(); ++i)
+  {
+    const Cell &a = fCells[i];
+    double zi = 0.5 * (a.zmin + a.zmax), Pi[3] = {a.O[0] + zi * a.ez[0], a.O[1] + zi * a.ez[1], a.O[2] + zi * a.ez[2]};
+    double ai = a.region == kBarrel ? a.apothem * zi / a.zmin : a.apothem;
+    for(size_t j = 0; j < fCells.size(); ++j)
+    {
+      const Cell &b = fCells[j];
+      if(j == i || b.region != a.region || b.side != a.side) continue;
+      double zj = 0.5 * (b.zmin + b.zmax), d[3] = {b.O[0] + zj * b.ez[0] - Pi[0], b.O[1] + zj * b.ez[1] - Pi[1], b.O[2] + zj * b.ez[2] - Pi[2]};
+      if(Norm(d) < 2.6 * ai) fNeighbours[i].push_back(j);
+    }
+  }
 
   fNtracks = fNcovered = 0;
-  fNrecoMoved = 0;
+  fNcrossed = 0;
+  fNsensorNeighbour = 0;
   fNgen[0] = fNgen[1] = fNdet[0] = fNdet[1] = 0;
   fCount = kFALSE;
   fDebugFile = GetString("DebugFile", "");
@@ -344,7 +362,7 @@ void ARCTracing::Finish()
   }
   cout << "ARCTracing: " << fNtracks << " tracks, " << fNcovered << " in the ARC; photons generated / detected: gas "
        << fNgen[kGas] << " / " << fNdet[kGas] << ", aerogel " << fNgen[kAerogel] << " / " << fNdet[kAerogel]
-       << "; gas emission points moved to mid-path (fixed radius beyond the mirror): " << fNrecoMoved << endl;
+       << "; photons on the mirror of a neighbouring cell: " << fNcrossed << ", on the array of a neighbouring cell: " << fNsensorNeighbour << endl;
   const char *why[18] = {"below threshold", "aerogel: absorbed (up)", "aerogel: stuck (up)", "aerogel: total reflection (up)",
                          "no mirror intersection", "mirror behind", "gas absorption", "mirror outside the cell", "mirror reflectivity",
                          "after mirror: not downwards", "slab top behind", "slab: absorbed (back)", "slab: scattered back up",
@@ -627,8 +645,10 @@ int ARCTracing::SlabTransport(double *Q, double *k, double zBot, double zTop, do
 }
 
 // one Cherenkov photon from the local point P (track direction T) with energy E: traced to a pixel centre D on the sensor face
-bool ARCTracing::TracePhoton(const Cell &c, int rad, double beta, double *P, double *T, double energy, double *D)
+bool ARCTracing::TracePhoton(const Cell &c0, int rad, double beta, double *P, double *T, double energy, double *D, int *cellDet)
 {
+  const Cell *cp = &c0; // the cell whose mirror and sensor the photon reaches (c0 unless MultiCell sends it to a neighbour)
+  const Cell &c = c0;
   const Radiator &r = fRad[rad];
   auto lost = [&](int why) { if(fCount) ++fLoss[rad][why]; return false; };
   double nE = 1.0 + r.indexScale * (r.n.Eval(energy) - 1.0);
@@ -680,22 +700,67 @@ bool ARCTracing::TracePhoton(const Cell &c, int rad, double beta, double *P, dou
   }
   if(toMirror)
   {
+    // the mirror the photon meets: its own cell's, if the forward intersection lies inside that cell's hexagon; otherwise (MultiCell)
+    // the nearest neighbour mirror met inside the neighbour's hexagon: the photon is above a neighbouring cell when it reaches the
+    // mirrors, or was emitted there by an inclined track (beyond its own cell's sphere); it then continues in that cell
     double dC[3] = {Q[0] - c.C[0], Q[1] - c.C[1], Q[2] - c.C[2]};
     double b = Dot(k, dC), cc = Dot(dC, dC) - c.R * c.R;
     double disc = b * b - cc;
-    if(disc < 0) return lost(4);
-    double d = -b + sqrt(disc);
-    if(d <= 0) return lost(5);
-    if(fRad[kGas].abs.Ok() && gRandom->Uniform() > exp(-d / fRad[kGas].abs.Eval(energy))) return lost(6);
+    double d = disc >= 0 ? -b + sqrt(disc) : -1.0;
     double M[3] = {Q[0] + d * k[0], Q[1] + d * k[1], Q[2] + d * k[2]};
-    double aM = c.region == kBarrel ? c.apothem * M[2] / c.zmin : c.apothem;
-    if(M[2] < c.zmin || !InHex(M[0], M[1], aM, c.phi0)) return lost(7);
+    int ownWhy = 0;
+    if(disc < 0) ownWhy = 4;
+    else if(d <= 0) ownWhy = 5;
+    else
+    {
+      double aM = c.region == kBarrel ? c.apothem * M[2] / c.zmin : c.apothem;
+      if(M[2] < c.zmin || !InHex(M[0], M[1], aM, c.phi0)) ownWhy = 7;
+    }
+    if(ownWhy)
+    {
+      if(!fMultiCell) return lost(ownWhy);
+      double Qw[3], kw[3];
+      for(int i = 0; i < 3; ++i)
+      {
+        Qw[i] = c.O[i] + Q[0] * c.ex[i] + Q[1] * c.ey[i] + Q[2] * c.ez[i];
+        kw[i] = k[0] * c.ex[i] + k[1] * c.ey[i] + k[2] * c.ez[i];
+      }
+      const Cell *nb = 0;
+      double bestD = 1e30, Qn[3], kn[3], Qb[3], kb[3];
+      for(int j : fNeighbours[&c - &fCells[0]])
+      {
+        const Cell &n = fCells[j];
+        ToLocal(n, Qw, Qn);
+        VecToLocal(n, kw, kn);
+        double dCn[3] = {Qn[0] - n.C[0], Qn[1] - n.C[1], Qn[2] - n.C[2]};
+        double bn = Dot(kn, dCn), ccn = Dot(dCn, dCn) - n.R * n.R, discn = bn * bn - ccn;
+        if(discn < 0) continue;
+        double dn = -bn + sqrt(discn);
+        if(dn <= 0 || dn >= bestD) continue;
+        double Mn[3] = {Qn[0] + dn * kn[0], Qn[1] + dn * kn[1], Qn[2] + dn * kn[2]};
+        double aMn = n.region == kBarrel ? n.apothem * Mn[2] / n.zmin : n.apothem;
+        if(Mn[2] < n.zmin || !InHex(Mn[0], Mn[1], aMn, n.phi0)) continue;
+        nb = &n; bestD = dn;
+        for(int i = 0; i < 3; ++i) { Qb[i] = Qn[i]; kb[i] = kn[i]; M[i] = Mn[i]; }
+      }
+      if(!nb) return lost(ownWhy);
+      cp = nb; d = bestD;
+      for(int i = 0; i < 3; ++i) { Q[i] = Qb[i]; k[i] = kb[i]; }
+      if(fCount) ++fNcrossed;
+    }
+    if(fRad[kGas].abs.Ok() && gRandom->Uniform() > exp(-d / fRad[kGas].abs.Eval(energy))) return lost(6);
     if(fRefl.Ok() && gRandom->Uniform() > fRefl.Eval(energy)) return lost(8);
-    double nrm[3] = {(M[0] - c.C[0]) / c.R, (M[1] - c.C[1]) / c.R, (M[2] - c.C[2]) / c.R};
+    double nrm[3] = {(M[0] - cp->C[0]) / cp->R, (M[1] - cp->C[1]) / cp->R, (M[2] - cp->C[2]) / cp->R};
     double kn = Dot(k, nrm);
     for(int i = 0; i < 3; ++i) k[i] -= 2.0 * kn * nrm[i];
     for(int i = 0; i < 3; ++i) Q[i] = M[i];
-    // back through the aerogel slab in front of the sensor
+    // back through the aerogel slab in front of the sensor (of the cell that reflected the photon)
+    if(cp != &c0)
+    {
+      double halfP = fRad[kAerogel].thickness > 0 ? 0.5 * fRad[kAerogel].thickness : cp->aeroHalf;
+      zTop = cp->aeroZ + halfP;
+      zBot = cp->aeroZ - halfP;
+    }
     if(fAerogelSlabInPath)
     {
       if(k[2] >= -1e-6) return lost(9);
@@ -710,20 +775,53 @@ bool ARCTracing::TracePhoton(const Cell &c, int rad, double beta, double *P, dou
       if(!RefractZ(k, nAero, nGas)) return lost(13);
     }
   }
-  // sensor face
-  double denom = Dot(k, c.sez);
-  if(denom >= -1e-9) return lost(14);
-  double dS[3] = {c.S[0] - Q[0], c.S[1] - Q[1], c.S[2] - Q[2]};
-  double ds = Dot(dS, c.sez) / denom;
-  if(ds <= 0) return lost(15);
-  double H[3] = {Q[0] + ds * k[0] - c.S[0], Q[1] + ds * k[1] - c.S[1], Q[2] + ds * k[2] - c.S[2]};
-  double uu = Dot(H, c.sex), vv = Dot(H, c.sey);
-  int nx = int(2.0 * c.hs[0] * fSensorSizeScale / fPixelPitch + 1e-6), ny = int(2.0 * c.hs[1] * fSensorSizeScale / fPixelPitch + 1e-6);
-  double hx = 0.5 * nx * fPixelPitch, hy = 0.5 * ny * fPixelPitch;
-  if(fabs(uu) > hx || fabs(vv) > hy) return lost(16);
-  int ix = min(max(int((uu + hx) / fPixelPitch), 0), nx - 1), iy = min(max(int((vv + hy) / fPixelPitch), 0), ny - 1);
-  double uc = -hx + (ix + 0.5) * fPixelPitch, vc = -hy + (iy + 0.5) * fPixelPitch;
-  for(int i = 0; i < 3; ++i) D[i] = c.S[i] + uc * c.sex[i] + vc * c.sey[i];
+  // sensor face: the array of the cell that reflected the photon; with MultiCell, a photon that misses it can land on the array of a
+  // neighbouring cell (an inclined track's light reflected off one mirror and focused next to its own sensor), as in Geant4
+  auto onSensor = [&](const Cell &sc, const double *Qs, const double *ks, double &dist, double *Dout) {
+    double denom = Dot(ks, sc.sez);
+    if(denom >= -1e-9) return 14;
+    double dS[3] = {sc.S[0] - Qs[0], sc.S[1] - Qs[1], sc.S[2] - Qs[2]};
+    double ds = Dot(dS, sc.sez) / denom;
+    if(ds <= 0) return 15;
+    double H[3] = {Qs[0] + ds * ks[0] - sc.S[0], Qs[1] + ds * ks[1] - sc.S[1], Qs[2] + ds * ks[2] - sc.S[2]};
+    double uu = Dot(H, sc.sex), vv = Dot(H, sc.sey);
+    int nx = int(2.0 * sc.hs[0] * fSensorSizeScale / fPixelPitch + 1e-6), ny = int(2.0 * sc.hs[1] * fSensorSizeScale / fPixelPitch + 1e-6);
+    double hx = 0.5 * nx * fPixelPitch, hy = 0.5 * ny * fPixelPitch;
+    if(fabs(uu) > hx || fabs(vv) > hy) return 16;
+    int ix = min(max(int((uu + hx) / fPixelPitch), 0), nx - 1), iy = min(max(int((vv + hy) / fPixelPitch), 0), ny - 1);
+    double uc = -hx + (ix + 0.5) * fPixelPitch, vc = -hy + (iy + 0.5) * fPixelPitch;
+    for(int i = 0; i < 3; ++i) Dout[i] = sc.S[i] + uc * sc.sex[i] + vc * sc.sey[i];
+    dist = ds;
+    return 0;
+  };
+  double dist = 0.0;
+  int why = onSensor(*cp, Q, k, dist, D);
+  if(why == 0)
+  {
+    if(cellDet) *cellDet = int(cp - &fCells[0]);
+    return true;
+  }
+  if(!fMultiCell) return lost(why);
+  double Qw[3], kw[3];
+  for(int i = 0; i < 3; ++i)
+  {
+    Qw[i] = cp->O[i] + Q[0] * cp->ex[i] + Q[1] * cp->ey[i] + Q[2] * cp->ez[i];
+    kw[i] = k[0] * cp->ex[i] + k[1] * cp->ey[i] + k[2] * cp->ez[i];
+  }
+  const Cell *best = 0;
+  double bestDist = 1e30, Db[3];
+  for(int j : fNeighbours[cp - &fCells[0]])
+  {
+    const Cell &n = fCells[j];
+    double Qn[3], kn[3], Dn[3], dn = 0.0;
+    ToLocal(n, Qw, Qn);
+    VecToLocal(n, kw, kn);
+    if(onSensor(n, Qn, kn, dn, Dn) == 0 && dn < bestDist) { best = &n; bestDist = dn; for(int i = 0; i < 3; ++i) Db[i] = Dn[i]; }
+  }
+  if(!best) return lost(why);
+  for(int i = 0; i < 3; ++i) D[i] = Db[i];
+  if(cellDet) *cellDet = int(best - &fCells[0]);
+  if(fCount) ++fNsensorNeighbour;
   return true;
 }
 
@@ -839,9 +937,10 @@ struct ARCTracingWork
   const ARCTracing::Cell *cell;
   double sEntry, sM, sLim[2][2], sLow[2], L[2];
   bool pathOk;
-  int nGen[2], nDet[2];
+  int nGen[2], nDet[2]; // nDet: detected in the main cell
   Long64_t index;
-  std::vector<double> hits; // the track's own detected photons (3 numbers each)
+  int mainCell; // cell with most of the track's photons (the entry cell without MultiCell or without photons)
+  std::map<int, std::vector<double> > hits; // the track's own detected photons per cell (3 numbers each, that cell's frame)
 };
 
 void ARCTracing::Process()
@@ -910,11 +1009,36 @@ void ARCTracing::Process()
       double sA1 = SolvePlane(hTrue, c, c.aeroZ + half, sEntry, ok1);
       double sApex = SolvePlane(hTrue, c, c.C[2] + c.R, sEntry, ok2);
       double sM = ok2 ? SolveSphere(hTrue, c, sApex, ok3) : 0.0;
+      if(fMultiCell && ok3)
+      {
+        // an inclined track can be above a neighbouring cell when it reaches the mirrors: the gas path ends on that cell's mirror
+        // (the entry cell's sphere, continued beyond its hexagon, curves away below it and would cut the path short)
+        double Pm[3], Tm[3], Lm[3];
+        hTrue.Point(sM, Pm, Tm);
+        ToLocal(c, Pm, Lm);
+        double aM = c.region == kBarrel ? c.apothem * Lm[2] / c.zmin : c.apothem;
+        if(!InHex(Lm[0], Lm[1], aM, c.phi0))
+        {
+          for(int j : fNeighbours[&c - &fCells[0]])
+          {
+            const Cell &n = fCells[j];
+            bool okn = false;
+            double sn = SolveSphere(hTrue, n, sM, okn);
+            if(!okn || sn <= sA1) continue;
+            hTrue.Point(sn, Pm, Tm);
+            ToLocal(n, Pm, Lm);
+            double an = n.region == kBarrel ? n.apothem * Lm[2] / n.zmin : n.apothem;
+            if(Lm[2] >= n.zmin && InHex(Lm[0], Lm[1], an, n.phi0)) { sM = sn; break; }
+          }
+        }
+      }
       double sLim[2][2] = {{sA1, sM}, {sA0, sA1}};
       double sLow[2] = {sEntry, sA0}; // gas below the aerogel slab (the sensor and cooling plates are ignored)
       bool pathOk = ok0 && ok1 && ok2 && ok3 && sA1 > sA0 && sM > sA1 && sA0 >= sEntry;
 
-      vector<double> hitsLocal; // 3 numbers per detected photon
+      map<int, vector<double> > hitsLocal; // per cell: 3 numbers per detected photon
+      map<int, int> nDetCell[2];
+      const int entryIdx = int(&c - &fCells[0]);
       double L[2] = {0.0, 0.0};
       int nGen[2] = {0, 0}, nDet[2] = {0, 0};
       if(pathOk)
@@ -948,10 +1072,12 @@ void ARCTracing::Process()
             hTrue.Point(sT, Pw, Tw);
             ToLocal(c, Pw, P);
             VecToLocal(c, Tw, T);
-            if(TracePhoton(c, rad, beta, P, T, fDebugMonoEnergy > 0 ? fDebugMonoEnergy : SampleEnergy(fRad[rad], cdf), D))
+            int cd = entryIdx;
+            if(TracePhoton(c, rad, beta, P, T, fDebugMonoEnergy > 0 ? fDebugMonoEnergy : SampleEnergy(fRad[rad], cdf), D, &cd))
             {
               ++nDet[rad];
-              hitsLocal.insert(hitsLocal.end(), D, D + 3);
+              ++nDetCell[rad][cd];
+              hitsLocal[cd].insert(hitsLocal[cd].end(), D, D + 3);
             }
           }
           fNgen[rad] += nGen[rad];
@@ -965,14 +1091,22 @@ void ARCTracing::Process()
           for(int id = 0; id < nd; ++id)
           {
             double uc = (gRandom->Integer(nx) + 0.5 - 0.5 * nx) * fPixelPitch, vc = (gRandom->Integer(ny) + 0.5 - 0.5 * ny) * fPixelPitch;
-            for(int i = 0; i < 3; ++i) hitsLocal.push_back(c.S[i] + uc * c.sex[i] + vc * c.sey[i]);
+            for(int i = 0; i < 3; ++i) hitsLocal[entryIdx].push_back(c.S[i] + uc * c.sex[i] + vc * c.sey[i]);
           }
         }
       }
 
 
+      // main cell: the one with most of the track's photons, as the full-simulation analysis; nDet counts that cell only
+      int mainIdx = entryIdx;
+      size_t mostHits = 0;
+      for(map<int, vector<double> >::const_iterator it = hitsLocal.begin(); it != hitsLocal.end(); ++it)
+        if(it->second.size() > mostHits) { mostHits = it->second.size(); mainIdx = it->first; }
+      if(!fMultiCell) mainIdx = entryIdx;
+      for(int rad = 0; rad < 2; ++rad) nDet[rad] = nDetCell[rad].count(mainIdx) ? nDetCell[rad][mainIdx] : 0;
+
       ARCTracingWork w;
-      w.candidate = candidate; w.mother = mother; w.particle = particle;
+      w.candidate = candidate; w.mother = mother; w.particle = particle; w.mainCell = mainIdx;
       w.pTrue = pTrue; w.mass = mass; w.charge = charge; w.beta = beta; w.recoP = recoMomentum.P();
       w.hTrue = hTrue; w.hReco = hReco; w.cell = cell; w.sEntry = sEntry; w.sM = sM;
       for(int i = 0; i < 2; ++i) { w.sLim[i][0] = sLim[i][0]; w.sLim[i][1] = sLim[i][1]; w.sLow[i] = sLow[i]; w.L[i] = L[i]; w.nGen[i] = nGen[i]; w.nDet[i] = nDet[i]; }
@@ -988,10 +1122,12 @@ void ARCTracing::Process()
   }
 
   // photons of all tracks of the event pooled per cell
-  map<const Cell *, vector<double> > pooled;
+  map<int, vector<double> > pooled;
   if(fSharedCells)
     for(size_t i = 0; i < works.size(); ++i)
-      if(works[i].cell) pooled[works[i].cell].insert(pooled[works[i].cell].end(), works[i].hits.begin(), works[i].hits.end());
+      if(works[i].cell)
+        for(map<int, vector<double> >::const_iterator it = works[i].hits.begin(); it != works[i].hits.end(); ++it)
+          pooled[it->first].insert(pooled[it->first].end(), it->second.begin(), it->second.end());
 
   // pass 2: reconstruction and particle identification, track by track, against the pooled hits of its cell
   for(size_t iw = 0; iw < works.size(); ++iw)
@@ -1000,14 +1136,16 @@ void ARCTracing::Process()
     candidate = w.candidate; mother = w.mother; particle = w.particle;
     if(w.cell)
     {
-      const Cell &c = *w.cell;
+      const Cell &cEntry = *w.cell;          // where the track enters: photon generation (test photons) starts here
+      const Cell &c = fCells[w.mainCell];    // the main cell: mirror, sensor and frame of the reconstruction
+      const int mainIdx = w.mainCell;
       const Helix &hTrue = w.hTrue, &hReco = w.hReco;
       double pTrue = w.pTrue, charge = w.charge, beta = w.beta, sEntry = w.sEntry, sM = w.sM;
       double nref[2] = {fRecoIndex[kGas], fRecoIndex[kAerogel]};
       double (&sLim)[2][2] = w.sLim; double (&sLow)[2] = w.sLow; double (&L)[2] = w.L;
       int (&nGen)[2] = w.nGen; int (&nDet)[2] = w.nDet;
       bool pathOk = w.pathOk;
-      const vector<double> &hitsLocal = fSharedCells ? pooled[w.cell] : w.hits;
+      const vector<double> &hitsLocal = fSharedCells ? pooled[mainIdx] : w.hits[mainIdx];
       (void)beta; (void)sEntry; (void)sM;
 
       // reconstruction: emission point at mid-radiator on the (true or smeared) track
@@ -1031,11 +1169,10 @@ void ARCTracing::Process()
         double Pw[3], Tw[3];
         hReco.Point(sT, Pw, Tw);
         ToLocal(c, Pw, E[rad]);
-        if(rad == kGas)
+        if(rad == kGas && fRecoMidPathFallback)
         {
-          // the fixed reconstruction radius is mid-gas for tracks along the cell axis; an inclined track meets the mirror of its
-          // cell nearer the cell edge, where the sphere is lower, and that radius can lie beyond the mirror: the reconstructed
-          // photon would then point backwards (angles near pi). Use the middle of the track between the aerogel and the mirror.
+          // the fixed reconstruction radius can lie beyond the main cell's mirror for an inclined track (its mirror is lower near
+          // the cell edge): then use the middle of the reconstructed track between the aerogel and that mirror
           double dE[3] = {E[rad][0] - c.C[0], E[rad][1] - c.C[1], E[rad][2] - c.C[2]};
           if(Norm(dE) >= c.R)
           {
@@ -1048,7 +1185,6 @@ void ARCTracing::Process()
             sT = 0.5 * (sA + sMr);
             hReco.Point(sT, Pw, Tw);
             ToLocal(c, Pw, E[rad]);
-            ++fNrecoMoved;
           }
         }
         VecToLocal(c, Tw, Tt[rad]);
@@ -1098,9 +1234,10 @@ void ARCTracing::Process()
         {
           double sT = gRandom->Uniform() < lowFrac ? gRandom->Uniform(sLow[0], sLow[1]) : gRandom->Uniform(sLim[rad][0], sLim[rad][1]), Pw[3], Tw[3], P[3], T[3], D[3];
           hTrue.Point(sT, Pw, Tw);
-          ToLocal(c, Pw, P);
-          VecToLocal(c, Tw, T);
-          if(TracePhoton(c, rad, betaH, P, T, SampleEnergy(fRad[rad], cdf), D)) ++nd;
+          ToLocal(cEntry, Pw, P);
+          VecToLocal(cEntry, Tw, T);
+          int cd = -1;
+          if(TracePhoton(cEntry, rad, betaH, P, T, SampleEnergy(fRad[rad], cdf), D, &cd) && cd == mainIdx) ++nd;
         }
         return double(nd) / nt;
       };
@@ -1119,9 +1256,10 @@ void ARCTracing::Process()
         {
           double sT = gRandom->Uniform() < lowFrac ? gRandom->Uniform(sLow[0], sLow[1]) : gRandom->Uniform(sLim[rad][0], sLim[rad][1]), Pw[3], Tw[3], P[3], T[3], Dh[3];
           hReco.Point(sT, Pw, Tw);
-          ToLocal(c, Pw, P);
-          VecToLocal(c, Tw, T);
-          if(TracePhoton(c, rad, betaH, P, T, SampleEnergy(fRad[rad], cdf), Dh))
+          ToLocal(cEntry, Pw, P);
+          VecToLocal(cEntry, Tw, T);
+          int cd = -1;
+          if(TracePhoton(cEntry, rad, betaH, P, T, SampleEnergy(fRad[rad], cdf), Dh, &cd) && cd == mainIdx)
           {
             double tr = RecoAngle(c, E[rad], Tt[rad], Dh, rad);
             if(tr >= 0 && tr < thetaMaxReco[rad]) th.push_back(tr);
