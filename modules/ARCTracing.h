@@ -153,6 +153,7 @@ private:
 
   // statistics
   Long64_t fNtracks, fNcovered, fNgen[2], fNdet[2];
+  Long64_t fNrecoMoved; // gas emission points moved from the fixed radius (beyond the mirror) to mid-path
   Long64_t fLoss[2][20]; //! photons lost per radiator and reason (see Finish)
   Bool_t fCount; //! count the losses (off for the hypothesis test photons)
   std::string fDebugFile;

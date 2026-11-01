@@ -314,6 +314,7 @@ void ARCTracing::Init()
   ReadCells(cellFile.c_str());
 
   fNtracks = fNcovered = 0;
+  fNrecoMoved = 0;
   fNgen[0] = fNgen[1] = fNdet[0] = fNdet[1] = 0;
   fCount = kFALSE;
   fDebugFile = GetString("DebugFile", "");
@@ -342,7 +343,8 @@ void ARCTracing::Finish()
     fDebug = 0;
   }
   cout << "ARCTracing: " << fNtracks << " tracks, " << fNcovered << " in the ARC; photons generated / detected: gas "
-       << fNgen[kGas] << " / " << fNdet[kGas] << ", aerogel " << fNgen[kAerogel] << " / " << fNdet[kAerogel] << endl;
+       << fNgen[kGas] << " / " << fNdet[kGas] << ", aerogel " << fNgen[kAerogel] << " / " << fNdet[kAerogel]
+       << "; gas emission points moved to mid-path (fixed radius beyond the mirror): " << fNrecoMoved << endl;
   const char *why[18] = {"below threshold", "aerogel: absorbed (up)", "aerogel: stuck (up)", "aerogel: total reflection (up)",
                          "no mirror intersection", "mirror behind", "gas absorption", "mirror outside the cell", "mirror reflectivity",
                          "after mirror: not downwards", "slab top behind", "slab: absorbed (back)", "slab: scattered back up",
@@ -754,6 +756,9 @@ double ARCTracing::RecoAngle(const Cell &c, const double *E, const double *T, co
     return Dot(s, tv);
   };
   double M[3], lo = 0.0, hi = betaD, flo = f(lo, M);
+  // the reflection point must lie between the two ends of the arc: without a sign change there is no specular solution in
+  // [0, betaD] and the bisection would stop at an end point (a meaningless direction, angles up to pi)
+  if((f(hi, M) > 0) == (flo > 0)) return -1.0;
   for(int it = 0; it < 45; ++it)
   {
     double mid = 0.5 * (lo + hi), fm = f(mid, M);
@@ -1007,6 +1012,9 @@ void ARCTracing::Process()
 
       // reconstruction: emission point at mid-radiator on the (true or smeared) track
       double E[2][3], Tt[2][3];
+      // largest physical Cherenkov angle (beta = 1) plus a margin of 4 windows: anything above is a failed reconstruction
+      double thetaMaxReco[2];
+      for(int rad = 0; rad < 2; ++rad) thetaMaxReco[rad] = acos(1.0 / fRecoIndex[rad]) + 4.0 * fWindow;
       bool recoOk[2] = {false, false};
       for(int rad = 0; rad < 2; ++rad)
       {
@@ -1023,6 +1031,26 @@ void ARCTracing::Process()
         double Pw[3], Tw[3];
         hReco.Point(sT, Pw, Tw);
         ToLocal(c, Pw, E[rad]);
+        if(rad == kGas)
+        {
+          // the fixed reconstruction radius is mid-gas for tracks along the cell axis; an inclined track meets the mirror of its
+          // cell nearer the cell edge, where the sphere is lower, and that radius can lie beyond the mirror: the reconstructed
+          // photon would then point backwards (angles near pi). Use the middle of the track between the aerogel and the mirror.
+          double dE[3] = {E[rad][0] - c.C[0], E[rad][1] - c.C[1], E[rad][2] - c.C[2]};
+          if(Norm(dE) >= c.R)
+          {
+            double halfA = fRad[kAerogel].thickness > 0 ? 0.5 * fRad[kAerogel].thickness : c.aeroHalf;
+            bool okA, okP, okS;
+            double sA = SolvePlane(hReco, c, c.aeroZ + halfA, sT, okA);
+            double sP = SolvePlane(hReco, c, c.C[2] + c.R, sT, okP);
+            double sMr = okP ? SolveSphere(hReco, c, sP, okS) : 0.0;
+            if(!(okA && okP && okS && sMr > sA)) continue;
+            sT = 0.5 * (sA + sMr);
+            hReco.Point(sT, Pw, Tw);
+            ToLocal(c, Pw, E[rad]);
+            ++fNrecoMoved;
+          }
+        }
         VecToLocal(c, Tw, Tt[rad]);
         recoOk[rad] = true;
       }
@@ -1032,7 +1060,10 @@ void ARCTracing::Process()
       {
         if(!recoOk[rad]) continue;
         for(size_t ih = 0; ih < nHits; ++ih)
-          theta[rad].push_back(RecoAngle(c, E[rad], Tt[rad], &hitsLocal[3 * ih], rad));
+          {
+            double tr = RecoAngle(c, E[rad], Tt[rad], &hitsLocal[3 * ih], rad);
+            if(tr >= 0 && tr < thetaMaxReco[rad]) theta[rad].push_back(tr);
+          }
       }
 
       if(fDebug)
@@ -1090,7 +1121,11 @@ void ARCTracing::Process()
           hReco.Point(sT, Pw, Tw);
           ToLocal(c, Pw, P);
           VecToLocal(c, Tw, T);
-          if(TracePhoton(c, rad, betaH, P, T, SampleEnergy(fRad[rad], cdf), Dh)) th.push_back(RecoAngle(c, E[rad], Tt[rad], Dh, rad));
+          if(TracePhoton(c, rad, betaH, P, T, SampleEnergy(fRad[rad], cdf), Dh))
+          {
+            double tr = RecoAngle(c, E[rad], Tt[rad], Dh, rad);
+            if(tr >= 0 && tr < thetaMaxReco[rad]) th.push_back(tr);
+          }
         }
         if(th.size() < 5) return -1.0;
         std::nth_element(th.begin(), th.begin() + th.size() / 2, th.end());
