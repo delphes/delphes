@@ -156,6 +156,7 @@ private:
   Long64_t fNcrossed; // photons reflected by the mirror of a neighbouring cell (MultiCell)
   Long64_t fNsensorNeighbour; // photons detected on the array of a neighbouring cell (MultiCell)
   Bool_t fRecoMidPathFallback;
+  Double_t fMirrorCapCos; // cosine of the polar half-angle of the spherical-cap mirrors
   Bool_t fMultiCell; // photons may reach the mirror and sensor of a neighbouring cell; tracks reconstructed in their main cell
   std::vector<std::vector<int> > fNeighbours; //! cells around each cell
   Long64_t fLoss[2][20]; //! photons lost per radiator and reason (see Finish)

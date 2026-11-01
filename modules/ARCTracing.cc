@@ -299,6 +299,9 @@ void ARCTracing::Init()
   fUseTrueMomentumForPID = GetBool("UseTrueMomentumForPID", false);
   fTrueHypothesisAngle = GetBool("TrueHypothesisAngle", false);
   fRecoMidPathFallback = GetBool("RecoMidPathFallback", false); // study option: gas emission point beyond the main mirror -> mid-path (default off: as the full-simulation analysis; better reach, fewer gas rings at 45-65 deg)
+  // the mirrors are spherical caps (k4geo ARC driver: Sphere(R - t, R, 0, 3.14 / 3.5) around the cell axis, cut to the hexagon):
+  // the sphere reflects only within that polar angle of its axis
+  fMirrorCapCos = cos(GetDouble("MirrorCapAngle", 3.14 / 3.5));
   fMultiCell = GetBool("MultiCell", true); // as Geant4: a photon reflects off the mirror of the cell it reaches; reconstruction in the main cell (most hits), as the full-simulation analysis
   fSharedCells = GetBool("SharedCells", true); // reconstruct every track against all photons of its cell (overlapping rings in jets)
   // hypothesis test: expected angle of each hypothesis from test photons reconstructed like the data (includes the bias of the
@@ -714,7 +717,7 @@ bool ARCTracing::TracePhoton(const Cell &c0, int rad, double beta, double *P, do
     else
     {
       double aM = c.region == kBarrel ? c.apothem * M[2] / c.zmin : c.apothem;
-      if(M[2] < c.zmin || !InHex(M[0], M[1], aM, c.phi0)) ownWhy = 7;
+      if(M[2] < c.zmin || !InHex(M[0], M[1], aM, c.phi0) || (M[2] - c.C[2]) < fMirrorCapCos * c.R) ownWhy = 7;
     }
     if(ownWhy)
     {
@@ -739,7 +742,7 @@ bool ARCTracing::TracePhoton(const Cell &c0, int rad, double beta, double *P, do
         if(dn <= 0 || dn >= bestD) continue;
         double Mn[3] = {Qn[0] + dn * kn[0], Qn[1] + dn * kn[1], Qn[2] + dn * kn[2]};
         double aMn = n.region == kBarrel ? n.apothem * Mn[2] / n.zmin : n.apothem;
-        if(Mn[2] < n.zmin || !InHex(Mn[0], Mn[1], aMn, n.phi0)) continue;
+        if(Mn[2] < n.zmin || !InHex(Mn[0], Mn[1], aMn, n.phi0) || (Mn[2] - n.C[2]) < fMirrorCapCos * n.R) continue;
         nb = &n; bestD = dn;
         for(int i = 0; i < 3; ++i) { Qb[i] = Qn[i]; kb[i] = kn[i]; M[i] = Mn[i]; }
       }
