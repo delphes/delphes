@@ -1150,7 +1150,7 @@ bool ARCTracing::TracePhoton(const Cell &c0, int rad, double beta, double *P, do
     kw[i] = k[0] * cp->ex[i] + k[1] * cp->ey[i] + k[2] * cp->ez[i];
   }
   const Cell *best = 0;
-  double bestDist = 1e30, Db[3];
+  double bestDist = 1e30, Db[3] = {0.0, 0.0, 0.0};
   for(int j : fNeighbours[cp - &fCells[0]])
   {
     const Cell &n = fCells[j];
@@ -1446,7 +1446,7 @@ void ARCTracing::Process()
       if(!fMultiCell) mainIdx = entryIdx;
       for(int rad = 0; rad < 2; ++rad) nDet[rad] = nDetCell[rad].count(mainIdx) ? nDetCell[rad][mainIdx] : 0;
 
-      ARCTracingWork w;
+      ARCTracingWork w = ARCTracingWork();
       w.candidate = candidate; w.mother = mother; w.particle = particle; w.mainCell = mainIdx;
       w.pTrue = pTrue; w.mass = mass; w.charge = charge; w.beta = beta; w.recoP = recoMomentum.P();
       w.hTrue = hTrue; w.hReco = hReco; w.cell = cell; w.sEntry = sEntry; w.sM = sM;
@@ -1456,7 +1456,7 @@ void ARCTracing::Process()
     }
     else
     {
-      ARCTracingWork w;
+      ARCTracingWork w = ARCTracingWork();
       w.candidate = candidate; w.mother = mother; w.particle = particle; w.cell = 0;
       works.push_back(w);
     }
