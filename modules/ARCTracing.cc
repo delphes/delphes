@@ -1558,8 +1558,9 @@ void ARCTracing::Process()
         {
           const double *D = &hitsLocal[3 * ih];
           double dS[3] = {D[0] - c.S[0], D[1] - c.S[1], D[2] - c.S[2]};
-          *fDebug << "H " << Dot(dS, c.sex) << " " << Dot(dS, c.sey) << " " << (recoOk[kGas] ? theta[kGas][ih] : -1.0) << " "
-                  << (recoOk[kAerogel] ? theta[kAerogel][ih] : -1.0) << "\n";
+          // per-hit angle under each radiator hypothesis (theta[] keeps only the hits within the physical range)
+          *fDebug << "H " << Dot(dS, c.sex) << " " << Dot(dS, c.sey) << " " << (recoOk[kGas] ? RecoAngle(c, E[kGas], Tt[kGas], D, kGas) : -1.0) << " "
+                  << (recoOk[kAerogel] ? RecoAngle(c, E[kAerogel], Tt[kAerogel], D, kAerogel) : -1.0) << "\n";
         }
       }
 
