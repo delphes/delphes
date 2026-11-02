@@ -46,7 +46,7 @@
  *  CellFile, in any combination; DumpCellsFile writes the cells in the "add Cell" form. Optical tables come from
  *  "add OpticsTable" lines or an OpticsFile. The module does not check a layout for overlaps or validate a new design.
  *
- *  \author ALFA ARC study
+ *  \author Apranik Fatehi
  */
 
 #include "classes/DelphesModule.h"

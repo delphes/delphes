@@ -20,7 +20,7 @@
  *
  *  Ray-tracing fast simulation of the ARC (see the header). Lengths in mm, energies in eV, angles in rad.
  *
- *  \author ALFA ARC study
+ *  \author Apranik Fatehi
  */
 
 #include "modules/ARCTracing.h"

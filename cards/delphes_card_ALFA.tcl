@@ -33,7 +33,7 @@ set B 3.0
 # ARC configuration
 #   ARCGas    : Xe2bar (xenon at 2 bar, n = 1.001313 at 3 eV) | C4F10 (1 bar, n = 1.001331)
 #   ARCArrays : baseline  (configuration B: 80 x 80 mm SiPM arrays, the CLD ARC cells)
-#               casestudy (configuration C, the ARC case study by Apranik: the largest arrays that fit the cells,
+#               casestudy (configuration C, the ARC case study by Apranik Fatehi: the largest arrays that fit the cells,
 #                          89.6 mm barrel / 108.8 mm endcap)
 #####################################################################
 set ARCGas Xe2bar
