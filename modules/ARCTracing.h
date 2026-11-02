@@ -57,6 +57,7 @@
 
 class TIterator;
 class TObjArray;
+class TRandom3;
 class Candidate;
 
 class ARCTracing: public DelphesModule
@@ -151,6 +152,7 @@ private:
   Bool_t fSharedCells;
   Bool_t fCalibratedHypotheses;
   Int_t fTestPhotons;
+  TRandom3 *fTestRandom; //! own random numbers for the test photons: the simulated event does not depend on them
   Bool_t fAerogelSlabInPath, fAerogelRayleigh, fAerogelAbsorption, fUseTrueTrack, fUseTrueMomentumForPID, fTrueHypothesisAngle;
 
   std::vector<Table> fTables; //!
@@ -173,7 +175,7 @@ private:
   Long64_t fLoss[2][20]; //! photons lost per radiator and reason (see Finish)
   Bool_t fCount; //! count the losses (off for the hypothesis test photons)
   std::string fDebugFile;
-  std::ofstream *fDebug; //! per-track / per-photon dump for validation studies
+  std::ofstream *fDebug; //! per-track / per-photon / per-hypothesis dump for validation studies
 
   TIterator *fItInputArray; //!
   const TObjArray *fInputArray; //!

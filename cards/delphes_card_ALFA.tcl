@@ -420,16 +420,16 @@ module ARCTracing ARCTracing {
   set MultiCell true              ;# photons reach the mirrors and arrays of neighbouring cells; each track reconstructed in its main cell
   set RecoMidPathFallback false   ;# study option: gas emission at mid-path when the fixed radius is beyond the main cell's mirror
   ## hypothesis test: expected angle and spread of each hypothesis from test photons traced and reconstructed like the data,
-  ## a missing ring weighted by P(N < MinPe); TestPhotons per hypothesis and radiator (20 halves their cost)
+  ## a missing ring weighted by P(N < MinPe); TestPhotons = detected test photons per hypothesis and radiator (at most 4x generated)
   set CalibratedHypotheses true
-  set TestPhotons 40
+  set TestPhotons 30
   set AerogelRayleigh true        ;# Rayleigh scattering in the aerogel (table AerogelRayleighTable)
   set AerogelAbsorption true      ;# absorption in the aerogel (table AerogelAbsorptionTable; none here, as the Geant4 material)
   ## validation switches: true track, true momentum for the hypotheses, window around the true angle
   set UseTrueTrack false
   set UseTrueMomentumForPID false
   set TrueHypothesisAngle false
-  ## for studies: set DumpCellsFile <file> (the cells as "add Cell" lines), DebugFile <file> (per-track and per-photon text
+  ## for studies: set DumpCellsFile <file> (the cells as "add Cell" lines), DebugFile <file> (per-track, per-photon and per-hypothesis text
   ## dump), DebugMonoEnergy <eV> (all photons at one energy: no chromatic error), DebugMidEmission true (emission at mid-path)
 
   ## ---- ARC cell optics (k4geo ARC_geo_o1_v01 construction; mm, rad) ----

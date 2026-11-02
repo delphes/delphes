@@ -45,6 +45,18 @@
 
 using namespace std;
 
+namespace
+{
+// gRandom replaced by another generator in a scope (the test photons draw their own random numbers, so that the simulated
+// photons and the rest of the event do not depend on the number of test photons)
+struct RandomSwap
+{
+  TRandom *saved;
+  RandomSwap(TRandom *r) : saved(gRandom) { gRandom = r; }
+  ~RandomSwap() { gRandom = saved; }
+};
+} // namespace
+
 static const double kMassPi = 0.13957039, kMassK = 0.493677, kMassP = 0.93827209;
 static const double kFrankTamm = 36.98; // Cherenkov photons per eV per mm at sin^2(theta) = 1: alpha / (hbar c)
 static const double kDeg = TMath::Pi() / 180.0;
@@ -66,12 +78,13 @@ static inline void Cross(const double *a, const double *b, double *c)
 //------------------------------------------------------------------------------
 
 ARCTracing::ARCTracing() :
-  fDebug(0), fItInputArray(0), fInputArray(0), fOutputArray(0)
+  fTestRandom(0), fDebug(0), fItInputArray(0), fInputArray(0), fOutputArray(0)
 {
 }
 
 ARCTracing::~ARCTracing()
 {
+  delete fTestRandom;
 }
 
 //------------------------------------------------------------------------------
@@ -625,7 +638,9 @@ void ARCTracing::Init()
   // hypothesis test: expected angle of each hypothesis from test photons reconstructed like the data (includes the bias of the
   // reconstruction method, the bending and the cell geometry), and a missing ring weighted by P(N < MinPe | expected photons)
   fCalibratedHypotheses = GetBool("CalibratedHypotheses", true);
-  fTestPhotons = GetInt("TestPhotons", 40);
+  fTestPhotons = GetInt("TestPhotons", 30); // detected test photons per hypothesis and radiator
+  delete fTestRandom;
+  fTestRandom = new TRandom3(GetInt("TestSeed", 4357));
   fDebugMonoEnergy = GetDouble("DebugMonoEnergy", 0.0); // > 0: all photons at this energy (no chromatic error), for studies
   fDebugMidEmission = GetBool("DebugMidEmission", false); // all photons from the middle of the radiator path, for studies
 
@@ -1568,6 +1583,7 @@ void ARCTracing::Process()
       auto acceptance = [&](int rad, double betaH) {
         if(nGen[rad] >= 10) return double(nDet[rad]) / nGen[rad];
         if(!pathOk) return 0.0;
+        RandomSwap rs(fTestRandom);
         vector<double> cdf;
         if(Yield(fRad[rad], betaH, &cdf) <= 0) return 0.0;
         int nt = 0, nd = 0;
@@ -1585,16 +1601,20 @@ void ARCTracing::Process()
       };
 
       // expected reconstructed angle of a hypothesis: test photons at betaH emitted along the reconstructed helix, traced through the
-      // cell and reconstructed exactly as the hits; median of the detected ones and their single-photon spread (1.4826 MAD) in sig1
-      // (-1 if fewer than 5 are detected)
-      auto expectedAngle = [&](int rad, double betaH, double &sig1) {
+      // cell and reconstructed exactly as the hits; the clipped mean of the detected ones (as a measured ring), their single-photon
+      // spread in sig1 and their number in nUsed (-1 if fewer than 5 are detected)
+      auto expectedAngle = [&](int rad, double betaH, double &sig1, int &nUsed) {
         sig1 = -1.0;
+        nUsed = 0;
+        RandomSwap rs(fTestRandom);
         if(!recoOk[rad]) return -1.0;
         vector<double> cdf;
         if(Yield(fRad[rad], betaH, &cdf) <= 0) return -1.0;
         double Llow = rad == kGas ? (sLow[1] - sLow[0]) : 0.0, lowFrac = Llow / (Llow + sLim[rad][1] - sLim[rad][0]);
+        // test photons until TestPhotons of them are detected (at most 4 x TestPhotons generated): the precision of the expected
+        // angle and of its spread does not depend on the acceptance of the radiator (about 30 % for the aerogel, 70 % for the gas)
         vector<double> th;
-        for(int it = 0; it < fTestPhotons; ++it)
+        for(int it = 0; it < 4 * fTestPhotons && int(th.size()) < fTestPhotons; ++it)
         {
           double sT = gRandom->Uniform() < lowFrac ? gRandom->Uniform(sLow[0], sLow[1]) : gRandom->Uniform(sLim[rad][0], sLim[rad][1]), Pw[3], Tw[3], P[3], T[3], Dh[3];
           hReco.Point(sT, Pw, Tw);
@@ -1610,20 +1630,28 @@ void ARCTracing::Process()
         if(th.size() < 5) return -1.0;
         std::nth_element(th.begin(), th.begin() + th.size() / 2, th.end());
         double med = th[th.size() / 2];
-        vector<double> dev(th.size());
-        for(size_t i = 0; i < th.size(); ++i) dev[i] = fabs(th[i] - med);
-        std::nth_element(dev.begin(), dev.begin() + dev.size() / 2, dev.end());
-        sig1 = 1.4826 * dev[dev.size() / 2];
-        return med;
+        // the same estimator as the measured ring (clipped mean in the window), so that its biases cancel
+        double mean, rms;
+        int nClip;
+        RobustMean(th, med, fWindow, mean, rms, nClip);
+        if(nClip < 5) return -1.0;
+        // single-photon spread: rms of all test photons in the window, without clipping. The clipping of a measured ring uses the
+        // spread of its own few photons and keeps part of the tails, so its mean scatters as the unclipped spread / sqrt(n), not
+        // as the clipped one (which is biased low for small samples). nUsed: the photons of the spread estimate
+        double s2 = 0.0;
+        for(size_t i = 0; i < th.size(); ++i)
+          if(fabs(th[i] - med) < fWindow) { s2 += (th[i] - mean) * (th[i] - mean); ++nUsed; }
+        sig1 = sqrt(s2 / nUsed);
+        return mean;
       };
 
       // the measured rings: the window with most photons among the hypotheses (and the true one, for validation)
       double pHyp = fUseTrueMomentumForPID ? pTrue : w.recoP;
       if(pHyp <= 0) pHyp = pTrue;
-      struct Ring { double mean, rms, sigma, thetaH, nExp, sig1H; int n; bool expected, found; };
+      struct Ring { double mean, rms, sigma, sigmaH, thetaH, nExp, sig1H; int n, nTestH; bool expected, found; };
       Ring ring[3][2];
       Ring meas[2];
-      for(int rad = 0; rad < 2; ++rad) { meas[rad].n = 0; meas[rad].found = false; meas[rad].mean = meas[rad].sigma = -1.0; }
+      for(int rad = 0; rad < 2; ++rad) { meas[rad].n = 0; meas[rad].found = false; meas[rad].mean = meas[rad].sigma = meas[rad].sigmaH = -1.0; }
       for(int h = 0; h < 3; ++h)
       {
         double betaH = pHyp / sqrt(pHyp * pHyp + masses[h] * masses[h]);
@@ -1633,15 +1661,16 @@ void ARCTracing::Process()
           double cs = 1.0 / (nref[rad] * betaH);
           r.thetaH = cs < 1.0 ? acos(cs) : -1.0;
           r.sig1H = -1.0;
+          r.nTestH = 0;
           if(fCalibratedHypotheses && r.thetaH > 0 && pathOk)
           {
-            double te = expectedAngle(rad, betaH, r.sig1H);
+            double te = expectedAngle(rad, betaH, r.sig1H, r.nTestH);
             if(te > 0) r.thetaH = te;
           }
           r.nExp = r.thetaH > 0 && pathOk ? Yield(fRad[rad], betaH, 0) * L[rad] * acceptance(rad, betaH) : 0.0;
           r.expected = r.thetaH > 0 && r.nExp >= fMinPe;
           r.n = 0;
-          r.mean = r.rms = r.sigma = -1.0;
+          r.mean = r.rms = r.sigma = r.sigmaH = -1.0;
           r.found = false;
           if(r.thetaH > 0 && recoOk[rad])
           {
@@ -1649,13 +1678,27 @@ void ARCTracing::Process()
             r.found = r.n >= fMinPe;
             if(r.found)
             {
-              double s1sq = max(r.rms * r.rms, fSigmaSingleFloor[rad] * fSigmaSingleFloor[rad]);
+              // per-track uncertainty: calibrated, from the single-photon spread of this hypothesis' test photons (the scatter of
+              // the few measured photons is biased low); otherwise from the measured photons
+              bool cal = fCalibratedHypotheses && r.sig1H > 0;
+              double s1 = cal ? r.sig1H : r.rms;
+              double s1sq = max(s1 * s1, fSigmaSingleFloor[rad] * fSigmaSingleFloor[rad]);
               r.sigma = sqrt(s1sq / r.n + fSigmaCorr[rad] * fSigmaCorr[rad] + fSigmaTrack * fSigmaTrack);
+              // the uncertainty of the hypothesis' expected angle from the finite number of test photons, for the chi2
+              r.sigmaH = cal ? sqrt(r.sigma * r.sigma + s1sq / r.nTestH) : r.sigma;
               if(r.n > meas[rad].n) meas[rad] = r;
             }
           }
         }
       }
+      if(fDebug)
+        for(int h = 0; h < 3; ++h)
+          for(int rad = 0; rad < 2; ++rad)
+          {
+            const Ring &r = ring[h][rad];
+            *fDebug << "R " << w.index << " " << h << " " << rad << " " << r.expected << " " << r.found << " " << r.n << " " << r.mean << " "
+                    << r.thetaH << " " << r.sigma << " " << r.sigmaH << " " << r.sig1H << " " << r.nTestH << " " << r.nExp << "\n";
+          }
       bool anyRing = meas[kGas].found || meas[kAerogel].found;
       if(anyRing)
       {
@@ -1667,17 +1710,7 @@ void ARCTracing::Process()
           {
             const Ring &r = ring[h][rad];
             if(r.expected && r.found)
-            {
-              // calibrated: the per-track uncertainty from the single-photon spread of the test photons of this hypothesis, not from
-              // the scatter of the few measured photons (which is often accidentally small)
-              double sg = r.sigma;
-              if(fCalibratedHypotheses && r.sig1H > 0)
-              {
-                double s1 = max(r.sig1H, fSigmaSingleFloor[rad]);
-                sg = sqrt(s1 * s1 / r.n + fSigmaCorr[rad] * fSigmaCorr[rad] + fSigmaTrack * fSigmaTrack);
-              }
-              c2 += pow((r.mean - r.thetaH) / sg, 2);
-            }
+              c2 += pow((r.mean - r.thetaH) / r.sigmaH, 2);
             else if(r.expected && !r.found)
             {
               if(fCalibratedHypotheses)
@@ -1689,6 +1722,8 @@ void ARCTracing::Process()
               }
               else
                 c2 += 2.0 * r.nExp; // -2 ln P(0 | nExp)
+              // and a ring measured in this radiator away from the hypothesis' angle is not explained by it
+              if(meas[rad].found) c2 += pow((meas[rad].mean - r.thetaH) / meas[rad].sigmaH, 2);
             }
             else if(!r.expected && meas[rad].found)
               c2 += pow(meas[rad].mean / meas[rad].sigma, 2); // a ring measured where this hypothesis predicts none
