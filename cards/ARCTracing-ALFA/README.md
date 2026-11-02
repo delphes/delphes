@@ -7,8 +7,9 @@ k4geo geometry (aerogel slab, spherical mirror, SiPM array, pixels) and reconstr
 analysis does. Thresholds, photon yields, chromatic error, ring size on the array, bending and scattering come out of
 the model; nothing is fitted to the full simulation.
 
-Validated against the Geant4 full simulation (k4geo `ALFA_o1_v01`) on three configurations and both gases: 23 of 24
-three-sigma reaches within 5 %, two configurations predicted blind. Validated range of the aerogel index: n <= 1.030.
+Validated against the Geant4 full simulation (k4geo `ALFA_o1_v01`) for the three cards, in the 14 cell-sized polar-angle bins
+from 12 to 90 deg: of the 174 three-sigma pi/K and K/p reaches (gas and aerogel), 131 agree within 5 %, 35 within 10 %, and the
+8 others are mostly in the barrel-endcap gap (39-44 deg). Validated range of the aerogel index: n <= 1.030.
 
 ## Files
 
@@ -54,9 +55,9 @@ make -j8 HAS_PYTHIA8=true
 ```
 
 The cards refer to `cards/ARCTracing-ALFA/...` relative to the Delphes directory: run from there or make the two paths absolute.
-Speed: the ARC adds about 4.2 ms per e+e- -> ZH event at 240 GeV (about 180 us per charged track): 8.0 ms per event with the
-ARC against 3.7 ms without, Pythia and ROOT output included (10k events, AMD EPYC 7302). About half of it is the test photons
-of the calibrated hypothesis test (TestPhotons = 40); TestPhotons = 20 halves that part.
+Speed: the ARC adds about 5 ms per e+e- -> ZH event at 240 GeV (about 210 us per charged track): 8.8 ms per event with the
+baseline cards (9.3 ms with the case-study card) against 3.8 ms without, Pythia and ROOT output included (10k events, AMD EPYC
+7302). About half of it is the test photons of the calibrated hypothesis test (TestPhotons = 40); TestPhotons = 20 halves that part.
 
 ## Module parameters (the values of the cards)
 
@@ -74,6 +75,9 @@ of the calibrated hypothesis test (TestPhotons = 40); TestPhotons = 20 halves th
 | `Window`, `MinPe` | window around the hypothesis angle [rad]; photons needed for a ring | 0.025, 3 |
 | `GasSigmaSingleFloor`, `AerogelSigmaSingleFloor`, `GasSigmaCorr`, `AerogelSigmaCorr`, `SigmaTrack` | per-track resolution: sigma^2 = max(rms^2, floor^2)/N + corr^2 + track^2 [rad] | 1.0e-3, 1.5e-3, 0, 0, 0 |
 | `SharedCells` | all tracks of a cell are reconstructed against the pooled photons of the cell | true |
+| `MultiCell` | a photon reaches the mirror (and array) of a neighbouring cell when it is above that cell; each track is reconstructed in its main cell (most of its photons), as the full-simulation analysis | true |
+| `MirrorCapAngle` | the mirrors are spherical caps of this polar half-angle around the cell axis, as in the k4geo driver [rad] | 3.14/3.5 |
+| `RecoMidPathFallback` | study option: gas emission point at mid-path when the fixed radius is beyond the main cell's mirror | false |
 | `CalibratedHypotheses`, `TestPhotons` | hypothesis test with the expected angle and single-photon spread of each hypothesis taken from test photons reconstructed like the data, and a missing ring weighted by P(N < MinPe); number of test photons per hypothesis and radiator | true, 40 |
 | `UseTrueTrack`, `UseTrueMomentumForPID`, `TrueHypothesisAngle` | validation switches (true track and momentum; window around the true angle) | false, false, false |
 
@@ -103,15 +107,18 @@ identifies 3-5 GeV kaons correctly only half of the time.
 
 ## The algorithm (per event, two passes)
 
-1. For every track: the cell the helix enters (barrel or endcap), in that cell's optical frame; photons along the helix
-   in aerogel and gas, N ~ Poisson(L dN/dL) with dN/dL = 36.98 /eV/mm * integral of sin^2 theta_c(E) PDE(E) R(E) dE,
-   energies sampled from the integrand; each photon refracted out of the slab, Rayleigh-scattered (1 + cos^2) with the
-   tabulated length, reflected on the mirror sphere (lost outside the hexagonal cell), traced back through the slab to
-   the SiPM array and binned in pixels. Photons are pooled per cell.
-2. For every track: inverse ray tracing of every pixel hit of its cell (pixel centre -> mirror point -> emission point at
-   mid-radiator) to an angle; window of +-25 mrad around the hypothesis angle; two passes of 3-sigma clipping with
-   sigma = 1.4826 MAD; mean, rms, N; resolution as above; chi2 and probabilities for pi, K, p.
+1. For every track: the cell the helix enters (barrel or endcap); photons along the helix in aerogel and gas up to the
+   mirror of the cell the track is in, N ~ Poisson(L dN/dL) with dN/dL = 36.98 /eV/mm * integral of sin^2 theta_c(E) PDE(E)
+   R(E) dE, energies sampled from the integrand; each photon refracted out of the slab, Rayleigh-scattered (1 + cos^2) with
+   the tabulated length, reflected by the first mirror cap it meets inside its cell's hexagon (its own cell's or a
+   neighbour's: inclined tracks cross from one cell to the next), traced back through that cell's slab to its SiPM array
+   (or a neighbouring array) and binned in pixels. Photons are kept per cell and pooled over the tracks of the event.
+2. For every track: its main cell (most of its photons); inverse ray tracing of every pixel hit of that cell (pixel
+   centre -> mirror point -> emission point at the fixed mid-radiator radius) to an angle, angles above the physical
+   maximum dropped; window of +-25 mrad around the hypothesis angle; two passes of 3-sigma clipping with sigma =
+   1.4826 MAD; mean, rms, N; resolution as above; chi2 and probabilities for pi, K, p.
 
-Performance of the two cards in the central barrel cell (3-sigma reach, fast / full simulation, GeV): Xe 2 bar
-gas pi/K 23.7 / 24.7, K/p 40.8 / 44.1, aerogel pi/K 7.3 / 7.4, K/p 13.0 / 13.2; C4F10 gas 23.8 / 24.4, 41.3 / 44.3,
-aerogel 7.3 / 7.4, 13.0 / 12.8.
+3-sigma reach in the central barrel cell (82.6-90 deg), fast / full simulation, GeV (gas pi/K, K/p; aerogel pi/K, K/p):
+case study C 24.6 / 25.0, 43.6 / 43.6, 7.9 / 7.6, 14.1 / 13.9; baseline B Xe 2 bar 24.9 / 24.7, 44.7 / 44.1, 7.7 / 7.4,
+13.4 / 13.2; baseline B C4F10 25.7 / 24.4, 45.4 / 44.3, 7.6 / 7.4, 13.6 / 12.8. Known difference: at 45-60 deg the fast
+simulation finds 80-90 % of the gas rings of the full simulation (light reaching a cell through more than one neighbour).
