@@ -19,8 +19,6 @@ from 12 to 90 deg: of the 174 three-sigma pi/K and K/p reaches (gas and aerogel)
 | `classes/DelphesClasses.h/.cc`, `modules/TreeWriter.cc` | 16 ARC members on `Candidate` and `Track` (below) |
 | `modules/ModulesLinkDef.h`, `Makefile` | registration and build |
 | `cards/ARCTracing-ALFA/delphes_card_ALFA.tcl` | the ALFA card: 3 T, all-MAPS tracker, ARC, GRAiNITA ECAL. The ARC configuration (gas, SiPM arrays) is chosen with two switches at the top; the ARC geometry, the cell optics and the optical tables are parameters of the ARCTracing module in the card. No other file is read. |
-| `cards/ARCTracing-ALFA/arc_card_block.py` | writes the cell-type lines and optical tables of the card from the k4geo sources (only needed to change them) |
-| `cards/ARCTracing-ALFA/gun_{pip,kp,p}.cmnd` | Pythia8 single-particle guns (pi+, K+, p), log-uniform p in 0.1-60 GeV, abs(eta) < 2.6 |
 
 ## The ARC configurations of the card
 
@@ -70,8 +68,11 @@ can still replace the parameters, for a geometry that does not follow this const
 source /cvmfs/sw-nightlies.hsf.org/key4hep/setup.sh   # ROOT, Pythia8, HepMC
 ./configure                                           # regenerates the Makefile with the new module
 make -j8 HAS_PYTHIA8=true
-./DelphesPythia8 cards/ARCTracing-ALFA/delphes_card_ALFA.tcl cards/ARCTracing-ALFA/gun_kp.cmnd kp.root
+./DelphesPythia8 cards/ARCTracing-ALFA/delphes_card_ALFA.tcl examples/Pythia8/ee_zh.cmnd zh.root
 ```
+
+Single particles, as used for the validation: `examples/Pythia8/configParticleGun.cmnd` with `Main:spareMode1 = 211`
+(or 321, 2212), `Main:spareParm1 = 60` (maximum momentum, GeV) and `Main:spareParm2 = 2.6` (maximum |eta|).
 
 Speed: the ARC adds about 5 ms per e+e- -> ZH event at 240 GeV (about 210 us per charged track): 8.8 ms per event with the
 baseline arrays (9.3 ms with the case-study arrays) against 3.8 ms without, Pythia and ROOT output included (10k events, AMD EPYC
