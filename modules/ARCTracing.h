@@ -25,20 +25,23 @@
  *
  *  Unlike a parametrised response fitted to the full simulation of one geometry, this module models the
  *  detector: for every charged track it
- *   1. finds the ARC cell the helix enters (barrel or endcap) and works in that cell's optical frame, read from a table
- *      dumped from the k4geo geometry (mirror centre and radius, SiPM array position, tilt and size, aerogel position);
+ *   1. builds the ARC cells from card parameters (vessel, hexagonal cell layout, and per cell type the mirror radius and
+ *      centre and the SiPM array offset and tilt, as the k4geo ARC_geo_o1_v01 construction), finds the cell the helix
+ *      enters (barrel or endcap) and works in that cell's optical frame;
  *   2. generates the Cherenkov photons along the helix in the aerogel slab and in the gas with the Frank-Tamm yield,
  *      the SiPM PDE and the mirror reflectivity, with the photon energy sampled from the detected spectrum, so that the
  *      dispersion n(E) of each radiator (chromatic error), the thresholds and the yield vs beta come out by themselves;
  *   3. traces every photon: refraction out of the aerogel, absorption and Rayleigh scattering in it, reflection on the
- *      spherical mirror (lost if outside the cell), the way back through the aerogel, the SiPM array (lost if outside),
+ *      first spherical-cap mirror it meets (its own cell's or a neighbour's), the way back through the aerogel, the SiPM
+ *      array of that cell or a neighbouring one (lost if outside),
  *      and the pixel: a ring that falls off the array, a ring larger than the sensor, a track that bends, are all modelled;
  *   4. reconstructs the Cherenkov angle of every pixel hit exactly as the full-simulation analysis does (inverse ray
  *      tracing from the pixel centre on the sensor face, emission assumed at mid-radiator on the track), and
  *   5. computes the per-track angle per radiator, its resolution and the pi/K/p probabilities (chi2 over the two radiators).
  *
- *  Gas, aerogel (index, dispersion, thickness, scattering), magnetic field, sensor size, pixel pitch, mirror curvature and
- *  photon-detection efficiency are parameters; another ARC geometry is another cell table (dump_arc_cells.py).
+ *  Geometry, gas and aerogel (index tables, dispersion, thickness, scattering), magnetic field, sensor size, pixel pitch,
+ *  mirror curvature and photon-detection efficiency are card parameters and tables; no external file is needed. A cell
+ *  table (CellFile) and an optics table (OpticsFile) can replace them for a geometry built differently.
  *
  *  \author ALFA ARC study
  */
@@ -109,7 +112,10 @@ public:
 
 private:
   void ReadTables(const char *file);
+  void ReadTablesFromCard();
   void ReadCells(const char *file);
+  void BuildCells();
+  void AddCell(int region, const double *raw);
   const Table *FindTable(const std::string &name) const;
   void BuildGrid(Radiator &r, const Table &pde, const Table &refl);
   double Yield(const Radiator &r, double beta, std::vector<double> *cdf) const; // detected photons per mm of path

@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -128,73 +129,347 @@ void ARCTracing::ReadCells(const char *file)
   ifstream in(file);
   if(!in) throw runtime_error(string("ARCTracing: cannot open the cell file ") + file);
   string line;
-  fBarrelRin = 1e9;
-  fEndcapZin = 1e9;
   while(getline(in, line))
   {
     if(line.empty() || line[0] == '#') continue;
     istringstream ss(line);
     string region, name;
     ss >> region >> name;
-    Cell c;
-    c.region = (region == "barrel") ? kBarrel : kEndcap;
-    double Rmax, aeroN[3], aeroRmax, aero[3];
-    for(int i = 0; i < 3; ++i) ss >> c.O[i];
-    for(int i = 0; i < 3; ++i) ss >> c.ex[i];
-    for(int i = 0; i < 3; ++i) ss >> c.ey[i];
-    for(int i = 0; i < 3; ++i) ss >> c.ez[i];
-    for(int i = 0; i < 3; ++i) ss >> c.C[i];
-    ss >> c.R >> Rmax;
-    for(int i = 0; i < 3; ++i) ss >> c.S[i];
-    for(int i = 0; i < 3; ++i) ss >> c.sex[i];
-    for(int i = 0; i < 3; ++i) ss >> c.sey[i];
-    for(int i = 0; i < 3; ++i) ss >> c.sez[i];
-    for(int i = 0; i < 3; ++i) ss >> c.hs[i];
-    for(int i = 0; i < 3; ++i) ss >> aero[i];
-    for(int i = 0; i < 3; ++i) ss >> aeroN[i];
-    ss >> c.aeroHalf >> aeroRmax >> c.phi0 >> c.zmin >> c.zmax >> c.apothem;
+    double raw[44];
+    for(int i = 0; i < 44; ++i) ss >> raw[i];
     if(!ss) throw runtime_error("ARCTracing: malformed cell line: " + line);
-    c.aeroZ = aero[2];
-    // the frames are written with a finite number of digits: make them exactly orthonormal (the Cherenkov angle of the gas,
-    // 50 mrad, is sensitive to 1e-4 in a direction's norm through cot(theta_c))
-    Unit(c.ez);
-    double pz = Dot(c.ex, c.ez);
-    for(int i = 0; i < 3; ++i) c.ex[i] -= pz * c.ez[i];
-    Unit(c.ex);
-    Cross(c.ez, c.ex, c.ey);
-    Unit(c.sez);
-    double qz = Dot(c.sex, c.sez);
-    for(int i = 0; i < 3; ++i) c.sex[i] -= qz * c.sez[i];
-    Unit(c.sex);
-    double sy[3];
-    Cross(c.sez, c.sex, sy);
-    if(Dot(sy, c.sey) < 0)
-      for(int i = 0; i < 3; ++i) sy[i] = -sy[i];
-    for(int i = 0; i < 3; ++i) c.sey[i] = sy[i];
-    c.side = (c.O[2] + c.ez[2] * c.zmin < 0.0) ? -1 : 1;
-    // the sensor normal pointing to the mirror surface, and the detection plane on that face
-    double apex[3] = {c.C[0], c.C[1], c.C[2] + c.R};
-    double toApex[3] = {apex[0] - c.S[0], apex[1] - c.S[1], apex[2] - c.S[2]};
-    if(Dot(c.sez, toApex) < 0.0)
-      for(int i = 0; i < 3; ++i) c.sez[i] = -c.sez[i];
-    for(int i = 0; i < 3; ++i) c.S[i] += c.hs[2] * c.sez[i];
-    // design knobs: sensor moved along the cell axis, mirror curvature changed with the apex fixed
-    c.S[2] += fSensorShift;
-    if(fMirrorRadiusScale != 1.0)
-    {
-      double Rnew = c.R * fMirrorRadiusScale;
-      c.C[2] = apex[2] - Rnew;
-      c.R = Rnew;
-    }
-    c.phiAxis = atan2(c.ez[1], c.ez[0]);
-    c.zAxis = c.O[2];
-    if(c.region == kBarrel)
-      fBarrelRin = min(fBarrelRin, c.zmin);
-    else
-      fEndcapZin = min(fEndcapZin, fabs(c.O[2] + c.ez[2] * c.zmin));
-    fCells.push_back(c);
+    AddCell(region == "barrel" ? kBarrel : kEndcap, raw);
   }
   if(fCells.empty()) throw runtime_error("ARCTracing: no cells read");
+}
+
+// one cell from the 44 numbers of a cell-table line (after region and name): O, ex, ey, ez (world), mirror centre (cell
+// frame), Rmin, Rmax, sensor centre, its axes and half sizes, aerogel centre and normal, aerogel half thickness and radius,
+// hexagon orientation [deg], cell z range, apothem
+void ARCTracing::AddCell(int region, const double *raw)
+{
+  Cell c;
+  c.region = region;
+  int k = 0;
+  for(int i = 0; i < 3; ++i) c.O[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.ex[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.ey[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.ez[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.C[i] = raw[k++];
+  c.R = raw[k++];
+  k++; // Rmax
+  for(int i = 0; i < 3; ++i) c.S[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.sex[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.sey[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.sez[i] = raw[k++];
+  for(int i = 0; i < 3; ++i) c.hs[i] = raw[k++];
+  c.aeroZ = raw[k + 2];
+  k += 6; // aerogel centre and normal
+  c.aeroHalf = raw[k++];
+  k++; // aerogel radius
+  c.phi0 = raw[k++];
+  c.zmin = raw[k++];
+  c.zmax = raw[k++];
+  c.apothem = raw[k++];
+  if(fCells.empty())
+  {
+    fBarrelRin = 1e9;
+    fEndcapZin = 1e9;
+  }
+  // frames given with a finite number of digits: make them exactly orthonormal (the Cherenkov angle of the gas, 50 mrad, is
+  // sensitive to 1e-4 in a direction's norm through cot(theta_c))
+  Unit(c.ez);
+  double pz = Dot(c.ex, c.ez);
+  for(int i = 0; i < 3; ++i) c.ex[i] -= pz * c.ez[i];
+  Unit(c.ex);
+  Cross(c.ez, c.ex, c.ey);
+  Unit(c.sez);
+  double qz = Dot(c.sex, c.sez);
+  for(int i = 0; i < 3; ++i) c.sex[i] -= qz * c.sez[i];
+  Unit(c.sex);
+  double sy[3];
+  Cross(c.sez, c.sex, sy);
+  if(Dot(sy, c.sey) < 0)
+    for(int i = 0; i < 3; ++i) sy[i] = -sy[i];
+  for(int i = 0; i < 3; ++i) c.sey[i] = sy[i];
+  c.side = (c.O[2] + c.ez[2] * c.zmin < 0.0) ? -1 : 1;
+  // the sensor normal pointing to the mirror surface, and the detection plane on that face
+  double apex[3] = {c.C[0], c.C[1], c.C[2] + c.R};
+  double toApex[3] = {apex[0] - c.S[0], apex[1] - c.S[1], apex[2] - c.S[2]};
+  if(Dot(c.sez, toApex) < 0.0)
+    for(int i = 0; i < 3; ++i) c.sez[i] = -c.sez[i];
+  for(int i = 0; i < 3; ++i) c.S[i] += c.hs[2] * c.sez[i];
+  // design knobs: sensor moved along the cell axis, mirror curvature changed with the apex fixed
+  c.S[2] += fSensorShift;
+  if(fMirrorRadiusScale != 1.0)
+  {
+    double Rnew = c.R * fMirrorRadiusScale;
+    c.C[2] = apex[2] - Rnew;
+    c.R = Rnew;
+  }
+  c.phiAxis = atan2(c.ez[1], c.ez[0]);
+  c.zAxis = c.O[2];
+  if(c.region == kBarrel)
+    fBarrelRin = min(fBarrelRin, c.zmin);
+  else
+    fEndcapZin = min(fEndcapZin, fabs(c.O[2] + c.ez[2] * c.zmin));
+  fCells.push_back(c);
+}
+
+//------------------------------------------------------------------------------
+
+namespace
+{
+// rigid transform x -> R x + t (the DD4hep placements of the k4geo ARC driver)
+struct ArcTf
+{
+  double R[3][3], t[3];
+};
+ArcTf ArcIdentity()
+{
+  ArcTf a;
+  for(int i = 0; i < 3; ++i)
+  {
+    for(int j = 0; j < 3; ++j) a.R[i][j] = (i == j);
+    a.t[i] = 0.0;
+  }
+  return a;
+}
+ArcTf ArcRot(int axis, double ang)
+{
+  ArcTf a = ArcIdentity();
+  double c = cos(ang), s = sin(ang);
+  int i = (axis + 1) % 3, j = (axis + 2) % 3;
+  a.R[i][i] = c;
+  a.R[i][j] = -s;
+  a.R[j][i] = s;
+  a.R[j][j] = c;
+  return a;
+}
+ArcTf ArcShift(double x, double y, double z)
+{
+  ArcTf a = ArcIdentity();
+  a.t[0] = x;
+  a.t[1] = y;
+  a.t[2] = z;
+  return a;
+}
+ArcTf operator*(const ArcTf &a, const ArcTf &b)
+{
+  ArcTf c;
+  for(int i = 0; i < 3; ++i)
+  {
+    c.t[i] = a.t[i];
+    for(int j = 0; j < 3; ++j)
+    {
+      c.R[i][j] = 0.0;
+      for(int k = 0; k < 3; ++k) c.R[i][j] += a.R[i][k] * b.R[k][j];
+      c.t[i] += a.R[i][j] * b.t[j];
+    }
+  }
+  return c;
+}
+void ArcPoint(const ArcTf &a, const double *p, double *q)
+{
+  for(int i = 0; i < 3; ++i) q[i] = a.t[i] + a.R[i][0] * p[0] + a.R[i][1] * p[1] + a.R[i][2] * p[2];
+}
+void ArcVector(const ArcTf &a, const double *v, double *w)
+{
+  for(int i = 0; i < 3; ++i) w[i] = a.R[i][0] * v[0] + a.R[i][1] * v[1] + a.R[i][2] * v[2];
+}
+} // namespace
+
+// The ARC cells from parameters, as the k4geo ARC_geo_o1_v01 driver builds them: hexagonal pyramid cells repeated in phi in the
+// barrel, hexagonal prisms on a grid of 60-degree sectors (with mirrored copies) in the two endcaps; each cell type has its own
+// mirror (radius, centre) and sensor (offset, tilt) from the ARC optics optimisation. Lengths in mm, angles in rad (phi step
+// in deg). The cells equal those of the DD4hep geometry of the k4geo driver (checked to 1e-6 mm for all 1203 cells).
+void ARCTracing::BuildCells()
+{
+  const double barrelRin = GetDouble("BarrelInnerRadius", 1900.0), barrelRout = GetDouble("BarrelOuterRadius", 2100.0);
+  const double endcapLength = GetDouble("EndcapLength", 200.0), endcapZ = GetDouble("EndcapZ", 2100.0);
+  const double wall = GetDouble("VesselWallThickness", 10.0), mirrorThick = GetDouble("MirrorThickness", 2.0);
+  const double sensorThick = GetDouble("SensorThickness", 2.0), sensorOffset = GetDouble("SensorZOffset", 5.0);
+  const double aerogelThick = GetDouble("CellAerogelThickness", 10.0);
+  const double mirrorShrink = GetDouble("BarrelMirrorZShrink", 6.0), mirrorOrigin = GetDouble("MirrorZOrigin", 370.0);
+  const double side = GetDouble("HexagonSide", 148.15), apo = side * cos(TMath::Pi() / 6.0);
+  const double phiStep = GetDouble("BarrelPhiStep", 13.333) * TMath::DegToRad();
+  const int nPhiBarrel = GetInt("BarrelSectors", 27), nPhiEndcap = GetInt("EndcapSectors", 6);
+  const int maxCell = GetInt("BarrelMaxCell", 17);
+  const double sensorB = GetDouble("BarrelSensorSize", 80.0), sensorE = GetDouble("EndcapSensorSize", 80.0);
+  const double halfPi = 0.5 * TMath::Pi();
+
+  // the sensor depth and the aerogel offset (the formula of the optimisation program, as in the driver)
+  auto sensorDepth = [&](double origin, double tilt, double sideX, double &aero) {
+    double z = origin, a = fabs(tilt), h = 0.5 * sideX;
+    if(a > asin(sensorOffset / h)) z += sin(a) * h - sensorOffset;
+    aero = sin(a) * sideX + aerogelThick + sensorThick;
+    return z;
+  };
+  // one cell in the cell-table convention: frame with z = cell axis, x = mirror-centre offset
+  auto addRow = [&](int region, const ArcTf &cellTf, const double *Cloc, double R, const ArcTf &sensTf, double sideX, double sideY,
+                    const double *Aloc, const double *nloc, const double *hexloc, double zmin, double zmax) {
+    double O[3], ez[3], C[3], Sl[3], S[3], A[3], nA[3], hv[3], zero[3] = {0, 0, 0}, z1[3] = {0, 0, 1};
+    ArcPoint(cellTf, zero, O);
+    ArcVector(cellTf, z1, ez);
+    ArcPoint(cellTf, Cloc, C);
+    ArcPoint(sensTf, zero, Sl);
+    ArcPoint(cellTf, Sl, S);
+    double v[3] = {C[0] - O[0], C[1] - O[1], C[2] - O[2]}, pv = Dot(v, ez);
+    for(int i = 0; i < 3; ++i) v[i] -= pv * ez[i];
+    if(Norm(v) < 0.5)
+    {
+      for(int i = 0; i < 3; ++i) v[i] = S[i] - O[i];
+      pv = Dot(v, ez);
+      for(int i = 0; i < 3; ++i) v[i] -= pv * ez[i];
+    }
+    Unit(v);
+    double ex[3] = {v[0], v[1], v[2]}, ey[3];
+    Cross(ez, ex, ey);
+    auto loc = [&](const double *P, double *out) {
+      double d[3] = {P[0] - O[0], P[1] - O[1], P[2] - O[2]};
+      out[0] = Dot(d, ex);
+      out[1] = Dot(d, ey);
+      out[2] = Dot(d, ez);
+    };
+    auto lvec = [&](const double *w, double *out) {
+      out[0] = Dot(w, ex);
+      out[1] = Dot(w, ey);
+      out[2] = Dot(w, ez);
+    };
+    ArcTf sw = cellTf * sensTf;
+    double raw[44], tmp[3], ax[3];
+    int k = 0;
+    for(int i = 0; i < 3; ++i) raw[k++] = O[i];
+    for(int i = 0; i < 3; ++i) raw[k++] = ex[i];
+    for(int i = 0; i < 3; ++i) raw[k++] = ey[i];
+    for(int i = 0; i < 3; ++i) raw[k++] = ez[i];
+    loc(C, tmp);
+    for(int i = 0; i < 3; ++i) raw[k++] = tmp[i];
+    raw[k++] = R - mirrorThick;
+    raw[k++] = R;
+    loc(S, tmp);
+    for(int i = 0; i < 3; ++i) raw[k++] = tmp[i];
+    for(int a = 0; a < 3; ++a)
+    {
+      double u[3] = {double(a == 0), double(a == 1), double(a == 2)};
+      ArcVector(sw, u, ax);
+      lvec(ax, tmp);
+      for(int i = 0; i < 3; ++i) raw[k++] = tmp[i];
+    }
+    raw[k++] = 0.5 * sideX;
+    raw[k++] = 0.5 * sideY;
+    raw[k++] = 0.5 * sensorThick;
+    ArcPoint(cellTf, Aloc, A);
+    loc(A, tmp);
+    for(int i = 0; i < 3; ++i) raw[k++] = tmp[i];
+    ArcVector(cellTf, nloc, nA);
+    lvec(nA, tmp);
+    for(int i = 0; i < 3; ++i) raw[k++] = tmp[i];
+    raw[k++] = 0.5 * aerogelThick;
+    raw[k++] = 1.5 * side;
+    ArcVector(cellTf, hexloc, hv);
+    lvec(hv, tmp);
+    raw[k++] = atan2(tmp[1], tmp[0]) * TMath::RadToDeg();
+    raw[k++] = zmin;
+    raw[k++] = zmax;
+    raw[k++] = apo;
+    AddCell(region, raw);
+  };
+
+  // ---- barrel: hexagonal pyramids, cell number n = 1..maxCell at z > 0 and 2..maxCell mirrored at z < 0, each repeated in phi
+  ExRootConfParam types = GetParam("BarrelCellTypes"); // {column row curvature xposition zposition sensorposition sensortilt}
+  int nTypes = types.GetSize();
+  if(nTypes == 0) throw runtime_error("ARCTracing: no BarrelCellTypes in the card (or give a CellFile)");
+  const double rin = barrelRin + wall, rout = barrelRout - wall, routShape = rout / sqrt(1.0 + pow(side / rin, 2));
+  const double mirrorOriginB = barrelRout - wall - mirrorOrigin - mirrorThick - mirrorShrink;
+  const double sensorOriginB = barrelRin + wall + sensorOffset, zstep = 2.0 * apo;
+  const ArcTf pyramid = ArcRot(1, -halfPi);
+  for(int sgn = -1; sgn <= 1; sgn += 2)
+    for(int n = (sgn < 0 ? 2 : 1); n <= maxCell; ++n)
+    {
+      int col = n / 2, row = (n % 2) ? 1 : 2, it = -1;
+      for(int i = 0; i < nTypes; ++i)
+        if(types[i][0].GetInt() == col && types[i][1].GetInt() == row) it = i;
+      if(it < 0) throw runtime_error(Form("ARCTracing: BarrelCellTypes has no column %d row %d", col, row));
+      double R = types[it][2].GetDouble(), cx = types[it][3].GetDouble(), cz = mirrorOriginB + types[it][4].GetDouble();
+      double dpos = types[it][5].GetDouble(), tilt = types[it][6].GetDouble();
+      if(sgn < 0)
+      {
+        cx = -cx;
+        dpos = -dpos;
+        tilt = -tilt;
+      }
+      double Cloc[3] = {cx, 0.0, cz - mirrorShrink}, aoff;
+      double szp = sensorDepth(sensorOriginB, tilt, sensorB, aoff);
+      // sensor: Transform3D(Ry(90 deg - tilt), (-depth, 0, offset)) placed with a further Ry(90 deg); aerogel likewise
+      ArcTf sensInner = ArcRot(1, halfPi - tilt), aerInner = ArcRot(1, halfPi);
+      sensInner.t[0] = -szp;
+      sensInner.t[2] = dpos;
+      aerInner.t[0] = -szp - aoff;
+      const ArcTf sensTf = ArcRot(1, halfPi) * sensInner, aerTf = ArcRot(1, halfPi) * aerInner;
+      double zero[3] = {0, 0, 0}, z1[3] = {0, 0, 1}, Aloc[3], nloc[3], hexloc[3] = {0, 1, 0};
+      ArcPoint(aerTf, zero, Aloc);
+      ArcVector(aerTf, z1, nloc);
+      double zabs = col * zstep - 0.5 * zstep * (row == 2);
+      if(sgn < 0) zabs = -zabs;
+      double phiOff = 0.5 * phiStep * (row == 2);
+      for(int phin = 0; phin < nPhiBarrel; ++phin)
+      {
+        ArcTf cellTf = ArcRot(2, phiStep * phin + phiOff) * ArcShift(0, 0, zabs) * pyramid;
+        addRow(kBarrel, cellTf, Cloc, R, sensTf, sensorB, sensorB, Aloc, nloc, hexloc, rin, routShape);
+      }
+    }
+
+  // ---- endcaps: hexagonal prisms at grid positions of one 60-degree sector, some with a mirrored copy, 6 sectors, two sides
+  ExRootConfParam ec = GetParam("EndcapCells"); // {row column x/side y/apothem mirrored curvature xposition zposition sensorposition sensortilt}
+  int nEc = ec.GetSize();
+  if(nEc == 0) throw runtime_error("ARCTracing: no EndcapCells in the card (or give a CellFile)");
+  const double mirrorOriginE = 0.5 * endcapLength - wall - mirrorOrigin, sensorOriginE = -0.5 * endcapLength + wall + sensorOffset;
+  const double halfLen = 0.5 * endcapLength - wall;
+  for(int i = 0; i < nEc; ++i)
+  {
+    double x = ec[i][2].GetDouble() * side, y = ec[i][3].GetDouble() * apo;
+    bool mirrored = ec[i][4].GetInt() != 0;
+    double R = ec[i][5].GetDouble(), cxr = ec[i][6].GetDouble(), cz = mirrorOriginE + ec[i][7].GetDouble();
+    double dpos = ec[i][8].GetDouble(), tilt = ec[i][9].GetDouble();
+    double alpha = (x != 0.0) ? atan(y / x) : halfPi;
+    if(alpha < 0) alpha += TMath::Pi();
+    double aoff, szp = sensorDepth(sensorOriginE, tilt, sensorE, aoff);
+    double Aloc[3] = {0, 0, sensorOriginE + aoff}, nloc[3] = {0, 0, 1}, hexloc[3] = {1, 0, 0};
+    for(int side_ = 0; side_ < 2; ++side_)
+    {
+      ArcTf env = side_ == 0 ? ArcShift(0, 0, endcapZ) : ArcRot(0, TMath::Pi()) * ArcIdentity();
+      if(side_ == 1) env.t[2] = -endcapZ;
+      for(int phin = 0; phin < nPhiEndcap; ++phin)
+        for(int ref = 0; ref < (mirrored ? 2 : 1); ++ref)
+        {
+          double sgn = ref ? -1.0 : 1.0;
+          double Cloc[3] = {sgn * cxr * cos(alpha), cxr * sin(alpha), cz};
+          ArcTf sensTf = ArcRot(2, ref ? halfPi - alpha : alpha - halfPi) * ArcRot(0, tilt) * ArcShift(0, dpos, szp);
+          ArcTf cellTf = env * ArcRot(2, TMath::Pi() / 3.0 * phin) * ArcShift(sgn * x, y, 0);
+          addRow(kEndcap, cellTf, Cloc, R, sensTf, sensorE, sensorE, Aloc, nloc, hexloc, -halfLen, halfLen);
+        }
+    }
+  }
+}
+
+// optical tables from the card: add OpticsTable {NAME e1 v1 e2 v2 ...} (energy [eV], value)
+void ARCTracing::ReadTablesFromCard()
+{
+  ExRootConfParam param = GetParam("OpticsTable");
+  int n = param.GetSize();
+  for(int i = 0; i < n; ++i)
+  {
+    Table t;
+    int m = param[i].GetSize();
+    for(int j = 1; j + 1 < m; j += 2)
+    {
+      t.e.push_back(param[i][j].GetDouble());
+      t.v.push_back(param[i][j + 1].GetDouble());
+    }
+    fTables.push_back(t);
+    fTableNames.push_back(param[i][0].GetString());
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -248,9 +523,13 @@ double ARCTracing::SampleEnergy(const Radiator &r, const vector<double> &cdf) co
 void ARCTracing::Init()
 {
   fBz = GetDouble("Bz", 3.0);
-  string cellFile = GetString("CellFile", "cells_ALFA_o1_v01.txt");
-  string opticsFile = GetString("OpticsFile", "arc_optics_tables.txt");
-  ReadTables(opticsFile.c_str());
+  // geometry and optics come from the card (parameters and tables); a cell file and an optics file can replace them
+  string cellFile = GetString("CellFile", "");
+  string opticsFile = GetString("OpticsFile", "");
+  if(opticsFile.empty())
+    ReadTablesFromCard();
+  else
+    ReadTables(opticsFile.c_str());
 
   fPDE = *FindTable(GetString("PDETable", "ARC_SiPM_QuantumEfficiency"));
   fPDEScale = GetDouble("PDEScale", 1.0);
@@ -316,7 +595,28 @@ void ARCTracing::Init()
     BuildGrid(fRad[i], fPDE, fRefl);
     fRecoIndex[i] = 1.0 + fRad[i].indexScale * (fRad[i].n.Eval(fRecoEnergy) - 1.0);
   }
-  ReadCells(cellFile.c_str());
+  if(cellFile.empty())
+    BuildCells();
+  else
+    ReadCells(cellFile.c_str());
+  string dumpCells = GetString("DumpCellsFile", ""); // write the cells used (origin, axis, mirror, sensor, ...) for checks
+  if(!dumpCells.empty())
+  {
+    ofstream out(dumpCells.c_str());
+    out << setprecision(10);
+    for(size_t i = 0; i < fCells.size(); ++i)
+    {
+      const Cell &c = fCells[i];
+      out << (c.region == kBarrel ? "barrel" : "endcap");
+      for(int j = 0; j < 3; ++j) out << " " << c.O[j];
+      for(int j = 0; j < 3; ++j) out << " " << c.ez[j];
+      for(int j = 0; j < 3; ++j) out << " " << c.C[j];
+      out << " " << c.R;
+      for(int j = 0; j < 3; ++j) out << " " << c.S[j];
+      for(int j = 0; j < 3; ++j) out << " " << c.sez[j];
+      out << " " << c.hs[0] << " " << c.hs[1] << " " << c.aeroZ << " " << c.phi0 << " " << c.zmin << " " << c.zmax << " " << c.apothem << "\n";
+    }
+  }
   // neighbours: cells of the same region and side whose axis points at mid-depth are within 2.6 apothems (first ring: 2)
   fNeighbours.assign(fCells.size(), vector<int>());
   for(size_t i = 0; i < fCells.size(); ++i)

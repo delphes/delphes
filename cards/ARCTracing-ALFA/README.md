@@ -7,7 +7,7 @@ k4geo geometry (aerogel slab, spherical mirror, SiPM array, pixels) and reconstr
 analysis does. Thresholds, photon yields, chromatic error, ring size on the array, bending and scattering come out of
 the model; nothing is fitted to the full simulation.
 
-Validated against the Geant4 full simulation (k4geo `ALFA_o1_v01`) for the three cards, in the 14 cell-sized polar-angle bins
+Validated against the Geant4 full simulation (k4geo `ALFA_o1_v01`) for the three ARC configurations of the card, in the 14 cell-sized polar-angle bins
 from 12 to 90 deg: of the 174 three-sigma pi/K and K/p reaches (gas and aerogel), 131 agree within 5 %, 35 within 10 %, and the
 8 others are mostly in the barrel-endcap gap (39-44 deg). Validated range of the aerogel index: n <= 1.030.
 
@@ -18,32 +18,51 @@ from 12 to 90 deg: of the 174 three-sigma pi/K and K/p reaches (gas and aerogel)
 | `modules/ARCTracing.h`, `modules/ARCTracing.cc` | the module |
 | `classes/DelphesClasses.h/.cc`, `modules/TreeWriter.cc` | 16 ARC members on `Candidate` and `Track` (below) |
 | `modules/ModulesLinkDef.h`, `Makefile` | registration and build |
-| `cards/ARCTracing-ALFA/delphes_card_ALFA_Xe2bar.tcl` | the ALFA card: 3 T, all-MAPS tracker, ARC with xenon at 2 bar (n = 1.001313 at 3 eV) and 10 mm aerogel (n = 1.0299), 80 mm SiPM arrays, GRAiNITA ECAL |
-| `cards/ARCTracing-ALFA/delphes_card_ALFA_C4F10.tcl` | the same with C4F10 at 1 bar in the ARC (n = 1.001331 at 3 eV); aerogel n = 1.0299 |
-| `cards/ARCTracing-ALFA/delphes_card_ALFA_Xe2bar_casestudy.tcl` | the ARC case study C (design study by Apranik): Xe 2 bar (n = 1.001313), aerogel n = 1.0299, SiPM arrays enlarged to the largest that fit the cells (89.6 / 108.8 mm) |
-| `cards/ARCTracing-ALFA/cells_ALFA_o1_v01.txt` | the 1203 ARC cells of `ALFA_o1_v01` (mirror, SiPM array, aerogel per cell; 80 x 80 mm arrays) |
-| `cards/ARCTracing-ALFA/cells_ALFA_o1_v01_bigSiPM.txt` | the same cells with the largest arrays that fit (89.6 mm barrel, 108.8 mm endcap) |
-| `cards/ARCTracing-ALFA/arc_optics_tables.txt` | n(E) of Xe, C4F10 and aerogel, aerogel Rayleigh length, SiPM PDE, mirror reflectivity (from the Geant4 materials) |
-| `cards/ARCTracing-ALFA/dump_arc_cells.py` | writes a cell table from a k4geo compact file (`python3 dump_arc_cells.py <compact.xml> <out.txt>`) |
+| `cards/ARCTracing-ALFA/delphes_card_ALFA.tcl` | the ALFA card: 3 T, all-MAPS tracker, ARC, GRAiNITA ECAL. The ARC configuration (gas, SiPM arrays) is chosen with two switches at the top; the ARC geometry, the cell optics and the optical tables are parameters of the ARCTracing module in the card. No other file is read. |
+| `cards/ARCTracing-ALFA/arc_card_block.py` | writes the cell-type lines and optical tables of the card from the k4geo sources (only needed to change them) |
 | `cards/ARCTracing-ALFA/gun_{pip,kp,p}.cmnd` | Pythia8 single-particle guns (pi+, K+, p), log-uniform p in 0.1-60 GeV, abs(eta) < 2.6 |
 
-## Which ARC configuration the cards describe
+## The ARC configurations of the card
 
-The ARC geometry is k4geo ALFA_o1_v01: the ALFA_o1_v00 detector of the ALFA group with the ARC cells of the CLD
-design (CLD_o3_v01, 80 x 80 mm SiPM arrays) integrated as barrel and endcaps for this study; the aerogel index was raised from
-n = 1.019 (CLD) to 1.030 here. The validation and the design study use three labels; the cards in this repository are **B** (two gases) and **C** (Xe 2 bar):
+The geometry is that of k4geo ALFA_o1_v01: the ALFA_o1_v00 detector of the ALFA group with the ARC cells of the CLD design
+(CLD_o3_v01) as barrel and endcaps, 10 mm aerogel with n = 1.030 (raised from the CLD value 1.019), 0.8 mm pixels. Two
+switches at the top of the card choose the configuration:
+
+```tcl
+set ARCGas    Xe2bar     ;# Xe2bar: xenon at 2 bar (n = 1.001313 at 3 eV) | C4F10: 1 bar (n = 1.001331)
+set ARCArrays baseline   ;# baseline: 80 x 80 mm SiPM arrays (configuration B) | casestudy: 89.6 mm barrel / 108.8 mm endcap (configuration C)
+```
+
+They set the gas index table, the SiPM array size and the ARC material in the track fit (Xe 2 bar: 6.0 % X0 at 90 deg with
+the baseline arrays, 6.2 % with the case-study arrays; C4F10: 4.4 %).
 
 | label | aerogel | SiPM arrays | status |
 |---|---|---|---|
-| A | n = 1.019, 10 mm | 80 x 80 mm (CLD ARC cells) | validated in the central cell with an earlier version of the module (no card here) |
-| **B, baseline** | **n = 1.030, 10 mm** | **80 x 80 mm (CLD ARC cells, k4geo ALFA_o1_v01)** | **validated in 14 polar-angle bins (this version); `delphes_card_ALFA_Xe2bar.tcl`, `delphes_card_ALFA_C4F10.tcl`** |
-| **C** | **n = 1.030, 10 mm** | **89.6 mm barrel / 108.8 mm endcap, the largest that fit the cells** | **validated in 14 polar-angle bins (this version); the ARC case study C, `delphes_card_ALFA_Xe2bar_casestudy.tcl`** |
+| A | n = 1.019, 10 mm | 80 x 80 mm (CLD ARC cells) | validated in the central cell with an earlier version of the module (not in the card) |
+| **B, baseline** (`ARCArrays baseline`, both gases) | **n = 1.030, 10 mm** | **80 x 80 mm** | **validated in 14 polar-angle bins (this version)** |
+| **C, case study** (`ARCArrays casestudy`, Xe 2 bar) | **n = 1.030, 10 mm** | **89.6 mm barrel / 108.8 mm endcap, the largest that fit the cells** | **validated in 14 polar-angle bins (this version)** |
 
-Every card states its configuration in its first lines. The case-study card differs from the baseline B Xe 2 bar card only by
-the cell table (`cells_ALFA_o1_v01_bigSiPM.txt`) and by the ARC material in the track fit (6.2 % instead of 6.0 % X0 at
-90 deg, from the larger sensors); gas, pixels, mirrors and reconstruction are identical. Its gain is in the number of
-rings, not in the separation per ring: for central tracks an aerogel ring is found for 42 % of the pions at 2 GeV and 61 %
-of the kaons at 3 GeV (baseline B: 30 % and 50 %). A C4F10 version is the C4F10 card with the same two changes.
+Configuration C is the ARC case study by Apranik. Its gain is in the number of rings, not in the separation per ring: for central
+tracks an aerogel ring is found for 42 % of the pions at 2 GeV and 61 % of the kaons at 3 GeV (baseline: 30 % and 50 %).
+
+## Another ARC, another gas
+
+Everything the module needs is in the card:
+
+- the vessel and cell layout: `BarrelInnerRadius`, `BarrelOuterRadius`, `EndcapZ`, `EndcapLength`, `VesselWallThickness`,
+  `HexagonSide`, `BarrelPhiStep`, `BarrelSectors`, `BarrelMaxCell`, `EndcapSectors`;
+- the optics of every cell type, one line each: `add BarrelCellTypes {column row mirror-radius mirror-x mirror-z sensor-offset
+  sensor-tilt}` and `add EndcapCells {row column x/side y/apothem mirrored-copy mirror-radius mirror-x mirror-z sensor-offset
+  sensor-tilt}` (mm, rad), placed as in the k4geo ARC_geo_o1_v01 construction;
+- the mirrors, sensors and aerogel: `MirrorThickness`, `MirrorZOrigin`, `BarrelMirrorZShrink`, `MirrorCapAngle`,
+  `SensorThickness`, `SensorZOffset`, `BarrelSensorSize`, `EndcapSensorSize`, `CellAerogelThickness`;
+- the materials: `add OpticsTable {name energy value energy value ...}` (energy in eV): refractive indices, absorption and
+  Rayleigh lengths, SiPM detection efficiency, mirror reflectivity. A new gas is one more table and `set GasIndexTable name`
+  (or an existing table with `GasIndexScale` for another pressure).
+
+The cells built from the parameters of this card reproduce the cells of the k4geo geometry to 1e-6 mm (checked against the
+DD4hep geometry for all 1203 cells and all three configurations). A table of cells (`CellFile`) and of optics (`OpticsFile`)
+can still replace the parameters, for a geometry that does not follow this construction.
 
 ## Build and run
 
@@ -51,21 +70,21 @@ of the kaons at 3 GeV (baseline B: 30 % and 50 %). A C4F10 version is the C4F10 
 source /cvmfs/sw-nightlies.hsf.org/key4hep/setup.sh   # ROOT, Pythia8, HepMC
 ./configure                                           # regenerates the Makefile with the new module
 make -j8 HAS_PYTHIA8=true
-./DelphesPythia8 cards/ARCTracing-ALFA/delphes_card_ALFA_Xe2bar.tcl cards/ARCTracing-ALFA/gun_kp.cmnd kp.root
+./DelphesPythia8 cards/ARCTracing-ALFA/delphes_card_ALFA.tcl cards/ARCTracing-ALFA/gun_kp.cmnd kp.root
 ```
 
-The cards refer to `cards/ARCTracing-ALFA/...` relative to the Delphes directory: run from there or make the two paths absolute.
 Speed: the ARC adds about 5 ms per e+e- -> ZH event at 240 GeV (about 210 us per charged track): 8.8 ms per event with the
-baseline cards (9.3 ms with the case-study card) against 3.8 ms without, Pythia and ROOT output included (10k events, AMD EPYC
+baseline arrays (9.3 ms with the case-study arrays) against 3.8 ms without, Pythia and ROOT output included (10k events, AMD EPYC
 7302). About half of it is the test photons of the calibrated hypothesis test (TestPhotons = 40); TestPhotons = 20 halves that part.
 
 ## Module parameters (the values of the cards)
 
 | Parameter | Meaning | Card |
 |---|---|---|
-| `CellFile`, `OpticsFile` | cell table, optical tables | `cards/ARCTracing-ALFA/...` |
+| geometry and optics parameters | see "Another ARC, another gas" above | the ALFA_o1_v01 values |
+| `CellFile`, `OpticsFile` | optional: a cell table and an optics table instead of the parameters | "" (not used) |
 | `Bz` | magnetic field [T] | `$::B` (3) |
-| `GasIndexTable`, `GasIndexScale` | n(E) of the gas; n - 1 scaled (pressure) | `RINDEX__Xenon_ARC`, 1.0 (Xe 2 bar); `RINDEX__C4F10_PFRICH` |
+| `GasIndexTable`, `GasIndexScale` | n(E) of the gas (an `OpticsTable`); n - 1 scaled (pressure) | from `ARCGas`: `RINDEX__Xenon_ARC` or `RINDEX__C4F10_PFRICH`; 1.0 |
 | `AerogelIndexTable`, `AerogelIndexScale` | n(E) of the aerogel; n - 1 scaled | `RINDEX__Aerogel_PFRICH`, 1.0 (n = 1.030) |
 | `AerogelRayleighTable`, `AerogelAbsorptionTable`, `GasAbsorptionTable` | attenuation tables; "" = none | `RAYLEIGH__Aerogel_BelleII`, "", "" (as the Geant4 material) |
 | `AerogelThickness`, `AerogelSlabInPath` | slab thickness [mm] (0: from the geometry, 10 mm); gas photons cross the slab on the way back | 0, true |

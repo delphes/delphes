@@ -1,8 +1,8 @@
-# ALFA Delphes card, ARC gas variant: Xe2bar. ARC simulated by the ARCTracing module.
-# ARC GEOMETRY: baseline B -- k4geo ALFA_o1_v01 (the ALFA_o1_v00 detector with the CLD ARC cells), 80 x 80 mm SiPM arrays,
-# 0.8 mm pixels, 10 mm aerogel n = 1.030
-# ("configuration B" of the validation). The ARC case study C ("configuration C": the largest arrays that fit the
-# cells, 89.6 mm barrel / 108.8 mm endcap) is the same card with CellFile cards/ARCTracing-ALFA/cells_ALFA_o1_v01_bigSiPM.txt.
+# ALFA Delphes card with the ARC simulated by the ARCTracing module (ray tracing of the Cherenkov photons through the ARC cells).
+# The ARC configuration is chosen with the two switches below (set ARCGas, set ARCArrays): everything that depends on it
+# (gas index table, SiPM array size, ARC material in the track fit) follows. The cell geometry and the optical tables are
+# parameters of the ARCTracing module at the end of this card (k4geo ALFA_o1_v01: the ALFA_o1_v00 detector with the CLD ARC
+# cells, 10 mm aerogel n = 1.030, 0.8 mm pixels); no external file is read.
 set RandomSeed 123
 
 #####################################################################
@@ -21,12 +21,44 @@ set RandomSeed 123
 #   HCAL    : SiPM-on-tile in the yoke; resolution is a PLACEHOLDER
 #   B field : 3 T
 #
-# ARC response: the ray-tracing ARCTracing module (modules/ARCTracing), with the
-# cell table cards/ARCTracing-ALFA/cells_ALFA_o1_v01.txt and the optical tables
-# cards/ARCTracing-ALFA/arc_optics_tables.txt of the k4geo full simulation.
+# ARC response: the ray-tracing ARCTracing module (modules/ARCTracing). Its geometry (vessel, cells, mirrors, sensors)
+# and the radiator and detection tables are parameters of the module in this card: change them to describe another ARC;
+# a new gas is one more "add OpticsTable {name energy n ...}" line and "set GasIndexTable name".
 #####################################################################
 
 set B 3.0
+
+#####################################################################
+# ARC configuration
+#   ARCGas    : Xe2bar (xenon at 2 bar, n = 1.001313 at 3 eV) | C4F10 (1 bar, n = 1.001331)
+#   ARCArrays : baseline  (configuration B: 80 x 80 mm SiPM arrays, the CLD ARC cells)
+#               casestudy (configuration C, the ARC case study by Apranik: the largest arrays that fit the cells,
+#                          89.6 mm barrel / 108.8 mm endcap)
+#####################################################################
+set ARCGas Xe2bar
+set ARCArrays baseline
+
+if {$ARCGas == "Xe2bar"} {
+  set ARCGasTable RINDEX__Xenon_ARC
+} elseif {$ARCGas == "C4F10"} {
+  set ARCGasTable RINDEX__C4F10_PFRICH
+} else {
+  error "ARCGas must be Xe2bar or C4F10"
+}
+if {$ARCArrays == "baseline"} {
+  set ARCSensorBarrel 80.0
+  set ARCSensorEndcap 80.0
+} elseif {$ARCArrays == "casestudy"} {
+  set ARCSensorBarrel 89.6
+  set ARCSensorEndcap 108.8
+} else {
+  error "ARCArrays must be baseline or casestudy"
+}
+## radiation length [m] of the 20 cm of ARC as one passive layer of the track fit (k4geo material scans at 90 deg:
+## Xe 2 bar 6.0 % X0 with the baseline arrays, 6.2 % with the case-study arrays, C4F10 4.4 %; C4F10 with the case-study
+## arrays from the same +0.13 % X0 of the larger arrays)
+set ARCX0Table [dict create Xe2bar,baseline 3.32 Xe2bar,casestudy 3.25 C4F10,baseline 4.59 C4F10,casestudy 4.46]
+set ARCX0 [dict get $ARCX0Table $ARCGas,$ARCArrays]
 ## inner radius / half length of the ECAL = where track propagation stops [m]
 set R 2.20
 set HL 2.30
@@ -240,7 +272,7 @@ module TrackCovariance TrackSmearing {
     set ElectronScaleFactor  {1.25}
 
 
-    set DetectorGeometry {
+    set DetectorGeometry [string map [list @ARCX0@ $::ARCX0] {
 
       # Layer type 1 = R (barrel) or 2 = z (forward/backward)
       # Layer label
@@ -276,8 +308,8 @@ module TrackCovariance TrackSmearing {
       1 OTB -1.345 1.345 1.64 0.0001874 0.0937 2 0 1.5708 3e-06 3e-06 1
       1 OTB -1.345 1.345 1.714 0.0002436 0.0937 2 0 1.5708 3e-06 3e-06 1
       1 OTB -1.345 1.345 1.767 0.0002436 0.0937 2 0 1.5708 3e-06 3e-06 1
-      # ARC barrel as passive material: 20 cm, 6.0% X0 at 90 deg (aerogel n = 1.030) (k4geo T04 material scan)
-      1 ARCB -2.2 2.2 2 0.2 3.32 0 0 0 0 0 0
+      # ARC barrel as passive material: 20 cm, X0 of the ARC configuration (ARCX0 above)
+      1 ARCB -2.2 2.2 2 0.2 @ARCX0@ 0 0 0 0 0 0
       # outer tracker endcaps: 4 double disks per side (ALFA Delphes card, Jul 2026; engineering design in progress)
       2 OTE 0.15 1.78 -2.045 0.000187 0.0937 2 0 1.5708 3e-06 3e-06 1
       2 OTE 0.15 1.78 -1.995 0.000187 0.0937 2 0 1.5708 3e-06 3e-06 1
@@ -296,10 +328,10 @@ module TrackCovariance TrackSmearing {
       2 OTE 0.15 1.78 1.995 0.000187 0.0937 2 0 1.5708 3e-06 3e-06 1
       2 OTE 0.15 1.78 2.045 0.000187 0.0937 2 0 1.5708 3e-06 3e-06 1
       # ARC endcaps as passive material
-      2 ARCE 0.28 1.9 -2.1 0.2 3.32 0 0 0 0 0 0
-      2 ARCE 0.28 1.9 2.1 0.2 3.32 0 0 0 0 0 0
+      2 ARCE 0.28 1.9 -2.1 0.2 @ARCX0@ 0 0 0 0 0 0
+      2 ARCE 0.28 1.9 2.1 0.2 @ARCX0@ 0 0 0 0 0 0
 
-    }
+    }]
 
 }
 
@@ -310,18 +342,37 @@ module TrackCovariance TrackSmearing {
 module ARCTracing ARCTracing {
   ## ARC fast simulation by ray tracing (ARCTracing): photons generated along the helix in the aerogel and the gas from
   ## the k4geo optical tables, traced through the cell optics of the k4geo geometry (mirror, aerogel slab, SiPM array,
-  ## pixels) and reconstructed as in the full-simulation analysis. Baseline geometry (configuration B): aerogel n = 1.030, 80 mm SiPM arrays; gas Xe2bar.
+  ## pixels) and reconstructed as in the full-simulation analysis. Configuration: ARCGas and ARCArrays at the top of the card.
   set InputArray TrackSmearing/tracks
   set OutputArray tracks
   set Bz $::B
 
-  set CellFile cards/ARCTracing-ALFA/cells_ALFA_o1_v01.txt      ;# baseline B: 80 mm arrays; cells_ALFA_o1_v01_bigSiPM.txt: case study (C)
-  set OpticsFile cards/ARCTracing-ALFA/arc_optics_tables.txt
+  ## ARC geometry (k4geo ALFA_o1_v01, the ARC_geo_o1_v01 construction), mm: the module builds the 1203 cells from these
+  ## numbers and the cell types at the end of this module (a CellFile / OpticsFile can replace them, e.g. for another geometry)
+  set BarrelInnerRadius 1900.0
+  set BarrelOuterRadius 2100.0
+  set EndcapZ 2100.0
+  set EndcapLength 200.0
+  set VesselWallThickness 10.0
+  set HexagonSide 148.15
+  set BarrelPhiStep 13.333        ;# deg, 27 cells around phi
+  set BarrelSectors 27
+  set BarrelMaxCell 17            ;# barrel cell numbers 1..17 at z > 0, 2..17 at z < 0
+  set EndcapSectors 6
+  set MirrorThickness 2.0
+  set MirrorZOrigin 370.0
+  set BarrelMirrorZShrink 6.0
+  set MirrorCapAngle 0.897143     ;# rad, 3.14 / 3.5: the mirrors are spherical caps
+  set SensorThickness 2.0
+  set SensorZOffset 5.0
+  set CellAerogelThickness 10.0
+  set BarrelSensorSize $::ARCSensorBarrel
+  set EndcapSensorSize $::ARCSensorEndcap
 
   ## radiators: index tables (n - 1 scaled by *IndexScale). Aerogel attenuation as in the Geant4 material of the full
   ## simulation (checked with a ddsim DEBUG dump): Rayleigh scattering with the BelleII table, no absorption (DD4hep keeps
   ## the first RAYLEIGH entry of Aerogel_PFRICH and drops ABSLENGTH); scattered photons are propagated, not killed.
-  set GasIndexTable RINDEX__Xenon_ARC
+  set GasIndexTable $::ARCGasTable
   set GasIndexScale 1.0
   set GasAbsorptionTable ""
   set AerogelIndexTable RINDEX__Aerogel_PFRICH
@@ -359,6 +410,56 @@ module ARCTracing ARCTracing {
   set UseTrueTrack false
   set UseTrueMomentumForPID false
   set TrueHypothesisAngle false
+
+  ## ---- ARC cell optics (k4geo ARC_geo_o1_v01 construction; mm, rad) ----
+  ## barrel cell types: column row mirror-radius mirror-x mirror-z sensor-offset sensor-tilt
+  add BarrelCellTypes {0 1 369.008 1.99739 0.484417 2.04862 -0.0204611}
+  add BarrelCellTypes {1 1 367.441 -44.1887 2.48451 -20.3282 -0.0931162}
+  add BarrelCellTypes {1 2 368.913 -25.092 1.09283 -12.7519 -0.0445222}
+  add BarrelCellTypes {2 1 358.554 -81.6915 11.3855 -35.1757 -0.132262}
+  add BarrelCellTypes {2 2 363.157 -63.806 6.37531 -28.171 -0.124024}
+  add BarrelCellTypes {3 1 346.543 -114.685 23.4365 -47.8341 -0.134323}
+  add BarrelCellTypes {3 2 350.086 -95.9577 19.3522 -39.7032 -0.150924}
+  add BarrelCellTypes {4 1 330.16 -127.363 42.25 -45.9939 -0.20144}
+  add BarrelCellTypes {4 2 336.429 -116.496 33.904 -42.3608 -0.18349}
+  add BarrelCellTypes {5 1 325.436 -128.286 50.3257 -32.4965 -0.154886}
+  add BarrelCellTypes {5 2 320.575 -123.091 51.37 -36.6375 -0.21376}
+  add BarrelCellTypes {6 1 326.104 -139.797 55.998 -29.5479 -0.134243}
+  add BarrelCellTypes {6 2 314.895 -129.993 62.4498 -31.5672 -0.229024}
+  add BarrelCellTypes {7 1 310.634 -134.094 76.318 -19.8518 -0.259362}
+  add BarrelCellTypes {7 2 319.311 -137.129 66.4953 -26.6767 -0.14106}
+  add BarrelCellTypes {8 1 350.381 -215.767 78.5187 -82.7883 -0.403075}
+  add BarrelCellTypes {8 2 321.726 -141.744 69.8931 -19.6984 -0.0928119}
+  add BarrelCellTypes {9 2 254.983 -221.951 135.631 -120.379 -1.38132}
+  ## endcap cells of one sector: row column x/side y/apothem mirrored-copy mirror-radius mirror-x mirror-z sensor-offset sensor-tilt
+  add EndcapCells {1 2 0 4 0 358.139 -84.6481 11.5558 -40.7355 -0.103914}
+  add EndcapCells {1 3 0 6 0 344.967 -107.123 25.0228 -44.7855 -0.137308}
+  add EndcapCells {1 4 0 8 0 333.608 -124.894 36.4653 -45.6515 -0.112783}
+  add EndcapCells {1 5 0 10 0 323.165 -134.206 53.0051 -44.3281 -0.20109}
+  add EndcapCells {1 6 0 12 0 324.725 -138.884 57.7007 -34.8118 -0.159627}
+  add EndcapCells {2 2 -1.5 3 0 359.63 -69.3705 10.0598 -30.4485 -0.118494}
+  add EndcapCells {2 3 -1.5 5 1 349.695 -99.9593 19.8683 -43.2295 -0.118265}
+  add EndcapCells {2 4 -1.5 7 1 339.376 -115.136 30.6836 -42.2966 -0.118536}
+  add EndcapCells {2 5 -1.5 9 1 324.686 -124.64 46.9601 -38.3 -0.186657}
+  add EndcapCells {2 6 -1.5 11 1 312.448 -125.109 62.1203 -29.028 -0.251983}
+  add EndcapCells {2 7 -1.5 13 1 315.405 -130.506 64.6394 -24.065 -0.124305}
+  add EndcapCells {3 3 -3 6 0 340.541 -113.788 28.9459 -41.9997 -0.119164}
+  add EndcapCells {3 4 -3 8 1 327.512 -126.093 42.7482 -43.3654 -0.143649}
+  add EndcapCells {3 5 -3 10 1 313.826 -118.079 57.0635 -25.4509 -0.186348}
+  add EndcapCells {3 6 -3 12 1 305.166 -117.67 68.4136 -16.9257 -0.211619}
+  add EndcapCells {4 5 -4.5 9 0 317.135 -121.418 53.2098 -28.8431 -0.129972}
+  add EndcapCells {4 6 -4.5 11 1 306.595 -116.272 64.8111 -15.9027 -0.19651}
+  ## ---- optical tables (Geant4 materials of the geometry): name, then energy [eV] and value pairs ----
+  add OpticsTable {ARC_SiPM_QuantumEfficiency 1.1000 0 1.3000 0 1.5500 0.13 1.7710 0.26 2.1010 0.4 2.4650 0.51 2.6550 0.53 2.7430 0.56 2.8370 0.57 2.9380 0.59 3.0020 0.6 3.0840 0.6 3.1630 0.59 3.3780 0.52 3.6470 0.47 3.8500 0.46 4.1470 0.41 4.3200 0.2 4.5000 0.1 4.7000 0 4.9000 0}
+  add OpticsTable {RINDEX__C4F10_PFRICH 1.8785 1.0013 1.9239 1.0013 2.1054 1.00131 2.3247 1.00131 2.5950 1.00132 2.9365 1.00133 3.3814 1.00134 3.9852 1.00136 4.8516 1.0014 6.1992 1.00149}
+  add OpticsTable {RINDEX__Xenon_ARC 1.8000 1.001257 2.0000 1.001264 2.2000 1.001272 2.4000 1.00128 2.6000 1.00129 2.8000 1.001301 3.0000 1.001313 3.2000 1.001325 3.4000 1.001339 3.6000 1.001354 3.8000 1.001371 4.0000 1.001389 4.2000 1.001408 4.4000 1.00143 4.6000 1.001453 4.8000 1.001478 5.0000 1.001505 5.2000 1.001535 5.4000 1.001568 5.6000 1.001605 5.8000 1.001645 6.0000 1.00169 6.2000 1.00174 6.4000 1.001797 6.6000 1.001862 6.8000 1.001938 7.0000 1.002028}
+  add OpticsTable {ABSLENGTH__Xenon_ARC 1.0000 10000 7.5000 10000}
+  add OpticsTable {REFLECTIVITY__ARC_Mirror 1.0000 1 7.5000 1}
+  add OpticsTable {ABSLENGTH__C4F10_PFRICH 1.7712 6000 1.9239 6000 2.1054 6000 2.3247 6000 2.5950 6000 2.9365 6000 3.3814 6000 3.9852 6000 4.8516 6000 6.1992 6000}
+  add OpticsTable {RINDEX__Aerogel_PFRICH 1.8785 1.02876 1.9667 1.02882 2.0549 1.0289 2.1431 1.02898 2.2313 1.02905 2.3194 1.02913 2.4076 1.02921 2.4958 1.0293 2.5840 1.0294 2.6721 1.02949 2.7603 1.02958 2.8485 1.02969 2.9367 1.0298 3.0248 1.02991 3.1130 1.03002 3.2012 1.03014 3.2894 1.03025 3.3775 1.03037 3.4657 1.03051 3.5539 1.03064 3.6421 1.03078 3.7303 1.03092 3.8184 1.03107 3.9066 1.03121 3.9948 1.03137 4.0830 1.03152 4.1711 1.03169 4.2593 1.03186 4.3475 1.03204 4.4357 1.03221 4.5239 1.03239 4.6120 1.03258 4.7002 1.03278 4.7884 1.03297 4.8766 1.03317 4.9647 1.03339 5.0529 1.0336 5.1411 1.03382 5.2293 1.03405 5.3174 1.03429 5.4056 1.03452 5.4938 1.03477 5.5820 1.03502 5.6701 1.03527 5.7583 1.03553 5.8465 1.03581 5.9347 1.03609 6.0229 1.03637 6.1110 1.03666 6.1992 1.03697}
+  add OpticsTable {ABSLENGTH__Aerogel_PFRICH 1.8785 140 1.9667 141.973 2.0549 143.776 2.1431 145.431 2.2313 146.955 2.3194 148.364 2.4076 149.669 2.4958 150.882 2.5840 152.012 2.6721 153.067 2.7603 154.055 2.8485 154.982 2.9367 155.854 3.0248 156.674 3.1130 157.448 3.2012 158.18 3.2894 158.872 3.3775 159.528 3.4657 160.15 3.5539 160.742 3.6421 147.916 3.7303 128.139 3.8184 111.378 3.9066 97.121 3.9948 84.948 4.0830 74.518 4.1711 65.552 4.2593 57.819 4.3475 51.13 4.4357 45.327 4.5239 40.278 4.6120 35.873 4.7002 32.019 4.7884 28.641 4.8766 25.67 4.9647 23.054 5.0529 20.742 5.1411 18.698 5.2293 16.884 5.3174 15.272 5.4056 13.837 5.4938 12.557 5.5820 11.413 5.6701 10.389 5.7583 9.47 5.8465 8.645 5.9347 7.902 6.0229 7.233 6.1110 6.629 6.1992 6.082}
+  add OpticsTable {RAYLEIGH__Aerogel_BelleII 1.8800 379.7 1.9700 316 2.0500 265.2 2.1400 224.2 2.2300 190.8 2.3200 163.4 2.4100 140.7 2.5000 121.9 2.5800 106.1 2.6700 92.7 2.7600 81.4 2.8500 71.8 2.9400 63.6 3.0200 56.5 3.1100 50.3 3.2000 45 3.2900 40.4 3.3800 36.3 3.4700 32.8 3.5500 29.6 3.6400 26.9 3.7300 24.4 3.8200 22.2 3.9100 20.3 3.9900 18.6 4.0800 17 4.1700 15.6 4.2600 14.4 4.3500 13.2 4.4400 12.2 4.5200 11.3 4.6100 10.5 4.7000 9.7 4.7900 9 4.8800 8.4 4.9600 7.8 5.0500 7.3 5.1400 6.8 5.2300 6.3 5.3200 5.9 5.4100 5.5 5.4900 5.2 5.5800 4.9 5.6700 4.6 5.7600 4.3 5.8500 4 5.9300 3.8 6.0200 3.6 6.1100 3.4 6.2000 3.2}
+  add OpticsTable {RAYLEIGH__Aerogel_PFRICH 1.8785 281.107 1.9667 233.984 2.0549 196.334 2.1431 165.962 2.2313 141.242 2.3194 120.958 2.4076 104.188 2.4958 90.226 2.5840 78.527 2.6721 68.663 2.7603 60.301 2.8485 53.174 2.9367 47.07 3.0248 41.816 3.1130 37.277 3.2012 33.336 3.2894 29.903 3.3775 26.9 3.4657 24.265 3.5539 21.946 3.6421 19.896 3.7303 18.08 3.8184 16.468 3.9066 15.03 3.9948 13.746 4.0830 12.596 4.1711 11.564 4.2593 10.637 4.3475 9.799 4.4357 9.043 4.5239 8.358 4.6120 7.738 4.7002 7.172 4.7884 6.659 4.8766 6.191 4.9647 5.762 5.0529 5.37 5.1411 5.011 5.2293 4.681 5.3174 4.379 5.4056 4.1 5.4938 3.844 5.5820 3.606 5.6701 3.386 5.7583 3.184 5.8465 2.996 5.9347 2.822 6.0229 2.66 6.1110 2.51 6.1992 2.37}
 }
 
 ##############
