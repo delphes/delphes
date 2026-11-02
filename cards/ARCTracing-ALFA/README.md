@@ -35,15 +35,15 @@ n = 1.019 (CLD) to 1.030 here. The validation and the design study use three lab
 
 | label | aerogel | SiPM arrays | status |
 |---|---|---|---|
-| A | n = 1.019, 10 mm | 80 x 80 mm (CLD ARC cells) | validated (blind) |
-| **B, baseline** | **n = 1.030, 10 mm** | **80 x 80 mm (CLD ARC cells, k4geo ALFA_o1_v01)** | **validated; `delphes_card_ALFA_Xe2bar.tcl`, `delphes_card_ALFA_C4F10.tcl`** |
-| **C** | **n = 1.030, 10 mm** | **89.6 mm barrel / 108.8 mm endcap, the largest that fit the cells** | **validated (blind); the ARC case study C, `delphes_card_ALFA_Xe2bar_casestudy.tcl`** |
+| A | n = 1.019, 10 mm | 80 x 80 mm (CLD ARC cells) | validated in the central cell with an earlier version of the module (no card here) |
+| **B, baseline** | **n = 1.030, 10 mm** | **80 x 80 mm (CLD ARC cells, k4geo ALFA_o1_v01)** | **validated in 14 polar-angle bins (this version); `delphes_card_ALFA_Xe2bar.tcl`, `delphes_card_ALFA_C4F10.tcl`** |
+| **C** | **n = 1.030, 10 mm** | **89.6 mm barrel / 108.8 mm endcap, the largest that fit the cells** | **validated in 14 polar-angle bins (this version); the ARC case study C, `delphes_card_ALFA_Xe2bar_casestudy.tcl`** |
 
 Every card states its configuration in its first lines. The case-study card differs from the baseline B Xe 2 bar card only by
 the cell table (`cells_ALFA_o1_v01_bigSiPM.txt`) and by the ARC material in the track fit (6.2 % instead of 6.0 % X0 at
-90 deg, from the larger sensors); gas, pixels, mirrors and reconstruction are identical. Its gain is in the aerogel:
-3-sigma pi/K coverage 0.9-25 GeV and K/p 3.0-43 GeV (baseline B: 1.2-25 and 3.6-43 GeV). A C4F10 version is the C4F10
-card with the same two changes.
+90 deg, from the larger sensors); gas, pixels, mirrors and reconstruction are identical. Its gain is in the number of
+rings, not in the separation per ring: for central tracks an aerogel ring is found for 42 % of the pions at 2 GeV and 61 %
+of the kaons at 3 GeV (baseline B: 30 % and 50 %). A C4F10 version is the C4F10 card with the same two changes.
 
 ## Build and run
 
@@ -103,7 +103,7 @@ the reconstructed track, traced through the cell and reconstructed exactly like 
 bias of the reconstruction method (about -2.5 mrad in the aerogel, as in the full simulation), the bending and the cell
 geometry are part of the expectation; sigma_h = sigma_1/sqrt(N) with sigma_1 their single-photon spread. Without this
 calibration (CalibratedHypotheses false) the test uses acos(1/(n beta)) and the scatter of the measured photons, which
-identifies 3-5 GeV kaons correctly only half of the time.
+ignores the bias of the method and underestimates the uncertainty of rings with few photons.
 
 ## The algorithm (per event, two passes)
 

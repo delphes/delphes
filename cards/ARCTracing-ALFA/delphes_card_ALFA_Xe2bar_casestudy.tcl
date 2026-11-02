@@ -1,7 +1,7 @@
 # ALFA Delphes card, ARC gas variant: Xe2bar, ARC CASE STUDY C. ARC simulated by the ARCTracing module.
 # ARC GEOMETRY: the cells of k4geo ALFA_o1_v01 with the largest SiPM arrays that fit them -- 89.6 mm (barrel) /
 # 108.8 mm (endcap) instead of 80 mm; 0.8 mm pixels, 10 mm aerogel n = 1.030 ("configuration C", ARC design study by Apranik,
-# validated blind against the Geant4 full simulation). Differs from delphes_card_ALFA_Xe2bar.tcl (baseline B) only by the cell
+# validated against the Geant4 full simulation in 14 polar-angle bins). Differs from delphes_card_ALFA_Xe2bar.tcl (baseline B) only by the cell
 # table and by the ARC material in the track fit (6.2% instead of 6.0% X0 at 90 deg, from the larger sensors).
 set RandomSeed 123
 
