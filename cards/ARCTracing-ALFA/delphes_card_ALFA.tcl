@@ -347,8 +347,15 @@ module ARCTracing ARCTracing {
   set OutputArray tracks
   set Bz $::B
 
-  ## ARC geometry (k4geo ALFA_o1_v01, the ARC_geo_o1_v01 construction), mm: the module builds the 1203 cells from these
-  ## numbers and the cell types at the end of this module (a CellFile / OpticsFile can replace them, e.g. for another geometry)
+  ## ARC geometry, mm. Three ways to give the cells, which add up (each is optional):
+  ##  - the construction of the k4geo ARC driver (ARC_geo_o1_v01): barrel of hexagonal pyramid cells, endcaps of hexagonal
+  ##    prisms, from the numbers below and the BarrelCellTypes / EndcapCells lines at the end of this module (ALFA_o1_v01: 1203
+  ##    cells); leave out BarrelCellTypes or EndcapCells for no barrel or no endcaps;
+  ##  - single cells of any layout: add Cell {barrel|endcap numbers...}, one line per cell (origin, axes, mirror, sensor,
+  ##    aerogel, cell shape; set DumpCellsFile <file> writes every cell of a configuration in this form, a starting point);
+  ##  - a file of such lines without "add Cell" (set CellFile <file>).
+  ## Barrel cells must have their axis pointing outward from the beam line and endcap cells along the beam axis: this decides
+  ## where a track enters the ARC and where the reconstruction assumes the emission (RecoRadius*, RecoZ*).
   set BarrelInnerRadius 1900.0
   set BarrelOuterRadius 2100.0
   set EndcapZ 2100.0
@@ -359,6 +366,7 @@ module ARCTracing ARCTracing {
   set BarrelSectors 27
   set BarrelMaxCell 17            ;# barrel cell numbers 1..17 at z > 0, 2..17 at z < 0
   set EndcapSectors 6
+  set EndcapPhiStep 60.0          ;# deg between endcap sectors
   set MirrorThickness 2.0
   set MirrorZOrigin 370.0
   set BarrelMirrorZShrink 6.0

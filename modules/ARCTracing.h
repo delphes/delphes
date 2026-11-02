@@ -40,8 +40,10 @@
  *   5. computes the per-track angle per radiator, its resolution and the pi/K/p probabilities (chi2 over the two radiators).
  *
  *  Geometry, gas and aerogel (index tables, dispersion, thickness, scattering), magnetic field, sensor size, pixel pitch,
- *  mirror curvature and photon-detection efficiency are card parameters and tables; no external file is needed. A cell
- *  table (CellFile) and an optics table (OpticsFile) can replace them for a geometry built differently.
+ *  mirror curvature and photon-detection efficiency are card parameters and tables; no external file is needed. Cells come
+ *  from the k4geo-like construction (BarrelCellTypes, EndcapCells), from single "add Cell" lines of any layout, or from a
+ *  CellFile, in any combination; DumpCellsFile writes the cells in the "add Cell" form. Optical tables come from
+ *  "add OpticsTable" lines or an OpticsFile. The module does not check a layout for overlaps or validate a new design.
  *
  *  \author ALFA ARC study
  */
@@ -115,6 +117,7 @@ private:
   void ReadTablesFromCard();
   void ReadCells(const char *file);
   void BuildCells();
+  void ReadInlineCells();
   void AddCell(int region, const double *raw);
   const Table *FindTable(const std::string &name) const;
   void BuildGrid(Radiator &r, const Table &pde, const Table &refl);
@@ -155,6 +158,7 @@ private:
   Radiator fRad[2]; //!
   double fRecoIndex[2];
   std::vector<Cell> fCells; //!
+  std::vector<std::vector<double> > fCellRaw; //! the 44 numbers each cell was given (for DumpCellsFile)
   double fBarrelRin, fEndcapZin;
 
   // statistics

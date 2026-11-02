@@ -150,6 +150,7 @@ void ARCTracing::AddCell(int region, const double *raw)
 {
   Cell c;
   c.region = region;
+  fCellRaw.push_back(vector<double>(raw, raw + 44));
   int k = 0;
   for(int i = 0; i < 3; ++i) c.O[i] = raw[k++];
   for(int i = 0; i < 3; ++i) c.ex[i] = raw[k++];
@@ -294,6 +295,7 @@ void ARCTracing::BuildCells()
   const double side = GetDouble("HexagonSide", 148.15), apo = side * cos(TMath::Pi() / 6.0);
   const double phiStep = GetDouble("BarrelPhiStep", 13.333) * TMath::DegToRad();
   const int nPhiBarrel = GetInt("BarrelSectors", 27), nPhiEndcap = GetInt("EndcapSectors", 6);
+  const double endcapPhiStep = GetDouble("EndcapPhiStep", 60.0) * TMath::DegToRad();
   const int maxCell = GetInt("BarrelMaxCell", 17);
   const double sensorB = GetDouble("BarrelSensorSize", 80.0), sensorE = GetDouble("EndcapSensorSize", 80.0);
   const double halfPi = 0.5 * TMath::Pi();
@@ -379,12 +381,11 @@ void ARCTracing::BuildCells()
   // ---- barrel: hexagonal pyramids, cell number n = 1..maxCell at z > 0 and 2..maxCell mirrored at z < 0, each repeated in phi
   ExRootConfParam types = GetParam("BarrelCellTypes"); // {column row curvature xposition zposition sensorposition sensortilt}
   int nTypes = types.GetSize();
-  if(nTypes == 0) throw runtime_error("ARCTracing: no BarrelCellTypes in the card (or give a CellFile)");
   const double rin = barrelRin + wall, rout = barrelRout - wall, routShape = rout / sqrt(1.0 + pow(side / rin, 2));
   const double mirrorOriginB = barrelRout - wall - mirrorOrigin - mirrorThick - mirrorShrink;
   const double sensorOriginB = barrelRin + wall + sensorOffset, zstep = 2.0 * apo;
   const ArcTf pyramid = ArcRot(1, -halfPi);
-  for(int sgn = -1; sgn <= 1; sgn += 2)
+  for(int sgn = -1; sgn <= 1 && nTypes > 0; sgn += 2) // no BarrelCellTypes: no barrel
     for(int n = (sgn < 0 ? 2 : 1); n <= maxCell; ++n)
     {
       int col = n / 2, row = (n % 2) ? 1 : 2, it = -1;
@@ -423,7 +424,6 @@ void ARCTracing::BuildCells()
   // ---- endcaps: hexagonal prisms at grid positions of one 60-degree sector, some with a mirrored copy, 6 sectors, two sides
   ExRootConfParam ec = GetParam("EndcapCells"); // {row column x/side y/apothem mirrored curvature xposition zposition sensorposition sensortilt}
   int nEc = ec.GetSize();
-  if(nEc == 0) throw runtime_error("ARCTracing: no EndcapCells in the card (or give a CellFile)");
   const double mirrorOriginE = 0.5 * endcapLength - wall - mirrorOrigin, sensorOriginE = -0.5 * endcapLength + wall + sensorOffset;
   const double halfLen = 0.5 * endcapLength - wall;
   for(int i = 0; i < nEc; ++i)
@@ -446,10 +446,28 @@ void ARCTracing::BuildCells()
           double sgn = ref ? -1.0 : 1.0;
           double Cloc[3] = {sgn * cxr * cos(alpha), cxr * sin(alpha), cz};
           ArcTf sensTf = ArcRot(2, ref ? halfPi - alpha : alpha - halfPi) * ArcRot(0, tilt) * ArcShift(0, dpos, szp);
-          ArcTf cellTf = env * ArcRot(2, TMath::Pi() / 3.0 * phin) * ArcShift(sgn * x, y, 0);
+          ArcTf cellTf = env * ArcRot(2, endcapPhiStep * phin) * ArcShift(sgn * x, y, 0);
           addRow(kEndcap, cellTf, Cloc, R, sensTf, sensorE, sensorE, Aloc, nloc, hexloc, -halfLen, halfLen);
         }
     }
+  }
+}
+
+// cells given one by one in the card, for any layout: add Cell {region numbers...} with region barrel (cell z axis outward
+// from the beam line, hexagonal pyramid: the apothem grows with the distance along the axis) or endcap (z axis along the
+// beam, hexagonal prism), followed by the 44 numbers of a cell-table line (DumpCellsFile writes them in this form)
+void ARCTracing::ReadInlineCells()
+{
+  ExRootConfParam param = GetParam("Cell");
+  int n = param.GetSize();
+  for(int i = 0; i < n; ++i)
+  {
+    if(param[i].GetSize() != 45) throw runtime_error(Form("ARCTracing: Cell entry %d has %d values instead of 45 (region and 44 numbers)", i, param[i].GetSize()));
+    string region = param[i][0].GetString();
+    if(region != "barrel" && region != "endcap") throw runtime_error("ARCTracing: Cell region must be barrel or endcap, not " + region);
+    double raw[44];
+    for(int k = 0; k < 44; ++k) raw[k] = param[i][k + 1].GetDouble();
+    AddCell(region == "barrel" ? kBarrel : kEndcap, raw);
   }
 }
 
@@ -595,26 +613,25 @@ void ARCTracing::Init()
     BuildGrid(fRad[i], fPDE, fRefl);
     fRecoIndex[i] = 1.0 + fRad[i].indexScale * (fRad[i].n.Eval(fRecoEnergy) - 1.0);
   }
-  if(cellFile.empty())
-    BuildCells();
-  else
-    ReadCells(cellFile.c_str());
-  string dumpCells = GetString("DumpCellsFile", ""); // write the cells used (origin, axis, mirror, sensor, ...) for checks
+  // cells: a cell file, the parametric barrel and endcaps (BarrelCellTypes, EndcapCells) and single cells (add Cell); each
+  // source is optional and they add up
+  if(!cellFile.empty()) ReadCells(cellFile.c_str());
+  BuildCells();
+  ReadInlineCells();
+  if(fCells.empty()) throw runtime_error("ARCTracing: no cells (give BarrelCellTypes / EndcapCells, add Cell entries or a CellFile)");
+  string dumpCells = GetString("DumpCellsFile", ""); // write every cell as an "add Cell" card line (to start a new layout)
   if(!dumpCells.empty())
   {
     ofstream out(dumpCells.c_str());
-    out << setprecision(10);
+    out << "## " << fCells.size() << " ARC cells: region, origin(3), x y z axes (3 each), mirror centre(3), mirror radius inner/outer,\n"
+        << "## sensor centre(3), sensor axes x y z (3 each), sensor half sizes(3), aerogel centre(3) and normal(3), aerogel half\n"
+        << "## thickness and radius, hexagon vertex angle [deg], cell z range (2), hexagon apothem; mm, in the cell frame after the origin and axes\n"
+        << setprecision(10);
     for(size_t i = 0; i < fCells.size(); ++i)
     {
-      const Cell &c = fCells[i];
-      out << (c.region == kBarrel ? "barrel" : "endcap");
-      for(int j = 0; j < 3; ++j) out << " " << c.O[j];
-      for(int j = 0; j < 3; ++j) out << " " << c.ez[j];
-      for(int j = 0; j < 3; ++j) out << " " << c.C[j];
-      out << " " << c.R;
-      for(int j = 0; j < 3; ++j) out << " " << c.S[j];
-      for(int j = 0; j < 3; ++j) out << " " << c.sez[j];
-      out << " " << c.hs[0] << " " << c.hs[1] << " " << c.aeroZ << " " << c.phi0 << " " << c.zmin << " " << c.zmax << " " << c.apothem << "\n";
+      out << "  add Cell {" << (fCells[i].region == kBarrel ? "barrel" : "endcap");
+      for(size_t k = 0; k < fCellRaw[i].size(); ++k) out << " " << fCellRaw[i][k];
+      out << "}\n";
     }
   }
   // neighbours: cells of the same region and side whose axis points at mid-depth are within 2.6 apothems (first ring: 2)
