@@ -373,6 +373,22 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->DZ = candidate->DZ;
     entry->Nclusters = candidate->Nclusters;
     entry->dNdx = candidate->dNdx;
+    entry->CherenkovAngleGas = candidate->CherenkovAngleGas;
+    entry->CherenkovAngleAerogel = candidate->CherenkovAngleAerogel;
+    entry->CherenkovRecoAngleGas = candidate->CherenkovRecoAngleGas;
+    entry->CherenkovRecoAngleAerogel = candidate->CherenkovRecoAngleAerogel;
+    entry->SigmaThetaCGas = candidate->SigmaThetaCGas;
+    entry->SigmaThetaCAerogel = candidate->SigmaThetaCAerogel;
+    entry->NpeGas = candidate->NpeGas;
+    entry->NpeAerogel = candidate->NpeAerogel;
+    entry->ARCchi2Pi = candidate->ARCchi2Pi;
+    entry->ARCchi2K = candidate->ARCchi2K;
+    entry->ARCchi2P = candidate->ARCchi2P;
+    entry->ARCpid = candidate->ARCpid;
+    entry->ARCprobPi = candidate->ARCprobPi;
+    entry->ARCprobK = candidate->ARCprobK;
+    entry->ARCprobP = candidate->ARCprobP;
+    entry->ARCmass = candidate->ARCmass;
 
     entry->ErrorP = candidate->ErrorP;
     entry->ErrorPT = candidate->ErrorPT;
