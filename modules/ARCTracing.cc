@@ -66,7 +66,7 @@ static inline void Cross(const double *a, const double *b, double *c)
 //------------------------------------------------------------------------------
 
 ARCTracing::ARCTracing() :
-  fItInputArray(0), fInputArray(0), fOutputArray(0)
+  fDebug(0), fItInputArray(0), fInputArray(0), fOutputArray(0)
 {
 }
 
@@ -88,6 +88,14 @@ double ARCTracing::Table::Eval(double x) const
 
 //------------------------------------------------------------------------------
 
+// a table needs at least two points with increasing energies (linear interpolation)
+static void CheckTable(const ARCTracing::Table &t, const string &name)
+{
+  if(t.e.size() < 2) throw runtime_error("ARCTracing: optical table " + name + " needs at least two (energy, value) points");
+  for(size_t i = 1; i < t.e.size(); ++i)
+    if(!(t.e[i] > t.e[i - 1])) throw runtime_error("ARCTracing: optical table " + name + ": the energies must increase");
+}
+
 void ARCTracing::ReadTables(const char *file)
 {
   ifstream in(file);
@@ -106,10 +114,11 @@ void ARCTracing::ReadTables(const char *file)
     {
       istringstream row(line);
       double e, v;
-      row >> e >> v;
+      if(!(row >> e >> v)) throw runtime_error("ARCTracing: malformed row in optical table " + name + ": " + line);
       t.e.push_back(e);
       t.v.push_back(v);
     }
+    CheckTable(t, name);
     fTables.push_back(t);
     fTableNames.push_back(name);
   }
@@ -133,14 +142,19 @@ void ARCTracing::ReadCells(const char *file)
   {
     if(line.empty() || line[0] == '#') continue;
     istringstream ss(line);
-    string region, name;
-    ss >> region >> name;
+    vector<string> w;
+    string tok;
+    while(ss >> tok) w.push_back(tok);
+    if(w.size() != 45 && w.size() != 46) throw runtime_error("ARCTracing: a cell line needs the region, an optional name and 44 numbers: " + line);
+    if(w[0] != "barrel" && w[0] != "endcap") throw runtime_error("ARCTracing: cell region must be barrel or endcap: " + line);
     double raw[44];
-    for(int i = 0; i < 44; ++i) ss >> raw[i];
-    if(!ss) throw runtime_error("ARCTracing: malformed cell line: " + line);
-    AddCell(region == "barrel" ? kBarrel : kEndcap, raw);
+    for(int i = 0; i < 44; ++i)
+    {
+      istringstream num(w[w.size() - 44 + i]);
+      if(!(num >> raw[i])) throw runtime_error("ARCTracing: not a number in a cell line: " + line);
+    }
+    AddCell(w[0] == "barrel" ? kBarrel : kEndcap, raw);
   }
-  if(fCells.empty()) throw runtime_error("ARCTracing: no cells read");
 }
 
 // one cell from the 44 numbers of a cell-table line (after region and name): O, ex, ey, ez (world), mirror centre (cell
@@ -381,6 +395,8 @@ void ARCTracing::BuildCells()
   // ---- barrel: hexagonal pyramids, cell number n = 1..maxCell at z > 0 and 2..maxCell mirrored at z < 0, each repeated in phi
   ExRootConfParam types = GetParam("BarrelCellTypes"); // {column row curvature xposition zposition sensorposition sensortilt}
   int nTypes = types.GetSize();
+  for(int i = 0; i < nTypes; ++i)
+    if(types[i].GetSize() != 7) throw runtime_error(Form("ARCTracing: BarrelCellTypes entry %d needs 7 values (column row radius x z sensor-offset tilt)", i));
   const double rin = barrelRin + wall, rout = barrelRout - wall, routShape = rout / sqrt(1.0 + pow(side / rin, 2));
   const double mirrorOriginB = barrelRout - wall - mirrorOrigin - mirrorThick - mirrorShrink;
   const double sensorOriginB = barrelRin + wall + sensorOffset, zstep = 2.0 * apo;
@@ -424,6 +440,8 @@ void ARCTracing::BuildCells()
   // ---- endcaps: hexagonal prisms at grid positions of one 60-degree sector, some with a mirrored copy, 6 sectors, two sides
   ExRootConfParam ec = GetParam("EndcapCells"); // {row column x/side y/apothem mirrored curvature xposition zposition sensorposition sensortilt}
   int nEc = ec.GetSize();
+  for(int i = 0; i < nEc; ++i)
+    if(ec[i].GetSize() != 10) throw runtime_error(Form("ARCTracing: EndcapCells entry %d needs 10 values (row column x y mirrored radius x z sensor-offset tilt)", i));
   const double mirrorOriginE = 0.5 * endcapLength - wall - mirrorOrigin, sensorOriginE = -0.5 * endcapLength + wall + sensorOffset;
   const double halfLen = 0.5 * endcapLength - wall;
   for(int i = 0; i < nEc; ++i)
@@ -480,13 +498,16 @@ void ARCTracing::ReadTablesFromCard()
   {
     Table t;
     int m = param[i].GetSize();
+    string name = m > 0 ? param[i][0].GetString() : "";
+    if(m % 2 == 0) throw runtime_error("ARCTracing: OpticsTable " + name + " must be a name followed by (energy, value) pairs");
     for(int j = 1; j + 1 < m; j += 2)
     {
       t.e.push_back(param[i][j].GetDouble());
       t.v.push_back(param[i][j + 1].GetDouble());
     }
+    CheckTable(t, name);
     fTables.push_back(t);
-    fTableNames.push_back(param[i][0].GetString());
+    fTableNames.push_back(name);
   }
 }
 
@@ -592,7 +613,7 @@ void ARCTracing::Init()
   fSigmaSingleFloor[kGas] = GetDouble("GasSigmaSingleFloor", 1.0E-3);
   fSigmaSingleFloor[kAerogel] = GetDouble("AerogelSigmaSingleFloor", 1.5E-3);
   fSigmaTrack = GetDouble("SigmaTrack", 0.0);
-  fUseTrueTrack = GetBool("UseTrueTrack", true);
+  fUseTrueTrack = GetBool("UseTrueTrack", false);
   fUseTrueMomentumForPID = GetBool("UseTrueMomentumForPID", false);
   fTrueHypothesisAngle = GetBool("TrueHypothesisAngle", false);
   fRecoMidPathFallback = GetBool("RecoMidPathFallback", false); // study option: gas emission point beyond the main mirror -> mid-path (default off: as the full-simulation analysis; better reach, fewer gas rings at 45-65 deg)

@@ -15,8 +15,9 @@ set RandomSeed 123
 #   tracker : all-MAPS. 5-layer vertex (r = 1.3-3.3 cm, 140 mrad acceptance,
 #             3 um), 4 double-layer barrel stations (r = 0.77-1.77 m, 3 um,
 #             0.2% X0 per plane), 4 double disks per side (|z| = 1.39-2.02 m)
-#   ARC     : barrel r = 1.90-2.10 m, endcaps |z| = 2.00-2.20 m, Xe 2 bar +
-#             1 cm aerogel; 5.8% X0 passive material in the track fit
+#   ARC     : barrel r = 1.90-2.10 m, endcaps |z| = 2.00-2.20 m, gas + 1 cm
+#             aerogel; passive material in the track fit from the ARC
+#             configuration below (4.4-6.2% X0 at 90 deg)
 #   ECAL    : GRAiNITA, 1.7%/sqrt(E) (+) 1.1%, 0.2 mrad angular at high E
 #   HCAL    : SiPM-on-tile in the yoke; resolution is a PLACEHOLDER
 #   B field : 3 T
@@ -353,7 +354,7 @@ module ARCTracing ARCTracing {
   ##    cells); leave out BarrelCellTypes or EndcapCells for no barrel or no endcaps;
   ##  - single cells of any layout: add Cell {barrel|endcap numbers...}, one line per cell (origin, axes, mirror, sensor,
   ##    aerogel, cell shape; set DumpCellsFile <file> writes every cell of a configuration in this form, a starting point);
-  ##  - a file of such lines without "add Cell" (set CellFile <file>).
+  ##  - a file of such lines without "add Cell" and the braces (set CellFile <file>; a name may follow the region).
   ## Barrel cells must have their axis pointing outward from the beam line and endcap cells along the beam axis: this decides
   ## where a track enters the ARC and where the reconstruction assumes the emission (RecoRadius*, RecoZ*).
   set BarrelInnerRadius 1900.0
@@ -403,6 +404,7 @@ module ARCTracing ARCTracing {
 
   ## reconstruction (as the full-simulation analysis): emission at mid-radiator, window around the hypothesis, 3-sigma clipping
   set RecoEnergy 3.0              ;# eV, the indices used by the reconstruction
+  ## assumed emission point, mm: barrel radius and endcap |z| of the middle of each radiator (change them with the geometry)
   set RecoRadiusGas 2000.0
   set RecoRadiusAerogel 1925.0
   set RecoZGas 2110.0
@@ -415,9 +417,20 @@ module ARCTracing ARCTracing {
   set AerogelSigmaCorr 0.0
   set SigmaTrack 0.0
   set SharedCells true            ;# every track is reconstructed against the pooled photons of its cell
+  set MultiCell true              ;# photons reach the mirrors and arrays of neighbouring cells; each track reconstructed in its main cell
+  set RecoMidPathFallback false   ;# study option: gas emission at mid-path when the fixed radius is beyond the main cell's mirror
+  ## hypothesis test: expected angle and spread of each hypothesis from test photons traced and reconstructed like the data,
+  ## a missing ring weighted by P(N < MinPe); TestPhotons per hypothesis and radiator (20 halves their cost)
+  set CalibratedHypotheses true
+  set TestPhotons 40
+  set AerogelRayleigh true        ;# Rayleigh scattering in the aerogel (table AerogelRayleighTable)
+  set AerogelAbsorption true      ;# absorption in the aerogel (table AerogelAbsorptionTable; none here, as the Geant4 material)
+  ## validation switches: true track, true momentum for the hypotheses, window around the true angle
   set UseTrueTrack false
   set UseTrueMomentumForPID false
   set TrueHypothesisAngle false
+  ## for studies: set DumpCellsFile <file> (the cells as "add Cell" lines), DebugFile <file> (per-track and per-photon text
+  ## dump), DebugMonoEnergy <eV> (all photons at one energy: no chromatic error), DebugMidEmission true (emission at mid-path)
 
   ## ---- ARC cell optics (k4geo ARC_geo_o1_v01 construction; mm, rad) ----
   ## barrel cell types: column row mirror-radius mirror-x mirror-z sensor-offset sensor-tilt

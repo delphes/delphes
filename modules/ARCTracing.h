@@ -21,7 +21,8 @@
 
 /** \class ARCTracing
  *
- *  Ray-tracing fast simulation of the ARC (Array of RICH Cells) for the ALFA detector.
+ *  Ray-tracing fast simulation of a RICH made of cells (mirror + photosensor array per cell, gas and aerogel radiators),
+ *  such as the ARC (Array of RICH Cells); cards/delphes_card_ALFA.tcl is the first user.
  *
  *  Unlike a parametrised response fitted to the full simulation of one geometry, this module models the
  *  detector: for every charged track it
