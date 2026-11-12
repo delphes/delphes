@@ -114,6 +114,12 @@ ObsTrk::ObsTrk(TVector3 x, TVector3 p, Double_t Q, Double_t mass, SolGeom *G)
 	//std::cout<<"Track p= "; p.Print();
 	//std::cout<<"Charge = "<<Q<<", Track parameters: "; fGenPar.Print();
 	SolTrack trk(fGenX, fGenP, fGenQ, fG);
+	//
+	// First hit position (as in CovCalc)
+	Double_t Xfirst, Yfirst, Zfirst;
+	trk.FirstHit(Xfirst, Yfirst, Zfirst);
+	fXfirst = TVector3(Xfirst, Yfirst, Zfirst);
+	//
 	Bool_t Res = kTRUE;	// Turn resolution on
 	Bool_t MS  = kTRUE; // Turn multiple scattering on
 	//std::cout<<"ObsTrk: x input: x(0)= "<<x(0)*1.e20<<", x(1)= "<<x(1)*1.e20<<std::endl;
