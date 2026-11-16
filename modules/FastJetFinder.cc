@@ -377,8 +377,12 @@ void FastJetFinder::Process()
       }
       else
       {
-        // exclusive njet mode
-        outputList = sorted_by_pt(sequence->exclusive_jets(fNJets));
+        // exclusive njet mode: fastjet throws (and prints an error) if there
+        // are fewer particles than requested jets, return no jets instead
+        if(sequence->n_particles() >= static_cast<unsigned int>(fNJets))
+        {
+          outputList = sorted_by_pt(sequence->exclusive_jets(fNJets));
+        }
       }
     }
     catch(fastjet::Error &)
