@@ -1,0 +1,21 @@
+/*
+ * Linker version script for libDelphes (ELF platforms).
+ *
+ * libDelphes contains its own copy of FastJet, FastJet contrib and SISCone
+ * (see external/fastjet). Exporting these symbols clashes with a separately
+ * built FastJet library that is loaded in the same process (e.g. by other
+ * frameworks), as the dynamic linker then binds both to whichever copy was
+ * loaded first. The two copies are generally of different versions and are
+ * configured differently (e.g. with or without FASTJET_HAVE_THREAD_SAFETY,
+ * which changes the layout of fastjet::PseudoJet), so this leads to crashes.
+ *
+ * Keep all symbols that involve the fastjet or siscone namespaces local, so
+ * that libDelphes always uses its own copy and does not interfere with others.
+ */
+{
+  global:
+    *;
+  local:
+    *7fastjet*;
+    *siscone*;
+};
