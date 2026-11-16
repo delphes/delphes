@@ -375,9 +375,9 @@ void FastJetFinder::Process()
       {
         outputList = sorted_by_pt(sequence->exclusive_jets(fDCut * fDCut));
       }
-      else
+      else if(sequence->n_particles() >= static_cast<unsigned int>(fNJets))
       {
-        // exclusive njet mode
+        // exclusive njet mode; skip if fewer particles than requested jets
         outputList = sorted_by_pt(sequence->exclusive_jets(fNJets));
       }
     }
