@@ -52,6 +52,20 @@ function(DELPHES_GENERATE_DICTIONARY dictionary)
   endif()
 endfunction()
 
+# FastJet: use the copy bundled in external/fastjet (default) or an installed
+# FastJet (with the SISCone and CDFCones plugins) and FastJet contrib
+option(DELPHES_USE_EXTERNAL_FASTJET "Use an installed FastJet and FastJet contrib instead of the bundled copy" OFF)
+if(DELPHES_USE_EXTERNAL_FASTJET)
+  find_package(FastJet REQUIRED)
+  find_package(FastJetContrib REQUIRED)
+  message(STATUS "Delphes: using external FastJet ${FastJet_VERSION} from ${FastJet_INCLUDE_DIRS}, FastJet contrib from ${FastJetContrib_INCLUDE_DIRS}")
+  # before the Delphes source tree, so that the bundled headers in external/fastjet are not used
+  include_directories(BEFORE ${FastJet_INCLUDE_DIRS} ${FastJetContrib_INCLUDE_DIRS})
+  add_compile_definitions(DELPHES_EXTERNAL_FASTJET)
+else()
+  message(STATUS "Delphes: using the bundled FastJet in external/fastjet")
+endif()
+
 # Define location of all other external dependencies
 set(DelphesExternals_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external)
 
@@ -68,7 +82,7 @@ add_library(Delphes SHARED
   $<TARGET_OBJECTS:classes>
   $<TARGET_OBJECTS:modules>
   $<TARGET_OBJECTS:ExRootAnalysis>
-  $<TARGET_OBJECTS:fastjet>
+  $<$<NOT:$<BOOL:${DELPHES_USE_EXTERNAL_FASTJET}>>:$<TARGET_OBJECTS:fastjet>>
   $<TARGET_OBJECTS:tcl>
   $<TARGET_OBJECTS:Hector>
   $<TARGET_OBJECTS:PUPPI>
@@ -76,6 +90,9 @@ add_library(Delphes SHARED
 )
 
 target_link_libraries(Delphes PUBLIC ROOT::Core ROOT::Hist ROOT::Tree ROOT::MathCore ROOT::Physics ROOT::EG)
+if(DELPHES_USE_EXTERNAL_FASTJET)
+  target_link_libraries(Delphes PUBLIC FastJet::Contrib FastJet::FastJet)
+endif()
 
 # Do not export the symbols of the bundled FastJet / SISCone, so that they do
 # not clash with a separate FastJet library loaded in the same process

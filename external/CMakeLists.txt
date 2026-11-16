@@ -1,4 +1,6 @@
-add_subdirectory(fastjet)
+if(NOT DELPHES_USE_EXTERNAL_FASTJET)
+  add_subdirectory(fastjet)
+endif()
 add_subdirectory(ExRootAnalysis)
 add_subdirectory(Hector)
 add_subdirectory(tcl)
