@@ -1102,7 +1102,6 @@ void SolTrack::CovCalc(Bool_t Res, Bool_t MS)
 	delete[] hord;
 	delete[] zh;
 	delete[] rh;
-	delete[] dh;
 	delete[] ih;
 	delete[] cs;
 	delete[] thms;
@@ -1408,7 +1407,6 @@ void SolTrack::KalmanCov(Bool_t Res, Bool_t MS, Double_t mass)
 	delete [] dh;
 	delete [] ih;
 	delete [] thms;
-	delete [] cs;
 }
 //
 //********************************************************
@@ -1744,7 +1742,6 @@ void SolTrack::KalmanCovT(Bool_t Res, Bool_t MS, Double_t mass)
 	delete [] dh;
 	delete [] ih;
 	delete [] thms;
-	delete [] cs;
 }
 //
 // Force positive definitness in normalized matrix
