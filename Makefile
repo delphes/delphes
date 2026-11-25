@@ -392,6 +392,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PhotonConversions.h \
 	modules/ParticlePropagator.h \
 	modules/UnstablePropagator.h \
+	modules/MetaStableCharged.h \
 	modules/Efficiency.h \
 	modules/IdentificationMap.h \
 	modules/EnergySmearing.h \
@@ -1145,6 +1146,14 @@ tmp/modules/UnstablePropagator.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/MetaStableCharged.$(ObjSuf): \
+	modules/MetaStableCharged.$(SrcSuf) \
+	modules/MetaStableCharged.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	external/ExRootAnalysis/ExRootClassifier.h \
+	external/ExRootAnalysis/ExRootFilter.h \
+	external/ExRootAnalysis/ExRootResult.h
 tmp/modules/VertexFinder.$(ObjSuf): \
 	modules/VertexFinder.$(SrcSuf) \
 	modules/VertexFinder.h \
@@ -1298,6 +1307,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/TruthVertexFinder.$(ObjSuf) \
 	tmp/modules/UniqueObjectFinder.$(ObjSuf) \
 	tmp/modules/UnstablePropagator.$(ObjSuf) \
+	tmp/modules/MetaStableCharged.$(ObjSuf) \
 	tmp/modules/VertexFinder.$(ObjSuf) \
 	tmp/modules/VertexFinderDA4D.$(ObjSuf) \
 	tmp/modules/VertexSorter.$(ObjSuf) \
@@ -2038,6 +2048,9 @@ modules/TrackPileUpSubtractor.h: \
 	classes/DelphesModule.h
 	@touch $@
 modules/UnstablePropagator.h: \
+	classes/DelphesModule.h
+	@touch $@
+modules/MetaStableCharged.h: \
 	classes/DelphesModule.h
 	@touch $@
 modules/Efficiency.h: \
