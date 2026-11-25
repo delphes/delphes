@@ -47,6 +47,8 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootTreeWriter.h"
 
+#include "classes/DelphesTreeWriter.h"
+
 #include <proio/event.h>
 #include <proio/model/mc.pb.h>
 #include <proio/reader.h>
@@ -271,7 +273,7 @@ int main(int argc, char *argv[])
   proio::Reader *inputFile = 0;
   TFile *outputFile = 0;
   TStopwatch readStopWatch, procStopWatch;
-  ExRootTreeWriter *treeWriter = 0;
+  DelphesTreeWriter *treeWriter = 0;
   ExRootTreeBranch *branchEvent = 0;
   ExRootConfReader *confReader = 0;
   Delphes *modularDelphes = 0;
@@ -309,7 +311,7 @@ int main(int argc, char *argv[])
       throw runtime_error(message.str());
     }
 
-    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+    treeWriter = new DelphesTreeWriter(outputFile, "Delphes");
 
     branchEvent = treeWriter->NewBranch("Event", HepMCEvent::Class());
 

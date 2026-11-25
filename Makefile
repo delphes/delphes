@@ -198,7 +198,8 @@ tmp/readers/DelphesHepMC2.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 DelphesHepMC3$(ExeSuf): \
 	tmp/readers/DelphesHepMC3.$(ObjSuf)
 tmp/readers/DelphesHepMC3.$(ObjSuf): \
@@ -209,7 +210,8 @@ tmp/readers/DelphesHepMC3.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 DelphesLHEF$(ExeSuf): \
 	tmp/readers/DelphesLHEF.$(ObjSuf)
 tmp/readers/DelphesLHEF.$(ObjSuf): \
@@ -220,7 +222,8 @@ tmp/readers/DelphesLHEF.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 DelphesROOT$(ExeSuf): \
 	tmp/readers/DelphesROOT.$(ObjSuf)
 tmp/readers/DelphesROOT.$(ObjSuf): \
@@ -232,7 +235,8 @@ tmp/readers/DelphesROOT.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
 	external/ExRootAnalysis/ExRootTreeReader.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 DelphesSTDHEP$(ExeSuf): \
 	tmp/readers/DelphesSTDHEP.$(ObjSuf)
 tmp/readers/DelphesSTDHEP.$(ObjSuf): \
@@ -243,7 +247,8 @@ tmp/readers/DelphesSTDHEP.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 EXECUTABLE +=  \
 	DelphesHepMC2$(ExeSuf) \
 	DelphesHepMC3$(ExeSuf) \
@@ -267,7 +272,8 @@ tmp/readers/DelphesCMSFWLite.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 EXECUTABLE +=  \
 	DelphesCMSFWLite$(ExeSuf)
 EXECUTABLE_OBJ +=  \
@@ -284,7 +290,8 @@ tmp/readers/DelphesProMC.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 EXECUTABLE +=  \
 	DelphesProMC$(ExeSuf)
 EXECUTABLE_OBJ +=  \
@@ -301,7 +308,8 @@ tmp/readers/DelphesProIO.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 EXECUTABLE +=  \
 	DelphesProIO$(ExeSuf)
 EXECUTABLE_OBJ +=  \
@@ -319,7 +327,8 @@ tmp/readers/DelphesPythia8.$(ObjSuf): \
 	modules/Delphes.h \
 	external/ExRootAnalysis/ExRootProgressBar.h \
 	external/ExRootAnalysis/ExRootTreeBranch.h \
-	external/ExRootAnalysis/ExRootTreeWriter.h
+	external/ExRootAnalysis/ExRootTreeWriter.h \
+	classes/DelphesTreeWriter.h
 EXECUTABLE +=  \
 	DelphesPythia8$(ExeSuf)
 EXECUTABLE_OBJ +=  \
@@ -426,6 +435,7 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/PhotonID.h \
 	modules/ConstituentFilter.h \
 	modules/StatusPidFilter.h \
+	modules/EventCounterFilter.h \
 	modules/PdgCodeFilter.h \
 	modules/BeamSpotFilter.h \
 	modules/BeamSpotSmearing.h \
@@ -563,6 +573,10 @@ tmp/classes/DelphesStream.$(ObjSuf): \
 tmp/classes/DelphesTF2.$(ObjSuf): \
 	classes/DelphesTF2.$(SrcSuf) \
 	classes/DelphesTF2.h
+tmp/classes/DelphesTreeWriter.$(ObjSuf): \
+	classes/DelphesTreeWriter.$(SrcSuf) \
+	classes/DelphesTreeWriter.h \
+	classes/DelphesClasses.h
 tmp/classes/DelphesXDRReader.$(ObjSuf): \
 	classes/DelphesXDRReader.$(SrcSuf) \
 	classes/DelphesXDRReader.h
@@ -811,6 +825,13 @@ tmp/modules/EnergySmearing.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/EventCounterFilter.$(ObjSuf): \
+	modules/EventCounterFilter.$(SrcSuf) \
+	modules/EventCounterFilter.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h \
+	classes/DelphesTreeWriter.h \
+	external/ExRootAnalysis/ExRootConfReader.h
 tmp/modules/ExampleModule.$(ObjSuf): \
 	modules/ExampleModule.$(SrcSuf) \
 	modules/ExampleModule.h \
@@ -1199,6 +1220,7 @@ DELPHES_OBJ +=  \
 	tmp/classes/DelphesSTDHEPReader.$(ObjSuf) \
 	tmp/classes/DelphesStream.$(ObjSuf) \
 	tmp/classes/DelphesTF2.$(ObjSuf) \
+	tmp/classes/DelphesTreeWriter.$(ObjSuf) \
 	tmp/classes/DelphesXDRReader.$(ObjSuf) \
 	tmp/classes/DelphesXDRWriter.$(ObjSuf) \
 	tmp/external/ExRootAnalysis/ExRootConfReader.$(ObjSuf) \
@@ -1262,6 +1284,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/Efficiency.$(ObjSuf) \
 	tmp/modules/EnergyScale.$(ObjSuf) \
 	tmp/modules/EnergySmearing.$(ObjSuf) \
+	tmp/modules/EventCounterFilter.$(ObjSuf) \
 	tmp/modules/ExampleModule.$(ObjSuf) \
 	tmp/modules/Hector.$(ObjSuf) \
 	tmp/modules/IdentificationMap.$(ObjSuf) \
@@ -2235,6 +2258,9 @@ external/fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh: \
 	external/fastjet/JetDefinition.hh \
 	external/fastjet/internal/thread_safety_helpers.hh
 	@touch $@
+classes/DelphesTreeWriter.h: \
+	external/ExRootAnalysis/ExRootTreeWriter.h
+	@touch $@
 external/PUPPI/PuppiContainer.hh: \
 	external/fastjet/PseudoJet.hh
 	@touch $@
@@ -2375,6 +2401,9 @@ external/fastjet/config.h: \
 	external/fastjet/config_auto.h
 	@touch $@
 modules/CscClusterId.h: \
+	classes/DelphesModule.h
+	@touch $@
+modules/EventCounterFilter.h: \
 	classes/DelphesModule.h
 	@touch $@
 classes/DelphesClasses.h: \
