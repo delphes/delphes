@@ -455,6 +455,9 @@ void DualReadoutCalorimeter::Process()
         fEFlowTrackOutputArray->Add(track);
       }
 
+      // use track impact point if no particle hit has set the tower position yet
+      if(fTower->Position.Vect().Mag2() == 0.0) fTower->Position = position;
+
       continue;
     }
 
