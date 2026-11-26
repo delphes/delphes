@@ -38,6 +38,7 @@
 #include "modules/TrackSmearing.h"
 #include "modules/TrackCovariance.h"
 #include "modules/ClusterCounting.h"
+#include "modules/ARCTracing.h"
 #include "modules/ImpactParameterSmearing.h"
 #include "modules/TimeSmearing.h"
 #include "modules/TimeOfFlight.h"
@@ -104,6 +105,7 @@
 #pragma link C++ class TrackSmearing+;
 #pragma link C++ class TrackCovariance+;
 #pragma link C++ class ClusterCounting+;
+#pragma link C++ class ARCTracing+;
 #pragma link C++ class ImpactParameterSmearing+;
 #pragma link C++ class TimeSmearing+;
 #pragma link C++ class TimeOfFlight+;

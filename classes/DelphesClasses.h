@@ -490,6 +490,24 @@ public:
   Float_t Nclusters; // Number of ionization clusters
   Float_t dNdx; // Number of ionization clusters
 
+  // ARC (Array of RICH Cells) Cherenkov emulation, see modules/ARCTracing
+  Float_t CherenkovAngleGas; // true Cherenkov angle in the gas radiator [rad] (-1 if no ring)
+  Float_t CherenkovAngleAerogel; // true Cherenkov angle in the aerogel radiator [rad] (-1 if no ring)
+  Float_t CherenkovRecoAngleGas; // reconstructed Cherenkov angle, gas [rad] (-1 if no ring)
+  Float_t CherenkovRecoAngleAerogel; // reconstructed Cherenkov angle, aerogel [rad] (-1 if no ring)
+  Float_t SigmaThetaCGas; // per-track angular resolution, gas [rad]
+  Float_t SigmaThetaCAerogel; // per-track angular resolution, aerogel [rad]
+  Float_t NpeGas; // photo-electrons in the reconstructed ring, gas
+  Float_t NpeAerogel; // photo-electrons in the reconstructed ring, aerogel
+  Float_t ARCchi2Pi; // chi2 of the pion hypothesis (-1 if no ring)
+  Float_t ARCchi2K; // chi2 of the kaon hypothesis (-1 if no ring)
+  Float_t ARCchi2P; // chi2 of the proton hypothesis (-1 if no ring)
+  Int_t ARCpid; // +-211 / +-321 / +-2212 best hypothesis, 0 if no ring
+  Float_t ARCprobPi; // probability of the pion hypothesis from the ARC chi2 (-1 if no ring)
+  Float_t ARCprobK; // probability of the kaon hypothesis (-1 if no ring)
+  Float_t ARCprobP; // probability of the proton hypothesis (-1 if no ring)
+  Float_t ARCmass; // mass of the best ARC hypothesis [GeV] (-1 if no ring)
+
   Float_t ErrorP; // track momentum error
   Float_t ErrorPT; // track transverse momentum error
   Float_t ErrorPhi; // track azimuthal angle error
@@ -793,6 +811,24 @@ public:
 
   Float_t Nclusters; // Number of ionization clusters
   Float_t dNdx; // Number of ionization clusters per unit length
+
+  // ARC (Array of RICH Cells) Cherenkov emulation, see modules/ARCTracing
+  Float_t CherenkovAngleGas; // true Cherenkov angle in the gas radiator [rad] (-1 if no ring)
+  Float_t CherenkovAngleAerogel; // true Cherenkov angle in the aerogel radiator [rad] (-1 if no ring)
+  Float_t CherenkovRecoAngleGas; // reconstructed Cherenkov angle, gas [rad] (-1 if no ring)
+  Float_t CherenkovRecoAngleAerogel; // reconstructed Cherenkov angle, aerogel [rad] (-1 if no ring)
+  Float_t SigmaThetaCGas; // per-track angular resolution, gas [rad]
+  Float_t SigmaThetaCAerogel; // per-track angular resolution, aerogel [rad]
+  Float_t NpeGas; // photo-electrons in the reconstructed ring, gas
+  Float_t NpeAerogel; // photo-electrons in the reconstructed ring, aerogel
+  Float_t ARCchi2Pi; // chi2 of the pion hypothesis (-1 if no ring)
+  Float_t ARCchi2K; // chi2 of the kaon hypothesis (-1 if no ring)
+  Float_t ARCchi2P; // chi2 of the proton hypothesis (-1 if no ring)
+  Int_t ARCpid; // +-211 / +-321 / +-2212 best hypothesis, 0 if no ring
+  Float_t ARCprobPi; // probability of the pion hypothesis from the ARC chi2 (-1 if no ring)
+  Float_t ARCprobK; // probability of the kaon hypothesis (-1 if no ring)
+  Float_t ARCprobP; // probability of the proton hypothesis (-1 if no ring)
+  Float_t ARCmass; // mass of the best ARC hypothesis [GeV] (-1 if no ring)
 
   Float_t Xd;
   Float_t Yd;
