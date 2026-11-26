@@ -102,6 +102,10 @@ private:
   Double_t fRcutOff;
   Int_t fN;
 
+  Bool_t fComputeEnergyCorrelationFunctions;
+  Double_t fECFBeta;
+  Int_t fECFMeasure;
+
   //-- Trimming parameters --
 
   Bool_t fComputeTrimming;

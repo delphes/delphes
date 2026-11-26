@@ -278,6 +278,11 @@ Candidate::Candidate() :
   Tau[2] = 0.0;
   Tau[3] = 0.0;
   Tau[4] = 0.0;
+  ECF[0] = 0.0;
+  ECF[1] = 0.0;
+  ECF[2] = 0.0;
+  ECF[3] = 0.0;
+  ECF[4] = 0.0;
 
   SoftDroppedJet.SetXYZT(0.0, 0.0, 0.0, 0.0);
   SoftDroppedSubJet1.SetXYZT(0.0, 0.0, 0.0, 0.0);
@@ -451,6 +456,11 @@ void Candidate::Copy(TObject &obj) const
   object.Tau[2] = Tau[2];
   object.Tau[3] = Tau[3];
   object.Tau[4] = Tau[4];
+  object.ECF[0] = ECF[0];
+  object.ECF[1] = ECF[1];
+  object.ECF[2] = ECF[2];
+  object.ECF[3] = ECF[3];
+  object.ECF[4] = ECF[4];
 
   object.TrimmedP4[0] = TrimmedP4[0];
   object.TrimmedP4[1] = TrimmedP4[1];
@@ -608,6 +618,11 @@ void Candidate::Clear(Option_t * /*option*/)
   Tau[2] = 0.0;
   Tau[3] = 0.0;
   Tau[4] = 0.0;
+  ECF[0] = 0.0;
+  ECF[1] = 0.0;
+  ECF[2] = 0.0;
+  ECF[3] = 0.0;
+  ECF[4] = 0.0;
 
   SoftDroppedJet.SetXYZT(0.0, 0.0, 0.0, 0.0);
   SoftDroppedSubJet1.SetXYZT(0.0, 0.0, 0.0, 0.0);
